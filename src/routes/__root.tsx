@@ -6,6 +6,7 @@ import {
   Scripts,
 } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
+import globalsCss from '~/styles/globals.css?url';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -14,6 +15,7 @@ export const Route = createRootRoute({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { title: 'kodapos' },
     ],
+    links: [{ rel: 'stylesheet', href: globalsCss }],
   }),
   component: RootComponent,
 });

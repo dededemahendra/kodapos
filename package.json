@@ -32,11 +32,13 @@
     "react-dom": "^19"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
     "@tanstack/router-devtools": "^1.166.13",
     "@tanstack/router-plugin": "^1.167.35",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "tailwindcss": "^4",
     "typescript": "^6.0.3",
     "vinxi": "^0.5.11",
     "vite": "^8.0.13",
