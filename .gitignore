@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build artifacts
+dist/
+.output/
+.vinxi/
+.tanstack/
+.wrangler/
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test artifacts
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Convex
+convex/_generated/
+
+# Misc
+*.tsbuildinfo
