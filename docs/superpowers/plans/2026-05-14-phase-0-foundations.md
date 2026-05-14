@@ -3169,3 +3169,91 @@ Type / name consistency check:
 - `i18n`, `convex`, `initSentry`, `initPostHog` — defined Tasks 7, 12, 16, 17; consumed by root layout / client entry.
 
 No type or name inconsistencies surfaced.
+
+---
+
+## Addendum A — TanStack Start API translations (discovered during Task 2 execution)
+
+**Recorded:** 2026-05-15
+**Context:** The plan was written against an older Vinxi/Nitro-era surface of TanStack Start. The version installed during Task 2 (`@tanstack/react-start@1.167.65`) uses a Vite-native architecture. Task 2 succeeded — dev server runs, page renders — but the plan's references to obsolete files and imports need translation when executing subsequent tasks. **This addendum is the authoritative translation table for Tasks 3–27.** Where it conflicts with earlier sections, the addendum wins.
+
+### A.1 Translation table
+
+| Plan reference | Actual current API |
+|---|---|
+| `app.config.ts` (with `defineConfig` from `@tanstack/react-start/config`) | `vite.config.ts` (with `tanstackStart()` from `@tanstack/react-start/plugin/vite`) |
+| `src/client.tsx` | Does not exist; plugin handles client hydration automatically |
+| `src/ssr.tsx` | Does not exist; plugin handles SSR automatically |
+| `Meta, Scripts` from `@tanstack/react-start` | `HeadContent, Scripts` from `@tanstack/react-router` |
+| `createRouter()` export in `src/router.tsx` | `getRouter()` export (plugin's `RouterEntry` requires this name) |
+| `declare module '@tanstack/react-router'` | `declare module '@tanstack/react-start'` |
+| `server: { preset: 'cloudflare-pages' }` in app config | Cloudflare adapter is configured inside `tanstackStart()` options in Task 18 (specifics to be discovered empirically — see A.4) |
+| Dev server URL `http://localhost:3000` | `http://localhost:5175` (Vite default) |
+| `dev: "vinxi dev"` script | `dev: "vite dev"` |
+| `build: "vinxi build"` script | `build: "vite build"` |
+| `start: "vinxi start"` script | `start: "node .output/server/index.mjs"` (auto-set by Task 2; verify build output in Task 18) |
+
+### A.2 Where module-scope initialization (Sentry, PostHog) goes
+
+Task 16 (Sentry) and Task 17 (PostHog) call for `initSentry()` / `initPostHog()` in `src/client.tsx`. Since that file doesn't exist:
+
+- **Init in `src/router.tsx` at module scope** (top of file, before `getRouter()` is defined). The router module is imported on the client side during hydration, so module-scope side effects run there exactly once. They will also run on the server during SSR — that is fine for these two libraries: Sentry has SSR-safe init, and PostHog's init early-returns when its key isn't set.
+- If a future stricter "client-only" boundary is needed, wrap the init calls in `if (typeof window !== 'undefined') { ... }`.
+
+### A.3 Where Vite plugins (Tailwind, Lingui) attach
+
+Task 3 (Tailwind) and Task 12 (Lingui) call for editing `app.config.ts` to add the `tailwindcss()` and `lingui()` plugins:
+
+- **Add them to `vite.config.ts`'s `plugins` array** instead, alongside the existing `tsconfigPaths()`, `tanstackStart()`, `viteReact()` entries.
+- Order matters in Vite plugin pipelines. The implementer's Task 2 ordering is `[tsconfigPaths, tanstackStart, viteReact]`. New plugin placement:
+  - **Tailwind** (`@tailwindcss/vite`): insert after `tanstackStart()` and before `viteReact()`. Tailwind needs to see component source after TanStack Start has transformed it.
+  - **Lingui** (`@lingui/vite-plugin`): insert before `viteReact()` so its macro transforms run before React's. Suggested order: `[tsconfigPaths, tanstackStart, lingui, tailwindcss, viteReact]`.
+
+### A.4 Cloudflare deploy story (Task 18) — verify empirically
+
+The plan's Task 18 assumes the Vinxi `cloudflare-pages` preset produces `.output/public/`. Reality with the Vite-native plugin is unconfirmed. When executing Task 18:
+
+1. **First**: run `pnpm build` with no Cloudflare config and inspect the output. Look for either `.output/public/` (if TanStack Start's Vite plugin still uses Nitro under the hood) or `dist/` (if it's pure Vite).
+2. **Second**: consult the current TanStack Start documentation for Cloudflare deployment (the API has been migrating; the official docs are the source of truth at execution time).
+3. **Third**: if `tanstackStart()` accepts a `target` or `adapter` option for Cloudflare, set it there. Otherwise, the deploy may need `@cloudflare/vite-plugin` or `@tanstack/start-adapter-cloudflare` (verify which package is current).
+4. **Fourth**: `wrangler pages deploy <actual-output-dir>` — pass whichever directory the build produced.
+
+Treat Task 18 as a small investigation task, not a deterministic recipe.
+
+### A.5 Playwright config (Task 15)
+
+Use `baseURL: 'http://localhost:5175'`. The `webServer.url` in `playwright.config.ts` should match: `'http://localhost:5175'`.
+
+### A.6 Cleanup: remove unused `vinxi` dep
+
+The Task 2 implementer installed `vinxi@0.5.11` as a dev dep but it's no longer used. **Remove during Task 22's typecheck/lint sweep**:
+
+```bash
+pnpm remove vinxi
+```
+
+Verify nothing else references it: `grep -r vinxi --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" src/ tests/ *.{json,ts,md}` should return zero hits (excluding this addendum and the plan/spec docs).
+
+### A.7 The `start` script
+
+The current `start: "node .output/server/index.mjs"` will only work if `pnpm build` produces that path. If Task 18 reveals a different output structure, update the `start` script then. Until then it's untested.
+
+### A.8 What did NOT change
+
+These plan details remain accurate:
+
+- All Convex code (`convex/*`) — unchanged; not affected by TanStack Start API migration.
+- Convex Auth wiring patterns — unchanged.
+- shadcn/ui, Tailwind tokens, design system — unchanged (the only difference is *where* the Vite plugin attaches).
+- Lingui macro usage and message catalogs — unchanged.
+- Sentry/PostHog package APIs themselves — unchanged; only the init location moves.
+- Biome, Vitest, Playwright configs at the file level — unchanged.
+- Tests, TDD pattern, commit pattern — unchanged.
+
+### A.9 How to use this addendum
+
+When dispatching an implementer subagent for any task numbered 3 or higher, include the relevant rows from §A.1 (or the full §A.1) in the prompt's "Notes" section, with a one-line cue like:
+
+> "Apply Addendum A translations to any file references that diverge from current reality. Specifically for this task: [list the relevant translations]."
+
+This avoids hand-rewriting 27 task sections in place while keeping the plan a live, accurate document.
