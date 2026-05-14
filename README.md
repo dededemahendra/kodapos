@@ -15,7 +15,7 @@ TanStack Start · Convex · shadcn/ui · Tailwind v4 · Cloudflare Pages
 ```bash
 pnpm install
 pnpm dev              # Vite dev server on http://localhost:3000
-pnpm convex dev       # Convex backend (separate terminal)
+pnpm convex:dev       # Convex backend (separate terminal)
 pnpm test             # Vitest unit tests
 pnpm test:e2e         # Playwright E2E
 pnpm lint             # Biome lint
