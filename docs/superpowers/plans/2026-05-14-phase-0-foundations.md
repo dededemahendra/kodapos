@@ -3250,9 +3250,30 @@ These plan details remain accurate:
 - Biome, Vitest, Playwright configs at the file level — unchanged.
 - Tests, TDD pattern, commit pattern — unchanged.
 
-### A.9 How to use this addendum
+### A.9 Route group filenames (discovered during Task 5 execution)
 
-When dispatching an implementer subagent for any task numbered 3 or higher, include the relevant rows from §A.1 (or the full §A.1) in the prompt's "Notes" section, with a one-line cue like:
+**Discovered:** 2026-05-15, `@tanstack/router-generator@1.166.42`.
+
+The plan uses `(group)/_layout.tsx` + `(group)/_layout/<route>.tsx` for pathless layout grouping. **This syntax does not work with the current router-generator** — both `_layout.tsx` files strip their group prefix and resolve to `routePath=""`, which the generator rejects with: *"Invalid route path `""` was found — root routes must be defined via `__root.tsx`"* (GitHub tanstack/router#4227).
+
+The functionally equivalent layout the generator does accept:
+
+| Plan path | Actual path |
+|---|---|
+| `src/routes/(public)/_layout.tsx` | `src/routes/_public.tsx` |
+| `src/routes/(public)/_layout/index.tsx` | `src/routes/_public/index.tsx` |
+| `src/routes/(public)/_layout/signup.tsx` | `src/routes/_public/signup.tsx` |
+| `src/routes/(public)/_layout/signin.tsx` | `src/routes/_public/signin.tsx` |
+| `src/routes/(pos)/_layout.tsx` | `src/routes/_pos.tsx` |
+| `src/routes/(pos)/_layout/dashboard.tsx` | `src/routes/_pos/dashboard.tsx` |
+
+Same URLs (`/`, `/signup`, `/signin`, `/dashboard`), same layout nesting, same Outlet wiring. Only the filenames change.
+
+When `createFileRoute('/(public)/_layout')` appears in plan text, use `createFileRoute('/_public')`. Similarly `createFileRoute('/(public)/_layout/signup')` → `createFileRoute('/_public/signup')`. The route tree generator infers the layout relationship from the matching filename `_public.tsx` and directory `_public/`.
+
+### A.10 How to use this addendum
+
+When dispatching an implementer subagent for any task numbered 3 or higher, include the relevant rows from §A.1, §A.9 (and any future additions) in the prompt's "Notes" section, with a one-line cue like:
 
 > "Apply Addendum A translations to any file references that diverge from current reality. Specifically for this task: [list the relevant translations]."
 
