@@ -1,9 +1,9 @@
 import {
-  Outlet,
-  ScrollRestoration,
   createRootRoute,
   HeadContent,
+  Outlet,
   Scripts,
+  ScrollRestoration,
 } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import globalsCss from '~/styles/globals.css?url';

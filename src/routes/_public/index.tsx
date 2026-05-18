@@ -13,9 +13,7 @@ function PublicHome() {
         <Coffee className="size-8 text-brand-600" />
         <h1 className="text-3xl font-bold text-brand-600">kodapos</h1>
       </header>
-      <p className="text-fg-muted mt-2">
-        AI-native POS untuk kafe & QSR Indonesia.
-      </p>
+      <p className="text-fg-muted mt-2">AI-native POS untuk kafe & QSR Indonesia.</p>
       <div className="mt-6 flex gap-3">
         <Button asChild>
           <a href="/signin">Masuk</a>
