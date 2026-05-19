@@ -1090,7 +1090,7 @@ git commit -m "feat: wire Convex React client into root layout"
 - Modify: `convex/schema.ts` (already includes `authTables` from Task 6 — verify only)
 - Modify: `src/routes/__root.tsx` (swap `ConvexProvider` for `ConvexAuthProvider`)
 
-- [ ] **Step 1: Create `convex/auth.config.ts`**
+- [x] **Step 1: Create `convex/auth.config.ts`**
 
 ```typescript
 export default {
@@ -1103,7 +1103,7 @@ export default {
 };
 ```
 
-- [ ] **Step 2: Create `convex/auth.ts`** with Password provider
+- [x] **Step 2: Create `convex/auth.ts`** with Password provider
 
 ```typescript
 import { Password } from '@convex-dev/auth/providers/Password';
@@ -1114,7 +1114,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 });
 ```
 
-- [ ] **Step 3: Create `convex/http.ts`** so Convex Auth's HTTP routes are exposed
+- [x] **Step 3: Create `convex/http.ts`** so Convex Auth's HTTP routes are exposed
 
 ```typescript
 import { httpRouter } from 'convex/server';
@@ -1126,7 +1126,7 @@ auth.addHttpRoutes(http);
 export default http;
 ```
 
-- [ ] **Step 4: Set Convex env vars**
+- [x] **Step 4: Set Convex env vars** (see Addendum §A.11 — also set `JWKS`; use `--from-file`; `SITE_URL=http://localhost:5173`)
 
 Run:
 ```bash
@@ -1142,7 +1142,7 @@ Then `pnpm dlx convex@latest env set JWT_PRIVATE_KEY '<that pem>'`.
 
 Verify with: `pnpm dlx convex@latest env list` — both `SITE_URL` and `JWT_PRIVATE_KEY` should appear.
 
-- [ ] **Step 5: Install the Convex Auth React client + swap the provider**
+- [x] **Step 5: Install the Convex Auth React client + swap the provider**
 
 Run: `pnpm add @convex-dev/auth`  (already installed in Task 6 — no-op)
 
@@ -1198,11 +1198,11 @@ function RootDocument({ children }: { children: ReactNode }) {
 }
 ```
 
-- [ ] **Step 6: Verify Convex picks up the auth functions**
+- [x] **Step 6: Verify Convex picks up the auth functions**
 
 The Convex CLI watcher (from `pnpm convex:dev`) should re-deploy automatically. Look for "Updated functions" log lines that include `auth:signIn`, `auth:signOut`, `http`.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add convex/auth.config.ts convex/auth.ts convex/http.ts src/routes/__root.tsx
@@ -3270,6 +3270,36 @@ The functionally equivalent layout the generator does accept:
 Same URLs (`/`, `/signup`, `/signin`, `/dashboard`), same layout nesting, same Outlet wiring. Only the filenames change.
 
 When `createFileRoute('/(public)/_layout')` appears in plan text, use `createFileRoute('/_public')`. Similarly `createFileRoute('/(public)/_layout/signup')` → `createFileRoute('/_public/signup')`. The route tree generator infers the layout relationship from the matching filename `_public.tsx` and directory `_public/`.
+
+### A.11 Convex Auth env vars (discovered during Task 8 execution)
+
+**Discovered:** 2026-05-19, `@convex-dev/auth@0.0.92`.
+
+Task 8 Step 4 lists only `SITE_URL` and `JWT_PRIVATE_KEY`. **Convex Auth also requires a third env var, `JWKS`** — a JSON Web Key Set containing the RSA public key paired with `JWT_PRIVATE_KEY`. Without it, any auth-protected query fails because Convex can't verify the tokens it issued.
+
+Generate them together so the public/private halves match:
+
+```bash
+TMPDIR_KP=$(mktemp -d) && chmod 700 "$TMPDIR_KP"
+node -e "
+const c = require('crypto');
+const { publicKey, privateKey } = c.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const fs = require('fs');
+const jwk = publicKey.export({ format: 'jwk' });
+jwk.use = 'sig';
+fs.writeFileSync('$TMPDIR_KP/priv.pem', privateKey.export({ type: 'pkcs8', format: 'pem' }), { mode: 0o600 });
+fs.writeFileSync('$TMPDIR_KP/jwks.json', JSON.stringify({ keys: [jwk] }), { mode: 0o600 });
+"
+pnpm dlx convex@latest env set JWT_PRIVATE_KEY --from-file "$TMPDIR_KP/priv.pem" --force
+pnpm dlx convex@latest env set JWKS --from-file "$TMPDIR_KP/jwks.json" --force
+shred -u "$TMPDIR_KP"/* 2>/dev/null; rm -rf "$TMPDIR_KP"
+```
+
+**Use `--from-file`, not inline values.** PEM is multiline and gets mangled by shell argument quoting; the CLI silently sets a partial value. The `--from-file` flag handles it cleanly.
+
+**Never `convex env list`** when the deployment holds secrets — it prints every value to stdout. Use `convex env get NAME > /dev/null 2>&1` and check exit codes instead.
+
+Also: **`SITE_URL` should be `http://localhost:5173`**, not `:3000` as the plan body says (port corrected per A.1).
 
 ### A.10 How to use this addendum
 
