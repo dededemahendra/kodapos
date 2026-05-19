@@ -3188,7 +3188,7 @@ No type or name inconsistencies surfaced.
 | `createRouter()` export in `src/router.tsx` | `getRouter()` export (plugin's `RouterEntry` requires this name) |
 | `declare module '@tanstack/react-router'` | `declare module '@tanstack/react-start'` |
 | `server: { preset: 'cloudflare-pages' }` in app config | Cloudflare adapter is configured inside `tanstackStart()` options in Task 18 (specifics to be discovered empirically — see A.4) |
-| Dev server URL `http://localhost:3000` | `http://localhost:5175` (Vite default) |
+| Dev server URL `http://localhost:3000` | `http://localhost:5173` (Vite default; corrected 2026-05-19 during Task 7 — earlier "5175" was an observation from a host with port collisions) |
 | `dev: "vinxi dev"` script | `dev: "vite dev"` |
 | `build: "vinxi build"` script | `build: "vite build"` |
 | `start: "vinxi start"` script | `start: "node .output/server/index.mjs"` (auto-set by Task 2; verify build output in Task 18) |
@@ -3222,7 +3222,7 @@ Treat Task 18 as a small investigation task, not a deterministic recipe.
 
 ### A.5 Playwright config (Task 15)
 
-Use `baseURL: 'http://localhost:5175'`. The `webServer.url` in `playwright.config.ts` should match: `'http://localhost:5175'`.
+Use `baseURL: 'http://localhost:5173'`. The `webServer.url` in `playwright.config.ts` should match: `'http://localhost:5173'`. (Corrected 2026-05-19 during Task 7 verification — Vite's actual default is 5173.)
 
 ### A.6 Cleanup: remove unused `vinxi` dep
 
