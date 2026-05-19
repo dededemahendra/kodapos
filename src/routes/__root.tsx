@@ -5,7 +5,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@tanstack/react-router';
+import { ConvexProvider } from 'convex/react';
 import type { ReactNode } from 'react';
+import { convex } from '~/lib/convex';
 import globalsCss from '~/styles/globals.css?url';
 
 export const Route = createRootRoute({
@@ -23,7 +25,9 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
-      <Outlet />
+      <ConvexProvider client={convex}>
+        <Outlet />
+      </ConvexProvider>
     </RootDocument>
   );
 }

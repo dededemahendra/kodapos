@@ -965,11 +965,11 @@ git commit -m "feat: initialize Convex backend with Phase 0 schema"
 - Create: `.env.example` already has the var; create `.env.local` from it locally
 - Modify: `package.json` (add `dev:all` script for convenience)
 
-- [ ] **Step 1: Install the Convex React client**
+- [x] **Step 1: Install the Convex React client**
 
 Run: `pnpm add convex`  (already installed in Task 6 — this is a no-op check)
 
-- [ ] **Step 2: Create `src/lib/convex.ts`**
+- [x] **Step 2: Create `src/lib/convex.ts`**
 
 ```typescript
 import { ConvexReactClient } from 'convex/react';
@@ -984,7 +984,7 @@ if (!url) {
 export const convex = new ConvexReactClient(url);
 ```
 
-- [ ] **Step 3: Wrap the root with `ConvexProvider`**
+- [x] **Step 3: Wrap the root with `ConvexProvider`**
 
 Update `src/routes/__root.tsx`:
 
@@ -1038,7 +1038,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 }
 ```
 
-- [ ] **Step 4: Add a `dev:all` script** to run Vite + Convex side-by-side
+- [x] **Step 4: Add a `dev:all` script** to run Vite + Convex side-by-side
 
 Modify `package.json` scripts (add the one new line shown):
 
@@ -1066,13 +1066,13 @@ Modify `package.json` scripts (add the one new line shown):
 
 Run: `pnpm add -D concurrently`
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run: `pnpm dev:all`
 
 Expected: both Vite and Convex start. Open `http://localhost:3000`. Page renders. Browser DevTools → Network → WS shows an open WebSocket to your `convex.cloud` deployment. Stop with Ctrl+C.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/convex.ts src/routes/__root.tsx package.json pnpm-lock.yaml

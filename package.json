@@ -6,6 +6,7 @@
   "packageManager": "pnpm@9.14.4",
   "scripts": {
     "dev": "vite dev",
+    "dev:all": "concurrently -k -n vite,convex \"pnpm dev\" \"pnpm convex:dev\"",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
     "convex:dev": "convex dev",
@@ -48,6 +49,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
     "tailwindcss": "^4",
     "typescript": "^6.0.3",
     "vinxi": "^0.5.11",
