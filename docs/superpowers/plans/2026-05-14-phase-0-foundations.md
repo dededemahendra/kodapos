@@ -890,14 +890,14 @@ git commit -m "feat: set up (public) and (pos) route groups"
 - Create: `convex/schema.ts`
 - Auto-generated: `convex/_generated/*`, `.env.local` (Convex CLI writes these)
 
-- [ ] **Step 1: Install Convex**
+- [x] **Step 1: Install Convex**
 
 Run:
 ```bash
 pnpm add convex
 ```
 
-- [ ] **Step 2: Initialize the Convex project**
+- [x] **Step 2: Initialize the Convex project**
 
 Run: `pnpm dlx convex@latest dev --once --configure=new`
 
@@ -908,7 +908,7 @@ When prompted:
 
 Expected: the CLI creates `convex/` directory with `_generated/`, writes `.env.local` containing `CONVEX_DEPLOYMENT` and `VITE_CONVEX_URL`.
 
-- [ ] **Step 3: Create the starter `convex/schema.ts`**
+- [x] **Step 3: Create the starter `convex/schema.ts`**
 
 This is a minimal schema for Phase 0 — only enough to support the auth + hello query. The full schema from spec §2 lands in Phase 1.
 
@@ -931,11 +931,11 @@ export default defineSchema({
 });
 ```
 
-- [ ] **Step 4: Install Convex Auth**
+- [x] **Step 4: Install Convex Auth**
 
 Run: `pnpm add @convex-dev/auth @auth/core`
 
-- [ ] **Step 5: Verify schema validates**
+- [x] **Step 5: Verify schema validates**
 
 Run (in a separate terminal): `pnpm convex:dev`
 
@@ -943,12 +943,12 @@ Expected: Convex CLI watches the schema, applies it, and prints a "Convex functi
 
 Stop with Ctrl+C if you want to free the terminal, but the CLI works fine running continuously.
 
-- [ ] **Step 6: Add `.env.local` to gitignore awareness**
+- [x] **Step 6: Add `.env.local` to gitignore awareness**
 
 `.env.local` is already gitignored by Task 1. Confirm with: `git status`
 Expected: `.env.local` does NOT appear in the untracked list.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add convex/schema.ts package.json pnpm-lock.yaml
@@ -1903,11 +1903,11 @@ git commit -m "feat(i18n): configure Lingui with ID source locale"
 **Files:**
 - Create: `biome.json`
 
-- [ ] **Step 1: Install Biome**
+- [x] **Step 1: Install Biome**
 
 Run: `pnpm add -D --save-exact @biomejs/biome@^2`
 
-- [ ] **Step 2: Create `biome.json`**
+- [x] **Step 2: Create `biome.json`**
 
 ```json
 {
@@ -1964,17 +1964,17 @@ Run: `pnpm add -D --save-exact @biomejs/biome@^2`
 }
 ```
 
-- [ ] **Step 3: Verify lint runs clean (or fix what it surfaces)**
+- [x] **Step 3: Verify lint runs clean (or fix what it surfaces)**
 
 Run: `pnpm lint`
 Expected: zero errors. Warnings are acceptable for Phase 0 if they're in generated or stylistic areas. If errors exist, run `pnpm lint:fix` and re-verify; remaining errors must be addressed manually.
 
-- [ ] **Step 4: Verify format runs idempotently**
+- [x] **Step 4: Verify format runs idempotently**
 
 Run: `pnpm format && git diff --quiet`
 Expected: exit code 0 (no diff after format).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add biome.json package.json pnpm-lock.yaml

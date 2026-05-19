@@ -25,12 +25,15 @@
     "pnpm": ">=9"
   },
   "dependencies": {
+    "@auth/core": "^0.37.4",
+    "@convex-dev/auth": "^0.0.92",
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-query": "^5.100.10",
     "@tanstack/react-router": "^1.169.2",
     "@tanstack/react-start": "^1.167.65",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "convex": "^1.39.1",
     "lucide-react": "^1.16.0",
     "react": "^19",
     "react-dom": "^19",
