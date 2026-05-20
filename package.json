@@ -19,7 +19,7 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "lingui:extract": "lingui extract",
-    "lingui:compile": "lingui compile"
+    "lingui:compile": "lingui compile --namespace es"
   },
   "engines": {
     "node": ">=20",
@@ -28,6 +28,8 @@
   "dependencies": {
     "@auth/core": "^0.37.4",
     "@convex-dev/auth": "^0.0.92",
+    "@lingui/core": "^6.0.1",
+    "@lingui/react": "^6.0.1",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
@@ -43,8 +45,15 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
     "@biomejs/biome": "^2",
     "@edge-runtime/vm": "^5.0.0",
+    "@lingui/babel-plugin-lingui-macro": "^6.0.1",
+    "@lingui/cli": "^6.0.1",
+    "@lingui/conf": "^6.0.1",
+    "@lingui/format-po": "^6.0.1",
+    "@lingui/vite-plugin": "^6.0.1",
+    "@rolldown/plugin-babel": "^0.2.3",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/router-devtools": "^1.166.13",
     "@tanstack/router-plugin": "^1.167.35",

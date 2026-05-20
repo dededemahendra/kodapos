@@ -35,5 +35,10 @@ playwright/.cache/
 # Convex
 convex/_generated/
 
+# Lingui compiled catalogs (compiled on-the-fly by the Vite plugin)
+src/locales/**/messages.js
+src/locales/**/messages.mjs
+src/locales/**/messages.ts
+
 # Misc
 *.tsbuildinfo

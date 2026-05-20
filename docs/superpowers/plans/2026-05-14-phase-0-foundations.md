@@ -1660,7 +1660,7 @@ function Dashboard() {
 - Modify: `src/routes/__root.tsx`
 - Modify: `src/routes/(public)/index.tsx` (use `<Trans>`)
 
-- [ ] **Step 1: Install Lingui**
+- [x] **Step 1: Install Lingui** (adapted per Addendum §A.13 — Lingui 6 ships split macro packages; install `@lingui/core @lingui/react` runtime and `@lingui/cli @lingui/conf @lingui/vite-plugin @lingui/babel-plugin-lingui-macro @lingui/format-po @rolldown/plugin-babel @babel/core` as dev deps. `@lingui/macro` and `babel-plugin-macros` are not needed.)
 
 Run:
 ```bash
@@ -1668,7 +1668,7 @@ pnpm add @lingui/core @lingui/react
 pnpm add -D @lingui/cli @lingui/vite-plugin @lingui/macro babel-plugin-macros
 ```
 
-- [ ] **Step 2: Create `lingui.config.ts`**
+- [x] **Step 2: Create `lingui.config.ts`** (adapted: `format` takes `formatter({ lineNumbers: false })` from `@lingui/format-po`, not the legacy `'po'` string. See Addendum §A.13.)
 
 ```typescript
 import type { LinguiConfig } from '@lingui/conf';
@@ -1689,7 +1689,7 @@ const config: LinguiConfig = {
 export default config;
 ```
 
-- [ ] **Step 3: Add the Lingui Vite plugin** to `app.config.ts`
+- [x] **Step 3: Add the Lingui Vite plugin** to `app.config.ts` (adapted per Addendum §A.3 + §A.13: edit `vite.config.ts` instead, and pair `lingui()` with a separate `babel({ presets: [linguiTransformerBabelPreset()] })` entry — `@vitejs/plugin-react@6` no longer accepts a `babel` option.)
 
 Replace `app.config.ts`:
 
@@ -1720,7 +1720,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 4: Create `src/lib/i18n.ts`**
+- [x] **Step 4: Create `src/lib/i18n.ts`** (adapted: imports come from the `.po` files directly via the Vite plugin's `.po` interceptor — `~/locales/id/messages.po`. Added `src/types/lingui.d.ts` with `declare module '*.po'` for TypeScript. See Addendum §A.13.)
 
 ```typescript
 import { i18n } from '@lingui/core';
@@ -1733,7 +1733,7 @@ i18n.activate('id');
 export { i18n };
 ```
 
-- [ ] **Step 5: Create empty PO catalogs**
+- [x] **Step 5: Create empty PO catalogs**
 
 `src/locales/id/messages.po`:
 
@@ -1757,7 +1757,7 @@ msgstr ""
 "Language: en\n"
 ```
 
-- [ ] **Step 6: Wrap root in `I18nProvider`**
+- [x] **Step 6: Wrap root in `I18nProvider`**
 
 Update `src/routes/__root.tsx`:
 
@@ -1815,7 +1815,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 }
 ```
 
-- [ ] **Step 7: Use `<Trans>` on the public home page**
+- [x] **Step 7: Use `<Trans>` on the public home page** (file at `src/routes/_public/index.tsx` per Addendum §A.9)
 
 Replace `src/routes/(public)/index.tsx`:
 
@@ -1856,7 +1856,7 @@ function PublicHome() {
 }
 ```
 
-- [ ] **Step 8: Extract and compile catalogs**
+- [x] **Step 8: Extract and compile catalogs** (only `pnpm lingui:extract` is needed for dev — the Vite plugin compiles `.po` on import. `pnpm lingui:compile` is now `lingui compile --namespace es` and remains useful for production CI. See Addendum §A.13.)
 
 Run:
 ```bash
@@ -1864,18 +1864,9 @@ pnpm lingui:extract
 pnpm lingui:compile
 ```
 
-Expected: both `src/locales/id/messages.po` and `src/locales/en/messages.po` now contain the extracted strings. Compiled JS catalogs (`messages.js` / `messages.ts`) are written alongside.
+- [x] **Step 9: Verify** (headless Playwright: home renders all three Lingui-wrapped strings ("AI-native POS untuk kafe & QSR Indonesia.", "Masuk", "Daftar"); `/signup` and `/signin` regression-free after root-layout changes.)
 
-- [ ] **Step 9: Verify**
-
-Run: `pnpm dev:all`. Visit `/`. Page renders correctly with Bahasa strings (Lingui falls back to source-locale strings when EN catalogs are empty).
-
-- [ ] **Step 10: Commit**
-
-```bash
-git add lingui.config.ts src/locales src/lib/i18n.ts src/routes app.config.ts package.json pnpm-lock.yaml
-git commit -m "feat(i18n): configure Lingui with ID source locale"
-```
+- [x] **Step 10: Commit**
 
 ---
 
@@ -3306,6 +3297,27 @@ const userId = await t.run(async (ctx) => ctx.db.insert('users', { name: 'X', em
 const asUser = t.withIdentity({ subject: `${userId}|test_session` });
 await asUser.query(api.users.hello);
 ```
+
+### A.13 Lingui 6 + Vite 8 macro pipeline (discovered during Task 12 execution)
+
+**Discovered:** 2026-05-20, `@lingui/*@6.0.1`, `vite@8.0.13`, `@vitejs/plugin-react@6.0.1`.
+
+The plan's Task 12 recipe is written for Lingui 4 / Vite 5 era. Several breakages on the current stack:
+
+1. **`format: 'po'` string is gone.** Lingui 6 requires `format: formatter({ lineNumbers: false })` from `@lingui/format-po`, which is now a separate package.
+2. **`babel-plugin-macros` indirection is dead.** Don't install `@lingui/macro` + `babel-plugin-macros`. Lingui 6 ships `@lingui/babel-plugin-lingui-macro` (direct, no `babel-plugin-macros` shim) and you import macros from `@lingui/react/macro` and `@lingui/core/macro`.
+3. **`@vitejs/plugin-react@6` dropped the `babel` option entirely.** It transforms JSX via Oxc/Rolldown, not Babel. Passing `viteReact({ babel: { plugins: [...] } })` silently does nothing.
+4. **Macros need their own Babel pass.** Install `@rolldown/plugin-babel` + `@babel/core` and add a separate plugin entry:
+   ```ts
+   import babel from '@rolldown/plugin-babel';
+   import { lingui, linguiTransformerBabelPreset } from '@lingui/vite-plugin';
+   // ...
+   plugins: [..., lingui(), babel({ presets: [linguiTransformerBabelPreset()] }), tailwindcss(), viteReact()]
+   ```
+5. **`@lingui/vite-plugin` intercepts `.po` imports.** Import catalogs directly: `import { messages } from '~/locales/id/messages.po'`. No need to commit compiled `messages.js`/`messages.mjs`. Add a `declare module '*.po'` shim (`src/types/lingui.d.ts`) for TypeScript. The `lingui:compile` script is still useful for production CI; pass `--namespace es` so it emits `.mjs` instead of CJS.
+6. **`compileNamespace: 'es'` in config does not control output module type.** Pass `--namespace es` on the CLI; that switches output from `messages.js` (`module.exports`) to `messages.mjs` (`export const messages`).
+
+The Task 12 step bodies have been left as-is for historical context. Treat §A.13 as the source of truth for the actual wiring.
 
 ### A.10 How to use this addendum
 

@@ -1,4 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Trans } from '@lingui/react/macro';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { Coffee } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 
@@ -13,13 +14,19 @@ function PublicHome() {
         <Coffee className="size-8 text-brand-600" />
         <h1 className="text-3xl font-bold text-brand-600">kodapos</h1>
       </header>
-      <p className="text-fg-muted mt-2">AI-native POS untuk kafe & QSR Indonesia.</p>
+      <p className="text-fg-muted mt-2">
+        <Trans>AI-native POS untuk kafe & QSR Indonesia.</Trans>
+      </p>
       <div className="mt-6 flex gap-3">
         <Button asChild>
-          <a href="/signin">Masuk</a>
+          <Link to="/signin">
+            <Trans>Masuk</Trans>
+          </Link>
         </Button>
         <Button variant="outline" asChild>
-          <a href="/signup">Daftar</a>
+          <Link to="/signup">
+            <Trans>Daftar</Trans>
+          </Link>
         </Button>
       </div>
     </main>

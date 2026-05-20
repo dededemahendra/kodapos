@@ -18,6 +18,7 @@
       "!convex/_generated",
       "!src/locales/**/*.po",
       "!src/locales/**/messages.js",
+      "!src/locales/**/messages.mjs",
       "!src/locales/**/messages.ts"
     ]
   },

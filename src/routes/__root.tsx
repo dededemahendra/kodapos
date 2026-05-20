@@ -1,3 +1,5 @@
+import { ConvexAuthProvider } from '@convex-dev/auth/react';
+import { I18nProvider } from '@lingui/react';
 import {
   createRootRoute,
   HeadContent,
@@ -5,9 +7,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@tanstack/react-router';
-import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import type { ReactNode } from 'react';
 import { convex } from '~/lib/convex';
+import { i18n } from '~/lib/i18n';
 import globalsCss from '~/styles/globals.css?url';
 
 export const Route = createRootRoute({
@@ -25,9 +27,11 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
-      <ConvexAuthProvider client={convex}>
-        <Outlet />
-      </ConvexAuthProvider>
+      <I18nProvider i18n={i18n}>
+        <ConvexAuthProvider client={convex}>
+          <Outlet />
+        </ConvexAuthProvider>
+      </I18nProvider>
     </RootDocument>
   );
 }
