@@ -1963,7 +1963,7 @@ git commit -m "chore: configure Biome lint + format"
 
 This task introduces a small, real utility we'll use throughout Phase 1+ — IDR formatting. It also exercises Vitest end-to-end.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `src/lib/money.test.ts`:
 
@@ -2012,12 +2012,9 @@ describe('computeChange', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests and verify they fail**
+- [x] **Step 2: Run the tests and verify they fail** (confirmed: `Error: Cannot find module './money'`)
 
-Run: `pnpm test`
-Expected: all tests fail with "Cannot find module" or similar — the `money.ts` file doesn't exist yet.
-
-- [ ] **Step 3: Implement `src/lib/money.ts`**
+- [x] **Step 3: Implement `src/lib/money.ts`**
 
 ```typescript
 const FORMATTER = new Intl.NumberFormat('id-ID', {
@@ -2058,17 +2055,9 @@ export function computeChange(params: {
 }
 ```
 
-- [ ] **Step 4: Run the tests and verify they pass**
+- [x] **Step 4: Run the tests and verify they pass** (7/7 money tests green; full suite 9/9)
 
-Run: `pnpm test`
-Expected: all tests pass.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/lib/money.ts src/lib/money.test.ts
-git commit -m "feat(money): add IDR formatter/parser/change helpers with tests"
-```
+- [x] **Step 5: Commit**
 
 ---
 
