@@ -2943,50 +2943,34 @@ pnpm dlx wrangler pages deploy .output/public --project-name=kodapos
 
 ---
 
-## Task 26: Confirm exit criteria
+## Task 26: Confirm exit criteria — PARTIAL (2 of 6 evaluated)
 
 **Files:** (no new files; produces decisions for Task 27)
 
 This is the verify-the-verifier task: a manual walkthrough of the six exit criteria from the plan header.
 
-- [ ] **Step 1: Criterion 1 — Deploys to Cloudflare Pages, responds from Indonesia**
+- [ ] **Step 1: Criterion 1 — Deploys to Cloudflare Pages, responds from Indonesia** — ⏸ deferred (blocked on Tasks 18–19).
 
-Open the deployed `<hash>.kodapos.pages.dev` URL. ✓ if HTTP 200, page renders, no SSR/hydration errors in console.
+- [ ] **Step 2: Criterion 2 — Convex Auth signup + signin works on the deployed app** — ⏸ deferred (locally ✓; deployed half blocked on Criterion 1).
 
-- [ ] **Step 2: Criterion 2 — Convex Auth signup + signin works on the deployed app**
+- [ ] **Step 3: Criterion 3 — Authenticated query returns data to deployed UI** — ⏸ deferred (locally ✓; deployed half blocked on Criterion 1).
 
-Sign up with a fresh email; sign out; sign back in. ✓ if all three succeed.
+- [ ] **Step 4: Criterion 4 — Latency from Jakarta** — ⏸ deferred (blocked on Tasks 19–20).
 
-- [ ] **Step 3: Criterion 3 — Authenticated query returns data to deployed UI**
+- [x] **Step 5: Criterion 5 — Quality gates pass** — partial ✓. `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e` all exit 0; `pnpm build` not run (Task 18 / Addendum §A.4 must verify output path first).
 
-After sign-in, the deployed dashboard shows `Halo, <name>!`. ✓.
-
-- [ ] **Step 4: Criterion 4 — Latency from Jakarta**
-
-Refer to Task 20 measurements. ✓ if WebSocket query p50 <300ms. ⚠ if 300–600ms. ✗ if >600ms.
-
-- [ ] **Step 5: Criterion 5 — Quality gates pass**
-
-Run locally:
-```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
-```
-✓ if all five exit code 0.
-
-- [ ] **Step 6: Criterion 6 — No discovered showstoppers**
-
-Reflect on the 25 tasks. List anything that was a surprise, fragile, or required workarounds. ✓ if list is empty or items are minor; flag for Task 27 if items are structural.
+- [x] **Step 6: Criterion 6 — No discovered showstoppers** — ✓ none structural; all friction captured in Addendum §§A.1, A.3, A.9, A.12, A.13. See `2026-05-20-phase-0-results.md` for the full list.
 
 ---
 
-## Task 27: Cut-bait decision document
+## Task 27: Cut-bait decision document — PARTIAL
 
 **Files:**
 - Create: `docs/superpowers/plans/2026-05-14-phase-0-results.md`
 
 The Phase 0 deliverable — a written verdict on whether to proceed to Phase 1 plan, revise the stack, or stop.
 
-- [ ] **Step 1: Write the results document**
+- [x] **Step 1: Write the results document** (filename adapted to today's date: `docs/superpowers/plans/2026-05-20-phase-0-results.md`.)
 
 `docs/superpowers/plans/2026-05-14-phase-0-results.md`:
 
@@ -3029,26 +3013,13 @@ The Phase 0 deliverable — a written verdict on whether to proceed to Phase 1 p
 (One sentence. Either: "Invoke writing-plans skill for Phase 1." OR "Update spec docs/superpowers/specs/2026-05-14-kodapos-v1-design.md to reflect <change>." OR "Halt; user to decide direction.")
 ```
 
-- [ ] **Step 2: Fill in the template based on Tasks 19, 20, 23, 26**
+- [x] **Step 2: Fill in the template based on Tasks 19, 20, 23, 26** — done with partial data; Tasks 19, 20 are deferred so their rows are marked ⏸. Verdict: PROCEED WITH NOTES, pending the deploy half.
 
-Replace every `<placeholder>` and pick exactly one verdict.
+- [x] **Step 3: Commit**
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: If verdict is PROCEED** — deferred. Verdict is conditional ("PROCEED WITH NOTES — pending the deploy half"). Cannot start Phase 1 feature work until Tasks 18–20 close the deferred criteria.
 
-```bash
-git add docs/superpowers/plans/2026-05-14-phase-0-results.md
-git commit -m "docs: Phase 0 results + cut-bait decision"
-```
-
-- [ ] **Step 4: If verdict is PROCEED**
-
-Reply to the user with the verdict and request Phase 1 plan authoring:
-
-> Phase 0 complete. Exit criteria summary: [pass/marginal/fail counts]. Verdict: PROCEED [WITH NOTES] / REVISE / STOP. Ready to author Phase 1 plan when you are.
-
-- [ ] **Step 5: If verdict is REVISE or STOP**
-
-Do not begin Phase 1 planning. The user decides next step.
+- [ ] **Step 5: If verdict is REVISE or STOP** — N/A.
 
 ---
 
