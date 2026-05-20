@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2",
+    "@edge-runtime/vm": "^5.0.0",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/router-devtools": "^1.166.13",
     "@tanstack/router-plugin": "^1.167.35",
@@ -50,10 +51,12 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^9.2.1",
+    "convex-test": "^0.0.53",
     "tailwindcss": "^4",
     "typescript": "^6.0.3",
     "vinxi": "^0.5.11",
     "vite": "^8.0.13",
-    "vite-tsconfig-paths": "^6.1.1"
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.6"
   }
 }

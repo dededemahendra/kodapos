@@ -1218,14 +1218,14 @@ git commit -m "feat: configure Convex Auth with Password provider"
 - Create: `tests/convex/users.test.ts`
 - Create: `vitest.config.ts`
 
-- [ ] **Step 1: Install testing dependencies**
+- [x] **Step 1: Install testing dependencies**
 
 Run:
 ```bash
 pnpm add -D vitest convex-test @edge-runtime/vm
 ```
 
-- [ ] **Step 2: Create `vitest.config.ts`**
+- [x] **Step 2: Create `vitest.config.ts`**
 
 ```typescript
 import { defineConfig } from 'vitest/config';
@@ -1241,7 +1241,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 3: Write the failing test**
+- [x] **Step 3: Write the failing test** (adapted: convex-test API uses `api.users.hello` + explicit `modules` via `import.meta.glob` — see Addendum §A.12)
 
 Create `tests/convex/users.test.ts`:
 
@@ -1277,13 +1277,13 @@ describe('users.hello', () => {
 });
 ```
 
-- [ ] **Step 4: Run the test and verify it fails**
+- [x] **Step 4: Run the test and verify it fails**
 
 Run: `pnpm test`
 
 Expected: both tests fail with errors indicating `users:hello` is not defined. (The first one may pass trivially if `runQuery` returns undefined for unknown functions — that's fine; the second will definitely fail.)
 
-- [ ] **Step 5: Implement `convex/users.ts`**
+- [x] **Step 5: Implement `convex/users.ts`** (using the typed `v.union(v.string(), v.null())` form)
 
 ```typescript
 import { query } from './_generated/server';
@@ -1326,14 +1326,14 @@ export const hello = query({
 });
 ```
 
-- [ ] **Step 6: Run the test and verify it passes**
+- [x] **Step 6: Run the test and verify it passes**
 
 Run: `pnpm test`
 Expected: both tests pass. The second test asserts the function looks up the seeded user and returns `Halo, Warren!`.
 
 If a test still fails because of `convex-test` shape differences between Convex versions, adjust the seed shape to match `authTables.users` for your version — the principle (authenticated → greeting; unauthenticated → null) is what matters.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add convex/users.ts tests/convex vitest.config.ts package.json pnpm-lock.yaml
@@ -3300,6 +3300,31 @@ shred -u "$TMPDIR_KP"/* 2>/dev/null; rm -rf "$TMPDIR_KP"
 **Never `convex env list`** when the deployment holds secrets — it prints every value to stdout. Use `convex env get NAME > /dev/null 2>&1` and check exit codes instead.
 
 Also: **`SITE_URL` should be `http://localhost:5173`**, not `:3000` as the plan body says (port corrected per A.1).
+
+### A.12 convex-test under pnpm (discovered during Task 9 execution)
+
+**Discovered:** 2026-05-19, `convex-test@0.0.53` + `pnpm@9.14.4`.
+
+The plan's Task 9 test code calls `convexTest(schema, modules)` with `modules` imported from `convex/_generated/modules` and queries via `runQuery('users:hello', ...)`. Both are stale:
+
+1. **There is no `_generated/modules` file.** Convex codegen emits `api.{js,d.ts}`, `dataModel.d.ts`, and `server.{js,d.ts}` — no `modules`.
+2. **convex-test's API takes function references, not string names.** Use `await t.query(api.users.hello)` (from `_generated/api`) — passing a `'users:hello'` string is not a supported overload.
+3. **Under pnpm, convex-test's default auto-discovery fails.** Its bundled `import.meta.glob('../../../convex/**/*.*s')` resolves relative to `node_modules/.pnpm/convex-test@.../node_modules/convex-test/dist/index.js` — three `..` segments don't reach the project root. You get: *"Could not find the `_generated` directory."*
+
+**Fix:** pass `modules` explicitly from the test file, so Vite resolves the glob relative to the test:
+
+```typescript
+const modules = import.meta.glob('../../convex/**/*.*s');
+const t = convexTest(schema, modules);
+```
+
+**Spoofing an authenticated user.** Convex Auth's `getAuthUserId` reads `identity.subject` and splits on `|` (`TOKEN_SUB_CLAIM_DIVIDER`). To act as a seeded user in tests:
+
+```typescript
+const userId = await t.run(async (ctx) => ctx.db.insert('users', { name: 'X', email: 'x@y' }));
+const asUser = t.withIdentity({ subject: `${userId}|test_session` });
+await asUser.query(api.users.hello);
+```
 
 ### A.10 How to use this addendum
 
