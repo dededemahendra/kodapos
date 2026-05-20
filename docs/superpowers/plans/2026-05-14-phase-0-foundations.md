@@ -2141,7 +2141,10 @@ test('sign-up → dashboard → sign-out flow', async ({ page }) => {
 
 ---
 
-## Task 16: Wire Sentry (frontend) + Convex error logging
+## Task 16: Wire Sentry (frontend) + Convex error logging — SKIPPED (deferred)
+
+_Skipped 2026-05-20: requires creating a Sentry project + DSN. Defer until error-monitoring is needed — pre-deploy is fine; current Phase 0 traffic is zero. Revisit before Task 19 (first deploy) or with first beta user._
+
 
 **Files:**
 - Create: `src/lib/sentry.ts`
@@ -2241,7 +2244,10 @@ git commit -m "feat(observability): wire Sentry frontend + Convex error logging 
 
 ---
 
-## Task 17: Wire PostHog (analytics)
+## Task 17: Wire PostHog (analytics) — SKIPPED (deferred)
+
+_Skipped 2026-05-20: requires PostHog project + API key. Defer alongside Sentry until product-analytics signal is actually useful — at zero traffic the data is noise. Revisit before broader beta launch._
+
 
 **Files:**
 - Create: `src/lib/posthog.ts`
@@ -2309,7 +2315,10 @@ git commit -m "feat(observability): wire PostHog analytics"
 
 ---
 
-## Task 18: Configure Cloudflare Pages deployment
+## Task 18: Configure Cloudflare Pages deployment — DEFERRED
+
+_Deferred 2026-05-20: needs interactive `wrangler login` and KV namespace creation. Skipping along with Tasks 19–21 to focus on local quality gates (22–25) first. Revisit when ready to deploy; per Addendum §A.4 this is an investigation task — first verify what `pnpm build` actually produces before locking in `wrangler.toml`._
+
 
 **Files:**
 - Create: `wrangler.toml`
@@ -2374,7 +2383,10 @@ git commit -m "ci: configure Cloudflare Pages deployment"
 
 ---
 
-## Task 19: First deploy to Cloudflare Pages (preview)
+## Task 19: First deploy to Cloudflare Pages (preview) — DEFERRED
+
+_Deferred 2026-05-20: requires Task 18 first._
+
 
 **Files:** (no new files — runtime deploy only)
 
@@ -2470,7 +2482,10 @@ git commit -m "docs: record first Cloudflare Pages deploy"
 
 ---
 
-## Task 20: Validate Indonesian latency
+## Task 20: Validate Indonesian latency — DEFERRED
+
+_Deferred 2026-05-20: requires Task 19 first (need a deployed URL to measure)._
+
 
 **Files:** (no code changes)
 
@@ -2520,7 +2535,10 @@ git commit -m "docs: record latency measurements from Indonesian client"
 
 ---
 
-## Task 21: Add CI workflow (GitHub Actions)
+## Task 21: Add CI workflow (GitHub Actions) — DEFERRED
+
+_Deferred 2026-05-20: project doesn't have a GitHub remote yet, and CI references Cloudflare Pages preview deployments (Task 18). Revisit when there's a remote + Cloudflare auth + Sentry/PostHog secrets._
+
 
 **Files:**
 - Create: `.github/workflows/ci.yml`
