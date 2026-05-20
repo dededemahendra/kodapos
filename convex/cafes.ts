@@ -2,8 +2,17 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 
+const cafeDoc = v.object({
+  _id: v.id('cafes'),
+  _creationTime: v.number(),
+  name: v.string(),
+  ownerUserId: v.id('users'),
+  createdAt: v.number(),
+});
+
 export const createForOwner = mutation({
   args: { name: v.string() },
+  returns: v.id('cafes'),
   handler: async (ctx, { name }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
@@ -19,6 +28,7 @@ export const createForOwner = mutation({
 
 export const mine = query({
   args: {},
+  returns: v.array(cafeDoc),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
