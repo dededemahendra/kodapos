@@ -2632,35 +2632,11 @@ After push, check GitHub → Actions tab. The `check` job should run and pass. T
 
 A defensive sweep: ensure the codebase typechecks cleanly before declaring Phase 0 done.
 
-- [ ] **Step 1: Run typecheck**
+- [x] **Step 1: Run typecheck** (fixed three pre-existing issues: removed deprecated `baseUrl` from `tsconfig.json` (TS 6/7 deprecation); added `src/types/vite-env.d.ts` with `/// <reference types="vite/client" />` so `import.meta.env`, `?url` CSS imports, and `import.meta.glob` resolve.)
 
-Run: `pnpm typecheck`
+- [x] **Step 2: Run lint + format check** (fixed: organize-imports on `convex/schema.ts`; line-length on `src/lib/convex.ts`; replaced non-null assertion in `convex/auth.config.ts` with an explicit guard. Removed unused `vinxi` dev dep per Addendum §A.6.)
 
-Expected: exit code 0. If errors surface, fix them before continuing. Common Phase 0 type issues:
-
-- `convex/_generated/api` import path mismatch — re-run `pnpm convex:dev --once` to regenerate.
-- TanStack Router type-augmentation missing — confirm the `declare module '@tanstack/react-router'` block in `src/router.tsx` (Task 2 Step 4) is present.
-- Lingui macro types — if Biome's `useImportType` complains about `@lingui/react/macro`, add `// biome-ignore lint/style/useImportType: macro` above the import.
-
-- [ ] **Step 2: Run lint + format check**
-
-Run: `pnpm lint && pnpm format && git diff --quiet`
-
-Expected: lint passes; format produces no diff. If diff appears, commit it:
-
-```bash
-git add -A
-git commit -m "chore: apply Biome formatter"
-```
-
-- [ ] **Step 3: Commit any type fixes**
-
-```bash
-git add -A
-git commit -m "chore: clean up type errors discovered in Phase 0 sweep" --allow-empty-message
-```
-
-(Only commit if there are actual changes — omit otherwise.)
+- [x] **Step 3: Commit any type fixes**
 
 ---
 
@@ -2668,19 +2644,11 @@ git commit -m "chore: clean up type errors discovered in Phase 0 sweep" --allow-
 
 **Files:** (no new files)
 
-- [ ] **Step 1: Run unit tests**
+- [x] **Step 1: Run unit tests** — `pnpm test`: 9 passed, 0 failed (2 Convex `hello` tests + 7 money tests).
 
-Run: `pnpm test`
-Expected: all unit + Convex tests pass.
+- [x] **Step 2: Run E2E tests locally** — `pnpm test:e2e`: 1 passed, 1 skipped (the env-gated auth flow). With `RUN_AUTH_E2E=1`: not run here (would seed dev Convex).
 
-- [ ] **Step 2: Run E2E tests locally**
-
-Run: `pnpm test:e2e`
-Expected: both smoke tests pass against the dev server.
-
-- [ ] **Step 3: Capture the test count + pass status**
-
-Note the test counts (e.g., "9 passed, 0 failed") for the Task 27 sign-off document.
+- [x] **Step 3: Capture the test count + pass status** — Recorded above for Task 27 sign-off.
 
 ---
 
