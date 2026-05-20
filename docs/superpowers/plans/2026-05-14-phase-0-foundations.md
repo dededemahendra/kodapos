@@ -2849,7 +2849,7 @@ function Dashboard() {
 - Modify: `.vscode/extensions.json` (optional, recommended extensions)
 - Modify: `README.md` (update with current run instructions)
 
-- [ ] **Step 1: Create `.vscode/extensions.json`**
+- [x] **Step 1: Create `.vscode/extensions.json`**
 
 ```json
 {
@@ -2864,7 +2864,7 @@ function Dashboard() {
 }
 ```
 
-- [ ] **Step 2: Create `.vscode/settings.json`**
+- [x] **Step 2: Create `.vscode/settings.json`** (adapted: `.vinxi` exclude replaced with `.tanstack` since the project migrated to the Vite-native TanStack Start plugin.)
 
 ```json
 {
@@ -2884,7 +2884,7 @@ function Dashboard() {
 }
 ```
 
-- [ ] **Step 3: Refresh `README.md` with current commands**
+- [x] **Step 3: Refresh `README.md` with current commands** (adapted: port 5173 per Addendum §A.5; status section reflects deferred tasks 16–21; added i18n section for Lingui workflow; noted `RUN_AUTH_E2E` env-gate for the Playwright auth flow.)
 
 Replace `README.md`:
 
@@ -2939,12 +2939,7 @@ pnpm dlx wrangler pages deploy .output/public --project-name=kodapos
 - Phase 0 deploy notes: `docs/superpowers/plans/2026-05-14-phase-0-deploy-notes.md`
 ```
 
-- [ ] **Step 4: Commit**
-
-```bash
-git add .vscode README.md
-git commit -m "chore: editor config + refresh README for end-of-Phase-0"
-```
+- [x] **Step 4: Commit**
 
 ---
 

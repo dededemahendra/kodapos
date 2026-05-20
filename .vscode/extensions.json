@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "ms-playwright.playwright",
+    "vitest.explorer",
+    "lingui.vscode-lingui",
+    "Cloudflare.wrangler-vscode"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.exclude": {
+    "**/.output": true,
+    "**/.tanstack": true,
+    "**/node_modules": true,
+    "**/.wrangler": true
+  }
+}
