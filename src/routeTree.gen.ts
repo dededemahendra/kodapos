@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as PosRouteImport } from './routes/_pos'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 
 const PublicRoute = PublicRouteImport.update({
@@ -27,6 +28,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicSignupRoute = PublicSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => PublicRoute,
+} as any)
 const PosDashboardRoute = PosDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -36,24 +42,33 @@ const PosDashboardRoute = PosDashboardRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/dashboard': typeof PosDashboardRoute
+  '/signup': typeof PublicSignupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/dashboard': typeof PosDashboardRoute
+  '/signup': typeof PublicSignupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_pos': typeof PosRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_pos/dashboard': typeof PosDashboardRoute
+  '/_public/signup': typeof PublicSignupRoute
   '/_public/': typeof PublicIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths: '/' | '/dashboard' | '/signup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/_pos' | '/_public' | '/_pos/dashboard' | '/_public/'
+  to: '/' | '/dashboard' | '/signup'
+  id:
+    | '__root__'
+    | '/_pos'
+    | '/_public'
+    | '/_pos/dashboard'
+    | '/_public/signup'
+    | '/_public/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -84,6 +99,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/signup': {
+      id: '/_public/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof PublicSignupRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_pos/dashboard': {
       id: '/_pos/dashboard'
       path: '/dashboard'
@@ -105,10 +127,12 @@ const PosRouteChildren: PosRouteChildren = {
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
 
 interface PublicRouteChildren {
+  PublicSignupRoute: typeof PublicSignupRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
+  PublicSignupRoute: PublicSignupRoute,
   PublicIndexRoute: PublicIndexRoute,
 }
 

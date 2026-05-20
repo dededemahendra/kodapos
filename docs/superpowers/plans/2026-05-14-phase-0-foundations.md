@@ -1349,7 +1349,7 @@ git commit -m "feat(convex): add users.hello query with tests"
 - Create: `src/components/ui/input.tsx`
 - Create: `src/components/ui/label.tsx`
 
-- [ ] **Step 1: Add the Input + Label primitives**
+- [x] **Step 1: Add the Input + Label primitives** (adapted: used `pnpm dlx shadcn@latest add input label field spinner` — pulled in `Field`/`FieldGroup`/`FieldError`/`Spinner` so the form follows the shadcn forms rule rather than raw `div` + `space-y-*`)
 
 Create `src/components/ui/input.tsx`:
 
@@ -1396,7 +1396,7 @@ Label.displayName = LabelPrimitive.Root.displayName;
 
 Run: `pnpm add @radix-ui/react-label`
 
-- [ ] **Step 2: Create the sign-up page**
+- [x] **Step 2: Create the sign-up page** (adapted: route file is `src/routes/_public/signup.tsx` per Addendum §A.9; form uses `FieldGroup` + `Field` + `FieldLabel` + `FieldError`; loading state uses `<Spinner data-icon="inline-start" />`)
 
 `src/routes/(public)/signup.tsx`:
 
@@ -1474,16 +1474,9 @@ function SignupPage() {
 }
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify** (headless Playwright via the `webapp-testing` skill — heading, all three labeled fields, brand button render; native `required` validation blocks empty submit; no page errors. Account-creation + redirect to `/dashboard` not verified locally — defer to Task 11 when sign-in is wired and the deploy is up.)
 
-Run: `pnpm dev:all`. Visit `/signup`. Form renders, validation works, submitting a new email creates an account and navigates to `/dashboard`.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/components/ui src/routes/(public)/signup.tsx package.json pnpm-lock.yaml
-git commit -m "feat(auth): add sign-up page"
-```
+- [x] **Step 4: Commit**
 
 ---
 
