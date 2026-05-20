@@ -53,6 +53,7 @@
     "@lingui/conf": "^6.0.1",
     "@lingui/format-po": "^6.0.1",
     "@lingui/vite-plugin": "^6.0.1",
+    "@playwright/test": "^1.60.0",
     "@rolldown/plugin-babel": "^0.2.3",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/router-devtools": "^1.166.13",
