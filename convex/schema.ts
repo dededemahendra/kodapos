@@ -83,6 +83,9 @@ export default defineSchema({
     cafeId: v.id('cafes'),
     cashierId: v.id('cafeStaff'),
     openedAt: v.number(),
+    // Close-time fields. Optional because they are populated by
+    // shifts.close (and Slice 5 will fill expectedCash/variance when
+    // payments land); null/undefined while status === 'open'.
     closedAt: v.optional(v.number()),
     openingFloatIDR: v.number(),
     expectedCashIDR: v.optional(v.number()),
