@@ -38,8 +38,7 @@ function OnboardingProfile() {
         submitLabel="Lanjut →"
         onSubmit={async (values) => {
           await updateProfile(values);
-          // Next onboarding step (`/onboarding/menu`) lands in a later task; use string nav until then.
-          navigate({ to: '/onboarding/menu' as never });
+          navigate({ to: '/onboarding/menu' });
         }}
         secondaryAction={{
           label: 'Lewati semua',
