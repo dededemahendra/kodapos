@@ -15,6 +15,8 @@ import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
+import { Route as PosOnboardingRouteRouteImport } from './routes/_pos/onboarding/route'
+import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboarding/profile'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -44,41 +46,71 @@ const PosDashboardRoute = PosDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => PosRoute,
 } as any)
+const PosOnboardingRouteRoute = PosOnboardingRouteRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosOnboardingProfileRoute = PosOnboardingProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PosOnboardingRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
+  '/onboarding/profile': typeof PosOnboardingProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
+  '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
+  '/onboarding/profile': typeof PosOnboardingProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_pos': typeof PosRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
+  '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/_pos/dashboard': typeof PosDashboardRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
   '/_public/': typeof PublicIndexRoute
+  '/_pos/onboarding/profile': typeof PosOnboardingProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/signin' | '/signup'
+  fullPaths:
+    | '/'
+    | '/onboarding'
+    | '/dashboard'
+    | '/signin'
+    | '/signup'
+    | '/onboarding/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/signin' | '/signup'
+  to:
+    | '/'
+    | '/onboarding'
+    | '/dashboard'
+    | '/signin'
+    | '/signup'
+    | '/onboarding/profile'
   id:
     | '__root__'
     | '/_pos'
     | '/_public'
+    | '/_pos/onboarding'
     | '/_pos/dashboard'
     | '/_public/signin'
     | '/_public/signup'
     | '/_public/'
+    | '/_pos/onboarding/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,14 +162,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosDashboardRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_pos/onboarding': {
+      id: '/_pos/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof PosOnboardingRouteRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/onboarding/profile': {
+      id: '/_pos/onboarding/profile'
+      path: '/profile'
+      fullPath: '/onboarding/profile'
+      preLoaderRoute: typeof PosOnboardingProfileRouteImport
+      parentRoute: typeof PosOnboardingRouteRoute
+    }
   }
 }
 
+interface PosOnboardingRouteRouteChildren {
+  PosOnboardingProfileRoute: typeof PosOnboardingProfileRoute
+}
+
+const PosOnboardingRouteRouteChildren: PosOnboardingRouteRouteChildren = {
+  PosOnboardingProfileRoute: PosOnboardingProfileRoute,
+}
+
+const PosOnboardingRouteRouteWithChildren =
+  PosOnboardingRouteRoute._addFileChildren(PosOnboardingRouteRouteChildren)
+
 interface PosRouteChildren {
+  PosOnboardingRouteRoute: typeof PosOnboardingRouteRouteWithChildren
   PosDashboardRoute: typeof PosDashboardRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
+  PosOnboardingRouteRoute: PosOnboardingRouteRouteWithChildren,
   PosDashboardRoute: PosDashboardRoute,
 }
 
