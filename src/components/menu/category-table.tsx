@@ -2,6 +2,7 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { type FormEvent, useState } from 'react';
+import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
@@ -110,17 +111,16 @@ export function CategoryTable() {
                 </button>
               </td>
               <td className="py-2 px-2 text-right">
-                <button
-                  type="button"
-                  className="text-xs text-danger hover:underline"
-                  onClick={() => {
-                    if (confirm(`Arsipkan "${c.name}"?`)) {
-                      void archiveCategory({ id: c._id });
-                    }
-                  }}
-                >
-                  Arsipkan
-                </button>
+                <ConfirmArchive
+                  noun="kategori"
+                  name={c.name}
+                  onConfirm={() => archiveCategory({ id: c._id })}
+                  trigger={
+                    <button type="button" className="text-xs text-danger hover:underline">
+                      Arsipkan
+                    </button>
+                  }
+                />
               </td>
             </tr>
           ))}

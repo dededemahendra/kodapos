@@ -80,6 +80,6 @@ describe('menu.categories', () => {
     expect(await ownerB.query(api.menu.categories.list, {})).toHaveLength(0);
     await expect(
       ownerB.mutation(api.menu.categories.update, { id: idA, name: 'pwn' })
-    ).rejects.toThrow(/akses|not found|forbidden/i);
+    ).rejects.toThrow(/tidak ditemukan|akses|not found|forbidden/i);
   });
 });

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
-import { requireOwnerCafe } from '../lib/auth';
+import { requireOwned, requireOwnerCafe } from '../lib/auth';
 
 const categoryDoc = v.object({
   _id: v.id('categories'),
@@ -46,8 +46,7 @@ export const update = mutation({
   returns: v.null(),
   handler: async (ctx, { id, name }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const row = await ctx.db.get(id);
-    if (!row || row.cafeId !== cafeId) throw new Error('Akses ditolak.');
+    await requireOwned(ctx, cafeId, id, 'Kategori');
     await ctx.db.patch(id, { name: assertName(name) });
     return null;
   },
@@ -58,8 +57,7 @@ export const reorder = mutation({
   returns: v.null(),
   handler: async (ctx, { id, direction }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const row = await ctx.db.get(id);
-    if (!row || row.cafeId !== cafeId) throw new Error('Akses ditolak.');
+    const row = await requireOwned(ctx, cafeId, id, 'Kategori');
     const siblings = await ctx.db
       .query('categories')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', row.archived))
@@ -79,8 +77,7 @@ export const archive = mutation({
   returns: v.null(),
   handler: async (ctx, { id }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const row = await ctx.db.get(id);
-    if (!row || row.cafeId !== cafeId) throw new Error('Akses ditolak.');
+    await requireOwned(ctx, cafeId, id, 'Kategori');
     await ctx.db.patch(id, { archived: true });
     return null;
   },

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 import { mutation, query } from '../_generated/server';
-import { requireOwnerCafe } from '../lib/auth';
+import { requireOwned, requireOwnerCafe } from '../lib/auth';
 
 const menuItemDoc = v.object({
   _id: v.id('menuItems'),
@@ -66,8 +66,7 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const cleanName = assertItem(args.name, args.priceIDR);
-    const category = await ctx.db.get(args.categoryId);
-    if (!category || category.cafeId !== cafeId) throw new Error('Kategori tidak ditemukan.');
+    await requireOwned(ctx, cafeId, args.categoryId, 'Kategori');
     const siblings = await ctx.db
       .query('menuItems')
       .withIndex('by_cafe_category', (q) =>
@@ -99,10 +98,8 @@ export const update = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const item = await ctx.db.get(args.id);
-    if (!item || item.cafeId !== cafeId) throw new Error('Akses ditolak.');
-    const category = await ctx.db.get(args.categoryId);
-    if (!category || category.cafeId !== cafeId) throw new Error('Kategori tidak ditemukan.');
+    const item = await requireOwned(ctx, cafeId, args.id, 'Item');
+    await requireOwned(ctx, cafeId, args.categoryId, 'Kategori');
     const cleanName = assertItem(args.name, args.priceIDR);
     // If the item is moving to a different category, give it a fresh
     // position at the bottom of the destination so it doesn't collide
@@ -133,8 +130,7 @@ export const setActive = mutation({
   returns: v.null(),
   handler: async (ctx, { id, isActive }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const item = await ctx.db.get(id);
-    if (!item || item.cafeId !== cafeId) throw new Error('Akses ditolak.');
+    await requireOwned(ctx, cafeId, id, 'Item');
     await ctx.db.patch(id, { isActive });
     return null;
   },
@@ -145,8 +141,7 @@ export const reorder = mutation({
   returns: v.null(),
   handler: async (ctx, { id, direction }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const item = await ctx.db.get(id);
-    if (!item || item.cafeId !== cafeId) throw new Error('Akses ditolak.');
+    const item = await requireOwned(ctx, cafeId, id, 'Item');
     const siblings = await ctx.db
       .query('menuItems')
       .withIndex('by_cafe_category', (q) =>
@@ -168,8 +163,7 @@ export const archive = mutation({
   returns: v.null(),
   handler: async (ctx, { id }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const item = await ctx.db.get(id);
-    if (!item || item.cafeId !== cafeId) throw new Error('Akses ditolak.');
+    await requireOwned(ctx, cafeId, id, 'Item');
     await ctx.db.patch(id, { archived: true });
     return null;
   },

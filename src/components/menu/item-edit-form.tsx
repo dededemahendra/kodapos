@@ -2,6 +2,7 @@ import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { type FormEvent, useState } from 'react';
+import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -232,18 +233,20 @@ export function ItemEditForm(props: ItemEditFormProps) {
       <div className="col-span-2 flex justify-between items-center mt-4 pt-4 border-t border-border">
         <div>
           {props.itemId !== 'new' && (
-            <button
-              type="button"
-              onClick={async () => {
-                if (props.itemId !== 'new' && confirm('Arsipkan item ini?')) {
-                  await archive({ id: props.itemId });
-                  props.onSaved(props.itemId);
-                }
+            <ConfirmArchive
+              noun="item"
+              name={name}
+              onConfirm={async () => {
+                if (props.itemId === 'new') return;
+                await archive({ id: props.itemId });
+                props.onSaved(props.itemId);
               }}
-              className="text-sm text-danger hover:underline"
-            >
-              Arsipkan item
-            </button>
+              trigger={
+                <button type="button" className="text-sm text-danger hover:underline">
+                  Arsipkan item
+                </button>
+              }
+            />
           )}
         </div>
         <div className="flex gap-2">

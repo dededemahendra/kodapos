@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from '../_generated/dataModel';
 import { mutation, type QueryCtx, query } from '../_generated/server';
-import { requireOwnerCafe } from '../lib/auth';
+import { requireOwned, requireOwnerCafe } from '../lib/auth';
 
 const optionInput = v.object({
   id: v.optional(v.id('modifierOptions')),
@@ -95,8 +95,7 @@ export const upsert = mutation({
 
     let groupId: Id<'modifierGroups'>;
     if (args.id) {
-      const existing = await ctx.db.get(args.id);
-      if (!existing || existing.cafeId !== cafeId) throw new Error('Akses ditolak.');
+      await requireOwned(ctx, cafeId, args.id, 'Grup modifier');
       await ctx.db.patch(args.id, {
         name: cleanName,
         required: args.required,
@@ -167,8 +166,7 @@ export const archive = mutation({
   returns: v.null(),
   handler: async (ctx, { id }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const row = await ctx.db.get(id);
-    if (!row || row.cafeId !== cafeId) throw new Error('Akses ditolak.');
+    await requireOwned(ctx, cafeId, id, 'Grup modifier');
     await ctx.db.patch(id, { archived: true });
     return null;
   },

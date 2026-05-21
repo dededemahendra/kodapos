@@ -1,16 +1,14 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
-import { requireOwnerCafe } from '../lib/auth';
+import { requireOwned, requireOwnerCafe } from '../lib/auth';
 
 export const attach = mutation({
   args: { menuItemId: v.id('menuItems'), modifierGroupId: v.id('modifierGroups') },
   returns: v.null(),
   handler: async (ctx, { menuItemId, modifierGroupId }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const item = await ctx.db.get(menuItemId);
-    if (!item || item.cafeId !== cafeId) throw new Error('Item tidak ditemukan.');
-    const group = await ctx.db.get(modifierGroupId);
-    if (!group || group.cafeId !== cafeId) throw new Error('Grup modifier tidak ditemukan.');
+    await requireOwned(ctx, cafeId, menuItemId, 'Item');
+    await requireOwned(ctx, cafeId, modifierGroupId, 'Grup modifier');
     const existing = await ctx.db
       .query('menuItemModifierGroups')
       .withIndex('by_item', (q) => q.eq('menuItemId', menuItemId))
@@ -33,8 +31,7 @@ export const detach = mutation({
   returns: v.null(),
   handler: async (ctx, { menuItemId, modifierGroupId }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const item = await ctx.db.get(menuItemId);
-    if (!item || item.cafeId !== cafeId) throw new Error('Item tidak ditemukan.');
+    await requireOwned(ctx, cafeId, menuItemId, 'Item');
     const joins = await ctx.db
       .query('menuItemModifierGroups')
       .withIndex('by_item', (q) => q.eq('menuItemId', menuItemId))
@@ -54,8 +51,7 @@ export const reorder = mutation({
   returns: v.null(),
   handler: async (ctx, { menuItemId, modifierGroupId, direction }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    const item = await ctx.db.get(menuItemId);
-    if (!item || item.cafeId !== cafeId) throw new Error('Item tidak ditemukan.');
+    await requireOwned(ctx, cafeId, menuItemId, 'Item');
     const joins = await ctx.db
       .query('menuItemModifierGroups')
       .withIndex('by_item', (q) => q.eq('menuItemId', menuItemId))
