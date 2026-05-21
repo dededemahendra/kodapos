@@ -104,10 +104,25 @@ export const update = mutation({
     const category = await ctx.db.get(args.categoryId);
     if (!category || category.cafeId !== cafeId) throw new Error('Kategori tidak ditemukan.');
     const cleanName = assertItem(args.name, args.priceIDR);
+    // If the item is moving to a different category, give it a fresh
+    // position at the bottom of the destination so it doesn't collide
+    // with an existing sibling that already has the same position number.
+    let nextPosition = item.position;
+    if (args.categoryId !== item.categoryId) {
+      const destSiblings = await ctx.db
+        .query('menuItems')
+        .withIndex('by_cafe_category', (q) =>
+          q.eq('cafeId', cafeId).eq('categoryId', args.categoryId).eq('archived', false)
+        )
+        .collect();
+      nextPosition =
+        destSiblings.length === 0 ? 100 : Math.max(...destSiblings.map((s) => s.position)) + 100;
+    }
     await ctx.db.patch(args.id, {
       categoryId: args.categoryId,
       name: cleanName,
       priceIDR: args.priceIDR,
+      position: nextPosition,
     });
     return null;
   },

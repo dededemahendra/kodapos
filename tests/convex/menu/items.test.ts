@@ -72,6 +72,59 @@ describe('menu.items', () => {
     expect(items[0]?.categoryId).toBe(otherCat);
   });
 
+  it('update assigns a fresh position when moving to a category with existing items', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const destCat = await asOwner.mutation(api.menu.categories.create, { name: 'Non-Kopi' });
+    // Seed the destination category with one item so position 100 is taken.
+    await asOwner.mutation(api.menu.items.create, {
+      categoryId: destCat,
+      name: 'Resident',
+      priceIDR: 15000,
+    });
+    const movingId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Mover',
+      priceIDR: 10000,
+    });
+    await asOwner.mutation(api.menu.items.update, {
+      id: movingId,
+      categoryId: destCat,
+      name: 'Mover',
+      priceIDR: 10000,
+    });
+    const inDest = await asOwner.query(api.menu.items.list, { categoryId: destCat });
+    expect(inDest).toHaveLength(2);
+    // Resident keeps position 100; Mover lands at 200.
+    expect(inDest[0]?.name).toBe('Resident');
+    expect(inDest[1]?.name).toBe('Mover');
+    expect(inDest[1]?.position).toBeGreaterThan(inDest[0]?.position ?? 0);
+  });
+
+  it('reorder swaps adjacent items inside a category', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const aId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'A',
+      priceIDR: 1000,
+    });
+    const bId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'B',
+      priceIDR: 1000,
+    });
+    await asOwner.mutation(api.menu.items.reorder, { id: bId, direction: 'up' });
+    const list = await asOwner.query(api.menu.items.list, {});
+    expect(list[0]?._id).toBe(bId);
+    expect(list[1]?._id).toBe(aId);
+    // edge no-op
+    await asOwner.mutation(api.menu.items.reorder, { id: bId, direction: 'up' });
+    const list2 = await asOwner.query(api.menu.items.list, {});
+    expect(list2[0]?._id).toBe(bId);
+    expect(list2[1]?._id).toBe(aId);
+  });
+
   it('setActive toggles isActive', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, categoryId } = await setupOwnerAndCategory(t);
