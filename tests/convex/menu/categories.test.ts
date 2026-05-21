@@ -52,12 +52,13 @@ describe('menu.categories', () => {
     const bId = await asOwner.mutation(api.menu.categories.create, { name: 'B' });
     await asOwner.mutation(api.menu.categories.reorder, { id: bId, direction: 'up' });
     const list = await asOwner.query(api.menu.categories.list, {});
-    expect(list[0]?.name).toBe('B');
-    expect(list[1]?.name).toBe('A');
+    expect(list[0]?._id).toBe(bId);
+    expect(list[1]?._id).toBe(aId);
     // reorder beyond edge is a no-op
     await asOwner.mutation(api.menu.categories.reorder, { id: bId, direction: 'up' });
     const list2 = await asOwner.query(api.menu.categories.list, {});
-    expect(list2[0]?.name).toBe('B');
+    expect(list2[0]?._id).toBe(bId);
+    expect(list2[1]?._id).toBe(aId);
   });
 
   it('archive hides from default list, visible with includeArchived', async () => {
