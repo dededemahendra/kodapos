@@ -54,13 +54,15 @@ function assertGroup(
   return trimmed;
 }
 
-function assertOption(name: string, priceAdjustmentIDR: number): string {
+function assertOption(name: string, priceAdjustmentIDR: number, position: number): string {
   const trimmed = name.trim();
   if (trimmed.length < 1) throw new Error('Nama opsi wajib diisi.');
   if (trimmed.length > 60) throw new Error('Nama opsi maksimal 60 karakter.');
   if (!Number.isInteger(priceAdjustmentIDR))
     throw new Error('Harga modifier harus berupa angka bulat (rupiah).');
   if (priceAdjustmentIDR < 0) throw new Error('Harga modifier tidak boleh negatif.');
+  if (!Number.isInteger(position) || position < 0)
+    throw new Error('Posisi opsi tidak valid.');
   return trimmed;
 }
 
@@ -133,10 +135,12 @@ export const upsert = mutation({
 
     // Insert new or update kept options.
     for (const opt of args.options) {
-      const cleanOptName = assertOption(opt.name, opt.priceAdjustmentIDR);
+      const cleanOptName = assertOption(opt.name, opt.priceAdjustmentIDR, opt.position);
       if (opt.id) {
         const existing = await ctx.db.get(opt.id);
-        if (!existing || existing.groupId !== groupId) throw new Error('Akses ditolak.');
+        if (!existing || existing.groupId !== groupId || existing.cafeId !== cafeId) {
+          throw new Error('Akses ditolak.');
+        }
         await ctx.db.patch(opt.id, {
           name: cleanOptName,
           priceAdjustmentIDR: opt.priceAdjustmentIDR,
