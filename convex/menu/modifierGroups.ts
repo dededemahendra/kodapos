@@ -61,8 +61,7 @@ function assertOption(name: string, priceAdjustmentIDR: number, position: number
   if (!Number.isInteger(priceAdjustmentIDR))
     throw new Error('Harga modifier harus berupa angka bulat (rupiah).');
   if (priceAdjustmentIDR < 0) throw new Error('Harga modifier tidak boleh negatif.');
-  if (!Number.isInteger(position) || position < 0)
-    throw new Error('Posisi opsi tidak valid.');
+  if (!Number.isInteger(position) || position < 0) throw new Error('Posisi opsi tidak valid.');
   return trimmed;
 }
 
