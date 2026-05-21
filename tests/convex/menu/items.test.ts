@@ -206,9 +206,7 @@ describe('menu.items', () => {
       maxSelect: 1,
       options: [{ name: 'Sapi', priceAdjustmentIDR: 0, position: 100 }],
     });
-    // @ts-expect-error api.menu.itemGroups lands in Task 8; this assertion drives that work.
     await asOwner.mutation(api.menu.itemGroups.attach, { menuItemId: itemId, modifierGroupId: g1 });
-    // @ts-expect-error api.menu.itemGroups lands in Task 8; this assertion drives that work.
     await asOwner.mutation(api.menu.itemGroups.attach, { menuItemId: itemId, modifierGroupId: g2 });
     const detail = await asOwner.query(api.menu.items.getById, { id: itemId });
     expect(detail?.item.name).toBe('Kopi');
