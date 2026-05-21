@@ -21,7 +21,7 @@ export async function verifyPin(pin: string, stored: string): Promise<boolean> {
   return constantTimeEqualHex(toHex(computed), hashHex);
 }
 
-async function pbkdf2(pin: string, salt: Uint8Array): Promise<Uint8Array> {
+async function pbkdf2(pin: string, salt: Uint8Array<ArrayBuffer>): Promise<Uint8Array> {
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(pin),
@@ -41,7 +41,7 @@ function toHex(bytes: Uint8Array): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-function fromHex(hex: string): Uint8Array | null {
+function fromHex(hex: string): Uint8Array<ArrayBuffer> | null {
   if (hex.length % 2 !== 0) return null;
   const out = new Uint8Array(hex.length / 2);
   for (let i = 0; i < out.length; i++) {
