@@ -85,7 +85,7 @@ function ItemsListPage() {
             className="max-w-xs"
           />
           <Button asChild>
-            <Link to={'/menu/items/$itemId' as never} params={{ itemId: 'new' } as never}>
+            <Link to="/menu/items/$itemId" params={{ itemId: 'new' }}>
               + Item
             </Link>
           </Button>
@@ -109,8 +109,8 @@ function ItemsListPage() {
                 <tr key={r._id} className="border-b border-border/50 hover:bg-surface">
                   <td className="py-2 px-2">
                     <Link
-                      to={'/menu/items/$itemId' as never}
-                      params={{ itemId: r._id } as never}
+                      to="/menu/items/$itemId"
+                      params={{ itemId: r._id }}
                       className="hover:underline"
                     >
                       {r.name}
