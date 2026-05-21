@@ -1,5 +1,7 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { Authenticated, AuthLoading, Unauthenticated } from 'convex/react';
+import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
+import { api } from 'convex/_generated/api';
+import { Authenticated, AuthLoading, Unauthenticated, useConvex } from 'convex/react';
+import { type ReactNode, useEffect } from 'react';
 import { Spinner } from '~/components/ui/spinner';
 
 export const Route = createFileRoute('/_pos')({
@@ -19,7 +21,9 @@ function PosLayout() {
         <SignedOutRedirect />
       </Unauthenticated>
       <Authenticated>
-        <Outlet />
+        <OnboardingGate>
+          <Outlet />
+        </OnboardingGate>
       </Authenticated>
     </div>
   );
@@ -30,4 +34,25 @@ function SignedOutRedirect() {
     window.location.replace('/signin');
   }
   return null;
+}
+
+function OnboardingGate({ children }: { children: ReactNode }) {
+  const convex = useConvex();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const cafe = await convex.query(api.cafes.myCafe);
+      if (cancelled) return;
+      const needsOnboarding = cafe !== null && !cafe.setupCompletedAt;
+      const alreadyOnOnboarding = path.startsWith('/onboarding');
+      if (needsOnboarding && !alreadyOnOnboarding && typeof window !== 'undefined') {
+        window.location.replace('/onboarding/profile');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [convex, path]);
+  return <>{children}</>;
 }

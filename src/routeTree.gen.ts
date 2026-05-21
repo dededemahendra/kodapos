@@ -15,6 +15,17 @@ import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
+import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
+import { Route as PosOnboardingRouteRouteImport } from './routes/_pos/onboarding/route'
+import { Route as PosMenuRouteRouteImport } from './routes/_pos/menu/route'
+import { Route as PosMenuIndexRouteImport } from './routes/_pos/menu/index'
+import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
+import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboarding/profile'
+import { Route as PosOnboardingMenuRouteImport } from './routes/_pos/onboarding/menu'
+import { Route as PosMenuModifiersRouteImport } from './routes/_pos/menu/modifiers'
+import { Route as PosMenuCategoriesRouteImport } from './routes/_pos/menu/categories'
+import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
+import { Route as PosMenuItemsItemIdRouteImport } from './routes/_pos/menu/items.$itemId'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -44,41 +55,168 @@ const PosDashboardRoute = PosDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => PosRoute,
 } as any)
+const PosSettingsRouteRoute = PosSettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosOnboardingRouteRoute = PosOnboardingRouteRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosMenuRouteRoute = PosMenuRouteRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosMenuIndexRoute = PosMenuIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PosMenuRouteRoute,
+} as any)
+const PosSettingsProfileRoute = PosSettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
+const PosOnboardingProfileRoute = PosOnboardingProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PosOnboardingRouteRoute,
+} as any)
+const PosOnboardingMenuRoute = PosOnboardingMenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => PosOnboardingRouteRoute,
+} as any)
+const PosMenuModifiersRoute = PosMenuModifiersRouteImport.update({
+  id: '/modifiers',
+  path: '/modifiers',
+  getParentRoute: () => PosMenuRouteRoute,
+} as any)
+const PosMenuCategoriesRoute = PosMenuCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => PosMenuRouteRoute,
+} as any)
+const PosMenuModifiersGroupIdRoute = PosMenuModifiersGroupIdRouteImport.update({
+  id: '/$groupId',
+  path: '/$groupId',
+  getParentRoute: () => PosMenuModifiersRoute,
+} as any)
+const PosMenuItemsItemIdRoute = PosMenuItemsItemIdRouteImport.update({
+  id: '/items/$itemId',
+  path: '/items/$itemId',
+  getParentRoute: () => PosMenuRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/menu': typeof PosMenuRouteRouteWithChildren
+  '/onboarding': typeof PosOnboardingRouteRouteWithChildren
+  '/settings': typeof PosSettingsRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
+  '/menu/categories': typeof PosMenuCategoriesRoute
+  '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
+  '/onboarding/menu': typeof PosOnboardingMenuRoute
+  '/onboarding/profile': typeof PosOnboardingProfileRoute
+  '/settings/profile': typeof PosSettingsProfileRoute
+  '/menu/': typeof PosMenuIndexRoute
+  '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
+  '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
+  '/onboarding': typeof PosOnboardingRouteRouteWithChildren
+  '/settings': typeof PosSettingsRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
+  '/menu/categories': typeof PosMenuCategoriesRoute
+  '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
+  '/onboarding/menu': typeof PosOnboardingMenuRoute
+  '/onboarding/profile': typeof PosOnboardingProfileRoute
+  '/settings/profile': typeof PosSettingsProfileRoute
+  '/menu': typeof PosMenuIndexRoute
+  '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
+  '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_pos': typeof PosRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
+  '/_pos/menu': typeof PosMenuRouteRouteWithChildren
+  '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
+  '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/dashboard': typeof PosDashboardRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
   '/_public/': typeof PublicIndexRoute
+  '/_pos/menu/categories': typeof PosMenuCategoriesRoute
+  '/_pos/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
+  '/_pos/onboarding/menu': typeof PosOnboardingMenuRoute
+  '/_pos/onboarding/profile': typeof PosOnboardingProfileRoute
+  '/_pos/settings/profile': typeof PosSettingsProfileRoute
+  '/_pos/menu/': typeof PosMenuIndexRoute
+  '/_pos/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
+  '/_pos/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/signin' | '/signup'
+  fullPaths:
+    | '/'
+    | '/menu'
+    | '/onboarding'
+    | '/settings'
+    | '/dashboard'
+    | '/signin'
+    | '/signup'
+    | '/menu/categories'
+    | '/menu/modifiers'
+    | '/onboarding/menu'
+    | '/onboarding/profile'
+    | '/settings/profile'
+    | '/menu/'
+    | '/menu/items/$itemId'
+    | '/menu/modifiers/$groupId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/signin' | '/signup'
+  to:
+    | '/'
+    | '/onboarding'
+    | '/settings'
+    | '/dashboard'
+    | '/signin'
+    | '/signup'
+    | '/menu/categories'
+    | '/menu/modifiers'
+    | '/onboarding/menu'
+    | '/onboarding/profile'
+    | '/settings/profile'
+    | '/menu'
+    | '/menu/items/$itemId'
+    | '/menu/modifiers/$groupId'
   id:
     | '__root__'
     | '/_pos'
     | '/_public'
+    | '/_pos/menu'
+    | '/_pos/onboarding'
+    | '/_pos/settings'
     | '/_pos/dashboard'
     | '/_public/signin'
     | '/_public/signup'
     | '/_public/'
+    | '/_pos/menu/categories'
+    | '/_pos/menu/modifiers'
+    | '/_pos/onboarding/menu'
+    | '/_pos/onboarding/profile'
+    | '/_pos/settings/profile'
+    | '/_pos/menu/'
+    | '/_pos/menu/items/$itemId'
+    | '/_pos/menu/modifiers/$groupId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,14 +268,150 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosDashboardRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_pos/settings': {
+      id: '/_pos/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof PosSettingsRouteRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/onboarding': {
+      id: '/_pos/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof PosOnboardingRouteRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/menu': {
+      id: '/_pos/menu'
+      path: '/menu'
+      fullPath: '/menu'
+      preLoaderRoute: typeof PosMenuRouteRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/menu/': {
+      id: '/_pos/menu/'
+      path: '/'
+      fullPath: '/menu/'
+      preLoaderRoute: typeof PosMenuIndexRouteImport
+      parentRoute: typeof PosMenuRouteRoute
+    }
+    '/_pos/settings/profile': {
+      id: '/_pos/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof PosSettingsProfileRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
+    '/_pos/onboarding/profile': {
+      id: '/_pos/onboarding/profile'
+      path: '/profile'
+      fullPath: '/onboarding/profile'
+      preLoaderRoute: typeof PosOnboardingProfileRouteImport
+      parentRoute: typeof PosOnboardingRouteRoute
+    }
+    '/_pos/onboarding/menu': {
+      id: '/_pos/onboarding/menu'
+      path: '/menu'
+      fullPath: '/onboarding/menu'
+      preLoaderRoute: typeof PosOnboardingMenuRouteImport
+      parentRoute: typeof PosOnboardingRouteRoute
+    }
+    '/_pos/menu/modifiers': {
+      id: '/_pos/menu/modifiers'
+      path: '/modifiers'
+      fullPath: '/menu/modifiers'
+      preLoaderRoute: typeof PosMenuModifiersRouteImport
+      parentRoute: typeof PosMenuRouteRoute
+    }
+    '/_pos/menu/categories': {
+      id: '/_pos/menu/categories'
+      path: '/categories'
+      fullPath: '/menu/categories'
+      preLoaderRoute: typeof PosMenuCategoriesRouteImport
+      parentRoute: typeof PosMenuRouteRoute
+    }
+    '/_pos/menu/modifiers/$groupId': {
+      id: '/_pos/menu/modifiers/$groupId'
+      path: '/$groupId'
+      fullPath: '/menu/modifiers/$groupId'
+      preLoaderRoute: typeof PosMenuModifiersGroupIdRouteImport
+      parentRoute: typeof PosMenuModifiersRoute
+    }
+    '/_pos/menu/items/$itemId': {
+      id: '/_pos/menu/items/$itemId'
+      path: '/items/$itemId'
+      fullPath: '/menu/items/$itemId'
+      preLoaderRoute: typeof PosMenuItemsItemIdRouteImport
+      parentRoute: typeof PosMenuRouteRoute
+    }
   }
 }
 
+interface PosMenuModifiersRouteChildren {
+  PosMenuModifiersGroupIdRoute: typeof PosMenuModifiersGroupIdRoute
+}
+
+const PosMenuModifiersRouteChildren: PosMenuModifiersRouteChildren = {
+  PosMenuModifiersGroupIdRoute: PosMenuModifiersGroupIdRoute,
+}
+
+const PosMenuModifiersRouteWithChildren =
+  PosMenuModifiersRoute._addFileChildren(PosMenuModifiersRouteChildren)
+
+interface PosMenuRouteRouteChildren {
+  PosMenuCategoriesRoute: typeof PosMenuCategoriesRoute
+  PosMenuModifiersRoute: typeof PosMenuModifiersRouteWithChildren
+  PosMenuIndexRoute: typeof PosMenuIndexRoute
+  PosMenuItemsItemIdRoute: typeof PosMenuItemsItemIdRoute
+}
+
+const PosMenuRouteRouteChildren: PosMenuRouteRouteChildren = {
+  PosMenuCategoriesRoute: PosMenuCategoriesRoute,
+  PosMenuModifiersRoute: PosMenuModifiersRouteWithChildren,
+  PosMenuIndexRoute: PosMenuIndexRoute,
+  PosMenuItemsItemIdRoute: PosMenuItemsItemIdRoute,
+}
+
+const PosMenuRouteRouteWithChildren = PosMenuRouteRoute._addFileChildren(
+  PosMenuRouteRouteChildren,
+)
+
+interface PosOnboardingRouteRouteChildren {
+  PosOnboardingMenuRoute: typeof PosOnboardingMenuRoute
+  PosOnboardingProfileRoute: typeof PosOnboardingProfileRoute
+}
+
+const PosOnboardingRouteRouteChildren: PosOnboardingRouteRouteChildren = {
+  PosOnboardingMenuRoute: PosOnboardingMenuRoute,
+  PosOnboardingProfileRoute: PosOnboardingProfileRoute,
+}
+
+const PosOnboardingRouteRouteWithChildren =
+  PosOnboardingRouteRoute._addFileChildren(PosOnboardingRouteRouteChildren)
+
+interface PosSettingsRouteRouteChildren {
+  PosSettingsProfileRoute: typeof PosSettingsProfileRoute
+}
+
+const PosSettingsRouteRouteChildren: PosSettingsRouteRouteChildren = {
+  PosSettingsProfileRoute: PosSettingsProfileRoute,
+}
+
+const PosSettingsRouteRouteWithChildren =
+  PosSettingsRouteRoute._addFileChildren(PosSettingsRouteRouteChildren)
+
 interface PosRouteChildren {
+  PosMenuRouteRoute: typeof PosMenuRouteRouteWithChildren
+  PosOnboardingRouteRoute: typeof PosOnboardingRouteRouteWithChildren
+  PosSettingsRouteRoute: typeof PosSettingsRouteRouteWithChildren
   PosDashboardRoute: typeof PosDashboardRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
+  PosMenuRouteRoute: PosMenuRouteRouteWithChildren,
+  PosOnboardingRouteRoute: PosOnboardingRouteRouteWithChildren,
+  PosSettingsRouteRoute: PosSettingsRouteRouteWithChildren,
   PosDashboardRoute: PosDashboardRoute,
 }
 
