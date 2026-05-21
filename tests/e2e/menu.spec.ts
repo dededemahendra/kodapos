@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 test.describe('menu (auth-gated)', () => {
   test.skip(!process.env.RUN_AUTH_E2E, 'set RUN_AUTH_E2E=1 to run');
 
-  test('wizard happy path: profile → menu → first item with modifier group', async ({ page }) => {
+  test('wizard happy path: profile → menu → first item', async ({ page }) => {
     const email = `e2e+${Date.now()}@kodapos.test`;
     const password = 'Sa{ngat-Aman-123';
 
