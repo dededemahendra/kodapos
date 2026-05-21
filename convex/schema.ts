@@ -69,4 +69,27 @@ export default defineSchema({
   })
     .index('by_item', ['menuItemId', 'position'])
     .index('by_group', ['modifierGroupId']),
+
+  cafeStaff: defineTable({
+    cafeId: v.id('cafes'),
+    name: v.string(),
+    pinHash: v.optional(v.string()),
+    role: v.union(v.literal('owner'), v.literal('cashier')),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  }).index('by_cafe_active', ['cafeId', 'archived']),
+
+  shifts: defineTable({
+    cafeId: v.id('cafes'),
+    cashierId: v.id('cafeStaff'),
+    openedAt: v.number(),
+    closedAt: v.optional(v.number()),
+    openingFloatIDR: v.number(),
+    expectedCashIDR: v.optional(v.number()),
+    countedCashIDR: v.optional(v.number()),
+    varianceIDR: v.optional(v.number()),
+    status: v.union(v.literal('open'), v.literal('closed')),
+  })
+    .index('by_cafe_status', ['cafeId', 'status'])
+    .index('by_cafe_opened', ['cafeId', 'openedAt']),
 });
