@@ -24,9 +24,8 @@ function MenuLayout() {
         >
           Kategori
         </Link>
-        {/* `/menu/modifiers` lands in Task 16; cast can drop once it exists. */}
         <Link
-          to={'/menu/modifiers' as never}
+          to="/menu/modifiers"
           className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-brand-500"
           activeProps={{ className: 'border-brand-500 font-semibold' }}
         >

@@ -21,7 +21,9 @@ import { Route as PosMenuRouteRouteImport } from './routes/_pos/menu/route'
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
 import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboarding/profile'
 import { Route as PosOnboardingMenuRouteImport } from './routes/_pos/onboarding/menu'
+import { Route as PosMenuModifiersRouteImport } from './routes/_pos/menu/modifiers'
 import { Route as PosMenuCategoriesRouteImport } from './routes/_pos/menu/categories'
+import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -81,10 +83,20 @@ const PosOnboardingMenuRoute = PosOnboardingMenuRouteImport.update({
   path: '/menu',
   getParentRoute: () => PosOnboardingRouteRoute,
 } as any)
+const PosMenuModifiersRoute = PosMenuModifiersRouteImport.update({
+  id: '/modifiers',
+  path: '/modifiers',
+  getParentRoute: () => PosMenuRouteRoute,
+} as any)
 const PosMenuCategoriesRoute = PosMenuCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
   getParentRoute: () => PosMenuRouteRoute,
+} as any)
+const PosMenuModifiersGroupIdRoute = PosMenuModifiersGroupIdRouteImport.update({
+  id: '/$groupId',
+  path: '/$groupId',
+  getParentRoute: () => PosMenuModifiersRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -96,9 +108,11 @@ export interface FileRoutesByFullPath {
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
+  '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
+  '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -109,9 +123,11 @@ export interface FileRoutesByTo {
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
+  '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
+  '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,9 +141,11 @@ export interface FileRoutesById {
   '/_public/signup': typeof PublicSignupRoute
   '/_public/': typeof PublicIndexRoute
   '/_pos/menu/categories': typeof PosMenuCategoriesRoute
+  '/_pos/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/_pos/onboarding/menu': typeof PosOnboardingMenuRoute
   '/_pos/onboarding/profile': typeof PosOnboardingProfileRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
+  '/_pos/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,9 +158,11 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/menu/categories'
+    | '/menu/modifiers'
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
+    | '/menu/modifiers/$groupId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,9 +173,11 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/menu/categories'
+    | '/menu/modifiers'
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
+    | '/menu/modifiers/$groupId'
   id:
     | '__root__'
     | '/_pos'
@@ -168,9 +190,11 @@ export interface FileRouteTypes {
     | '/_public/signup'
     | '/_public/'
     | '/_pos/menu/categories'
+    | '/_pos/menu/modifiers'
     | '/_pos/onboarding/menu'
     | '/_pos/onboarding/profile'
     | '/_pos/settings/profile'
+    | '/_pos/menu/modifiers/$groupId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -264,6 +288,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosOnboardingMenuRouteImport
       parentRoute: typeof PosOnboardingRouteRoute
     }
+    '/_pos/menu/modifiers': {
+      id: '/_pos/menu/modifiers'
+      path: '/modifiers'
+      fullPath: '/menu/modifiers'
+      preLoaderRoute: typeof PosMenuModifiersRouteImport
+      parentRoute: typeof PosMenuRouteRoute
+    }
     '/_pos/menu/categories': {
       id: '/_pos/menu/categories'
       path: '/categories'
@@ -271,15 +302,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosMenuCategoriesRouteImport
       parentRoute: typeof PosMenuRouteRoute
     }
+    '/_pos/menu/modifiers/$groupId': {
+      id: '/_pos/menu/modifiers/$groupId'
+      path: '/$groupId'
+      fullPath: '/menu/modifiers/$groupId'
+      preLoaderRoute: typeof PosMenuModifiersGroupIdRouteImport
+      parentRoute: typeof PosMenuModifiersRoute
+    }
   }
 }
 
+interface PosMenuModifiersRouteChildren {
+  PosMenuModifiersGroupIdRoute: typeof PosMenuModifiersGroupIdRoute
+}
+
+const PosMenuModifiersRouteChildren: PosMenuModifiersRouteChildren = {
+  PosMenuModifiersGroupIdRoute: PosMenuModifiersGroupIdRoute,
+}
+
+const PosMenuModifiersRouteWithChildren =
+  PosMenuModifiersRoute._addFileChildren(PosMenuModifiersRouteChildren)
+
 interface PosMenuRouteRouteChildren {
   PosMenuCategoriesRoute: typeof PosMenuCategoriesRoute
+  PosMenuModifiersRoute: typeof PosMenuModifiersRouteWithChildren
 }
 
 const PosMenuRouteRouteChildren: PosMenuRouteRouteChildren = {
   PosMenuCategoriesRoute: PosMenuCategoriesRoute,
+  PosMenuModifiersRoute: PosMenuModifiersRouteWithChildren,
 }
 
 const PosMenuRouteRouteWithChildren = PosMenuRouteRoute._addFileChildren(
