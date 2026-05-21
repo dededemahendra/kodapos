@@ -81,17 +81,18 @@ export const updateProfile = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    if (args.name.trim().length < 1) {
+    const trimmedName = args.name.trim();
+    if (trimmedName.length < 1) {
       throw new Error('Nama kafe wajib diisi.');
     }
-    if (args.name.length > 80) {
+    if (trimmedName.length > 80) {
       throw new Error('Nama kafe maksimal 80 karakter.');
     }
     if (args.taxRatePct < 0 || args.taxRatePct > 100) {
       throw new Error('Persentase pajak harus antara 0 dan 100.');
     }
     await ctx.db.patch(cafeId, {
-      name: args.name.trim(),
+      name: trimmedName,
       phone: args.phone?.trim() || undefined,
       addressLine: args.addressLine?.trim() || undefined,
       timezone: args.timezone,
