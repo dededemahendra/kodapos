@@ -44,8 +44,7 @@ function OnboardingProfile() {
           label: 'Lewati semua',
           onClick: async () => {
             await markComplete();
-            // `/menu` arrives in a later task; cast until the route exists.
-            navigate({ to: '/menu' as never });
+            navigate({ to: '/menu' });
           },
         }}
       />

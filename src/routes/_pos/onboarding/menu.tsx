@@ -13,8 +13,7 @@ function OnboardingMenu() {
 
   async function finish(target: '/menu' | '/menu/categories') {
     await markComplete();
-    // `/menu` and `/menu/categories` land in later tasks; cast can drop once those routes exist.
-    navigate({ to: target as never });
+    navigate({ to: target });
   }
 
   return (

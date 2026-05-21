@@ -17,9 +17,11 @@ import { Route as PublicSigninRouteImport } from './routes/_public/signin'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
 import { Route as PosOnboardingRouteRouteImport } from './routes/_pos/onboarding/route'
+import { Route as PosMenuRouteRouteImport } from './routes/_pos/menu/route'
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
 import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboarding/profile'
 import { Route as PosOnboardingMenuRouteImport } from './routes/_pos/onboarding/menu'
+import { Route as PosMenuCategoriesRouteImport } from './routes/_pos/menu/categories'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -59,6 +61,11 @@ const PosOnboardingRouteRoute = PosOnboardingRouteRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => PosRoute,
 } as any)
+const PosMenuRouteRoute = PosMenuRouteRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => PosRoute,
+} as any)
 const PosSettingsProfileRoute = PosSettingsProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -74,25 +81,34 @@ const PosOnboardingMenuRoute = PosOnboardingMenuRouteImport.update({
   path: '/menu',
   getParentRoute: () => PosOnboardingRouteRoute,
 } as any)
+const PosMenuCategoriesRoute = PosMenuCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => PosMenuRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/menu': typeof PosMenuRouteRouteWithChildren
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
+  '/menu/categories': typeof PosMenuCategoriesRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
+  '/menu': typeof PosMenuRouteRouteWithChildren
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
+  '/menu/categories': typeof PosMenuCategoriesRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
@@ -101,12 +117,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_pos': typeof PosRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
+  '/_pos/menu': typeof PosMenuRouteRouteWithChildren
   '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/dashboard': typeof PosDashboardRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
   '/_public/': typeof PublicIndexRoute
+  '/_pos/menu/categories': typeof PosMenuCategoriesRoute
   '/_pos/onboarding/menu': typeof PosOnboardingMenuRoute
   '/_pos/onboarding/profile': typeof PosOnboardingProfileRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
@@ -115,22 +133,26 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/menu'
     | '/onboarding'
     | '/settings'
     | '/dashboard'
     | '/signin'
     | '/signup'
+    | '/menu/categories'
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/menu'
     | '/onboarding'
     | '/settings'
     | '/dashboard'
     | '/signin'
     | '/signup'
+    | '/menu/categories'
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
@@ -138,12 +160,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_pos'
     | '/_public'
+    | '/_pos/menu'
     | '/_pos/onboarding'
     | '/_pos/settings'
     | '/_pos/dashboard'
     | '/_public/signin'
     | '/_public/signup'
     | '/_public/'
+    | '/_pos/menu/categories'
     | '/_pos/onboarding/menu'
     | '/_pos/onboarding/profile'
     | '/_pos/settings/profile'
@@ -212,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosOnboardingRouteRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_pos/menu': {
+      id: '/_pos/menu'
+      path: '/menu'
+      fullPath: '/menu'
+      preLoaderRoute: typeof PosMenuRouteRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_pos/settings/profile': {
       id: '/_pos/settings/profile'
       path: '/profile'
@@ -233,8 +264,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosOnboardingMenuRouteImport
       parentRoute: typeof PosOnboardingRouteRoute
     }
+    '/_pos/menu/categories': {
+      id: '/_pos/menu/categories'
+      path: '/categories'
+      fullPath: '/menu/categories'
+      preLoaderRoute: typeof PosMenuCategoriesRouteImport
+      parentRoute: typeof PosMenuRouteRoute
+    }
   }
 }
+
+interface PosMenuRouteRouteChildren {
+  PosMenuCategoriesRoute: typeof PosMenuCategoriesRoute
+}
+
+const PosMenuRouteRouteChildren: PosMenuRouteRouteChildren = {
+  PosMenuCategoriesRoute: PosMenuCategoriesRoute,
+}
+
+const PosMenuRouteRouteWithChildren = PosMenuRouteRoute._addFileChildren(
+  PosMenuRouteRouteChildren,
+)
 
 interface PosOnboardingRouteRouteChildren {
   PosOnboardingMenuRoute: typeof PosOnboardingMenuRoute
@@ -261,12 +311,14 @@ const PosSettingsRouteRouteWithChildren =
   PosSettingsRouteRoute._addFileChildren(PosSettingsRouteRouteChildren)
 
 interface PosRouteChildren {
+  PosMenuRouteRoute: typeof PosMenuRouteRouteWithChildren
   PosOnboardingRouteRoute: typeof PosOnboardingRouteRouteWithChildren
   PosSettingsRouteRoute: typeof PosSettingsRouteRouteWithChildren
   PosDashboardRoute: typeof PosDashboardRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
+  PosMenuRouteRoute: PosMenuRouteRouteWithChildren,
   PosOnboardingRouteRoute: PosOnboardingRouteRouteWithChildren,
   PosSettingsRouteRoute: PosSettingsRouteRouteWithChildren,
   PosDashboardRoute: PosDashboardRoute,
