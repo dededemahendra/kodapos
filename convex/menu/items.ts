@@ -196,6 +196,54 @@ export const list = query({
   },
 });
 
+const groupWithOptionsForSale = v.object({
+  group: modifierGroupDoc,
+  options: v.array(modifierOptionDoc),
+  position: v.number(),
+});
+
+const itemForSale = v.object({
+  item: menuItemDoc,
+  attachedGroups: v.array(groupWithOptionsForSale),
+});
+
+export const listForSale = query({
+  args: {},
+  returns: v.array(itemForSale),
+  handler: async (ctx) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const items = await ctx.db
+      .query('menuItems')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
+      .collect();
+    const active = items.filter((i) => i.isActive).sort((a, b) => a.position - b.position);
+    const result = [];
+    for (const item of active) {
+      const joins = await ctx.db
+        .query('menuItemModifierGroups')
+        .withIndex('by_item', (q) => q.eq('menuItemId', item._id))
+        .collect();
+      joins.sort((a, b) => a.position - b.position);
+      const attachedGroups = [];
+      for (const j of joins) {
+        const group = await ctx.db.get(j.modifierGroupId);
+        if (!group || group.archived) continue;
+        const options = await ctx.db
+          .query('modifierOptions')
+          .withIndex('by_group_active', (q) => q.eq('groupId', group._id).eq('archived', false))
+          .collect();
+        attachedGroups.push({
+          group,
+          options: options.sort((a, b) => a.position - b.position),
+          position: j.position,
+        });
+      }
+      result.push({ item, attachedGroups });
+    }
+    return result;
+  },
+});
+
 export const getById = query({
   args: { id: v.id('menuItems') },
   returns: v.union(itemDetail, v.null()),
