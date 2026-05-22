@@ -127,8 +127,10 @@ export default defineSchema({
       v.literal('qris_static'),
       v.literal('qris_dynamic')
     ),
+    // 'pending' + 'void' reserved for Slice 5 (QRIS + voids); cash always inserts 'paid'.
     paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
     createdAtClient: v.number(),
+    // Set by server at insert time today; optional reserved for Phase 2 offline-first when the client may persist an order before the backend confirms sync.
     syncedAt: v.optional(v.number()),
   })
     .index('by_cafe_clientId', ['cafeId', 'clientId'])
@@ -148,6 +150,7 @@ export default defineSchema({
     changeIDR: v.optional(v.number()),
     providerRef: v.optional(v.string()),
     providerStatus: v.optional(v.string()),
+    // Set on insert for cash; optional reserved for Slice 5 QRIS dynamic where the row exists in 'pending' state until the provider webhook fires.
     confirmedAt: v.optional(v.number()),
   })
     .index('by_order', ['orderId'])
