@@ -12,7 +12,12 @@ export async function verifyPin(pin: string, stored: string): Promise<boolean> {
   const parts = stored.split(':');
   if (parts.length !== 2) return false;
   const [saltHex, hashHex] = parts;
-  if (!saltHex || !hashHex || saltHex.length !== SALT_BYTES * 2 || hashHex.length !== KEY_BYTES * 2) {
+  if (
+    !saltHex ||
+    !hashHex ||
+    saltHex.length !== SALT_BYTES * 2 ||
+    hashHex.length !== KEY_BYTES * 2
+  ) {
     return false;
   }
   const salt = fromHex(saltHex);
