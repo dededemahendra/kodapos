@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
-import { mutation, query } from '../_generated/server';
+import { mutation, query, type QueryCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from '../lib/auth';
 
 const menuItemDoc = v.object({
@@ -58,6 +58,42 @@ function assertItem(name: string, priceIDR: number): string {
   if (!Number.isInteger(priceIDR)) throw new Error('Harga harus berupa angka bulat (rupiah).');
   if (priceIDR < 0) throw new Error('Harga tidak boleh negatif.');
   return trimmed;
+}
+
+async function resolveAttachedGroups(
+  ctx: QueryCtx,
+  menuItemId: Id<'menuItems'>
+): Promise<
+  Array<{
+    group: Doc<'modifierGroups'>;
+    options: Doc<'modifierOptions'>[];
+    position: number;
+  }>
+> {
+  const joins = await ctx.db
+    .query('menuItemModifierGroups')
+    .withIndex('by_item', (q) => q.eq('menuItemId', menuItemId))
+    .collect();
+  joins.sort((a, b) => a.position - b.position);
+  const attachedGroups: Array<{
+    group: Doc<'modifierGroups'>;
+    options: Doc<'modifierOptions'>[];
+    position: number;
+  }> = [];
+  for (const j of joins) {
+    const group = await ctx.db.get(j.modifierGroupId);
+    if (!group || group.archived) continue;
+    const options = await ctx.db
+      .query('modifierOptions')
+      .withIndex('by_group_active', (q) => q.eq('groupId', group._id).eq('archived', false))
+      .collect();
+    attachedGroups.push({
+      group,
+      options: options.sort((a, b) => a.position - b.position),
+      position: j.position,
+    });
+  }
+  return attachedGroups;
 }
 
 export const create = mutation({
@@ -219,25 +255,7 @@ export const listForSale = query({
     const active = items.filter((i) => i.isActive).sort((a, b) => a.position - b.position);
     const result = [];
     for (const item of active) {
-      const joins = await ctx.db
-        .query('menuItemModifierGroups')
-        .withIndex('by_item', (q) => q.eq('menuItemId', item._id))
-        .collect();
-      joins.sort((a, b) => a.position - b.position);
-      const attachedGroups = [];
-      for (const j of joins) {
-        const group = await ctx.db.get(j.modifierGroupId);
-        if (!group || group.archived) continue;
-        const options = await ctx.db
-          .query('modifierOptions')
-          .withIndex('by_group_active', (q) => q.eq('groupId', group._id).eq('archived', false))
-          .collect();
-        attachedGroups.push({
-          group,
-          options: options.sort((a, b) => a.position - b.position),
-          position: j.position,
-        });
-      }
+      const attachedGroups = await resolveAttachedGroups(ctx, item._id);
       result.push({ item, attachedGroups });
     }
     return result;
@@ -251,29 +269,7 @@ export const getById = query({
     const { cafeId } = await requireOwnerCafe(ctx);
     const item = await ctx.db.get(id);
     if (!item || item.cafeId !== cafeId) return null;
-    const joins = await ctx.db
-      .query('menuItemModifierGroups')
-      .withIndex('by_item', (q) => q.eq('menuItemId', id))
-      .collect();
-    joins.sort((a, b) => a.position - b.position);
-    const attachedGroups: Array<{
-      group: Doc<'modifierGroups'>;
-      options: Doc<'modifierOptions'>[];
-      position: number;
-    }> = [];
-    for (const j of joins) {
-      const group = await ctx.db.get(j.modifierGroupId);
-      if (!group || group.archived) continue;
-      const options = await ctx.db
-        .query('modifierOptions')
-        .withIndex('by_group_active', (q) => q.eq('groupId', group._id).eq('archived', false))
-        .collect();
-      attachedGroups.push({
-        group,
-        options: options.sort((a, b) => a.position - b.position),
-        position: j.position,
-      });
-    }
+    const attachedGroups = await resolveAttachedGroups(ctx, id);
     return { item, attachedGroups };
   },
 });
