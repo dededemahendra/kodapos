@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
-import { hashPin } from './lib/pin';
+import { hashPin, verifyPin as verifyPinHash } from './lib/pin';
 
 const cafeStaffDoc = v.object({
   _id: v.id('cafeStaff'),
@@ -98,6 +98,31 @@ export const archive = mutation({
       throw new Error('Tutup shift sebelum mengarsipkan.');
     }
     await ctx.db.patch(id, { archived: true });
+    return null;
+  },
+});
+
+export const verifyPin = query({
+  args: { id: v.id('cafeStaff'), pin: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, { id, pin }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const row = await ctx.db.get(id);
+    if (!row || row.cafeId !== cafeId || row.archived) return false;
+    if (!row.pinHash) return false;
+    return await verifyPinHash(pin, row.pinHash);
+  },
+});
+
+export const resetPin = mutation({
+  args: { id: v.id('cafeStaff'), pin: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { id, pin }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await requireOwned(ctx, cafeId, id, 'Staf');
+    const cleanPin = assertPin(pin);
+    const pinHash = await hashPin(cleanPin);
+    await ctx.db.patch(id, { pinHash });
     return null;
   },
 });

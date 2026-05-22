@@ -114,4 +114,35 @@ describe('staff', () => {
       ownerB.mutation(api.staff.updateName, { id: aRow!._id, name: 'pwn' })
     ).rejects.toThrow(/tidak ditemukan|akses/i);
   });
+
+  it('verifyPin returns true on match, false on mismatch', async () => {
+    const t = convexTest(schema, modules);
+    const asOwner = await setupOwner(t);
+    const id = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
+    expect(await asOwner.query(api.staff.verifyPin, { id, pin: '1234' })).toBe(true);
+    expect(await asOwner.query(api.staff.verifyPin, { id, pin: '0000' })).toBe(false);
+  });
+
+  it('verifyPin returns false on a row with no pinHash (owner before set)', async () => {
+    const t = convexTest(schema, modules);
+    const asOwner = await setupOwner(t);
+    const owner = (await asOwner.query(api.staff.list, {}))[0];
+    expect(await asOwner.query(api.staff.verifyPin, { id: owner!._id, pin: '0000' })).toBe(false);
+  });
+
+  it('resetPin changes the hash so old PIN no longer verifies', async () => {
+    const t = convexTest(schema, modules);
+    const asOwner = await setupOwner(t);
+    const id = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
+    await asOwner.mutation(api.staff.resetPin, { id, pin: '9999' });
+    expect(await asOwner.query(api.staff.verifyPin, { id, pin: '1234' })).toBe(false);
+    expect(await asOwner.query(api.staff.verifyPin, { id, pin: '9999' })).toBe(true);
+  });
+
+  it('resetPin rejects malformed PIN', async () => {
+    const t = convexTest(schema, modules);
+    const asOwner = await setupOwner(t);
+    const id = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
+    await expect(asOwner.mutation(api.staff.resetPin, { id, pin: 'abcd' })).rejects.toThrow(/pin/i);
+  });
 });
