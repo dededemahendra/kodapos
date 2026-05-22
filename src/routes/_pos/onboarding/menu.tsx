@@ -33,9 +33,14 @@ function OnboardingMenu() {
       </div>
       <div className="flex gap-2">
         <Button onClick={() => finish('/menu/categories')}>Mulai dengan kategori →</Button>
-        <Button variant="outline" onClick={() => finish('/menu')}>
+        <Button asChild variant="outline">
+          <Link to="/onboarding/cashier">Lanjut: PIN & Kasir →</Link>
+        </Button>
+        <Button variant="ghost" onClick={() => finish('/menu')}>
           Selesaikan nanti
         </Button>
+      </div>
+      <div className="mt-4">
         <Button asChild variant="ghost">
           <Link to="/onboarding/profile">← Kembali</Link>
         </Button>
