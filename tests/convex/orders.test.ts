@@ -1,0 +1,199 @@
+import { convexTest } from 'convex-test';
+import { describe, expect, it } from 'vitest';
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+import schema from '../../convex/schema';
+
+const modules = import.meta.glob('../../convex/**/*.*s');
+
+type Setup = {
+  asOwner: ReturnType<ReturnType<typeof convexTest>['withIdentity']>;
+  cafeId: Id<'cafes'>;
+  cashierId: Id<'cafeStaff'>;
+  shiftId: Id<'shifts'>;
+  categoryId: Id<'categories'>;
+  itemId: Id<'menuItems'>;
+};
+
+async function setup(
+  t: ReturnType<typeof convexTest>,
+  opts: { email?: string; taxEnabled?: boolean; taxRatePct?: number } = {}
+): Promise<Setup> {
+  const email = opts.email ?? 'o@x.com';
+  const taxEnabled = opts.taxEnabled ?? false;
+  const taxRatePct = opts.taxRatePct ?? 0;
+  const userId = await t.run(async (ctx) => {
+    return await ctx.db.insert('users', { name: 'Owner', email });
+  });
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+  await asOwner.mutation(api.cafes.updateProfile, {
+    name: 'Kopi Senja',
+    timezone: 'Asia/Jakarta',
+    taxRatePct,
+    taxEnabled,
+  });
+  const cafe = await asOwner.query(api.cafes.myCafe, {});
+  const cafeId = cafe!._id;
+  const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
+  const shiftId = await asOwner.mutation(api.shifts.open, {
+    cashierId,
+    openingFloatIDR: 100000,
+  });
+  const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
+  const itemId = await asOwner.mutation(api.menu.items.create, {
+    categoryId,
+    name: 'Espresso',
+    priceIDR: 18000,
+  });
+  return { asOwner, cafeId, cashierId, shiftId, categoryId, itemId };
+}
+
+describe('orders.createCashSale', () => {
+  it('creates an order with a single no-modifier line and a paired cash payment', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'order-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    expect(result.totalIDR).toBe(18000);
+    expect(result.changeIDR).toBe(2000);
+
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.paymentStatus).toBe('paid');
+    expect(order?.paymentMethod).toBe('cash');
+    expect(order?.subtotalIDR).toBe(18000);
+    expect(order?.taxIDR).toBe(0);
+    expect(order?.totalIDR).toBe(18000);
+    expect(order?.discountIDR).toBe(0);
+    expect(order?.lines).toHaveLength(1);
+    expect(order?.lines[0].nameSnapshot).toBe('Espresso');
+    expect(order?.lines[0].unitPriceIDR).toBe(18000);
+    expect(order?.lines[0].lineTotalIDR).toBe(18000);
+    expect(order?.lines[0].modifiersSnapshot).toEqual([]);
+
+    const payments = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', result.orderId))
+        .collect()
+    );
+    expect(payments).toHaveLength(1);
+    expect(payments[0].method).toBe('cash');
+    expect(payments[0].amountIDR).toBe(18000);
+    expect(payments[0].cashTenderedIDR).toBe(20000);
+    expect(payments[0].changeIDR).toBe(2000);
+    expect(payments[0].confirmedAt).toEqual(expect.any(Number));
+  });
+
+  it('applies tax when cafe.taxEnabled is true; snapshots taxRatePct at sale time', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId, cafeId } = await setup(t, {
+      taxEnabled: true,
+      taxRatePct: 11,
+    });
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'order-tax',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 30000,
+      createdAtClient: 1700000000000,
+    });
+    // 18000 * 11 / 100 = 1980; total = 19980.
+    expect(result.totalIDR).toBe(19980);
+    expect(result.changeIDR).toBe(10020);
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.taxRatePct).toBe(11);
+    expect(order?.taxIDR).toBe(1980);
+
+    // Owner later edits PPN; the existing order still snapshots the original rate.
+    await asOwner.mutation(api.cafes.updateProfile, {
+      name: 'Kopi Senja',
+      timezone: 'Asia/Jakarta',
+      taxRatePct: 5,
+      taxEnabled: true,
+    });
+    const orderAgain = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(orderAgain?.taxRatePct).toBe(11);
+  });
+
+  it('zero tax when cafe.taxEnabled is false even if taxRatePct is non-zero', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t, {
+      taxEnabled: false,
+      taxRatePct: 11,
+    });
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'order-notax',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 18000,
+      createdAtClient: 1700000000000,
+    });
+    expect(result.totalIDR).toBe(18000);
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.taxRatePct).toBe(0);
+    expect(order?.taxIDR).toBe(0);
+  });
+
+  it('multi-line order with modifiers — snapshot + unit price calculation', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+
+    // Build a modifier group with two options, attach to the item.
+    const groupId = await asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Susu',
+      required: true,
+      minSelect: 1,
+      maxSelect: 1,
+      options: [
+        { name: 'Reguler', priceAdjustmentIDR: 0, position: 0 },
+        { name: 'Oat (+5k)', priceAdjustmentIDR: 5000, position: 1 },
+      ],
+    });
+    await asOwner.mutation(api.menu.itemGroups.attach, {
+      menuItemId: itemId,
+      modifierGroupId: groupId,
+    });
+
+    const group = await asOwner.query(api.menu.modifierGroups.getById, { id: groupId });
+    const oat = group!.options.find((o) => o.name === 'Oat (+5k)')!;
+    const regular = group!.options.find((o) => o.name === 'Reguler')!;
+
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'order-mod',
+      shiftId,
+      cashierId,
+      lines: [
+        { menuItemId: itemId, qty: 2, modifierOptionIds: [oat._id] },
+        { menuItemId: itemId, qty: 1, modifierOptionIds: [regular._id] },
+      ],
+      cashTenderedIDR: 100000,
+      createdAtClient: 1700000000000,
+    });
+    // line 1: qty 2 * (18000 + 5000) = 46000
+    // line 2: qty 1 * (18000 + 0)    = 18000
+    // subtotal = 64000; tax disabled; total = 64000
+    expect(result.totalIDR).toBe(64000);
+    expect(result.changeIDR).toBe(36000);
+
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.lines).toHaveLength(2);
+    expect(order?.lines[0].unitPriceIDR).toBe(23000);
+    expect(order?.lines[0].lineTotalIDR).toBe(46000);
+    expect(order?.lines[0].modifiersSnapshot).toEqual([
+      { groupName: 'Susu', optionName: 'Oat (+5k)', priceAdjustmentIDR: 5000 },
+    ]);
+    expect(order?.lines[1].unitPriceIDR).toBe(18000);
+    expect(order?.lines[1].modifiersSnapshot).toEqual([
+      { groupName: 'Susu', optionName: 'Reguler', priceAdjustmentIDR: 0 },
+    ]);
+  });
+});
