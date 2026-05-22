@@ -72,10 +72,10 @@ describe('orders.createCashSale', () => {
     expect(order?.totalIDR).toBe(18000);
     expect(order?.discountIDR).toBe(0);
     expect(order?.lines).toHaveLength(1);
-    expect(order?.lines[0].nameSnapshot).toBe('Espresso');
-    expect(order?.lines[0].unitPriceIDR).toBe(18000);
-    expect(order?.lines[0].lineTotalIDR).toBe(18000);
-    expect(order?.lines[0].modifiersSnapshot).toEqual([]);
+    expect(order?.lines?.[0]?.nameSnapshot).toBe('Espresso');
+    expect(order?.lines?.[0]?.unitPriceIDR).toBe(18000);
+    expect(order?.lines?.[0]?.lineTotalIDR).toBe(18000);
+    expect(order?.lines?.[0]?.modifiersSnapshot).toEqual([]);
 
     const payments = await t.run(async (ctx) =>
       await ctx.db
@@ -84,11 +84,11 @@ describe('orders.createCashSale', () => {
         .collect()
     );
     expect(payments).toHaveLength(1);
-    expect(payments[0].method).toBe('cash');
-    expect(payments[0].amountIDR).toBe(18000);
-    expect(payments[0].cashTenderedIDR).toBe(20000);
-    expect(payments[0].changeIDR).toBe(2000);
-    expect(payments[0].confirmedAt).toEqual(expect.any(Number));
+    expect(payments?.[0]?.method).toBe('cash');
+    expect(payments?.[0]?.amountIDR).toBe(18000);
+    expect(payments?.[0]?.cashTenderedIDR).toBe(20000);
+    expect(payments?.[0]?.changeIDR).toBe(2000);
+    expect(payments?.[0]?.confirmedAt).toEqual(expect.any(Number));
   });
 
   it('applies tax when cafe.taxEnabled is true; snapshots taxRatePct at sale time', async () => {
@@ -186,13 +186,13 @@ describe('orders.createCashSale', () => {
 
     const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
     expect(order?.lines).toHaveLength(2);
-    expect(order?.lines[0].unitPriceIDR).toBe(23000);
-    expect(order?.lines[0].lineTotalIDR).toBe(46000);
-    expect(order?.lines[0].modifiersSnapshot).toEqual([
+    expect(order?.lines?.[0]?.unitPriceIDR).toBe(23000);
+    expect(order?.lines?.[0]?.lineTotalIDR).toBe(46000);
+    expect(order?.lines?.[0]?.modifiersSnapshot).toEqual([
       { groupName: 'Susu', optionName: 'Oat (+5k)', priceAdjustmentIDR: 5000 },
     ]);
-    expect(order?.lines[1].unitPriceIDR).toBe(18000);
-    expect(order?.lines[1].modifiersSnapshot).toEqual([
+    expect(order?.lines?.[1]?.unitPriceIDR).toBe(18000);
+    expect(order?.lines?.[1]?.modifiersSnapshot).toEqual([
       { groupName: 'Susu', optionName: 'Reguler', priceAdjustmentIDR: 0 },
     ]);
   });
