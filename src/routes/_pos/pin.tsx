@@ -30,8 +30,7 @@ function PinPickerPage() {
 
   async function selectWithoutPin(id: Id<'cafeStaff'>): Promise<void> {
     setCashier(id);
-    // /shift/open lands in Task 12; cast until then.
-    navigate({ to: '/shift/open' as never });
+    navigate({ to: '/shift/open' });
   }
 
   async function selectWithPin(pin: string): Promise<void> {
@@ -43,8 +42,7 @@ function PinPickerPage() {
     }
     setCashier(picking.id);
     setPicking(null);
-    // /shift/open lands in Task 12; cast until then.
-    navigate({ to: '/shift/open' as never });
+    navigate({ to: '/shift/open' });
   }
 
   return (

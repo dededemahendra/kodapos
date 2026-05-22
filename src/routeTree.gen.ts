@@ -16,10 +16,13 @@ import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
 import { Route as PosPinRouteImport } from './routes/_pos/pin'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
+import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
 import { Route as PosOnboardingRouteRouteImport } from './routes/_pos/onboarding/route'
 import { Route as PosMenuRouteRouteImport } from './routes/_pos/menu/route'
 import { Route as PosMenuIndexRouteImport } from './routes/_pos/menu/index'
+import { Route as PosShiftOpenRouteImport } from './routes/_pos/shift/open'
+import { Route as PosShiftCloseRouteImport } from './routes/_pos/shift/close'
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
 import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboarding/profile'
 import { Route as PosOnboardingMenuRouteImport } from './routes/_pos/onboarding/menu'
@@ -61,6 +64,11 @@ const PosDashboardRoute = PosDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => PosRoute,
 } as any)
+const PosShiftRouteRoute = PosShiftRouteRouteImport.update({
+  id: '/shift',
+  path: '/shift',
+  getParentRoute: () => PosRoute,
+} as any)
 const PosSettingsRouteRoute = PosSettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -80,6 +88,16 @@ const PosMenuIndexRoute = PosMenuIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PosMenuRouteRoute,
+} as any)
+const PosShiftOpenRoute = PosShiftOpenRouteImport.update({
+  id: '/open',
+  path: '/open',
+  getParentRoute: () => PosShiftRouteRoute,
+} as any)
+const PosShiftCloseRoute = PosShiftCloseRouteImport.update({
+  id: '/close',
+  path: '/close',
+  getParentRoute: () => PosShiftRouteRoute,
 } as any)
 const PosSettingsProfileRoute = PosSettingsProfileRouteImport.update({
   id: '/profile',
@@ -122,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/menu': typeof PosMenuRouteRouteWithChildren
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
+  '/shift': typeof PosShiftRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
   '/pin': typeof PosPinRoute
   '/signin': typeof PublicSigninRoute
@@ -131,6 +150,8 @@ export interface FileRoutesByFullPath {
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
+  '/shift/close': typeof PosShiftCloseRoute
+  '/shift/open': typeof PosShiftOpenRoute
   '/menu/': typeof PosMenuIndexRoute
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
@@ -139,6 +160,7 @@ export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
+  '/shift': typeof PosShiftRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
   '/pin': typeof PosPinRoute
   '/signin': typeof PublicSigninRoute
@@ -148,6 +170,8 @@ export interface FileRoutesByTo {
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
+  '/shift/close': typeof PosShiftCloseRoute
+  '/shift/open': typeof PosShiftOpenRoute
   '/menu': typeof PosMenuIndexRoute
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
@@ -159,6 +183,7 @@ export interface FileRoutesById {
   '/_pos/menu': typeof PosMenuRouteRouteWithChildren
   '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
+  '/_pos/shift': typeof PosShiftRouteRouteWithChildren
   '/_pos/dashboard': typeof PosDashboardRoute
   '/_pos/pin': typeof PosPinRoute
   '/_public/signin': typeof PublicSigninRoute
@@ -169,6 +194,8 @@ export interface FileRoutesById {
   '/_pos/onboarding/menu': typeof PosOnboardingMenuRoute
   '/_pos/onboarding/profile': typeof PosOnboardingProfileRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
+  '/_pos/shift/close': typeof PosShiftCloseRoute
+  '/_pos/shift/open': typeof PosShiftOpenRoute
   '/_pos/menu/': typeof PosMenuIndexRoute
   '/_pos/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/_pos/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
@@ -180,6 +207,7 @@ export interface FileRouteTypes {
     | '/menu'
     | '/onboarding'
     | '/settings'
+    | '/shift'
     | '/dashboard'
     | '/pin'
     | '/signin'
@@ -189,6 +217,8 @@ export interface FileRouteTypes {
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
+    | '/shift/close'
+    | '/shift/open'
     | '/menu/'
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
@@ -197,6 +227,7 @@ export interface FileRouteTypes {
     | '/'
     | '/onboarding'
     | '/settings'
+    | '/shift'
     | '/dashboard'
     | '/pin'
     | '/signin'
@@ -206,6 +237,8 @@ export interface FileRouteTypes {
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
+    | '/shift/close'
+    | '/shift/open'
     | '/menu'
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
@@ -216,6 +249,7 @@ export interface FileRouteTypes {
     | '/_pos/menu'
     | '/_pos/onboarding'
     | '/_pos/settings'
+    | '/_pos/shift'
     | '/_pos/dashboard'
     | '/_pos/pin'
     | '/_public/signin'
@@ -226,6 +260,8 @@ export interface FileRouteTypes {
     | '/_pos/onboarding/menu'
     | '/_pos/onboarding/profile'
     | '/_pos/settings/profile'
+    | '/_pos/shift/close'
+    | '/_pos/shift/open'
     | '/_pos/menu/'
     | '/_pos/menu/items/$itemId'
     | '/_pos/menu/modifiers/$groupId'
@@ -287,6 +323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosDashboardRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_pos/shift': {
+      id: '/_pos/shift'
+      path: '/shift'
+      fullPath: '/shift'
+      preLoaderRoute: typeof PosShiftRouteRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_pos/settings': {
       id: '/_pos/settings'
       path: '/settings'
@@ -314,6 +357,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/menu/'
       preLoaderRoute: typeof PosMenuIndexRouteImport
       parentRoute: typeof PosMenuRouteRoute
+    }
+    '/_pos/shift/open': {
+      id: '/_pos/shift/open'
+      path: '/open'
+      fullPath: '/shift/open'
+      preLoaderRoute: typeof PosShiftOpenRouteImport
+      parentRoute: typeof PosShiftRouteRoute
+    }
+    '/_pos/shift/close': {
+      id: '/_pos/shift/close'
+      path: '/close'
+      fullPath: '/shift/close'
+      preLoaderRoute: typeof PosShiftCloseRouteImport
+      parentRoute: typeof PosShiftRouteRoute
     }
     '/_pos/settings/profile': {
       id: '/_pos/settings/profile'
@@ -420,10 +477,25 @@ const PosSettingsRouteRouteChildren: PosSettingsRouteRouteChildren = {
 const PosSettingsRouteRouteWithChildren =
   PosSettingsRouteRoute._addFileChildren(PosSettingsRouteRouteChildren)
 
+interface PosShiftRouteRouteChildren {
+  PosShiftCloseRoute: typeof PosShiftCloseRoute
+  PosShiftOpenRoute: typeof PosShiftOpenRoute
+}
+
+const PosShiftRouteRouteChildren: PosShiftRouteRouteChildren = {
+  PosShiftCloseRoute: PosShiftCloseRoute,
+  PosShiftOpenRoute: PosShiftOpenRoute,
+}
+
+const PosShiftRouteRouteWithChildren = PosShiftRouteRoute._addFileChildren(
+  PosShiftRouteRouteChildren,
+)
+
 interface PosRouteChildren {
   PosMenuRouteRoute: typeof PosMenuRouteRouteWithChildren
   PosOnboardingRouteRoute: typeof PosOnboardingRouteRouteWithChildren
   PosSettingsRouteRoute: typeof PosSettingsRouteRouteWithChildren
+  PosShiftRouteRoute: typeof PosShiftRouteRouteWithChildren
   PosDashboardRoute: typeof PosDashboardRoute
   PosPinRoute: typeof PosPinRoute
 }
@@ -432,6 +504,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosMenuRouteRoute: PosMenuRouteRouteWithChildren,
   PosOnboardingRouteRoute: PosOnboardingRouteRouteWithChildren,
   PosSettingsRouteRoute: PosSettingsRouteRouteWithChildren,
+  PosShiftRouteRoute: PosShiftRouteRouteWithChildren,
   PosDashboardRoute: PosDashboardRoute,
   PosPinRoute: PosPinRoute,
 }
