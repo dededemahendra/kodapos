@@ -5,8 +5,9 @@ import { gotoHydrated, waitForUrlHydrated } from './_helpers';
 test.describe('menu (auth-gated)', () => {
   test.skip(!process.env.RUN_AUTH_E2E, 'set RUN_AUTH_E2E=1 to run');
   // ~20 step flow with networkidle waits routinely sits above Playwright's
-  // default 30s budget. Bump to 90s so the long-form tests don't flake.
-  test.setTimeout(90_000);
+  // default 30s budget. 180s leaves headroom for the slower CRUD round-trip
+  // when running the full auth-gated suite back-to-back.
+  test.setTimeout(180_000);
 
   test('wizard happy path: profile → menu → first item', async ({ page }) => {
     const email = `e2e+${Date.now()}@kodapos.test`;
