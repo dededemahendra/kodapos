@@ -27,6 +27,7 @@ import { Route as PosSettingsStaffRouteImport } from './routes/_pos/settings/sta
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
 import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboarding/profile'
 import { Route as PosOnboardingMenuRouteImport } from './routes/_pos/onboarding/menu'
+import { Route as PosOnboardingCashierRouteImport } from './routes/_pos/onboarding/cashier'
 import { Route as PosMenuModifiersRouteImport } from './routes/_pos/menu/modifiers'
 import { Route as PosMenuCategoriesRouteImport } from './routes/_pos/menu/categories'
 import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
@@ -120,6 +121,11 @@ const PosOnboardingMenuRoute = PosOnboardingMenuRouteImport.update({
   path: '/menu',
   getParentRoute: () => PosOnboardingRouteRoute,
 } as any)
+const PosOnboardingCashierRoute = PosOnboardingCashierRouteImport.update({
+  id: '/cashier',
+  path: '/cashier',
+  getParentRoute: () => PosOnboardingRouteRoute,
+} as any)
 const PosMenuModifiersRoute = PosMenuModifiersRouteImport.update({
   id: '/modifiers',
   path: '/modifiers',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof PublicSignupRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
+  '/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/signup': typeof PublicSignupRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
+  '/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/_public/': typeof PublicIndexRoute
   '/_pos/menu/categories': typeof PosMenuCategoriesRoute
   '/_pos/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
+  '/_pos/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/_pos/onboarding/menu': typeof PosOnboardingMenuRoute
   '/_pos/onboarding/profile': typeof PosOnboardingProfileRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/menu/categories'
     | '/menu/modifiers'
+    | '/onboarding/cashier'
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/menu/categories'
     | '/menu/modifiers'
+    | '/onboarding/cashier'
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/_public/'
     | '/_pos/menu/categories'
     | '/_pos/menu/modifiers'
+    | '/_pos/onboarding/cashier'
     | '/_pos/onboarding/menu'
     | '/_pos/onboarding/profile'
     | '/_pos/settings/profile'
@@ -412,6 +424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosOnboardingMenuRouteImport
       parentRoute: typeof PosOnboardingRouteRoute
     }
+    '/_pos/onboarding/cashier': {
+      id: '/_pos/onboarding/cashier'
+      path: '/cashier'
+      fullPath: '/onboarding/cashier'
+      preLoaderRoute: typeof PosOnboardingCashierRouteImport
+      parentRoute: typeof PosOnboardingRouteRoute
+    }
     '/_pos/menu/modifiers': {
       id: '/_pos/menu/modifiers'
       path: '/modifiers'
@@ -473,11 +492,13 @@ const PosMenuRouteRouteWithChildren = PosMenuRouteRoute._addFileChildren(
 )
 
 interface PosOnboardingRouteRouteChildren {
+  PosOnboardingCashierRoute: typeof PosOnboardingCashierRoute
   PosOnboardingMenuRoute: typeof PosOnboardingMenuRoute
   PosOnboardingProfileRoute: typeof PosOnboardingProfileRoute
 }
 
 const PosOnboardingRouteRouteChildren: PosOnboardingRouteRouteChildren = {
+  PosOnboardingCashierRoute: PosOnboardingCashierRoute,
   PosOnboardingMenuRoute: PosOnboardingMenuRoute,
   PosOnboardingProfileRoute: PosOnboardingProfileRoute,
 }
