@@ -75,7 +75,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       return { lines: state.lines.filter((l) => l.lineKey !== action.lineKey) };
     }
     case 'clearCart': {
-      return initialCart;
+      return { lines: [] };
     }
   }
 }
