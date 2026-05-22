@@ -442,3 +442,60 @@ describe('orders.createCashSale', () => {
     expect(order?.lines?.[0]?.lineTotalIDR).toBe(54000);
   });
 });
+
+describe('orders read queries', () => {
+  it('listForShift returns shift orders in createdAtClient desc', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const a = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'A',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    const b = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'B',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 2, modifierOptionIds: [] }],
+      cashTenderedIDR: 50000,
+      createdAtClient: 1700000001000,
+    });
+    const rows = await asOwner.query(api.orders.listForShift, { shiftId });
+    expect(rows.map((r) => r._id)).toEqual([b.orderId, a.orderId]);
+    expect(rows[0]?.totalIDR).toBe(36000);
+    expect(rows[1]?.totalIDR).toBe(18000);
+  });
+
+  it('listForShift rejects a shift from another cafe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: ownerA } = await setup(t, { email: 'a@x.com' });
+    const { shiftId: shiftB } = await setup(t, { email: 'b@x.com' });
+    await expect(ownerA.query(api.orders.listForShift, { shiftId: shiftB })).rejects.toThrow(
+      /tidak ditemukan/i
+    );
+  });
+
+  it('getById returns null for an order in another cafe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: ownerA } = await setup(t, { email: 'a@x.com' });
+    const { asOwner: ownerB, shiftId: shiftB, cashierId: cashierB, itemId: itemB } = await setup(t, {
+      email: 'b@x.com',
+    });
+    const created = await ownerB.mutation(api.orders.createCashSale, {
+      clientId: 'B-only',
+      shiftId: shiftB,
+      cashierId: cashierB,
+      lines: [{ menuItemId: itemB, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    expect(await ownerA.query(api.orders.getById, { id: created.orderId })).toBeNull();
+    const own = await ownerB.query(api.orders.getById, { id: created.orderId });
+    expect(own?._id).toBe(created.orderId);
+    expect(own?.payment?.method).toBe('cash');
+    expect(own?.cashierName).toBe('Andi');
+  });
+});

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
-import { mutation } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { requireActiveCashier } from './lib/staff';
 
@@ -151,5 +151,107 @@ export const createCashSale = mutation({
     });
 
     return { orderId, totalIDR, changeIDR };
+  },
+});
+
+// ─── Read queries ────────────────────────────────────────────────────────────
+
+const orderSummary = v.object({
+  _id: v.id('orders'),
+  _creationTime: v.number(),
+  cafeId: v.id('cafes'),
+  shiftId: v.id('shifts'),
+  cashierId: v.id('cafeStaff'),
+  clientId: v.string(),
+  lines: v.array(
+    v.object({
+      menuItemId: v.id('menuItems'),
+      nameSnapshot: v.string(),
+      qty: v.number(),
+      unitPriceIDR: v.number(),
+      modifiersSnapshot: v.array(
+        v.object({
+          groupName: v.string(),
+          optionName: v.string(),
+          priceAdjustmentIDR: v.number(),
+        })
+      ),
+      lineTotalIDR: v.number(),
+    })
+  ),
+  subtotalIDR: v.number(),
+  taxRatePct: v.number(),
+  taxIDR: v.number(),
+  discountIDR: v.number(),
+  totalIDR: v.number(),
+  paymentMethod: v.union(
+    v.literal('cash'),
+    v.literal('qris_static'),
+    v.literal('qris_dynamic')
+  ),
+  paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
+  createdAtClient: v.number(),
+  syncedAt: v.optional(v.number()),
+});
+
+const orderDetail = v.object({
+  ...orderSummary.fields,
+  cashierName: v.string(),
+  payment: v.union(
+    v.object({
+      method: v.union(
+        v.literal('cash'),
+        v.literal('qris_static'),
+        v.literal('qris_dynamic')
+      ),
+      amountIDR: v.number(),
+      cashTenderedIDR: v.optional(v.number()),
+      changeIDR: v.optional(v.number()),
+      confirmedAt: v.optional(v.number()),
+    }),
+    v.null()
+  ),
+});
+
+export const listForShift = query({
+  args: { shiftId: v.id('shifts') },
+  returns: v.array(orderSummary),
+  handler: async (ctx, { shiftId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await requireOwned(ctx, cafeId, shiftId, 'Shift');
+    const rows = await ctx.db
+      .query('orders')
+      .withIndex('by_shift', (q) => q.eq('shiftId', shiftId))
+      .collect();
+    return rows.sort((a, b) => b.createdAtClient - a.createdAtClient);
+  },
+});
+
+export const getById = query({
+  args: { id: v.id('orders') },
+  returns: v.union(orderDetail, v.null()),
+  handler: async (ctx, { id }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const order = await ctx.db.get(id);
+    if (!order || order.cafeId !== cafeId) return null;
+    const cashier = await ctx.db.get(order.cashierId);
+    const payment = await ctx.db
+      .query('payments')
+      .withIndex('by_order', (q) => q.eq('orderId', order._id))
+      .unique();
+    const paymentObj = payment
+      ? {
+          method: payment.method,
+          amountIDR: payment.amountIDR,
+          ...(payment.cashTenderedIDR !== undefined && { cashTenderedIDR: payment.cashTenderedIDR }),
+          ...(payment.changeIDR !== undefined && { changeIDR: payment.changeIDR }),
+          ...(payment.confirmedAt !== undefined && { confirmedAt: payment.confirmedAt }),
+        }
+      : null;
+    return {
+      ...order,
+      cashierName: cashier?.name ?? '—',
+      payment: paymentObj,
+    };
   },
 });
