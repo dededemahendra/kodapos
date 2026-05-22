@@ -70,7 +70,8 @@ export const createCashSale = mutation({
       }
       const item = await ctx.db.get(line.menuItemId);
       if (!item || item.cafeId !== cafeId || item.archived || !item.isActive) {
-        throw new Error(`Item ${item?.name ?? ''} tidak tersedia.`.replace(/\s+/g, ' ').trim());
+        const name = item?.name ? ` ${item.name}` : '';
+        throw new Error(`Item${name} tidak tersedia.`);
       }
 
       const modifiersSnapshot: Doc<'orders'>['lines'][number]['modifiersSnapshot'] = [];
@@ -82,11 +83,11 @@ export const createCashSale = mutation({
         }
         const group = await ctx.db.get(option.groupId);
         if (!group) throw new Error('Modifier tidak tersedia.');
-        const attachment = await ctx.db
+        const attachments = await ctx.db
           .query('menuItemModifierGroups')
           .withIndex('by_item', (q) => q.eq('menuItemId', item._id))
-          .filter((q) => q.eq(q.field('modifierGroupId'), group._id))
-          .unique();
+          .collect();
+        const attachment = attachments.find((a) => a.modifierGroupId === group._id);
         if (!attachment) throw new Error('Modifier tidak tersedia.');
         modifiersSnapshot.push({
           groupName: group.name,
