@@ -17,6 +17,13 @@ function SettingsLayout() {
           >
             Profil kafe
           </Link>
+          <Link
+            to="/settings/staff"
+            className="hover:underline"
+            activeProps={{ className: 'font-semibold' }}
+          >
+            Staff
+          </Link>
         </nav>
       </aside>
       <main className="flex-1">

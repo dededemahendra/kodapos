@@ -23,6 +23,7 @@ import { Route as PosMenuRouteRouteImport } from './routes/_pos/menu/route'
 import { Route as PosMenuIndexRouteImport } from './routes/_pos/menu/index'
 import { Route as PosShiftOpenRouteImport } from './routes/_pos/shift/open'
 import { Route as PosShiftCloseRouteImport } from './routes/_pos/shift/close'
+import { Route as PosSettingsStaffRouteImport } from './routes/_pos/settings/staff'
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
 import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboarding/profile'
 import { Route as PosOnboardingMenuRouteImport } from './routes/_pos/onboarding/menu'
@@ -99,6 +100,11 @@ const PosShiftCloseRoute = PosShiftCloseRouteImport.update({
   path: '/close',
   getParentRoute: () => PosShiftRouteRoute,
 } as any)
+const PosSettingsStaffRoute = PosSettingsStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
 const PosSettingsProfileRoute = PosSettingsProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
+  '/settings/staff': typeof PosSettingsStaffRoute
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
   '/menu/': typeof PosMenuIndexRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
   '/settings/profile': typeof PosSettingsProfileRoute
+  '/settings/staff': typeof PosSettingsStaffRoute
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
   '/menu': typeof PosMenuIndexRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/_pos/onboarding/menu': typeof PosOnboardingMenuRoute
   '/_pos/onboarding/profile': typeof PosOnboardingProfileRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
+  '/_pos/settings/staff': typeof PosSettingsStaffRoute
   '/_pos/shift/close': typeof PosShiftCloseRoute
   '/_pos/shift/open': typeof PosShiftOpenRoute
   '/_pos/menu/': typeof PosMenuIndexRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
+    | '/settings/staff'
     | '/shift/close'
     | '/shift/open'
     | '/menu/'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/onboarding/menu'
     | '/onboarding/profile'
     | '/settings/profile'
+    | '/settings/staff'
     | '/shift/close'
     | '/shift/open'
     | '/menu'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/_pos/onboarding/menu'
     | '/_pos/onboarding/profile'
     | '/_pos/settings/profile'
+    | '/_pos/settings/staff'
     | '/_pos/shift/close'
     | '/_pos/shift/open'
     | '/_pos/menu/'
@@ -372,6 +384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosShiftCloseRouteImport
       parentRoute: typeof PosShiftRouteRoute
     }
+    '/_pos/settings/staff': {
+      id: '/_pos/settings/staff'
+      path: '/staff'
+      fullPath: '/settings/staff'
+      preLoaderRoute: typeof PosSettingsStaffRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
     '/_pos/settings/profile': {
       id: '/_pos/settings/profile'
       path: '/profile'
@@ -468,10 +487,12 @@ const PosOnboardingRouteRouteWithChildren =
 
 interface PosSettingsRouteRouteChildren {
   PosSettingsProfileRoute: typeof PosSettingsProfileRoute
+  PosSettingsStaffRoute: typeof PosSettingsStaffRoute
 }
 
 const PosSettingsRouteRouteChildren: PosSettingsRouteRouteChildren = {
   PosSettingsProfileRoute: PosSettingsProfileRoute,
+  PosSettingsStaffRoute: PosSettingsStaffRoute,
 }
 
 const PosSettingsRouteRouteWithChildren =
