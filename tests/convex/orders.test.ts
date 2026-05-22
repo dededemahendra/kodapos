@@ -196,4 +196,249 @@ describe('orders.createCashSale', () => {
       { groupName: 'Susu', optionName: 'Reguler', priceAdjustmentIDR: 0 },
     ]);
   });
+
+  it('idempotent: same clientId twice → one order, one payment, returns same orderId', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId, cafeId } = await setup(t);
+    const args = {
+      clientId: 'dup-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] as Id<'modifierOptions'>[] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    };
+    const first = await asOwner.mutation(api.orders.createCashSale, args);
+    const second = await asOwner.mutation(api.orders.createCashSale, args);
+    expect(second.orderId).toBe(first.orderId);
+    expect(second.totalIDR).toBe(first.totalIDR);
+    expect(second.changeIDR).toBe(first.changeIDR);
+
+    const allOrders = await t.run(async (ctx) =>
+      await ctx.db
+        .query('orders')
+        .withIndex('by_cafe_clientId', (q) => q.eq('cafeId', cafeId).eq('clientId', 'dup-1'))
+        .collect()
+    );
+    expect(allOrders).toHaveLength(1);
+    const allPayments = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', first.orderId))
+        .collect()
+    );
+    expect(allPayments).toHaveLength(1);
+  });
+
+  it('different clientId for otherwise identical args → two orders', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const base = {
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] as Id<'modifierOptions'>[] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    };
+    const a = await asOwner.mutation(api.orders.createCashSale, { ...base, clientId: 'A' });
+    const b = await asOwner.mutation(api.orders.createCashSale, { ...base, clientId: 'B' });
+    expect(b.orderId).not.toBe(a.orderId);
+  });
+
+  it('rejects empty cart', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId } = await setup(t);
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'empty',
+        shiftId,
+        cashierId,
+        lines: [],
+        cashTenderedIDR: 0,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/kosong/i);
+  });
+
+  it('rejects qty < 1 or qty > 99 or fractional', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    for (const qty of [0, -1, 100, 1.5]) {
+      await expect(
+        asOwner.mutation(api.orders.createCashSale, {
+          clientId: `qty-${qty}`,
+          shiftId,
+          cashierId,
+          lines: [{ menuItemId: itemId, qty, modifierOptionIds: [] }],
+          cashTenderedIDR: 1000000,
+          createdAtClient: 1700000000000,
+        })
+      ).rejects.toThrow(/tidak valid/i);
+    }
+  });
+
+  it('rejects archived item', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.menu.items.archive, { id: itemId });
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'arch-item',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/tidak tersedia/i);
+  });
+
+  it('rejects inactive item', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.menu.items.setActive, { id: itemId, isActive: false });
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'inactive',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/tidak tersedia/i);
+  });
+
+  it('rejects modifier option from a group not attached to the item', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const detachedGroupId = await asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Detached',
+      required: false,
+      minSelect: 0,
+      maxSelect: 1,
+      options: [{ name: 'Solo', priceAdjustmentIDR: 1000, position: 0 }],
+    });
+    const detached = await asOwner.query(api.menu.modifierGroups.getById, { id: detachedGroupId });
+    const opt = detached!.options[0]!;
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'detached-opt',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [opt._id] }],
+        cashTenderedIDR: 100000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/tidak tersedia/i);
+  });
+
+  it('rejects insufficient cash tender', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'short',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 10000, // < 18000
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/kurang dari total/i);
+  });
+
+  it('rejects fractional or negative tendered amount', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'frac',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000.5,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/bulat|rupiah/i);
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'neg',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: -1,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/negatif/i);
+  });
+
+  it('rejects closed shift', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.shifts.close, { id: shiftId, countedCashIDR: 100000 });
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'closed',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/sudah ditutup/i);
+  });
+
+  it('rejects cashier from another cafe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: ownerA, shiftId: shiftA, itemId: itemA } = await setup(t, { email: 'a@x.com' });
+    const { cashierId: cashierB } = await setup(t, { email: 'b@x.com' });
+    await expect(
+      ownerA.mutation(api.orders.createCashSale, {
+        clientId: 'cross-cashier',
+        shiftId: shiftA,
+        cashierId: cashierB,
+        lines: [{ menuItemId: itemA, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/tidak ditemukan/i);
+  });
+
+  it('rejects shift from another cafe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: ownerA, cashierId: cashierA, itemId: itemA } = await setup(t, { email: 'a@x.com' });
+    const { shiftId: shiftB } = await setup(t, { email: 'b@x.com' });
+    await expect(
+      ownerA.mutation(api.orders.createCashSale, {
+        clientId: 'cross-shift',
+        shiftId: shiftB,
+        cashierId: cashierA,
+        lines: [{ menuItemId: itemA, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/tidak ditemukan/i);
+  });
+
+  it('server recomputes — client-provided prices are ignored', async () => {
+    // The mutation signature only accepts menuItemId/qty/modifierOptionIds
+    // from the client. There is no way to pass a price. This test simply
+    // re-asserts that totals match the menu, even when the client used the
+    // mutation contract correctly.
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'override',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 100000,
+      createdAtClient: 1700000000000,
+    });
+    expect(result.totalIDR).toBe(54000); // 3 * 18000
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.lines?.[0]?.unitPriceIDR).toBe(18000);
+    expect(order?.lines?.[0]?.lineTotalIDR).toBe(54000);
+  });
 });
