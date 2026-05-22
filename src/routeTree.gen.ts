@@ -18,8 +18,10 @@ import { Route as PosPinRouteImport } from './routes/_pos/pin'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
+import { Route as PosSaleRouteRouteImport } from './routes/_pos/sale/route'
 import { Route as PosOnboardingRouteRouteImport } from './routes/_pos/onboarding/route'
 import { Route as PosMenuRouteRouteImport } from './routes/_pos/menu/route'
+import { Route as PosSaleIndexRouteImport } from './routes/_pos/sale/index'
 import { Route as PosMenuIndexRouteImport } from './routes/_pos/menu/index'
 import { Route as PosShiftOpenRouteImport } from './routes/_pos/shift/open'
 import { Route as PosShiftCloseRouteImport } from './routes/_pos/shift/close'
@@ -76,6 +78,11 @@ const PosSettingsRouteRoute = PosSettingsRouteRouteImport.update({
   path: '/settings',
   getParentRoute: () => PosRoute,
 } as any)
+const PosSaleRouteRoute = PosSaleRouteRouteImport.update({
+  id: '/sale',
+  path: '/sale',
+  getParentRoute: () => PosRoute,
+} as any)
 const PosOnboardingRouteRoute = PosOnboardingRouteRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -85,6 +92,11 @@ const PosMenuRouteRoute = PosMenuRouteRouteImport.update({
   id: '/menu',
   path: '/menu',
   getParentRoute: () => PosRoute,
+} as any)
+const PosSaleIndexRoute = PosSaleIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PosSaleRouteRoute,
 } as any)
 const PosMenuIndexRoute = PosMenuIndexRouteImport.update({
   id: '/',
@@ -151,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/menu': typeof PosMenuRouteRouteWithChildren
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
+  '/sale': typeof PosSaleRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
@@ -167,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
   '/menu/': typeof PosMenuIndexRoute
+  '/sale/': typeof PosSaleIndexRoute
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
@@ -189,6 +203,7 @@ export interface FileRoutesByTo {
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
   '/menu': typeof PosMenuIndexRoute
+  '/sale': typeof PosSaleIndexRoute
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
@@ -198,6 +213,7 @@ export interface FileRoutesById {
   '/_public': typeof PublicRouteWithChildren
   '/_pos/menu': typeof PosMenuRouteRouteWithChildren
   '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
+  '/_pos/sale': typeof PosSaleRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
   '/_pos/dashboard': typeof PosDashboardRoute
@@ -215,6 +231,7 @@ export interface FileRoutesById {
   '/_pos/shift/close': typeof PosShiftCloseRoute
   '/_pos/shift/open': typeof PosShiftOpenRoute
   '/_pos/menu/': typeof PosMenuIndexRoute
+  '/_pos/sale/': typeof PosSaleIndexRoute
   '/_pos/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/_pos/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
 }
@@ -224,6 +241,7 @@ export interface FileRouteTypes {
     | '/'
     | '/menu'
     | '/onboarding'
+    | '/sale'
     | '/settings'
     | '/shift'
     | '/dashboard'
@@ -240,6 +258,7 @@ export interface FileRouteTypes {
     | '/shift/close'
     | '/shift/open'
     | '/menu/'
+    | '/sale/'
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
   fileRoutesByTo: FileRoutesByTo
@@ -262,6 +281,7 @@ export interface FileRouteTypes {
     | '/shift/close'
     | '/shift/open'
     | '/menu'
+    | '/sale'
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
   id:
@@ -270,6 +290,7 @@ export interface FileRouteTypes {
     | '/_public'
     | '/_pos/menu'
     | '/_pos/onboarding'
+    | '/_pos/sale'
     | '/_pos/settings'
     | '/_pos/shift'
     | '/_pos/dashboard'
@@ -287,6 +308,7 @@ export interface FileRouteTypes {
     | '/_pos/shift/close'
     | '/_pos/shift/open'
     | '/_pos/menu/'
+    | '/_pos/sale/'
     | '/_pos/menu/items/$itemId'
     | '/_pos/menu/modifiers/$groupId'
   fileRoutesById: FileRoutesById
@@ -361,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosSettingsRouteRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_pos/sale': {
+      id: '/_pos/sale'
+      path: '/sale'
+      fullPath: '/sale'
+      preLoaderRoute: typeof PosSaleRouteRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_pos/onboarding': {
       id: '/_pos/onboarding'
       path: '/onboarding'
@@ -374,6 +403,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/menu'
       preLoaderRoute: typeof PosMenuRouteRouteImport
       parentRoute: typeof PosRoute
+    }
+    '/_pos/sale/': {
+      id: '/_pos/sale/'
+      path: '/'
+      fullPath: '/sale/'
+      preLoaderRoute: typeof PosSaleIndexRouteImport
+      parentRoute: typeof PosSaleRouteRoute
     }
     '/_pos/menu/': {
       id: '/_pos/menu/'
@@ -506,6 +542,18 @@ const PosOnboardingRouteRouteChildren: PosOnboardingRouteRouteChildren = {
 const PosOnboardingRouteRouteWithChildren =
   PosOnboardingRouteRoute._addFileChildren(PosOnboardingRouteRouteChildren)
 
+interface PosSaleRouteRouteChildren {
+  PosSaleIndexRoute: typeof PosSaleIndexRoute
+}
+
+const PosSaleRouteRouteChildren: PosSaleRouteRouteChildren = {
+  PosSaleIndexRoute: PosSaleIndexRoute,
+}
+
+const PosSaleRouteRouteWithChildren = PosSaleRouteRoute._addFileChildren(
+  PosSaleRouteRouteChildren,
+)
+
 interface PosSettingsRouteRouteChildren {
   PosSettingsProfileRoute: typeof PosSettingsProfileRoute
   PosSettingsStaffRoute: typeof PosSettingsStaffRoute
@@ -536,6 +584,7 @@ const PosShiftRouteRouteWithChildren = PosShiftRouteRoute._addFileChildren(
 interface PosRouteChildren {
   PosMenuRouteRoute: typeof PosMenuRouteRouteWithChildren
   PosOnboardingRouteRoute: typeof PosOnboardingRouteRouteWithChildren
+  PosSaleRouteRoute: typeof PosSaleRouteRouteWithChildren
   PosSettingsRouteRoute: typeof PosSettingsRouteRouteWithChildren
   PosShiftRouteRoute: typeof PosShiftRouteRouteWithChildren
   PosDashboardRoute: typeof PosDashboardRoute
@@ -545,6 +594,7 @@ interface PosRouteChildren {
 const PosRouteChildren: PosRouteChildren = {
   PosMenuRouteRoute: PosMenuRouteRouteWithChildren,
   PosOnboardingRouteRoute: PosOnboardingRouteRouteWithChildren,
+  PosSaleRouteRoute: PosSaleRouteRouteWithChildren,
   PosSettingsRouteRoute: PosSettingsRouteRouteWithChildren,
   PosShiftRouteRoute: PosShiftRouteRouteWithChildren,
   PosDashboardRoute: PosDashboardRoute,
