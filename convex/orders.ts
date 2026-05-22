@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
-import { mutation, type MutationCtx } from './_generated/server';
+import { mutation } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { requireActiveCashier } from './lib/staff';
 
