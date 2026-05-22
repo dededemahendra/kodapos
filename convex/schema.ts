@@ -95,4 +95,61 @@ export default defineSchema({
   })
     .index('by_cafe_status', ['cafeId', 'status'])
     .index('by_cafe_opened', ['cafeId', 'openedAt']),
+
+  orders: defineTable({
+    cafeId: v.id('cafes'),
+    shiftId: v.id('shifts'),
+    cashierId: v.id('cafeStaff'),
+    clientId: v.string(),
+    lines: v.array(
+      v.object({
+        menuItemId: v.id('menuItems'),
+        nameSnapshot: v.string(),
+        qty: v.number(),
+        unitPriceIDR: v.number(),
+        modifiersSnapshot: v.array(
+          v.object({
+            groupName: v.string(),
+            optionName: v.string(),
+            priceAdjustmentIDR: v.number(),
+          })
+        ),
+        lineTotalIDR: v.number(),
+      })
+    ),
+    subtotalIDR: v.number(),
+    taxRatePct: v.number(),
+    taxIDR: v.number(),
+    discountIDR: v.number(),
+    totalIDR: v.number(),
+    paymentMethod: v.union(
+      v.literal('cash'),
+      v.literal('qris_static'),
+      v.literal('qris_dynamic')
+    ),
+    paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
+    createdAtClient: v.number(),
+    syncedAt: v.optional(v.number()),
+  })
+    .index('by_cafe_clientId', ['cafeId', 'clientId'])
+    .index('by_shift', ['shiftId'])
+    .index('by_cafe_created', ['cafeId', 'createdAtClient']),
+
+  payments: defineTable({
+    cafeId: v.id('cafes'),
+    orderId: v.id('orders'),
+    method: v.union(
+      v.literal('cash'),
+      v.literal('qris_static'),
+      v.literal('qris_dynamic')
+    ),
+    amountIDR: v.number(),
+    cashTenderedIDR: v.optional(v.number()),
+    changeIDR: v.optional(v.number()),
+    providerRef: v.optional(v.string()),
+    providerStatus: v.optional(v.string()),
+    confirmedAt: v.optional(v.number()),
+  })
+    .index('by_order', ['orderId'])
+    .index('by_cafe_method_confirmed', ['cafeId', 'method', 'confirmedAt']),
 });
