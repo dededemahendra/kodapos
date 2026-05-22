@@ -1,0 +1,93 @@
+import { Button } from '~/components/ui/button';
+import { formatIDR } from '~/lib/money';
+import type { CartAction, CartState } from './cart-reducer';
+import { CartLineRow } from './cart-line-row';
+
+export function CartPane({
+  cart,
+  dispatch,
+  taxEnabled,
+  taxRatePct,
+  onBayar,
+  onKosongkan,
+}: {
+  cart: CartState;
+  dispatch: (a: CartAction) => void;
+  taxEnabled: boolean;
+  taxRatePct: number;
+  onBayar: () => void;
+  onKosongkan: () => void;
+}) {
+  const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
+  const tax = taxEnabled ? Math.round((subtotal * taxRatePct) / 100) : 0;
+  const total = subtotal + tax;
+  const empty = cart.lines.length === 0;
+
+  return (
+    <aside className="border-l border-border flex flex-col h-full">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+        <h2 className="text-sm font-semibold">Pesanan ({cart.lines.length})</h2>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          onClick={onKosongkan}
+          disabled={empty}
+          className="text-fg-muted"
+        >
+          Kosongkan
+        </Button>
+      </div>
+      <div className="flex-1 overflow-y-auto px-3">
+        {empty ? (
+          <p className="text-fg-muted text-sm mt-6 text-center">Belum ada item.</p>
+        ) : (
+          <ul>
+            {cart.lines.map((line) => (
+              <CartLineRow
+                key={line.lineKey}
+                line={line}
+                onIncrement={() => dispatch({ type: 'incrementQty', lineKey: line.lineKey })}
+                onDecrement={() => dispatch({ type: 'decrementQty', lineKey: line.lineKey })}
+                onRemove={() => dispatch({ type: 'removeLine', lineKey: line.lineKey })}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="border-t border-border px-3 py-3 space-y-1 text-sm">
+        <Row label="Subtotal" value={formatIDR(subtotal)} />
+        {taxEnabled ? <Row label={`PPN ${taxRatePct}%`} value={formatIDR(tax)} /> : null}
+        <Row label="Total" value={formatIDR(total)} bold large />
+        <Button
+          type="button"
+          onClick={onBayar}
+          disabled={empty}
+          className="w-full mt-2"
+          size="lg"
+        >
+          Bayar
+        </Button>
+      </div>
+    </aside>
+  );
+}
+
+function Row({
+  label,
+  value,
+  bold,
+  large,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+  large?: boolean;
+}) {
+  return (
+    <div className={`flex justify-between ${bold ? 'font-semibold' : ''} ${large ? 'text-base' : ''}`}>
+      <span>{label}</span>
+      <span className="tabular-nums">{value}</span>
+    </div>
+  );
+}
