@@ -25,7 +25,7 @@ export const createForOwner = mutation({
     if (!userId) {
       throw new Error('not authenticated');
     }
-    return await ctx.db.insert('cafes', {
+    const cafeId = await ctx.db.insert('cafes', {
       name,
       ownerUserId: userId,
       createdAt: Date.now(),
@@ -33,6 +33,16 @@ export const createForOwner = mutation({
       taxRatePct: 11,
       taxEnabled: true,
     });
+    const user = await ctx.db.get(userId);
+    const ownerName = (user as { name?: string } | null)?.name?.trim() || 'Pemilik';
+    await ctx.db.insert('cafeStaff', {
+      cafeId,
+      name: ownerName,
+      role: 'owner',
+      archived: false,
+      createdAt: Date.now(),
+    });
+    return cafeId;
   },
 });
 

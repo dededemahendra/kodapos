@@ -95,4 +95,20 @@ describe('cafes profile', () => {
     const cafe2 = await asOwner.query(api.cafes.myCafe);
     expect(cafe2?.setupCompletedAt).toBe(firstTime);
   });
+
+  it('createForOwner auto-inserts an owner cafeStaff row', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { name: 'Pak Budi', email: 'b@x.com' });
+    });
+    const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+    await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+
+    const staff = await t.run(async (ctx) => await ctx.db.query('cafeStaff').collect());
+    expect(staff).toHaveLength(1);
+    expect(staff[0]?.role).toBe('owner');
+    expect(staff[0]?.name).toBe('Pak Budi');
+    expect(staff[0]?.archived).toBe(false);
+    expect(staff[0]?.pinHash).toBeUndefined();
+  });
 });
