@@ -15,6 +15,15 @@ async function setupOwnerAndCategory(t: ReturnType<typeof convexTest>, email = '
   return { asOwner, categoryId };
 }
 
+async function setupOwner(t: ReturnType<typeof convexTest>) {
+  const userId = await t.run(async (ctx) => {
+    return await ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' });
+  });
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+  return { asOwner };
+}
+
 describe('menu.items', () => {
   it('create + list happy path', async () => {
     const t = convexTest(schema, modules);
@@ -227,15 +236,6 @@ describe('menu.items', () => {
     expect(await ownerB.query(api.menu.items.list, {})).toHaveLength(0);
   });
 });
-
-async function setupOwner(t: ReturnType<typeof convexTest>) {
-  const userId = await t.run(async (ctx) => {
-    return await ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' });
-  });
-  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
-  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
-  return { asOwner };
-}
 
 describe('menu.items.listForSale', () => {
   it('returns active items with their attached modifier groups + options, sorted by position', async () => {
