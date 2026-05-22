@@ -14,6 +14,7 @@ import { Route as PosRouteImport } from './routes/_pos'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
+import { Route as PosPinRouteImport } from './routes/_pos/pin'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
 import { Route as PosOnboardingRouteRouteImport } from './routes/_pos/onboarding/route'
@@ -49,6 +50,11 @@ const PublicSigninRoute = PublicSigninRouteImport.update({
   id: '/signin',
   path: '/signin',
   getParentRoute: () => PublicRoute,
+} as any)
+const PosPinRoute = PosPinRouteImport.update({
+  id: '/pin',
+  path: '/pin',
+  getParentRoute: () => PosRoute,
 } as any)
 const PosDashboardRoute = PosDashboardRouteImport.update({
   id: '/dashboard',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
+  '/pin': typeof PosPinRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/dashboard': typeof PosDashboardRoute
+  '/pin': typeof PosPinRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/dashboard': typeof PosDashboardRoute
+  '/_pos/pin': typeof PosPinRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
   '/_public/': typeof PublicIndexRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/dashboard'
+    | '/pin'
     | '/signin'
     | '/signup'
     | '/menu/categories'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/dashboard'
+    | '/pin'
     | '/signin'
     | '/signup'
     | '/menu/categories'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/_pos/onboarding'
     | '/_pos/settings'
     | '/_pos/dashboard'
+    | '/_pos/pin'
     | '/_public/signin'
     | '/_public/signup'
     | '/_public/'
@@ -260,6 +272,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/signin'
       preLoaderRoute: typeof PublicSigninRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/_pos/pin': {
+      id: '/_pos/pin'
+      path: '/pin'
+      fullPath: '/pin'
+      preLoaderRoute: typeof PosPinRouteImport
+      parentRoute: typeof PosRoute
     }
     '/_pos/dashboard': {
       id: '/_pos/dashboard'
@@ -406,6 +425,7 @@ interface PosRouteChildren {
   PosOnboardingRouteRoute: typeof PosOnboardingRouteRouteWithChildren
   PosSettingsRouteRoute: typeof PosSettingsRouteRouteWithChildren
   PosDashboardRoute: typeof PosDashboardRoute
+  PosPinRoute: typeof PosPinRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
@@ -413,6 +433,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosOnboardingRouteRoute: PosOnboardingRouteRouteWithChildren,
   PosSettingsRouteRoute: PosSettingsRouteRouteWithChildren,
   PosDashboardRoute: PosDashboardRoute,
+  PosPinRoute: PosPinRoute,
 }
 
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
