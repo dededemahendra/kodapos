@@ -227,3 +227,79 @@ describe('menu.items', () => {
     expect(await ownerB.query(api.menu.items.list, {})).toHaveLength(0);
   });
 });
+
+async function setupOwner(t: ReturnType<typeof convexTest>) {
+  const userId = await t.run(async (ctx) => {
+    return await ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' });
+  });
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+  return { asOwner };
+}
+
+describe('menu.items.listForSale', () => {
+  it('returns active items with their attached modifier groups + options, sorted by position', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
+    const espressoId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Espresso',
+      priceIDR: 18000,
+    });
+    const latteId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 28000,
+    });
+    const susuGroupId = await asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Susu',
+      required: true,
+      minSelect: 1,
+      maxSelect: 1,
+      options: [
+        { name: 'Reguler', priceAdjustmentIDR: 0, position: 0 },
+        { name: 'Oat', priceAdjustmentIDR: 5000, position: 1 },
+      ],
+    });
+    await asOwner.mutation(api.menu.itemGroups.attach, {
+      menuItemId: latteId,
+      modifierGroupId: susuGroupId,
+    });
+
+    const rows = await asOwner.query(api.menu.items.listForSale, {});
+    expect(rows).toHaveLength(2);
+    const espresso = rows.find((r) => r.item._id === espressoId)!;
+    const latte = rows.find((r) => r.item._id === latteId)!;
+    expect(espresso.attachedGroups).toEqual([]);
+    expect(latte.attachedGroups).toHaveLength(1);
+    expect(latte.attachedGroups[0]!.group.name).toBe('Susu');
+    expect(latte.attachedGroups[0]!.options.map((o) => o.name)).toEqual(['Reguler', 'Oat']);
+  });
+
+  it('excludes archived and inactive items', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
+    const a = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Active',
+      priceIDR: 1000,
+    });
+    const inactive = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Off',
+      priceIDR: 1000,
+    });
+    await asOwner.mutation(api.menu.items.setActive, { id: inactive, isActive: false });
+    const archived = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Arsip',
+      priceIDR: 1000,
+    });
+    await asOwner.mutation(api.menu.items.archive, { id: archived });
+
+    const rows = await asOwner.query(api.menu.items.listForSale, {});
+    expect(rows.map((r) => r.item._id)).toEqual([a]);
+  });
+});
