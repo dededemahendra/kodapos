@@ -76,25 +76,45 @@ export const createCashSale = mutation({
 
       const modifiersSnapshot: Doc<'orders'>['lines'][number]['modifiersSnapshot'] = [];
       let modifierAdjustments = 0;
+
+      // Hoist attachment query once per line (avoids O(N*M) DB reads).
+      const attachments = await ctx.db
+        .query('menuItemModifierGroups')
+        .withIndex('by_item', (q) => q.eq('menuItemId', item._id))
+        .collect();
+      const attachedGroupIds = new Set(attachments.map((a) => a.modifierGroupId));
+
+      // Tally selected options per group while validating each option.
+      const countByGroup = new Map<string, number>();
       for (const optionId of line.modifierOptionIds) {
         const option = await ctx.db.get(optionId);
         if (!option || option.cafeId !== cafeId || option.archived) {
           throw new Error('Modifier tidak tersedia.');
         }
         const group = await ctx.db.get(option.groupId);
-        if (!group) throw new Error('Modifier tidak tersedia.');
-        const attachments = await ctx.db
-          .query('menuItemModifierGroups')
-          .withIndex('by_item', (q) => q.eq('menuItemId', item._id))
-          .collect();
-        const attachment = attachments.find((a) => a.modifierGroupId === group._id);
-        if (!attachment) throw new Error('Modifier tidak tersedia.');
+        if (!group || !attachedGroupIds.has(group._id)) {
+          throw new Error('Modifier tidak tersedia.');
+        }
+        countByGroup.set(group._id, (countByGroup.get(group._id) ?? 0) + 1);
         modifiersSnapshot.push({
           groupName: group.name,
           optionName: option.name,
           priceAdjustmentIDR: option.priceAdjustmentIDR,
         });
         modifierAdjustments += option.priceAdjustmentIDR;
+      }
+
+      // Enforce min/max per attached modifier group.
+      for (const attachment of attachments) {
+        const group = await ctx.db.get(attachment.modifierGroupId);
+        if (!group || group.archived) continue;
+        const count = countByGroup.get(group._id) ?? 0;
+        if (count < group.minSelect) {
+          throw new Error(`Modifier wajib pada grup ${group.name} belum dipilih.`);
+        }
+        if (count > group.maxSelect) {
+          throw new Error(`Pilihan modifier melebihi batas pada grup ${group.name}.`);
+        }
       }
 
       const unitPriceIDR = item.priceIDR + modifierAdjustments;
