@@ -25,6 +25,16 @@ export const createForOwner = mutation({
     if (!userId) {
       throw new Error('not authenticated');
     }
+    // Idempotent: if a cafe already exists for this owner, return it.
+    // The signup flow retries this call against auth-token-propagation
+    // races, so the mutation MUST be safe to invoke multiple times.
+    const existing = await ctx.db
+      .query('cafes')
+      .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
+      .first();
+    if (existing) {
+      return existing._id;
+    }
     const cafeId = await ctx.db.insert('cafes', {
       name,
       ownerUserId: userId,
@@ -71,10 +81,14 @@ export const myCafe = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
+    // .first() (not .unique()) so a corrupted state with multiple cafes
+    // for the same owner still returns deterministically (the oldest one,
+    // since the index orders by insertion). The mutation is now
+    // idempotent so duplicates can only arise from data already in the DB.
     const cafe = await ctx.db
       .query('cafes')
       .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
-      .unique();
+      .first();
     return cafe ?? null;
   },
 });
@@ -110,6 +124,93 @@ export const updateProfile = mutation({
       taxEnabled: args.taxEnabled,
     });
     return null;
+  },
+});
+
+/**
+ * One-shot cleanup for owners with duplicate cafe rows (caused by the
+ * non-idempotent createForOwner mutation before it was fixed). Keeps the
+ * OLDEST cafe (the one that `requireOwnerCafe`/`myCafe` now pick via
+ * `.first()`); deletes every empty newer duplicate. A "duplicate" is only
+ * deleted if it has no categories, items, modifier groups, staff rows,
+ * shifts, or orders attached — keeping anything that has data, so the
+ * caller can manually reconcile if a newer cafe accidentally accrued
+ * content.
+ *
+ * Safe to call repeatedly. Returns counts so the caller can verify.
+ */
+export const cleanupDuplicateCafes = mutation({
+  args: {},
+  returns: v.object({
+    kept: v.id('cafes'),
+    deleted: v.array(v.id('cafes')),
+    skippedWithData: v.array(v.id('cafes')),
+  }),
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('not authenticated');
+    }
+    const all = await ctx.db
+      .query('cafes')
+      .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
+      .collect();
+    if (all.length === 0) {
+      throw new Error('Tidak ada kafe untuk dibersihkan.');
+    }
+    const sorted = [...all].sort((a, b) => a._creationTime - b._creationTime);
+    const kept = sorted[0]!;
+    const duplicates = sorted.slice(1);
+
+    const deleted: typeof kept._id[] = [];
+    const skippedWithData: typeof kept._id[] = [];
+
+    for (const dup of duplicates) {
+      const [categories, items, groups, staff, shifts, orders] = await Promise.all([
+        ctx.db
+          .query('categories')
+          .withIndex('by_cafe_active', (q) => q.eq('cafeId', dup._id))
+          .first(),
+        ctx.db
+          .query('menuItems')
+          .withIndex('by_cafe_active', (q) => q.eq('cafeId', dup._id))
+          .first(),
+        ctx.db
+          .query('modifierGroups')
+          .withIndex('by_cafe_active', (q) => q.eq('cafeId', dup._id))
+          .first(),
+        ctx.db
+          .query('cafeStaff')
+          .withIndex('by_cafe_active', (q) => q.eq('cafeId', dup._id))
+          .first(),
+        ctx.db
+          .query('shifts')
+          .withIndex('by_cafe_opened', (q) => q.eq('cafeId', dup._id))
+          .first(),
+        ctx.db
+          .query('orders')
+          .withIndex('by_cafe_created', (q) => q.eq('cafeId', dup._id))
+          .first(),
+      ]);
+      if (categories || items || groups || shifts || orders) {
+        skippedWithData.push(dup._id);
+        continue;
+      }
+      // staff rows are the only thing createForOwner inserts alongside the
+      // cafe, so they're allowed — archive them as part of the cleanup.
+      if (staff) {
+        const staffRows = await ctx.db
+          .query('cafeStaff')
+          .withIndex('by_cafe_active', (q) => q.eq('cafeId', dup._id))
+          .collect();
+        for (const row of staffRows) {
+          await ctx.db.delete(row._id);
+        }
+      }
+      await ctx.db.delete(dup._id);
+      deleted.push(dup._id);
+    }
+    return { kept: kept._id, deleted, skippedWithData };
   },
 });
 
