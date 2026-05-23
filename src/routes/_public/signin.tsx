@@ -27,7 +27,7 @@ function SigninPage() {
         email: String(fd.get('email') ?? ''),
         password: String(fd.get('password') ?? ''),
       });
-      navigate({ to: '/dashboard' });
+      navigate({ to: '/menu' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Email atau password salah.');
     } finally {
