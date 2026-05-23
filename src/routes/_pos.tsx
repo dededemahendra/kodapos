@@ -2,13 +2,20 @@ import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useConvex } from 'convex/react';
 import { type ReactNode, useEffect } from 'react';
+import { PosNav } from '~/components/pos-nav';
 import { Spinner } from '~/components/ui/spinner';
 
 export const Route = createFileRoute('/_pos')({
   component: PosLayout,
 });
 
+// Routes where the global nav would get in the way (full-screen flows).
+const NAV_HIDDEN_PREFIXES = ['/onboarding', '/pin', '/shift'];
+
 function PosLayout() {
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const showNav = !NAV_HIDDEN_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
+
   return (
     <div data-density="compact" className="min-h-screen bg-surface">
       <AuthLoading>
@@ -22,6 +29,7 @@ function PosLayout() {
       </Unauthenticated>
       <Authenticated>
         <OnboardingGate>
+          {showNav ? <PosNav /> : null}
           <Outlet />
         </OnboardingGate>
       </Authenticated>
