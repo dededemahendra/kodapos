@@ -1,12 +1,6 @@
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { I18nProvider } from '@lingui/react';
-import {
-  createRootRoute,
-  HeadContent,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from '@tanstack/react-router';
+import { createRootRoute, HeadContent, Link, Outlet, Scripts } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { convex } from '~/lib/convex';
 import { i18n } from '~/lib/i18n';
@@ -22,7 +16,20 @@ export const Route = createRootRoute({
     links: [{ rel: 'stylesheet', href: globalsCss }],
   }),
   component: RootComponent,
+  notFoundComponent: NotFound,
 });
+
+function NotFound() {
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
+      <h1 className="text-2xl font-bold">Halaman tidak ditemukan</h1>
+      <p className="text-fg-muted text-sm">URL yang kamu buka tidak ada di kodapos.</p>
+      <Link to="/" className="text-brand-700 underline">
+        Kembali ke beranda
+      </Link>
+    </main>
+  );
+}
 
 function RootComponent() {
   return (
@@ -44,7 +51,6 @@ function RootDocument({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
-        <ScrollRestoration />
         <Scripts />
       </body>
     </html>
