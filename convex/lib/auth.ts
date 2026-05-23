@@ -17,10 +17,16 @@ export async function requireOwnerCafe(
   if (!userId) {
     throw new Error('not authenticated');
   }
+  // .first() (not .unique()) is defensive against data corruption where
+  // the same owner ends up with multiple cafe rows. The mutation that
+  // creates cafes (cafes.createForOwner) is now idempotent, but historical
+  // duplicates from before that fix may still exist. Picking the oldest
+  // cafe (which is what .first() returns under by_owner) keeps behavior
+  // deterministic for affected users.
   const cafe = await ctx.db
     .query('cafes')
     .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
-    .unique();
+    .first();
   if (!cafe) {
     throw new Error('cafe not found');
   }
