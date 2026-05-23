@@ -15,6 +15,7 @@ import { Spinner } from '~/components/ui/spinner';
 import { cartReducer, initialCart } from './cart-reducer';
 import { CartPane } from './cart-pane';
 import { MenuPane, type ItemForSale } from './menu-pane';
+import { ModifierPickerDialog } from './modifier-picker-dialog';
 
 function genLineKey(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -28,6 +29,7 @@ export function SaleScreen() {
   const cafe = useQuery(api.cafes.myCafe, {});
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [clearOpen, setClearOpen] = useState(false);
+  const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
 
   if (categories === undefined || items === undefined || cafe === undefined) {
     return (
@@ -40,7 +42,7 @@ export function SaleScreen() {
 
   function onItemTap(row: ItemForSale) {
     if (row.attachedGroups.length > 0) {
-      // Modifier dialog wired in Task 10. No-op for now.
+      setPickerRow(row);
       return;
     }
     dispatch({
@@ -70,6 +72,29 @@ export function SaleScreen() {
           console.warn('Bayar — wired in Task 11');
         }}
         onKosongkan={() => setClearOpen(true)}
+      />
+      <ModifierPickerDialog
+        open={pickerRow !== null}
+        onOpenChange={(open) => {
+          if (!open) setPickerRow(null);
+        }}
+        row={pickerRow}
+        onConfirm={(pick) => {
+          if (!pickerRow) return;
+          dispatch({
+            type: 'addLine',
+            lineKey: genLineKey(),
+            line: {
+              menuItemId: pickerRow.item._id,
+              nameSnapshot: pickerRow.item.name,
+              qty: pick.qty,
+              unitPriceIDR: pick.unitPriceIDR,
+              modifierOptionIds: pick.modifierOptionIds,
+              modifierLabels: pick.modifierLabels,
+            },
+          });
+          setPickerRow(null);
+        }}
       />
       <AlertDialog open={clearOpen} onOpenChange={setClearOpen}>
         <AlertDialogContent>
