@@ -1,6 +1,8 @@
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { useReducer, useState } from 'react';
+import { useActiveCashier } from '~/lib/active-cashier';
+import { CashPaymentDialog } from './cash-payment-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,11 +29,14 @@ export function SaleScreen() {
   const categories = useQuery(api.menu.categories.list, {});
   const items = useQuery(api.menu.items.listForSale, {});
   const cafe = useQuery(api.cafes.myCafe, {});
+  const shift = useQuery(api.shifts.current, {});
+  const { cashierId } = useActiveCashier();
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
-  if (categories === undefined || items === undefined || cafe === undefined) {
+  if (categories === undefined || items === undefined || cafe === undefined || shift === undefined) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] gap-2 text-fg-muted">
         <Spinner />
@@ -39,6 +44,12 @@ export function SaleScreen() {
       </div>
     );
   }
+
+  const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
+  const taxEnabled = cafe?.taxEnabled === true;
+  const taxRatePct = cafe?.taxRatePct ?? 0;
+  const tax = taxEnabled ? Math.round((subtotal * taxRatePct) / 100) : 0;
+  const total = subtotal + tax;
 
   function onItemTap(row: ItemForSale) {
     if (row.attachedGroups.length > 0) {
@@ -65,11 +76,10 @@ export function SaleScreen() {
       <CartPane
         cart={cart}
         dispatch={dispatch}
-        taxEnabled={cafe?.taxEnabled === true}
-        taxRatePct={cafe?.taxRatePct ?? 0}
+        taxEnabled={taxEnabled}
+        taxRatePct={taxRatePct}
         onBayar={() => {
-          // Wired in Task 11 (CashPaymentDialog).
-          console.warn('Bayar — wired in Task 11');
+          if (cart.lines.length > 0) setPaymentOpen(true);
         }}
         onKosongkan={() => setClearOpen(true)}
       />
@@ -117,6 +127,21 @@ export function SaleScreen() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {shift && cashierId ? (
+        <CashPaymentDialog
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          totalIDR={total}
+          cart={cart}
+          shiftId={shift._id}
+          cashierId={cashierId}
+          onPaid={(orderId, totalIDR, changeIDR) => {
+            // ReceiptPreview hooked in Task 12; for now log + clear cart.
+            console.warn('paid', orderId, totalIDR, changeIDR);
+            dispatch({ type: 'clearCart' });
+          }}
+        />
+      ) : null}
     </div>
   );
 }
