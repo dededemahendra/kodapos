@@ -1,8 +1,10 @@
 import { api } from 'convex/_generated/api';
+import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { useReducer, useState } from 'react';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { CashPaymentDialog } from './cash-payment-dialog';
+import { ReceiptPreview } from './receipt-preview';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +37,7 @@ export function SaleScreen() {
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
 
   if (categories === undefined || items === undefined || cafe === undefined || shift === undefined) {
     return (
@@ -135,13 +138,20 @@ export function SaleScreen() {
           cart={cart}
           shiftId={shift._id}
           cashierId={cashierId}
-          onPaid={(orderId, totalIDR, changeIDR) => {
-            // ReceiptPreview hooked in Task 12; for now log + clear cart.
-            console.warn('paid', orderId, totalIDR, changeIDR);
+          onPaid={(orderId) => {
+            setReceiptOrderId(orderId);
             dispatch({ type: 'clearCart' });
           }}
         />
       ) : null}
+      <ReceiptPreview
+        open={receiptOrderId !== null}
+        onOpenChange={(open) => {
+          if (!open) setReceiptOrderId(null);
+        }}
+        orderId={receiptOrderId}
+        onDone={() => setReceiptOrderId(null)}
+      />
     </div>
   );
 }

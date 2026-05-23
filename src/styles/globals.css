@@ -62,3 +62,20 @@ html, body { margin: 0; padding: 0; min-height: 100vh; }
 [data-density="comfortable"] {
   --kodapos-touch: 40px;
 }
+
+/* Receipt printing. Hides everything except the [data-print-receipt] root. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  [data-print-receipt],
+  [data-print-receipt] * {
+    visibility: visible;
+  }
+  [data-print-receipt] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
