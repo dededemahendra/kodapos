@@ -441,6 +441,108 @@ describe('orders.createCashSale', () => {
     expect(order?.lines?.[0]?.unitPriceIDR).toBe(18000);
     expect(order?.lines?.[0]?.lineTotalIDR).toBe(54000);
   });
+
+  it('rejects required modifier group with no selection', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const groupId = await asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Susu',
+      required: true,
+      minSelect: 1,
+      maxSelect: 1,
+      options: [
+        { name: 'Reguler', priceAdjustmentIDR: 0, position: 0 },
+      ],
+    });
+    await asOwner.mutation(api.menu.itemGroups.attach, {
+      menuItemId: itemId,
+      modifierGroupId: groupId,
+    });
+
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'no-mod-selection',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/wajib/i);
+  });
+
+  it('rejects modifier count exceeding group maxSelect', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const groupId = await asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Toppings',
+      required: false,
+      minSelect: 0,
+      maxSelect: 1,
+      options: [
+        { name: 'A', priceAdjustmentIDR: 1000, position: 0 },
+        { name: 'B', priceAdjustmentIDR: 1000, position: 1 },
+      ],
+    });
+    await asOwner.mutation(api.menu.itemGroups.attach, {
+      menuItemId: itemId,
+      modifierGroupId: groupId,
+    });
+    const group = await asOwner.query(api.menu.modifierGroups.getById, { id: groupId });
+    const [a, b] = group!.options;
+
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'too-many-mods',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [a!._id, b!._id] }],
+        cashTenderedIDR: 30000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/melebihi batas/i);
+  });
+
+  it('rejects archived modifier option', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const groupId = await asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Susu',
+      required: false,
+      minSelect: 0,
+      maxSelect: 1,
+      options: [
+        { name: 'Oat', priceAdjustmentIDR: 5000, position: 0 },
+      ],
+    });
+    await asOwner.mutation(api.menu.itemGroups.attach, {
+      menuItemId: itemId,
+      modifierGroupId: groupId,
+    });
+    const group = await asOwner.query(api.menu.modifierGroups.getById, { id: groupId });
+    const oat = group!.options[0]!;
+
+    // Archive the option by calling upsert with an empty options list.
+    await asOwner.mutation(api.menu.modifierGroups.upsert, {
+      id: groupId,
+      name: 'Susu',
+      required: false,
+      minSelect: 0,
+      maxSelect: 1,
+      options: [],
+    });
+
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'archived-opt',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [oat._id] }],
+        cashTenderedIDR: 30000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/tidak tersedia/i);
+  });
 });
 
 describe('orders read queries', () => {
