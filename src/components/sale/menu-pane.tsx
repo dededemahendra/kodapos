@@ -9,6 +9,7 @@ export type ItemForSale = {
     options: Doc<'modifierOptions'>[];
     position: number;
   }>;
+  lowStockIngredientNames: string[];
 };
 
 export function MenuPane({
@@ -56,6 +57,7 @@ export function MenuPane({
                 key={row.item._id}
                 item={row.item}
                 hasModifiers={row.attachedGroups.length > 0}
+                lowStockIngredientNames={row.lowStockIngredientNames}
                 onTap={() => onItemTap(row)}
               />
             ))}
