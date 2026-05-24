@@ -8,6 +8,7 @@ const LINKS = [
   { to: '/sale', label: 'Kasir' },
   { to: '/history', label: 'Riwayat' },
   { to: '/menu', label: 'Menu' },
+  { to: '/inventory', label: 'Inventaris' },
   { to: '/settings/profile', label: 'Pengaturan' },
 ] as const;
 
