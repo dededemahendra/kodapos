@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
+import { RecipeEditor } from '~/components/inventory/recipe-editor';
 import { ItemEditForm } from '~/components/menu/item-edit-form';
 
 export const Route = createFileRoute('/_pos/menu/items/$itemId')({
@@ -47,6 +48,7 @@ function ItemEditPage() {
         }))}
         onSaved={() => navigate({ to: '/menu' })}
       />
+      {!isNew ? <RecipeEditor menuItemId={itemId as Id<'menuItems'>} /> : null}
     </div>
   );
 }
