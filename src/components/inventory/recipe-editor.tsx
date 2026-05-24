@@ -135,8 +135,9 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
                   </div>
                   <div className="w-28">
                     <Field>
-                      <FieldLabel>Jumlah</FieldLabel>
+                      <FieldLabel htmlFor={`recipe-qty-${line.key}`}>Jumlah</FieldLabel>
                       <Input
+                        id={`recipe-qty-${line.key}`}
                         type="number"
                         min="0"
                         step="0.01"
@@ -147,8 +148,9 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
                   </div>
                   <div className="w-24">
                     <Field>
-                      <FieldLabel>Wastage</FieldLabel>
+                      <FieldLabel htmlFor={`recipe-wastage-${line.key}`}>Wastage</FieldLabel>
                       <Input
+                        id={`recipe-wastage-${line.key}`}
                         type="number"
                         min="1"
                         max="5"

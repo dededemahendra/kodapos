@@ -47,16 +47,28 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.getByRole('button', { name: /Selesai/ }).click();
     await waitForUrlHydrated(page, /\/menu$/);
 
-    // 5. /inventory: add Susu
+    // 5. PIN in — /inventory is PinGate-protected, so select cashier first.
+    // Successful PIN entry redirects to /shift/open; waiting for that
+    // confirms setCashier() has run before we navigate to /inventory.
+    await page.goto('/pin');
+    await waitForUrlHydrated(page, /\/pin$/);
+    await page.getByRole('button', { name: /E2E Owner/ }).click();
+    for (const digit of '1234') {
+      await page.keyboard.type(digit);
+    }
+    await waitForUrlHydrated(page, /\/shift\/open$/);
+
+    // 6. /inventory: add Susu
     await page.goto('/inventory');
     await waitForUrlHydrated(page, /\/inventory$/);
     await page.getByRole('button', { name: /\+ Tambah Bahan/ }).click();
     await page.getByLabel('Nama').fill('Susu');
-    // Unit select - shadcn Select. Click trigger then pick the option.
-    await page.getByLabel('Satuan').click();
+    // Unit select - shadcn Select. Use exact match because "Satuan" also
+    // appears in "Biaya per satuan (Rp)".
+    await page.getByLabel('Satuan', { exact: true }).click();
     await page.getByRole('option', { name: /Mililiter/ }).click();
     await page.getByLabel('Ambang isi ulang').fill('500');
-    await page.getByLabel('Biaya per satuan').fill('25');
+    await page.getByLabel('Biaya per satuan (Rp)').fill('25');
     await page.getByRole('button', { name: /^Simpan$/ }).click();
     await expect(page.getByText(/Susu/)).toBeVisible();
 
@@ -76,13 +88,9 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.getByRole('button', { name: /Simpan resep/ }).click();
     await expect(page.getByText(/Tersimpan/).first()).toBeVisible();
 
-    // 8. Pin gate + open shift
+    // 8. Open shift — cashier is already PIN'd from step 5, so /sale
+    // redirects straight to /shift/open (no /pin stop).
     await page.goto('/sale');
-    await waitForUrlHydrated(page, /\/pin$/);
-    await page.getByRole('button', { name: /E2E Owner/ }).click();
-    for (const digit of '1234') {
-      await page.keyboard.type(digit);
-    }
     await waitForUrlHydrated(page, /\/shift\/open$/);
     await page.getByLabel('Modal awal').fill('100000');
     await page.getByRole('button', { name: /Buka Shift/ }).click();
