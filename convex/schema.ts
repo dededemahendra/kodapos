@@ -115,6 +115,19 @@ export default defineSchema({
           })
         ),
         lineTotalIDR: v.number(),
+        // Recipe frozen at sale time so retroactive recipe edits don't rewrite
+        // history. Optional for backward compat with Slice 3 orders inserted
+        // before this field existed. Going forward, every createCashSale writes
+        // it — [] for items without a recipe.
+        recipeSnapshot: v.optional(
+          v.array(
+            v.object({
+              ingredientId: v.id('ingredients'),
+              qty: v.number(),
+              wastageFactor: v.number(),
+            })
+          )
+        ),
       })
     ),
     subtotalIDR: v.number(),
@@ -155,4 +168,48 @@ export default defineSchema({
   })
     .index('by_order', ['orderId'])
     .index('by_cafe_method_confirmed', ['cafeId', 'method', 'confirmedAt']),
+
+  ingredients: defineTable({
+    cafeId: v.id('cafes'),
+    name: v.string(),
+    canonicalUnit: v.union(v.literal('g'), v.literal('ml'), v.literal('piece')),
+    reorderThreshold: v.number(),
+    lastCostPerUnitIDR: v.number(),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index('by_cafe_active', ['cafeId', 'archived'])
+    .index('by_cafe_name', ['cafeId', 'name']),
+
+  recipes: defineTable({
+    cafeId: v.id('cafes'),
+    menuItemId: v.id('menuItems'),
+    lines: v.array(
+      v.object({
+        ingredientId: v.id('ingredients'),
+        qty: v.number(),
+        wastageFactor: v.number(),
+      })
+    ),
+    updatedAt: v.number(),
+  }).index('by_cafe_item', ['cafeId', 'menuItemId']),
+
+  inventoryMovements: defineTable({
+    cafeId: v.id('cafes'),
+    ingredientId: v.id('ingredients'),
+    delta: v.number(),
+    reason: v.union(
+      v.literal('sale'),
+      v.literal('adjustment'),
+      // 'waste' is reserved; not written in Slice 4. Will be used by a
+      // future "Catat limbah" action in V1.1.
+      v.literal('waste')
+    ),
+    refType: v.optional(v.string()),
+    refId: v.optional(v.string()),
+    note: v.optional(v.string()),
+    at: v.number(),
+  })
+    .index('by_cafe_ingredient', ['cafeId', 'ingredientId'])
+    .index('by_cafe_ingredient_at', ['cafeId', 'ingredientId', 'at']),
 });
