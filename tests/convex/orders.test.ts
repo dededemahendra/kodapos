@@ -601,3 +601,242 @@ describe('orders read queries', () => {
     expect(own?.cashierName).toBe('Andi');
   });
 });
+
+describe('orders.createCashSale — inventory deduction', () => {
+  it('writes one inventoryMovements row per recipe ingredient', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId, cafeId } = await setup(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 25,
+    });
+    const beanId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Biji',
+      canonicalUnit: 'g',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 100,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [
+        { ingredientId: susuId, qty: 200, wastageFactor: 1.0 },
+        { ingredientId: beanId, qty: 18, wastageFactor: 1.0 },
+      ],
+    });
+
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'inv-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+
+    const movements = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('inventoryMovements')
+          .withIndex('by_cafe_ingredient', (q) =>
+            q.eq('cafeId', cafeId).eq('ingredientId', susuId)
+          )
+          .collect()
+    );
+    expect(movements).toHaveLength(1);
+    expect(movements[0]?.delta).toBe(-200);
+    expect(movements[0]?.reason).toBe('sale');
+    expect(movements[0]?.refType).toBe('order');
+    expect(movements[0]?.refId).toBe(result.orderId);
+
+    const beanMovements = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('inventoryMovements')
+          .withIndex('by_cafe_ingredient', (q) =>
+            q.eq('cafeId', cafeId).eq('ingredientId', beanId)
+          )
+          .collect()
+    );
+    expect(beanMovements).toHaveLength(1);
+    expect(beanMovements[0]?.delta).toBe(-18);
+  });
+
+  it('multiplies by line qty: order line qty 3 with 200ml recipe → -600ml', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId, cafeId } = await setup(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 25,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId: susuId, qty: 200, wastageFactor: 1.0 }],
+    });
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'inv-3x',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 100000,
+      createdAtClient: 1700000000000,
+    });
+    const movements = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('inventoryMovements')
+          .withIndex('by_cafe_ingredient', (q) =>
+            q.eq('cafeId', cafeId).eq('ingredientId', susuId)
+          )
+          .collect()
+    );
+    expect(movements[0]?.delta).toBe(-600);
+  });
+
+  it('snapshots recipe at sale time; later recipe edits do not mutate the order', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 25,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId: susuId, qty: 200, wastageFactor: 1.0 }],
+    });
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'snap-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId: susuId, qty: 999, wastageFactor: 1.0 }],
+    });
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.lines?.[0]?.recipeSnapshot?.[0]?.qty).toBe(200);
+  });
+
+  it('item without a recipe writes zero movements and recipeSnapshot is empty', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId, cafeId } = await setup(t);
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'no-recipe',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.lines?.[0]?.recipeSnapshot).toEqual([]);
+    const movements = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('inventoryMovements')
+          .withIndex('by_cafe_ingredient_at', (q) => q.eq('cafeId', cafeId))
+          .collect()
+    );
+    expect(movements).toHaveLength(0);
+  });
+
+  it('skips archived ingredients silently; other lines still deduct', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId, cafeId } = await setup(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 25,
+    });
+    const beanId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Biji',
+      canonicalUnit: 'g',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 100,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [
+        { ingredientId: susuId, qty: 200, wastageFactor: 1.0 },
+        { ingredientId: beanId, qty: 18, wastageFactor: 1.0 },
+      ],
+    });
+    // Archive susu AFTER the recipe was built.
+    await asOwner.mutation(api.ingredients.archive, { id: susuId });
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'skip-archived',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    const susuMovements = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('inventoryMovements')
+          .withIndex('by_cafe_ingredient', (q) =>
+            q.eq('cafeId', cafeId).eq('ingredientId', susuId)
+          )
+          .collect()
+    );
+    expect(susuMovements).toHaveLength(0);
+    const beanMovements = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('inventoryMovements')
+          .withIndex('by_cafe_ingredient', (q) =>
+            q.eq('cafeId', cafeId).eq('ingredientId', beanId)
+          )
+          .collect()
+    );
+    expect(beanMovements[0]?.delta).toBe(-18);
+    // recipeSnapshot only has the non-archived line.
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.lines?.[0]?.recipeSnapshot).toHaveLength(1);
+  });
+
+  it('idempotent: duplicate clientId does not re-write movements', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId, cafeId } = await setup(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 25,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId: susuId, qty: 200, wastageFactor: 1.0 }],
+    });
+    const args = {
+      clientId: 'idemp-inv',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    };
+    await asOwner.mutation(api.orders.createCashSale, args);
+    await asOwner.mutation(api.orders.createCashSale, args);
+    const movements = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('inventoryMovements')
+          .withIndex('by_cafe_ingredient', (q) =>
+            q.eq('cafeId', cafeId).eq('ingredientId', susuId)
+          )
+          .collect()
+    );
+    expect(movements).toHaveLength(1);
+  });
+});
