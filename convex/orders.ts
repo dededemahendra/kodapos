@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import type { Doc } from './_generated/dataModel';
+import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { requireActiveCashier } from './lib/staff';
@@ -119,6 +119,33 @@ export const createCashSale = mutation({
 
       const unitPriceIDR = item.priceIDR + modifierAdjustments;
       const lineTotalIDR = line.qty * unitPriceIDR;
+
+      // Look up the recipe (if any) and build recipeSnapshot. Archived
+      // ingredients are silently skipped — the owner intentionally
+      // opted them out; the line still sells.
+      const recipe = await ctx.db
+        .query('recipes')
+        .withIndex('by_cafe_item', (q) =>
+          q.eq('cafeId', cafeId).eq('menuItemId', item._id)
+        )
+        .unique();
+      const recipeSnapshot: Array<{
+        ingredientId: Id<'ingredients'>;
+        qty: number;
+        wastageFactor: number;
+      }> = [];
+      if (recipe) {
+        for (const recipeLine of recipe.lines) {
+          const ing = await ctx.db.get(recipeLine.ingredientId);
+          if (!ing || ing.cafeId !== cafeId || ing.archived) continue;
+          recipeSnapshot.push({
+            ingredientId: recipeLine.ingredientId,
+            qty: recipeLine.qty,
+            wastageFactor: recipeLine.wastageFactor,
+          });
+        }
+      }
+
       builtLines.push({
         menuItemId: item._id,
         nameSnapshot: item.name,
@@ -126,6 +153,7 @@ export const createCashSale = mutation({
         unitPriceIDR,
         modifiersSnapshot,
         lineTotalIDR,
+        recipeSnapshot,
       });
     }
 
@@ -170,6 +198,23 @@ export const createCashSale = mutation({
       confirmedAt: now,
     });
 
+    // Inventory deduction: one inventoryMovements row per (line × ingredient).
+    // Atomic with the order + payment because this all runs in one mutation.
+    for (const builtLine of builtLines) {
+      for (const recipeLine of builtLine.recipeSnapshot ?? []) {
+        const consumed = builtLine.qty * recipeLine.qty * recipeLine.wastageFactor;
+        await ctx.db.insert('inventoryMovements', {
+          cafeId,
+          ingredientId: recipeLine.ingredientId,
+          delta: -consumed,
+          reason: 'sale',
+          refType: 'order',
+          refId: orderId as unknown as string,
+          at: now,
+        });
+      }
+    }
+
     return { orderId, totalIDR, changeIDR };
   },
 });
@@ -197,6 +242,15 @@ const orderSummary = v.object({
         })
       ),
       lineTotalIDR: v.number(),
+      recipeSnapshot: v.optional(
+        v.array(
+          v.object({
+            ingredientId: v.id('ingredients'),
+            qty: v.number(),
+            wastageFactor: v.number(),
+          })
+        )
+      ),
     })
   ),
   subtotalIDR: v.number(),
