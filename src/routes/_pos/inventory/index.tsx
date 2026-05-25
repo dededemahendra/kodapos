@@ -47,7 +47,7 @@ function InventoryIndex() {
   const isLoading = ingredients === undefined;
 
   return (
-    <main className="max-w-5xl mx-auto p-6">
+    <main className="p-6">
       <header className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Inventaris</h1>
         <Button type="button" onClick={() => setCreateOpen(true)}>

@@ -6,7 +6,7 @@ export const Route = createFileRoute('/_pos/menu')({
 
 function MenuLayout() {
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="p-6">
       <nav className="flex gap-4 border-b border-border mb-4 text-sm">
         <Link
           to="/menu"

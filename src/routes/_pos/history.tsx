@@ -41,7 +41,7 @@ function HistoryList() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-3">
+    <main className="p-6 space-y-3">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Riwayat shift ini</h1>
         <Link to="/sale" className="text-sm underline text-primary">
