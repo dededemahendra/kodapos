@@ -76,7 +76,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-8 max-w-4xl">
       <div>
-        <h2 className="text-xs uppercase tracking-wide text-fg-muted mb-2">Dasar</h2>
+        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Dasar</h2>
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="name">Nama</FieldLabel>
@@ -95,7 +95,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value as Id<'categories'>)}
               required
-              className="flex h-10 w-full rounded-md border border-border bg-bg px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
             >
               <option value="">— Pilih kategori —</option>
               {(categories ?? []).map((c) => (
@@ -135,7 +135,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs uppercase tracking-wide text-fg-muted">
+          <h2 className="text-xs uppercase tracking-wide text-muted-foreground">
             Grup modifier ({props.attached.length})
           </h2>
           {props.itemId !== 'new' && availableGroups.length > 0 && (
@@ -150,7 +150,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
                   e.target.value = '';
                 }
               }}
-              className="text-xs px-2 py-1 border border-border rounded-md bg-bg"
+              className="text-xs px-2 py-1 border border-border rounded-md bg-background"
             >
               <option value="">+ Pasang grup…</option>
               {availableGroups.map((g) => (
@@ -162,9 +162,9 @@ export function ItemEditForm(props: ItemEditFormProps) {
           )}
         </div>
         {props.itemId === 'new' ? (
-          <p className="text-sm text-fg-muted">Simpan item dulu untuk memasang grup modifier.</p>
+          <p className="text-sm text-muted-foreground">Simpan item dulu untuk memasang grup modifier.</p>
         ) : props.attached.length === 0 ? (
-          <p className="text-sm text-fg-muted">Belum ada grup terpasang.</p>
+          <p className="text-sm text-muted-foreground">Belum ada grup terpasang.</p>
         ) : (
           <ul className="space-y-2">
             {props.attached.map((a, i) => (
@@ -174,7 +174,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
               >
                 <span className="flex-1">
                   <strong>{a.group.name}</strong>
-                  <span className="text-xs text-fg-muted ml-2">
+                  <span className="text-xs text-muted-foreground ml-2">
                     {a.group.required ? 'wajib' : 'opsional'} · {a.group.minSelect}/
                     {a.group.maxSelect}
                   </span>
