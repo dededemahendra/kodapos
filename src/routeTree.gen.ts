@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as PosRouteImport } from './routes/_pos'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
+import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
 import { Route as PosPinRouteImport } from './routes/_pos/pin'
 import { Route as PosHistoryRouteImport } from './routes/_pos/history'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
@@ -51,6 +53,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicTermsRoute = PublicTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => PublicRoute,
+} as any)
 const PublicSignupRoute = PublicSignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -59,6 +66,11 @@ const PublicSignupRoute = PublicSignupRouteImport.update({
 const PublicSigninRoute = PublicSigninRouteImport.update({
   id: '/signin',
   path: '/signin',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => PublicRoute,
 } as any)
 const PosPinRoute = PosPinRouteImport.update({
@@ -188,8 +200,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof PosDashboardRoute
   '/history': typeof PosHistoryRoute
   '/pin': typeof PosPinRoute
+  '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
+  '/terms': typeof PublicTermsRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/onboarding/cashier': typeof PosOnboardingCashierRoute
@@ -213,8 +227,10 @@ export interface FileRoutesByTo {
   '/dashboard': typeof PosDashboardRoute
   '/history': typeof PosHistoryRoute
   '/pin': typeof PosPinRoute
+  '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
+  '/terms': typeof PublicTermsRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/onboarding/cashier': typeof PosOnboardingCashierRoute
@@ -243,8 +259,10 @@ export interface FileRoutesById {
   '/_pos/dashboard': typeof PosDashboardRoute
   '/_pos/history': typeof PosHistoryRoute
   '/_pos/pin': typeof PosPinRoute
+  '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
+  '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
   '/_pos/menu/categories': typeof PosMenuCategoriesRoute
   '/_pos/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
@@ -274,8 +292,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/pin'
+    | '/privacy'
     | '/signin'
     | '/signup'
+    | '/terms'
     | '/menu/categories'
     | '/menu/modifiers'
     | '/onboarding/cashier'
@@ -299,8 +319,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/pin'
+    | '/privacy'
     | '/signin'
     | '/signup'
+    | '/terms'
     | '/menu/categories'
     | '/menu/modifiers'
     | '/onboarding/cashier'
@@ -328,8 +350,10 @@ export interface FileRouteTypes {
     | '/_pos/dashboard'
     | '/_pos/history'
     | '/_pos/pin'
+    | '/_public/privacy'
     | '/_public/signin'
     | '/_public/signup'
+    | '/_public/terms'
     | '/_public/'
     | '/_pos/menu/categories'
     | '/_pos/menu/modifiers'
@@ -375,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/terms': {
+      id: '/_public/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof PublicTermsRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/signup': {
       id: '/_public/signup'
       path: '/signup'
@@ -387,6 +418,13 @@ declare module '@tanstack/react-router' {
       path: '/signin'
       fullPath: '/signin'
       preLoaderRoute: typeof PublicSigninRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/privacy': {
+      id: '/_public/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PublicPrivacyRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_pos/pin': {
@@ -674,14 +712,18 @@ const PosRouteChildren: PosRouteChildren = {
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
 
 interface PublicRouteChildren {
+  PublicPrivacyRoute: typeof PublicPrivacyRoute
   PublicSigninRoute: typeof PublicSigninRoute
   PublicSignupRoute: typeof PublicSignupRoute
+  PublicTermsRoute: typeof PublicTermsRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
+  PublicPrivacyRoute: PublicPrivacyRoute,
   PublicSigninRoute: PublicSigninRoute,
   PublicSignupRoute: PublicSignupRoute,
+  PublicTermsRoute: PublicTermsRoute,
   PublicIndexRoute: PublicIndexRoute,
 }
 
