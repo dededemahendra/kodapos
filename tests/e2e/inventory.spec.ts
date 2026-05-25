@@ -14,7 +14,10 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.getByLabel('Nama Anda').fill('E2E Owner');
     await page.getByLabel('Nama kafe').fill('Kopi E2E S4');
     await page.getByLabel('Email').fill(email);
-    await page.getByLabel('Password').fill(password);
+    await page.getByLabel('Password', { exact: true }).fill(password);
+    // T&C checkbox is required to enable the Daftar submit. Radix Checkbox
+    // is a <button role="checkbox">, not a native input — addressable by id.
+    await page.locator('#terms').click();
     await page.getByRole('button', { name: /Daftar/ }).click();
 
     // 2. Onboarding/profile
