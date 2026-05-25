@@ -106,7 +106,7 @@ export function ModifierPickerDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{item.item.name}</DialogTitle>
-          <p className="text-sm text-fg-muted">Harga dasar {formatIDR(item.item.priceIDR)}</p>
+          <p className="text-sm text-muted-foreground">Harga dasar {formatIDR(item.item.priceIDR)}</p>
         </DialogHeader>
         <div className="space-y-4 max-h-[50vh] overflow-y-auto">
           {item.attachedGroups.map((ag) => {
@@ -115,7 +115,7 @@ export function ModifierPickerDialog({
               <div key={ag.group._id}>
                 <div className="flex items-baseline justify-between">
                   <h3 className="text-sm font-medium">{ag.group.name}</h3>
-                  <span className="text-xs text-fg-muted">
+                  <span className="text-xs text-muted-foreground">
                     {isRequired
                       ? `Wajib (pilih ${ag.group.minSelect}${
                           ag.group.maxSelect > ag.group.minSelect ? `–${ag.group.maxSelect}` : ''
@@ -133,8 +133,8 @@ export function ModifierPickerDialog({
                         onClick={() => toggle(ag.group._id, opt._id, ag.group.maxSelect)}
                         className={`text-sm px-3 py-1.5 rounded-full border ${
                           checked
-                            ? 'bg-brand-600 text-white border-brand-600'
-                            : 'bg-bg text-fg border-border hover:border-brand-400'
+                            ? 'bg-primary text-white border-ring'
+                            : 'bg-background text-foreground border-border hover:border-ring'
                         }`}
                       >
                         {opt.name}

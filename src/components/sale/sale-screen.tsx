@@ -41,7 +41,7 @@ export function SaleScreen() {
 
   if (categories === undefined || items === undefined || cafe === undefined || shift === undefined) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] gap-2 text-fg-muted">
+      <div className="flex items-center justify-center min-h-[60vh] gap-2 text-muted-foreground">
         <Spinner />
         <span>Memuat menu…</span>
       </div>

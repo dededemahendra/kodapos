@@ -33,14 +33,14 @@ export function CartPane({
           variant="ghost"
           onClick={onKosongkan}
           disabled={empty}
-          className="text-fg-muted"
+          className="text-muted-foreground"
         >
           Kosongkan
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto px-3">
         {empty ? (
-          <p className="text-fg-muted text-sm mt-6 text-center">Belum ada item.</p>
+          <p className="text-muted-foreground text-sm mt-6 text-center">Belum ada item.</p>
         ) : (
           <ul>
             {cart.lines.map((line) => (

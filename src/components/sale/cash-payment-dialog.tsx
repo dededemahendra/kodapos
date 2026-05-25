@@ -106,9 +106,9 @@ export function CashPaymentDialog({
           <DialogTitle>Pembayaran Tunai</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="rounded-md bg-surface px-3 py-2 text-center">
-            <div className="text-[10px] uppercase tracking-wide text-fg-muted">Total tagihan</div>
-            <div className="text-2xl font-semibold text-brand-700 tabular-nums">
+          <div className="rounded-md bg-muted px-3 py-2 text-center">
+            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Total tagihan</div>
+            <div className="text-2xl font-semibold text-primary tabular-nums">
               {formatIDR(totalIDR)}
             </div>
           </div>
@@ -116,14 +116,14 @@ export function CashPaymentDialog({
           <div
             className={`rounded-md border-2 px-3 py-2 text-right font-mono text-2xl tabular-nums ${
               tenderedNum >= totalIDR && tenderedNum > 0
-                ? 'border-brand-600 bg-brand-50 text-brand-800'
-                : 'border-border text-fg'
+                ? 'border-ring bg-accent text-primary'
+                : 'border-border text-foreground'
             }`}
           >
             {tenderedNum > 0 ? tenderedNum.toLocaleString('id-ID') : '0'}
           </div>
           <div className="flex justify-between text-xs px-1">
-            <span className="text-fg-muted">Kembalian</span>
+            <span className="text-muted-foreground">Kembalian</span>
             <span className="font-semibold tabular-nums">
               {changeNum >= 0 ? formatIDR(changeNum) : '—'}
             </span>
@@ -135,7 +135,7 @@ export function CashPaymentDialog({
                 type="button"
                 key={`${d}-${i}`}
                 onClick={() => setTendered(String(d))}
-                className="text-xs px-2 py-2 rounded-md border border-border bg-bg hover:bg-surface"
+                className="text-xs px-2 py-2 rounded-md border border-border bg-background hover:bg-muted"
               >
                 {d === totalIDR ? 'Pas' : `${(d / 1000).toLocaleString('id-ID')}k`}
               </button>
@@ -148,7 +148,7 @@ export function CashPaymentDialog({
                 type="button"
                 key={k}
                 onClick={() => pressKey(k)}
-                className="text-base px-2 py-3 rounded-md border border-border bg-bg hover:bg-surface font-medium"
+                className="text-base px-2 py-3 rounded-md border border-border bg-background hover:bg-muted font-medium"
               >
                 {k}
               </button>

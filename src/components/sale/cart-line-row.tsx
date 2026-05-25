@@ -20,7 +20,7 @@ export function CartLineRow({
         <div className="text-sm tabular-nums">{formatIDR(line.qty * line.unitPriceIDR)}</div>
       </div>
       {line.modifierLabels.length > 0 ? (
-        <ul className="text-xs text-fg-muted mt-0.5">
+        <ul className="text-xs text-muted-foreground mt-0.5">
           {line.modifierLabels.map((m, i) => (
             <li key={`${line.lineKey}-mod-${i}`}>
               • {m.groupName}: {m.optionName}
@@ -30,7 +30,7 @@ export function CartLineRow({
         </ul>
       ) : null}
       <div className="flex items-center justify-between mt-1.5">
-        <div className="text-xs text-fg-muted">{formatIDR(line.unitPriceIDR)} / item</div>
+        <div className="text-xs text-muted-foreground">{formatIDR(line.unitPriceIDR)} / item</div>
         <div className="flex items-center gap-1">
           <Button
             type="button"
@@ -60,7 +60,7 @@ export function CartLineRow({
             variant="ghost"
             onClick={onRemove}
             aria-label="Hapus baris"
-            className="text-fg-muted hover:text-red-600"
+            className="text-muted-foreground hover:text-red-600"
           >
             ×
           </Button>
