@@ -13,7 +13,19 @@ export const Route = createRootRoute({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { title: 'kodapos' },
     ],
-    links: [{ rel: 'stylesheet', href: globalsCss }],
+    links: [
+      { rel: 'stylesheet', href: globalsCss },
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Geist+Mono:wght@400;500;600&display=swap',
+      },
+    ],
   }),
   component: RootComponent,
   notFoundComponent: NotFound,
