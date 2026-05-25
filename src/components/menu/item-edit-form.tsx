@@ -220,7 +220,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
                       modifierGroupId: a.group._id,
                     })
                   }
-                  className="text-xs text-danger hover:underline"
+                  className="text-xs text-destructive hover:underline"
                 >
                   Lepas
                 </button>
@@ -242,7 +242,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
                 props.onSaved(props.itemId);
               }}
               trigger={
-                <button type="button" className="text-sm text-danger hover:underline">
+                <button type="button" className="text-sm text-destructive hover:underline">
                   Arsipkan item
                 </button>
               }

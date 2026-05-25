@@ -133,7 +133,7 @@ export function ModifierPickerDialog({
                         onClick={() => toggle(ag.group._id, opt._id, ag.group.maxSelect)}
                         className={`text-sm px-3 py-1.5 rounded-full border ${
                           checked
-                            ? 'bg-primary text-white border-ring'
+                            ? 'bg-primary text-primary-foreground border-ring'
                             : 'bg-background text-foreground border-border hover:border-ring'
                         }`}
                       >

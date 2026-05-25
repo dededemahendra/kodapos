@@ -19,7 +19,7 @@ function ModifierGroupsPage() {
           </p>
         </div>
         <Link to="/menu/modifiers/$groupId" params={{ groupId: 'new' }} className="text-sm">
-          <span className="px-3 py-1 rounded-md bg-primary text-white">+ Grup baru</span>
+          <span className="px-3 py-1 rounded-md bg-primary text-primary-foreground">+ Grup baru</span>
         </Link>
       </div>
       {groups === undefined && <p className="text-muted-foreground">Memuat…</p>}

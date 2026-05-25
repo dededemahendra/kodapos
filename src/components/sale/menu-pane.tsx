@@ -83,7 +83,7 @@ function CategoryTab({
       onClick={onClick}
       className={`shrink-0 text-sm px-3 py-1.5 rounded-md ${
         active
-          ? 'bg-primary text-white'
+          ? 'bg-primary text-primary-foreground'
           : 'bg-muted text-muted-foreground hover:bg-background hover:text-foreground'
       }`}
     >

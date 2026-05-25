@@ -90,7 +90,7 @@ function StaffSettingsPage() {
           {creating ? '…' : '+ Tambah'}
         </Button>
       </form>
-      {createError && <p className="text-sm text-danger">{createError}</p>}
+      {createError && <p className="text-sm text-destructive">{createError}</p>}
 
       <table className="w-full text-sm">
         <thead>
@@ -195,7 +195,7 @@ function StaffRow({
           name={row.name}
           onConfirm={onArchive}
           trigger={
-            <button type="button" className="text-xs text-danger hover:underline">
+            <button type="button" className="text-xs text-destructive hover:underline">
               Arsipkan
             </button>
           }

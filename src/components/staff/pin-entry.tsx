@@ -65,7 +65,7 @@ export function PinEntry({ digits = 4, onComplete, errorMessage }: PinEntryProps
         ))}
       </div>
       {errorMessage && (
-        <p className="text-center text-sm text-danger" role="alert">
+        <p className="text-center text-sm text-destructive" role="alert">
           {errorMessage}
         </p>
       )}

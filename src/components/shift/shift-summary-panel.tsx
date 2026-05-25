@@ -49,7 +49,7 @@ export function ShiftSummaryPanel({ shift }: ShiftSummaryPanelProps) {
       {shift.varianceIDR !== undefined && (
         <>
           <dt className="text-muted-foreground">Selisih</dt>
-          <dd className={shift.varianceIDR < 0 ? 'text-danger' : ''}>
+          <dd className={shift.varianceIDR < 0 ? 'text-destructive' : ''}>
             {formatIDR(shift.varianceIDR)}
           </dd>
         </>

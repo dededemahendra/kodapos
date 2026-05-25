@@ -22,8 +22,8 @@ export function WizardStepper({ steps, currentIndex }: WizardStepperProps) {
             <span
               className={cn(
                 'inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-medium',
-                isDone && 'bg-primary text-white',
-                isCurrent && 'bg-primary text-white',
+                isDone && 'bg-primary text-primary-foreground',
+                isCurrent && 'bg-primary text-primary-foreground',
                 !isCurrent && !isDone && isEnabled && 'bg-muted text-muted-foreground',
                 !isEnabled && 'bg-muted text-muted-foreground/50'
               )}

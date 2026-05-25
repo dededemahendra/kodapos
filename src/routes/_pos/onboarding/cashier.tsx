@@ -117,7 +117,7 @@ function OnboardingCashier() {
             {adding ? '…' : '+ Tambah'}
           </Button>
         </form>
-        {addError && <p className="text-sm text-danger mb-2">{addError}</p>}
+        {addError && <p className="text-sm text-destructive mb-2">{addError}</p>}
         {cashiers.length > 0 && (
           <ul className="text-sm space-y-1">
             {cashiers.map((c) => (

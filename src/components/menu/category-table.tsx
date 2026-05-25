@@ -49,7 +49,7 @@ export function CategoryTable() {
           {creating ? '…' : '+ Tambah'}
         </Button>
       </form>
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
@@ -116,7 +116,7 @@ export function CategoryTable() {
                   name={c.name}
                   onConfirm={() => archiveCategory({ id: c._id })}
                   trigger={
-                    <button type="button" className="text-xs text-danger hover:underline">
+                    <button type="button" className="text-xs text-destructive hover:underline">
                       Arsipkan
                     </button>
                   }
