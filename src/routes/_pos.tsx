@@ -2,14 +2,15 @@ import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useConvex } from 'convex/react';
 import { type ReactNode, useEffect } from 'react';
-import { PosNav } from '~/components/pos-nav';
+import { AppSidebar } from '~/components/app-sidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar';
 import { Spinner } from '~/components/ui/spinner';
 
 export const Route = createFileRoute('/_pos')({
   component: PosLayout,
 });
 
-// Routes where the global nav would get in the way (full-screen flows).
+// Routes where the sidebar would get in the way (full-screen flows).
 const NAV_HIDDEN_PREFIXES = ['/onboarding', '/pin', '/shift'];
 
 function PosLayout() {
@@ -29,8 +30,19 @@ function PosLayout() {
       </Unauthenticated>
       <Authenticated>
         <OnboardingGate>
-          {showNav ? <PosNav /> : null}
-          <Outlet />
+          {showNav ? (
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset>
+                <header className="flex h-12 items-center gap-2 border-b border-border bg-background px-4">
+                  <SidebarTrigger />
+                </header>
+                <Outlet />
+              </SidebarInset>
+            </SidebarProvider>
+          ) : (
+            <Outlet />
+          )}
         </OnboardingGate>
       </Authenticated>
     </div>

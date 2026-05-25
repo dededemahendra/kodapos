@@ -95,7 +95,10 @@
     --sidebar-foreground: oklch(0.9850 0 0);
     --sidebar-primary: oklch(0.4880 0.2430 264.3760);
     --sidebar-primary-foreground: oklch(0.9850 0 0);
-    --sidebar-accent: oklch(0.2690 0 0);
+    /* tweakcn ships --sidebar-accent equal to --sidebar (both 0.2690), which
+       makes the SidebarMenuButton[data-active=true] highlight invisible.
+       Bumping accent slightly brighter so active state reads in dark mode. */
+    --sidebar-accent: oklch(0.3500 0 0);
     --sidebar-accent-foreground: oklch(0.9850 0 0);
     --sidebar-border: oklch(0.2750 0 0);
     --sidebar-ring: oklch(0.4390 0 0);
