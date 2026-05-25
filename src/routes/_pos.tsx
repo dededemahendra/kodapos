@@ -54,7 +54,9 @@ function PosLayout() {
       <Authenticated>
         <OnboardingGate>
           {showNav ? (
-            <SidebarProvider>
+            <SidebarProvider
+              style={{ '--sidebar-width': '18rem' } as React.CSSProperties}
+            >
               <AppSidebar />
               <SidebarInset>
                 <header className="flex h-12 items-center gap-2 border-b border-border bg-background px-4">
