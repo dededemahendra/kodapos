@@ -1,16 +1,34 @@
 import { useAuthActions } from '@convex-dev/auth/react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useConvex } from 'convex/react';
-import { type FormEvent, useState } from 'react';
+import { Coffee, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
+import {
+  type ChangeEvent,
+  type FocusEvent,
+  type FormEvent,
+  useMemo,
+  useState,
+} from 'react';
 import { Button } from '~/components/ui/button';
+import { Checkbox } from '~/components/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import {
+  passwordStrength,
+  validateCafeName,
+  validateEmail,
+  validateName,
+  validatePasswordSignup,
+} from '~/lib/auth-validation';
 
 export const Route = createFileRoute('/_public/signup')({
   component: SignupPage,
 });
+
+type FieldState = { value: string; touched: boolean; error: string | null };
+const initialField: FieldState = { value: '', touched: false, error: null };
 
 async function createCafeWhenAuthReady(
   convex: ReturnType<typeof useConvex>,
@@ -34,30 +52,75 @@ function SignupPage() {
   const { signIn } = useAuthActions();
   const convex = useConvex();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+
+  const [name, setName] = useState<FieldState>(initialField);
+  const [cafeName, setCafeName] = useState<FieldState>(initialField);
+  const [email, setEmail] = useState<FieldState>(initialField);
+  const [password, setPassword] = useState<FieldState>(initialField);
+  const [showPassword, setShowPassword] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+  const strength = useMemo(() => passwordStrength(password.value), [password.value]);
+
+  function bindBlur(
+    setter: React.Dispatch<React.SetStateAction<FieldState>>,
+    validator: (value: string) => string | null
+  ) {
+    return (_: FocusEvent<HTMLInputElement>) => {
+      setter((prev) => ({ ...prev, touched: true, error: validator(prev.value) }));
+    };
+  }
+  function bindChange(
+    setter: React.Dispatch<React.SetStateAction<FieldState>>,
+    validator: (value: string) => string | null
+  ) {
+    return (e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setter((prev) => ({
+        ...prev,
+        value,
+        error: prev.touched ? validator(value) : prev.error,
+      }));
+    };
+  }
+
+  const formInvalid =
+    name.error !== null ||
+    cafeName.error !== null ||
+    email.error !== null ||
+    password.error !== null ||
+    name.value.length === 0 ||
+    cafeName.value.length === 0 ||
+    email.value.length === 0 ||
+    password.value.length === 0 ||
+    !agreed;
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
+    const nameErr = validateName(name.value);
+    const cafeErr = validateCafeName(cafeName.value);
+    const emailErr = validateEmail(email.value);
+    const passwordErr = validatePasswordSignup(password.value);
+    setName((prev) => ({ ...prev, touched: true, error: nameErr }));
+    setCafeName((prev) => ({ ...prev, touched: true, error: cafeErr }));
+    setEmail((prev) => ({ ...prev, touched: true, error: emailErr }));
+    setPassword((prev) => ({ ...prev, touched: true, error: passwordErr }));
+    if (nameErr || cafeErr || emailErr || passwordErr || !agreed) return;
     setSubmitting(true);
-    setError(null);
-    const fd = new FormData(e.currentTarget);
+    setAuthError(null);
     try {
-      const ownerName = String(fd.get('name') ?? '').trim();
-      const cafeName = String(fd.get('cafeName') ?? '').trim();
       await signIn('password', {
         flow: 'signUp',
-        email: String(fd.get('email') ?? ''),
-        password: String(fd.get('password') ?? ''),
-        name: ownerName,
+        email: email.value.trim(),
+        password: password.value,
+        name: name.value.trim(),
       });
-      // Convex Auth's signIn returns when the server accepts credentials,
-      // but the new auth token takes a beat to propagate into the React
-      // client. Retry until createForOwner sees the identity (cap at ~3s).
-      await createCafeWhenAuthReady(convex, cafeName);
+      await createCafeWhenAuthReady(convex, cafeName.value.trim());
       navigate({ to: '/onboarding/profile' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal mendaftar.');
+      setAuthError(err instanceof Error ? err.message : 'Gagal mendaftar.');
     } finally {
       setSubmitting(false);
     }
@@ -73,40 +136,151 @@ function SignupPage() {
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="name">Nama Anda</FieldLabel>
-            <Input id="name" name="name" required autoComplete="name" />
+            <div className="relative">
+              <User
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="name"
+                name="name"
+                autoComplete="name"
+                className={`pl-9 ${name.error ? 'border-destructive' : ''}`}
+                value={name.value}
+                onBlur={bindBlur(setName, validateName)}
+                onChange={bindChange(setName, validateName)}
+                aria-invalid={name.error !== null}
+                aria-describedby={name.error ? 'name-error' : undefined}
+              />
+            </div>
+            {name.error && <FieldError id="name-error">{name.error}</FieldError>}
           </Field>
+
           <Field>
             <FieldLabel htmlFor="cafeName">Nama kafe</FieldLabel>
-            <Input
-              id="cafeName"
-              name="cafeName"
-              required
-              maxLength={80}
-              autoComplete="organization"
-              placeholder="mis. Kopi Senja"
-            />
+            <div className="relative">
+              <Coffee
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="cafeName"
+                name="cafeName"
+                autoComplete="organization"
+                placeholder="mis. Kopi Senja"
+                maxLength={80}
+                className={`pl-9 ${cafeName.error ? 'border-destructive' : ''}`}
+                value={cafeName.value}
+                onBlur={bindBlur(setCafeName, validateCafeName)}
+                onChange={bindChange(setCafeName, validateCafeName)}
+                aria-invalid={cafeName.error !== null}
+                aria-describedby={cafeName.error ? 'cafeName-error' : undefined}
+              />
+            </div>
+            {cafeName.error && <FieldError id="cafeName-error">{cafeName.error}</FieldError>}
           </Field>
+
           <Field>
             <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input id="email" name="email" type="email" required autoComplete="email" />
+            <div className="relative">
+              <Mail
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                className={`pl-9 ${email.error ? 'border-destructive' : ''}`}
+                value={email.value}
+                onBlur={bindBlur(setEmail, validateEmail)}
+                onChange={bindChange(setEmail, validateEmail)}
+                aria-invalid={email.error !== null}
+                aria-describedby={email.error ? 'email-error' : undefined}
+              />
+            </div>
+            {email.error && <FieldError id="email-error">{email.error}</FieldError>}
           </Field>
+
           <Field>
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <Lock
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                className={`pl-9 pr-9 ${password.error ? 'border-destructive' : ''}`}
+                value={password.value}
+                onBlur={bindBlur(setPassword, validatePasswordSignup)}
+                onChange={bindChange(setPassword, validatePasswordSignup)}
+                aria-invalid={password.error !== null}
+                aria-describedby={password.error ? 'password-error' : 'password-strength'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+              >
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+            {password.value.length > 0 && (
+              <div id="password-strength" className="mt-1.5">
+                <div className="h-1 w-full bg-muted rounded">
+                  <div
+                    className="h-1 bg-foreground rounded transition-all duration-200"
+                    style={{ width: `${strength.percent}%` }}
+                  />
+                </div>
+                {strength.label && (
+                  <p className="mt-1 text-xs text-muted-foreground">{strength.label}</p>
+                )}
+              </div>
+            )}
+            {password.error && <FieldError id="password-error">{password.error}</FieldError>}
           </Field>
-          {error && <FieldError>{error}</FieldError>}
-          <Button type="submit" className="w-full" disabled={submitting}>
+
+          <div className="flex items-start gap-2">
+            <Checkbox
+              id="terms"
+              checked={agreed}
+              onCheckedChange={(checked) => setAgreed(checked === true)}
+              className="mt-0.5"
+            />
+            <label htmlFor="terms" className="text-sm text-muted-foreground select-none">
+              Saya menyetujui{' '}
+              <Link to="/terms" className="text-primary underline">
+                Syarat Layanan
+              </Link>{' '}
+              dan{' '}
+              <Link to="/privacy" className="text-primary underline">
+                Kebijakan Privasi
+              </Link>
+              .
+            </label>
+          </div>
+
+          {authError && <FieldError>{authError}</FieldError>}
+
+          <Button type="submit" className="w-full" disabled={submitting || formInvalid}>
             {submitting && <Spinner data-icon="inline-start" />}
             {submitting ? 'Memproses…' : 'Daftar'}
           </Button>
         </FieldGroup>
+
+        <div className="mt-6 pt-6 border-t border-border text-center text-sm text-muted-foreground">
+          Sudah punya akun?{' '}
+          <Link to="/signin" className="text-primary underline">
+            Masuk
+          </Link>
+        </div>
       </form>
     </main>
   );
