@@ -106,6 +106,7 @@ function SigninPage() {
                 name="email"
                 type="email"
                 autoComplete="email"
+                placeholder="nama@email.com"
                 className={`pl-9 ${email.error ? 'border-destructive' : ''}`}
                 value={email.value}
                 onBlur={handleEmailBlur}

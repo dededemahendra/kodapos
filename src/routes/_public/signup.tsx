@@ -145,6 +145,7 @@ function SignupPage() {
                 id="name"
                 name="name"
                 autoComplete="name"
+                placeholder="mis. Warren"
                 className={`pl-9 ${name.error ? 'border-destructive' : ''}`}
                 value={name.value}
                 onBlur={bindBlur(setName, validateName)}
@@ -192,6 +193,7 @@ function SignupPage() {
                 name="email"
                 type="email"
                 autoComplete="email"
+                placeholder="nama@email.com"
                 className={`pl-9 ${email.error ? 'border-destructive' : ''}`}
                 value={email.value}
                 onBlur={bindBlur(setEmail, validateEmail)}
@@ -215,6 +217,7 @@ function SignupPage() {
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
+                placeholder="Minimal 8 karakter"
                 className={`pl-9 pr-9 ${password.error ? 'border-destructive' : ''}`}
                 value={password.value}
                 onBlur={bindBlur(setPassword, validatePasswordSignup)}
