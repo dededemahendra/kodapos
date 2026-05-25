@@ -24,9 +24,9 @@ export function PosNav() {
   }
 
   return (
-    <nav className="border-b border-border bg-bg">
+    <nav className="border-b border-border bg-background">
       <div className="max-w-6xl mx-auto px-4 h-12 flex items-center gap-1">
-        <Link to="/menu" className="flex items-center gap-1.5 mr-3 text-brand-600">
+        <Link to="/menu" className="flex items-center gap-1.5 mr-3 text-primary">
           <Coffee className="size-4" />
           <span className="font-semibold text-sm">kodapos</span>
         </Link>
@@ -41,8 +41,8 @@ export function PosNav() {
               to={link.to}
               className={`text-sm px-3 py-1.5 rounded-md ${
                 active
-                  ? 'bg-brand-50 text-brand-700 font-medium'
-                  : 'text-fg-muted hover:bg-surface hover:text-fg'
+                  ? 'bg-accent text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
               {link.label}
@@ -54,7 +54,7 @@ export function PosNav() {
           variant="ghost"
           size="sm"
           onClick={handleSignOut}
-          className="ml-auto text-fg-muted"
+          className="ml-auto text-muted-foreground"
         >
           Keluar
         </Button>

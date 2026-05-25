@@ -16,13 +16,13 @@ export function StaffPickerCard({ name, role, hasPin, onClick }: StaffPickerCard
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border bg-bg hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+      className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border bg-background hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="flex items-center justify-center size-14 rounded-full bg-brand-100 text-brand-700 text-lg font-semibold">
+      <span className="flex items-center justify-center size-14 rounded-full bg-accent text-primary text-lg font-semibold">
         {initials}
       </span>
       <span className="text-sm font-medium">{name}</span>
-      <span className="text-xs text-fg-muted">
+      <span className="text-xs text-muted-foreground">
         {role === 'owner' ? 'Pemilik' : 'Kasir'}
         {!hasPin && ' · belum ada PIN'}
       </span>

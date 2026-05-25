@@ -22,33 +22,33 @@ export function ShiftSummaryPanel({ shift }: ShiftSummaryPanelProps) {
   const closed = shift.closedAt ? new Date(shift.closedAt).toLocaleString('id-ID') : null;
   return (
     <dl className="grid grid-cols-2 gap-y-2 text-sm">
-      <dt className="text-fg-muted">Dibuka oleh</dt>
+      <dt className="text-muted-foreground">Dibuka oleh</dt>
       <dd>{shift.cashierName}</dd>
-      <dt className="text-fg-muted">Dibuka pada</dt>
+      <dt className="text-muted-foreground">Dibuka pada</dt>
       <dd>{opened}</dd>
       {closed && (
         <>
-          <dt className="text-fg-muted">Ditutup pada</dt>
+          <dt className="text-muted-foreground">Ditutup pada</dt>
           <dd>{closed}</dd>
         </>
       )}
-      <dt className="text-fg-muted">Modal awal</dt>
+      <dt className="text-muted-foreground">Modal awal</dt>
       <dd>{formatIDR(shift.openingFloatIDR)}</dd>
       {shift.expectedCashIDR !== undefined && (
         <>
-          <dt className="text-fg-muted">Uang seharusnya</dt>
+          <dt className="text-muted-foreground">Uang seharusnya</dt>
           <dd>{formatIDR(shift.expectedCashIDR)}</dd>
         </>
       )}
       {shift.countedCashIDR !== undefined && (
         <>
-          <dt className="text-fg-muted">Uang terhitung</dt>
+          <dt className="text-muted-foreground">Uang terhitung</dt>
           <dd>{formatIDR(shift.countedCashIDR)}</dd>
         </>
       )}
       {shift.varianceIDR !== undefined && (
         <>
-          <dt className="text-fg-muted">Selisih</dt>
+          <dt className="text-muted-foreground">Selisih</dt>
           <dd className={shift.varianceIDR < 0 ? 'text-danger' : ''}>
             {formatIDR(shift.varianceIDR)}
           </dd>
