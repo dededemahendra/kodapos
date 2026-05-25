@@ -107,17 +107,17 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
     <section className="mt-10 pt-6 border-t border-border">
       <div className="flex items-baseline justify-between mb-3">
         <h2 className="text-lg font-bold">Resep</h2>
-        <span className="text-sm text-fg-muted">
+        <span className="text-sm text-muted-foreground">
           ≈ <span className="font-semibold tabular-nums">{formatIDR(costPreview)}</span> / porsi
         </span>
       </div>
 
       {recipe === undefined || ingredients === undefined ? (
-        <p className="text-fg-muted">Memuat…</p>
+        <p className="text-muted-foreground">Memuat…</p>
       ) : (
         <>
           {lines.length === 0 ? (
-            <p className="text-fg-muted text-sm mb-3">
+            <p className="text-muted-foreground text-sm mb-3">
               Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis.
             </p>
           ) : (
@@ -182,7 +182,7 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
               + Tambah bahan
             </Button>
             <div className="ml-auto flex items-center gap-3">
-              {savedAt ? <span className="text-xs text-brand-700">Tersimpan.</span> : null}
+              {savedAt ? <span className="text-xs text-primary">Tersimpan.</span> : null}
               <Button type="button" onClick={save} disabled={submitting}>
                 {submitting && <Spinner data-icon="inline-start" />}
                 {submitting ? 'Menyimpan…' : 'Simpan resep'}

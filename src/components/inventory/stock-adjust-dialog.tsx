@@ -77,7 +77,7 @@ export function StockAdjustDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
-          <p className="text-fg-muted">Memuat…</p>
+          <p className="text-muted-foreground">Memuat…</p>
         </DialogContent>
       </Dialog>
     );
@@ -91,7 +91,7 @@ export function StockAdjustDialog({
         </DialogHeader>
         <form onSubmit={onSubmit}>
           <FieldGroup>
-            <div className="rounded-md bg-surface px-3 py-2 text-sm">
+            <div className="rounded-md bg-muted px-3 py-2 text-sm">
               Stok saat ini:{' '}
               <span className="font-semibold tabular-nums">
                 {ingredient?.currentStockQty} {ingredient?.canonicalUnit}
