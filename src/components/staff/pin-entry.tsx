@@ -59,13 +59,13 @@ export function PinEntry({ digits = 4, onComplete, errorMessage }: PinEntryProps
             value={v}
             onChange={(e) => handleChange(idx, e.target.value)}
             onKeyDown={(e) => handleKeyDown(idx, e)}
-            className="size-14 text-center text-2xl font-semibold rounded-md border border-border bg-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+            className="size-14 text-center text-2xl font-semibold rounded-md border border-border bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={`Digit ${idx + 1}`}
           />
         ))}
       </div>
       {errorMessage && (
-        <p className="text-center text-sm text-danger" role="alert">
+        <p className="text-center text-sm text-destructive" role="alert">
           {errorMessage}
         </p>
       )}

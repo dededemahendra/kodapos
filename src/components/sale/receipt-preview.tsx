@@ -25,17 +25,17 @@ export function ReceiptPreview({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         {order === undefined || cafe === undefined ? (
-          <p className="text-fg-muted">Memuat struk…</p>
+          <p className="text-muted-foreground">Memuat struk…</p>
         ) : !order ? (
           <p className="text-red-600">Pesanan tidak ditemukan.</p>
         ) : (
           <div data-print-receipt className="font-mono text-sm">
             <div className="text-center mb-3">
               <div className="font-semibold">{cafe?.name}</div>
-              <div className="text-xs text-fg-muted">
+              <div className="text-xs text-muted-foreground">
                 {new Date(order.createdAtClient).toLocaleString('id-ID')}
               </div>
-              <div className="text-xs text-fg-muted">Kasir: {order.cashierName}</div>
+              <div className="text-xs text-muted-foreground">Kasir: {order.cashierName}</div>
             </div>
             <hr className="border-dashed border-border my-2" />
             {order.lines.map((line, i) => (
@@ -47,7 +47,7 @@ export function ReceiptPreview({
                   <span className="tabular-nums">{formatIDR(line.lineTotalIDR)}</span>
                 </div>
                 {line.modifiersSnapshot.length > 0 ? (
-                  <ul className="text-xs text-fg-muted ml-3">
+                  <ul className="text-xs text-muted-foreground ml-3">
                     {line.modifiersSnapshot.map((m, j) => (
                       <li key={`${order._id}-line-${i}-mod-${j}`}>
                         + {m.groupName}: {m.optionName}

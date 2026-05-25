@@ -23,7 +23,7 @@ function OnboardingCashier() {
   const [addError, setAddError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
-  if (staff === undefined) return <p className="text-fg-muted">Memuat…</p>;
+  if (staff === undefined) return <p className="text-muted-foreground">Memuat…</p>;
 
   const owner = staff.find((s) => s.role === 'owner');
   const cashiers = staff.filter((s) => s.role === 'cashier');
@@ -67,15 +67,15 @@ function OnboardingCashier() {
     <div className="space-y-8 max-w-2xl">
       <div>
         <h1 className="text-2xl font-bold mb-1">PIN Pemilik & Kasir</h1>
-        <p className="text-fg-muted text-sm">
+        <p className="text-muted-foreground text-sm">
           Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (opsional).
         </p>
       </div>
 
       <section>
-        <h2 className="text-xs uppercase tracking-wide text-fg-muted mb-2">PIN Pemilik</h2>
+        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">PIN Pemilik</h2>
         {owner && (
-          <div className="flex items-center justify-between p-3 rounded-md border border-border bg-bg">
+          <div className="flex items-center justify-between p-3 rounded-md border border-border bg-background">
             <span>{owner.name}</span>
             <Button
               variant={owner.pinHash ? 'outline' : 'default'}
@@ -88,18 +88,18 @@ function OnboardingCashier() {
       </section>
 
       <section>
-        <h2 className="text-xs uppercase tracking-wide text-fg-muted mb-2">
+        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
           Kasir lain (opsional)
         </h2>
         <form onSubmit={handleAddCashier} className="flex gap-2 items-end mb-3">
           <div className="flex-1">
-            <label htmlFor="cName" className="text-xs text-fg-muted">
+            <label htmlFor="cName" className="text-xs text-muted-foreground">
               Nama
             </label>
             <Input id="cName" name="name" placeholder="mis. Andi" required maxLength={60} />
           </div>
           <div>
-            <label htmlFor="cPin" className="text-xs text-fg-muted">
+            <label htmlFor="cPin" className="text-xs text-muted-foreground">
               PIN 4 digit
             </label>
             <Input
@@ -117,7 +117,7 @@ function OnboardingCashier() {
             {adding ? '…' : '+ Tambah'}
           </Button>
         </form>
-        {addError && <p className="text-sm text-danger mb-2">{addError}</p>}
+        {addError && <p className="text-sm text-destructive mb-2">{addError}</p>}
         {cashiers.length > 0 && (
           <ul className="text-sm space-y-1">
             {cashiers.map((c) => (

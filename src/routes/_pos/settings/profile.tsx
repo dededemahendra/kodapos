@@ -12,10 +12,10 @@ function SettingsProfile() {
   const updateProfile = useMutation(api.cafes.updateProfile);
 
   if (cafe === undefined) {
-    return <p className="text-fg-muted">Memuat…</p>;
+    return <p className="text-muted-foreground">Memuat…</p>;
   }
   if (cafe === null) {
-    return <p className="text-fg-muted">Kafe tidak ditemukan.</p>;
+    return <p className="text-muted-foreground">Kafe tidak ditemukan.</p>;
   }
 
   const initial: CafeProfileFormValues = {
@@ -30,7 +30,7 @@ function SettingsProfile() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-1">Profil kafe</h1>
-      <p className="text-fg-muted mb-6 text-sm">Ubah informasi dasar kafe Anda.</p>
+      <p className="text-muted-foreground mb-6 text-sm">Ubah informasi dasar kafe Anda.</p>
       <CafeProfileForm
         initial={initial}
         submitLabel="Simpan"

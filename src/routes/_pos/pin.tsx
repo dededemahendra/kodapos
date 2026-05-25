@@ -25,7 +25,7 @@ function PinPickerPage() {
   const [error, setError] = useState<string | null>(null);
 
   if (staff === undefined) {
-    return <p className="text-fg-muted p-6">Memuat…</p>;
+    return <p className="text-muted-foreground p-6">Memuat…</p>;
   }
 
   async function selectWithoutPin(id: Id<'cafeStaff'>): Promise<void> {
@@ -48,7 +48,7 @@ function PinPickerPage() {
   return (
     <main className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-1">Siapa yang bertugas?</h1>
-      <p className="text-fg-muted text-sm mb-6">Pilih nama Anda dan masukkan PIN 4 digit.</p>
+      <p className="text-muted-foreground text-sm mb-6">Pilih nama Anda dan masukkan PIN 4 digit.</p>
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
         {staff.map((s) => (
           <StaffPickerCard

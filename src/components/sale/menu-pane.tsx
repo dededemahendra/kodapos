@@ -49,7 +49,7 @@ export function MenuPane({
       </div>
       <div className="flex-1 overflow-y-auto p-3">
         {visible.length === 0 ? (
-          <p className="text-fg-muted text-sm">Tidak ada item di kategori ini.</p>
+          <p className="text-muted-foreground text-sm">Tidak ada item di kategori ini.</p>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
             {visible.map((row) => (
@@ -83,8 +83,8 @@ function CategoryTab({
       onClick={onClick}
       className={`shrink-0 text-sm px-3 py-1.5 rounded-md ${
         active
-          ? 'bg-brand-600 text-white'
-          : 'bg-surface text-fg-muted hover:bg-bg hover:text-fg'
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-muted text-muted-foreground hover:bg-background hover:text-foreground'
       }`}
     >
       {label}

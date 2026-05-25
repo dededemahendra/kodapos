@@ -19,11 +19,11 @@ function OnboardingMenu() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-bold mb-1">Susun menu kafe</h1>
-      <p className="text-fg-muted mb-6 text-sm">
+      <p className="text-muted-foreground mb-6 text-sm">
         Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa
         diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama.
       </p>
-      <div className="space-y-3 p-4 rounded-md border border-border bg-bg max-w-md mb-6">
+      <div className="space-y-3 p-4 rounded-md border border-border bg-background max-w-md mb-6">
         <h2 className="font-semibold text-sm">Langkah singkat</h2>
         <ol className="list-decimal pl-5 text-sm space-y-1">
           <li>Buat 2–3 kategori (Kopi, Non-Kopi, Makanan).</li>

@@ -22,10 +22,10 @@ export function WizardStepper({ steps, currentIndex }: WizardStepperProps) {
             <span
               className={cn(
                 'inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-medium',
-                isDone && 'bg-brand-600 text-white',
-                isCurrent && 'bg-brand-600 text-white',
-                !isCurrent && !isDone && isEnabled && 'bg-surface text-fg-muted',
-                !isEnabled && 'bg-surface text-fg-muted/50'
+                isDone && 'bg-primary text-primary-foreground',
+                isCurrent && 'bg-primary text-primary-foreground',
+                !isCurrent && !isDone && isEnabled && 'bg-muted text-muted-foreground',
+                !isEnabled && 'bg-muted text-muted-foreground/50'
               )}
               aria-current={isCurrent ? 'step' : undefined}
             >
@@ -34,16 +34,16 @@ export function WizardStepper({ steps, currentIndex }: WizardStepperProps) {
             <span
               className={cn(
                 'font-medium',
-                isCurrent && 'text-fg',
-                !isCurrent && isEnabled && 'text-fg-muted',
-                !isEnabled && 'text-fg-muted/50'
+                isCurrent && 'text-foreground',
+                !isCurrent && isEnabled && 'text-muted-foreground',
+                !isEnabled && 'text-muted-foreground/50'
               )}
             >
               {step.label}
             </span>
             {i < steps.length - 1 && (
               <span
-                className={cn('flex-1 h-px', isDone ? 'bg-brand-600' : 'bg-border')}
+                className={cn('flex-1 h-px', isDone ? 'bg-primary' : 'bg-border')}
                 aria-hidden="true"
               />
             )}

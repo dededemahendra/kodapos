@@ -155,7 +155,7 @@ export function IngredientForm({
                 noun="bahan"
                 name={existing?.name ?? ''}
                 trigger={
-                  <Button type="button" variant="ghost" className="text-fg-muted mr-auto">
+                  <Button type="button" variant="ghost" className="text-muted-foreground mr-auto">
                     Arsipkan
                   </Button>
                 }

@@ -33,13 +33,13 @@ export function CategoryTable() {
     }
   }
 
-  if (categories === undefined) return <p className="text-fg-muted">Memuat…</p>;
+  if (categories === undefined) return <p className="text-muted-foreground">Memuat…</p>;
 
   return (
     <div className="space-y-4">
       <form onSubmit={handleCreate} className="flex gap-2 items-end max-w-md">
         <div className="flex-1">
-          <label htmlFor="newName" className="text-xs text-fg-muted">
+          <label htmlFor="newName" className="text-xs text-muted-foreground">
             Nama kategori baru
           </label>
           <Input id="newName" name="name" placeholder="mis. Kopi" required maxLength={60} />
@@ -49,10 +49,10 @@ export function CategoryTable() {
           {creating ? '…' : '+ Tambah'}
         </Button>
       </form>
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-xs uppercase text-fg-muted border-b border-border">
+          <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
             <th className="py-2 px-2 w-12">#</th>
             <th className="py-2 px-2">Nama</th>
             <th className="py-2 px-2 w-32 text-right">Urutan</th>
@@ -62,14 +62,14 @@ export function CategoryTable() {
         <tbody>
           {categories.length === 0 && (
             <tr>
-              <td colSpan={4} className="py-6 text-center text-fg-muted">
+              <td colSpan={4} className="py-6 text-center text-muted-foreground">
                 Belum ada kategori.
               </td>
             </tr>
           )}
           {categories.map((c, i) => (
             <tr key={c._id} className="border-b border-border/50">
-              <td className="py-2 px-2 text-fg-muted">{i + 1}</td>
+              <td className="py-2 px-2 text-muted-foreground">{i + 1}</td>
               <td className="py-2 px-2">
                 {editingId === c._id ? (
                   <InlineEdit
@@ -116,7 +116,7 @@ export function CategoryTable() {
                   name={c.name}
                   onConfirm={() => archiveCategory({ id: c._id })}
                   trigger={
-                    <button type="button" className="text-xs text-danger hover:underline">
+                    <button type="button" className="text-xs text-destructive hover:underline">
                       Arsipkan
                     </button>
                   }

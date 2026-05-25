@@ -37,13 +37,13 @@ function ShiftClosePage() {
   }
 
   if (current === undefined) {
-    return <p className="text-fg-muted p-6">Memuat…</p>;
+    return <p className="text-muted-foreground p-6">Memuat…</p>;
   }
 
   if (current === null) {
     return (
       <main className="max-w-xl mx-auto p-6">
-        <p className="text-fg-muted">Tidak ada shift terbuka.</p>
+        <p className="text-muted-foreground">Tidak ada shift terbuka.</p>
         <Button asChild className="mt-3">
           <Link to="/shift/open">Buka Shift Baru</Link>
         </Button>

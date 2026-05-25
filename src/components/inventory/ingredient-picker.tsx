@@ -52,15 +52,15 @@ export function IngredientPicker({
         }}
       />
       {showList ? (
-        <ul className="absolute z-10 left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-md border border-border bg-bg shadow-md">
+        <ul className="absolute z-10 left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-md border border-border bg-background shadow-md">
           {matches.length === 0 ? (
-            <li className="px-3 py-2 text-sm text-fg-muted">Tidak ada bahan cocok.</li>
+            <li className="px-3 py-2 text-sm text-muted-foreground">Tidak ada bahan cocok.</li>
           ) : (
             matches.map((ing) => (
               <li key={ing._id}>
                 <button
                   type="button"
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-surface"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
                   onMouseDown={() => {
                     onChange(ing._id);
                     setSearch('');
@@ -68,7 +68,7 @@ export function IngredientPicker({
                   }}
                 >
                   {ing.name}{' '}
-                  <span className="text-fg-muted text-xs">
+                  <span className="text-muted-foreground text-xs">
                     ({ing.currentStockQty} {ing.canonicalUnit})
                   </span>
                 </button>
@@ -79,7 +79,7 @@ export function IngredientPicker({
             <li className="border-t border-border">
               <button
                 type="button"
-                className="w-full text-left px-3 py-2 text-sm text-brand-700 hover:bg-surface"
+                className="w-full text-left px-3 py-2 text-sm text-primary hover:bg-muted"
                 onMouseDown={() => {
                   onRequestCreate(search.trim());
                   setSearch('');

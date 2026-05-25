@@ -17,8 +17,8 @@ function ModifierGroupEditor() {
     isNew ? 'skip' : { id: groupId as Id<'modifierGroups'> }
   );
 
-  if (!isNew && existing === undefined) return <p className="text-fg-muted">Memuat…</p>;
-  if (!isNew && existing === null) return <p className="text-fg-muted">Grup tidak ditemukan.</p>;
+  if (!isNew && existing === undefined) return <p className="text-muted-foreground">Memuat…</p>;
+  if (!isNew && existing === null) return <p className="text-muted-foreground">Grup tidak ditemukan.</p>;
 
   return (
     <div>

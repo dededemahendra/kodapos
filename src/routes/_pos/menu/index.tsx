@@ -50,7 +50,7 @@ function ItemsListPage() {
   return (
     <div className="flex gap-6">
       <aside className="w-52 shrink-0 text-sm">
-        <h2 className="text-xs uppercase tracking-wide text-fg-muted mb-2">Kategori</h2>
+        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Kategori</h2>
         <nav className="space-y-1">
           <FilterButton
             active={filter === 'all'}
@@ -91,13 +91,13 @@ function ItemsListPage() {
           </Button>
         </div>
         {isLoading ? (
-          <p className="text-fg-muted">Memuat…</p>
+          <p className="text-muted-foreground">Memuat…</p>
         ) : rows.length === 0 ? (
-          <p className="text-fg-muted">Tidak ada item.</p>
+          <p className="text-muted-foreground">Tidak ada item.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase text-fg-muted border-b border-border">
+              <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
                 <th className="py-2 px-2">Nama</th>
                 <th className="py-2 px-2 w-24">Kategori</th>
                 <th className="py-2 px-2 w-28 text-right">Harga</th>
@@ -106,7 +106,7 @@ function ItemsListPage() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r._id} className="border-b border-border/50 hover:bg-surface">
+                <tr key={r._id} className="border-b border-border/50 hover:bg-muted">
                   <td className="py-2 px-2">
                     <Link
                       to="/menu/items/$itemId"
@@ -116,17 +116,17 @@ function ItemsListPage() {
                       {r.name}
                     </Link>
                   </td>
-                  <td className="py-2 px-2 text-fg-muted">
+                  <td className="py-2 px-2 text-muted-foreground">
                     {categories?.find((c) => c._id === r.categoryId)?.name ?? '—'}
                   </td>
                   <td className="py-2 px-2 text-right">{formatIDR(r.priceIDR)}</td>
                   <td className="py-2 px-2">
                     {r.archived ? (
-                      <span className="text-xs text-fg-muted">● Arsip</span>
+                      <span className="text-xs text-muted-foreground">● Arsip</span>
                     ) : r.isActive ? (
-                      <span className="text-xs text-brand-600">● Aktif</span>
+                      <span className="text-xs text-primary">● Aktif</span>
                     ) : (
-                      <span className="text-xs text-fg-muted">○ Off</span>
+                      <span className="text-xs text-muted-foreground">○ Off</span>
                     )}
                   </td>
                 </tr>
@@ -155,8 +155,8 @@ function FilterButton({
       type="button"
       onClick={onClick}
       className={`w-full text-left px-2 py-1 rounded ${
-        active ? 'bg-brand-50 text-brand-700 font-medium' : 'hover:bg-surface'
-      } ${muted ? 'text-fg-muted' : ''}`}
+        active ? 'bg-accent text-primary font-medium' : 'hover:bg-muted'
+      } ${muted ? 'text-muted-foreground' : ''}`}
     >
       {label}
     </button>

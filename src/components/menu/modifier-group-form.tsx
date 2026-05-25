@@ -126,7 +126,7 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs uppercase tracking-wide text-fg-muted">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">
               Opsi ({options.length})
             </span>
             <Button type="button" size="sm" variant="outline" onClick={addRow}>
@@ -135,7 +135,7 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
           </div>
           <div className="space-y-2">
             {options.length === 0 && (
-              <p className="text-sm text-fg-muted">Belum ada opsi. Tambahkan minimal satu.</p>
+              <p className="text-sm text-muted-foreground">Belum ada opsi. Tambahkan minimal satu.</p>
             )}
             {options.map((o, idx) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: new rows have no persisted id yet; index is the pragmatic key.
