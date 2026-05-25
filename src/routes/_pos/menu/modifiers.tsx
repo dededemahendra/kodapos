@@ -14,22 +14,22 @@ function ModifierGroupsPage() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-bold">Grup Modifier</h1>
-          <p className="text-fg-muted text-sm">
+          <p className="text-muted-foreground text-sm">
             Dipakai ulang di banyak item — ubah di satu tempat.
           </p>
         </div>
         <Link to="/menu/modifiers/$groupId" params={{ groupId: 'new' }} className="text-sm">
-          <span className="px-3 py-1 rounded-md bg-brand-600 text-white">+ Grup baru</span>
+          <span className="px-3 py-1 rounded-md bg-primary text-white">+ Grup baru</span>
         </Link>
       </div>
-      {groups === undefined && <p className="text-fg-muted">Memuat…</p>}
+      {groups === undefined && <p className="text-muted-foreground">Memuat…</p>}
       {groups && groups.length === 0 && (
-        <p className="text-fg-muted">Belum ada grup modifier. Buat satu untuk mulai.</p>
+        <p className="text-muted-foreground">Belum ada grup modifier. Buat satu untuk mulai.</p>
       )}
       {groups && groups.length > 0 && (
         <ul className="divide-y divide-border border border-border rounded-md">
           {groups.map((g) => (
-            <li key={g._id} className="p-3 hover:bg-surface">
+            <li key={g._id} className="p-3 hover:bg-muted">
               <Link
                 to="/menu/modifiers/$groupId"
                 params={{ groupId: g._id }}
@@ -37,12 +37,12 @@ function ModifierGroupsPage() {
               >
                 <div>
                   <span className="font-medium">{g.name}</span>
-                  <span className="text-xs text-fg-muted ml-2">
+                  <span className="text-xs text-muted-foreground ml-2">
                     {g.required ? 'wajib' : 'opsional'} · {g.minSelect}/{g.maxSelect} ·{' '}
                     {g.options.length} opsi
                   </span>
                 </div>
-                <span className="text-fg-muted">›</span>
+                <span className="text-muted-foreground">›</span>
               </Link>
             </li>
           ))}

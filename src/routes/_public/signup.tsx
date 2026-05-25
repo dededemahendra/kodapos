@@ -67,7 +67,7 @@ function SignupPage() {
     <main className="min-h-screen flex items-center justify-center p-6">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm p-6 rounded-lg border border-border bg-bg"
+        className="w-full max-w-sm p-6 rounded-lg border border-border bg-background"
       >
         <h1 className="mb-6 text-2xl font-bold">Daftar</h1>
         <FieldGroup>

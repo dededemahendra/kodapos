@@ -55,24 +55,24 @@ function StaffSettingsPage() {
     }
   }
 
-  if (staff === undefined) return <p className="text-fg-muted">Memuat…</p>;
+  if (staff === undefined) return <p className="text-muted-foreground">Memuat…</p>;
 
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="text-2xl font-bold mb-1">Staff</h1>
-        <p className="text-fg-muted text-sm">Tambah kasir, ganti PIN, atau arsipkan staf.</p>
+        <p className="text-muted-foreground text-sm">Tambah kasir, ganti PIN, atau arsipkan staf.</p>
       </div>
 
       <form onSubmit={handleCreate} className="flex gap-2 items-end">
         <div className="flex-1">
-          <label htmlFor="newName" className="text-xs text-fg-muted">
+          <label htmlFor="newName" className="text-xs text-muted-foreground">
             Nama kasir baru
           </label>
           <Input id="newName" name="name" placeholder="mis. Andi" required maxLength={60} />
         </div>
         <div>
-          <label htmlFor="newPin" className="text-xs text-fg-muted">
+          <label htmlFor="newPin" className="text-xs text-muted-foreground">
             PIN 4 digit
           </label>
           <Input
@@ -94,7 +94,7 @@ function StaffSettingsPage() {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-xs uppercase text-fg-muted border-b border-border">
+          <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
             <th className="py-2 px-2">Nama</th>
             <th className="py-2 px-2 w-24">Peran</th>
             <th className="py-2 px-2 w-32">PIN</th>
@@ -179,11 +179,11 @@ function StaffRow({
           </button>
         )}
       </td>
-      <td className="py-2 px-2 text-fg-muted">{row.role === 'owner' ? 'Pemilik' : 'Kasir'}</td>
+      <td className="py-2 px-2 text-muted-foreground">{row.role === 'owner' ? 'Pemilik' : 'Kasir'}</td>
       <td className="py-2 px-2">
         <button
           type="button"
-          className="text-xs text-brand-600 hover:underline"
+          className="text-xs text-primary hover:underline"
           onClick={onResetPinClick}
         >
           {row.pinHash ? 'Ganti PIN' : 'Set PIN'}

@@ -18,12 +18,12 @@ function ItemEditPage() {
     isNew ? 'skip' : { id: itemId as Id<'menuItems'> }
   );
 
-  if (!isNew && detail === undefined) return <p className="text-fg-muted">Memuat…</p>;
-  if (!isNew && detail === null) return <p className="text-fg-muted">Item tidak ditemukan.</p>;
+  if (!isNew && detail === undefined) return <p className="text-muted-foreground">Memuat…</p>;
+  if (!isNew && detail === null) return <p className="text-muted-foreground">Item tidak ditemukan.</p>;
 
   return (
     <div>
-      <div className="text-xs text-fg-muted mb-2">
+      <div className="text-xs text-muted-foreground mb-2">
         <Link to="/menu" className="hover:underline">
           Menu
         </Link>{' '}

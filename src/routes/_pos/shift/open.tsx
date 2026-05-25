@@ -23,7 +23,7 @@ function ShiftOpenPage() {
   const [submitting, setSubmitting] = useState(false);
 
   if (current === undefined || staff === undefined) {
-    return <p className="text-fg-muted p-6">Memuat…</p>;
+    return <p className="text-muted-foreground p-6">Memuat…</p>;
   }
 
   if (current) {
@@ -41,7 +41,7 @@ function ShiftOpenPage() {
   const me = staff.find((s) => s._id === cashierId);
   if (!me) {
     return (
-      <p className="text-fg-muted p-6">
+      <p className="text-muted-foreground p-6">
         Kasir tidak dikenal.{' '}
         <Link to="/pin" className="underline">
           Pilih ulang
@@ -73,7 +73,7 @@ function ShiftOpenPage() {
   return (
     <main className="max-w-md mx-auto p-6">
       <h1 className="text-2xl font-bold mb-1">Buka Shift</h1>
-      <p className="text-fg-muted text-sm mb-6">Sebagai: {me.name}</p>
+      <p className="text-muted-foreground text-sm mb-6">Sebagai: {me.name}</p>
       <form onSubmit={onSubmit}>
         <FieldGroup>
           <Field>

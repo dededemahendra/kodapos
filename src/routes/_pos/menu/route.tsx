@@ -10,23 +10,23 @@ function MenuLayout() {
       <nav className="flex gap-4 border-b border-border mb-4 text-sm">
         <Link
           to="/menu"
-          className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-brand-500"
-          activeProps={{ className: 'border-brand-500 font-semibold' }}
+          className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
+          activeProps={{ className: 'border-ring font-semibold' }}
           activeOptions={{ exact: true }}
         >
           Items
         </Link>
         <Link
           to="/menu/categories"
-          className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-brand-500"
-          activeProps={{ className: 'border-brand-500 font-semibold' }}
+          className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
+          activeProps={{ className: 'border-ring font-semibold' }}
         >
           Kategori
         </Link>
         <Link
           to="/menu/modifiers"
-          className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-brand-500"
-          activeProps={{ className: 'border-brand-500 font-semibold' }}
+          className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
+          activeProps={{ className: 'border-ring font-semibold' }}
         >
           Grup Modifier
         </Link>

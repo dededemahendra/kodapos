@@ -35,8 +35,8 @@ function NotFound() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
       <h1 className="text-2xl font-bold">Halaman tidak ditemukan</h1>
-      <p className="text-fg-muted text-sm">URL yang kamu buka tidak ada di kodapos.</p>
-      <Link to="/" className="text-brand-700 underline">
+      <p className="text-muted-foreground text-sm">URL yang kamu buka tidak ada di kodapos.</p>
+      <Link to="/" className="text-primary underline">
         Kembali ke beranda
       </Link>
     </main>

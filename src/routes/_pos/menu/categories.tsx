@@ -9,7 +9,7 @@ function CategoriesPage() {
   return (
     <div>
       <h1 className="text-xl font-bold mb-1">Kategori</h1>
-      <p className="text-fg-muted text-sm mb-4">
+      <p className="text-muted-foreground text-sm mb-4">
         Kategori muncul sebagai filter di daftar Items dan di layar kasir.
       </p>
       <CategoryTable />

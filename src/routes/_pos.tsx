@@ -17,9 +17,9 @@ function PosLayout() {
   const showNav = !NAV_HIDDEN_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 
   return (
-    <div data-density="compact" className="min-h-screen bg-surface">
+    <div data-density="compact" className="min-h-screen bg-muted">
       <AuthLoading>
-        <div className="flex min-h-screen items-center justify-center gap-2 text-fg-muted">
+        <div className="flex min-h-screen items-center justify-center gap-2 text-muted-foreground">
           <Spinner />
           <span>Memuat sesi…</span>
         </div>

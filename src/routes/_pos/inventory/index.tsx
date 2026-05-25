@@ -74,12 +74,12 @@ function InventoryIndex() {
       </div>
 
       {isLoading ? (
-        <div className="flex gap-2 text-fg-muted items-center">
+        <div className="flex gap-2 text-muted-foreground items-center">
           <Spinner />
           <span>Memuat…</span>
         </div>
       ) : visible.length === 0 ? (
-        <p className="text-fg-muted">
+        <p className="text-muted-foreground">
           {filter === 'low'
             ? 'Tidak ada bahan dengan stok rendah.'
             : filter === 'archived'
@@ -89,7 +89,7 @@ function InventoryIndex() {
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs uppercase text-fg-muted border-b border-border">
+            <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
               <th className="py-2 px-2">Nama</th>
               <th className="py-2 px-2 w-32 text-right">Stok</th>
               <th className="py-2 px-2 w-24 text-right">Ambang</th>
@@ -104,7 +104,7 @@ function InventoryIndex() {
               return (
                 <tr
                   key={row._id}
-                  className={`border-b border-border/50 hover:bg-surface ${low ? 'bg-amber-50' : ''}`}
+                  className={`border-b border-border/50 hover:bg-muted ${low ? 'bg-destructive/10' : ''}`}
                 >
                   <td className="py-2 px-2">
                     {low ? <span className="mr-1">⚠</span> : null}
@@ -121,11 +121,11 @@ function InventoryIndex() {
                   </td>
                   <td className="py-2 px-2 text-xs">
                     {row.archived ? (
-                      <span className="text-fg-muted">● Arsip</span>
+                      <span className="text-muted-foreground">● Arsip</span>
                     ) : low ? (
-                      <span className="text-amber-700">● Rendah</span>
+                      <span className="text-destructive">● Rendah</span>
                     ) : (
-                      <span className="text-brand-600">● Aktif</span>
+                      <span className="text-primary">● Aktif</span>
                     )}
                   </td>
                   <td className="py-2 px-2 text-right">
@@ -189,8 +189,8 @@ function FilterChip({
       onClick={onClick}
       className={`text-sm px-3 py-1.5 rounded-md ${
         active
-          ? 'bg-brand-50 text-brand-700 font-medium'
-          : 'text-fg-muted hover:bg-surface hover:text-fg'
+          ? 'bg-accent text-primary font-medium'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
       }`}
     >
       {children}

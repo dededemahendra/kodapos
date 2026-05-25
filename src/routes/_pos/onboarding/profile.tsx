@@ -14,10 +14,10 @@ function OnboardingProfile() {
   const navigate = useNavigate();
 
   if (cafe === undefined) {
-    return <p className="text-fg-muted">Memuat…</p>;
+    return <p className="text-muted-foreground">Memuat…</p>;
   }
   if (cafe === null) {
-    return <p className="text-fg-muted">Kafe tidak ditemukan.</p>;
+    return <p className="text-muted-foreground">Kafe tidak ditemukan.</p>;
   }
 
   const initial: CafeProfileFormValues = {
@@ -32,7 +32,7 @@ function OnboardingProfile() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-1">Profil kafe</h1>
-      <p className="text-fg-muted mb-6 text-sm">Bisa diubah kapan saja di Pengaturan.</p>
+      <p className="text-muted-foreground mb-6 text-sm">Bisa diubah kapan saja di Pengaturan.</p>
       <CafeProfileForm
         initial={initial}
         submitLabel="Lanjut →"
