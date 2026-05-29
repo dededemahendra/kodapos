@@ -4,6 +4,8 @@ import { useId } from "react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import { useLingui } from "@lingui/react/macro";
 import { Trans } from "@lingui/react/macro";
+import { useQuery } from "convex/react";
+import { api } from "convex/_generated/api";
 import { formatDate } from "~/lib/formater";
 import {
 	CardContent,
@@ -19,93 +21,57 @@ import {
 } from "~/components/ui/chart";
 import { Delta, DeltaIcon, DeltaValue } from "~/components/delta";
 import { DashboardCard } from "~/components/dashboard-card";
-
-const VISIBLE_DAYS = 7;
-
-/** One row per day: ISO `date`, `retail` / `online` = sales counts (units sold). */
-type ChannelSalesChartRow = {
-	date: string;
-	retail: number;
-	online: number;
-};
-
-/**
- * Demo Data.
- */
-const chartData: ChannelSalesChartRow[] = [
-	{ date: "2026-03-15", retail: 198, online: 96 },
-	{ date: "2026-03-16", retail: 176, online: 82 },
-	{ date: "2026-03-17", retail: 184, online: 88 },
-	{ date: "2026-03-18", retail: 170, online: 80 },
-	{ date: "2026-03-19", retail: 188, online: 90 },
-	{ date: "2026-03-20", retail: 180, online: 85 },
-	{ date: "2026-03-21", retail: 192, online: 92 },
-	{ date: "2026-03-22", retail: 172, online: 78 },
-	{ date: "2026-03-23", retail: 166, online: 74 },
-	{ date: "2026-03-24", retail: 174, online: 79 },
-	{ date: "2026-03-25", retail: 158, online: 72 },
-	{ date: "2026-03-26", retail: 168, online: 76 },
-	{ date: "2026-03-27", retail: 152, online: 70 },
-	{ date: "2026-03-28", retail: 160, online: 74 },
-	{ date: "2026-03-29", retail: 146, online: 68 },
-	{ date: "2026-03-30", retail: 154, online: 71 },
-	{ date: "2026-03-31", retail: 142, online: 65 },
-	{ date: "2026-04-01", retail: 140, online: 63 },
-	{ date: "2026-04-02", retail: 132, online: 59 },
-	{ date: "2026-04-03", retail: 124, online: 56 },
-	{ date: "2026-04-04", retail: 128, online: 58 },
-	{ date: "2026-04-05", retail: 116, online: 52 },
-	{ date: "2026-04-06", retail: 84, online: 40 },
-	{ date: "2026-04-07", retail: 82, online: 38 },
-	{ date: "2026-04-08", retail: 96, online: 46 },
-	{ date: "2026-04-09", retail: 92, online: 69 },
-	{ date: "2026-04-10", retail: 96, online: 62 },
-	{ date: "2026-04-11", retail: 112, online: 75 },
-	{ date: "2026-04-12", retail: 101, online: 77 },
-	{ date: "2026-04-13", retail: 112, online: 78 },
-];
-
-/** Most recent daily rows shown in the chart. */
-const chartRows = chartData.slice(-VISIBLE_DAYS);
-
-function rowTotal(row: ChannelSalesChartRow) {
-	return row.retail + row.online;
-}
-
-function growthPctForWindow(rows: readonly ChannelSalesChartRow[]) {
-	const first = rows[0];
-	if (!first) {
-		return 0;
-	}
-	const last = rows.at(-1);
-	if (!last) {
-		return 0;
-	}
-	const a = rowTotal(first);
-	const b = rowTotal(last);
-	if (!a) {
-		return 0;
-	}
-	return ((b - a) / a) * 100;
-}
-
-const growthPctNum = growthPctForWindow(chartRows);
+import { Skeleton } from "~/components/ui/skeleton";
 
 export function ChannelSalesChart() {
 	const chartUid = useId().replace(/:/g, "");
 	const idLineGlow = `channel-sales-line-glow-${chartUid}`;
 	const { t } = useLingui();
 
+	const rawData = useQuery(api.dashboard.paymentMethods, {});
+
 	const chartConfig = {
-		retail: {
-			label: t`Retail`,
+		cash: {
+			label: t`Tunai`,
 			color: "var(--chart-2)",
 		},
-		online: {
-			label: t`Online`,
+		qris: {
+			label: t`QRIS`,
 			color: "var(--chart-1)",
 		},
 	} satisfies ChartConfig;
+
+	if (rawData === undefined) {
+		return (
+			<DashboardCard className="gap-0 md:col-span-2">
+				<CardHeader>
+					<div className="min-w-0 space-y-2">
+						<CardTitle>
+							<Trans>Metode pembayaran</Trans>
+						</CardTitle>
+						<CardDescription>
+							<Trans>Jumlah transaksi per metode, 7 hari terakhir.</Trans>
+						</CardDescription>
+					</div>
+				</CardHeader>
+				<CardContent>
+					<Skeleton className="h-60 w-full" />
+				</CardContent>
+			</DashboardCard>
+		);
+	}
+
+	const chartRows = rawData.map((r) => ({
+		label: formatDate(new Date(r.dayStart).toISOString(), "day-month"),
+		cash: r.cash,
+		qris: r.qris,
+	}));
+
+	const first = chartRows[0];
+	const last = chartRows.at(-1);
+	const firstTotal = first ? first.cash + first.qris : 0;
+	const lastTotal = last ? last.cash + last.qris : 0;
+	const growthPctNum = firstTotal ? ((lastTotal - firstTotal) / firstTotal) * 100 : 0;
 
 	return (
 		<DashboardCard className="gap-0 md:col-span-2">
@@ -113,7 +79,7 @@ export function ChannelSalesChart() {
 				<div className="min-w-0 space-y-2">
 					<div className="flex flex-wrap items-center gap-2">
 						<CardTitle>
-							<Trans>Channel sales</Trans>
+							<Trans>Metode pembayaran</Trans>
 						</CardTitle>
 						<Delta value={growthPctNum} variant="badge">
 							<DeltaIcon variant="trend" />
@@ -121,7 +87,7 @@ export function ChannelSalesChart() {
 						</Delta>
 					</div>
 					<CardDescription>
-						<Trans>Daily sales count by channel, last {VISIBLE_DAYS} days.</Trans>
+						<Trans>Jumlah transaksi per metode, 7 hari terakhir.</Trans>
 					</CardDescription>
 				</div>
 			</CardHeader>
@@ -142,9 +108,8 @@ export function ChannelSalesChart() {
 						<CartesianGrid className="stroke-border" vertical={false} />
 						<XAxis
 							axisLine={false}
-							dataKey="date"
+							dataKey="label"
 							interval={0}
-							tickFormatter={(value) => formatDate(String(value), "day-month")}
 							tickLine={false}
 							tickMargin={8}
 						/>
@@ -165,18 +130,18 @@ export function ChannelSalesChart() {
 							</filter>
 						</defs>
 						<Line
-							dataKey="online"
+							dataKey="qris"
 							dot={false}
 							filter={`url(#${idLineGlow})`}
-							stroke="var(--color-online)"
+							stroke="var(--color-qris)"
 							strokeWidth={2}
 							type="step"
 						/>
 						<Line
-							dataKey="retail"
+							dataKey="cash"
 							dot={false}
 							filter={`url(#${idLineGlow})`}
-							stroke="var(--color-retail)"
+							stroke="var(--color-cash)"
 							strokeWidth={2}
 							type="step"
 						/>

@@ -60,6 +60,23 @@ export function formatTime(value: string | number | Date): string {
   }).format(d);
 }
 
+/** Locale-aware relative time, e.g. "2 jam lalu" / "2 hours ago". */
+export function formatRelative(value: number | string | Date): string {
+  const ms =
+    value instanceof Date
+      ? value.getTime()
+      : typeof value === 'number'
+        ? value
+        : new Date(value).getTime();
+  if (Number.isNaN(ms)) return '';
+  const diff = ms - Date.now();
+  const abs = Math.abs(diff);
+  const rtf = new Intl.RelativeTimeFormat(activeLocale(), { numeric: 'auto' });
+  if (abs < 3_600_000) return rtf.format(Math.round(diff / 60_000), 'minute');
+  if (abs < 86_400_000) return rtf.format(Math.round(diff / 3_600_000), 'hour');
+  return rtf.format(Math.round(diff / 86_400_000), 'day');
+}
+
 // IDR is always formatted in id-ID locale so the Rp symbol is always shown,
 // regardless of the active UI locale (English uses "IDR" which is wrong for POS).
 const IDR = new Intl.NumberFormat('id-ID', {

@@ -1,7 +1,13 @@
 "use client";
 
 import { Trans } from "@lingui/react/macro";
+import { useQuery } from "convex/react";
+import { api } from "convex/_generated/api";
+import { Link } from "@tanstack/react-router";
+import { ArrowRightIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
 	CardContent,
 	CardDescription,
@@ -18,87 +24,115 @@ import {
 	TableRow,
 } from "~/components/ui/table";
 import { DashboardCard } from "~/components/dashboard-card";
-import { ArrowRightIcon } from "lucide-react";
+import { formatIDR, formatRelative } from "~/lib/formater";
 
-const invoices = [
-	{
-		id: "1045",
-		customer: "Northwind Labs",
-		amount: "$2,400.00",
-		status: "Paid",
-	},
-	{
-		id: "1044",
-		customer: "Blue River Co.",
-		amount: "$890.00",
-		status: "Pending",
-	},
-	{
-		id: "1043",
-		customer: "Oak Street Studio",
-		amount: "$5,120.00",
-		status: "Paid",
-	},
-	{
-		id: "1042",
-		customer: "Harbor Freight LLC",
-		amount: "$310.50",
-		status: "Overdue",
-	},
-] as const;
+type OrderStatus = "pending" | "paid" | "void";
+
+function StatusBadge({ status }: { status: OrderStatus }) {
+	if (status === "paid") {
+		return (
+			<Badge variant="secondary">
+				<Trans>Lunas</Trans>
+			</Badge>
+		);
+	}
+	if (status === "pending") {
+		return (
+			<Badge variant="outline">
+				<Trans>Menunggu</Trans>
+			</Badge>
+		);
+	}
+	return (
+		<Badge variant="destructive">
+			<Trans context="order status">Batal</Trans>
+		</Badge>
+	);
+}
 
 export function DashboardInvoices() {
+	const data = useQuery(api.dashboard.recentOrders, {});
+
 	return (
 		<DashboardCard className="relative gap-0 md:col-span-2">
 			<CardHeader className="border-b">
 				<CardTitle className="text-base">
-					<Trans>Recent invoices</Trans>
+					<Trans>Transaksi terbaru</Trans>
 				</CardTitle>
 				<CardDescription>
-					<Trans>Open amounts and payment status.</Trans>
+					<Trans>Pesanan terakhir dan statusnya.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="mask-b-from-50% mask-b-to-100% px-0">
 				<Table>
 					<TableCaption className="sr-only">
-						<Trans>Recent invoices with customer, amount, and status.</Trans>
+						<Trans>Transaksi terbaru dengan kasir, waktu, dan total.</Trans>
 					</TableCaption>
 					<TableHeader>
 						<TableRow>
 							<TableHead className="ps-6">
-								<Trans>Customer</Trans>
+								<Trans>Kasir</Trans>
 							</TableHead>
 							<TableHead>
-								<Trans>Invoice</Trans>
+								<Trans>Waktu</Trans>
 							</TableHead>
 							<TableHead className="pe-6 text-right tabular-nums">
-								<Trans>Amount</Trans>
+								<Trans>Total</Trans>
 							</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{invoices.map((inv) => (
-							<TableRow className="h-12" key={inv.id}>
-								<TableCell className="max-w-40 truncate ps-6 font-medium">
-									{inv.customer}
-								</TableCell>
-								<TableCell className="text-muted-foreground tabular-nums">
-									#{inv.id}
-								</TableCell>
-								<TableCell className="pe-6 text-right tabular-nums">
-									{inv.amount}
+						{data === undefined ? (
+							Array.from({ length: 4 }).map((_, i) => (
+								// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders have no stable id
+								<TableRow className="h-12" key={i}>
+									<TableCell className="ps-6">
+										<Skeleton className="h-4 w-28" />
+									</TableCell>
+									<TableCell>
+										<Skeleton className="h-4 w-20" />
+									</TableCell>
+									<TableCell className="pe-6 text-right">
+										<Skeleton className="ms-auto h-4 w-24" />
+									</TableCell>
+								</TableRow>
+							))
+						) : data.length === 0 ? (
+							<TableRow>
+								<TableCell
+									colSpan={3}
+									className="py-8 text-center text-muted-foreground"
+								>
+									<Trans>Belum ada transaksi.</Trans>
 								</TableCell>
 							</TableRow>
-						))}
+						) : (
+							data.map((o) => (
+								<TableRow className="h-12" key={o.id}>
+									<TableCell className="max-w-44 truncate ps-6 font-medium">
+										<span className="flex items-center gap-2">
+											{o.cashier}
+											<StatusBadge status={o.status} />
+										</span>
+									</TableCell>
+									<TableCell className="text-muted-foreground tabular-nums">
+										{formatRelative(o.at)}
+									</TableCell>
+									<TableCell className="pe-6 text-right tabular-nums">
+										{formatIDR(o.totalIDR)}
+									</TableCell>
+								</TableRow>
+							))
+						)}
 					</TableBody>
 				</Table>
 			</CardContent>
 			<div className="mask-t-from-30% absolute inset-x-0 bottom-0 flex h-1/5 items-center justify-center bg-background">
 				<Button asChild className="relative" variant="ghost">
-					<a href="/#">
-						<Trans>View All</Trans>
+					<Link to="/history">
+						<Trans>Lihat semua</Trans>
 						<ArrowRightIcon aria-hidden="true" />
-					</a>
+					</Link>
 				</Button>
 			</div>
 		</DashboardCard>

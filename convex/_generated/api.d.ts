@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as cafes from "../cafes.js";
+import type * as dashboard from "../dashboard.js";
 import type * as http from "../http.js";
 import type * as ingredients from "../ingredients.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -35,6 +36,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   cafes: typeof cafes;
+  dashboard: typeof dashboard;
   http: typeof http;
   ingredients: typeof ingredients;
   "lib/auth": typeof lib_auth;

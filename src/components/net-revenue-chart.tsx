@@ -4,6 +4,8 @@ import type * as React from "react";
 import { Bar, BarChart, XAxis } from "recharts";
 import { useLingui } from "@lingui/react/macro";
 import { Trans } from "@lingui/react/macro";
+import { useQuery } from "convex/react";
+import { api } from "convex/_generated/api";
 import {
 	CardContent,
 	CardDescription,
@@ -18,23 +20,8 @@ import {
 } from "~/components/ui/chart";
 import { Delta, DeltaIcon, DeltaValue } from "~/components/delta";
 import { DashboardCard } from "~/components/dashboard-card";
-
-/** Demo: last 7 days. */
-const salesDaily7 = [
-	{ day: "Mon", sales: 3200 },
-	{ day: "Tue", sales: 3001 },
-	{ day: "Wed", sales: 3780 },
-	{ day: "Thu", sales: 4100 },
-	{ day: "Fri", sales: 4520 },
-	{ day: "Sat", sales: 4004 },
-	{ day: "Sun", sales: 5340 },
-] as const;
-
-const chartRows = salesDaily7.map((row) => ({ ...row }));
-
-const firstDay = salesDaily7[0].sales;
-const lastDay = salesDaily7.at(-1)?.sales ?? firstDay;
-const growthPct = (((lastDay - firstDay) / firstDay) * 100).toFixed(1);
+import { Skeleton } from "~/components/ui/skeleton";
+import { formatDate, formatIDR } from "~/lib/formater";
 
 function CustomGradientBar(
 	props: React.SVGProps<SVGRectElement> & {
@@ -48,7 +35,7 @@ function CustomGradientBar(
 		y = 0,
 		width = 0,
 		height = 0,
-		dataKey = "sales",
+		dataKey = "revenue",
 		index = 0,
 	} = props;
 	const gid = `gradient-bar-${String(dataKey)}-${index}`;
@@ -76,55 +63,78 @@ function CustomGradientBar(
 
 export function NetRevenueChart() {
 	const { t } = useLingui();
+	const data = useQuery(api.dashboard.revenueDaily, {});
 
 	const chartConfig = {
-		sales: {
-			label: t`Sales`,
+		revenue: {
+			label: t`Pendapatan`,
 			color: "var(--chart-2)",
 		},
 	} satisfies ChartConfig;
+
+	const chartRows =
+		data?.map((r) => ({
+			label: formatDate(new Date(r.dayStart).toISOString(), "day-month"),
+			revenue: r.revenueIDR,
+		})) ?? [];
+
+	const firstRevenue = data?.[0]?.revenueIDR ?? 0;
+	const lastRevenue = data?.at(-1)?.revenueIDR ?? 0;
+	const growthPct =
+		firstRevenue === 0
+			? 0
+			: Number((((lastRevenue - firstRevenue) / firstRevenue) * 100).toFixed(1));
 
 	return (
 		<DashboardCard className="gap-0 md:col-span-2">
 			<CardHeader className="gap-2">
 				<div className="flex flex-wrap items-center gap-2">
 					<CardTitle>
-						<Trans>Net revenue</Trans>
+						<Trans>Pendapatan</Trans>
 					</CardTitle>
-					<Delta value={Number(growthPct)} variant="badge">
+					<Delta value={growthPct} variant="badge">
 						<DeltaIcon variant="trend" />
 						<DeltaValue />
 					</Delta>
 				</div>
 				<CardDescription>
-					<Trans>Daily net sales, last 7 days.</Trans>
+					<Trans>Pendapatan harian, 7 hari terakhir.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<ChartContainer
-					className="aspect-auto h-60 w-full md:h-80"
-					config={chartConfig}
-				>
-					<BarChart accessibilityLayer data={chartRows}>
-						<XAxis
-							axisLine={false}
-							dataKey="day"
-							interval={0}
-							tickFormatter={(value) => String(value)}
-							tickLine={false}
-							tickMargin={10}
-						/>
-						<ChartTooltip
-							content={<ChartTooltipContent hideLabel />}
-							cursor={false}
-						/>
-						<Bar
-							dataKey="sales"
-							fill="var(--color-sales)"
-							shape={<CustomGradientBar />}
-						/>
-					</BarChart>
-				</ChartContainer>
+				{data === undefined ? (
+					<Skeleton className="h-60 w-full" />
+				) : (
+					<ChartContainer
+						className="aspect-auto h-60 w-full md:h-80"
+						config={chartConfig}
+					>
+						<BarChart accessibilityLayer data={chartRows}>
+							<XAxis
+								axisLine={false}
+								dataKey="label"
+								interval={0}
+								tickFormatter={(value) => String(value)}
+								tickLine={false}
+								tickMargin={10}
+							/>
+							<ChartTooltip
+								content={
+									<ChartTooltipContent
+										hideLabel
+										formatter={(value) => formatIDR(Number(value))}
+									/>
+								}
+								cursor={false}
+							/>
+							<Bar
+								dataKey="revenue"
+								fill="var(--color-revenue)"
+								shape={<CustomGradientBar />}
+							/>
+						</BarChart>
+					</ChartContainer>
+				)}
 			</CardContent>
 		</DashboardCard>
 	);

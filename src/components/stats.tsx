@@ -1,66 +1,72 @@
-import { useLingui } from "@lingui/react/macro";
 import { Trans } from "@lingui/react/macro";
+import { useQuery } from "convex/react";
+import { api } from "convex/_generated/api";
 import {
 	CardContent,
 	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import { Delta, DeltaIcon, DeltaValue } from "~/components/delta";
 import { DashboardCard } from "~/components/dashboard-card";
-
-type Stat = {
-	label: string;
-	value: string;
-	delta: number;
-};
+import { formatIDR } from "~/lib/formater";
 
 export function DashboardStats() {
-	const { t } = useLingui();
+	const data = useQuery(api.dashboard.kpis, {});
 
-	const stats: Stat[] = [
+	const tiles: { label: React.ReactNode; value: React.ReactNode; delta: number | undefined }[] = [
 		{
-			label: t`Active users`,
-			value: "847",
-			delta: 3.1,
+			label: <Trans>Pendapatan hari ini</Trans>,
+			value: data !== undefined ? formatIDR(data.revenueIDR) : undefined,
+			delta: data?.revenueDeltaPct,
 		},
 		{
-			label: t`Revenue`,
-			value: "$18,290",
-			delta: 12.4,
+			label: <Trans>Transaksi</Trans>,
+			value: data?.orders,
+			delta: data?.ordersDeltaPct,
 		},
 		{
-			label: t`Conversion Rate`,
-			value: "3.28%",
-			delta: -0.4,
+			label: <Trans>Rata-rata transaksi</Trans>,
+			value: data !== undefined ? formatIDR(data.avgOrderIDR) : undefined,
+			delta: data?.avgOrderDeltaPct,
 		},
 		{
-			label: t`New signups`,
-			value: "142",
-			delta: 8.7,
+			label: <Trans>Item terjual</Trans>,
+			value: data?.itemsSold,
+			delta: data?.itemsSoldDeltaPct,
 		},
 	];
 
 	return (
 		<>
-			{stats.map((s) => (
-				<DashboardCard className="" key={s.label}>
+			{tiles.map((tile, index) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: static tile order never changes
+				<DashboardCard className="" key={index}>
 					<CardHeader className="flex flex-row items-center justify-between">
 						<CardTitle className="font-normal text-xs tracking-wide">
-							{s.label}
+							{tile.label}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="flex flex-row items-center gap-2">
-						<p className="font-semibold text-2xl tabular-nums">{s.value}</p>
+						{tile.value !== undefined ? (
+							<p className="font-semibold text-2xl tabular-nums">{tile.value}</p>
+						) : (
+							<Skeleton className="h-8 w-24" />
+						)}
 					</CardContent>
 					<CardFooter className="gap-1 rounded-none bg-background text-xs">
-						<Delta value={s.delta}>
-							<DeltaIcon />
-							<DeltaValue />
-						</Delta>
+						{tile.delta !== undefined ? (
+							<Delta value={tile.delta}>
+								<DeltaIcon />
+								<DeltaValue />
+							</Delta>
+						) : (
+							<Skeleton className="h-4 w-12" />
+						)}
 						<span className="text-muted-foreground">
-							<Trans>vs last week</Trans>
-						</span>{" "}
+							<Trans>vs kemarin</Trans>
+						</span>
 					</CardFooter>
 				</DashboardCard>
 			))}
