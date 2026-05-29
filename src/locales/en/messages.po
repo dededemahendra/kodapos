@@ -222,6 +222,10 @@ msgstr "Language & Region"
 msgid "Bahasa tampilan aplikasi."
 msgstr "App display language."
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Bahasa, kepadatan tampilan, dan format tanggal & waktu berlaku langsung. Preferensi lain menyusul."
+msgstr "Language, display density, and date & time formats apply instantly. Other preferences are coming soon."
+
 #: src/components/billing-health.tsx
 msgid "Balances and payouts look fine. nothing overdue in this snapshot."
 msgstr "Balances and payouts look fine. nothing overdue in this snapshot."
@@ -279,8 +283,8 @@ msgid "Belum punya akun?"
 msgstr "Don't have an account?"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Besar"
-msgstr "Large"
+#~ msgid "Besar"
+#~ msgstr "Large"
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Biaya / satuan"
@@ -723,8 +727,8 @@ msgid "Kebijakan Privasi"
 msgstr "Privacy Policy"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Kecil"
-msgstr "Small"
+#~ msgid "Kecil"
+#~ msgstr "Small"
 
 #: src/components/nav-user.tsx
 msgid "Keluar"
@@ -1078,8 +1082,8 @@ msgid "Nomor HP"
 msgstr "Phone number"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Normal"
-msgstr "Normal"
+#~ msgid "Normal"
+#~ msgstr "Normal"
 
 #: src/components/billing-health.tsx
 msgid "Nothing urgent needs your attention."
@@ -1408,12 +1412,16 @@ msgid "Sebagai: {0}"
 msgstr "As: {0}"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
-msgstr "Some preferences apply after reloading the app."
+#~ msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
+#~ msgstr "Some preferences apply after reloading the app."
 
 #: src/lib/auth-validation.ts
 msgid "Sedang"
 msgstr "Medium"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Segera"
+msgstr "Soon"
 
 #: src/components/latest-change.tsx
 msgid "Selengkapnya"
@@ -1724,16 +1732,16 @@ msgid "Ubah informasi dasar kafe Anda."
 msgstr "Update your cafe's basic information."
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Ukuran font dasar antarmuka."
-msgstr "Base font size for the interface."
+#~ msgid "Ukuran font dasar antarmuka."
+#~ msgstr "Base font size for the interface."
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Ukuran kertas"
 msgstr "Paper size"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Ukuran teks"
-msgstr "Text size"
+#~ msgid "Ukuran teks"
+#~ msgstr "Text size"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/settings/general.tsx

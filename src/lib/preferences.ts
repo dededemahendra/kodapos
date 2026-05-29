@@ -36,6 +36,48 @@ export function applyDensity(density: Density): void {
   document.documentElement.dataset.density = density;
 }
 
+// ---------------------------------------------------------------------------
+// Date / time format readers (browser-only, SSR-safe)
+// ---------------------------------------------------------------------------
+
+export type DateFormatPref = 'dmy-short' | 'dmy-numeric' | 'iso';
+export type TimeFormatPref = '24' | '12';
+
+const DEFAULT_DATE_FORMAT: DateFormatPref = 'dmy-short';
+const DEFAULT_TIME_FORMAT: TimeFormatPref = '24';
+
+function isValidDateFormat(v: string | null | undefined): v is DateFormatPref {
+  return v === 'dmy-short' || v === 'dmy-numeric' || v === 'iso';
+}
+
+function isValidTimeFormat(v: string | null | undefined): v is TimeFormatPref {
+  return v === '24' || v === '12';
+}
+
+/** Browser-only read; returns DEFAULT_DATE_FORMAT on the server. */
+export function getDateFormat(): DateFormatPref {
+  if (typeof window === 'undefined') return DEFAULT_DATE_FORMAT;
+  try {
+    const stored = window.localStorage.getItem('kodapos.dateFormat');
+    return isValidDateFormat(stored) ? stored : DEFAULT_DATE_FORMAT;
+  } catch {
+    return DEFAULT_DATE_FORMAT;
+  }
+}
+
+/** Browser-only read; returns DEFAULT_TIME_FORMAT on the server. */
+export function getTimeFormat(): TimeFormatPref {
+  if (typeof window === 'undefined') return DEFAULT_TIME_FORMAT;
+  try {
+    const stored = window.localStorage.getItem('kodapos.timeFormat');
+    return isValidTimeFormat(stored) ? stored : DEFAULT_TIME_FORMAT;
+  } catch {
+    return DEFAULT_TIME_FORMAT;
+  }
+}
+
+// ---------------------------------------------------------------------------
+
 /**
  * Small typed localStorage hook. Key is namespaced as `kodapos.<key>`.
  * Falls back to `fallback` when the key is absent or localStorage is unavailable.

@@ -208,13 +208,9 @@ function RegionSection({
 function AppearanceSection({
   density,
   handleDensity,
-  fontSize,
-  setFontSize,
 }: {
   density: Density;
   handleDensity: (v: string) => void;
-  fontSize: string;
-  setFontSize: (v: string) => void;
 }) {
   return (
     <Card>
@@ -239,31 +235,6 @@ function AppearanceSection({
                   </SelectItem>
                   <SelectItem value="comfortable">
                     <Trans>Nyaman</Trans>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            }
-          />
-
-          <RowSep />
-
-          <SettingRow
-            label={<Trans>Ukuran teks</Trans>}
-            description={<Trans>Ukuran font dasar antarmuka.</Trans>}
-            control={
-              <Select value={fontSize} onValueChange={setFontSize}>
-                <SelectTrigger className="w-44">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="small">
-                    <Trans>Kecil</Trans>
-                  </SelectItem>
-                  <SelectItem value="normal">
-                    <Trans>Normal</Trans>
-                  </SelectItem>
-                  <SelectItem value="large">
-                    <Trans>Besar</Trans>
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -648,14 +619,16 @@ function SecuritySection({
 // Section nav definitions
 // ---------------------------------------------------------------------------
 
-const SECTIONS: { id: SectionId; label: React.ReactNode }[] = [
+// Sections marked `soon: true` are not yet wired to any live behaviour —
+// they persist to localStorage but don't affect the app yet.
+const SECTIONS: { id: SectionId; label: React.ReactNode; soon?: true }[] = [
   { id: 'region', label: <Trans>Bahasa &amp; Wilayah</Trans> },
   { id: 'appearance', label: <Trans>Tampilan</Trans> },
-  { id: 'receipt', label: <Trans>Struk &amp; Cetak</Trans> },
-  { id: 'payment', label: <Trans>Pembayaran</Trans> },
-  { id: 'orders', label: <Trans>Pesanan</Trans> },
-  { id: 'notifications', label: <Trans>Notifikasi</Trans> },
-  { id: 'security', label: <Trans>Keamanan</Trans> },
+  { id: 'receipt', label: <Trans>Struk &amp; Cetak</Trans>, soon: true },
+  { id: 'payment', label: <Trans>Pembayaran</Trans>, soon: true },
+  { id: 'orders', label: <Trans>Pesanan</Trans>, soon: true },
+  { id: 'notifications', label: <Trans>Notifikasi</Trans>, soon: true },
+  { id: 'security', label: <Trans>Keamanan</Trans>, soon: true },
 ];
 
 // ---------------------------------------------------------------------------
@@ -682,9 +655,6 @@ function GeneralSettings() {
   const [timezone, setTimezone] = usePreference<string>('timezone', 'Asia/Jakarta');
   const [dateFormat, setDateFormat] = usePreference<string>('dateFormat', 'dmy-short');
   const [timeFormat, setTimeFormat] = usePreference<string>('timeFormat', '24');
-
-  // Tampilan
-  const [fontSize, setFontSize] = usePreference<string>('fontSize', 'normal');
 
   // Struk & Cetak
   const [autoPrint, setAutoPrint] = useBoolPreference('autoPrint', false);
@@ -729,8 +699,6 @@ function GeneralSettings() {
           <AppearanceSection
             density={density}
             handleDensity={handleDensity}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
           />
         );
       case 'receipt':
@@ -800,7 +768,7 @@ function GeneralSettings() {
           <Trans>Umum</Trans>
         </h1>
         <p className="text-muted-foreground text-xs mt-1">
-          <Trans>Sebagian preferensi diterapkan saat aplikasi dimuat ulang.</Trans>
+          <Trans>Bahasa, kepadatan tampilan, dan format tanggal &amp; waktu berlaku langsung. Preferensi lain menyusul.</Trans>
         </p>
       </div>
 
@@ -808,19 +776,24 @@ function GeneralSettings() {
       <div className="flex gap-6">
         {/* Section rail */}
         <nav className="w-52 shrink-0 flex flex-col gap-1">
-          {SECTIONS.map(({ id, label }) => (
+          {SECTIONS.map(({ id, label, soon }) => (
             <button
               key={id}
               type="button"
               onClick={() => setActiveSection(id)}
               className={cn(
-                'text-left text-sm px-3 py-1.5 rounded-md transition-colors',
+                'flex items-center justify-between text-left text-sm px-3 py-1.5 rounded-md transition-colors',
                 activeSection === id
                   ? 'bg-accent text-accent-foreground font-medium'
                   : 'text-muted-foreground hover:bg-muted',
               )}
             >
-              {label}
+              <span>{label}</span>
+              {soon && (
+                <span className="ml-2 shrink-0 text-[10px] leading-none px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-normal">
+                  <Trans>Segera</Trans>
+                </span>
+              )}
             </button>
           ))}
         </nav>
