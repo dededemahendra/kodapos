@@ -86,9 +86,29 @@ msgstr "● Arsip"
 msgid "08xx-xxxx-xxxx"
 msgstr "08xx-xxxx-xxxx"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "12 jam (AM/PM)"
+msgstr "12 jam (AM/PM)"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "15 menit"
+msgstr "15 menit"
+
 #: src/components/dashboard-activity.tsx
 msgid "2 days ago"
 msgstr "2 days ago"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "24 jam"
+msgstr "24 jam"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "30 menit"
+msgstr "30 menit"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "5 menit"
+msgstr "5 menit"
 
 #: src/components/dashboard-activity.tsx
 msgid "About 2 hours ago"
@@ -178,6 +198,10 @@ msgstr "Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (
 msgid "Atur PIN Pemilik"
 msgstr "Atur PIN Pemilik"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Awalan nomor pesanan"
+msgstr "Awalan nomor pesanan"
+
 #: src/components/inventory/ingredient-form.tsx
 msgid "bahan"
 msgstr "bahan"
@@ -189,6 +213,10 @@ msgstr "Bahan"
 #: src/routes/_pos/settings/general.tsx
 msgid "Bahasa"
 msgstr "Bahasa"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Bahasa & Wilayah"
+msgstr "Bahasa & Wilayah"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Bahasa tampilan aplikasi."
@@ -250,6 +278,10 @@ msgstr "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang
 msgid "Belum punya akun?"
 msgstr "Belum punya akun?"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Besar"
+msgstr "Besar"
+
 #: src/routes/_pos/inventory/index.tsx
 msgid "Biaya / satuan"
 msgstr "Biaya / satuan"
@@ -294,6 +326,14 @@ msgstr "Buka Shift"
 msgid "Buka Shift Baru"
 msgstr "Buka Shift Baru"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Bulatkan total transaksi ke satuan terdekat."
+msgstr "Bulatkan total transaksi ke satuan terdekat."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Cara tanggal ditampilkan di struk dan laporan."
+msgstr "Cara tanggal ditampilkan di struk dan laporan."
+
 #: src/routes/_pos/inventory/index.tsx
 msgid "Cari bahan…"
 msgstr "Cari bahan…"
@@ -322,13 +362,25 @@ msgstr "Catat stok:"
 msgid "Catatan (opsional)"
 msgstr "Catatan (opsional)"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Catatan kaki struk"
+msgstr "Catatan kaki struk"
+
 #: src/components/sale/receipt-preview.tsx
 msgid "Cetak"
 msgstr "Cetak"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Cetak logo kafe di bagian atas struk."
+msgstr "Cetak logo kafe di bagian atas struk."
+
 #: src/routes/_pos/shift/close.tsx
 msgid "Cetak ringkasan"
 msgstr "Cetak ringkasan"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Cetak struk otomatis"
+msgstr "Cetak struk otomatis"
 
 #: src/components/channel-sales-chart.tsx
 msgid "Channel sales"
@@ -413,6 +465,18 @@ msgstr "Email wajib diisi."
 #: src/lib/auth-validation.ts
 msgid "Format email tidak valid."
 msgstr "Format email tidak valid."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Format jam 24-jam atau 12-jam (AM/PM)."
+msgstr "Format jam 24-jam atau 12-jam (AM/PM)."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Format Tanggal"
+msgstr "Format Tanggal"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Format Waktu"
+msgstr "Format Waktu"
 
 #: src/components/menu/category-table.tsx
 msgid "Gagal membuat kategori."
@@ -605,6 +669,10 @@ msgstr "Kafe tidak ditemukan."
 msgid "Kasir"
 msgstr "Kasir"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
+msgstr "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
+
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Kasir lain (opsional)"
 msgstr "Kasir lain (opsional)"
@@ -634,9 +702,17 @@ msgstr "Kategori"
 msgid "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
 msgstr "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Keamanan"
+msgstr "Keamanan"
+
 #: src/routes/_public/privacy.tsx
 msgid "Kebijakan Privasi"
 msgstr "Kebijakan Privasi"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Kecil"
+msgstr "Kecil"
 
 #: src/components/nav-user.tsx
 msgid "Keluar"
@@ -655,6 +731,10 @@ msgstr "Kembali ke /sale"
 msgid "Kembali ke beranda"
 msgstr "Kembali ke beranda"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Kembali ke layar PIN setelah periode tidak aktif."
+msgstr "Kembali ke layar PIN setelah periode tidak aktif."
+
 #: src/routes/_pos/shift/close.tsx
 msgid "Kembali ke menu"
 msgstr "Kembali ke menu"
@@ -671,6 +751,10 @@ msgstr "Kepadatan tampilan"
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Konfirmasi"
 msgstr "Konfirmasi"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Konfirmasi sebelum kosongkan keranjang"
+msgstr "Konfirmasi sebelum kosongkan keranjang"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Koreksi"
@@ -689,6 +773,10 @@ msgstr "Kosongkan keranjang?"
 msgid "Kuat"
 msgstr "Kuat"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Kunci otomatis saat tidak aktif"
+msgstr "Kunci otomatis saat tidak aktif"
+
 #: src/components/sale/cart-line-row.tsx
 msgid "Kurangi jumlah"
 msgstr "Kurangi jumlah"
@@ -696,6 +784,10 @@ msgstr "Kurangi jumlah"
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Langkah singkat"
 msgstr "Langkah singkat"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Langsung cetak setelah pembayaran berhasil."
+msgstr "Langsung cetak setelah pembayaran berhasil."
 
 #: src/routes/_pos/onboarding/profile.tsx
 msgid "Lanjut →"
@@ -765,6 +857,10 @@ msgstr "Masuk"
 msgid "Mata Uang"
 msgstr "Mata Uang"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Mati"
+msgstr "Mati"
+
 #: src/components/menu/modifier-group-form.tsx
 msgid "Max"
 msgstr "Max"
@@ -813,6 +909,10 @@ msgstr "Memuat struk…"
 msgid "Memuat…"
 msgstr "Memuat…"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Mengikuti sistem."
+msgstr "Mengikuti sistem."
+
 #: src/components/app-shared.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
 #: src/routes/_pos/onboarding/route.tsx
@@ -832,6 +932,14 @@ msgstr "Menutup…"
 msgid "Menyimpan…"
 msgstr "Menyimpan…"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Metode default"
+msgstr "Metode default"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Metode pembayaran yang dipilih saat checkout."
+msgstr "Metode pembayaran yang dipilih saat checkout."
+
 #: src/components/inventory/ingredient-form.tsx
 msgid "Mililiter (ml)"
 msgstr "Mililiter (ml)"
@@ -849,6 +957,10 @@ msgstr "Minimal 8 karakter"
 msgid "mis. Andi"
 msgstr "mis. Andi"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "mis. INV-"
+msgstr "mis. INV-"
+
 #: src/components/menu/category-table.tsx
 msgid "mis. Kopi"
 msgstr "mis. Kopi"
@@ -856,6 +968,10 @@ msgstr "mis. Kopi"
 #: src/routes/_public/signup.tsx
 msgid "mis. Kopi Senja"
 msgstr "mis. Kopi Senja"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "mis. Terima kasih telah berbelanja"
+msgstr "mis. Terima kasih telah berbelanja"
 
 #: src/routes/_public/signup.tsx
 msgid "mis. Warren"
@@ -868,6 +984,10 @@ msgstr "Modal awal"
 #: src/routes/_pos/shift/open.tsx
 msgid "Modal awal (Rp)"
 msgstr "Modal awal (Rp)"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Mode gelap"
+msgstr "Mode gelap"
 
 #: src/components/app-shared.tsx
 msgid "Modifier"
@@ -945,11 +1065,16 @@ msgstr "New signups"
 msgid "Nomor HP"
 msgstr "Nomor HP"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Normal"
+msgstr "Normal"
+
 #: src/components/billing-health.tsx
 msgid "Nothing urgent needs your attention."
 msgstr "Nothing urgent needs your attention."
 
 #: src/components/app-header.tsx
+#: src/routes/_pos/settings/general.tsx
 msgid "Notifikasi"
 msgstr "Notifikasi"
 
@@ -1016,6 +1141,7 @@ msgstr "PEMBARUAN"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/onboarding/route.tsx
+#: src/routes/_pos/settings/general.tsx
 msgid "Pembayaran"
 msgstr "Pembayaran"
 
@@ -1027,6 +1153,10 @@ msgstr "Pembayaran Tunai"
 #: src/routes/_pos/inventory/purchases.tsx
 msgid "Pembelian"
 msgstr "Pembelian"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Pembulatan"
+msgstr "Pembulatan"
 
 #: src/components/nav-user.tsx
 #: src/components/staff/staff-picker-card.tsx
@@ -1060,9 +1190,17 @@ msgstr "Penyesuaian Stok"
 msgid "Peran"
 msgstr "Peran"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Peringatan stok rendah"
+msgstr "Peringatan stok rendah"
+
 #: src/components/menu/cafe-profile-form.tsx
 msgid "Persentase PPN"
 msgstr "Persentase PPN"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Pesanan"
+msgstr "Pesanan"
 
 #. placeholder {0}: cart.lines.length
 #: src/components/sale/cart-pane.tsx
@@ -1141,6 +1279,10 @@ msgstr "PPN {taxRatePct}%"
 msgid "Preferensi tampilan dan regional aplikasi."
 msgstr "Preferensi tampilan dan regional aplikasi."
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Prefiks yang ditambahkan di depan nomor pesanan."
+msgstr "Prefiks yang ditambahkan di depan nomor pesanan."
+
 #: src/components/app-shared.tsx
 msgid "Produk"
 msgstr "Produk"
@@ -1172,6 +1314,10 @@ msgstr "Promo & Diskon"
 msgid "Pusat Bantuan"
 msgstr "Pusat Bantuan"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Putar suara konfirmasi setelah pembayaran selesai."
+msgstr "Putar suara konfirmasi setelah pembayaran selesai."
+
 #: src/components/dashboard-invoices.tsx
 msgid "Recent invoices"
 msgstr "Recent invoices"
@@ -1181,8 +1327,8 @@ msgid "Recent invoices with customer, amount, and status."
 msgstr "Recent invoices with customer, amount, and status."
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Regional"
-msgstr "Regional"
+#~ msgid "Regional"
+#~ msgstr "Regional"
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Rendah"
@@ -1243,6 +1389,10 @@ msgstr "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 msgid "Sebagai: {0}"
 msgstr "Sebagai: {0}"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
+msgstr "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
+
 #: src/lib/auth-validation.ts
 msgid "Sedang"
 msgstr "Sedang"
@@ -1291,6 +1441,10 @@ msgstr "Semua item akan dihapus dari pesanan ini."
 #: src/routes/_pos/settings/general.tsx
 msgid "Semua transaksi dalam Rupiah."
 msgstr "Semua transaksi dalam Rupiah."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Sesuaikan dengan lebar gulungan printer Anda."
+msgstr "Sesuaikan dengan lebar gulungan printer Anda."
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Set PIN"
@@ -1371,10 +1525,18 @@ msgstr "Stok rendah: {0}"
 msgid "Stok saat ini:"
 msgstr "Stok saat ini:"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Struk & Cetak"
+msgstr "Struk & Cetak"
+
 #: src/components/app-shared.tsx
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Struk & Printer"
 msgstr "Struk & Printer"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Suara saat transaksi berhasil"
+msgstr "Suara saat transaksi berhasil"
 
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
@@ -1422,10 +1584,34 @@ msgstr "Tambahkan beberapa item beserta harganya."
 msgid "Tampilan"
 msgstr "Tampilan"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilkan dialog konfirmasi sebelum keranjang dikosongkan."
+msgstr "Tampilkan dialog konfirmasi sebelum keranjang dikosongkan."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilkan logo di struk"
+msgstr "Tampilkan logo di struk"
+
 #: src/routes/_public/signin.tsx
 #: src/routes/_public/signup.tsx
 msgid "Tampilkan password"
 msgstr "Tampilkan password"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilkan peringatan saat stok bahan mendekati ambang batas."
+msgstr "Tampilkan peringatan saat stok bahan mendekati ambang batas."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilkan tombol nominal saat pembayaran tunai."
+msgstr "Tampilkan tombol nominal saat pembayaran tunai."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tanpa pembulatan"
+msgstr "Tanpa pembulatan"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Teks yang dicetak di bagian bawah struk."
+msgstr "Teks yang dicetak di bagian bawah struk."
 
 #: src/components/inventory/recipe-editor.tsx
 msgid "Tersimpan."
@@ -1459,6 +1645,10 @@ msgstr "Tidak ada item."
 msgid "Tidak ada shift terbuka."
 msgstr "Tidak ada shift terbuka."
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Tombol nominal cepat"
+msgstr "Tombol nominal cepat"
+
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
 msgid "Total"
@@ -1475,6 +1665,7 @@ msgstr "Total tagihan"
 
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/history.tsx
+#: src/routes/_pos/settings/general.tsx
 msgid "Tunai"
 msgstr "Tunai"
 
@@ -1508,12 +1699,24 @@ msgid "Ubah bahan"
 msgstr "Ubah bahan"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Ubah di Profil kafe."
-msgstr "Ubah di Profil kafe."
+#~ msgid "Ubah di Profil kafe."
+#~ msgstr "Ubah di Profil kafe."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Ubah informasi dasar kafe Anda."
 msgstr "Ubah informasi dasar kafe Anda."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Ukuran font dasar antarmuka."
+msgstr "Ukuran font dasar antarmuka."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Ukuran kertas"
+msgstr "Ukuran kertas"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Ukuran teks"
+msgstr "Ukuran teks"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/settings/general.tsx
@@ -1548,6 +1751,10 @@ msgstr "wajib"
 msgid "Wajib (pilih {0}{1})"
 msgstr "Wajib (pilih {0}{1})"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Wajib PIN untuk void/refund"
+msgstr "Wajib PIN untuk void/refund"
+
 #: src/components/menu/modifier-group-form.tsx
 msgid "Wajib?"
 msgstr "Wajib?"
@@ -1555,6 +1762,18 @@ msgstr "Wajib?"
 #: src/components/dashboard-activity.tsx
 msgid "Weekly summary exported"
 msgstr "Weekly summary exported"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "WIB — Jakarta"
+msgstr "WIB — Jakarta"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "WIT — Jayapura"
+msgstr "WIT — Jayapura"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "WITA — Makassar"
+msgstr "WITA — Makassar"
 
 #: src/components/dashboard-activity.tsx
 msgid "Yesterday"
@@ -1571,3 +1790,7 @@ msgstr "Zona waktu"
 #: src/routes/_pos/settings/general.tsx
 msgid "Zona Waktu"
 msgstr "Zona Waktu"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Zona waktu untuk jam dan laporan."
+msgstr "Zona waktu untuk jam dan laporan."

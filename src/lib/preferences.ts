@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 export type Density = 'compact' | 'comfortable';
 
 export const DEFAULT_DENSITY: Density = 'compact';
@@ -32,4 +34,52 @@ export function storeDensity(density: Density): void {
 export function applyDensity(density: Density): void {
   if (typeof document === 'undefined') return;
   document.documentElement.dataset.density = density;
+}
+
+/**
+ * Small typed localStorage hook. Key is namespaced as `kodapos.<key>`.
+ * Falls back to `fallback` when the key is absent or localStorage is unavailable.
+ */
+export function usePreference<T extends string>(
+  key: string,
+  fallback: T,
+): [T, (v: T) => void] {
+  const [value, setValue] = useState<T>(() => {
+    if (typeof window === 'undefined') return fallback;
+    try {
+      return (window.localStorage.getItem(`kodapos.${key}`) as T) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  });
+
+  const set = (v: T) => {
+    setValue(v);
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(`kodapos.${key}`, v);
+      } catch {
+        /* ignore (private mode, quota exceeded, etc.) */
+      }
+    }
+  };
+
+  return [value, set];
+}
+
+/**
+ * Boolean variant of `usePreference`. Stores the string `'true'` or `'false'`.
+ */
+export function useBoolPreference(
+  key: string,
+  fallback: boolean,
+): [boolean, (v: boolean) => void] {
+  const [raw, setRaw] = usePreference<'true' | 'false'>(
+    key,
+    fallback ? 'true' : 'false',
+  );
+
+  const set = (v: boolean) => setRaw(v ? 'true' : 'false');
+
+  return [raw === 'true', set];
 }
