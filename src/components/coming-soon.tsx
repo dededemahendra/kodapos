@@ -1,3 +1,6 @@
+import type { MessageDescriptor } from '@lingui/core';
+import { useLingui } from '@lingui/react';
+import { Trans } from '@lingui/react/macro';
 import { Hammer } from "lucide-react";
 import {
 	Empty,
@@ -8,7 +11,8 @@ import {
 } from "~/components/ui/empty";
 
 /** Placeholder for nav destinations that are scaffolded but not built yet. */
-export function ComingSoon({ title }: { title: string }) {
+export function ComingSoon({ title }: { title: MessageDescriptor }) {
+	const { i18n } = useLingui();
 	return (
 		<div className="flex flex-1 items-center justify-center p-10">
 			<Empty>
@@ -16,9 +20,9 @@ export function ComingSoon({ title }: { title: string }) {
 					<EmptyMedia variant="icon">
 						<Hammer />
 					</EmptyMedia>
-					<EmptyTitle>{title}</EmptyTitle>
+					<EmptyTitle>{i18n._(title)}</EmptyTitle>
 					<EmptyDescription>
-						Halaman ini sedang dalam pengembangan.
+						<Trans>Halaman ini sedang dalam pengembangan.</Trans>
 					</EmptyDescription>
 				</EmptyHeader>
 			</Empty>
