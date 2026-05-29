@@ -18,6 +18,23 @@ export default defineSchema({
     taxRatePct: v.optional(v.number()),
     taxEnabled: v.optional(v.boolean()),
     setupCompletedAt: v.optional(v.number()),
+    businessType: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
+    email: v.optional(v.string()),
+    instagram: v.optional(v.string()),
+    city: v.optional(v.string()),
+    postalCode: v.optional(v.string()),
+    logoStorageId: v.optional(v.id('_storage')),
+    operatingHours: v.optional(
+      v.array(
+        v.object({
+          day: v.number(), // 0=Mon .. 6=Sun
+          open: v.boolean(),
+          openTime: v.string(), // 'HH:MM'
+          closeTime: v.string(),
+        })
+      )
+    ),
   }).index('by_owner', ['ownerUserId']),
 
   categories: defineTable({
