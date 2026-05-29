@@ -657,6 +657,10 @@ msgstr "Quantity"
 msgid "Jumlah {0}"
 msgstr "Quantity {0}"
 
+#: src/routes/_pos/settings/route.tsx
+#~ msgid "Kafe"
+#~ msgstr "Cafe"
+
 #: src/routes/_pos/onboarding/profile.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kafe tidak ditemukan."
@@ -958,8 +962,8 @@ msgid "mis. Andi"
 msgstr "e.g. Alex"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "mis. INV-"
-msgstr "e.g. INV-"
+#~ msgid "mis. INV-"
+#~ msgstr "e.g. INV-"
 
 #: src/components/menu/category-table.tsx
 msgid "mis. Kopi"
@@ -970,8 +974,8 @@ msgid "mis. Kopi Senja"
 msgstr "e.g. Sunrise Cafe"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "mis. Terima kasih telah berbelanja"
-msgstr "e.g. Thank you for shopping with us"
+#~ msgid "mis. Terima kasih telah berbelanja"
+#~ msgstr "e.g. Thank you for shopping with us"
 
 #: src/routes/_public/signup.tsx
 msgid "mis. Warren"
@@ -1275,9 +1279,13 @@ msgstr "VAT {0}%"
 msgid "PPN {taxRatePct}%"
 msgstr "VAT {taxRatePct}%"
 
+#: src/routes/_pos/settings/route.tsx
+#~ msgid "Preferensi"
+#~ msgstr "Preferences"
+
 #: src/routes/_pos/settings/general.tsx
-msgid "Preferensi tampilan dan regional aplikasi."
-msgstr "App display and regional preferences."
+#~ msgid "Preferensi tampilan dan regional aplikasi."
+#~ msgstr "App display and regional preferences."
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Prefiks yang ditambahkan di depan nomor pesanan."
@@ -1485,10 +1493,10 @@ msgid "Simpan resep"
 msgstr "Save recipe"
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/settings/route.tsx
 msgid "Staf"
 msgstr "Staff"
 
-#: src/routes/_pos/settings/route.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Staff"
 msgstr "Staff"
