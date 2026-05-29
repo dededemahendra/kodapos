@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
   color-scheme: light dark;
   font-family: var(--font-sans);
@@ -100,7 +102,9 @@
        Bumping accent slightly brighter so active state reads in dark mode. */
     --sidebar-accent: oklch(0.3500 0 0);
     --sidebar-accent-foreground: oklch(0.9850 0 0);
-    --sidebar-border: oklch(0.2750 0 0);
+    /* Lifted clear of --sidebar (0.2690) so sidebar dividers stay visible
+       against the sidebar surface, instead of blending into it. */
+    --sidebar-border: oklch(0.3450 0 0);
     --sidebar-ring: oklch(0.4390 0 0);
   }
 }
@@ -174,6 +178,23 @@
 }
 
 @layer base {
+  /* Tailwind v4 defaults bare `border-*` utilities to currentColor, which made
+     the header/sidebar borders render in the foreground color (near-white in
+     dark mode). Default them to the border token so they match the dashboard
+     grid hairlines (which use bg-border explicitly). */
+  *,
+  ::after,
+  ::before {
+    border-color: var(--border);
+  }
+  /* The sidebar surface (--sidebar) sits close to --border, so its dividers
+     would vanish. Default borders inside the sidebar to --sidebar-border,
+     which is lifted clear of the surface — keeping a visible, distinct weight
+     from the content/dashboard hairlines. */
+  [data-sidebar='sidebar'],
+  [data-sidebar='sidebar'] * {
+    border-color: var(--sidebar-border);
+  }
   body {
     letter-spacing: var(--tracking-normal);
   }
