@@ -22,6 +22,8 @@ import { Route as PosPromosRouteImport } from './routes/_pos/promos'
 import { Route as PosPinRouteImport } from './routes/_pos/pin'
 import { Route as PosLoyaltyRouteImport } from './routes/_pos/loyalty'
 import { Route as PosHistoryRouteImport } from './routes/_pos/history'
+import { Route as PosHelpRouteImport } from './routes/_pos/help'
+import { Route as PosDocsRouteImport } from './routes/_pos/docs'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 import { Route as PosCustomersRouteImport } from './routes/_pos/customers'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
@@ -118,6 +120,16 @@ const PosLoyaltyRoute = PosLoyaltyRouteImport.update({
 const PosHistoryRoute = PosHistoryRouteImport.update({
   id: '/history',
   path: '/history',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosHelpRoute = PosHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosDocsRoute = PosDocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
   getParentRoute: () => PosRoute,
 } as any)
 const PosDashboardRoute = PosDashboardRouteImport.update({
@@ -302,6 +314,8 @@ export interface FileRoutesByFullPath {
   '/shift': typeof PosShiftRouteRouteWithChildren
   '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
+  '/docs': typeof PosDocsRoute
+  '/help': typeof PosHelpRoute
   '/history': typeof PosHistoryRoute
   '/loyalty': typeof PosLoyaltyRoute
   '/pin': typeof PosPinRoute
@@ -345,6 +359,8 @@ export interface FileRoutesByTo {
   '/shift': typeof PosShiftRouteRouteWithChildren
   '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
+  '/docs': typeof PosDocsRoute
+  '/help': typeof PosHelpRoute
   '/history': typeof PosHistoryRoute
   '/loyalty': typeof PosLoyaltyRoute
   '/pin': typeof PosPinRoute
@@ -394,6 +410,8 @@ export interface FileRoutesById {
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
   '/_pos/customers': typeof PosCustomersRoute
   '/_pos/dashboard': typeof PosDashboardRoute
+  '/_pos/docs': typeof PosDocsRoute
+  '/_pos/help': typeof PosHelpRoute
   '/_pos/history': typeof PosHistoryRoute
   '/_pos/loyalty': typeof PosLoyaltyRoute
   '/_pos/pin': typeof PosPinRoute
@@ -444,6 +462,8 @@ export interface FileRouteTypes {
     | '/shift'
     | '/customers'
     | '/dashboard'
+    | '/docs'
+    | '/help'
     | '/history'
     | '/loyalty'
     | '/pin'
@@ -487,6 +507,8 @@ export interface FileRouteTypes {
     | '/shift'
     | '/customers'
     | '/dashboard'
+    | '/docs'
+    | '/help'
     | '/history'
     | '/loyalty'
     | '/pin'
@@ -535,6 +557,8 @@ export interface FileRouteTypes {
     | '/_pos/shift'
     | '/_pos/customers'
     | '/_pos/dashboard'
+    | '/_pos/docs'
+    | '/_pos/help'
     | '/_pos/history'
     | '/_pos/loyalty'
     | '/_pos/pin'
@@ -669,6 +693,20 @@ declare module '@tanstack/react-router' {
       path: '/history'
       fullPath: '/history'
       preLoaderRoute: typeof PosHistoryRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/help': {
+      id: '/_pos/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof PosHelpRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/docs': {
+      id: '/_pos/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof PosDocsRouteImport
       parentRoute: typeof PosRoute
     }
     '/_pos/dashboard': {
@@ -1048,6 +1086,8 @@ interface PosRouteChildren {
   PosShiftRouteRoute: typeof PosShiftRouteRouteWithChildren
   PosCustomersRoute: typeof PosCustomersRoute
   PosDashboardRoute: typeof PosDashboardRoute
+  PosDocsRoute: typeof PosDocsRoute
+  PosHelpRoute: typeof PosHelpRoute
   PosHistoryRoute: typeof PosHistoryRoute
   PosLoyaltyRoute: typeof PosLoyaltyRoute
   PosPinRoute: typeof PosPinRoute
@@ -1066,6 +1106,8 @@ const PosRouteChildren: PosRouteChildren = {
   PosShiftRouteRoute: PosShiftRouteRouteWithChildren,
   PosCustomersRoute: PosCustomersRoute,
   PosDashboardRoute: PosDashboardRoute,
+  PosDocsRoute: PosDocsRoute,
+  PosHelpRoute: PosHelpRoute,
   PosHistoryRoute: PosHistoryRoute,
   PosLoyaltyRoute: PosLoyaltyRoute,
   PosPinRoute: PosPinRoute,

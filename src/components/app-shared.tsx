@@ -110,8 +110,8 @@ export const navGroups: SidebarNavGroup[] = [
 
 // Footer help links shown above the copyright in the sidebar footer.
 export const footerNavLinks: SidebarNavItem[] = [
-	{ title: "Pusat Bantuan", path: "#", icon: <HelpCircle /> },
-	{ title: "Dokumentasi", path: "#", icon: <BookOpen /> },
+	{ title: "Pusat Bantuan", path: "/help", icon: <HelpCircle /> },
+	{ title: "Dokumentasi", path: "/docs", icon: <BookOpen /> },
 ];
 
 export const navLinks: SidebarNavItem[] = [
