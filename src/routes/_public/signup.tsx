@@ -1,4 +1,5 @@
 import { useAuthActions } from '@convex-dev/auth/react';
+import type { MessageDescriptor } from '@lingui/core';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
@@ -28,7 +29,7 @@ export const Route = createFileRoute('/_public/signup')({
   component: SignupPage,
 });
 
-type FieldState = { value: string; touched: boolean; error: string | null };
+type FieldState = { value: string; touched: boolean; error: MessageDescriptor | null };
 const initialField: FieldState = { value: '', touched: false, error: null };
 
 async function createCafeWhenAuthReady(
@@ -53,7 +54,7 @@ function SignupPage() {
   const { signIn } = useAuthActions();
   const convex = useConvex();
   const navigate = useNavigate();
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
 
   const [name, setName] = useState<FieldState>(initialField);
   const [cafeName, setCafeName] = useState<FieldState>(initialField);
@@ -68,7 +69,7 @@ function SignupPage() {
 
   function bindBlur(
     setter: React.Dispatch<React.SetStateAction<FieldState>>,
-    validator: (value: string) => string | null
+    validator: (value: string) => MessageDescriptor | null
   ) {
     return (_: FocusEvent<HTMLInputElement>) => {
       setter((prev) => ({ ...prev, touched: true, error: validator(prev.value) }));
@@ -76,7 +77,7 @@ function SignupPage() {
   }
   function bindChange(
     setter: React.Dispatch<React.SetStateAction<FieldState>>,
-    validator: (value: string) => string | null
+    validator: (value: string) => MessageDescriptor | null
   ) {
     return (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
@@ -156,7 +157,7 @@ function SignupPage() {
                 aria-describedby={name.error ? 'name-error' : undefined}
               />
             </div>
-            {name.error && <FieldError id="name-error">{name.error}</FieldError>}
+            {name.error && <FieldError id="name-error">{i18n._(name.error)}</FieldError>}
           </Field>
 
           <Field>
@@ -180,7 +181,7 @@ function SignupPage() {
                 aria-describedby={cafeName.error ? 'cafeName-error' : undefined}
               />
             </div>
-            {cafeName.error && <FieldError id="cafeName-error">{cafeName.error}</FieldError>}
+            {cafeName.error && <FieldError id="cafeName-error">{i18n._(cafeName.error)}</FieldError>}
           </Field>
 
           <Field>
@@ -204,7 +205,7 @@ function SignupPage() {
                 aria-describedby={email.error ? 'email-error' : undefined}
               />
             </div>
-            {email.error && <FieldError id="email-error">{email.error}</FieldError>}
+            {email.error && <FieldError id="email-error">{i18n._(email.error)}</FieldError>}
           </Field>
 
           <Field>
@@ -245,11 +246,11 @@ function SignupPage() {
                   />
                 </div>
                 {strength.label && (
-                  <p className="mt-1 text-xs text-muted-foreground">{strength.label}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{i18n._(strength.label)}</p>
                 )}
               </div>
             )}
-            {password.error && <FieldError id="password-error">{password.error}</FieldError>}
+            {password.error && <FieldError id="password-error">{i18n._(password.error)}</FieldError>}
           </Field>
 
           <div className="flex items-start gap-2">

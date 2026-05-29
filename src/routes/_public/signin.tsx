@@ -1,4 +1,5 @@
 import { useAuthActions } from '@convex-dev/auth/react';
+import type { MessageDescriptor } from '@lingui/core';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
@@ -18,14 +19,14 @@ export const Route = createFileRoute('/_public/signin')({
   component: SigninPage,
 });
 
-type FieldState = { value: string; touched: boolean; error: string | null };
+type FieldState = { value: string; touched: boolean; error: MessageDescriptor | null };
 
 const initialField: FieldState = { value: '', touched: false, error: null };
 
 function SigninPage() {
   const { signIn } = useAuthActions();
   const navigate = useNavigate();
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const [email, setEmail] = useState<FieldState>(initialField);
   const [password, setPassword] = useState<FieldState>(initialField);
   const [showPassword, setShowPassword] = useState(false);
@@ -117,7 +118,7 @@ function SigninPage() {
                 aria-describedby={email.error ? 'email-error' : undefined}
               />
             </div>
-            {email.error && <FieldError id="email-error">{email.error}</FieldError>}
+            {email.error && <FieldError id="email-error">{i18n._(email.error)}</FieldError>}
           </Field>
 
           <Field>
@@ -148,7 +149,7 @@ function SigninPage() {
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
-            {password.error && <FieldError id="password-error">{password.error}</FieldError>}
+            {password.error && <FieldError id="password-error">{i18n._(password.error)}</FieldError>}
           </Field>
 
           {authError && <FieldError>{authError}</FieldError>}

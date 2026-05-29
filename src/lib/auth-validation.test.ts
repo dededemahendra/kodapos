@@ -1,4 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { i18n } from '@lingui/core';
+import { beforeAll, describe, expect, it } from 'vitest';
+
+beforeAll(() => {
+  i18n.activate('id');
+});
 import {
   passwordStrength,
   validateCafeName,
@@ -10,13 +15,13 @@ import {
 
 describe('validateEmail', () => {
   it('rejects empty', () => {
-    expect(validateEmail('')).toBe('Email wajib diisi.');
-    expect(validateEmail('   ')).toBe('Email wajib diisi.');
+    expect(i18n._(validateEmail('')!)).toBe('Email wajib diisi.');
+    expect(i18n._(validateEmail('   ')!)).toBe('Email wajib diisi.');
   });
   it('rejects malformed', () => {
-    expect(validateEmail('abc')).toBe('Format email tidak valid.');
-    expect(validateEmail('a@b')).toBe('Format email tidak valid.');
-    expect(validateEmail('@example.com')).toBe('Format email tidak valid.');
+    expect(i18n._(validateEmail('abc')!)).toBe('Format email tidak valid.');
+    expect(i18n._(validateEmail('a@b')!)).toBe('Format email tidak valid.');
+    expect(i18n._(validateEmail('@example.com')!)).toBe('Format email tidak valid.');
   });
   it('accepts a valid address', () => {
     expect(validateEmail('warren@example.com')).toBeNull();
@@ -26,7 +31,7 @@ describe('validateEmail', () => {
 
 describe('validatePasswordRequired', () => {
   it('rejects empty', () => {
-    expect(validatePasswordRequired('')).toBe('Password wajib diisi.');
+    expect(i18n._(validatePasswordRequired('')!)).toBe('Password wajib diisi.');
   });
   it('accepts anything non-empty', () => {
     expect(validatePasswordRequired('x')).toBeNull();
@@ -35,11 +40,11 @@ describe('validatePasswordRequired', () => {
 
 describe('validatePasswordSignup', () => {
   it('rejects empty', () => {
-    expect(validatePasswordSignup('')).toBe('Password wajib diisi.');
+    expect(i18n._(validatePasswordSignup('')!)).toBe('Password wajib diisi.');
   });
   it('rejects <8 chars', () => {
-    expect(validatePasswordSignup('abc')).toBe('Password minimal 8 karakter.');
-    expect(validatePasswordSignup('abcdefg')).toBe('Password minimal 8 karakter.');
+    expect(i18n._(validatePasswordSignup('abc')!)).toBe('Password minimal 8 karakter.');
+    expect(i18n._(validatePasswordSignup('abcdefg')!)).toBe('Password minimal 8 karakter.');
   });
   it('accepts 8+', () => {
     expect(validatePasswordSignup('abcdefgh')).toBeNull();
@@ -48,8 +53,8 @@ describe('validatePasswordSignup', () => {
 
 describe('validateName', () => {
   it('rejects empty', () => {
-    expect(validateName('')).toBe('Nama wajib diisi.');
-    expect(validateName('   ')).toBe('Nama wajib diisi.');
+    expect(i18n._(validateName('')!)).toBe('Nama wajib diisi.');
+    expect(i18n._(validateName('   ')!)).toBe('Nama wajib diisi.');
   });
   it('accepts non-empty', () => {
     expect(validateName('Warren')).toBeNull();
@@ -58,10 +63,10 @@ describe('validateName', () => {
 
 describe('validateCafeName', () => {
   it('rejects empty', () => {
-    expect(validateCafeName('')).toBe('Nama kafe wajib diisi.');
+    expect(i18n._(validateCafeName('')!)).toBe('Nama kafe wajib diisi.');
   });
   it('rejects > 80 chars', () => {
-    expect(validateCafeName('x'.repeat(81))).toBe('Nama kafe maksimal 80 karakter.');
+    expect(i18n._(validateCafeName('x'.repeat(81))!)).toBe('Nama kafe maksimal 80 karakter.');
   });
   it('accepts valid name', () => {
     expect(validateCafeName('Kopi Senja')).toBeNull();
@@ -69,22 +74,33 @@ describe('validateCafeName', () => {
 });
 
 describe('passwordStrength', () => {
-  it('empty returns bucket 0 / 0%', () => {
-    expect(passwordStrength('')).toEqual({ bucket: 0, label: '', percent: 0 });
+  it('empty returns bucket 0 / 0% / null label', () => {
+    const result = passwordStrength('');
+    expect(result.bucket).toBe(0);
+    expect(result.percent).toBe(0);
+    expect(result.label).toBeNull();
   });
   it('short returns Lemah / 33%', () => {
-    expect(passwordStrength('abc')).toEqual({ bucket: 1, label: 'Lemah', percent: 33 });
+    const result = passwordStrength('abc');
+    expect(result.bucket).toBe(1);
+    expect(result.percent).toBe(33);
+    expect(i18n._(result.label!)).toBe('Lemah');
   });
   it('8+ chars OR 2-class returns Sedang / 66%', () => {
-    expect(passwordStrength('warren12')).toEqual({ bucket: 2, label: 'Sedang', percent: 66 });
+    const r1 = passwordStrength('warren12');
+    expect(r1.bucket).toBe(2);
+    expect(r1.percent).toBe(66);
+    expect(i18n._(r1.label!)).toBe('Sedang');
     // 6 chars with 2 classes (lower+digit) — qualifies via the OR branch
-    expect(passwordStrength('warr3n')).toEqual({ bucket: 2, label: 'Sedang', percent: 66 });
+    const r2 = passwordStrength('warr3n');
+    expect(r2.bucket).toBe(2);
+    expect(r2.percent).toBe(66);
+    expect(i18n._(r2.label!)).toBe('Sedang');
   });
   it('12+ chars AND 3-class returns Kuat / 100%', () => {
-    expect(passwordStrength('Warren!2026Kopi')).toEqual({
-      bucket: 3,
-      label: 'Kuat',
-      percent: 100,
-    });
+    const result = passwordStrength('Warren!2026Kopi');
+    expect(result.bucket).toBe(3);
+    expect(result.percent).toBe(100);
+    expect(i18n._(result.label!)).toBe('Kuat');
   });
 });
