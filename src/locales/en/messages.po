@@ -899,6 +899,10 @@ msgstr "Loading menu…"
 msgid "Memuat riwayat…"
 msgstr "Loading history…"
 
+#: src/routes/_pos.tsx
+msgid "Memuat sesi…"
+msgstr "Loading session…"
+
 #: src/components/shift/shift-gate.tsx
 msgid "Memuat shift…"
 msgstr "Loading shift…"

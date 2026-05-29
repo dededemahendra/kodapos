@@ -899,6 +899,10 @@ msgstr "Memuat menu…"
 msgid "Memuat riwayat…"
 msgstr "Memuat riwayat…"
 
+#: src/routes/_pos.tsx
+msgid "Memuat sesi…"
+msgstr "Memuat sesi…"
+
 #: src/components/shift/shift-gate.tsx
 msgid "Memuat shift…"
 msgstr "Memuat shift…"

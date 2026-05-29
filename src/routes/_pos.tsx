@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useConvex, useQuery } from 'convex/react';
@@ -32,7 +33,7 @@ function PosLayout() {
       <AuthLoading>
         <div className="flex min-h-screen items-center justify-center gap-2 text-muted-foreground">
           <Spinner />
-          <span>Memuat sesi…</span>
+          <span><Trans>Memuat sesi…</Trans></span>
         </div>
       </AuthLoading>
       <Unauthenticated>
