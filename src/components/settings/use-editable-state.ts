@@ -16,9 +16,16 @@ export function useEditableState<T>(serverValue: T | undefined) {
     if (serverValue === undefined) return;
     const key = JSON.stringify(serverValue);
     if (key !== lastServer.current) {
+      // Preserve in-progress edits: only adopt the new server snapshot when
+      // the user hasn't diverged from the previous one.
+      const wasDirty =
+        lastServer.current !== undefined &&
+        JSON.stringify(draft) !== lastServer.current;
       lastServer.current = key;
-      setDraft(serverValue);
+      if (!wasDirty) setDraft(serverValue);
     }
+    // `draft` is intentionally read but omitted from deps: we react only to
+    // server pushes, and `draft` is current as of this render.
   }, [serverValue]);
 
   const dirty =
