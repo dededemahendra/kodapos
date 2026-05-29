@@ -55,15 +55,19 @@ interface ProfileDraft {
   operatingHours: OperatingHoursDraft[];
 }
 
-const DAY_LABELS = [
-  'Senin',
-  'Selasa',
-  'Rabu',
-  'Kamis',
-  'Jumat',
-  'Sabtu',
-  'Minggu',
-] as const;
+/** Day labels indexed 0=Senin..6=Minggu, localized via the active catalog. */
+function useDayLabels(): string[] {
+  const { t } = useLingui();
+  return [
+    t`Senin`,
+    t`Selasa`,
+    t`Rabu`,
+    t`Kamis`,
+    t`Jumat`,
+    t`Sabtu`,
+    t`Minggu`,
+  ];
+}
 
 function defaultHours(): OperatingHoursDraft[] {
   return Array.from({ length: 7 }, (_, i) => ({
@@ -80,6 +84,7 @@ function defaultHours(): OperatingHoursDraft[] {
 
 function SettingsProfile() {
   const { t } = useLingui();
+  const dayLabels = useDayLabels();
   const cafe = useQuery(api.cafes.myCafe);
 
   const updateProfileDetails = useMutation(api.cafes.updateProfileDetails);
@@ -469,13 +474,13 @@ function SettingsProfile() {
             <div key={h.day}>
               {i > 0 && <RowSep />}
               <SettingRow
-                label={DAY_LABELS[i]}
+                label={dayLabels[i]}
                 control={
                   <div className="flex items-center gap-3">
                     <Switch
                       checked={h.open}
                       onCheckedChange={(checked) => updateHour(i, { open: checked })}
-                      aria-label={DAY_LABELS[i]}
+                      aria-label={dayLabels[i]}
                     />
                     <Input
                       type="time"

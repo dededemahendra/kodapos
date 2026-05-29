@@ -32,6 +32,10 @@ export function SaveBar({
     try {
       await onSave();
       setSavedAt((n) => n + 1);
+    } catch {
+      // onSave rejected — the caller is responsible for surfacing the error
+      // (e.g. its own error state). Swallow here so we neither show a false
+      // "Tersimpan ✓" nor leak an unhandled promise rejection.
     } finally {
       setSaving(false);
     }
