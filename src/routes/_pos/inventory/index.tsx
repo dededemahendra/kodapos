@@ -1,3 +1,4 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
@@ -17,6 +18,7 @@ export const Route = createFileRoute('/_pos/inventory/')({
 type Filter = 'all' | 'low' | 'archived';
 
 function InventoryIndex() {
+  const { t } = useLingui();
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
@@ -49,52 +51,54 @@ function InventoryIndex() {
   return (
     <main className="p-6">
       <header className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Inventaris</h1>
+        <h1 className="text-2xl font-bold"><Trans>Inventaris</Trans></h1>
         <Button type="button" onClick={() => setCreateOpen(true)}>
-          + Tambah Bahan
+          <Trans>+ Tambah Bahan</Trans>
         </Button>
       </header>
 
       <div className="flex items-center gap-2 mb-3">
         <Input
-          placeholder="Cari bahan…"
+          placeholder={t`Cari bahan…`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
         <FilterChip active={filter === 'all'} onClick={() => setFilter('all')}>
-          Semua
+          <Trans>Semua</Trans>
         </FilterChip>
         <FilterChip active={filter === 'low'} onClick={() => setFilter('low')}>
-          Stok rendah
+          <Trans>Stok rendah</Trans>
         </FilterChip>
         <FilterChip active={filter === 'archived'} onClick={() => setFilter('archived')}>
-          Arsip
+          <Trans>Arsip</Trans>
         </FilterChip>
       </div>
 
       {isLoading ? (
         <div className="flex gap-2 text-muted-foreground items-center">
           <Spinner />
-          <span>Memuat…</span>
+          <span><Trans>Memuat…</Trans></span>
         </div>
       ) : visible.length === 0 ? (
         <p className="text-muted-foreground">
-          {filter === 'low'
-            ? 'Tidak ada bahan dengan stok rendah.'
-            : filter === 'archived'
-              ? 'Tidak ada bahan diarsipkan.'
-              : 'Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok.'}
+          {filter === 'low' ? (
+            <Trans>Tidak ada bahan dengan stok rendah.</Trans>
+          ) : filter === 'archived' ? (
+            <Trans>Tidak ada bahan diarsipkan.</Trans>
+          ) : (
+            <Trans>Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok.</Trans>
+          )}
         </p>
       ) : (
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
-              <th className="py-2 px-2">Nama</th>
-              <th className="py-2 px-2 w-32 text-right">Stok</th>
-              <th className="py-2 px-2 w-24 text-right">Ambang</th>
-              <th className="py-2 px-2 w-32 text-right">Biaya / satuan</th>
-              <th className="py-2 px-2 w-32">Status</th>
+              <th className="py-2 px-2"><Trans>Nama</Trans></th>
+              <th className="py-2 px-2 w-32 text-right"><Trans>Stok</Trans></th>
+              <th className="py-2 px-2 w-24 text-right"><Trans>Ambang</Trans></th>
+              <th className="py-2 px-2 w-32 text-right"><Trans>Biaya / satuan</Trans></th>
+              <th className="py-2 px-2 w-32"><Trans>Status</Trans></th>
               <th className="py-2 px-2 w-32" />
             </tr>
           </thead>
@@ -121,11 +125,11 @@ function InventoryIndex() {
                   </td>
                   <td className="py-2 px-2 text-xs">
                     {row.archived ? (
-                      <span className="text-muted-foreground">● Arsip</span>
+                      <span className="text-muted-foreground">● <Trans>Arsip</Trans></span>
                     ) : low ? (
-                      <span className="text-destructive">● Rendah</span>
+                      <span className="text-destructive">● <Trans>Rendah</Trans></span>
                     ) : (
-                      <span className="text-primary">● Aktif</span>
+                      <span className="text-primary">● <Trans>Aktif</Trans></span>
                     )}
                   </td>
                   <td className="py-2 px-2 text-right">
@@ -135,7 +139,7 @@ function InventoryIndex() {
                       size="sm"
                       onClick={() => setAdjustId(row._id)}
                     >
-                      Catat Stok
+                      <Trans>Catat Stok</Trans>
                     </Button>
                     <Button
                       type="button"
@@ -143,7 +147,7 @@ function InventoryIndex() {
                       size="sm"
                       onClick={() => setEditId(row._id)}
                     >
-                      Ubah
+                      <Trans>Ubah</Trans>
                     </Button>
                   </td>
                 </tr>

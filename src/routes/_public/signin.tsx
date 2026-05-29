@@ -1,4 +1,5 @@
 import { useAuthActions } from '@convex-dev/auth/react';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import {
@@ -24,6 +25,7 @@ const initialField: FieldState = { value: '', touched: false, error: null };
 function SigninPage() {
   const { signIn } = useAuthActions();
   const navigate = useNavigate();
+  const { t } = useLingui();
   const [email, setEmail] = useState<FieldState>(initialField);
   const [password, setPassword] = useState<FieldState>(initialField);
   const [showPassword, setShowPassword] = useState(false);
@@ -80,7 +82,7 @@ function SigninPage() {
       });
       navigate({ to: '/menu' });
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Email atau password salah.');
+      setAuthError(err instanceof Error ? err.message : t`Email atau password salah.`);
     } finally {
       setSubmitting(false);
     }
@@ -92,7 +94,7 @@ function SigninPage() {
         onSubmit={onSubmit}
         className="w-full max-w-sm p-6 rounded-lg border border-border bg-background"
       >
-        <h1 className="mb-6 text-2xl font-bold">Masuk</h1>
+        <h1 className="mb-6 text-2xl font-bold"><Trans>Masuk</Trans></h1>
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -141,7 +143,7 @@ function SigninPage() {
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                aria-label={showPassword ? t`Sembunyikan password` : t`Tampilkan password`}
               >
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
@@ -153,14 +155,14 @@ function SigninPage() {
 
           <Button type="submit" className="w-full" disabled={submitting || formInvalid}>
             {submitting && <Spinner data-icon="inline-start" />}
-            {submitting ? 'Memproses…' : 'Masuk'}
+            {submitting ? <Trans>Memproses…</Trans> : <Trans>Masuk</Trans>}
           </Button>
         </FieldGroup>
 
         <div className="mt-6 pt-6 border-t border-border text-center text-sm text-muted-foreground">
-          Belum punya akun?{' '}
+          <Trans>Belum punya akun?</Trans>{' '}
           <Link to="/signup" className="text-primary underline">
-            Daftar
+            <Trans>Daftar</Trans>
           </Link>
         </div>
       </form>

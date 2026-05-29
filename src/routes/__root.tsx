@@ -1,5 +1,6 @@
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { I18nProvider } from '@lingui/react';
+import { Trans } from '@lingui/react/macro';
 import { createRootRoute, HeadContent, Link, Outlet, Scripts } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { LocaleProvider } from '~/components/locale-provider';
@@ -35,10 +36,10 @@ export const Route = createRootRoute({
 function NotFound() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
-      <h1 className="text-2xl font-bold">Halaman tidak ditemukan</h1>
-      <p className="text-muted-foreground text-sm">URL yang kamu buka tidak ada di kodapos.</p>
+      <h1 className="text-2xl font-bold"><Trans>Halaman tidak ditemukan</Trans></h1>
+      <p className="text-muted-foreground text-sm"><Trans>URL yang kamu buka tidak ada di kodapos.</Trans></p>
       <Link to="/" className="text-primary underline">
-        Kembali ke beranda
+        <Trans>Kembali ke beranda</Trans>
       </Link>
     </main>
   );

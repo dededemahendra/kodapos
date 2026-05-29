@@ -1,4 +1,5 @@
 import { useAuthActions } from '@convex-dev/auth/react';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useConvex } from 'convex/react';
@@ -52,6 +53,7 @@ function SignupPage() {
   const { signIn } = useAuthActions();
   const convex = useConvex();
   const navigate = useNavigate();
+  const { t } = useLingui();
 
   const [name, setName] = useState<FieldState>(initialField);
   const [cafeName, setCafeName] = useState<FieldState>(initialField);
@@ -120,7 +122,7 @@ function SignupPage() {
       await createCafeWhenAuthReady(convex, cafeName.value.trim());
       navigate({ to: '/onboarding/profile' });
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Gagal mendaftar.');
+      setAuthError(err instanceof Error ? err.message : t`Gagal mendaftar.`);
     } finally {
       setSubmitting(false);
     }
@@ -132,10 +134,10 @@ function SignupPage() {
         onSubmit={onSubmit}
         className="w-full max-w-sm p-6 rounded-lg border border-border bg-background"
       >
-        <h1 className="mb-6 text-2xl font-bold">Daftar</h1>
+        <h1 className="mb-6 text-2xl font-bold"><Trans>Daftar</Trans></h1>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="name">Nama Anda</FieldLabel>
+            <FieldLabel htmlFor="name"><Trans>Nama Anda</Trans></FieldLabel>
             <div className="relative">
               <User
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
@@ -145,7 +147,7 @@ function SignupPage() {
                 id="name"
                 name="name"
                 autoComplete="name"
-                placeholder="mis. Warren"
+                placeholder={t`mis. Warren`}
                 className={`pl-9 ${name.error ? 'border-destructive' : ''}`}
                 value={name.value}
                 onBlur={bindBlur(setName, validateName)}
@@ -158,7 +160,7 @@ function SignupPage() {
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="cafeName">Nama kafe</FieldLabel>
+            <FieldLabel htmlFor="cafeName"><Trans>Nama kafe</Trans></FieldLabel>
             <div className="relative">
               <Coffee
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
@@ -168,7 +170,7 @@ function SignupPage() {
                 id="cafeName"
                 name="cafeName"
                 autoComplete="organization"
-                placeholder="mis. Kopi Senja"
+                placeholder={t`mis. Kopi Senja`}
                 maxLength={80}
                 className={`pl-9 ${cafeName.error ? 'border-destructive' : ''}`}
                 value={cafeName.value}
@@ -217,7 +219,7 @@ function SignupPage() {
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
-                placeholder="Minimal 8 karakter"
+                placeholder={t`Minimal 8 karakter`}
                 className={`pl-9 pr-9 ${password.error ? 'border-destructive' : ''}`}
                 value={password.value}
                 onBlur={bindBlur(setPassword, validatePasswordSignup)}
@@ -229,7 +231,7 @@ function SignupPage() {
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                aria-label={showPassword ? t`Sembunyikan password` : t`Tampilkan password`}
               >
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
@@ -258,15 +260,17 @@ function SignupPage() {
               className="mt-0.5"
             />
             <label htmlFor="terms" className="text-sm text-muted-foreground select-none">
-              Saya menyetujui{' '}
-              <Link to="/terms" className="text-primary underline">
-                Syarat Layanan
-              </Link>{' '}
-              dan{' '}
-              <Link to="/privacy" className="text-primary underline">
-                Kebijakan Privasi
-              </Link>
-              .
+              <Trans>
+                Saya menyetujui{' '}
+                <Link to="/terms" className="text-primary underline">
+                  Syarat Layanan
+                </Link>{' '}
+                dan{' '}
+                <Link to="/privacy" className="text-primary underline">
+                  Kebijakan Privasi
+                </Link>
+                .
+              </Trans>
             </label>
           </div>
 
@@ -274,14 +278,14 @@ function SignupPage() {
 
           <Button type="submit" className="w-full" disabled={submitting || formInvalid}>
             {submitting && <Spinner data-icon="inline-start" />}
-            {submitting ? 'Memproses…' : 'Daftar'}
+            {submitting ? <Trans>Memproses…</Trans> : <Trans>Daftar</Trans>}
           </Button>
         </FieldGroup>
 
         <div className="mt-6 pt-6 border-t border-border text-center text-sm text-muted-foreground">
-          Sudah punya akun?{' '}
+          <Trans>Sudah punya akun?</Trans>{' '}
           <Link to="/signin" className="text-primary underline">
-            Masuk
+            <Trans>Masuk</Trans>
           </Link>
         </div>
       </form>

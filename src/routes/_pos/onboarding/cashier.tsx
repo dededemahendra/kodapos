@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { type FormEvent, useState } from 'react';
 import { PinEntry } from '~/components/staff/pin-entry';
 import { Button } from '~/components/ui/button';
@@ -13,6 +15,7 @@ export const Route = createFileRoute('/_pos/onboarding/cashier')({
 });
 
 function OnboardingCashier() {
+  const { t } = useLingui();
   const staff = useQuery(api.staff.list, {});
   const create = useMutation(api.staff.create);
   const resetPin = useMutation(api.staff.resetPin);
@@ -23,7 +26,7 @@ function OnboardingCashier() {
   const [addError, setAddError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
-  if (staff === undefined) return <p className="text-muted-foreground">Memuat…</p>;
+  if (staff === undefined) return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
 
   const owner = staff.find((s) => s.role === 'owner');
   const cashiers = staff.filter((s) => s.role === 'cashier');
@@ -35,7 +38,7 @@ function OnboardingCashier() {
       await resetPin({ id: owner._id, pin });
       setPickingOwner(false);
     } catch (err) {
-      setPinError(err instanceof Error ? err.message : 'Gagal mengatur PIN.');
+      setPinError(err instanceof Error ? err.message : t`Gagal mengatur PIN.`);
     }
   }
 
@@ -52,7 +55,7 @@ function OnboardingCashier() {
       });
       form.reset();
     } catch (err) {
-      setAddError(err instanceof Error ? err.message : 'Gagal menambah kasir.');
+      setAddError(err instanceof Error ? err.message : t`Gagal menambah kasir.`);
     } finally {
       setAdding(false);
     }
@@ -66,14 +69,14 @@ function OnboardingCashier() {
   return (
     <div className="space-y-8 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold mb-1">PIN Pemilik & Kasir</h1>
+        <h1 className="text-2xl font-bold mb-1"><Trans>PIN Pemilik & Kasir</Trans></h1>
         <p className="text-muted-foreground text-sm">
-          Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (opsional).
+          <Trans>Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (opsional).</Trans>
         </p>
       </div>
 
       <section>
-        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">PIN Pemilik</h2>
+        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2"><Trans>PIN Pemilik</Trans></h2>
         {owner && (
           <div className="flex items-center justify-between p-3 rounded-md border border-border bg-background">
             <span>{owner.name}</span>
@@ -81,7 +84,7 @@ function OnboardingCashier() {
               variant={owner.pinHash ? 'outline' : 'default'}
               onClick={() => setPickingOwner(true)}
             >
-              {owner.pinHash ? 'Ganti PIN' : 'Atur PIN'}
+              {owner.pinHash ? <Trans>Ganti PIN</Trans> : <Trans>Atur PIN</Trans>}
             </Button>
           </div>
         )}
@@ -89,18 +92,18 @@ function OnboardingCashier() {
 
       <section>
         <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-          Kasir lain (opsional)
+          <Trans>Kasir lain (opsional)</Trans>
         </h2>
         <form onSubmit={handleAddCashier} className="flex gap-2 items-end mb-3">
           <div className="flex-1">
             <label htmlFor="cName" className="text-xs text-muted-foreground">
-              Nama
+              <Trans>Nama</Trans>
             </label>
-            <Input id="cName" name="name" placeholder="mis. Andi" required maxLength={60} />
+            <Input id="cName" name="name" placeholder={t`mis. Andi`} required maxLength={60} />
           </div>
           <div>
             <label htmlFor="cPin" className="text-xs text-muted-foreground">
-              PIN 4 digit
+              <Trans>PIN 4 digit</Trans>
             </label>
             <Input
               id="cPin"
@@ -114,7 +117,7 @@ function OnboardingCashier() {
           </div>
           <Button type="submit" disabled={adding}>
             {adding && <Spinner data-icon="inline-start" />}
-            {adding ? '…' : '+ Tambah'}
+            {adding ? <Trans>…</Trans> : <Trans>+ Tambah</Trans>}
           </Button>
         </form>
         {addError && <p className="text-sm text-destructive mb-2">{addError}</p>}
@@ -130,16 +133,16 @@ function OnboardingCashier() {
       </section>
 
       <div className="flex gap-2">
-        <Button onClick={() => void finish()}>Selesai</Button>
+        <Button onClick={() => void finish()}><Trans>Selesai</Trans></Button>
         <Button asChild variant="ghost">
-          <Link to="/onboarding/menu">← Kembali</Link>
+          <Link to="/onboarding/menu"><Trans>← Kembali</Trans></Link>
         </Button>
       </div>
 
       <Dialog open={pickingOwner} onOpenChange={(o) => !o && setPickingOwner(false)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Atur PIN Pemilik</DialogTitle>
+            <DialogTitle><Trans>Atur PIN Pemilik</Trans></DialogTitle>
           </DialogHeader>
           <PinEntry
             onComplete={(pin) => {

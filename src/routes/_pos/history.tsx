@@ -2,6 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { useState } from 'react';
 import { PinGate } from '~/components/staff/pin-gate';
 import { ReceiptPreview } from '~/components/sale/receipt-preview';
@@ -24,6 +26,7 @@ function HistoryPage() {
 }
 
 function HistoryList() {
+  const { t } = useLingui();
   const shift = useQuery(api.shifts.current, {});
   const [openId, setOpenId] = useState<Id<'orders'> | null>(null);
   const orders = useQuery(
@@ -35,7 +38,7 @@ function HistoryList() {
     return (
       <div className="p-6 flex gap-2 text-muted-foreground items-center">
         <Spinner />
-        <span>Memuat riwayat…</span>
+        <span><Trans>Memuat riwayat…</Trans></span>
       </div>
     );
   }
@@ -43,13 +46,13 @@ function HistoryList() {
   return (
     <main className="p-6 space-y-3">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Riwayat shift ini</h1>
+        <h1 className="text-2xl font-bold"><Trans>Riwayat shift ini</Trans></h1>
         <Link to="/sale" className="text-sm underline text-primary">
-          Kembali ke /sale
+          <Trans>Kembali ke /sale</Trans>
         </Link>
       </div>
       {orders.length === 0 ? (
-        <p className="text-muted-foreground">Belum ada pesanan di shift ini.</p>
+        <p className="text-muted-foreground"><Trans>Belum ada pesanan di shift ini.</Trans></p>
       ) : (
         <ul className="divide-y divide-border border border-border rounded-md">
           {orders.map((o) => (
@@ -68,7 +71,7 @@ function HistoryList() {
                   </span>
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
-                  {o.lines.length} item · {o.paymentMethod === 'cash' ? 'Tunai' : o.paymentMethod}
+                  {t`${o.lines.length} item`} · {o.paymentMethod === 'cash' ? t`Tunai` : o.paymentMethod}
                 </div>
               </button>
             </li>

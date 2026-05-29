@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { type FormEvent, useState } from 'react';
 import { type ShiftSummary, ShiftSummaryPanel } from '~/components/shift/shift-summary-panel';
 import { Button } from '~/components/ui/button';
@@ -14,6 +16,7 @@ export const Route = createFileRoute('/_pos/shift/close')({
 });
 
 function ShiftClosePage() {
+  const { t } = useLingui();
   const current = useQuery(api.shifts.current, {});
   const closeShift = useMutation(api.shifts.close);
   const { clearCashier } = useActiveCashier();
@@ -24,12 +27,12 @@ function ShiftClosePage() {
   if (closedShift) {
     return (
       <main className="max-w-xl mx-auto p-6 space-y-4">
-        <h1 className="text-2xl font-bold">Shift ditutup</h1>
+        <h1 className="text-2xl font-bold"><Trans>Shift ditutup</Trans></h1>
         <ShiftSummaryPanel shift={closedShift} />
         <div className="flex gap-2">
-          <Button onClick={() => window.print()}>Cetak ringkasan</Button>
+          <Button onClick={() => window.print()}><Trans>Cetak ringkasan</Trans></Button>
           <Button variant="outline" asChild>
-            <Link to="/menu">Kembali ke menu</Link>
+            <Link to="/menu"><Trans>Kembali ke menu</Trans></Link>
           </Button>
         </div>
       </main>
@@ -37,15 +40,15 @@ function ShiftClosePage() {
   }
 
   if (current === undefined) {
-    return <p className="text-muted-foreground p-6">Memuat…</p>;
+    return <p className="text-muted-foreground p-6"><Trans>Memuat…</Trans></p>;
   }
 
   if (current === null) {
     return (
       <main className="max-w-xl mx-auto p-6">
-        <p className="text-muted-foreground">Tidak ada shift terbuka.</p>
+        <p className="text-muted-foreground"><Trans>Tidak ada shift terbuka.</Trans></p>
         <Button asChild className="mt-3">
-          <Link to="/shift/open">Buka Shift Baru</Link>
+          <Link to="/shift/open"><Trans>Buka Shift Baru</Trans></Link>
         </Button>
       </main>
     );
@@ -63,7 +66,7 @@ function ShiftClosePage() {
       setClosedShift({ ...current, countedCashIDR: counted, closedAt: Date.now() });
       clearCashier();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal menutup shift.');
+      setError(err instanceof Error ? err.message : t`Gagal menutup shift.`);
     } finally {
       setSubmitting(false);
     }
@@ -72,14 +75,14 @@ function ShiftClosePage() {
   return (
     <main className="max-w-3xl mx-auto p-6 grid grid-cols-2 gap-8">
       <section>
-        <h1 className="text-2xl font-bold mb-3">Tutup Shift</h1>
+        <h1 className="text-2xl font-bold mb-3"><Trans>Tutup Shift</Trans></h1>
         <ShiftSummaryPanel shift={current} />
       </section>
       <section>
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="countedCashIDR">Uang terhitung (Rp)</FieldLabel>
+              <FieldLabel htmlFor="countedCashIDR"><Trans>Uang terhitung (Rp)</Trans></FieldLabel>
               <Input
                 id="countedCashIDR"
                 name="countedCashIDR"
@@ -92,7 +95,7 @@ function ShiftClosePage() {
             {error && <FieldError>{error}</FieldError>}
             <Button type="submit" disabled={submitting}>
               {submitting && <Spinner data-icon="inline-start" />}
-              {submitting ? 'Menutup…' : 'Tutup Shift'}
+              {submitting ? <Trans>Menutup…</Trans> : <Trans>Tutup Shift</Trans>}
             </Button>
           </FieldGroup>
         </form>

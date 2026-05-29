@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { CafeProfileForm, type CafeProfileFormValues } from '~/components/menu/cafe-profile-form';
 
 export const Route = createFileRoute('/_pos/onboarding/profile')({
@@ -8,16 +10,17 @@ export const Route = createFileRoute('/_pos/onboarding/profile')({
 });
 
 function OnboardingProfile() {
+  const { t } = useLingui();
   const cafe = useQuery(api.cafes.myCafe);
   const updateProfile = useMutation(api.cafes.updateProfile);
   const markComplete = useMutation(api.cafes.markSetupComplete);
   const navigate = useNavigate();
 
   if (cafe === undefined) {
-    return <p className="text-muted-foreground">Memuat…</p>;
+    return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
   }
   if (cafe === null) {
-    return <p className="text-muted-foreground">Kafe tidak ditemukan.</p>;
+    return <p className="text-muted-foreground"><Trans>Kafe tidak ditemukan.</Trans></p>;
   }
 
   const initial: CafeProfileFormValues = {
@@ -31,17 +34,17 @@ function OnboardingProfile() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-1">Profil kafe</h1>
-      <p className="text-muted-foreground mb-6 text-sm">Bisa diubah kapan saja di Pengaturan.</p>
+      <h1 className="text-2xl font-bold mb-1"><Trans>Profil kafe</Trans></h1>
+      <p className="text-muted-foreground mb-6 text-sm"><Trans>Bisa diubah kapan saja di Pengaturan.</Trans></p>
       <CafeProfileForm
         initial={initial}
-        submitLabel="Lanjut →"
+        submitLabel={t`Lanjut →`}
         onSubmit={async (values) => {
           await updateProfile(values);
           navigate({ to: '/onboarding/menu' });
         }}
         secondaryAction={{
-          label: 'Lewati semua',
+          label: t`Lewati semua`,
           onClick: async () => {
             await markComplete();
             navigate({ to: '/menu' });
