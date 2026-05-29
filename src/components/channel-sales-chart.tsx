@@ -6,7 +6,7 @@ import { useLingui } from "@lingui/react/macro";
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
-import { formatDate } from "~/lib/formater";
+import { formatDayKey } from "~/lib/formater";
 import {
 	CardContent,
 	CardDescription,
@@ -62,7 +62,7 @@ export function ChannelSalesChart() {
 	}
 
 	const chartRows = rawData.map((r) => ({
-		label: formatDate(new Date(r.dayStart).toISOString(), "day-month"),
+		label: formatDayKey(r.day),
 		cash: r.cash,
 		qris: r.qris,
 	}));

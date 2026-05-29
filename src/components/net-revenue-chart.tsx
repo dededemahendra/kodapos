@@ -21,7 +21,7 @@ import {
 import { Delta, DeltaIcon, DeltaValue } from "~/components/delta";
 import { DashboardCard } from "~/components/dashboard-card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { formatDate, formatIDR } from "~/lib/formater";
+import { formatDayKey, formatIDR } from "~/lib/formater";
 
 function CustomGradientBar(
 	props: React.SVGProps<SVGRectElement> & {
@@ -74,7 +74,7 @@ export function NetRevenueChart() {
 
 	const chartRows =
 		data?.map((r) => ({
-			label: formatDate(new Date(r.dayStart).toISOString(), "day-month"),
+			label: formatDayKey(r.day),
 			revenue: r.revenueIDR,
 		})) ?? [];
 

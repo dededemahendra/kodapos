@@ -10,7 +10,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Delta, DeltaIcon, DeltaValue } from "~/components/delta";
 import { DashboardCard } from "~/components/dashboard-card";
-import { formatIDR } from "~/lib/formater";
+import { formatCount, formatIDR } from "~/lib/formater";
 
 export function DashboardStats() {
 	const data = useQuery(api.dashboard.kpis, {});
@@ -23,7 +23,7 @@ export function DashboardStats() {
 		},
 		{
 			label: <Trans>Transaksi</Trans>,
-			value: data?.orders,
+			value: data !== undefined ? formatCount(data.orders) : undefined,
 			delta: data?.ordersDeltaPct,
 		},
 		{
@@ -33,7 +33,7 @@ export function DashboardStats() {
 		},
 		{
 			label: <Trans>Item terjual</Trans>,
-			value: data?.itemsSold,
+			value: data !== undefined ? formatCount(data.itemsSold) : undefined,
 			delta: data?.itemsSoldDeltaPct,
 		},
 	];

@@ -49,16 +49,50 @@ function tzOffsetMs(tz: string, atMs: number): number {
 
 /** UTC ms of local-midnight for the day `daysAgo` days before `nowMs`, in `tz`. */
 function startOfLocalDay(tz: string, daysAgo: number, nowMs: number): number {
-  const target = new Date(nowMs - daysAgo * DAY_MS);
-  const ymd = new Intl.DateTimeFormat('en-CA', {
+  const asUtc = utcOfDayKey(dayKeyFn(tz)(nowMs - daysAgo * DAY_MS));
+  return asUtc - tzOffsetMs(tz, asUtc);
+}
+
+/** Maps an instant (ms) to its cafe-local calendar day, "YYYY-MM-DD". The
+ *  formatter is built once per `tz` so per-order bucketing stays cheap. */
+function dayKeyFn(tz: string): (atMs: number) => string {
+  const fmt = new Intl.DateTimeFormat('en-CA', {
     timeZone: tz,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).format(target);
-  const [y, m, d] = ymd.split('-');
-  const asUtc = Date.UTC(Number(y), Number(m) - 1, Number(d));
-  return asUtc - tzOffsetMs(tz, asUtc);
+  });
+  return (atMs) => fmt.format(new Date(atMs));
+}
+
+function utcOfDayKey(key: string): number {
+  const [y, m, d] = key.split('-');
+  return Date.UTC(Number(y), Number(m) - 1, Number(d));
+}
+
+/** Buckets the last 7 cafe-local days (oldest → newest), keyed by day. Returns
+ *  the ordered buckets plus a `windowStart` instant for the index range scan
+ *  and a `bucketFor` that resolves an order's instant to its bucket (or null). */
+function sevenDayBuckets<T extends object>(
+  tz: string,
+  nowMs: number,
+  init: () => T
+): {
+  windowStart: number;
+  buckets: Array<{ day: string } & T>;
+  bucketFor: (atMs: number) => ({ day: string } & T) | undefined;
+} {
+  const keyOf = dayKeyFn(tz);
+  const buckets = Array.from({ length: 7 }, (_, i) => ({
+    day: keyOf(nowMs - (6 - i) * DAY_MS),
+    ...init(),
+  }));
+  const byDay = new Map(buckets.map((b) => [b.day, b]));
+  return {
+    windowStart: startOfLocalDay(tz, 6, nowMs),
+    buckets,
+    bucketFor: (atMs) => byDay.get(keyOf(atMs)),
+  };
 }
 
 function pctDelta(cur: number, prev: number): number {
@@ -135,16 +169,15 @@ export const kpis = query({
 /** Daily paid revenue for the last 7 days (oldest → newest). */
 export const revenueDaily = query({
   args: {},
-  returns: v.array(v.object({ dayStart: v.number(), revenueIDR: v.number() })),
+  returns: v.array(v.object({ day: v.string(), revenueIDR: v.number() })),
   handler: async (ctx) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const tz = await tzFor(ctx, cafeId);
-    const now = Date.now();
-    const windowStart = startOfLocalDay(tz, 6, now);
-    const buckets = Array.from({ length: 7 }, (_, i) => ({
-      dayStart: startOfLocalDay(tz, 6 - i, now),
-      revenueIDR: 0,
-    }));
+    const { windowStart, buckets, bucketFor } = sevenDayBuckets(
+      tz,
+      Date.now(),
+      () => ({ revenueIDR: 0 })
+    );
     const rows = await ctx.db
       .query('orders')
       .withIndex('by_cafe_created', (q) =>
@@ -153,13 +186,8 @@ export const revenueDaily = query({
       .collect();
     for (const o of rows) {
       if (o.paymentStatus !== 'paid') continue;
-      for (let i = buckets.length - 1; i >= 0; i--) {
-        const b = buckets[i];
-        if (b && o.createdAtClient >= b.dayStart) {
-          b.revenueIDR += o.totalIDR;
-          break;
-        }
-      }
+      const b = bucketFor(o.createdAtClient);
+      if (b) b.revenueIDR += o.totalIDR;
     }
     return buckets;
   },
@@ -169,18 +197,16 @@ export const revenueDaily = query({
 export const paymentMethods = query({
   args: {},
   returns: v.array(
-    v.object({ dayStart: v.number(), cash: v.number(), qris: v.number() })
+    v.object({ day: v.string(), cash: v.number(), qris: v.number() })
   ),
   handler: async (ctx) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const tz = await tzFor(ctx, cafeId);
-    const now = Date.now();
-    const windowStart = startOfLocalDay(tz, 6, now);
-    const buckets = Array.from({ length: 7 }, (_, i) => ({
-      dayStart: startOfLocalDay(tz, 6 - i, now),
-      cash: 0,
-      qris: 0,
-    }));
+    const { windowStart, buckets, bucketFor } = sevenDayBuckets(
+      tz,
+      Date.now(),
+      () => ({ cash: 0, qris: 0 })
+    );
     const rows = await ctx.db
       .query('orders')
       .withIndex('by_cafe_created', (q) =>
@@ -189,14 +215,10 @@ export const paymentMethods = query({
       .collect();
     for (const o of rows) {
       if (o.paymentStatus !== 'paid') continue;
-      for (let i = buckets.length - 1; i >= 0; i--) {
-        const b = buckets[i];
-        if (b && o.createdAtClient >= b.dayStart) {
-          if (o.paymentMethod === 'cash') b.cash += 1;
-          else b.qris += 1;
-          break;
-        }
-      }
+      const b = bucketFor(o.createdAtClient);
+      if (!b) continue;
+      if (o.paymentMethod === 'cash') b.cash += 1;
+      else b.qris += 1;
     }
     return buckets;
   },

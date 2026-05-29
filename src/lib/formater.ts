@@ -72,9 +72,32 @@ export function formatRelative(value: number | string | Date): string {
   const diff = ms - Date.now();
   const abs = Math.abs(diff);
   const rtf = new Intl.RelativeTimeFormat(activeLocale(), { numeric: 'auto' });
+  // Sub-minute reads as "now" / "sekarang" rather than rounding to "this minute".
+  if (abs < 60_000) return rtf.format(0, 'second');
   if (abs < 3_600_000) return rtf.format(Math.round(diff / 60_000), 'minute');
   if (abs < 86_400_000) return rtf.format(Math.round(diff / 3_600_000), 'hour');
   return rtf.format(Math.round(diff / 86_400_000), 'day');
+}
+
+/**
+ * Format a calendar-day key ("YYYY-MM-DD") as locale-aware day + short month.
+ * Timezone-independent: the key already encodes the intended calendar day, so
+ * it renders the same regardless of the viewer's browser timezone.
+ */
+export function formatDayKey(key: string): string {
+  const [y, m, d] = key.split('-').map(Number);
+  if (!y || !m || !d) return key;
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return new Intl.DateTimeFormat(activeLocale(), {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
+/** Locale-aware integer count with grouping separators, e.g. "1.234" / "1,234". */
+export function formatCount(value: number): string {
+  return new Intl.NumberFormat(activeLocale()).format(value);
 }
 
 // IDR is always formatted in id-ID locale so the Rp symbol is always shown,
