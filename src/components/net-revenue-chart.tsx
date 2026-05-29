@@ -2,6 +2,8 @@
 
 import type * as React from "react";
 import { Bar, BarChart, XAxis } from "recharts";
+import { useLingui } from "@lingui/react/macro";
+import { Trans } from "@lingui/react/macro";
 import {
 	CardContent,
 	CardDescription,
@@ -33,13 +35,6 @@ const chartRows = salesDaily7.map((row) => ({ ...row }));
 const firstDay = salesDaily7[0].sales;
 const lastDay = salesDaily7.at(-1)?.sales ?? firstDay;
 const growthPct = (((lastDay - firstDay) / firstDay) * 100).toFixed(1);
-
-const chartConfig = {
-	sales: {
-		label: "Sales",
-		color: "var(--chart-2)",
-	},
-} satisfies ChartConfig;
 
 function CustomGradientBar(
 	props: React.SVGProps<SVGRectElement> & {
@@ -80,17 +75,30 @@ function CustomGradientBar(
 }
 
 export function NetRevenueChart() {
+	const { t } = useLingui();
+
+	const chartConfig = {
+		sales: {
+			label: t`Sales`,
+			color: "var(--chart-2)",
+		},
+	} satisfies ChartConfig;
+
 	return (
 		<DashboardCard className="gap-0 md:col-span-2">
 			<CardHeader className="gap-2">
 				<div className="flex flex-wrap items-center gap-2">
-					<CardTitle>Net revenue</CardTitle>
+					<CardTitle>
+						<Trans>Net revenue</Trans>
+					</CardTitle>
 					<Delta value={Number(growthPct)} variant="badge">
 						<DeltaIcon variant="trend" />
 						<DeltaValue />
 					</Delta>
 				</div>
-				<CardDescription>Daily net sales, last 7 days.</CardDescription>
+				<CardDescription>
+					<Trans>Daily net sales, last 7 days.</Trans>
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<ChartContainer

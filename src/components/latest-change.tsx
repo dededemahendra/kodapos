@@ -2,15 +2,11 @@
 
 import { cn } from "~/lib/utils";
 import { useState } from "react";
+import { Trans } from "@lingui/react/macro";
 import { Button } from "~/components/ui/button";
 import { XIcon } from "lucide-react";
 
-const latestChange = {
-	badge: "PEMBARUAN",
-	title: "Dasbor baru",
-	description: "Navigasi sidebar & dasbor.", // Single line, max ~5 words.
-	readMore: { href: "#", label: "Selengkapnya" },
-} as const;
+const latestChangeHref = "#";
 
 export function LatestChange() {
 	const [isOpen, setIsOpen] = useState(true);
@@ -28,11 +24,11 @@ export function LatestChange() {
 			)}
 		>
 			<span className="font-light font-mono text-[10px] text-muted-foreground">
-				{latestChange.badge}
+				<Trans>PEMBARUAN</Trans>
 			</span>
-			<p className="font-medium text-xs">{latestChange.title}</p>
+			<p className="font-medium text-xs"><Trans>Dasbor baru</Trans></p>
 			<span className="text-[10px] text-muted-foreground">
-				{latestChange.description}
+				<Trans>Navigasi sidebar & dasbor.</Trans>
 			</span>
 			<Button
 				asChild
@@ -40,7 +36,7 @@ export function LatestChange() {
 				size="sm"
 				variant="link"
 			>
-				<a href={latestChange.readMore.href}>{latestChange.readMore.label}</a>
+				<a href={latestChangeHref}><Trans>Selengkapnya</Trans></a>
 			</Button>
 			<Button
 				className="absolute top-2 right-2 z-10 size-6 rounded-full opacity-0 transition-opacity group-hover/latest-change:opacity-100"

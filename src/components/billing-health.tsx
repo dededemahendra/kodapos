@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { Button } from "~/components/ui/button";
 import {
 	CardContent,
@@ -20,9 +21,11 @@ export function BillingHealth() {
 	return (
 		<DashboardCard className="gap-0">
 			<CardHeader className="border-b">
-				<CardTitle className="text-balance text-base">Billing health</CardTitle>
+				<CardTitle className="text-balance text-base">
+					<Trans>Billing health</Trans>
+				</CardTitle>
 				<CardDescription className="text-pretty">
-					Nothing urgent needs your attention.
+					<Trans>Nothing urgent needs your attention.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex h-full items-center px-0">
@@ -31,15 +34,19 @@ export function BillingHealth() {
 						<EmptyMedia variant="icon">
 							<CircleCheckIcon aria-hidden="true" />
 						</EmptyMedia>
-						<EmptyTitle>You're caught up.</EmptyTitle>
+						<EmptyTitle>
+							<Trans>You're caught up.</Trans>
+						</EmptyTitle>
 						<EmptyDescription className="text-xs">
-							Balances and payouts look fine. nothing overdue in this snapshot.
+							<Trans>
+								Balances and payouts look fine. nothing overdue in this snapshot.
+							</Trans>
 						</EmptyDescription>
 					</EmptyHeader>
 					<EmptyContent>
 						<Button asChild variant="ghost">
 							<a href="/#">
-								Review open invoices
+								<Trans>Review open invoices</Trans>
 								<ArrowRightIcon aria-hidden="true" />
 							</a>
 						</Button>

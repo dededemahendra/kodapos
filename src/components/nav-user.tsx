@@ -5,6 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { api } from "convex/_generated/api";
 import { useQuery } from "convex/react";
 import { LogOut, Settings } from "lucide-react";
+import { Trans } from "@lingui/react/macro";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -44,7 +45,7 @@ export function NavUser() {
 					</Avatar>
 					<div className="min-w-0">
 						<p className="truncate font-medium text-foreground">{name}</p>
-						<p className="truncate text-muted-foreground text-xs">Pemilik</p>
+						<p className="truncate text-muted-foreground text-xs"><Trans>Pemilik</Trans></p>
 					</div>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
@@ -52,7 +53,7 @@ export function NavUser() {
 					<DropdownMenuItem asChild>
 						<Link to="/settings/profile">
 							<Settings />
-							Pengaturan
+							<Trans>Pengaturan</Trans>
 						</Link>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
@@ -63,7 +64,7 @@ export function NavUser() {
 					variant="destructive"
 				>
 					<LogOut />
-					Keluar
+					<Trans>Keluar</Trans>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

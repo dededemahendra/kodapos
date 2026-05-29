@@ -1,3 +1,5 @@
+import { useLingui } from "@lingui/react/macro";
+import { Trans } from "@lingui/react/macro";
 import {
 	CardContent,
 	CardFooter,
@@ -13,30 +15,32 @@ type Stat = {
 	delta: number;
 };
 
-const stats: Stat[] = [
-	{
-		label: "Active users",
-		value: "847",
-		delta: 3.1,
-	},
-	{
-		label: "Revenue",
-		value: "$18,290",
-		delta: 12.4,
-	},
-	{
-		label: "Conversion Rate",
-		value: "3.28%",
-		delta: -0.4,
-	},
-	{
-		label: "New signups",
-		value: "142",
-		delta: 8.7,
-	},
-] as const;
-
 export function DashboardStats() {
+	const { t } = useLingui();
+
+	const stats: Stat[] = [
+		{
+			label: t`Active users`,
+			value: "847",
+			delta: 3.1,
+		},
+		{
+			label: t`Revenue`,
+			value: "$18,290",
+			delta: 12.4,
+		},
+		{
+			label: t`Conversion Rate`,
+			value: "3.28%",
+			delta: -0.4,
+		},
+		{
+			label: t`New signups`,
+			value: "142",
+			delta: 8.7,
+		},
+	];
+
 	return (
 		<>
 			{stats.map((s) => (
@@ -54,7 +58,9 @@ export function DashboardStats() {
 							<DeltaIcon />
 							<DeltaValue />
 						</Delta>
-						<span className="text-muted-foreground">vs last week</span>{" "}
+						<span className="text-muted-foreground">
+							<Trans>vs last week</Trans>
+						</span>{" "}
 					</CardFooter>
 				</DashboardCard>
 			))}

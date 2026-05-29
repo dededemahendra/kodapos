@@ -2,6 +2,8 @@
 
 import { useId } from "react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { useLingui } from "@lingui/react/macro";
+import { Trans } from "@lingui/react/macro";
 import { formatDate } from "~/lib/formater";
 import {
 	CardContent,
@@ -89,34 +91,37 @@ function growthPctForWindow(rows: readonly ChannelSalesChartRow[]) {
 
 const growthPctNum = growthPctForWindow(chartRows);
 
-const chartConfig = {
-	retail: {
-		label: "Retail",
-		color: "var(--chart-2)",
-	},
-	online: {
-		label: "Online",
-		color: "var(--chart-1)",
-	},
-} satisfies ChartConfig;
-
 export function ChannelSalesChart() {
 	const chartUid = useId().replace(/:/g, "");
 	const idLineGlow = `channel-sales-line-glow-${chartUid}`;
+	const { t } = useLingui();
+
+	const chartConfig = {
+		retail: {
+			label: t`Retail`,
+			color: "var(--chart-2)",
+		},
+		online: {
+			label: t`Online`,
+			color: "var(--chart-1)",
+		},
+	} satisfies ChartConfig;
 
 	return (
 		<DashboardCard className="gap-0 md:col-span-2">
 			<CardHeader>
 				<div className="min-w-0 space-y-2">
 					<div className="flex flex-wrap items-center gap-2">
-						<CardTitle>Channel sales</CardTitle>
+						<CardTitle>
+							<Trans>Channel sales</Trans>
+						</CardTitle>
 						<Delta value={growthPctNum} variant="badge">
 							<DeltaIcon variant="trend" />
 							<DeltaValue />
 						</Delta>
 					</div>
 					<CardDescription>
-						Daily sales count by channel, last {VISIBLE_DAYS} days.
+						<Trans>Daily sales count by channel, last {VISIBLE_DAYS} days.</Trans>
 					</CardDescription>
 				</div>
 			</CardHeader>

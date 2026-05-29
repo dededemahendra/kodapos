@@ -1,3 +1,5 @@
+import { useLingui } from "@lingui/react/macro";
+import { Trans } from "@lingui/react/macro";
 import {
 	CardContent,
 	CardDescription,
@@ -7,47 +9,53 @@ import {
 import { DashboardCard } from "~/components/dashboard-card";
 import { CreditCardIcon, UserPlusIcon, FileTextIcon, RocketIcon } from "lucide-react";
 
-const items = [
-	{
-		title: "Invoice #1045 marked paid",
-		time: "About 2 hours ago",
-		icon: (
-			<CreditCardIcon
-			/>
-		),
-	},
-	{
-		title: "Jordan joined the team",
-		time: "This morning",
-		icon: (
-			<UserPlusIcon
-			/>
-		),
-	},
-	{
-		title: "Weekly summary exported",
-		time: "Yesterday",
-		icon: (
-			<FileTextIcon
-			/>
-		),
-	},
-	{
-		title: "Dashboard v2 shipped to prod",
-		time: "2 days ago",
-		icon: (
-			<RocketIcon
-			/>
-		),
-	},
-] as const;
-
 export function DashboardActivity() {
+	const { t } = useLingui();
+
+	const items = [
+		{
+			title: t`Invoice #1045 marked paid`,
+			time: t`About 2 hours ago`,
+			icon: (
+				<CreditCardIcon
+				/>
+			),
+		},
+		{
+			title: t`Jordan joined the team`,
+			time: t`This morning`,
+			icon: (
+				<UserPlusIcon
+				/>
+			),
+		},
+		{
+			title: t`Weekly summary exported`,
+			time: t`Yesterday`,
+			icon: (
+				<FileTextIcon
+				/>
+			),
+		},
+		{
+			title: t`Dashboard v2 shipped to prod`,
+			time: t`2 days ago`,
+			icon: (
+				<RocketIcon
+				/>
+			),
+		},
+	];
+
 	return (
 		<DashboardCard className="gap-0">
 			<CardHeader className="border-b">
-				<CardTitle>Activity</CardTitle>
-				<CardDescription>Latest updates in your workspace.</CardDescription>
+				<CardTitle>
+					<Trans>Activity</Trans>
+				</CardTitle>
+				<CardDescription>
+					<Trans>Latest updates in your workspace.</Trans>
+				</CardDescription>
 			</CardHeader>
 			<CardContent className="px-0">
 				<ul className="flex flex-col divide-y divide-border">

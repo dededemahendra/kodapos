@@ -1,4 +1,5 @@
 import { useRouterState } from "@tanstack/react-router";
+import { useLingui } from "@lingui/react/macro";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -10,6 +11,7 @@ import { NavUser } from "~/components/nav-user";
 import { BellIcon } from "lucide-react";
 
 export function AppHeader() {
+	const { t } = useLingui();
 	const path = useRouterState({ select: (s) => s.location.pathname });
 	const activeItem = navLinks.find(
 		(item) =>
@@ -33,7 +35,7 @@ export function AppHeader() {
 				<AppBreadcrumbs page={activeItem ?? null} />
 			</div>
 			<div className="flex items-center gap-3">
-				<Button aria-label="Notifikasi" size="icon-sm" variant="outline">
+				<Button aria-label={t`Notifikasi`} size="icon-sm" variant="outline">
 					<BellIcon />
 				</Button>
 				<Separator
