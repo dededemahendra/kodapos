@@ -28,7 +28,7 @@ function PosLayout() {
   const showNav = !urlHidden && !needsOnboarding;
 
   return (
-    <div data-density="compact" className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-muted">
       <AuthLoading>
         <div className="flex min-h-screen items-center justify-center gap-2 text-muted-foreground">
           <Spinner />
