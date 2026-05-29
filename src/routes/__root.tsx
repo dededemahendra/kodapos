@@ -2,6 +2,7 @@ import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { I18nProvider } from '@lingui/react';
 import { createRootRoute, HeadContent, Link, Outlet, Scripts } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
+import { LocaleProvider } from '~/components/locale-provider';
 import { convex } from '~/lib/convex';
 import { i18n } from '~/lib/i18n';
 import globalsCss from '~/styles/globals.css?url';
@@ -47,9 +48,11 @@ function RootComponent() {
   return (
     <RootDocument>
       <I18nProvider i18n={i18n}>
-        <ConvexAuthProvider client={convex}>
-          <Outlet />
-        </ConvexAuthProvider>
+        <LocaleProvider>
+          <ConvexAuthProvider client={convex}>
+            <Outlet />
+          </ConvexAuthProvider>
+        </LocaleProvider>
       </I18nProvider>
     </RootDocument>
   );
