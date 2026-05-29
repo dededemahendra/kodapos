@@ -137,7 +137,7 @@ export const get = query({
       integrations: row?.integrations ?? DEFAULT_SETTINGS.integrations,
       taxName: row?.taxName ?? DEFAULT_SETTINGS.taxName,
       taxInclusive: row?.taxInclusive ?? DEFAULT_SETTINGS.taxInclusive,
-      ...(row?.npwp ? { npwp: row.npwp } : {}),
+      ...(row?.npwp !== undefined ? { npwp: row.npwp } : {}),
       taxRatePct: cafe?.taxRatePct ?? 11,
       taxEnabled: cafe?.taxEnabled ?? true,
     };

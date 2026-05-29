@@ -90,4 +90,29 @@ describe('settings.get', () => {
     expect(s.taxName).toBe('PPN');
     expect(s.payment.defaultMethod).toBe('cash');
   });
+
+  it('returns npwp only when stored, passing through empty string', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedOwner(t);
+    const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+
+    const cafeId = await t.run(async (ctx) => {
+      const cafe = await ctx.db
+        .query('cafes')
+        .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
+        .first();
+      return cafe!._id;
+    });
+
+    // No npwp stored → key absent on the result.
+    const before = await asOwner.query(api.settings.get);
+    expect(before.npwp).toBeUndefined();
+
+    // Stored npwp (including empty string) → passed through.
+    await t.run(async (ctx) => {
+      await ctx.db.insert('cafeSettings', { cafeId, npwp: '', updatedAt: 0 });
+    });
+    const after = await asOwner.query(api.settings.get);
+    expect(after.npwp).toBe('');
+  });
 });
