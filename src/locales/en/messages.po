@@ -1170,7 +1170,6 @@ msgstr "Owner"
 
 #: src/components/app-shared.tsx
 #: src/components/nav-user.tsx
-#: src/routes/_pos/settings/route.tsx
 msgid "Pengaturan"
 msgstr "Settings"
 
@@ -1301,7 +1300,6 @@ msgstr "Profile"
 
 #: src/routes/_pos/onboarding/profile.tsx
 #: src/routes/_pos/settings/profile.tsx
-#: src/routes/_pos/settings/route.tsx
 msgid "Profil kafe"
 msgstr "Cafe profile"
 
@@ -1493,7 +1491,6 @@ msgid "Simpan resep"
 msgstr "Save recipe"
 
 #: src/components/app-shared.tsx
-#: src/routes/_pos/settings/route.tsx
 msgid "Staf"
 msgstr "Staff"
 
@@ -1728,7 +1725,6 @@ msgstr "Text size"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/settings/general.tsx
-#: src/routes/_pos/settings/route.tsx
 msgid "Umum"
 msgstr "General"
 
