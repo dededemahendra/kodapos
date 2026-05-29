@@ -17,8 +17,8 @@ msgid " · belum ada PIN"
 msgstr " · belum ada PIN"
 
 #: src/components/menu/item-edit-form.tsx
-msgid "— Pilih kategori —"
-msgstr "— Pilih kategori —"
+#~ msgid "— Pilih kategori —"
+#~ msgstr "— Pilih kategori —"
 
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -303,8 +303,12 @@ msgid "Buah (pcs)"
 msgstr "Buah (pcs)"
 
 #: src/routes/_pos/onboarding/menu.tsx
-msgid "Buat 2–3 kategori (Kopi, Non-Kopi, Makanan)."
-msgstr "Buat 2–3 kategori (Kopi, Non-Kopi, Makanan)."
+msgid "Buat 2-3 kategori (Kopi, Non-Kopi, Makanan)."
+msgstr "Buat 2-3 kategori (Kopi, Non-Kopi, Makanan)."
+
+#: src/routes/_pos/onboarding/menu.tsx
+#~ msgid "Buat 2–3 kategori (Kopi, Non-Kopi, Makanan)."
+#~ msgstr "Buat 2–3 kategori (Kopi, Non-Kopi, Makanan)."
 
 #: src/components/inventory/ingredient-picker.tsx
 msgid "Buat bahan baru:"
@@ -438,8 +442,12 @@ msgid "Digit {0}"
 msgstr "Digit {0}"
 
 #: src/routes/_pos/menu/modifiers.tsx
-msgid "Dipakai ulang di banyak item — ubah di satu tempat."
-msgstr "Dipakai ulang di banyak item — ubah di satu tempat."
+#~ msgid "Dipakai ulang di banyak item — ubah di satu tempat."
+#~ msgstr "Dipakai ulang di banyak item — ubah di satu tempat."
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Dipakai ulang di banyak item, ubah di satu tempat."
+msgstr "Dipakai ulang di banyak item, ubah di satu tempat."
 
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Ditutup pada"
@@ -1223,6 +1231,10 @@ msgstr "Pilih bahan…"
 #~ msgstr "Pilih bahasa tampilan kasir."
 
 #: src/components/menu/item-edit-form.tsx
+msgid "Pilih kategori"
+msgstr "Pilih kategori"
+
+#: src/components/menu/item-edit-form.tsx
 msgid "Pilih kategori terlebih dahulu."
 msgstr "Pilih kategori terlebih dahulu."
 
@@ -1750,7 +1762,7 @@ msgid "wajib"
 msgstr "wajib"
 
 #. placeholder {0}: ag.group.minSelect
-#. placeholder {1}: ag.group.maxSelect > ag.group.minSelect ? `–${ag.group.maxSelect}` : ''
+#. placeholder {1}: ag.group.maxSelect > ag.group.minSelect ? `-${ag.group.maxSelect}` : ''
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Wajib (pilih {0}{1})"
 msgstr "Wajib (pilih {0}{1})"
@@ -1768,16 +1780,28 @@ msgid "Weekly summary exported"
 msgstr "Weekly summary exported"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "WIB — Jakarta"
-msgstr "WIB — Jakarta"
+#~ msgid "WIB — Jakarta"
+#~ msgstr "WIB — Jakarta"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "WIT — Jayapura"
-msgstr "WIT — Jayapura"
+msgid "WIB (Jakarta)"
+msgstr "WIB (Jakarta)"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "WITA — Makassar"
-msgstr "WITA — Makassar"
+#~ msgid "WIT — Jayapura"
+#~ msgstr "WIT — Jayapura"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "WIT (Jayapura)"
+msgstr "WIT (Jayapura)"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "WITA — Makassar"
+#~ msgstr "WITA — Makassar"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "WITA (Makassar)"
+msgstr "WITA (Makassar)"
 
 #: src/components/dashboard-activity.tsx
 msgid "Yesterday"

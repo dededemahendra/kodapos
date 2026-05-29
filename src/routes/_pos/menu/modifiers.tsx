@@ -18,7 +18,7 @@ function ModifierGroupsPage() {
         <div>
           <h1 className="text-xl font-bold"><Trans>Grup Modifier</Trans></h1>
           <p className="text-muted-foreground text-sm">
-            <Trans>Dipakai ulang di banyak item — ubah di satu tempat.</Trans>
+            <Trans>Dipakai ulang di banyak item, ubah di satu tempat.</Trans>
           </p>
         </div>
         <Link to="/menu/modifiers/$groupId" params={{ groupId: 'new' }} className="text-sm">

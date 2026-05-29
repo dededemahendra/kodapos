@@ -124,7 +124,7 @@ export function ModifierPickerDialog({
                     {isRequired
                       ? t`Wajib (pilih ${ag.group.minSelect}${
                           ag.group.maxSelect > ag.group.minSelect
-                            ? `–${ag.group.maxSelect}`
+                            ? `-${ag.group.maxSelect}`
                             : ''
                         })`
                       : t`Opsional (maks ${ag.group.maxSelect})`}

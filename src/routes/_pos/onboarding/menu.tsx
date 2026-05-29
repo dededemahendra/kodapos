@@ -29,7 +29,7 @@ function OnboardingMenu() {
       <div className="space-y-3 p-4 rounded-md border border-border bg-background max-w-md mb-6">
         <h2 className="font-semibold text-sm"><Trans>Langkah singkat</Trans></h2>
         <ol className="list-decimal pl-5 text-sm space-y-1">
-          <li><Trans>Buat 2–3 kategori (Kopi, Non-Kopi, Makanan).</Trans></li>
+          <li><Trans>Buat 2-3 kategori (Kopi, Non-Kopi, Makanan).</Trans></li>
           <li><Trans>Tambahkan beberapa item beserta harganya.</Trans></li>
           <li><Trans>Buat grup modifier (mis. Ukuran) dan pasang ke item.</Trans></li>
         </ol>

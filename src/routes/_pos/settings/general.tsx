@@ -136,13 +136,13 @@ function RegionSection({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Asia/Jakarta">
-                    <Trans>WIB — Jakarta</Trans>
+                    <Trans>WIB (Jakarta)</Trans>
                   </SelectItem>
                   <SelectItem value="Asia/Makassar">
-                    <Trans>WITA — Makassar</Trans>
+                    <Trans>WITA (Makassar)</Trans>
                   </SelectItem>
                   <SelectItem value="Asia/Jayapura">
-                    <Trans>WIT — Jayapura</Trans>
+                    <Trans>WIT (Jayapura)</Trans>
                   </SelectItem>
                 </SelectContent>
               </Select>
