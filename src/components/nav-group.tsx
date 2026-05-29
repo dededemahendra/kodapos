@@ -27,7 +27,7 @@ export function NavGroup({ label, items }: SidebarNavGroup) {
 
 	return (
 		<SidebarGroup>
-			{label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+			{label && <SidebarGroupLabel>{i18n._(label)}</SidebarGroupLabel>}
 			<SidebarMenu>
 				{items.map((item) =>
 					item.subItems?.length ? (

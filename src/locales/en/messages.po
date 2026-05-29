@@ -118,6 +118,10 @@ msgstr "Active (visible to cashier)"
 msgid "Aktifkan PPN di kasir"
 msgstr "Enable VAT at cashier"
 
+#: src/components/app-shared.tsx
+msgid "Akun"
+msgstr "Account"
+
 #: src/components/menu/cafe-profile-form.tsx
 msgid "Alamat (opsional)"
 msgstr "Address (optional)"
@@ -158,6 +162,10 @@ msgstr "Archive {noun}?"
 msgid "Arsipkan item"
 msgstr "Archive item"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Atur kerapatan elemen antarmuka."
+msgstr "Adjust the density of interface elements."
+
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Atur PIN"
 msgstr "Set PIN"
@@ -178,11 +186,13 @@ msgstr "ingredient"
 msgid "Bahan"
 msgstr "Ingredient"
 
-#: src/components/app-shared.tsx
-#: src/routes/_pos/settings/language.tsx
-#: src/routes/_pos/settings/route.tsx
+#: src/routes/_pos/settings/general.tsx
 msgid "Bahasa"
 msgstr "Language"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Bahasa tampilan aplikasi."
+msgstr "App display language."
 
 #: src/components/billing-health.tsx
 msgid "Balances and payouts look fine. nothing overdue in this snapshot."
@@ -609,6 +619,10 @@ msgid "Kasir: {0}"
 msgstr "Cashier: {0}"
 
 #: src/components/app-shared.tsx
+msgid "Katalog"
+msgstr "Catalog"
+
+#: src/components/app-shared.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/menu/categories.tsx
 #: src/routes/_pos/menu/index.tsx
@@ -649,6 +663,10 @@ msgstr "Back to menu"
 #: src/components/sale/receipt-preview.tsx
 msgid "Kembalian"
 msgstr "Change"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Kepadatan tampilan"
+msgstr "Display density"
 
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Konfirmasi"
@@ -742,6 +760,10 @@ msgstr "Loyalty"
 #: src/routes/_public/signup.tsx
 msgid "Masuk"
 msgstr "Sign in"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Mata Uang"
+msgstr "Currency"
 
 #: src/components/menu/modifier-group-form.tsx
 msgid "Max"
@@ -931,6 +953,10 @@ msgstr "Nothing urgent needs your attention."
 msgid "Notifikasi"
 msgstr "Notifications"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Nyaman"
+msgstr "Comfortable"
+
 #: src/components/channel-sales-chart.tsx
 msgid "Online"
 msgstr "Online"
@@ -938,6 +964,10 @@ msgstr "Online"
 #: src/components/dashboard-invoices.tsx
 msgid "Open amounts and payment status."
 msgstr "Open amounts and payment status."
+
+#: src/components/app-shared.tsx
+msgid "Operasional"
+msgstr "Operations"
 
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "opsi"
@@ -1048,8 +1078,8 @@ msgid "Pilih bahan…"
 msgstr "Select ingredient…"
 
 #: src/routes/_pos/settings/language.tsx
-msgid "Pilih bahasa tampilan kasir."
-msgstr "Select the cashier display language."
+#~ msgid "Pilih bahasa tampilan kasir."
+#~ msgstr "Select the cashier display language."
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Pilih kategori terlebih dahulu."
@@ -1107,6 +1137,10 @@ msgstr "VAT {0}%"
 msgid "PPN {taxRatePct}%"
 msgstr "VAT {taxRatePct}%"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Preferensi tampilan dan regional aplikasi."
+msgstr "App display and regional preferences."
+
 #: src/components/app-shared.tsx
 msgid "Produk"
 msgstr "Products"
@@ -1146,6 +1180,10 @@ msgstr "Recent invoices"
 msgid "Recent invoices with customer, amount, and status."
 msgstr "Recent invoices with customer, amount, and status."
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Regional"
+msgstr "Regional"
+
 #: src/routes/_pos/inventory/index.tsx
 msgid "Rendah"
 msgstr "Low"
@@ -1167,6 +1205,10 @@ msgstr "Revenue"
 #: src/components/billing-health.tsx
 msgid "Review open invoices"
 msgstr "Review open invoices"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Ringkas"
+msgstr "Compact"
 
 #: src/components/app-shared.tsx
 msgid "Ringkasan"
@@ -1245,6 +1287,10 @@ msgstr "All ({0})"
 #: src/components/sale/sale-screen.tsx
 msgid "Semua item akan dihapus dari pesanan ini."
 msgstr "All items will be removed from this order."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Semua transaksi dalam Rupiah."
+msgstr "All transactions are in Rupiah."
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Set PIN"
@@ -1372,6 +1418,10 @@ msgstr "Add to order"
 msgid "Tambahkan beberapa item beserta harganya."
 msgstr "Add some items along with their prices."
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilan"
+msgstr "Appearance"
+
 #: src/routes/_public/signin.tsx
 #: src/routes/_public/signup.tsx
 msgid "Tampilkan password"
@@ -1457,9 +1507,19 @@ msgstr "Edit"
 msgid "Ubah bahan"
 msgstr "Edit ingredient"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Ubah di Profil kafe."
+msgstr "Change in Cafe profile."
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Ubah informasi dasar kafe Anda."
 msgstr "Update your cafe's basic information."
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/settings/general.tsx
+#: src/routes/_pos/settings/route.tsx
+msgid "Umum"
+msgstr "General"
 
 #: src/routes/__root.tsx
 msgid "URL yang kamu buka tidak ada di kodapos."
@@ -1507,3 +1567,7 @@ msgstr "You're caught up."
 #: src/components/menu/cafe-profile-form.tsx
 msgid "Zona waktu"
 msgstr "Time zone"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Zona Waktu"
+msgstr "Timezone"

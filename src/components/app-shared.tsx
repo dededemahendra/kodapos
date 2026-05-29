@@ -27,7 +27,7 @@ export type SidebarNavItem = {
 };
 
 export type SidebarNavGroup = {
-	label?: string;
+	label?: MessageDescriptor;
 	items: SidebarNavItem[];
 };
 
@@ -35,7 +35,7 @@ export type SidebarNavGroup = {
 // progress render a ComingSoon placeholder (see the stub route files).
 export const navGroups: SidebarNavGroup[] = [
 	{
-		label: "Operasional",
+		label: msg`Operasional`,
 		items: [
 			{ title: msg`Dasbor`, path: "/dashboard", icon: <LayoutDashboard /> },
 			{ title: msg`Kasir`, path: "/sale", icon: <Calculator /> },
@@ -44,7 +44,7 @@ export const navGroups: SidebarNavGroup[] = [
 		],
 	},
 	{
-		label: "Katalog",
+		label: msg`Katalog`,
 		items: [
 			{
 				title: msg`Menu`,
@@ -70,7 +70,7 @@ export const navGroups: SidebarNavGroup[] = [
 		],
 	},
 	{
-		label: "Laporan",
+		label: msg`Laporan`,
 		items: [
 			{
 				title: msg`Laporan`,
@@ -86,25 +86,25 @@ export const navGroups: SidebarNavGroup[] = [
 		],
 	},
 	{
-		label: "Pelanggan",
+		label: msg`Pelanggan`,
 		items: [
 			{ title: msg`Pelanggan`, path: "/customers", icon: <Users /> },
 			{ title: msg`Loyalitas`, path: "/loyalty", icon: <Gift /> },
 		],
 	},
 	{
-		label: "Akun",
+		label: msg`Akun`,
 		items: [
 			{
 				title: msg`Pengaturan`,
 				icon: <Settings />,
 				subItems: [
+					{ title: msg`Umum`, path: "/settings/general" },
 					{ title: msg`Profil`, path: "/settings/profile" },
 					{ title: msg`Staf`, path: "/settings/staff" },
 					{ title: msg`Pajak & Pembayaran`, path: "/settings/tax" },
 					{ title: msg`Struk & Printer`, path: "/settings/receipt" },
 					{ title: msg`Integrasi`, path: "/settings/integrations" },
-					{ title: msg`Bahasa`, path: "/settings/language" },
 				],
 			},
 		],

@@ -14,6 +14,13 @@ function SettingsLayout() {
         </h2>
         <nav className="flex flex-col gap-1 text-sm">
           <Link
+            to="/settings/general"
+            className="hover:underline"
+            activeProps={{ className: 'font-semibold' }}
+          >
+            <Trans>Umum</Trans>
+          </Link>
+          <Link
             to="/settings/profile"
             className="hover:underline"
             activeProps={{ className: 'font-semibold' }}
@@ -26,13 +33,6 @@ function SettingsLayout() {
             activeProps={{ className: 'font-semibold' }}
           >
             <Trans>Staff</Trans>
-          </Link>
-          <Link
-            to="/settings/language"
-            className="hover:underline"
-            activeProps={{ className: 'font-semibold' }}
-          >
-            <Trans>Bahasa</Trans>
           </Link>
         </nav>
       </aside>
