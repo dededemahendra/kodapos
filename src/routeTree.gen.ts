@@ -43,6 +43,7 @@ import { Route as PosSettingsTaxRouteImport } from './routes/_pos/settings/tax'
 import { Route as PosSettingsStaffRouteImport } from './routes/_pos/settings/staff'
 import { Route as PosSettingsReceiptRouteImport } from './routes/_pos/settings/receipt'
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
+import { Route as PosSettingsLanguageRouteImport } from './routes/_pos/settings/language'
 import { Route as PosSettingsIntegrationsRouteImport } from './routes/_pos/settings/integrations'
 import { Route as PosReportsSalesRouteImport } from './routes/_pos/reports/sales'
 import { Route as PosReportsProductsRouteImport } from './routes/_pos/reports/products'
@@ -227,6 +228,11 @@ const PosSettingsProfileRoute = PosSettingsProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => PosSettingsRouteRoute,
 } as any)
+const PosSettingsLanguageRoute = PosSettingsLanguageRouteImport.update({
+  id: '/language',
+  path: '/language',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
 const PosSettingsIntegrationsRoute = PosSettingsIntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
@@ -339,6 +345,7 @@ export interface FileRoutesByFullPath {
   '/reports/products': typeof PosReportsProductsRoute
   '/reports/sales': typeof PosReportsSalesRoute
   '/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/settings/language': typeof PosSettingsLanguageRoute
   '/settings/profile': typeof PosSettingsProfileRoute
   '/settings/receipt': typeof PosSettingsReceiptRoute
   '/settings/staff': typeof PosSettingsStaffRoute
@@ -384,6 +391,7 @@ export interface FileRoutesByTo {
   '/reports/products': typeof PosReportsProductsRoute
   '/reports/sales': typeof PosReportsSalesRoute
   '/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/settings/language': typeof PosSettingsLanguageRoute
   '/settings/profile': typeof PosSettingsProfileRoute
   '/settings/receipt': typeof PosSettingsReceiptRoute
   '/settings/staff': typeof PosSettingsStaffRoute
@@ -436,6 +444,7 @@ export interface FileRoutesById {
   '/_pos/reports/products': typeof PosReportsProductsRoute
   '/_pos/reports/sales': typeof PosReportsSalesRoute
   '/_pos/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/_pos/settings/language': typeof PosSettingsLanguageRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
   '/_pos/settings/receipt': typeof PosSettingsReceiptRoute
   '/_pos/settings/staff': typeof PosSettingsStaffRoute
@@ -487,6 +496,7 @@ export interface FileRouteTypes {
     | '/reports/products'
     | '/reports/sales'
     | '/settings/integrations'
+    | '/settings/language'
     | '/settings/profile'
     | '/settings/receipt'
     | '/settings/staff'
@@ -532,6 +542,7 @@ export interface FileRouteTypes {
     | '/reports/products'
     | '/reports/sales'
     | '/settings/integrations'
+    | '/settings/language'
     | '/settings/profile'
     | '/settings/receipt'
     | '/settings/staff'
@@ -583,6 +594,7 @@ export interface FileRouteTypes {
     | '/_pos/reports/products'
     | '/_pos/reports/sales'
     | '/_pos/settings/integrations'
+    | '/_pos/settings/language'
     | '/_pos/settings/profile'
     | '/_pos/settings/receipt'
     | '/_pos/settings/staff'
@@ -842,6 +854,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosSettingsProfileRouteImport
       parentRoute: typeof PosSettingsRouteRoute
     }
+    '/_pos/settings/language': {
+      id: '/_pos/settings/language'
+      path: '/language'
+      fullPath: '/settings/language'
+      preLoaderRoute: typeof PosSettingsLanguageRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
     '/_pos/settings/integrations': {
       id: '/_pos/settings/integrations'
       path: '/integrations'
@@ -1045,6 +1064,7 @@ const PosSaleRouteRouteWithChildren = PosSaleRouteRoute._addFileChildren(
 
 interface PosSettingsRouteRouteChildren {
   PosSettingsIntegrationsRoute: typeof PosSettingsIntegrationsRoute
+  PosSettingsLanguageRoute: typeof PosSettingsLanguageRoute
   PosSettingsProfileRoute: typeof PosSettingsProfileRoute
   PosSettingsReceiptRoute: typeof PosSettingsReceiptRoute
   PosSettingsStaffRoute: typeof PosSettingsStaffRoute
@@ -1053,6 +1073,7 @@ interface PosSettingsRouteRouteChildren {
 
 const PosSettingsRouteRouteChildren: PosSettingsRouteRouteChildren = {
   PosSettingsIntegrationsRoute: PosSettingsIntegrationsRoute,
+  PosSettingsLanguageRoute: PosSettingsLanguageRoute,
   PosSettingsProfileRoute: PosSettingsProfileRoute,
   PosSettingsReceiptRoute: PosSettingsReceiptRoute,
   PosSettingsStaffRoute: PosSettingsStaffRoute,
