@@ -1,6 +1,7 @@
 "use client";
 
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useLingui } from "@lingui/react";
 import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import type { SidebarNavGroup, SidebarNavItem } from "~/components/app-shared";
 
 export function NavGroup({ label, items }: SidebarNavGroup) {
 	const path = useRouterState({ select: (s) => s.location.pathname });
+	const { i18n } = useLingui();
 	// `matches` = on this page or a nested page; `exact` = this page only.
 	const matches = (p?: string) =>
 		!!p && (path === p || path.startsWith(`${p}/`));
@@ -32,19 +34,19 @@ export function NavGroup({ label, items }: SidebarNavGroup) {
 						<CollapsibleNavItem
 							exact={exact}
 							item={item}
-							key={item.title}
+							key={item.path ?? item.title.id}
 							matches={matches}
 						/>
 					) : (
-						<SidebarMenuItem key={item.title}>
+						<SidebarMenuItem key={item.path ?? item.title.id}>
 							<SidebarMenuButton
 								asChild
 								isActive={matches(item.path)}
-								tooltip={item.title}
+								tooltip={i18n._(item.title)}
 							>
 								<Link to={item.path as string}>
 									{item.icon}
-									<span>{item.title}</span>
+									<span>{i18n._(item.title)}</span>
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
@@ -64,6 +66,7 @@ function CollapsibleNavItem({
 	matches: (p?: string) => boolean;
 	exact: (p?: string) => boolean;
 }) {
+	const { i18n } = useLingui();
 	const subItems = item.subItems ?? [];
 	const sectionActive = subItems.some((s) => matches(s.path));
 	const [open, setOpen] = useState(sectionActive);
@@ -79,10 +82,10 @@ function CollapsibleNavItem({
 				aria-expanded={open}
 				isActive={sectionActive}
 				onClick={() => setOpen((o) => !o)}
-				tooltip={item.title}
+				tooltip={i18n._(item.title)}
 			>
 				{item.icon}
-				<span>{item.title}</span>
+				<span>{i18n._(item.title)}</span>
 				<motion.span
 					animate={{ rotate: open ? 90 : 0 }}
 					className="ml-auto inline-flex shrink-0"
@@ -103,10 +106,10 @@ function CollapsibleNavItem({
 					>
 						<SidebarMenuSub>
 							{subItems.map((sub) => (
-								<SidebarMenuSubItem key={sub.title}>
+								<SidebarMenuSubItem key={sub.path ?? sub.title.id}>
 									<SidebarMenuSubButton asChild isActive={exact(sub.path)}>
 										<Link to={sub.path as string}>
-											<span>{sub.title}</span>
+											<span>{i18n._(sub.title)}</span>
 										</Link>
 									</SidebarMenuSubButton>
 								</SidebarMenuSubItem>

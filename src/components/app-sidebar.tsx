@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
+import { useLingui } from "@lingui/react";
 import { Coffee } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
@@ -17,6 +18,8 @@ import { LatestChange } from "~/components/latest-change";
 import { NavGroup } from "~/components/nav-group";
 
 export function AppSidebar() {
+	const { i18n } = useLingui();
+
 	return (
 		<Sidebar
 			className={cn(
@@ -44,7 +47,7 @@ export function AppSidebar() {
 				<LatestChange />
 				<SidebarMenu className="border-t p-2">
 					{footerNavLinks.map((item) => (
-						<SidebarMenuItem key={item.title}>
+						<SidebarMenuItem key={item.path ?? item.title.id}>
 							<SidebarMenuButton
 								asChild
 								className="text-muted-foreground"
@@ -52,7 +55,7 @@ export function AppSidebar() {
 							>
 								<Link to={item.path as string}>
 									{item.icon}
-									<span>{item.title}</span>
+									<span>{i18n._(item.title)}</span>
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>

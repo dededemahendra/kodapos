@@ -1,3 +1,5 @@
+import { msg } from '@lingui/core/macro';
+import type { MessageDescriptor } from '@lingui/core';
 import type { ReactNode } from "react";
 import {
 	BadgePercent,
@@ -17,7 +19,7 @@ import {
 } from "lucide-react";
 
 export type SidebarNavItem = {
-	title: string;
+	title: MessageDescriptor;
 	path?: string;
 	icon?: ReactNode;
 	isActive?: boolean;
@@ -35,50 +37,50 @@ export const navGroups: SidebarNavGroup[] = [
 	{
 		label: "Operasional",
 		items: [
-			{ title: "Dasbor", path: "/dashboard", icon: <LayoutDashboard /> },
-			{ title: "Kasir", path: "/sale", icon: <Calculator /> },
-			{ title: "Riwayat", path: "/history", icon: <History /> },
-			{ title: "Shift", path: "/shifts", icon: <Clock /> },
+			{ title: msg`Dasbor`, path: "/dashboard", icon: <LayoutDashboard /> },
+			{ title: msg`Kasir`, path: "/sale", icon: <Calculator /> },
+			{ title: msg`Riwayat`, path: "/history", icon: <History /> },
+			{ title: msg`Shift`, path: "/shifts", icon: <Clock /> },
 		],
 	},
 	{
 		label: "Katalog",
 		items: [
 			{
-				title: "Menu",
+				title: msg`Menu`,
 				icon: <UtensilsCrossed />,
 				subItems: [
-					{ title: "Item Menu", path: "/menu" },
-					{ title: "Kategori", path: "/menu/categories" },
-					{ title: "Modifier", path: "/menu/modifiers" },
+					{ title: msg`Item Menu`, path: "/menu" },
+					{ title: msg`Kategori`, path: "/menu/categories" },
+					{ title: msg`Modifier`, path: "/menu/modifiers" },
 				],
 			},
-			{ title: "Resep", path: "/recipes", icon: <NotebookText /> },
+			{ title: msg`Resep`, path: "/recipes", icon: <NotebookText /> },
 			{
-				title: "Inventaris",
+				title: msg`Inventaris`,
 				icon: <Package />,
 				subItems: [
-					{ title: "Stok", path: "/inventory" },
-					{ title: "Penyesuaian", path: "/inventory/adjustments" },
-					{ title: "Limbah", path: "/inventory/waste" },
-					{ title: "Pembelian", path: "/inventory/purchases" },
+					{ title: msg`Stok`, path: "/inventory" },
+					{ title: msg`Penyesuaian`, path: "/inventory/adjustments" },
+					{ title: msg`Limbah`, path: "/inventory/waste" },
+					{ title: msg`Pembelian`, path: "/inventory/purchases" },
 				],
 			},
-			{ title: "Promo", path: "/promos", icon: <BadgePercent /> },
+			{ title: msg`Promo`, path: "/promos", icon: <BadgePercent /> },
 		],
 	},
 	{
 		label: "Laporan",
 		items: [
 			{
-				title: "Laporan",
+				title: msg`Laporan`,
 				icon: <BarChart3 />,
 				subItems: [
-					{ title: "Ringkasan", path: "/reports" },
-					{ title: "Penjualan", path: "/reports/sales" },
-					{ title: "Produk", path: "/reports/products" },
-					{ title: "Kasir", path: "/reports/cashiers" },
-					{ title: "Pembayaran", path: "/reports/payments" },
+					{ title: msg`Ringkasan`, path: "/reports" },
+					{ title: msg`Penjualan`, path: "/reports/sales" },
+					{ title: msg`Produk`, path: "/reports/products" },
+					{ title: msg`Kasir`, path: "/reports/cashiers" },
+					{ title: msg`Pembayaran`, path: "/reports/payments" },
 				],
 			},
 		],
@@ -86,22 +88,23 @@ export const navGroups: SidebarNavGroup[] = [
 	{
 		label: "Pelanggan",
 		items: [
-			{ title: "Pelanggan", path: "/customers", icon: <Users /> },
-			{ title: "Loyalitas", path: "/loyalty", icon: <Gift /> },
+			{ title: msg`Pelanggan`, path: "/customers", icon: <Users /> },
+			{ title: msg`Loyalitas`, path: "/loyalty", icon: <Gift /> },
 		],
 	},
 	{
 		label: "Akun",
 		items: [
 			{
-				title: "Pengaturan",
+				title: msg`Pengaturan`,
 				icon: <Settings />,
 				subItems: [
-					{ title: "Profil", path: "/settings/profile" },
-					{ title: "Staf", path: "/settings/staff" },
-					{ title: "Pajak & Pembayaran", path: "/settings/tax" },
-					{ title: "Struk & Printer", path: "/settings/receipt" },
-					{ title: "Integrasi", path: "/settings/integrations" },
+					{ title: msg`Profil`, path: "/settings/profile" },
+					{ title: msg`Staf`, path: "/settings/staff" },
+					{ title: msg`Pajak & Pembayaran`, path: "/settings/tax" },
+					{ title: msg`Struk & Printer`, path: "/settings/receipt" },
+					{ title: msg`Integrasi`, path: "/settings/integrations" },
+					{ title: msg`Bahasa`, path: "/settings/language" },
 				],
 			},
 		],
@@ -110,8 +113,8 @@ export const navGroups: SidebarNavGroup[] = [
 
 // Footer help links shown above the copyright in the sidebar footer.
 export const footerNavLinks: SidebarNavItem[] = [
-	{ title: "Pusat Bantuan", path: "/help", icon: <HelpCircle /> },
-	{ title: "Dokumentasi", path: "/docs", icon: <BookOpen /> },
+	{ title: msg`Pusat Bantuan`, path: "/help", icon: <HelpCircle /> },
+	{ title: msg`Dokumentasi`, path: "/docs", icon: <BookOpen /> },
 ];
 
 export const navLinks: SidebarNavItem[] = [
