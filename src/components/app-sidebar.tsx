@@ -1,92 +1,68 @@
-import { useAuthActions } from '@convex-dev/auth/react';
-import { Link, useRouterState } from '@tanstack/react-router';
-import {
-  Calculator,
-  Coffee,
-  History,
-  LogOut,
-  Package,
-  Settings,
-  UtensilsCrossed,
-} from 'lucide-react';
-import type { ComponentType } from 'react';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '~/components/ui/sidebar';
-import { useActiveCashier } from '~/lib/active-cashier';
+"use client";
 
-type IconComponent = ComponentType<{ className?: string }>;
-
-const LINKS: Array<{ to: string; label: string; icon: IconComponent }> = [
-  { to: '/sale', label: 'Kasir', icon: Calculator },
-  { to: '/history', label: 'Riwayat', icon: History },
-  { to: '/menu', label: 'Menu', icon: UtensilsCrossed },
-  { to: '/inventory', label: 'Inventaris', icon: Package },
-  { to: '/settings/profile', label: 'Pengaturan', icon: Settings },
-];
+import { Coffee } from "lucide-react";
+import { cn } from "~/lib/utils";
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+} from "~/components/ui/sidebar";
+import { footerNavLinks, navGroups } from "~/components/app-shared";
+import { LatestChange } from "~/components/latest-change";
+import { NavGroup } from "~/components/nav-group";
 
 export function AppSidebar() {
-  const { signOut } = useAuthActions();
-  const path = useRouterState({ select: (s) => s.location.pathname });
-  const { clearCashier } = useActiveCashier();
-
-  async function handleSignOut(): Promise<void> {
-    clearCashier();
-    await signOut();
-    window.location.replace('/');
-  }
-
-  return (
-    <Sidebar>
-      <SidebarHeader>
-        <Link to="/menu" className="flex items-center gap-2 px-2 py-1.5 text-primary">
-          <Coffee className="size-5" />
-          <span className="font-semibold text-base">kodapos</span>
-        </Link>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {LINKS.map((link) => {
-                const active =
-                  link.to === '/settings/profile'
-                    ? path.startsWith('/settings')
-                    : path === link.to || path.startsWith(`${link.to}/`);
-                const Icon = link.icon;
-                return (
-                  <SidebarMenuItem key={link.to}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <Link to={link.to}>
-                        <Icon />
-                        <span>{link.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleSignOut} className="text-muted-foreground">
-              <LogOut />
-              <span>Keluar</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
-  );
+	return (
+		<Sidebar
+			className={cn(
+				"*:data-[slot=sidebar-inner]:bg-background",
+				"*:data-[slot=sidebar-inner]:dark:bg-[radial-gradient(60%_18%_at_10%_0%,--theme(--color-foreground/.08),transparent)]",
+				"**:data-[slot=sidebar-menu-button]:[&>span]:text-foreground/75"
+			)}
+			collapsible="icon"
+			variant="sidebar"
+		>
+			<SidebarHeader className="h-14 justify-center border-b px-2">
+				<SidebarMenuButton asChild>
+					<a href="/dashboard">
+						<Coffee className="text-primary" />
+						<span className="font-medium text-foreground!">kodapos</span>
+					</a>
+				</SidebarMenuButton>
+			</SidebarHeader>
+			<SidebarContent>
+				{navGroups.map((group, index) => (
+					<NavGroup key={`sidebar-group-${index}`} {...group} />
+				))}
+			</SidebarContent>
+			<SidebarFooter className="gap-0 p-0">
+				<LatestChange />
+				<SidebarMenu className="border-t p-2">
+					{footerNavLinks.map((item) => (
+						<SidebarMenuItem key={item.title}>
+							<SidebarMenuButton
+								asChild
+								className="text-muted-foreground"
+								size="sm"
+							>
+								<a href={item.path}>
+									{item.icon}
+									<span>{item.title}</span>
+								</a>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					))}
+				</SidebarMenu>
+				<div className="px-4 pt-4 pb-2 transition-opacity group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0">
+					<p className="text-nowrap text-[9px] text-muted-foreground">
+						© {new Date().getFullYear()} kodapos
+					</p>
+				</div>
+			</SidebarFooter>
+		</Sidebar>
+	);
 }

@@ -2,9 +2,9 @@ import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useConvex, useQuery } from 'convex/react';
 import { type ReactNode, useEffect } from 'react';
+import { AppHeader } from '~/components/app-header';
 import { AppSidebar } from '~/components/app-sidebar';
-import { Separator } from '~/components/ui/separator';
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar';
+import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Spinner } from '~/components/ui/spinner';
 
 export const Route = createFileRoute('/_pos')({
@@ -13,16 +13,6 @@ export const Route = createFileRoute('/_pos')({
 
 // Routes where the sidebar would get in the way (full-screen flows).
 const NAV_HIDDEN_PREFIXES = ['/onboarding', '/pin', '/shift'];
-
-// Top-level route → label shown in the header bar. Anything not in this map
-// falls back to no title (keeps the SidebarTrigger alone).
-const PAGE_TITLES: Array<{ prefix: string; title: string }> = [
-  { prefix: '/sale', title: 'Kasir' },
-  { prefix: '/history', title: 'Riwayat' },
-  { prefix: '/menu', title: 'Menu' },
-  { prefix: '/inventory', title: 'Inventaris' },
-  { prefix: '/settings', title: 'Pengaturan' },
-];
 
 function PosLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -36,9 +26,6 @@ function PosLayout() {
   // onboarding routes navigate into /menu/* or /settings/* mid-flow.
   const needsOnboarding = cafe !== undefined && cafe !== null && !cafe.setupCompletedAt;
   const showNav = !urlHidden && !needsOnboarding;
-  const pageTitle = PAGE_TITLES.find(
-    (m) => path === m.prefix || path.startsWith(`${m.prefix}/`)
-  )?.title;
 
   return (
     <div data-density="compact" className="min-h-screen bg-muted">
@@ -54,20 +41,10 @@ function PosLayout() {
       <Authenticated>
         <OnboardingGate>
           {showNav ? (
-            <SidebarProvider
-              style={{ '--sidebar-width': '18rem' } as React.CSSProperties}
-            >
+            <SidebarProvider>
               <AppSidebar />
               <SidebarInset>
-                <header className="flex h-12 items-center gap-2 border-b border-border bg-background px-4">
-                  <SidebarTrigger />
-                  {pageTitle ? (
-                    <>
-                      <Separator orientation="vertical" className="h-4" />
-                      <h1 className="text-sm font-semibold">{pageTitle}</h1>
-                    </>
-                  ) : null}
-                </header>
+                <AppHeader />
                 <Outlet />
               </SidebarInset>
             </SidebarProvider>
