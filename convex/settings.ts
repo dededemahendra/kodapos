@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
-import type { Doc } from './_generated/dataModel';
-import { query } from './_generated/server';
+import type { Doc, Id } from './_generated/dataModel';
+import { mutation, query } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 
 /**
@@ -141,5 +142,107 @@ export const get = query({
       taxRatePct: cafe?.taxRatePct ?? 11,
       taxEnabled: cafe?.taxEnabled ?? true,
     };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Private helper
+// ---------------------------------------------------------------------------
+
+async function getOrCreateSettingsId(
+  ctx: MutationCtx,
+  cafeId: Id<'cafes'>
+): Promise<Id<'cafeSettings'>> {
+  const row = await ctx.db
+    .query('cafeSettings')
+    .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+    .first();
+  if (row) return row._id;
+  return await ctx.db.insert('cafeSettings', { cafeId, updatedAt: Date.now() });
+}
+
+// ---------------------------------------------------------------------------
+// Mutations
+// ---------------------------------------------------------------------------
+
+export const updatePayment = mutation({
+  args: { payment: paymentValidator },
+  returns: v.null(),
+  handler: async (ctx, { payment }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    await ctx.db.patch(id, { payment, updatedAt: Date.now() });
+    return null;
+  },
+});
+
+export const updateReceipt = mutation({
+  args: { receipt: receiptValidator },
+  returns: v.null(),
+  handler: async (ctx, { receipt }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    await ctx.db.patch(id, { receipt, updatedAt: Date.now() });
+    return null;
+  },
+});
+
+export const updateTaxPayment = mutation({
+  args: {
+    taxRatePct: v.number(),
+    taxEnabled: v.boolean(),
+    taxName: v.string(),
+    taxInclusive: v.boolean(),
+    npwp: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, { taxRatePct, taxEnabled, taxName, taxInclusive, npwp }) => {
+    if (taxRatePct < 0 || taxRatePct > 100) {
+      throw new Error('Persentase pajak harus antara 0 dan 100.');
+    }
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await ctx.db.patch(cafeId, { taxRatePct, taxEnabled });
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    await ctx.db.patch(id, {
+      taxName: taxName.trim(),
+      taxInclusive,
+      npwp: npwp?.trim() || undefined,
+      updatedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+export const connectIntegration = mutation({
+  args: { key: v.string(), config: v.optional(v.any()) },
+  returns: v.null(),
+  handler: async (ctx, { key, config }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    const row = await ctx.db.get(id);
+    const existing = row?.integrations ?? [];
+    const items = existing.filter((item) => item.key !== key);
+    items.push({
+      key,
+      connected: true,
+      connectedAt: Date.now(),
+      ...(config !== undefined ? { config } : {}),
+    });
+    await ctx.db.patch(id, { integrations: items, updatedAt: Date.now() });
+    return null;
+  },
+});
+
+export const disconnectIntegration = mutation({
+  args: { key: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { key }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    const row = await ctx.db.get(id);
+    const existing = row?.integrations ?? [];
+    const items = existing.filter((item) => item.key !== key);
+    await ctx.db.patch(id, { integrations: items, updatedAt: Date.now() });
+    return null;
   },
 });
