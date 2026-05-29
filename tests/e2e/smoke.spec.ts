@@ -34,14 +34,15 @@ test.describe('auth flow', () => {
     await page.getByRole('button', { name: /Lewati semua/ }).click();
     await waitForUrlHydrated(page, /\/menu$/);
 
-    // /dashboard is reachable once setupCompletedAt is set; the greeting
-    // proves the authenticated query path works end-to-end.
+    // /dashboard renders the authenticated POS dashboard once setupCompletedAt
+    // is set; the page title + a KPI label prove the layout + sidebar render
+    // behind the auth boundary.
     await gotoHydrated(page, '/dashboard');
-    await expect(page.getByText(/Halo, E2E User/)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Dasbor' })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Net revenue')).toBeVisible();
 
     // After sign-out, _pos's Unauthenticated boundary redirects to /signin
-    // via window.location.replace. The dashboard's own redirect to '/' loses
-    // the race — that's intentional, the layout owns auth flow.
+    // via window.location.replace.
     await page.getByRole('button', { name: /Keluar/ }).click();
     await waitForUrlHydrated(page, /\/signin$/);
   });
