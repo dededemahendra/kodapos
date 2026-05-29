@@ -79,6 +79,90 @@ export default defineSchema({
     createdAt: v.number(),
   }).index('by_cafe_active', ['cafeId', 'archived']),
 
+  cafeSettings: defineTable({
+    cafeId: v.id('cafes'),
+
+    payment: v.optional(
+      v.object({
+        methods: v.object({
+          cash: v.boolean(),
+          qrisStatic: v.boolean(),
+          qrisDynamic: v.boolean(),
+          card: v.boolean(),
+          ewallet: v.boolean(),
+          transfer: v.boolean(),
+        }),
+        defaultMethod: v.union(
+          v.literal('cash'),
+          v.literal('qris_static'),
+          v.literal('qris_dynamic'),
+          v.literal('card'),
+          v.literal('ewallet'),
+          v.literal('transfer')
+        ),
+        cashRounding: v.union(
+          v.literal('none'),
+          v.literal('nearest_100'),
+          v.literal('nearest_500'),
+          v.literal('nearest_1000')
+        ),
+        quickCashButtons: v.array(v.number()),
+        serviceChargeEnabled: v.boolean(),
+        serviceChargePct: v.number(),
+        serviceChargeName: v.string(),
+        qrisMerchantName: v.optional(v.string()),
+        qrisNmid: v.optional(v.string()),
+        qrisImageStorageId: v.optional(v.id('_storage')),
+      })
+    ),
+
+    receipt: v.optional(
+      v.object({
+        headerText: v.optional(v.string()),
+        footerText: v.optional(v.string()),
+        orderNumberPrefix: v.optional(v.string()),
+        showLogo: v.boolean(),
+        showAddress: v.boolean(),
+        showPhone: v.boolean(),
+        showCashier: v.boolean(),
+        showOrderNumber: v.boolean(),
+        showItemModifiers: v.boolean(),
+        showTaxBreakdown: v.boolean(),
+        paperSize: v.union(v.literal('58mm'), v.literal('80mm')),
+        fontSize: v.union(
+          v.literal('small'),
+          v.literal('normal'),
+          v.literal('large')
+        ),
+        autoPrint: v.boolean(),
+        printCopies: v.number(),
+        printerType: v.union(
+          v.literal('bluetooth'),
+          v.literal('usb'),
+          v.literal('network')
+        ),
+        openDrawer: v.boolean(),
+      })
+    ),
+
+    integrations: v.optional(
+      v.array(
+        v.object({
+          key: v.string(),
+          connected: v.boolean(),
+          connectedAt: v.optional(v.number()),
+          config: v.optional(v.any()),
+        })
+      )
+    ),
+
+    taxName: v.optional(v.string()),
+    taxInclusive: v.optional(v.boolean()),
+    npwp: v.optional(v.string()),
+
+    updatedAt: v.number(),
+  }).index('by_cafe', ['cafeId']),
+
   shifts: defineTable({
     cafeId: v.id('cafes'),
     cashierId: v.id('cafeStaff'),

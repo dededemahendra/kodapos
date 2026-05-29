@@ -22,6 +22,7 @@ import type * as menu_items from "../menu/items.js";
 import type * as menu_modifierGroups from "../menu/modifierGroups.js";
 import type * as orders from "../orders.js";
 import type * as recipes from "../recipes.js";
+import type * as settings from "../settings.js";
 import type * as shifts from "../shifts.js";
 import type * as staff from "../staff.js";
 import type * as users from "../users.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   "menu/modifierGroups": typeof menu_modifierGroups;
   orders: typeof orders;
   recipes: typeof recipes;
+  settings: typeof settings;
   shifts: typeof shifts;
   staff: typeof staff;
   users: typeof users;
