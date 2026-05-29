@@ -2,6 +2,8 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { type FormEvent, useState } from 'react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -25,6 +27,7 @@ export interface ModifierGroupFormProps {
 }
 
 export function ModifierGroupForm(props: ModifierGroupFormProps) {
+  const { t } = useLingui();
   const upsert = useMutation(api.menu.modifierGroups.upsert);
   const [name, setName] = useState(props.initialName);
   const [required, setRequired] = useState(props.initialRequired);
@@ -67,7 +70,7 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
       });
       props.onSaved(id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal menyimpan grup.');
+      setError(err instanceof Error ? err.message : t`Gagal menyimpan grup.`);
     } finally {
       setSubmitting(false);
     }
@@ -77,7 +80,7 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
     <form onSubmit={handleSubmit} className="max-w-xl">
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="groupName">Nama grup</FieldLabel>
+          <FieldLabel htmlFor="groupName"><Trans>Nama grup</Trans></FieldLabel>
           <Input
             id="groupName"
             value={name}
@@ -88,7 +91,7 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
         </Field>
         <div className="grid grid-cols-3 gap-3">
           <Field>
-            <FieldLabel htmlFor="required">Wajib?</FieldLabel>
+            <FieldLabel htmlFor="required"><Trans>Wajib?</Trans></FieldLabel>
             <label className="flex items-center gap-2 text-sm">
               <input
                 id="required"
@@ -97,11 +100,11 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
                 onChange={(e) => setRequired(e.target.checked)}
                 className="h-4 w-4"
               />
-              Cashier harus memilih
+              <Trans>Cashier harus memilih</Trans>
             </label>
           </Field>
           <Field>
-            <FieldLabel htmlFor="minSelect">Min</FieldLabel>
+            <FieldLabel htmlFor="minSelect"><Trans>Min</Trans></FieldLabel>
             <Input
               id="minSelect"
               type="number"
@@ -112,7 +115,7 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="maxSelect">Max</FieldLabel>
+            <FieldLabel htmlFor="maxSelect"><Trans>Max</Trans></FieldLabel>
             <Input
               id="maxSelect"
               type="number"
@@ -127,21 +130,21 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Opsi ({options.length})
+              <Trans>Opsi ({options.length})</Trans>
             </span>
             <Button type="button" size="sm" variant="outline" onClick={addRow}>
-              + Opsi
+              <Trans>+ Opsi</Trans>
             </Button>
           </div>
           <div className="space-y-2">
             {options.length === 0 && (
-              <p className="text-sm text-muted-foreground">Belum ada opsi. Tambahkan minimal satu.</p>
+              <p className="text-sm text-muted-foreground"><Trans>Belum ada opsi. Tambahkan minimal satu.</Trans></p>
             )}
             {options.map((o, idx) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: new rows have no persisted id yet; index is the pragmatic key.
               <div key={idx} className="grid grid-cols-[1fr_120px_auto] gap-2 items-center">
                 <Input
-                  placeholder="Nama opsi (mis. Large)"
+                  placeholder={t`Nama opsi (mis. Large)`}
                   value={o.name}
                   onChange={(e) => updateRow(idx, { name: e.target.value })}
                   required
@@ -151,12 +154,12 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
                   type="number"
                   min="0"
                   step="500"
-                  placeholder="Selisih harga"
+                  placeholder={t`Selisih harga`}
                   value={o.priceAdjustmentIDR}
                   onChange={(e) => updateRow(idx, { priceAdjustmentIDR: Number(e.target.value) })}
                 />
                 <Button type="button" size="sm" variant="ghost" onClick={() => removeRow(idx)}>
-                  Hapus
+                  <Trans>Hapus</Trans>
                 </Button>
               </div>
             ))}
@@ -167,7 +170,7 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
         <div className="flex gap-2">
           <Button type="submit" disabled={submitting}>
             {submitting && <Spinner data-icon="inline-start" />}
-            {submitting ? 'Menyimpan…' : 'Simpan grup'}
+            {submitting ? <Trans>Menyimpan…</Trans> : <Trans>Simpan grup</Trans>}
           </Button>
         </div>
       </FieldGroup>

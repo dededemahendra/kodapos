@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import type { CartLine } from './cart-reducer';
 import { Button } from '~/components/ui/button';
 import { formatIDR } from '~/lib/money';
@@ -13,6 +15,7 @@ export function CartLineRow({
   onDecrement: () => void;
   onRemove: () => void;
 }) {
+  const { t } = useLingui();
   return (
     <li className="border-b border-border py-2">
       <div className="flex items-baseline justify-between gap-2">
@@ -30,18 +33,20 @@ export function CartLineRow({
         </ul>
       ) : null}
       <div className="flex items-center justify-between mt-1.5">
-        <div className="text-xs text-muted-foreground">{formatIDR(line.unitPriceIDR)} / item</div>
+        <div className="text-xs text-muted-foreground">
+          <Trans>{formatIDR(line.unitPriceIDR)} / item</Trans>
+        </div>
         <div className="flex items-center gap-1">
           <Button
             type="button"
             size="sm"
             variant="outline"
             onClick={onDecrement}
-            aria-label="Kurangi jumlah"
+            aria-label={t`Kurangi jumlah`}
           >
             −
           </Button>
-          <span className="w-7 text-center text-sm tabular-nums" aria-label={`Jumlah ${line.qty}`}>
+          <span className="w-7 text-center text-sm tabular-nums" aria-label={t`Jumlah ${line.qty}`}>
             {line.qty}
           </span>
           <Button
@@ -49,7 +54,7 @@ export function CartLineRow({
             size="sm"
             variant="outline"
             onClick={onIncrement}
-            aria-label="Tambah jumlah"
+            aria-label={t`Tambah jumlah`}
             disabled={line.qty >= 99}
           >
             +
@@ -59,7 +64,7 @@ export function CartLineRow({
             size="sm"
             variant="ghost"
             onClick={onRemove}
-            aria-label="Hapus baris"
+            aria-label={t`Hapus baris`}
             className="text-muted-foreground hover:text-red-600"
           >
             ×

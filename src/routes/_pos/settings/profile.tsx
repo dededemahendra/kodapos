@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
@@ -8,14 +10,15 @@ export const Route = createFileRoute('/_pos/settings/profile')({
 });
 
 function SettingsProfile() {
+  const { t } = useLingui();
   const cafe = useQuery(api.cafes.myCafe);
   const updateProfile = useMutation(api.cafes.updateProfile);
 
   if (cafe === undefined) {
-    return <p className="text-muted-foreground">Memuat…</p>;
+    return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
   }
   if (cafe === null) {
-    return <p className="text-muted-foreground">Kafe tidak ditemukan.</p>;
+    return <p className="text-muted-foreground"><Trans>Kafe tidak ditemukan.</Trans></p>;
   }
 
   const initial: CafeProfileFormValues = {
@@ -29,11 +32,11 @@ function SettingsProfile() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-1">Profil kafe</h1>
-      <p className="text-muted-foreground mb-6 text-sm">Ubah informasi dasar kafe Anda.</p>
+      <h1 className="text-2xl font-bold mb-1"><Trans>Profil kafe</Trans></h1>
+      <p className="text-muted-foreground mb-6 text-sm"><Trans>Ubah informasi dasar kafe Anda.</Trans></p>
       <CafeProfileForm
         initial={initial}
-        submitLabel="Simpan"
+        submitLabel={t`Simpan`}
         onSubmit={async (values) => {
           await updateProfile(values);
         }}

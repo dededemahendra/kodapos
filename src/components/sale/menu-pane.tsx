@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMemo, useState } from 'react';
 import { ItemCard } from './item-card';
@@ -21,6 +23,7 @@ export function MenuPane({
   items: ItemForSale[];
   onItemTap: (item: ItemForSale) => void;
 }) {
+  const { t } = useLingui();
   const [activeCategoryId, setActiveCategoryId] = useState<Id<'categories'> | 'all'>('all');
   const visible = useMemo(() => {
     if (activeCategoryId === 'all') return items;
@@ -31,7 +34,7 @@ export function MenuPane({
     <div className="flex flex-col h-full">
       <div className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-border">
         <CategoryTab
-          label={`Semua (${items.length})`}
+          label={t`Semua (${items.length})`}
           active={activeCategoryId === 'all'}
           onClick={() => setActiveCategoryId('all')}
         />
@@ -49,7 +52,9 @@ export function MenuPane({
       </div>
       <div className="flex-1 overflow-y-auto p-3">
         {visible.length === 0 ? (
-          <p className="text-muted-foreground text-sm">Tidak ada item di kategori ini.</p>
+          <p className="text-muted-foreground text-sm">
+            <Trans>Tidak ada item di kategori ini.</Trans>
+          </p>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
             {visible.map((row) => (

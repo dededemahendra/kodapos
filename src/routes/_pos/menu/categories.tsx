@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { CategoryTable } from '~/components/menu/category-table';
 
@@ -8,9 +9,9 @@ export const Route = createFileRoute('/_pos/menu/categories')({
 function CategoriesPage() {
   return (
     <div>
-      <h1 className="text-xl font-bold mb-1">Kategori</h1>
+      <h1 className="text-xl font-bold mb-1"><Trans>Kategori</Trans></h1>
       <p className="text-muted-foreground text-sm mb-4">
-        Kategori muncul sebagai filter di daftar Items dan di layar kasir.
+        <Trans>Kategori muncul sebagai filter di daftar Items dan di layar kasir.</Trans>
       </p>
       <CategoryTable />
     </div>

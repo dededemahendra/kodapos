@@ -32,8 +32,9 @@ test-results/
 playwright-report/
 playwright/.cache/
 
-# Convex
-convex/_generated/
+# Convex — track generated types so CI can typecheck/test without a deploy key
+# (regenerate with `pnpm convex:dev`/codegen and commit when the schema changes).
+convex/_generated/ai/
 
 # Lingui compiled catalogs (compiled on-the-fly by the Vite plugin)
 src/locales/**/messages.js

@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
@@ -17,13 +18,13 @@ function ModifierGroupEditor() {
     isNew ? 'skip' : { id: groupId as Id<'modifierGroups'> }
   );
 
-  if (!isNew && existing === undefined) return <p className="text-muted-foreground">Memuat…</p>;
-  if (!isNew && existing === null) return <p className="text-muted-foreground">Grup tidak ditemukan.</p>;
+  if (!isNew && existing === undefined) return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
+  if (!isNew && existing === null) return <p className="text-muted-foreground"><Trans>Grup tidak ditemukan.</Trans></p>;
 
   return (
     <div>
       <h1 className="text-xl font-bold mb-4">
-        {isNew ? 'Grup modifier baru' : 'Edit grup modifier'}
+        {isNew ? <Trans>Grup modifier baru</Trans> : <Trans>Edit grup modifier</Trans>}
       </h1>
       <ModifierGroupForm
         {...(existing?._id !== undefined && { initialId: existing._id })}

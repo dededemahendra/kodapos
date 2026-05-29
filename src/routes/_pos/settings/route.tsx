@@ -1,34 +1,16 @@
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_pos/settings')({
   component: SettingsLayout,
 });
 
+// No settings-level rail here: the main app sidebar's "Pengaturan" submenu
+// already navigates between settings pages, and the General page provides its
+// own section rail. This avoids a redundant double sidebar.
 function SettingsLayout() {
   return (
-    <div className="max-w-5xl mx-auto p-6 flex gap-6">
-      <aside className="w-48 shrink-0">
-        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-3">Pengaturan</h2>
-        <nav className="flex flex-col gap-1 text-sm">
-          <Link
-            to="/settings/profile"
-            className="hover:underline"
-            activeProps={{ className: 'font-semibold' }}
-          >
-            Profil kafe
-          </Link>
-          <Link
-            to="/settings/staff"
-            className="hover:underline"
-            activeProps={{ className: 'font-semibold' }}
-          >
-            Staff
-          </Link>
-        </nav>
-      </aside>
-      <main className="flex-1">
-        <Outlet />
-      </main>
+    <div className="p-6">
+      <Outlet />
     </div>
   );
 }

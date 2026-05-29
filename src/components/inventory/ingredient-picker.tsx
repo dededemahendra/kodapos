@@ -1,6 +1,7 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { useMemo, useRef, useState } from 'react';
 import { Input } from '~/components/ui/input';
 
@@ -13,6 +14,7 @@ export function IngredientPicker({
   onChange: (id: Id<'ingredients'>) => void;
   onRequestCreate?: (initialName: string) => void;
 }) {
+  const { t } = useLingui();
   const ingredients = useQuery(api.ingredients.list, {});
   const [search, setSearch] = useState('');
   const [focused, setFocused] = useState(false);
@@ -38,7 +40,7 @@ export function IngredientPicker({
     <div className="relative">
       <Input
         value={search || (selected?.name ?? '')}
-        placeholder="Pilih bahan…"
+        placeholder={t`Pilih bahan…`}
         onChange={(e) => {
           setSearch(e.target.value);
         }}
@@ -54,7 +56,9 @@ export function IngredientPicker({
       {showList ? (
         <ul className="absolute z-10 left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-md border border-border bg-background shadow-md">
           {matches.length === 0 ? (
-            <li className="px-3 py-2 text-sm text-muted-foreground">Tidak ada bahan cocok.</li>
+            <li className="px-3 py-2 text-sm text-muted-foreground">
+              <Trans>Tidak ada bahan cocok.</Trans>
+            </li>
           ) : (
             matches.map((ing) => (
               <li key={ing._id}>
@@ -86,7 +90,7 @@ export function IngredientPicker({
                   setFocused(false);
                 }}
               >
-                + Buat bahan baru: "{search.trim()}"
+                + <Trans>Buat bahan baru:</Trans> "{search.trim()}"
               </button>
             </li>
           ) : null}

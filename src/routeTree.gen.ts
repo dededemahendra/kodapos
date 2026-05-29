@@ -16,27 +16,47 @@ import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PosShiftsRouteImport } from './routes/_pos/shifts'
+import { Route as PosRecipesRouteImport } from './routes/_pos/recipes'
+import { Route as PosPromosRouteImport } from './routes/_pos/promos'
 import { Route as PosPinRouteImport } from './routes/_pos/pin'
+import { Route as PosLoyaltyRouteImport } from './routes/_pos/loyalty'
 import { Route as PosHistoryRouteImport } from './routes/_pos/history'
+import { Route as PosHelpRouteImport } from './routes/_pos/help'
+import { Route as PosDocsRouteImport } from './routes/_pos/docs'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
+import { Route as PosCustomersRouteImport } from './routes/_pos/customers'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
 import { Route as PosSaleRouteRouteImport } from './routes/_pos/sale/route'
+import { Route as PosReportsRouteRouteImport } from './routes/_pos/reports/route'
 import { Route as PosOnboardingRouteRouteImport } from './routes/_pos/onboarding/route'
 import { Route as PosMenuRouteRouteImport } from './routes/_pos/menu/route'
 import { Route as PosInventoryRouteRouteImport } from './routes/_pos/inventory/route'
 import { Route as PosSaleIndexRouteImport } from './routes/_pos/sale/index'
+import { Route as PosReportsIndexRouteImport } from './routes/_pos/reports/index'
 import { Route as PosMenuIndexRouteImport } from './routes/_pos/menu/index'
 import { Route as PosInventoryIndexRouteImport } from './routes/_pos/inventory/index'
 import { Route as PosShiftOpenRouteImport } from './routes/_pos/shift/open'
 import { Route as PosShiftCloseRouteImport } from './routes/_pos/shift/close'
+import { Route as PosSettingsTaxRouteImport } from './routes/_pos/settings/tax'
 import { Route as PosSettingsStaffRouteImport } from './routes/_pos/settings/staff'
+import { Route as PosSettingsReceiptRouteImport } from './routes/_pos/settings/receipt'
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
+import { Route as PosSettingsIntegrationsRouteImport } from './routes/_pos/settings/integrations'
+import { Route as PosSettingsGeneralRouteImport } from './routes/_pos/settings/general'
+import { Route as PosReportsSalesRouteImport } from './routes/_pos/reports/sales'
+import { Route as PosReportsProductsRouteImport } from './routes/_pos/reports/products'
+import { Route as PosReportsPaymentsRouteImport } from './routes/_pos/reports/payments'
+import { Route as PosReportsCashiersRouteImport } from './routes/_pos/reports/cashiers'
 import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboarding/profile'
 import { Route as PosOnboardingMenuRouteImport } from './routes/_pos/onboarding/menu'
 import { Route as PosOnboardingCashierRouteImport } from './routes/_pos/onboarding/cashier'
 import { Route as PosMenuModifiersRouteImport } from './routes/_pos/menu/modifiers'
 import { Route as PosMenuCategoriesRouteImport } from './routes/_pos/menu/categories'
+import { Route as PosInventoryWasteRouteImport } from './routes/_pos/inventory/waste'
+import { Route as PosInventoryPurchasesRouteImport } from './routes/_pos/inventory/purchases'
+import { Route as PosInventoryAdjustmentsRouteImport } from './routes/_pos/inventory/adjustments'
 import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
 import { Route as PosMenuItemsItemIdRouteImport } from './routes/_pos/menu/items.$itemId'
 
@@ -73,9 +93,29 @@ const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => PublicRoute,
 } as any)
+const PosShiftsRoute = PosShiftsRouteImport.update({
+  id: '/shifts',
+  path: '/shifts',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosRecipesRoute = PosRecipesRouteImport.update({
+  id: '/recipes',
+  path: '/recipes',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosPromosRoute = PosPromosRouteImport.update({
+  id: '/promos',
+  path: '/promos',
+  getParentRoute: () => PosRoute,
+} as any)
 const PosPinRoute = PosPinRouteImport.update({
   id: '/pin',
   path: '/pin',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosLoyaltyRoute = PosLoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
   getParentRoute: () => PosRoute,
 } as any)
 const PosHistoryRoute = PosHistoryRouteImport.update({
@@ -83,9 +123,24 @@ const PosHistoryRoute = PosHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => PosRoute,
 } as any)
+const PosHelpRoute = PosHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosDocsRoute = PosDocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => PosRoute,
+} as any)
 const PosDashboardRoute = PosDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosCustomersRoute = PosCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
   getParentRoute: () => PosRoute,
 } as any)
 const PosShiftRouteRoute = PosShiftRouteRouteImport.update({
@@ -101,6 +156,11 @@ const PosSettingsRouteRoute = PosSettingsRouteRouteImport.update({
 const PosSaleRouteRoute = PosSaleRouteRouteImport.update({
   id: '/sale',
   path: '/sale',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosReportsRouteRoute = PosReportsRouteRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => PosRoute,
 } as any)
 const PosOnboardingRouteRoute = PosOnboardingRouteRouteImport.update({
@@ -123,6 +183,11 @@ const PosSaleIndexRoute = PosSaleIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PosSaleRouteRoute,
 } as any)
+const PosReportsIndexRoute = PosReportsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PosReportsRouteRoute,
+} as any)
 const PosMenuIndexRoute = PosMenuIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -143,15 +208,55 @@ const PosShiftCloseRoute = PosShiftCloseRouteImport.update({
   path: '/close',
   getParentRoute: () => PosShiftRouteRoute,
 } as any)
+const PosSettingsTaxRoute = PosSettingsTaxRouteImport.update({
+  id: '/tax',
+  path: '/tax',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
 const PosSettingsStaffRoute = PosSettingsStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
+const PosSettingsReceiptRoute = PosSettingsReceiptRouteImport.update({
+  id: '/receipt',
+  path: '/receipt',
   getParentRoute: () => PosSettingsRouteRoute,
 } as any)
 const PosSettingsProfileRoute = PosSettingsProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => PosSettingsRouteRoute,
+} as any)
+const PosSettingsIntegrationsRoute = PosSettingsIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
+const PosSettingsGeneralRoute = PosSettingsGeneralRouteImport.update({
+  id: '/general',
+  path: '/general',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
+const PosReportsSalesRoute = PosReportsSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => PosReportsRouteRoute,
+} as any)
+const PosReportsProductsRoute = PosReportsProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => PosReportsRouteRoute,
+} as any)
+const PosReportsPaymentsRoute = PosReportsPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => PosReportsRouteRoute,
+} as any)
+const PosReportsCashiersRoute = PosReportsCashiersRouteImport.update({
+  id: '/cashiers',
+  path: '/cashiers',
+  getParentRoute: () => PosReportsRouteRoute,
 } as any)
 const PosOnboardingProfileRoute = PosOnboardingProfileRouteImport.update({
   id: '/profile',
@@ -178,6 +283,21 @@ const PosMenuCategoriesRoute = PosMenuCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => PosMenuRouteRoute,
 } as any)
+const PosInventoryWasteRoute = PosInventoryWasteRouteImport.update({
+  id: '/waste',
+  path: '/waste',
+  getParentRoute: () => PosInventoryRouteRoute,
+} as any)
+const PosInventoryPurchasesRoute = PosInventoryPurchasesRouteImport.update({
+  id: '/purchases',
+  path: '/purchases',
+  getParentRoute: () => PosInventoryRouteRoute,
+} as any)
+const PosInventoryAdjustmentsRoute = PosInventoryAdjustmentsRouteImport.update({
+  id: '/adjustments',
+  path: '/adjustments',
+  getParentRoute: () => PosInventoryRouteRoute,
+} as any)
 const PosMenuModifiersGroupIdRoute = PosMenuModifiersGroupIdRouteImport.update({
   id: '/$groupId',
   path: '/$groupId',
@@ -194,27 +314,47 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof PosInventoryRouteRouteWithChildren
   '/menu': typeof PosMenuRouteRouteWithChildren
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
+  '/reports': typeof PosReportsRouteRouteWithChildren
   '/sale': typeof PosSaleRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
+  '/docs': typeof PosDocsRoute
+  '/help': typeof PosHelpRoute
   '/history': typeof PosHistoryRoute
+  '/loyalty': typeof PosLoyaltyRoute
   '/pin': typeof PosPinRoute
+  '/promos': typeof PosPromosRoute
+  '/recipes': typeof PosRecipesRoute
+  '/shifts': typeof PosShiftsRoute
   '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
+  '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
+  '/inventory/purchases': typeof PosInventoryPurchasesRoute
+  '/inventory/waste': typeof PosInventoryWasteRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
+  '/reports/cashiers': typeof PosReportsCashiersRoute
+  '/reports/payments': typeof PosReportsPaymentsRoute
+  '/reports/products': typeof PosReportsProductsRoute
+  '/reports/sales': typeof PosReportsSalesRoute
+  '/settings/general': typeof PosSettingsGeneralRoute
+  '/settings/integrations': typeof PosSettingsIntegrationsRoute
   '/settings/profile': typeof PosSettingsProfileRoute
+  '/settings/receipt': typeof PosSettingsReceiptRoute
   '/settings/staff': typeof PosSettingsStaffRoute
+  '/settings/tax': typeof PosSettingsTaxRoute
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
   '/inventory/': typeof PosInventoryIndexRoute
   '/menu/': typeof PosMenuIndexRoute
+  '/reports/': typeof PosReportsIndexRoute
   '/sale/': typeof PosSaleIndexRoute
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
@@ -224,24 +364,43 @@ export interface FileRoutesByTo {
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
+  '/docs': typeof PosDocsRoute
+  '/help': typeof PosHelpRoute
   '/history': typeof PosHistoryRoute
+  '/loyalty': typeof PosLoyaltyRoute
   '/pin': typeof PosPinRoute
+  '/promos': typeof PosPromosRoute
+  '/recipes': typeof PosRecipesRoute
+  '/shifts': typeof PosShiftsRoute
   '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
+  '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
+  '/inventory/purchases': typeof PosInventoryPurchasesRoute
+  '/inventory/waste': typeof PosInventoryWasteRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
+  '/reports/cashiers': typeof PosReportsCashiersRoute
+  '/reports/payments': typeof PosReportsPaymentsRoute
+  '/reports/products': typeof PosReportsProductsRoute
+  '/reports/sales': typeof PosReportsSalesRoute
+  '/settings/general': typeof PosSettingsGeneralRoute
+  '/settings/integrations': typeof PosSettingsIntegrationsRoute
   '/settings/profile': typeof PosSettingsProfileRoute
+  '/settings/receipt': typeof PosSettingsReceiptRoute
   '/settings/staff': typeof PosSettingsStaffRoute
+  '/settings/tax': typeof PosSettingsTaxRoute
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
   '/inventory': typeof PosInventoryIndexRoute
   '/menu': typeof PosMenuIndexRoute
+  '/reports': typeof PosReportsIndexRoute
   '/sale': typeof PosSaleIndexRoute
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
@@ -253,28 +412,48 @@ export interface FileRoutesById {
   '/_pos/inventory': typeof PosInventoryRouteRouteWithChildren
   '/_pos/menu': typeof PosMenuRouteRouteWithChildren
   '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
+  '/_pos/reports': typeof PosReportsRouteRouteWithChildren
   '/_pos/sale': typeof PosSaleRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
+  '/_pos/customers': typeof PosCustomersRoute
   '/_pos/dashboard': typeof PosDashboardRoute
+  '/_pos/docs': typeof PosDocsRoute
+  '/_pos/help': typeof PosHelpRoute
   '/_pos/history': typeof PosHistoryRoute
+  '/_pos/loyalty': typeof PosLoyaltyRoute
   '/_pos/pin': typeof PosPinRoute
+  '/_pos/promos': typeof PosPromosRoute
+  '/_pos/recipes': typeof PosRecipesRoute
+  '/_pos/shifts': typeof PosShiftsRoute
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
+  '/_pos/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
+  '/_pos/inventory/purchases': typeof PosInventoryPurchasesRoute
+  '/_pos/inventory/waste': typeof PosInventoryWasteRoute
   '/_pos/menu/categories': typeof PosMenuCategoriesRoute
   '/_pos/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/_pos/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/_pos/onboarding/menu': typeof PosOnboardingMenuRoute
   '/_pos/onboarding/profile': typeof PosOnboardingProfileRoute
+  '/_pos/reports/cashiers': typeof PosReportsCashiersRoute
+  '/_pos/reports/payments': typeof PosReportsPaymentsRoute
+  '/_pos/reports/products': typeof PosReportsProductsRoute
+  '/_pos/reports/sales': typeof PosReportsSalesRoute
+  '/_pos/settings/general': typeof PosSettingsGeneralRoute
+  '/_pos/settings/integrations': typeof PosSettingsIntegrationsRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
+  '/_pos/settings/receipt': typeof PosSettingsReceiptRoute
   '/_pos/settings/staff': typeof PosSettingsStaffRoute
+  '/_pos/settings/tax': typeof PosSettingsTaxRoute
   '/_pos/shift/close': typeof PosShiftCloseRoute
   '/_pos/shift/open': typeof PosShiftOpenRoute
   '/_pos/inventory/': typeof PosInventoryIndexRoute
   '/_pos/menu/': typeof PosMenuIndexRoute
+  '/_pos/reports/': typeof PosReportsIndexRoute
   '/_pos/sale/': typeof PosSaleIndexRoute
   '/_pos/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/_pos/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
@@ -286,27 +465,47 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/menu'
     | '/onboarding'
+    | '/reports'
     | '/sale'
     | '/settings'
     | '/shift'
+    | '/customers'
     | '/dashboard'
+    | '/docs'
+    | '/help'
     | '/history'
+    | '/loyalty'
     | '/pin'
+    | '/promos'
+    | '/recipes'
+    | '/shifts'
     | '/privacy'
     | '/signin'
     | '/signup'
     | '/terms'
+    | '/inventory/adjustments'
+    | '/inventory/purchases'
+    | '/inventory/waste'
     | '/menu/categories'
     | '/menu/modifiers'
     | '/onboarding/cashier'
     | '/onboarding/menu'
     | '/onboarding/profile'
+    | '/reports/cashiers'
+    | '/reports/payments'
+    | '/reports/products'
+    | '/reports/sales'
+    | '/settings/general'
+    | '/settings/integrations'
     | '/settings/profile'
+    | '/settings/receipt'
     | '/settings/staff'
+    | '/settings/tax'
     | '/shift/close'
     | '/shift/open'
     | '/inventory/'
     | '/menu/'
+    | '/reports/'
     | '/sale/'
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
@@ -316,24 +515,43 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/shift'
+    | '/customers'
     | '/dashboard'
+    | '/docs'
+    | '/help'
     | '/history'
+    | '/loyalty'
     | '/pin'
+    | '/promos'
+    | '/recipes'
+    | '/shifts'
     | '/privacy'
     | '/signin'
     | '/signup'
     | '/terms'
+    | '/inventory/adjustments'
+    | '/inventory/purchases'
+    | '/inventory/waste'
     | '/menu/categories'
     | '/menu/modifiers'
     | '/onboarding/cashier'
     | '/onboarding/menu'
     | '/onboarding/profile'
+    | '/reports/cashiers'
+    | '/reports/payments'
+    | '/reports/products'
+    | '/reports/sales'
+    | '/settings/general'
+    | '/settings/integrations'
     | '/settings/profile'
+    | '/settings/receipt'
     | '/settings/staff'
+    | '/settings/tax'
     | '/shift/close'
     | '/shift/open'
     | '/inventory'
     | '/menu'
+    | '/reports'
     | '/sale'
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
@@ -344,28 +562,48 @@ export interface FileRouteTypes {
     | '/_pos/inventory'
     | '/_pos/menu'
     | '/_pos/onboarding'
+    | '/_pos/reports'
     | '/_pos/sale'
     | '/_pos/settings'
     | '/_pos/shift'
+    | '/_pos/customers'
     | '/_pos/dashboard'
+    | '/_pos/docs'
+    | '/_pos/help'
     | '/_pos/history'
+    | '/_pos/loyalty'
     | '/_pos/pin'
+    | '/_pos/promos'
+    | '/_pos/recipes'
+    | '/_pos/shifts'
     | '/_public/privacy'
     | '/_public/signin'
     | '/_public/signup'
     | '/_public/terms'
     | '/_public/'
+    | '/_pos/inventory/adjustments'
+    | '/_pos/inventory/purchases'
+    | '/_pos/inventory/waste'
     | '/_pos/menu/categories'
     | '/_pos/menu/modifiers'
     | '/_pos/onboarding/cashier'
     | '/_pos/onboarding/menu'
     | '/_pos/onboarding/profile'
+    | '/_pos/reports/cashiers'
+    | '/_pos/reports/payments'
+    | '/_pos/reports/products'
+    | '/_pos/reports/sales'
+    | '/_pos/settings/general'
+    | '/_pos/settings/integrations'
     | '/_pos/settings/profile'
+    | '/_pos/settings/receipt'
     | '/_pos/settings/staff'
+    | '/_pos/settings/tax'
     | '/_pos/shift/close'
     | '/_pos/shift/open'
     | '/_pos/inventory/'
     | '/_pos/menu/'
+    | '/_pos/reports/'
     | '/_pos/sale/'
     | '/_pos/menu/items/$itemId'
     | '/_pos/menu/modifiers/$groupId'
@@ -427,11 +665,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicPrivacyRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_pos/shifts': {
+      id: '/_pos/shifts'
+      path: '/shifts'
+      fullPath: '/shifts'
+      preLoaderRoute: typeof PosShiftsRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/recipes': {
+      id: '/_pos/recipes'
+      path: '/recipes'
+      fullPath: '/recipes'
+      preLoaderRoute: typeof PosRecipesRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/promos': {
+      id: '/_pos/promos'
+      path: '/promos'
+      fullPath: '/promos'
+      preLoaderRoute: typeof PosPromosRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_pos/pin': {
       id: '/_pos/pin'
       path: '/pin'
       fullPath: '/pin'
       preLoaderRoute: typeof PosPinRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/loyalty': {
+      id: '/_pos/loyalty'
+      path: '/loyalty'
+      fullPath: '/loyalty'
+      preLoaderRoute: typeof PosLoyaltyRouteImport
       parentRoute: typeof PosRoute
     }
     '/_pos/history': {
@@ -441,11 +707,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosHistoryRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_pos/help': {
+      id: '/_pos/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof PosHelpRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/docs': {
+      id: '/_pos/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof PosDocsRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_pos/dashboard': {
       id: '/_pos/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof PosDashboardRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/customers': {
+      id: '/_pos/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof PosCustomersRouteImport
       parentRoute: typeof PosRoute
     }
     '/_pos/shift': {
@@ -467,6 +754,13 @@ declare module '@tanstack/react-router' {
       path: '/sale'
       fullPath: '/sale'
       preLoaderRoute: typeof PosSaleRouteRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/reports': {
+      id: '/_pos/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof PosReportsRouteRouteImport
       parentRoute: typeof PosRoute
     }
     '/_pos/onboarding': {
@@ -497,6 +791,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosSaleIndexRouteImport
       parentRoute: typeof PosSaleRouteRoute
     }
+    '/_pos/reports/': {
+      id: '/_pos/reports/'
+      path: '/'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof PosReportsIndexRouteImport
+      parentRoute: typeof PosReportsRouteRoute
+    }
     '/_pos/menu/': {
       id: '/_pos/menu/'
       path: '/'
@@ -525,11 +826,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosShiftCloseRouteImport
       parentRoute: typeof PosShiftRouteRoute
     }
+    '/_pos/settings/tax': {
+      id: '/_pos/settings/tax'
+      path: '/tax'
+      fullPath: '/settings/tax'
+      preLoaderRoute: typeof PosSettingsTaxRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
     '/_pos/settings/staff': {
       id: '/_pos/settings/staff'
       path: '/staff'
       fullPath: '/settings/staff'
       preLoaderRoute: typeof PosSettingsStaffRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
+    '/_pos/settings/receipt': {
+      id: '/_pos/settings/receipt'
+      path: '/receipt'
+      fullPath: '/settings/receipt'
+      preLoaderRoute: typeof PosSettingsReceiptRouteImport
       parentRoute: typeof PosSettingsRouteRoute
     }
     '/_pos/settings/profile': {
@@ -538,6 +853,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/profile'
       preLoaderRoute: typeof PosSettingsProfileRouteImport
       parentRoute: typeof PosSettingsRouteRoute
+    }
+    '/_pos/settings/integrations': {
+      id: '/_pos/settings/integrations'
+      path: '/integrations'
+      fullPath: '/settings/integrations'
+      preLoaderRoute: typeof PosSettingsIntegrationsRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
+    '/_pos/settings/general': {
+      id: '/_pos/settings/general'
+      path: '/general'
+      fullPath: '/settings/general'
+      preLoaderRoute: typeof PosSettingsGeneralRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
+    '/_pos/reports/sales': {
+      id: '/_pos/reports/sales'
+      path: '/sales'
+      fullPath: '/reports/sales'
+      preLoaderRoute: typeof PosReportsSalesRouteImport
+      parentRoute: typeof PosReportsRouteRoute
+    }
+    '/_pos/reports/products': {
+      id: '/_pos/reports/products'
+      path: '/products'
+      fullPath: '/reports/products'
+      preLoaderRoute: typeof PosReportsProductsRouteImport
+      parentRoute: typeof PosReportsRouteRoute
+    }
+    '/_pos/reports/payments': {
+      id: '/_pos/reports/payments'
+      path: '/payments'
+      fullPath: '/reports/payments'
+      preLoaderRoute: typeof PosReportsPaymentsRouteImport
+      parentRoute: typeof PosReportsRouteRoute
+    }
+    '/_pos/reports/cashiers': {
+      id: '/_pos/reports/cashiers'
+      path: '/cashiers'
+      fullPath: '/reports/cashiers'
+      preLoaderRoute: typeof PosReportsCashiersRouteImport
+      parentRoute: typeof PosReportsRouteRoute
     }
     '/_pos/onboarding/profile': {
       id: '/_pos/onboarding/profile'
@@ -574,6 +931,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosMenuCategoriesRouteImport
       parentRoute: typeof PosMenuRouteRoute
     }
+    '/_pos/inventory/waste': {
+      id: '/_pos/inventory/waste'
+      path: '/waste'
+      fullPath: '/inventory/waste'
+      preLoaderRoute: typeof PosInventoryWasteRouteImport
+      parentRoute: typeof PosInventoryRouteRoute
+    }
+    '/_pos/inventory/purchases': {
+      id: '/_pos/inventory/purchases'
+      path: '/purchases'
+      fullPath: '/inventory/purchases'
+      preLoaderRoute: typeof PosInventoryPurchasesRouteImport
+      parentRoute: typeof PosInventoryRouteRoute
+    }
+    '/_pos/inventory/adjustments': {
+      id: '/_pos/inventory/adjustments'
+      path: '/adjustments'
+      fullPath: '/inventory/adjustments'
+      preLoaderRoute: typeof PosInventoryAdjustmentsRouteImport
+      parentRoute: typeof PosInventoryRouteRoute
+    }
     '/_pos/menu/modifiers/$groupId': {
       id: '/_pos/menu/modifiers/$groupId'
       path: '/$groupId'
@@ -592,10 +970,16 @@ declare module '@tanstack/react-router' {
 }
 
 interface PosInventoryRouteRouteChildren {
+  PosInventoryAdjustmentsRoute: typeof PosInventoryAdjustmentsRoute
+  PosInventoryPurchasesRoute: typeof PosInventoryPurchasesRoute
+  PosInventoryWasteRoute: typeof PosInventoryWasteRoute
   PosInventoryIndexRoute: typeof PosInventoryIndexRoute
 }
 
 const PosInventoryRouteRouteChildren: PosInventoryRouteRouteChildren = {
+  PosInventoryAdjustmentsRoute: PosInventoryAdjustmentsRoute,
+  PosInventoryPurchasesRoute: PosInventoryPurchasesRoute,
+  PosInventoryWasteRoute: PosInventoryWasteRoute,
   PosInventoryIndexRoute: PosInventoryIndexRoute,
 }
 
@@ -646,6 +1030,26 @@ const PosOnboardingRouteRouteChildren: PosOnboardingRouteRouteChildren = {
 const PosOnboardingRouteRouteWithChildren =
   PosOnboardingRouteRoute._addFileChildren(PosOnboardingRouteRouteChildren)
 
+interface PosReportsRouteRouteChildren {
+  PosReportsCashiersRoute: typeof PosReportsCashiersRoute
+  PosReportsPaymentsRoute: typeof PosReportsPaymentsRoute
+  PosReportsProductsRoute: typeof PosReportsProductsRoute
+  PosReportsSalesRoute: typeof PosReportsSalesRoute
+  PosReportsIndexRoute: typeof PosReportsIndexRoute
+}
+
+const PosReportsRouteRouteChildren: PosReportsRouteRouteChildren = {
+  PosReportsCashiersRoute: PosReportsCashiersRoute,
+  PosReportsPaymentsRoute: PosReportsPaymentsRoute,
+  PosReportsProductsRoute: PosReportsProductsRoute,
+  PosReportsSalesRoute: PosReportsSalesRoute,
+  PosReportsIndexRoute: PosReportsIndexRoute,
+}
+
+const PosReportsRouteRouteWithChildren = PosReportsRouteRoute._addFileChildren(
+  PosReportsRouteRouteChildren,
+)
+
 interface PosSaleRouteRouteChildren {
   PosSaleIndexRoute: typeof PosSaleIndexRoute
 }
@@ -659,13 +1063,21 @@ const PosSaleRouteRouteWithChildren = PosSaleRouteRoute._addFileChildren(
 )
 
 interface PosSettingsRouteRouteChildren {
+  PosSettingsGeneralRoute: typeof PosSettingsGeneralRoute
+  PosSettingsIntegrationsRoute: typeof PosSettingsIntegrationsRoute
   PosSettingsProfileRoute: typeof PosSettingsProfileRoute
+  PosSettingsReceiptRoute: typeof PosSettingsReceiptRoute
   PosSettingsStaffRoute: typeof PosSettingsStaffRoute
+  PosSettingsTaxRoute: typeof PosSettingsTaxRoute
 }
 
 const PosSettingsRouteRouteChildren: PosSettingsRouteRouteChildren = {
+  PosSettingsGeneralRoute: PosSettingsGeneralRoute,
+  PosSettingsIntegrationsRoute: PosSettingsIntegrationsRoute,
   PosSettingsProfileRoute: PosSettingsProfileRoute,
+  PosSettingsReceiptRoute: PosSettingsReceiptRoute,
   PosSettingsStaffRoute: PosSettingsStaffRoute,
+  PosSettingsTaxRoute: PosSettingsTaxRoute,
 }
 
 const PosSettingsRouteRouteWithChildren =
@@ -689,24 +1101,40 @@ interface PosRouteChildren {
   PosInventoryRouteRoute: typeof PosInventoryRouteRouteWithChildren
   PosMenuRouteRoute: typeof PosMenuRouteRouteWithChildren
   PosOnboardingRouteRoute: typeof PosOnboardingRouteRouteWithChildren
+  PosReportsRouteRoute: typeof PosReportsRouteRouteWithChildren
   PosSaleRouteRoute: typeof PosSaleRouteRouteWithChildren
   PosSettingsRouteRoute: typeof PosSettingsRouteRouteWithChildren
   PosShiftRouteRoute: typeof PosShiftRouteRouteWithChildren
+  PosCustomersRoute: typeof PosCustomersRoute
   PosDashboardRoute: typeof PosDashboardRoute
+  PosDocsRoute: typeof PosDocsRoute
+  PosHelpRoute: typeof PosHelpRoute
   PosHistoryRoute: typeof PosHistoryRoute
+  PosLoyaltyRoute: typeof PosLoyaltyRoute
   PosPinRoute: typeof PosPinRoute
+  PosPromosRoute: typeof PosPromosRoute
+  PosRecipesRoute: typeof PosRecipesRoute
+  PosShiftsRoute: typeof PosShiftsRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
   PosInventoryRouteRoute: PosInventoryRouteRouteWithChildren,
   PosMenuRouteRoute: PosMenuRouteRouteWithChildren,
   PosOnboardingRouteRoute: PosOnboardingRouteRouteWithChildren,
+  PosReportsRouteRoute: PosReportsRouteRouteWithChildren,
   PosSaleRouteRoute: PosSaleRouteRouteWithChildren,
   PosSettingsRouteRoute: PosSettingsRouteRouteWithChildren,
   PosShiftRouteRoute: PosShiftRouteRouteWithChildren,
+  PosCustomersRoute: PosCustomersRoute,
   PosDashboardRoute: PosDashboardRoute,
+  PosDocsRoute: PosDocsRoute,
+  PosHelpRoute: PosHelpRoute,
   PosHistoryRoute: PosHistoryRoute,
+  PosLoyaltyRoute: PosLoyaltyRoute,
   PosPinRoute: PosPinRoute,
+  PosPromosRoute: PosPromosRoute,
+  PosRecipesRoute: PosRecipesRoute,
+  PosShiftsRoute: PosShiftsRoute,
 }
 
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)

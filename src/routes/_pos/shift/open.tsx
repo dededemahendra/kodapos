@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { type FormEvent, useState } from 'react';
 import { ShiftSummaryPanel } from '~/components/shift/shift-summary-panel';
 import { Button } from '~/components/ui/button';
@@ -14,6 +16,7 @@ export const Route = createFileRoute('/_pos/shift/open')({
 });
 
 function ShiftOpenPage() {
+  const { t } = useLingui();
   const { cashierId } = useActiveCashier();
   const current = useQuery(api.shifts.current, {});
   const staff = useQuery(api.staff.list, {});
@@ -23,16 +26,16 @@ function ShiftOpenPage() {
   const [submitting, setSubmitting] = useState(false);
 
   if (current === undefined || staff === undefined) {
-    return <p className="text-muted-foreground p-6">Memuat…</p>;
+    return <p className="text-muted-foreground p-6"><Trans>Memuat…</Trans></p>;
   }
 
   if (current) {
     return (
       <main className="max-w-xl mx-auto p-6 space-y-4">
-        <h1 className="text-2xl font-bold">Sudah ada shift terbuka</h1>
+        <h1 className="text-2xl font-bold"><Trans>Sudah ada shift terbuka</Trans></h1>
         <ShiftSummaryPanel shift={current} />
         <Button asChild>
-          <Link to="/shift/close">Lanjut ke Tutup Shift</Link>
+          <Link to="/shift/close"><Trans>Lanjut ke Tutup Shift</Trans></Link>
         </Button>
       </main>
     );
@@ -42,9 +45,9 @@ function ShiftOpenPage() {
   if (!me) {
     return (
       <p className="text-muted-foreground p-6">
-        Kasir tidak dikenal.{' '}
+        <Trans>Kasir tidak dikenal.</Trans>{' '}
         <Link to="/pin" className="underline">
-          Pilih ulang
+          <Trans>Pilih ulang</Trans>
         </Link>
         .
       </p>
@@ -64,7 +67,7 @@ function ShiftOpenPage() {
       });
       navigate({ to: '/shift/close' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal membuka shift.');
+      setError(err instanceof Error ? err.message : t`Gagal membuka shift.`);
     } finally {
       setSubmitting(false);
     }
@@ -72,12 +75,12 @@ function ShiftOpenPage() {
 
   return (
     <main className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-1">Buka Shift</h1>
-      <p className="text-muted-foreground text-sm mb-6">Sebagai: {me.name}</p>
+      <h1 className="text-2xl font-bold mb-1"><Trans>Buka Shift</Trans></h1>
+      <p className="text-muted-foreground text-sm mb-6"><Trans>Sebagai: {me.name}</Trans></p>
       <form onSubmit={onSubmit}>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="openingFloatIDR">Modal awal (Rp)</FieldLabel>
+            <FieldLabel htmlFor="openingFloatIDR"><Trans>Modal awal (Rp)</Trans></FieldLabel>
             <Input
               id="openingFloatIDR"
               name="openingFloatIDR"
@@ -91,7 +94,7 @@ function ShiftOpenPage() {
           {error && <FieldError>{error}</FieldError>}
           <Button type="submit" disabled={submitting}>
             {submitting && <Spinner data-icon="inline-start" />}
-            {submitting ? 'Membuka…' : 'Buka Shift'}
+            {submitting ? <Trans>Membuka…</Trans> : <Trans>Buka Shift</Trans>}
           </Button>
         </FieldGroup>
       </form>

@@ -2,6 +2,7 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { useReducer, useState } from 'react';
+import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { CashPaymentDialog } from './cash-payment-dialog';
 import { ReceiptPreview } from './receipt-preview';
@@ -43,7 +44,9 @@ export function SaleScreen() {
     return (
       <div className="flex items-center justify-center min-h-[60vh] gap-2 text-muted-foreground">
         <Spinner />
-        <span>Memuat menu…</span>
+        <span>
+          <Trans>Memuat menu…</Trans>
+        </span>
       </div>
     );
   }
@@ -112,20 +115,24 @@ export function SaleScreen() {
       <AlertDialog open={clearOpen} onOpenChange={setClearOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Kosongkan keranjang?</AlertDialogTitle>
+            <AlertDialogTitle>
+              <Trans>Kosongkan keranjang?</Trans>
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Semua item akan dihapus dari pesanan ini.
+              <Trans>Semua item akan dihapus dari pesanan ini.</Trans>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel>
+              <Trans>Batal</Trans>
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 dispatch({ type: 'clearCart' });
                 setClearOpen(false);
               }}
             >
-              Kosongkan
+              <Trans>Kosongkan</Trans>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

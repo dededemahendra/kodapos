@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_pos/menu')({
@@ -6,7 +7,7 @@ export const Route = createFileRoute('/_pos/menu')({
 
 function MenuLayout() {
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="p-6">
       <nav className="flex gap-4 border-b border-border mb-4 text-sm">
         <Link
           to="/menu"
@@ -14,21 +15,21 @@ function MenuLayout() {
           activeProps={{ className: 'border-ring font-semibold' }}
           activeOptions={{ exact: true }}
         >
-          Items
+          <Trans>Items</Trans>
         </Link>
         <Link
           to="/menu/categories"
           className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
           activeProps={{ className: 'border-ring font-semibold' }}
         >
-          Kategori
+          <Trans>Kategori</Trans>
         </Link>
         <Link
           to="/menu/modifiers"
           className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
           activeProps={{ className: 'border-ring font-semibold' }}
         >
-          Grup Modifier
+          <Trans>Grup Modifier</Trans>
         </Link>
       </nav>
       <Outlet />

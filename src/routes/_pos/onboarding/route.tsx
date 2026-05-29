@@ -1,19 +1,22 @@
 import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
+import { useLingui } from '@lingui/react/macro';
 import { type WizardStep, WizardStepper } from '~/components/menu/wizard-stepper';
 
 export const Route = createFileRoute('/_pos/onboarding')({
   component: OnboardingLayout,
 });
 
-const STEPS: ReadonlyArray<WizardStep> = [
-  { label: 'Profil Kafe', enabled: true },
-  { label: 'Menu', enabled: true },
-  { label: 'Pembayaran', enabled: false },
-  { label: 'Kasir', enabled: true },
-];
-
 function OnboardingLayout() {
+  const { t } = useLingui();
   const path = useRouterState({ select: (s) => s.location.pathname });
+
+  const STEPS: ReadonlyArray<WizardStep> = [
+    { label: t`Profil Kafe`, enabled: true },
+    { label: t`Menu`, enabled: true },
+    { label: t`Pembayaran`, enabled: false },
+    { label: t`Kasir`, enabled: true },
+  ];
+
   let currentIndex = 0;
   if (path.includes('/onboarding/menu')) currentIndex = 1;
   else if (path.includes('/onboarding/cashier')) currentIndex = 3;

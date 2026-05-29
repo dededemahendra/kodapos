@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import type { Id } from 'convex/_generated/dataModel';
 import { useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
@@ -31,6 +33,7 @@ export function ModifierPickerDialog({
   row: ItemForSale | null;
   onConfirm: (pick: ModifierPickResult) => void;
 }) {
+  const { t } = useLingui();
   const [selected, setSelected] = useState<Record<string, Set<string>>>({});
   const [qty, setQty] = useState(1);
 
@@ -106,7 +109,9 @@ export function ModifierPickerDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{item.item.name}</DialogTitle>
-          <p className="text-sm text-muted-foreground">Harga dasar {formatIDR(item.item.priceIDR)}</p>
+          <p className="text-sm text-muted-foreground">
+            <Trans>Harga dasar {formatIDR(item.item.priceIDR)}</Trans>
+          </p>
         </DialogHeader>
         <div className="space-y-4 max-h-[50vh] overflow-y-auto">
           {item.attachedGroups.map((ag) => {
@@ -117,10 +122,12 @@ export function ModifierPickerDialog({
                   <h3 className="text-sm font-medium">{ag.group.name}</h3>
                   <span className="text-xs text-muted-foreground">
                     {isRequired
-                      ? `Wajib (pilih ${ag.group.minSelect}${
-                          ag.group.maxSelect > ag.group.minSelect ? `–${ag.group.maxSelect}` : ''
+                      ? t`Wajib (pilih ${ag.group.minSelect}${
+                          ag.group.maxSelect > ag.group.minSelect
+                            ? `-${ag.group.maxSelect}`
+                            : ''
                         })`
-                      : `Opsional (maks ${ag.group.maxSelect})`}
+                      : t`Opsional (maks ${ag.group.maxSelect})`}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -149,7 +156,9 @@ export function ModifierPickerDialog({
             );
           })}
           <div className="flex items-center gap-2 pt-2 border-t border-border">
-            <span className="text-sm">Jumlah</span>
+            <span className="text-sm">
+              <Trans>Jumlah</Trans>
+            </span>
             <div className="flex items-center gap-1 ml-auto">
               <Button
                 type="button"
@@ -173,16 +182,18 @@ export function ModifierPickerDialog({
         </div>
         <DialogFooter className="flex items-center justify-between">
           <div className="text-sm">
-            Total <span className="font-semibold tabular-nums">{formatIDR(qty * unitPriceIDR)}</span>
+            <Trans>
+              Total <span className="font-semibold tabular-nums">{formatIDR(qty * unitPriceIDR)}</span>
+            </Trans>
           </div>
           <div className="flex gap-2">
             <DialogClose asChild>
               <Button type="button" variant="ghost">
-                Batal
+                <Trans>Batal</Trans>
               </Button>
             </DialogClose>
             <Button type="button" onClick={submit} disabled={!allRequiredSatisfied}>
-              Tambah ke pesanan
+              <Trans>Tambah ke pesanan</Trans>
             </Button>
           </div>
         </DialogFooter>

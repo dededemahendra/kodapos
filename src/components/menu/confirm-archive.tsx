@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Trans } from '@lingui/react/macro';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,14 +29,14 @@ export function ConfirmArchive({ noun, name, trigger, onConfirm }: ConfirmArchiv
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Arsipkan {noun}?</AlertDialogTitle>
+          <AlertDialogTitle><Trans>Arsipkan {noun}?</Trans></AlertDialogTitle>
           <AlertDialogDescription>
-            “{name}” akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip.
+            <Trans>"{name}" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip.</Trans>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Batal</AlertDialogCancel>
-          <AlertDialogAction onClick={() => void onConfirm()}>Arsipkan</AlertDialogAction>
+          <AlertDialogCancel><Trans>Batal</Trans></AlertDialogCancel>
+          <AlertDialogAction onClick={() => void onConfirm()}><Trans>Arsipkan</Trans></AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

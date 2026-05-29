@@ -1,6 +1,7 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
+import { Trans } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent } from '~/components/ui/dialog';
 import { formatIDR } from '~/lib/money';
@@ -25,9 +26,13 @@ export function ReceiptPreview({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         {order === undefined || cafe === undefined ? (
-          <p className="text-muted-foreground">Memuat struk…</p>
+          <p className="text-muted-foreground">
+            <Trans>Memuat struk…</Trans>
+          </p>
         ) : !order ? (
-          <p className="text-red-600">Pesanan tidak ditemukan.</p>
+          <p className="text-red-600">
+            <Trans>Pesanan tidak ditemukan.</Trans>
+          </p>
         ) : (
           <div data-print-receipt className="font-mono text-sm">
             <div className="text-center mb-3">
@@ -35,7 +40,9 @@ export function ReceiptPreview({
               <div className="text-xs text-muted-foreground">
                 {new Date(order.createdAtClient).toLocaleString('id-ID')}
               </div>
-              <div className="text-xs text-muted-foreground">Kasir: {order.cashierName}</div>
+              <div className="text-xs text-muted-foreground">
+                <Trans>Kasir: {order.cashierName}</Trans>
+              </div>
             </div>
             <hr className="border-dashed border-border my-2" />
             {order.lines.map((line, i) => (
@@ -60,27 +67,27 @@ export function ReceiptPreview({
             ))}
             <hr className="border-dashed border-border my-2" />
             <div className="flex justify-between">
-              <span>Subtotal</span>
+              <span><Trans>Subtotal</Trans></span>
               <span className="tabular-nums">{formatIDR(order.subtotalIDR)}</span>
             </div>
             {order.taxIDR > 0 ? (
               <div className="flex justify-between">
-                <span>PPN {order.taxRatePct}%</span>
+                <span><Trans>PPN {order.taxRatePct}%</Trans></span>
                 <span className="tabular-nums">{formatIDR(order.taxIDR)}</span>
               </div>
             ) : null}
             <div className="flex justify-between font-semibold text-base">
-              <span>Total</span>
+              <span><Trans>Total</Trans></span>
               <span className="tabular-nums">{formatIDR(order.totalIDR)}</span>
             </div>
             {order.payment?.method === 'cash' ? (
               <>
                 <div className="flex justify-between mt-1">
-                  <span>Tunai</span>
+                  <span><Trans>Tunai</Trans></span>
                   <span className="tabular-nums">{formatIDR(order.payment.cashTenderedIDR ?? 0)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Kembalian</span>
+                  <span><Trans>Kembalian</Trans></span>
                   <span className="tabular-nums">{formatIDR(order.payment.changeIDR ?? 0)}</span>
                 </div>
               </>
@@ -89,10 +96,10 @@ export function ReceiptPreview({
         )}
         <div className="flex gap-2 justify-end mt-4">
           <Button type="button" variant="outline" onClick={() => window.print()}>
-            Cetak
+            <Trans>Cetak</Trans>
           </Button>
           <Button type="button" onClick={onDone}>
-            Selesai
+            <Trans>Selesai</Trans>
           </Button>
         </div>
       </DialogContent>

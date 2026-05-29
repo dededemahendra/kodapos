@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro';
 import type { Id } from 'convex/_generated/dataModel';
 import { formatIDR } from '~/lib/money';
 
@@ -22,33 +23,33 @@ export function ShiftSummaryPanel({ shift }: ShiftSummaryPanelProps) {
   const closed = shift.closedAt ? new Date(shift.closedAt).toLocaleString('id-ID') : null;
   return (
     <dl className="grid grid-cols-2 gap-y-2 text-sm">
-      <dt className="text-muted-foreground">Dibuka oleh</dt>
+      <dt className="text-muted-foreground"><Trans>Dibuka oleh</Trans></dt>
       <dd>{shift.cashierName}</dd>
-      <dt className="text-muted-foreground">Dibuka pada</dt>
+      <dt className="text-muted-foreground"><Trans>Dibuka pada</Trans></dt>
       <dd>{opened}</dd>
       {closed && (
         <>
-          <dt className="text-muted-foreground">Ditutup pada</dt>
+          <dt className="text-muted-foreground"><Trans>Ditutup pada</Trans></dt>
           <dd>{closed}</dd>
         </>
       )}
-      <dt className="text-muted-foreground">Modal awal</dt>
+      <dt className="text-muted-foreground"><Trans>Modal awal</Trans></dt>
       <dd>{formatIDR(shift.openingFloatIDR)}</dd>
       {shift.expectedCashIDR !== undefined && (
         <>
-          <dt className="text-muted-foreground">Uang seharusnya</dt>
+          <dt className="text-muted-foreground"><Trans>Uang seharusnya</Trans></dt>
           <dd>{formatIDR(shift.expectedCashIDR)}</dd>
         </>
       )}
       {shift.countedCashIDR !== undefined && (
         <>
-          <dt className="text-muted-foreground">Uang terhitung</dt>
+          <dt className="text-muted-foreground"><Trans>Uang terhitung</Trans></dt>
           <dd>{formatIDR(shift.countedCashIDR)}</dd>
         </>
       )}
       {shift.varianceIDR !== undefined && (
         <>
-          <dt className="text-muted-foreground">Selisih</dt>
+          <dt className="text-muted-foreground"><Trans>Selisih</Trans></dt>
           <dd className={shift.varianceIDR < 0 ? 'text-destructive' : ''}>
             {formatIDR(shift.varianceIDR)}
           </dd>

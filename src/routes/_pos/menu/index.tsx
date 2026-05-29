@@ -1,3 +1,5 @@
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
@@ -14,6 +16,7 @@ export const Route = createFileRoute('/_pos/menu/')({
 type CategoryFilter = 'all' | 'archived' | Id<'categories'>;
 
 function ItemsListPage() {
+  const { t } = useLingui();
   const categories = useQuery(api.menu.categories.list, {});
   const allItems = useQuery(api.menu.items.list, {});
   const [filter, setFilter] = useState<CategoryFilter>('all');
@@ -50,12 +53,12 @@ function ItemsListPage() {
   return (
     <div className="flex gap-6">
       <aside className="w-52 shrink-0 text-sm">
-        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Kategori</h2>
+        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2"><Trans>Kategori</Trans></h2>
         <nav className="space-y-1">
           <FilterButton
             active={filter === 'all'}
             onClick={() => setFilter('all')}
-            label={`Semua (${allItems?.length ?? 0})`}
+            label={t`Semua (${allItems?.length ?? 0})`}
           />
           {(categories ?? []).map((c) => {
             const count = allItems?.filter((i) => i.categoryId === c._id).length ?? 0;
@@ -71,7 +74,7 @@ function ItemsListPage() {
           <FilterButton
             active={filter === 'archived'}
             onClick={() => setFilter('archived')}
-            label="Arsip"
+            label={t`Arsip`}
             muted
           />
         </nav>
@@ -79,29 +82,29 @@ function ItemsListPage() {
       <section className="flex-1">
         <div className="flex gap-2 mb-3">
           <Input
-            placeholder="Cari item…"
+            placeholder={t`Cari item…`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-xs"
           />
           <Button asChild>
             <Link to="/menu/items/$itemId" params={{ itemId: 'new' }}>
-              + Item
+              <Trans>+ Item</Trans>
             </Link>
           </Button>
         </div>
         {isLoading ? (
-          <p className="text-muted-foreground">Memuat…</p>
+          <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>
         ) : rows.length === 0 ? (
-          <p className="text-muted-foreground">Tidak ada item.</p>
+          <p className="text-muted-foreground"><Trans>Tidak ada item.</Trans></p>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
-                <th className="py-2 px-2">Nama</th>
-                <th className="py-2 px-2 w-24">Kategori</th>
-                <th className="py-2 px-2 w-28 text-right">Harga</th>
-                <th className="py-2 px-2 w-24">Status</th>
+                <th className="py-2 px-2"><Trans>Nama</Trans></th>
+                <th className="py-2 px-2 w-24"><Trans>Kategori</Trans></th>
+                <th className="py-2 px-2 w-28 text-right"><Trans>Harga</Trans></th>
+                <th className="py-2 px-2 w-24"><Trans>Status</Trans></th>
               </tr>
             </thead>
             <tbody>
@@ -122,11 +125,11 @@ function ItemsListPage() {
                   <td className="py-2 px-2 text-right">{formatIDR(r.priceIDR)}</td>
                   <td className="py-2 px-2">
                     {r.archived ? (
-                      <span className="text-xs text-muted-foreground">● Arsip</span>
+                      <span className="text-xs text-muted-foreground"><Trans>● Arsip</Trans></span>
                     ) : r.isActive ? (
-                      <span className="text-xs text-primary">● Aktif</span>
+                      <span className="text-xs text-primary"><Trans>● Aktif</Trans></span>
                     ) : (
-                      <span className="text-xs text-muted-foreground">○ Off</span>
+                      <span className="text-xs text-muted-foreground"><Trans>○ Off</Trans></span>
                     )}
                   </td>
                 </tr>

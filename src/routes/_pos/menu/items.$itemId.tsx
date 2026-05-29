@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
@@ -18,22 +19,22 @@ function ItemEditPage() {
     isNew ? 'skip' : { id: itemId as Id<'menuItems'> }
   );
 
-  if (!isNew && detail === undefined) return <p className="text-muted-foreground">Memuat…</p>;
-  if (!isNew && detail === null) return <p className="text-muted-foreground">Item tidak ditemukan.</p>;
+  if (!isNew && detail === undefined) return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
+  if (!isNew && detail === null) return <p className="text-muted-foreground"><Trans>Item tidak ditemukan.</Trans></p>;
 
   return (
     <div>
       <div className="text-xs text-muted-foreground mb-2">
         <Link to="/menu" className="hover:underline">
-          Menu
+          <Trans>Menu</Trans>
         </Link>{' '}
         ›{' '}
         <Link to="/menu" className="hover:underline">
-          Items
+          <Trans>Items</Trans>
         </Link>{' '}
-        › {isNew ? 'Baru' : detail?.item.name}
+        › {isNew ? <Trans>Baru</Trans> : detail?.item.name}
       </div>
-      <h1 className="text-xl font-bold mb-4">{isNew ? 'Item baru' : detail?.item.name}</h1>
+      <h1 className="text-xl font-bold mb-4">{isNew ? <Trans>Item baru</Trans> : detail?.item.name}</h1>
       <ItemEditForm
         itemId={isNew ? 'new' : (itemId as Id<'menuItems'>)}
         initial={{

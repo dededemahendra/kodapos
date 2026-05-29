@@ -1,6 +1,7 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { type FormEvent, useEffect, useState } from 'react';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { Button } from '~/components/ui/button';
@@ -24,12 +25,6 @@ import { Spinner } from '~/components/ui/spinner';
 
 type CanonicalUnit = 'g' | 'ml' | 'piece';
 
-const UNIT_LABELS: Record<CanonicalUnit, string> = {
-  g: 'Gram (g)',
-  ml: 'Mililiter (ml)',
-  piece: 'Buah (pcs)',
-};
-
 export function IngredientForm({
   open,
   ingredientId,
@@ -39,6 +34,7 @@ export function IngredientForm({
   ingredientId: Id<'ingredients'> | null;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useLingui();
   const isEdit = ingredientId !== null;
   const existing = useQuery(
     api.ingredients.get,
@@ -53,6 +49,12 @@ export function IngredientForm({
   const [lastCostPerUnitIDR, setLastCostPerUnitIDR] = useState<string>('0');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const unitLabels: Record<CanonicalUnit, string> = {
+    g: t`Gram (g)`,
+    ml: t`Mililiter (ml)`,
+    piece: t`Buah (pcs)`,
+  };
 
   useEffect(() => {
     if (open && existing) {
@@ -84,7 +86,7 @@ export function IngredientForm({
       });
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal menyimpan bahan.');
+      setError(err instanceof Error ? err.message : t`Gagal menyimpan bahan.`);
     } finally {
       setSubmitting(false);
     }
@@ -94,12 +96,14 @@ export function IngredientForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Ubah bahan' : 'Tambah bahan'}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? <Trans>Ubah bahan</Trans> : <Trans>Tambah bahan</Trans>}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="ing-name">Nama</FieldLabel>
+              <FieldLabel htmlFor="ing-name"><Trans>Nama</Trans></FieldLabel>
               <Input
                 id="ing-name"
                 value={name}
@@ -109,7 +113,7 @@ export function IngredientForm({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="ing-unit">Satuan</FieldLabel>
+              <FieldLabel htmlFor="ing-unit"><Trans>Satuan</Trans></FieldLabel>
               <Select value={unit} onValueChange={(v) => setUnit(v as CanonicalUnit)}>
                 <SelectTrigger id="ing-unit">
                   <SelectValue />
@@ -117,14 +121,14 @@ export function IngredientForm({
                 <SelectContent>
                   {(['g', 'ml', 'piece'] as CanonicalUnit[]).map((u) => (
                     <SelectItem key={u} value={u}>
-                      {UNIT_LABELS[u]}
+                      {unitLabels[u]}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
             <Field>
-              <FieldLabel htmlFor="ing-threshold">Ambang isi ulang</FieldLabel>
+              <FieldLabel htmlFor="ing-threshold"><Trans>Ambang isi ulang</Trans></FieldLabel>
               <Input
                 id="ing-threshold"
                 type="number"
@@ -136,7 +140,7 @@ export function IngredientForm({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="ing-cost">Biaya per satuan (Rp)</FieldLabel>
+              <FieldLabel htmlFor="ing-cost"><Trans>Biaya per satuan (Rp)</Trans></FieldLabel>
               <Input
                 id="ing-cost"
                 type="number"
@@ -152,11 +156,11 @@ export function IngredientForm({
           <DialogFooter className="mt-4">
             {isEdit && ingredientId ? (
               <ConfirmArchive
-                noun="bahan"
+                noun={t`bahan`}
                 name={existing?.name ?? ''}
                 trigger={
                   <Button type="button" variant="ghost" className="text-muted-foreground mr-auto">
-                    Arsipkan
+                    <Trans>Arsipkan</Trans>
                   </Button>
                 }
                 onConfirm={async () => {
@@ -166,11 +170,11 @@ export function IngredientForm({
               />
             ) : null}
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              Batal
+              <Trans>Batal</Trans>
             </Button>
             <Button type="submit" disabled={submitting}>
               {submitting && <Spinner data-icon="inline-start" />}
-              {submitting ? 'Menyimpan…' : 'Simpan'}
+              {submitting ? <Trans>Menyimpan…</Trans> : <Trans>Simpan</Trans>}
             </Button>
           </DialogFooter>
         </form>

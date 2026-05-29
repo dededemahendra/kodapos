@@ -12,14 +12,1829 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
+#: src/components/staff/staff-picker-card.tsx
+msgid " · belum ada PIN"
+msgstr " · no PIN set"
+
+#: src/components/menu/item-edit-form.tsx
+#~ msgid "— Pilih kategori —"
+#~ msgstr "— Select category —"
+
+#: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "…"
+msgstr "…"
+
+#: src/components/menu/confirm-archive.tsx
+msgid "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
+msgstr "\"{name}\" will be hidden from the active list. It can be restored from the archive view."
+
+#. placeholder {0}: formatIDR(line.unitPriceIDR)
+#: src/components/sale/cart-line-row.tsx
+msgid "{0} / item"
+msgstr "{0} / item"
+
+#. placeholder {0}: o.lines.length
+#: src/routes/_pos/history.tsx
+msgid "{0} item"
+msgstr "{0} item"
+
+#: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "← Kembali"
+msgstr "← Back"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "+ Grup baru"
+msgstr "+ New group"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "+ Item"
+msgstr "+ Item"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "+ Opsi"
+msgstr "+ Option"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "+ Pasang grup…"
+msgstr "+ Attach group…"
+
+#: src/components/menu/category-table.tsx
+#: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "+ Tambah"
+msgstr "+ Add"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "+ Tambah Bahan"
+msgstr "+ Add Ingredient"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "○ Off"
+msgstr "○ Off"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "● Aktif"
+msgstr "● Active"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "● Arsip"
+msgstr "● Archive"
+
+#: src/components/menu/cafe-profile-form.tsx
+msgid "08xx-xxxx-xxxx"
+msgstr "08xx-xxxx-xxxx"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "12 jam (AM/PM)"
+msgstr "12-hour (AM/PM)"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "15 menit"
+msgstr "15 minutes"
+
+#: src/components/dashboard-activity.tsx
+msgid "2 days ago"
+msgstr "2 days ago"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "24 jam"
+msgstr "24-hour"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "30 menit"
+msgstr "30 minutes"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "5 menit"
+msgstr "5 minutes"
+
+#: src/components/dashboard-activity.tsx
+msgid "About 2 hours ago"
+msgstr "About 2 hours ago"
+
+#: src/components/stats.tsx
+msgid "Active users"
+msgstr "Active users"
+
+#: src/components/dashboard-activity.tsx
+msgid "Activity"
+msgstr "Activity"
+
 #: src/routes/_public/index.tsx
 msgid "AI-native POS untuk kafe & QSR Indonesia."
-msgstr ""
+msgstr "AI-native POS for Indonesian cafes & QSRs."
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Aktif"
+msgstr "Active"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Aktif (tampil ke kasir)"
+msgstr "Active (visible to cashier)"
+
+#: src/components/menu/cafe-profile-form.tsx
+msgid "Aktifkan PPN di kasir"
+msgstr "Enable VAT at cashier"
+
+#: src/components/app-shared.tsx
+msgid "Akun"
+msgstr "Account"
+
+#: src/components/menu/cafe-profile-form.tsx
+msgid "Alamat (opsional)"
+msgstr "Address (optional)"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Alasan"
+msgstr "Reason"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Ambang"
+msgstr "Threshold"
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Ambang isi ulang"
+msgstr "Reorder threshold"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Amount"
+msgstr "Amount"
+
+#: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/menu/index.tsx
+msgid "Arsip"
+msgstr "Archive"
+
+#: src/components/inventory/ingredient-form.tsx
+#: src/components/menu/category-table.tsx
+#: src/components/menu/confirm-archive.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "Arsipkan"
+msgstr "Archive"
+
+#: src/components/menu/confirm-archive.tsx
+msgid "Arsipkan {noun}?"
+msgstr "Archive {noun}?"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Arsipkan item"
+msgstr "Archive item"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Atur kerapatan elemen antarmuka."
+msgstr "Adjust the density of interface elements."
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "Atur PIN"
+msgstr "Set PIN"
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (opsional)."
+msgstr "Set a 4-digit PIN for yourself. You can also add additional cashiers (optional)."
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "Atur PIN Pemilik"
+msgstr "Set Owner PIN"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Awalan nomor pesanan"
+msgstr "Order number prefix"
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "bahan"
+msgstr "ingredient"
+
+#: src/components/inventory/recipe-editor.tsx
+msgid "Bahan"
+msgstr "Ingredient"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Bahasa"
+msgstr "Language"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Bahasa & Wilayah"
+msgstr "Language & Region"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Bahasa tampilan aplikasi."
+msgstr "App display language."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Bahasa, kepadatan tampilan, dan format tanggal & waktu berlaku langsung. Preferensi lain menyusul."
+msgstr "Language, display density, and date & time formats apply instantly. Other preferences are coming soon."
+
+#: src/components/billing-health.tsx
+msgid "Balances and payouts look fine. nothing overdue in this snapshot."
+msgstr "Balances and payouts look fine. nothing overdue in this snapshot."
+
+#: src/routes/_pos/menu/items.$itemId.tsx
+msgid "Baru"
+msgstr "New"
+
+#: src/components/inventory/ingredient-form.tsx
+#: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/menu/confirm-archive.tsx
+#: src/components/sale/modifier-picker-dialog.tsx
+#: src/components/sale/sale-screen.tsx
+msgid "Batal"
+msgstr "Cancel"
+
+#: src/components/sale/cart-pane.tsx
+msgid "Bayar"
+msgstr "Pay"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
+msgstr "No ingredients yet. Add your first ingredient to start tracking stock."
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Belum ada grup modifier. Buat satu untuk mulai."
+msgstr "No modifier groups yet. Create one to get started."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Belum ada grup terpasang."
+msgstr "No groups attached."
+
+#: src/components/sale/cart-pane.tsx
+msgid "Belum ada item."
+msgstr "No items yet."
+
+#: src/components/menu/category-table.tsx
+msgid "Belum ada kategori."
+msgstr "No categories yet."
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Belum ada opsi. Tambahkan minimal satu."
+msgstr "No options yet. Add at least one."
+
+#: src/routes/_pos/history.tsx
+msgid "Belum ada pesanan di shift ini."
+msgstr "No orders in this shift."
+
+#: src/components/inventory/recipe-editor.tsx
+msgid "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
+msgstr "No recipe yet. The item can still be sold, but ingredient stock won't be deducted automatically."
+
+#: src/routes/_public/signin.tsx
+msgid "Belum punya akun?"
+msgstr "Don't have an account?"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Besar"
+#~ msgstr "Large"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Biaya / satuan"
+msgstr "Cost / unit"
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Biaya per satuan (Rp)"
+msgstr "Cost per unit (Rp)"
+
+#: src/components/billing-health.tsx
+msgid "Billing health"
+msgstr "Billing health"
+
+#: src/routes/_pos/onboarding/profile.tsx
+msgid "Bisa diubah kapan saja di Pengaturan."
+msgstr "Can be changed anytime in Settings."
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Buah (pcs)"
+msgstr "Piece (pcs)"
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Buat 2-3 kategori (Kopi, Non-Kopi, Makanan)."
+msgstr "Create 2-3 categories (Coffee, Non-Coffee, Food)."
+
+#: src/routes/_pos/onboarding/menu.tsx
+#~ msgid "Buat 2–3 kategori (Kopi, Non-Kopi, Makanan)."
+#~ msgstr "Create 2–3 categories (Coffee, Non-Coffee, Food)."
+
+#: src/components/inventory/ingredient-picker.tsx
+msgid "Buat bahan baru:"
+msgstr "Create new ingredient:"
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Buat grup modifier (mis. Ukuran) dan pasang ke item."
+msgstr "Create modifier groups (e.g. Size) and attach them to items."
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
+msgstr "Create categories, add items, and group reusable modifiers. You can finish now or continue anytime from the main menu."
+
+#: src/routes/_pos/shift/open.tsx
+msgid "Buka Shift"
+msgstr "Open Shift"
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Buka Shift Baru"
+msgstr "Open New Shift"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Bulatkan total transaksi ke satuan terdekat."
+msgstr "Round the transaction total to the nearest unit."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Cara tanggal ditampilkan di struk dan laporan."
+msgstr "How dates are displayed on receipts and reports."
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Cari bahan…"
+msgstr "Search ingredients…"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Cari item…"
+msgstr "Search items…"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Cashier harus memilih"
+msgstr "Cashier must select"
+
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Catat Limbah"
+msgstr "Log Waste"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Catat Stok"
+msgstr "Record Stock"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Catat stok:"
+msgstr "Record stock:"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Catatan (opsional)"
+msgstr "Note (optional)"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Catatan kaki struk"
+msgstr "Receipt footer"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Cetak"
+msgstr "Print"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Cetak logo kafe di bagian atas struk."
+msgstr "Print your cafe logo at the top of the receipt."
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Cetak ringkasan"
+msgstr "Print summary"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Cetak struk otomatis"
+msgstr "Auto-print receipt"
+
+#: src/components/channel-sales-chart.tsx
+msgid "Channel sales"
+msgstr "Channel sales"
+
+#: src/components/stats.tsx
+msgid "Conversion Rate"
+msgstr "Conversion Rate"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Customer"
+msgstr "Customer"
 
 #: src/routes/_public/index.tsx
+#: src/routes/_public/signin.tsx
+#: src/routes/_public/signup.tsx
 msgid "Daftar"
-msgstr ""
+msgstr "Sign up"
+
+#: src/components/net-revenue-chart.tsx
+msgid "Daily net sales, last 7 days."
+msgstr "Daily net sales, last 7 days."
+
+#: src/components/channel-sales-chart.tsx
+msgid "Daily sales count by channel, last {VISIBLE_DAYS} days."
+msgstr "Daily sales count by channel, last {VISIBLE_DAYS} days."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Dasar"
+msgstr "Base"
+
+#: src/components/app-shared.tsx
+msgid "Dasbor"
+msgstr "Dashboard"
+
+#: src/components/latest-change.tsx
+msgid "Dasbor baru"
+msgstr "New dashboard"
+
+#: src/components/dashboard-activity.tsx
+msgid "Dashboard v2 shipped to prod"
+msgstr "Dashboard v2 shipped to prod"
+
+#: src/components/dashboard.tsx
+msgid "Data contoh: dasbor belum terhubung ke data kafe."
+msgstr "Sample data: the dashboard isn't connected to cafe data yet."
+
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Dibuka oleh"
+msgstr "Opened by"
+
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Dibuka pada"
+msgstr "Opened at"
+
+#. placeholder {0}: idx + 1
+#: src/components/staff/pin-entry.tsx
+msgid "Digit {0}"
+msgstr "Digit {0}"
+
+#: src/routes/_pos/menu/modifiers.tsx
+#~ msgid "Dipakai ulang di banyak item — ubah di satu tempat."
+#~ msgstr "Reused across many items — change in one place."
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Dipakai ulang di banyak item, ubah di satu tempat."
+msgstr "Reused across many items, change in one place."
+
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Ditutup pada"
+msgstr "Closed at"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/docs.tsx
+msgid "Dokumentasi"
+msgstr "Documentation"
+
+#: src/routes/_pos/menu/modifiers.$groupId.tsx
+msgid "Edit grup modifier"
+msgstr "Edit modifier group"
+
+#: src/routes/_public/signin.tsx
+msgid "Email atau password salah."
+msgstr "Incorrect email or password."
+
+#: src/lib/auth-validation.ts
+msgid "Email wajib diisi."
+msgstr "Email is required."
+
+#: src/lib/auth-validation.ts
+msgid "Format email tidak valid."
+msgstr "Invalid email format."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Format jam 24-jam atau 12-jam (AM/PM)."
+msgstr "24-hour or 12-hour (AM/PM) time format."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Format Tanggal"
+msgstr "Date format"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Format Waktu"
+msgstr "Time format"
+
+#: src/components/menu/category-table.tsx
+msgid "Gagal membuat kategori."
+msgstr "Failed to create category."
+
+#: src/routes/_pos/shift/open.tsx
+msgid "Gagal membuka shift."
+msgstr "Failed to open shift."
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Gagal memproses pembayaran."
+msgstr "Failed to process payment."
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "Gagal menambah kasir."
+msgstr "Failed to add cashier."
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Gagal menambah staf."
+msgstr "Failed to add staff."
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Gagal mencatat stok."
+msgstr "Failed to record stock."
+
+#: src/routes/_public/signup.tsx
+msgid "Gagal mendaftar."
+msgstr "Sign up failed."
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "Gagal mengatur PIN."
+msgstr "Failed to set PIN."
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Gagal mengganti PIN."
+msgstr "Failed to change PIN."
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Gagal menutup shift."
+msgstr "Failed to close shift."
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Gagal menyimpan bahan."
+msgstr "Failed to save ingredient."
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Gagal menyimpan grup."
+msgstr "Failed to save group."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Gagal menyimpan item."
+msgstr "Failed to save item."
+
+#: src/components/menu/cafe-profile-form.tsx
+msgid "Gagal menyimpan profil."
+msgstr "Failed to save profile."
+
+#: src/components/inventory/recipe-editor.tsx
+msgid "Gagal menyimpan resep."
+msgstr "Failed to save recipe."
+
+#: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "Ganti PIN"
+msgstr "Change PIN"
+
+#. placeholder {0}: resetting.name
+#: src/routes/_pos/settings/staff.tsx
+msgid "Ganti PIN untuk {0}"
+msgstr "Change PIN for {0}"
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Gram (g)"
+msgstr "Gram (g)"
+
+#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/route.tsx
+msgid "Grup Modifier"
+msgstr "Modifier Groups"
+
+#. placeholder {0}: props.attached.length
+#: src/components/menu/item-edit-form.tsx
+msgid "Grup modifier ({0})"
+msgstr "Modifier groups ({0})"
+
+#: src/routes/_pos/menu/modifiers.$groupId.tsx
+msgid "Grup modifier baru"
+msgstr "New modifier group"
+
+#: src/routes/_pos/menu/modifiers.$groupId.tsx
+msgid "Grup tidak ditemukan."
+msgstr "Group not found."
+
+#: src/routes/_public/privacy.tsx
+msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
+msgstr "This page will be filled in before the official launch. For questions about our privacy policy, contact the kodapos team."
+
+#: src/routes/_public/terms.tsx
+msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait syarat dan ketentuan, hubungi tim kodapos."
+msgstr "This page will be filled in before the official launch. For questions about our terms and conditions, contact the kodapos team."
+
+#: src/components/coming-soon.tsx
+msgid "Halaman ini sedang dalam pengembangan."
+msgstr "This page is under development."
+
+#: src/routes/__root.tsx
+msgid "Halaman tidak ditemukan"
+msgstr "Page not found"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Hapus"
+msgstr "Remove"
+
+#: src/components/inventory/recipe-editor.tsx
+#: src/components/sale/cart-line-row.tsx
+msgid "Hapus baris"
+msgstr "Remove row"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Harga"
+msgstr "Price"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Harga (Rp)"
+msgstr "Price (Rp)"
+
+#. placeholder {0}: formatIDR(item.item.priceIDR)
+#: src/components/sale/modifier-picker-dialog.tsx
+msgid "Harga dasar {0}"
+msgstr "Base price {0}"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Integrasi"
+msgstr "Integrations"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/inventory/index.tsx
+msgid "Inventaris"
+msgstr "Inventory"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Invoice"
+msgstr "Invoice"
+
+#: src/components/dashboard-activity.tsx
+msgid "Invoice #1045 marked paid"
+msgstr "Invoice #1045 marked paid"
+
+#: src/routes/_pos/menu/items.$itemId.tsx
+msgid "Item baru"
+msgstr "New item"
+
+#: src/components/app-shared.tsx
+msgid "Item Menu"
+msgstr "Menu Items"
+
+#: src/routes/_pos/menu/items.$itemId.tsx
+msgid "Item tidak ditemukan."
+msgstr "Item not found."
+
+#: src/routes/_pos/menu/items.$itemId.tsx
+#: src/routes/_pos/menu/route.tsx
+msgid "Items"
+msgstr "Items"
+
+#: src/components/dashboard-activity.tsx
+msgid "Jordan joined the team"
+msgstr "Jordan joined the team"
+
+#: src/components/inventory/recipe-editor.tsx
+#: src/components/sale/modifier-picker-dialog.tsx
+msgid "Jumlah"
+msgstr "Quantity"
+
+#. placeholder {0}: line.qty
+#: src/components/sale/cart-line-row.tsx
+msgid "Jumlah {0}"
+msgstr "Quantity {0}"
+
+#: src/routes/_pos/settings/route.tsx
+#~ msgid "Kafe"
+#~ msgstr "Cafe"
+
+#: src/routes/_pos/onboarding/profile.tsx
+#: src/routes/_pos/settings/profile.tsx
+msgid "Kafe tidak ditemukan."
+msgstr "Cafe not found."
+
+#: src/components/app-shared.tsx
+#: src/components/staff/staff-picker-card.tsx
+#: src/routes/_pos/onboarding/route.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "Kasir"
+msgstr "Cashier"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
+msgstr "Cashier must enter the owner PIN to void a transaction."
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "Kasir lain (opsional)"
+msgstr "Other cashiers (optional)"
+
+#: src/routes/_pos/shift/open.tsx
+msgid "Kasir tidak dikenal."
+msgstr "Unknown cashier."
+
+#. placeholder {0}: order.cashierName
+#: src/components/sale/receipt-preview.tsx
+msgid "Kasir: {0}"
+msgstr "Cashier: {0}"
+
+#: src/components/app-shared.tsx
+msgid "Katalog"
+msgstr "Catalog"
+
+#: src/components/app-shared.tsx
+#: src/components/menu/item-edit-form.tsx
+#: src/routes/_pos/menu/categories.tsx
+#: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/route.tsx
+msgid "Kategori"
+msgstr "Category"
+
+#: src/routes/_pos/menu/categories.tsx
+msgid "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
+msgstr "Categories appear as filters in the Items list and on the cashier screen."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Keamanan"
+msgstr "Security"
+
+#: src/routes/_public/privacy.tsx
+msgid "Kebijakan Privasi"
+msgstr "Privacy Policy"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Kecil"
+#~ msgstr "Small"
+
+#: src/components/nav-user.tsx
+msgid "Keluar"
+msgstr "Log out"
+
+#: src/routes/_public/privacy.tsx
+#: src/routes/_public/terms.tsx
+msgid "Kembali"
+msgstr "Back"
+
+#: src/routes/_pos/history.tsx
+msgid "Kembali ke /sale"
+msgstr "Back to /sale"
+
+#: src/routes/__root.tsx
+msgid "Kembali ke beranda"
+msgstr "Back to home"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Kembali ke layar PIN setelah periode tidak aktif."
+msgstr "Return to the PIN screen after a period of inactivity."
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Kembali ke menu"
+msgstr "Back to menu"
+
+#: src/components/sale/cash-payment-dialog.tsx
+#: src/components/sale/receipt-preview.tsx
+msgid "Kembalian"
+msgstr "Change"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Kepadatan tampilan"
+msgstr "Display density"
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Konfirmasi"
+msgstr "Confirm"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Konfirmasi sebelum kosongkan keranjang"
+msgstr "Confirm before clearing cart"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Koreksi"
+msgstr "Correction"
+
+#: src/components/sale/cart-pane.tsx
+#: src/components/sale/sale-screen.tsx
+msgid "Kosongkan"
+msgstr "Clear"
+
+#: src/components/sale/sale-screen.tsx
+msgid "Kosongkan keranjang?"
+msgstr "Clear cart?"
+
+#: src/lib/auth-validation.ts
+msgid "Kuat"
+msgstr "Strong"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Kunci otomatis saat tidak aktif"
+msgstr "Auto-lock when idle"
+
+#: src/components/sale/cart-line-row.tsx
+msgid "Kurangi jumlah"
+msgstr "Decrease quantity"
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Langkah singkat"
+msgstr "Quick steps"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Langsung cetak setelah pembayaran berhasil."
+msgstr "Automatically print after a successful payment."
+
+#: src/routes/_pos/onboarding/profile.tsx
+msgid "Lanjut →"
+msgstr "Continue →"
+
+#: src/routes/_pos/shift/open.tsx
+msgid "Lanjut ke Tutup Shift"
+msgstr "Continue to Close Shift"
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Lanjut: PIN & Kasir →"
+msgstr "Next: PIN & Cashier →"
+
+#: src/components/app-shared.tsx
+msgid "Laporan"
+msgstr "Reports"
+
+#: src/routes/_pos/reports/cashiers.tsx
+msgid "Laporan Kasir"
+msgstr "Cashier Report"
+
+#: src/routes/_pos/reports/payments.tsx
+msgid "Laporan Pembayaran"
+msgstr "Payment Report"
+
+#: src/routes/_pos/reports/sales.tsx
+msgid "Laporan Penjualan"
+msgstr "Sales Report"
+
+#: src/routes/_pos/reports/products.tsx
+msgid "Laporan Produk"
+msgstr "Product Report"
+
+#: src/components/dashboard-activity.tsx
+msgid "Latest updates in your workspace."
+msgstr "Latest updates in your workspace."
+
+#: src/lib/auth-validation.ts
+msgid "Lemah"
+msgstr "Weak"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Lepas"
+msgstr "Detach"
+
+#: src/routes/_pos/onboarding/profile.tsx
+msgid "Lewati semua"
+msgstr "Skip all"
+
+#: src/components/app-shared.tsx
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Limbah"
+msgstr "Waste"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/loyalty.tsx
+msgid "Loyalitas"
+msgstr "Loyalty"
 
 #: src/routes/_public/index.tsx
+#: src/routes/_public/signin.tsx
+#: src/routes/_public/signup.tsx
 msgid "Masuk"
-msgstr ""
+msgstr "Sign in"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Mata Uang"
+msgstr "Currency"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Mati"
+msgstr "Off"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Max"
+msgstr "Max"
+
+#: src/routes/_pos/shift/open.tsx
+msgid "Membuka…"
+msgstr "Opening…"
+
+#: src/components/sale/cash-payment-dialog.tsx
+#: src/routes/_public/signin.tsx
+#: src/routes/_public/signup.tsx
+msgid "Memproses…"
+msgstr "Processing…"
+
+#: src/components/sale/sale-screen.tsx
+msgid "Memuat menu…"
+msgstr "Loading menu…"
+
+#: src/routes/_pos/history.tsx
+msgid "Memuat riwayat…"
+msgstr "Loading history…"
+
+#: src/routes/_pos.tsx
+msgid "Memuat sesi…"
+msgstr "Loading session…"
+
+#: src/components/shift/shift-gate.tsx
+msgid "Memuat shift…"
+msgstr "Loading shift…"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Memuat struk…"
+msgstr "Loading receipt…"
+
+#: src/components/inventory/recipe-editor.tsx
+#: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/menu/category-table.tsx
+#: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/items.$itemId.tsx
+#: src/routes/_pos/menu/modifiers.$groupId.tsx
+#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/onboarding/profile.tsx
+#: src/routes/_pos/pin.tsx
+#: src/routes/_pos/settings/profile.tsx
+#: src/routes/_pos/settings/staff.tsx
+#: src/routes/_pos/shift/close.tsx
+#: src/routes/_pos/shift/open.tsx
+msgid "Memuat…"
+msgstr "Loading…"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Mengikuti sistem."
+msgstr "Follows system."
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/menu/items.$itemId.tsx
+#: src/routes/_pos/onboarding/route.tsx
+msgid "Menu"
+msgstr "Menu"
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Menutup…"
+msgstr "Closing…"
+
+#: src/components/inventory/ingredient-form.tsx
+#: src/components/inventory/recipe-editor.tsx
+#: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/menu/cafe-profile-form.tsx
+#: src/components/menu/item-edit-form.tsx
+#: src/components/menu/modifier-group-form.tsx
+msgid "Menyimpan…"
+msgstr "Saving…"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Metode default"
+msgstr "Default method"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Metode pembayaran yang dipilih saat checkout."
+msgstr "Payment method selected by default at checkout."
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Mililiter (ml)"
+msgstr "Milliliter (ml)"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Min"
+msgstr "Min"
+
+#: src/routes/_public/signup.tsx
+msgid "Minimal 8 karakter"
+msgstr "Minimum 8 characters"
+
+#: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "mis. Andi"
+msgstr "e.g. Alex"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "mis. INV-"
+#~ msgstr "e.g. INV-"
+
+#: src/components/menu/category-table.tsx
+msgid "mis. Kopi"
+msgstr "e.g. Coffee"
+
+#: src/routes/_public/signup.tsx
+msgid "mis. Kopi Senja"
+msgstr "e.g. Sunrise Cafe"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "mis. Terima kasih telah berbelanja"
+#~ msgstr "e.g. Thank you for shopping with us"
+
+#: src/routes/_public/signup.tsx
+msgid "mis. Warren"
+msgstr "e.g. Warren"
+
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Modal awal"
+msgstr "Opening cash"
+
+#: src/routes/_pos/shift/open.tsx
+msgid "Modal awal (Rp)"
+msgstr "Opening cash (Rp)"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Mode gelap"
+msgstr "Dark mode"
+
+#: src/components/app-shared.tsx
+msgid "Modifier"
+msgstr "Modifiers"
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Mulai dengan kategori →"
+msgstr "Start with categories →"
+
+#: src/components/menu/category-table.tsx
+#: src/components/menu/item-edit-form.tsx
+msgid "Naikkan urutan"
+msgstr "Move up"
+
+#: src/components/inventory/ingredient-form.tsx
+#: src/components/menu/category-table.tsx
+#: src/components/menu/item-edit-form.tsx
+#: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "Nama"
+msgstr "Name"
+
+#: src/routes/_public/signup.tsx
+msgid "Nama Anda"
+msgstr "Your name"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Nama grup"
+msgstr "Group name"
+
+#: src/components/menu/cafe-profile-form.tsx
+#: src/routes/_public/signup.tsx
+msgid "Nama kafe"
+msgstr "Cafe name"
+
+#: src/lib/auth-validation.ts
+msgid "Nama kafe maksimal 80 karakter."
+msgstr "Cafe name must be 80 characters or fewer."
+
+#: src/lib/auth-validation.ts
+msgid "Nama kafe wajib diisi."
+msgstr "Cafe name is required."
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Nama kasir baru"
+msgstr "New cashier name"
+
+#: src/components/menu/category-table.tsx
+msgid "Nama kategori baru"
+msgstr "New category name"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Nama opsi (mis. Large)"
+msgstr "Option name (e.g. Large)"
+
+#: src/lib/auth-validation.ts
+msgid "Nama wajib diisi."
+msgstr "Name is required."
+
+#: src/components/latest-change.tsx
+msgid "Navigasi sidebar & dasbor."
+msgstr "Sidebar navigation & dashboard."
+
+#: src/components/net-revenue-chart.tsx
+msgid "Net revenue"
+msgstr "Net revenue"
+
+#: src/components/stats.tsx
+msgid "New signups"
+msgstr "New signups"
+
+#: src/components/menu/cafe-profile-form.tsx
+msgid "Nomor HP"
+msgstr "Phone number"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Normal"
+#~ msgstr "Normal"
+
+#: src/components/billing-health.tsx
+msgid "Nothing urgent needs your attention."
+msgstr "Nothing urgent needs your attention."
+
+#: src/components/app-header.tsx
+#: src/routes/_pos/settings/general.tsx
+msgid "Notifikasi"
+msgstr "Notifications"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Nyaman"
+msgstr "Comfortable"
+
+#: src/components/channel-sales-chart.tsx
+msgid "Online"
+msgstr "Online"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Open amounts and payment status."
+msgstr "Open amounts and payment status."
+
+#: src/components/app-shared.tsx
+msgid "Operasional"
+msgstr "Operations"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "opsi"
+msgstr "options"
+
+#. placeholder {0}: options.length
+#: src/components/menu/modifier-group-form.tsx
+msgid "Opsi ({0})"
+msgstr "Options ({0})"
+
+#: src/components/menu/item-edit-form.tsx
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "opsional"
+msgstr "optional"
+
+#. placeholder {0}: ag.group.maxSelect
+#: src/components/sale/modifier-picker-dialog.tsx
+msgid "Opsional (maks {0})"
+msgstr "Optional (max {0})"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/settings/tax.tsx
+msgid "Pajak & Pembayaran"
+msgstr "Tax & Payment"
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Pas"
+msgstr "Exact"
+
+#: src/lib/auth-validation.ts
+msgid "Password minimal 8 karakter."
+msgstr "Password must be at least 8 characters."
+
+#: src/lib/auth-validation.ts
+msgid "Password wajib diisi."
+msgstr "Password is required."
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/customers.tsx
+msgid "Pelanggan"
+msgstr "Customers"
+
+#: src/components/latest-change.tsx
+msgid "PEMBARUAN"
+msgstr "UPDATE"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/onboarding/route.tsx
+#: src/routes/_pos/settings/general.tsx
+msgid "Pembayaran"
+msgstr "Payment"
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Pembayaran Tunai"
+msgstr "Cash Payment"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Pembelian"
+msgstr "Purchases"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Pembulatan"
+msgstr "Rounding"
+
+#: src/components/nav-user.tsx
+#: src/components/staff/staff-picker-card.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "Pemilik"
+msgstr "Owner"
+
+#: src/components/app-shared.tsx
+#: src/components/nav-user.tsx
+msgid "Pengaturan"
+msgstr "Settings"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Pengiriman masuk"
+msgstr "Incoming delivery"
+
+#: src/components/app-shared.tsx
+msgid "Penjualan"
+msgstr "Sales"
+
+#: src/components/app-shared.tsx
+msgid "Penyesuaian"
+msgstr "Adjustments"
+
+#: src/routes/_pos/inventory/adjustments.tsx
+msgid "Penyesuaian Stok"
+msgstr "Stock Adjustments"
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Peran"
+msgstr "Role"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Peringatan stok rendah"
+msgstr "Low-stock alerts"
+
+#: src/components/menu/cafe-profile-form.tsx
+msgid "Persentase PPN"
+msgstr "VAT percentage"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Pesanan"
+msgstr "Orders"
+
+#. placeholder {0}: cart.lines.length
+#: src/components/sale/cart-pane.tsx
+msgid "Pesanan ({0})"
+msgstr "Order ({0})"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Pesanan tidak ditemukan."
+msgstr "Order not found."
+
+#: src/components/inventory/ingredient-picker.tsx
+msgid "Pilih bahan…"
+msgstr "Select ingredient…"
+
+#: src/routes/_pos/settings/language.tsx
+#~ msgid "Pilih bahasa tampilan kasir."
+#~ msgstr "Select the cashier display language."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Pilih kategori"
+msgstr "Select category"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Pilih kategori terlebih dahulu."
+msgstr "Select a category first."
+
+#: src/routes/_pos/pin.tsx
+msgid "Pilih nama Anda dan masukkan PIN 4 digit."
+msgstr "Select your name and enter your 4-digit PIN."
+
+#: src/routes/_pos/shift/open.tsx
+msgid "Pilih ulang"
+msgstr "Reselect"
+
+#: src/components/sale/item-card.tsx
+msgid "Pilihan"
+msgstr "Options"
+
+#: src/components/staff/pin-entry.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "PIN"
+msgstr "PIN"
+
+#: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "PIN 4 digit"
+msgstr "4-digit PIN"
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "PIN Pemilik"
+msgstr "Owner PIN"
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "PIN Pemilik & Kasir"
+msgstr "Owner & Cashier PIN"
+
+#: src/routes/_pos/pin.tsx
+msgid "PIN salah."
+msgstr "Incorrect PIN."
+
+#. placeholder {0}: picking?.name
+#: src/routes/_pos/pin.tsx
+msgid "PIN untuk {0}"
+msgstr "PIN for {0}"
+
+#: src/components/inventory/recipe-editor.tsx
+msgid "porsi"
+msgstr "serving"
+
+#. placeholder {0}: order.taxRatePct
+#: src/components/sale/receipt-preview.tsx
+msgid "PPN {0}%"
+msgstr "VAT {0}%"
+
+#: src/components/sale/cart-pane.tsx
+msgid "PPN {taxRatePct}%"
+msgstr "VAT {taxRatePct}%"
+
+#: src/routes/_pos/settings/route.tsx
+#~ msgid "Preferensi"
+#~ msgstr "Preferences"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Preferensi tampilan dan regional aplikasi."
+#~ msgstr "App display and regional preferences."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Prefiks yang ditambahkan di depan nomor pesanan."
+msgstr "Prefix added in front of the order number."
+
+#: src/components/app-shared.tsx
+msgid "Produk"
+msgstr "Products"
+
+#: src/components/app-shared.tsx
+msgid "Profil"
+msgstr "Profile"
+
+#: src/routes/_pos/onboarding/profile.tsx
+#: src/routes/_pos/settings/profile.tsx
+msgid "Profil kafe"
+msgstr "Cafe profile"
+
+#: src/routes/_pos/onboarding/route.tsx
+msgid "Profil Kafe"
+msgstr "Cafe Profile"
+
+#: src/components/app-shared.tsx
+msgid "Promo"
+msgstr "Promotions"
+
+#: src/routes/_pos/promos.tsx
+msgid "Promo & Diskon"
+msgstr "Promos & Discounts"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/help.tsx
+msgid "Pusat Bantuan"
+msgstr "Help Center"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Putar suara konfirmasi setelah pembayaran selesai."
+msgstr "Play a confirmation sound after a successful sale."
+
+#: src/components/dashboard-invoices.tsx
+msgid "Recent invoices"
+msgstr "Recent invoices"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Recent invoices with customer, amount, and status."
+msgstr "Recent invoices with customer, amount, and status."
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Regional"
+#~ msgstr "Regional"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Rendah"
+msgstr "Low"
+
+#: src/components/app-shared.tsx
+#: src/components/inventory/recipe-editor.tsx
+#: src/routes/_pos/recipes.tsx
+msgid "Resep"
+msgstr "Recipes"
+
+#: src/components/channel-sales-chart.tsx
+msgid "Retail"
+msgstr "Retail"
+
+#: src/components/stats.tsx
+msgid "Revenue"
+msgstr "Revenue"
+
+#: src/components/billing-health.tsx
+msgid "Review open invoices"
+msgstr "Review open invoices"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Ringkas"
+msgstr "Compact"
+
+#: src/components/app-shared.tsx
+msgid "Ringkasan"
+msgstr "Summary"
+
+#: src/routes/_pos/reports/index.tsx
+msgid "Ringkasan Laporan"
+msgstr "Report Summary"
+
+#: src/components/app-shared.tsx
+msgid "Riwayat"
+msgstr "History"
+
+#: src/routes/_pos/history.tsx
+msgid "Riwayat shift ini"
+msgstr "This shift's history"
+
+#: src/components/net-revenue-chart.tsx
+msgid "Sales"
+msgstr "Sales"
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Satuan"
+msgstr "Unit"
+
+#: src/routes/_public/signup.tsx
+msgid "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
+msgstr "I agree to the <0>Terms of Service</0> and <1>Privacy Policy</1>."
+
+#. placeholder {0}: me.name
+#: src/routes/_pos/shift/open.tsx
+msgid "Sebagai: {0}"
+msgstr "As: {0}"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
+#~ msgstr "Some preferences apply after reloading the app."
+
+#: src/lib/auth-validation.ts
+msgid "Sedang"
+msgstr "Medium"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Segera"
+msgstr "Soon"
+
+#: src/components/latest-change.tsx
+msgid "Selengkapnya"
+msgstr "Learn more"
+
+#: src/components/sale/receipt-preview.tsx
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "Selesai"
+msgstr "Done"
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Selesaikan nanti"
+msgstr "Finish later"
+
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Selisih"
+msgstr "Difference"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Selisih harga"
+msgstr "Price difference"
+
+#: src/routes/_public/signin.tsx
+#: src/routes/_public/signup.tsx
+msgid "Sembunyikan password"
+msgstr "Hide password"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Semua"
+msgstr "All"
+
+#. placeholder {0}: allItems?.length ?? 0
+#. placeholder {0}: items.length
+#: src/components/sale/menu-pane.tsx
+#: src/routes/_pos/menu/index.tsx
+msgid "Semua ({0})"
+msgstr "All ({0})"
+
+#: src/components/sale/sale-screen.tsx
+msgid "Semua item akan dihapus dari pesanan ini."
+msgstr "All items will be removed from this order."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Semua transaksi dalam Rupiah."
+msgstr "All transactions are in Rupiah."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Sesuaikan dengan lebar gulungan printer Anda."
+msgstr "Match the roll width of your printer."
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Set PIN"
+msgstr "Set PIN"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/shifts.tsx
+msgid "Shift"
+msgstr "Shift"
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Shift ditutup"
+msgstr "Shift closed"
+
+#: src/routes/_pos/pin.tsx
+msgid "Siapa yang bertugas?"
+msgstr "Who's on duty?"
+
+#: src/components/inventory/ingredient-form.tsx
+#: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/menu/category-table.tsx
+#: src/components/menu/item-edit-form.tsx
+#: src/routes/_pos/settings/profile.tsx
+#: src/routes/_pos/settings/staff.tsx
+msgid "Simpan"
+msgstr "Save"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Simpan grup"
+msgstr "Save group"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Simpan item dulu untuk memasang grup modifier."
+msgstr "Save the item first to attach modifier groups."
+
+#: src/components/inventory/recipe-editor.tsx
+msgid "Simpan resep"
+msgstr "Save recipe"
+
+#: src/components/app-shared.tsx
+msgid "Staf"
+msgstr "Staff"
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Staff"
+msgstr "Staff"
+
+#: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/menu/index.tsx
+msgid "Status"
+msgstr "Status"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/inventory/index.tsx
+msgid "Stok"
+msgstr "Stock"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Stok baru"
+msgstr "New stock"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Stok opname"
+msgstr "Stock count"
+
+#: src/components/sale/item-card.tsx
+#: src/routes/_pos/inventory/index.tsx
+msgid "Stok rendah"
+msgstr "Low stock"
+
+#. placeholder {0}: lowStockIngredientNames.join(', ')
+#: src/components/sale/item-card.tsx
+msgid "Stok rendah: {0}"
+msgstr "Low stock: {0}"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Stok saat ini:"
+msgstr "Current stock:"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Struk & Cetak"
+msgstr "Receipt & Printing"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/settings/receipt.tsx
+msgid "Struk & Printer"
+msgstr "Receipt & Printer"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Suara saat transaksi berhasil"
+msgstr "Sound on successful sale"
+
+#: src/components/sale/cart-pane.tsx
+#: src/components/sale/receipt-preview.tsx
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#: src/routes/_pos/shift/open.tsx
+msgid "Sudah ada shift terbuka"
+msgstr "A shift is already open"
+
+#: src/routes/_public/signup.tsx
+msgid "Sudah punya akun?"
+msgstr "Already have an account?"
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Susun menu kafe"
+msgstr "Build your cafe menu"
+
+#: src/routes/_public/terms.tsx
+msgid "Syarat Layanan"
+msgstr "Terms of Service"
+
+#: src/components/inventory/ingredient-form.tsx
+#: src/components/inventory/recipe-editor.tsx
+msgid "Tambah bahan"
+msgstr "Add ingredient"
+
+#: src/components/sale/cart-line-row.tsx
+msgid "Tambah jumlah"
+msgstr "Increase quantity"
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Tambah kasir, ganti PIN, atau arsipkan staf."
+msgstr "Add cashiers, change PINs, or archive staff."
+
+#: src/components/sale/modifier-picker-dialog.tsx
+msgid "Tambah ke pesanan"
+msgstr "Add to order"
+
+#: src/routes/_pos/onboarding/menu.tsx
+msgid "Tambahkan beberapa item beserta harganya."
+msgstr "Add some items along with their prices."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilan"
+msgstr "Appearance"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilkan dialog konfirmasi sebelum keranjang dikosongkan."
+msgstr "Show a confirmation dialog before clearing the cart."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilkan logo di struk"
+msgstr "Show logo on receipt"
+
+#: src/routes/_public/signin.tsx
+#: src/routes/_public/signup.tsx
+msgid "Tampilkan password"
+msgstr "Show password"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilkan peringatan saat stok bahan mendekati ambang batas."
+msgstr "Show a warning when ingredient stock approaches the threshold."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tampilkan tombol nominal saat pembayaran tunai."
+msgstr "Show quick-amount buttons during cash payment."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tanpa pembulatan"
+msgstr "No rounding"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Teks yang dicetak di bagian bawah struk."
+msgstr "Text printed at the bottom of the receipt."
+
+#: src/components/inventory/recipe-editor.tsx
+msgid "Tersimpan."
+msgstr "Saved."
+
+#: src/components/dashboard-activity.tsx
+msgid "This morning"
+msgstr "This morning"
+
+#: src/components/inventory/ingredient-picker.tsx
+msgid "Tidak ada bahan cocok."
+msgstr "No matching ingredients."
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Tidak ada bahan dengan stok rendah."
+msgstr "No ingredients with low stock."
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Tidak ada bahan diarsipkan."
+msgstr "No archived ingredients."
+
+#: src/components/sale/menu-pane.tsx
+msgid "Tidak ada item di kategori ini."
+msgstr "No items in this category."
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Tidak ada item."
+msgstr "No items."
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Tidak ada shift terbuka."
+msgstr "No open shift."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Tombol nominal cepat"
+msgstr "Quick cash buttons"
+
+#: src/components/sale/cart-pane.tsx
+#: src/components/sale/receipt-preview.tsx
+msgid "Total"
+msgstr "Total"
+
+#. placeholder {0}: formatIDR(qty * unitPriceIDR)
+#: src/components/sale/modifier-picker-dialog.tsx
+msgid "Total <0>{0}</0>"
+msgstr "Total <0>{0}</0>"
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Total tagihan"
+msgstr "Total bill"
+
+#: src/components/sale/receipt-preview.tsx
+#: src/routes/_pos/history.tsx
+#: src/routes/_pos/settings/general.tsx
+msgid "Tunai"
+msgstr "Cash"
+
+#: src/components/menu/category-table.tsx
+#: src/components/menu/item-edit-form.tsx
+msgid "Turunkan urutan"
+msgstr "Move down"
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Tutup Shift"
+msgstr "Close Shift"
+
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Uang seharusnya"
+msgstr "Expected cash"
+
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Uang terhitung"
+msgstr "Counted cash"
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Uang terhitung (Rp)"
+msgstr "Counted cash (Rp)"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Ubah"
+msgstr "Edit"
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Ubah bahan"
+msgstr "Edit ingredient"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Ubah di Profil kafe."
+#~ msgstr "Change in Cafe profile."
+
+#: src/routes/_pos/settings/profile.tsx
+msgid "Ubah informasi dasar kafe Anda."
+msgstr "Update your cafe's basic information."
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Ukuran font dasar antarmuka."
+#~ msgstr "Base font size for the interface."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Ukuran kertas"
+msgstr "Paper size"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Ukuran teks"
+#~ msgstr "Text size"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/settings/general.tsx
+msgid "Umum"
+msgstr "General"
+
+#: src/routes/__root.tsx
+msgid "URL yang kamu buka tidak ada di kodapos."
+msgstr "The URL you opened doesn't exist in kodapos."
+
+#: src/components/menu/category-table.tsx
+msgid "Urutan"
+msgstr "Order"
+
+#: src/components/dashboard-invoices.tsx
+msgid "View All"
+msgstr "View All"
+
+#: src/components/stats.tsx
+msgid "vs last week"
+msgstr "vs last week"
+
+#: src/components/menu/item-edit-form.tsx
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "wajib"
+msgstr "required"
+
+#. placeholder {0}: ag.group.minSelect
+#. placeholder {1}: ag.group.maxSelect > ag.group.minSelect ? `-${ag.group.maxSelect}` : ''
+#: src/components/sale/modifier-picker-dialog.tsx
+msgid "Wajib (pilih {0}{1})"
+msgstr "Required (select {0}{1})"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Wajib PIN untuk void/refund"
+msgstr "Require PIN for void/refund"
+
+#: src/components/menu/modifier-group-form.tsx
+msgid "Wajib?"
+msgstr "Required?"
+
+#: src/components/dashboard-activity.tsx
+msgid "Weekly summary exported"
+msgstr "Weekly summary exported"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "WIB — Jakarta"
+#~ msgstr "WIB — Jakarta"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "WIB (Jakarta)"
+msgstr "WIB (Jakarta)"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "WIT — Jayapura"
+#~ msgstr "WIT — Jayapura"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "WIT (Jayapura)"
+msgstr "WIT (Jayapura)"
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "WITA — Makassar"
+#~ msgstr "WITA — Makassar"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "WITA (Makassar)"
+msgstr "WITA (Makassar)"
+
+#: src/components/dashboard-activity.tsx
+msgid "Yesterday"
+msgstr "Yesterday"
+
+#: src/components/billing-health.tsx
+msgid "You're caught up."
+msgstr "You're caught up."
+
+#: src/components/menu/cafe-profile-form.tsx
+msgid "Zona waktu"
+msgstr "Time zone"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Zona Waktu"
+msgstr "Timezone"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Zona waktu untuk jam dan laporan."
+msgstr "Timezone for times and reports."
