@@ -2,12 +2,15 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { type FormEvent, useState } from 'react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 
 export function CategoryTable() {
+  const { t } = useLingui();
   const categories = useQuery(api.menu.categories.list, {});
   const createCategory = useMutation(api.menu.categories.create);
   const updateCategory = useMutation(api.menu.categories.update);
@@ -27,26 +30,26 @@ export function CategoryTable() {
       await createCategory({ name: String(fd.get('name') ?? '') });
       form.reset();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal membuat kategori.');
+      setError(err instanceof Error ? err.message : t`Gagal membuat kategori.`);
     } finally {
       setCreating(false);
     }
   }
 
-  if (categories === undefined) return <p className="text-muted-foreground">Memuat…</p>;
+  if (categories === undefined) return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
 
   return (
     <div className="space-y-4">
       <form onSubmit={handleCreate} className="flex gap-2 items-end max-w-md">
         <div className="flex-1">
           <label htmlFor="newName" className="text-xs text-muted-foreground">
-            Nama kategori baru
+            <Trans>Nama kategori baru</Trans>
           </label>
-          <Input id="newName" name="name" placeholder="mis. Kopi" required maxLength={60} />
+          <Input id="newName" name="name" placeholder={t`mis. Kopi`} required maxLength={60} />
         </div>
         <Button type="submit" disabled={creating}>
           {creating && <Spinner data-icon="inline-start" />}
-          {creating ? '…' : '+ Tambah'}
+          {creating ? '…' : <Trans>+ Tambah</Trans>}
         </Button>
       </form>
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -54,8 +57,8 @@ export function CategoryTable() {
         <thead>
           <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
             <th className="py-2 px-2 w-12">#</th>
-            <th className="py-2 px-2">Nama</th>
-            <th className="py-2 px-2 w-32 text-right">Urutan</th>
+            <th className="py-2 px-2"><Trans>Nama</Trans></th>
+            <th className="py-2 px-2 w-32 text-right"><Trans>Urutan</Trans></th>
             <th className="py-2 px-2 w-24"></th>
           </tr>
         </thead>
@@ -63,7 +66,7 @@ export function CategoryTable() {
           {categories.length === 0 && (
             <tr>
               <td colSpan={4} className="py-6 text-center text-muted-foreground">
-                Belum ada kategori.
+                <Trans>Belum ada kategori.</Trans>
               </td>
             </tr>
           )}
@@ -96,7 +99,7 @@ export function CategoryTable() {
                   className="px-1 disabled:opacity-30"
                   disabled={i === 0}
                   onClick={() => reorderCategory({ id: c._id, direction: 'up' })}
-                  aria-label="Naikkan urutan"
+                  aria-label={t`Naikkan urutan`}
                 >
                   ▲
                 </button>
@@ -105,7 +108,7 @@ export function CategoryTable() {
                   className="px-1 disabled:opacity-30"
                   disabled={i === categories.length - 1}
                   onClick={() => reorderCategory({ id: c._id, direction: 'down' })}
-                  aria-label="Turunkan urutan"
+                  aria-label={t`Turunkan urutan`}
                 >
                   ▼
                 </button>
@@ -117,7 +120,7 @@ export function CategoryTable() {
                   onConfirm={() => archiveCategory({ id: c._id })}
                   trigger={
                     <button type="button" className="text-xs text-destructive hover:underline">
-                      Arsipkan
+                      <Trans>Arsipkan</Trans>
                     </button>
                   }
                 />
@@ -162,7 +165,7 @@ function InlineEdit({
         maxLength={60}
       />
       <Button type="submit" size="sm" disabled={saving}>
-        Simpan
+        <Trans>Simpan</Trans>
       </Button>
     </form>
   );

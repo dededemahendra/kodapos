@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react/macro';
+
 export interface StaffPickerCardProps {
   name: string;
   role: 'owner' | 'cashier';
@@ -6,6 +8,7 @@ export interface StaffPickerCardProps {
 }
 
 export function StaffPickerCard({ name, role, hasPin, onClick }: StaffPickerCardProps) {
+  const { t } = useLingui();
   const initials = name
     .split(/\s+/)
     .filter(Boolean)
@@ -23,8 +26,8 @@ export function StaffPickerCard({ name, role, hasPin, onClick }: StaffPickerCard
       </span>
       <span className="text-sm font-medium">{name}</span>
       <span className="text-xs text-muted-foreground">
-        {role === 'owner' ? 'Pemilik' : 'Kasir'}
-        {!hasPin && ' · belum ada PIN'}
+        {role === 'owner' ? t`Pemilik` : t`Kasir`}
+        {!hasPin && t` · belum ada PIN`}
       </span>
     </button>
   );

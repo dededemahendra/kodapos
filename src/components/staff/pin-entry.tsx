@@ -1,3 +1,4 @@
+import { useLingui } from '@lingui/react/macro';
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 export interface PinEntryProps {
@@ -9,6 +10,7 @@ export interface PinEntryProps {
 }
 
 export function PinEntry({ digits = 4, onComplete, errorMessage }: PinEntryProps) {
+  const { t } = useLingui();
   const [values, setValues] = useState<string[]>(() => Array(digits).fill(''));
   const refs = useRef<Array<HTMLInputElement | null>>([]);
 
@@ -44,7 +46,7 @@ export function PinEntry({ digits = 4, onComplete, errorMessage }: PinEntryProps
   return (
     <div className="space-y-2">
       {/* biome-ignore lint/a11y/useSemanticElements: <fieldset> would constrain layout; group role with aria-label is sufficient */}
-      <div className="flex gap-2 justify-center" role="group" aria-label="PIN">
+      <div className="flex gap-2 justify-center" role="group" aria-label={t`PIN`}>
         {values.map((v, idx) => (
           <input
             // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length array of digit cells
@@ -60,7 +62,7 @@ export function PinEntry({ digits = 4, onComplete, errorMessage }: PinEntryProps
             onChange={(e) => handleChange(idx, e.target.value)}
             onKeyDown={(e) => handleKeyDown(idx, e)}
             className="size-14 text-center text-2xl font-semibold rounded-md border border-border bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label={`Digit ${idx + 1}`}
+            aria-label={t`Digit ${idx + 1}`}
           />
         ))}
       </div>

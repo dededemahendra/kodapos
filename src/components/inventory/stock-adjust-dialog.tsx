@@ -1,6 +1,7 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { type FormEvent, useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import {
@@ -32,11 +33,20 @@ export function StockAdjustDialog({
   ingredientId: Id<'ingredients'> | null;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useLingui();
   const ingredient = useQuery(
     api.ingredients.get,
     ingredientId ? { id: ingredientId } : 'skip'
   );
   const adjustStock = useMutation(api.ingredients.adjustStock);
+
+  // Reason labels keyed by the raw DB value so the value prop stays untranslated.
+  const reasonLabels: Record<typeof REASONS[number], string> = {
+    'Pengiriman masuk': t`Pengiriman masuk`,
+    'Stok opname': t`Stok opname`,
+    'Limbah': t`Limbah`,
+    'Koreksi': t`Koreksi`,
+  };
 
   const [newQty, setNewQty] = useState('');
   const [reason, setReason] = useState<string>(REASONS[0]);
@@ -67,7 +77,7 @@ export function StockAdjustDialog({
       });
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal mencatat stok.');
+      setError(err instanceof Error ? err.message : t`Gagal mencatat stok.`);
     } finally {
       setSubmitting(false);
     }
@@ -77,7 +87,7 @@ export function StockAdjustDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
-          <p className="text-muted-foreground">Memuat…</p>
+          <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>
         </DialogContent>
       </Dialog>
     );
@@ -87,19 +97,21 @@ export function StockAdjustDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Catat stok: {ingredient?.name}</DialogTitle>
+          <DialogTitle>
+            <Trans>Catat stok:</Trans> {ingredient?.name}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <div className="rounded-md bg-muted px-3 py-2 text-sm">
-              Stok saat ini:{' '}
+              <Trans>Stok saat ini:</Trans>{' '}
               <span className="font-semibold tabular-nums">
                 {ingredient?.currentStockQty} {ingredient?.canonicalUnit}
               </span>
             </div>
             <Field>
               <FieldLabel htmlFor="adj-qty">
-                Stok baru ({ingredient?.canonicalUnit})
+                <Trans>Stok baru</Trans> ({ingredient?.canonicalUnit})
               </FieldLabel>
               <Input
                 id="adj-qty"
@@ -113,7 +125,7 @@ export function StockAdjustDialog({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="adj-reason">Alasan</FieldLabel>
+              <FieldLabel htmlFor="adj-reason"><Trans>Alasan</Trans></FieldLabel>
               <Select value={reason} onValueChange={setReason}>
                 <SelectTrigger id="adj-reason">
                   <SelectValue />
@@ -121,14 +133,14 @@ export function StockAdjustDialog({
                 <SelectContent>
                   {REASONS.map((r) => (
                     <SelectItem key={r} value={r}>
-                      {r}
+                      {reasonLabels[r]}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
             <Field>
-              <FieldLabel htmlFor="adj-note">Catatan (opsional)</FieldLabel>
+              <FieldLabel htmlFor="adj-note"><Trans>Catatan (opsional)</Trans></FieldLabel>
               <Input
                 id="adj-note"
                 value={note}
@@ -140,11 +152,11 @@ export function StockAdjustDialog({
           </FieldGroup>
           <DialogFooter className="mt-4">
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              Batal
+              <Trans>Batal</Trans>
             </Button>
             <Button type="submit" disabled={submitting}>
               {submitting && <Spinner data-icon="inline-start" />}
-              {submitting ? 'Menyimpan…' : 'Simpan'}
+              {submitting ? <Trans>Menyimpan…</Trans> : <Trans>Simpan</Trans>}
             </Button>
           </DialogFooter>
         </form>

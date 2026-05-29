@@ -2,6 +2,8 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
@@ -42,6 +44,7 @@ export function CashPaymentDialog({
   cashierId: Id<'cafeStaff'>;
   onPaid: (orderId: Id<'orders'>, totalIDR: number, changeIDR: number) => void;
 }) {
+  const { t } = useLingui();
   const createCashSale = useMutation(api.orders.createCashSale);
   const [tendered, setTendered] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
@@ -85,7 +88,7 @@ export function CashPaymentDialog({
       onPaid(result.orderId, result.totalIDR, result.changeIDR);
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memproses pembayaran.');
+      setError(err instanceof Error ? err.message : t`Gagal memproses pembayaran.`);
     } finally {
       setSubmitting(false);
     }
@@ -103,11 +106,15 @@ export function CashPaymentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Pembayaran Tunai</DialogTitle>
+          <DialogTitle>
+            <Trans>Pembayaran Tunai</Trans>
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="rounded-md bg-muted px-3 py-2 text-center">
-            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Total tagihan</div>
+            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              <Trans>Total tagihan</Trans>
+            </div>
             <div className="text-2xl font-semibold text-primary tabular-nums">
               {formatIDR(totalIDR)}
             </div>
@@ -123,7 +130,9 @@ export function CashPaymentDialog({
             {tenderedNum > 0 ? tenderedNum.toLocaleString('id-ID') : '0'}
           </div>
           <div className="flex justify-between text-xs px-1">
-            <span className="text-muted-foreground">Kembalian</span>
+            <span className="text-muted-foreground">
+              <Trans>Kembalian</Trans>
+            </span>
             <span className="font-semibold tabular-nums">
               {changeNum >= 0 ? formatIDR(changeNum) : '—'}
             </span>
@@ -137,7 +146,7 @@ export function CashPaymentDialog({
                 onClick={() => setTendered(String(d))}
                 className="text-xs px-2 py-2 rounded-md border border-border bg-background hover:bg-muted"
               >
-                {d === totalIDR ? 'Pas' : `${(d / 1000).toLocaleString('id-ID')}k`}
+                {d === totalIDR ? <Trans>Pas</Trans> : `${(d / 1000).toLocaleString('id-ID')}k`}
               </button>
             ))}
           </div>
@@ -165,7 +174,7 @@ export function CashPaymentDialog({
             size="lg"
           >
             {submitting ? <Spinner data-icon="inline-start" /> : null}
-            {submitting ? 'Memproses…' : 'Konfirmasi'}
+            {submitting ? <Trans>Memproses…</Trans> : <Trans>Konfirmasi</Trans>}
           </Button>
         </div>
       </DialogContent>

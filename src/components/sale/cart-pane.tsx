@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { formatIDR } from '~/lib/money';
 import type { CartAction, CartState } from './cart-reducer';
@@ -18,6 +20,7 @@ export function CartPane({
   onBayar: () => void;
   onKosongkan: () => void;
 }) {
+  const { t } = useLingui();
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
   const tax = taxEnabled ? Math.round((subtotal * taxRatePct) / 100) : 0;
   const total = subtotal + tax;
@@ -26,7 +29,9 @@ export function CartPane({
   return (
     <aside className="border-l border-border flex flex-col h-full">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-        <h2 className="text-sm font-semibold">Pesanan ({cart.lines.length})</h2>
+        <h2 className="text-sm font-semibold">
+          <Trans>Pesanan ({cart.lines.length})</Trans>
+        </h2>
         <Button
           type="button"
           size="sm"
@@ -35,12 +40,14 @@ export function CartPane({
           disabled={empty}
           className="text-muted-foreground"
         >
-          Kosongkan
+          <Trans>Kosongkan</Trans>
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto px-3">
         {empty ? (
-          <p className="text-muted-foreground text-sm mt-6 text-center">Belum ada item.</p>
+          <p className="text-muted-foreground text-sm mt-6 text-center">
+            <Trans>Belum ada item.</Trans>
+          </p>
         ) : (
           <ul>
             {cart.lines.map((line) => (
@@ -56,9 +63,9 @@ export function CartPane({
         )}
       </div>
       <div className="border-t border-border px-3 py-3 space-y-1 text-sm">
-        <Row label="Subtotal" value={formatIDR(subtotal)} />
-        {taxEnabled ? <Row label={`PPN ${taxRatePct}%`} value={formatIDR(tax)} /> : null}
-        <Row label="Total" value={formatIDR(total)} bold large />
+        <Row label={t`Subtotal`} value={formatIDR(subtotal)} />
+        {taxEnabled ? <Row label={t`PPN ${taxRatePct}%`} value={formatIDR(tax)} /> : null}
+        <Row label={t`Total`} value={formatIDR(total)} bold large />
         <Button
           type="button"
           onClick={onBayar}
@@ -66,7 +73,7 @@ export function CartPane({
           className="w-full mt-2"
           size="lg"
         >
-          Bayar
+          <Trans>Bayar</Trans>
         </Button>
       </div>
     </aside>

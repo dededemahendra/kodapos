@@ -1,4 +1,6 @@
 import { type FormEvent, useState } from 'react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -26,6 +28,7 @@ export function CafeProfileForm({
   onSubmit,
   secondaryAction,
 }: CafeProfileFormProps) {
+  const { t } = useLingui();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -47,7 +50,7 @@ export function CafeProfileForm({
     try {
       await onSubmit(values);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal menyimpan profil.');
+      setError(err instanceof Error ? err.message : t`Gagal menyimpan profil.`);
     } finally {
       setSubmitting(false);
     }
@@ -57,29 +60,29 @@ export function CafeProfileForm({
     <form onSubmit={handleSubmit} className="max-w-md">
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="name">Nama kafe</FieldLabel>
+          <FieldLabel htmlFor="name"><Trans>Nama kafe</Trans></FieldLabel>
           <Input id="name" name="name" required defaultValue={initial.name} maxLength={80} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="phone">Nomor HP</FieldLabel>
+          <FieldLabel htmlFor="phone"><Trans>Nomor HP</Trans></FieldLabel>
           <Input
             id="phone"
             name="phone"
             type="tel"
             defaultValue={initial.phone ?? ''}
-            placeholder="08xx-xxxx-xxxx"
+            placeholder={t`08xx-xxxx-xxxx`}
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="addressLine">Alamat (opsional)</FieldLabel>
+          <FieldLabel htmlFor="addressLine"><Trans>Alamat (opsional)</Trans></FieldLabel>
           <Input id="addressLine" name="addressLine" defaultValue={initial.addressLine ?? ''} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="timezone">Zona waktu</FieldLabel>
+          <FieldLabel htmlFor="timezone"><Trans>Zona waktu</Trans></FieldLabel>
           <Input id="timezone" name="timezone" defaultValue={initial.timezone} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="taxRatePct">Persentase PPN</FieldLabel>
+          <FieldLabel htmlFor="taxRatePct"><Trans>Persentase PPN</Trans></FieldLabel>
           <Input
             id="taxRatePct"
             name="taxRatePct"
@@ -98,14 +101,14 @@ export function CafeProfileForm({
               defaultChecked={initial.taxEnabled}
               className="h-4 w-4"
             />
-            Aktifkan PPN di kasir
+            <Trans>Aktifkan PPN di kasir</Trans>
           </label>
         </Field>
         {error && <FieldError>{error}</FieldError>}
         <div className="flex gap-2 items-center">
           <Button type="submit" disabled={submitting}>
             {submitting && <Spinner data-icon="inline-start" />}
-            {submitting ? 'Menyimpan…' : submitLabel}
+            {submitting ? <Trans>Menyimpan…</Trans> : submitLabel}
           </Button>
           {secondaryAction && (
             <Button type="button" variant="ghost" onClick={secondaryAction.onClick}>

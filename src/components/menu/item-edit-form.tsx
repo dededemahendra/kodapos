@@ -2,6 +2,8 @@ import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { type FormEvent, useState } from 'react';
+import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
@@ -26,6 +28,7 @@ export interface ItemEditFormProps {
 }
 
 export function ItemEditForm(props: ItemEditFormProps) {
+  const { t } = useLingui();
   const categories = useQuery(api.menu.categories.list, {});
   const allGroups = useQuery(api.menu.modifierGroups.list, {});
   const createItem = useMutation(api.menu.items.create);
@@ -49,7 +52,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!categoryId) {
-      setError('Pilih kategori terlebih dahulu.');
+      setError(t`Pilih kategori terlebih dahulu.`);
       return;
     }
     setSubmitting(true);
@@ -67,7 +70,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
       }
       props.onSaved(id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal menyimpan item.');
+      setError(err instanceof Error ? err.message : t`Gagal menyimpan item.`);
     } finally {
       setSubmitting(false);
     }
@@ -76,10 +79,10 @@ export function ItemEditForm(props: ItemEditFormProps) {
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-8 max-w-4xl">
       <div>
-        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Dasar</h2>
+        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2"><Trans>Dasar</Trans></h2>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="name">Nama</FieldLabel>
+            <FieldLabel htmlFor="name"><Trans>Nama</Trans></FieldLabel>
             <Input
               id="name"
               value={name}
@@ -89,7 +92,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="categoryId">Kategori</FieldLabel>
+            <FieldLabel htmlFor="categoryId"><Trans>Kategori</Trans></FieldLabel>
             <select
               id="categoryId"
               value={categoryId}
@@ -97,7 +100,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
               required
               className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
             >
-              <option value="">— Pilih kategori —</option>
+              <option value="">{t`— Pilih kategori —`}</option>
               {(categories ?? []).map((c) => (
                 <option key={c._id} value={c._id}>
                   {c.name}
@@ -106,7 +109,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
             </select>
           </Field>
           <Field>
-            <FieldLabel htmlFor="priceIDR">Harga (Rp)</FieldLabel>
+            <FieldLabel htmlFor="priceIDR"><Trans>Harga (Rp)</Trans></FieldLabel>
             <Input
               id="priceIDR"
               type="number"
@@ -126,7 +129,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
                   onChange={(e) => setIsActive(e.target.checked)}
                   className="h-4 w-4"
                 />
-                Aktif (tampil ke kasir)
+                <Trans>Aktif (tampil ke kasir)</Trans>
               </label>
             </Field>
           )}
@@ -136,7 +139,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xs uppercase tracking-wide text-muted-foreground">
-            Grup modifier ({props.attached.length})
+            <Trans>Grup modifier ({props.attached.length})</Trans>
           </h2>
           {props.itemId !== 'new' && availableGroups.length > 0 && (
             <select
@@ -152,7 +155,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
               }}
               className="text-xs px-2 py-1 border border-border rounded-md bg-background"
             >
-              <option value="">+ Pasang grup…</option>
+              <option value="">{t`+ Pasang grup…`}</option>
               {availableGroups.map((g) => (
                 <option key={g._id} value={g._id}>
                   {g.name}
@@ -162,9 +165,9 @@ export function ItemEditForm(props: ItemEditFormProps) {
           )}
         </div>
         {props.itemId === 'new' ? (
-          <p className="text-sm text-muted-foreground">Simpan item dulu untuk memasang grup modifier.</p>
+          <p className="text-sm text-muted-foreground"><Trans>Simpan item dulu untuk memasang grup modifier.</Trans></p>
         ) : props.attached.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Belum ada grup terpasang.</p>
+          <p className="text-sm text-muted-foreground"><Trans>Belum ada grup terpasang.</Trans></p>
         ) : (
           <ul className="space-y-2">
             {props.attached.map((a, i) => (
@@ -175,7 +178,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
                 <span className="flex-1">
                   <strong>{a.group.name}</strong>
                   <span className="text-xs text-muted-foreground ml-2">
-                    {a.group.required ? 'wajib' : 'opsional'} · {a.group.minSelect}/
+                    {a.group.required ? t`wajib` : t`opsional`} · {a.group.minSelect}/
                     {a.group.maxSelect}
                   </span>
                 </span>
@@ -190,7 +193,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
                       direction: 'up',
                     })
                   }
-                  aria-label="Naikkan urutan"
+                  aria-label={t`Naikkan urutan`}
                   className="px-1 disabled:opacity-30"
                 >
                   ▲
@@ -206,7 +209,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
                       direction: 'down',
                     })
                   }
-                  aria-label="Turunkan urutan"
+                  aria-label={t`Turunkan urutan`}
                   className="px-1 disabled:opacity-30"
                 >
                   ▼
@@ -222,7 +225,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
                   }
                   className="text-xs text-destructive hover:underline"
                 >
-                  Lepas
+                  <Trans>Lepas</Trans>
                 </button>
               </li>
             ))}
@@ -243,7 +246,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
               }}
               trigger={
                 <button type="button" className="text-sm text-destructive hover:underline">
-                  Arsipkan item
+                  <Trans>Arsipkan item</Trans>
                 </button>
               }
             />
@@ -253,7 +256,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
           {error && <FieldError>{error}</FieldError>}
           <Button type="submit" disabled={submitting}>
             {submitting && <Spinner data-icon="inline-start" />}
-            {submitting ? 'Menyimpan…' : 'Simpan'}
+            {submitting ? <Trans>Menyimpan…</Trans> : <Trans>Simpan</Trans>}
           </Button>
         </div>
       </div>
