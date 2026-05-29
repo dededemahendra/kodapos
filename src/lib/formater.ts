@@ -1,47 +1,37 @@
-// Small formatting helpers for the dashboard. Indonesian locale, IDR currency.
-// (Replaces the @efferd/formater registry dependency.)
-
-const ID_MONTHS_SHORT = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'Mei',
-  'Jun',
-  'Jul',
-  'Agu',
-  'Sep',
-  'Okt',
-  'Nov',
-  'Des',
-];
+import { i18n } from '@lingui/core';
 
 type DateFormat = 'day-month' | 'full';
 
-/** Format an ISO date string (e.g. "2026-04-13"). */
+function activeLocale(): string {
+  return i18n.locale || 'id';
+}
+
 export function formatDate(value: string, format: DateFormat = 'day-month'): string {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
-  const day = d.getDate();
-  const month = ID_MONTHS_SHORT[d.getMonth()];
-  if (format === 'full') return `${day} ${month} ${d.getFullYear()}`;
-  return `${day} ${month}`;
+  const opts: Intl.DateTimeFormatOptions =
+    format === 'full'
+      ? { day: 'numeric', month: 'short', year: 'numeric' }
+      : { day: 'numeric', month: 'short' };
+  return new Intl.DateTimeFormat(activeLocale(), opts).format(d);
 }
 
+// IDR is always formatted in id-ID locale so the Rp symbol is always shown,
+// regardless of the active UI locale (English uses "IDR" which is wrong for POS).
 const IDR = new Intl.NumberFormat('id-ID', {
   style: 'currency',
   currency: 'IDR',
   maximumFractionDigits: 0,
 });
 
-/** Format a rupiah amount (integer IDR) as "Rp1.234.567". */
 export function formatIDR(amount: number): string {
   return IDR.format(amount);
 }
 
-/** Compact rupiah for tight spaces, e.g. "Rp1,2 jt" / "Rp450 rb". */
 export function formatIDRCompact(amount: number): string {
-  if (amount >= 1_000_000) return `Rp${(amount / 1_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} jt`;
-  if (amount >= 1_000) return `Rp${Math.round(amount / 1_000).toLocaleString('id-ID')} rb`;
+  if (amount >= 1_000_000)
+    return `Rp${(amount / 1_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} jt`;
+  if (amount >= 1_000)
+    return `Rp${Math.round(amount / 1_000).toLocaleString('id-ID')} rb`;
   return formatIDR(amount);
 }
