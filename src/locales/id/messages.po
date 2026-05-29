@@ -432,6 +432,10 @@ msgstr "Dasbor baru"
 msgid "Dashboard v2 shipped to prod"
 msgstr "Dashboard v2 shipped to prod"
 
+#: src/components/dashboard.tsx
+msgid "Data contoh: dasbor belum terhubung ke data kafe."
+msgstr "Data contoh: dasbor belum terhubung ke data kafe."
+
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Dibuka oleh"
 msgstr "Dibuka oleh"
