@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { Coffee } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
@@ -28,10 +29,10 @@ export function AppSidebar() {
 		>
 			<SidebarHeader className="h-14 justify-center border-b px-2">
 				<SidebarMenuButton asChild>
-					<a href="/dashboard">
+					<Link to="/dashboard">
 						<Coffee className="text-primary" />
 						<span className="font-medium text-foreground!">kodapos</span>
-					</a>
+					</Link>
 				</SidebarMenuButton>
 			</SidebarHeader>
 			<SidebarContent>
@@ -49,10 +50,10 @@ export function AppSidebar() {
 								className="text-muted-foreground"
 								size="sm"
 							>
-								<a href={item.path}>
+								<Link to={item.path as string}>
 									{item.icon}
 									<span>{item.title}</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					))}

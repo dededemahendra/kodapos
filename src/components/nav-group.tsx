@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
@@ -14,7 +14,7 @@ import {
 	SidebarMenuSubButton,
 	SidebarMenuSubItem,
 } from "~/components/ui/sidebar";
-import type { SidebarNavItem, SidebarNavGroup } from "~/components/app-shared";
+import type { SidebarNavGroup, SidebarNavItem } from "~/components/app-shared";
 
 export function NavGroup({ label, items }: SidebarNavGroup) {
 	const path = useRouterState({ select: (s) => s.location.pathname });
@@ -42,10 +42,10 @@ export function NavGroup({ label, items }: SidebarNavGroup) {
 								isActive={matches(item.path)}
 								tooltip={item.title}
 							>
-								<a href={item.path}>
+								<Link to={item.path as string}>
 									{item.icon}
 									<span>{item.title}</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					)
@@ -68,9 +68,15 @@ function CollapsibleNavItem({
 	const sectionActive = subItems.some((s) => matches(s.path));
 	const [open, setOpen] = useState(sectionActive);
 
+	// Auto-open when navigating into this section (SPA nav doesn't remount).
+	useEffect(() => {
+		if (sectionActive) setOpen(true);
+	}, [sectionActive]);
+
 	return (
 		<SidebarMenuItem>
 			<SidebarMenuButton
+				aria-expanded={open}
 				isActive={sectionActive}
 				onClick={() => setOpen((o) => !o)}
 				tooltip={item.title}
@@ -99,9 +105,9 @@ function CollapsibleNavItem({
 							{subItems.map((sub) => (
 								<SidebarMenuSubItem key={sub.title}>
 									<SidebarMenuSubButton asChild isActive={exact(sub.path)}>
-										<a href={sub.path}>
+										<Link to={sub.path as string}>
 											<span>{sub.title}</span>
-										</a>
+										</Link>
 									</SidebarMenuSubButton>
 								</SidebarMenuSubItem>
 							))}

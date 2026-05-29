@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
+import { Link } from "@tanstack/react-router";
 import { api } from "convex/_generated/api";
 import { useQuery } from "convex/react";
 import { LogOut, Settings } from "lucide-react";
@@ -49,10 +50,10 @@ export function NavUser() {
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuItem asChild>
-						<a href="/settings/profile">
+						<Link to="/settings/profile">
 							<Settings />
 							Pengaturan
-						</a>
+						</Link>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
