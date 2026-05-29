@@ -15,7 +15,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Node 22+: @lingui/cli 6 (loaded by vitest.config.ts) needs fs.globSync.
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
