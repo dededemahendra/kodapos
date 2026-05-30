@@ -2,9 +2,17 @@ import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
+import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { WasteDialog } from '~/components/inventory/waste-dialog';
 import { Button } from '~/components/ui/button';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { formatDate } from '~/lib/formater';
 import { formatIDR } from '~/lib/money';
@@ -52,9 +60,19 @@ function WastePage() {
           </span>
         </div>
       ) : rows.length === 0 ? (
-        <p className="text-muted-foreground">
-          <Trans>Belum ada limbah tercatat dalam 30 hari terakhir.</Trans>
-        </p>
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Trash2 />
+            </EmptyMedia>
+            <EmptyTitle>
+              <Trans>Belum ada limbah</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Belum ada limbah tercatat dalam 30 hari terakhir.</Trans>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <table className="w-full text-sm">
           <thead>

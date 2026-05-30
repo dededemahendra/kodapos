@@ -344,6 +344,10 @@ msgid "Belum ada kategori."
 msgstr "Belum ada kategori."
 
 #: src/routes/_pos/inventory/waste.tsx
+msgid "Belum ada limbah"
+msgstr "Belum ada limbah"
+
+#: src/routes/_pos/inventory/waste.tsx
 msgid "Belum ada limbah tercatat dalam 30 hari terakhir."
 msgstr "Belum ada limbah tercatat dalam 30 hari terakhir."
 
