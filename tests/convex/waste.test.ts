@@ -119,3 +119,89 @@ describe('waste.record', () => {
     ).rejects.toThrow(/tidak ditemukan/i);
   });
 });
+
+describe('waste.recent', () => {
+  it('returns waste rows newest-first with correct totalCostIDR', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const milk = await stockedIngredient(asOwner, { name: 'Susu', cost: 25, qty: 1000 });
+    const bean = await stockedIngredient(asOwner, { name: 'Biji Kopi', cost: 200, qty: 1000 });
+
+    await asOwner.mutation(api.waste.record, {
+      ingredientId: milk,
+      qtyWasted: 100,
+      wasteReason: 'basi',
+    });
+    await asOwner.mutation(api.waste.record, {
+      ingredientId: bean,
+      qtyWasted: 50,
+      wasteReason: 'rusak',
+    });
+
+    const rows = await asOwner.query(api.waste.recent, {});
+    expect(rows).toHaveLength(2);
+    // newest-first: bean was recorded last
+    expect(rows[0]?.ingredientName).toBe('Biji Kopi');
+    expect(rows[0]?.qtyWasted).toBe(50);
+    expect(rows[0]?.totalCostIDR).toBe(50 * 200);
+    expect(rows[1]?.ingredientName).toBe('Susu');
+    expect(rows[1]?.totalCostIDR).toBe(100 * 25);
+  });
+
+  it('snapshots cost so later cost edits do not change historical totals', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const id = await stockedIngredient(asOwner, { name: 'Susu', cost: 25, qty: 1000 });
+
+    await asOwner.mutation(api.waste.record, {
+      ingredientId: id,
+      qtyWasted: 100,
+      wasteReason: 'basi',
+    });
+
+    // Raise the ingredient cost after the waste was recorded.
+    await asOwner.mutation(api.ingredients.upsert, {
+      id,
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 999,
+    });
+
+    const rows = await asOwner.query(api.waste.recent, {});
+    expect(rows[0]?.costPerUnitIDR).toBe(25);
+    expect(rows[0]?.totalCostIDR).toBe(100 * 25);
+  });
+
+  it('excludes rows outside the days window and is scoped to the cafe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const id = await stockedIngredient(asOwner, { qty: 1000 });
+    await asOwner.mutation(api.waste.record, {
+      ingredientId: id,
+      qtyWasted: 10,
+      wasteReason: 'rusak',
+    });
+
+    // A window of 0 days has a cutoff of "now", excluding the just-recorded row.
+    const none = await asOwner.query(api.waste.recent, { days: 0 });
+    expect(none).toHaveLength(0);
+
+    const some = await asOwner.query(api.waste.recent, { days: 30 });
+    expect(some).toHaveLength(1);
+  });
+
+  it('does not leak another cafe\'s waste', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: ownerA } = await setupOwner(t, 'a@x.com');
+    const { asOwner: ownerB } = await setupOwner(t, 'b@x.com');
+    const idB = await stockedIngredient(ownerB, { qty: 1000 });
+    await ownerB.mutation(api.waste.record, {
+      ingredientId: idB,
+      qtyWasted: 10,
+      wasteReason: 'rusak',
+    });
+    const rowsA = await ownerA.query(api.waste.recent, {});
+    expect(rowsA).toHaveLength(0);
+  });
+});
