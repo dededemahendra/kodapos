@@ -42,7 +42,13 @@ export function SaleScreen() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
 
-  if (categories === undefined || items === undefined || cafe === undefined || shift === undefined) {
+  if (
+    categories === undefined ||
+    items === undefined ||
+    cafe === undefined ||
+    shift === undefined ||
+    settings === undefined
+  ) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] gap-2 text-muted-foreground">
         <Spinner />

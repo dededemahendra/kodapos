@@ -73,7 +73,7 @@ export function ReceiptPreview({
             {(order.serviceChargeIDR ?? 0) > 0 ? (
               <div className="flex justify-between">
                 <span>
-                  {order.serviceChargeName ?? 'Biaya Layanan'} {order.serviceChargePct}%
+                  {order.serviceChargeName ?? 'Biaya Layanan'} {order.serviceChargePct ?? 0}%
                 </span>
                 <span className="tabular-nums">{formatIDR(order.serviceChargeIDR ?? 0)}</span>
               </div>
