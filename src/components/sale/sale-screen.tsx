@@ -1,6 +1,7 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
+import { computeOrderTotals } from 'convex/lib/pricing';
 import { useReducer, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
@@ -33,6 +34,7 @@ export function SaleScreen() {
   const items = useQuery(api.menu.items.listForSale, {});
   const cafe = useQuery(api.cafes.myCafe, {});
   const shift = useQuery(api.shifts.current, {});
+  const settings = useQuery(api.settings.get, {});
   const { cashierId } = useActiveCashier();
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [clearOpen, setClearOpen] = useState(false);
@@ -54,8 +56,17 @@ export function SaleScreen() {
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
   const taxEnabled = cafe?.taxEnabled === true;
   const taxRatePct = cafe?.taxRatePct ?? 0;
-  const tax = taxEnabled ? Math.round((subtotal * taxRatePct) / 100) : 0;
-  const total = subtotal + tax;
+  const scEnabled = settings?.payment.serviceChargeEnabled === true;
+  const scPct = scEnabled ? settings?.payment.serviceChargePct ?? 0 : 0;
+  const scName = settings?.payment.serviceChargeName ?? 'Biaya Layanan';
+  const { serviceChargeIDR, taxIDR: tax, totalIDR: total } = computeOrderTotals({
+    subtotalIDR: subtotal,
+    discountIDR: 0,
+    serviceChargeEnabled: scEnabled,
+    serviceChargePct: scPct,
+    taxEnabled,
+    taxRatePct,
+  });
 
   function onItemTap(row: ItemForSale) {
     if (row.attachedGroups.length > 0) {
@@ -82,8 +93,14 @@ export function SaleScreen() {
       <CartPane
         cart={cart}
         dispatch={dispatch}
+        subtotalIDR={subtotal}
+        serviceChargeIDR={serviceChargeIDR}
+        serviceChargeName={scName}
+        serviceChargePct={scPct}
         taxEnabled={taxEnabled}
         taxRatePct={taxRatePct}
+        taxIDR={tax}
+        totalIDR={total}
         onBayar={() => {
           if (cart.lines.length > 0) setPaymentOpen(true);
         }}
