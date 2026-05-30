@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
+import { Spinner } from '~/components/ui/spinner';
 
 export const Route = createFileRoute('/_pos/settings/integrations')({
   component: SettingsIntegrations,
@@ -255,6 +256,7 @@ function SettingsIntegrations() {
                           disabled={isBusy}
                           onClick={() => handleDisconnect(entry.key)}
                         >
+                          {isBusy && <Spinner data-icon="inline-start" />}
                           <Trans>Putuskan</Trans>
                         </Button>
                       ) : (
@@ -283,10 +285,11 @@ function SettingsIntegrations() {
           </DialogHeader>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <label htmlFor="apiKey" className="text-sm font-medium">
               <Trans>Kunci API</Trans>
             </label>
             <Input
+              id="apiKey"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder={t`Masukkan kunci API (opsional)`}
@@ -302,6 +305,7 @@ function SettingsIntegrations() {
               disabled={busyKey !== null}
               onClick={() => dialogKey && handleConnect(dialogKey)}
             >
+              {busyKey !== null && <Spinner data-icon="inline-start" />}
               <Trans>Hubungkan</Trans>
             </Button>
           </DialogFooter>
