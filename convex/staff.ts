@@ -3,6 +3,14 @@ import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { hashPin, verifyPin as verifyPinHash } from './lib/pin';
 
+const permissionsValidator = v.object({
+  canVoid: v.boolean(),
+  canDiscount: v.boolean(),
+  canManageShift: v.boolean(),
+  canViewReports: v.boolean(),
+  canEditMenu: v.boolean(),
+});
+
 const cafeStaffDoc = v.object({
   _id: v.id('cafeStaff'),
   _creationTime: v.number(),
@@ -12,6 +20,9 @@ const cafeStaffDoc = v.object({
   role: v.union(v.literal('owner'), v.literal('cashier')),
   archived: v.boolean(),
   createdAt: v.number(),
+  phone: v.optional(v.string()),
+  email: v.optional(v.string()),
+  permissions: v.optional(permissionsValidator),
 });
 
 function assertName(name: string): string {
@@ -123,6 +134,40 @@ export const resetPin = mutation({
     const cleanPin = assertPin(pin);
     const pinHash = await hashPin(cleanPin);
     await ctx.db.patch(id, { pinHash });
+    return null;
+  },
+});
+
+export const updateDetails = mutation({
+  args: {
+    id: v.id('cafeStaff'),
+    name: v.string(),
+    phone: v.optional(v.string()),
+    email: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, { id, name, phone, email }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await requireOwned(ctx, cafeId, id, 'Staf');
+    await ctx.db.patch(id, {
+      name: assertName(name),
+      phone: phone?.trim() || undefined,
+      email: email?.trim() || undefined,
+    });
+    return null;
+  },
+});
+
+export const setPermissions = mutation({
+  args: {
+    id: v.id('cafeStaff'),
+    permissions: permissionsValidator,
+  },
+  returns: v.null(),
+  handler: async (ctx, { id, permissions }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await requireOwned(ctx, cafeId, id, 'Staf');
+    await ctx.db.patch(id, { permissions });
     return null;
   },
 });

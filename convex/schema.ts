@@ -94,6 +94,17 @@ export default defineSchema({
     role: v.union(v.literal('owner'), v.literal('cashier')),
     archived: v.boolean(),
     createdAt: v.number(),
+    phone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    permissions: v.optional(
+      v.object({
+        canVoid: v.boolean(),
+        canDiscount: v.boolean(),
+        canManageShift: v.boolean(),
+        canViewReports: v.boolean(),
+        canEditMenu: v.boolean(),
+      })
+    ),
   }).index('by_cafe_active', ['cafeId', 'archived']),
 
   cafeSettings: defineTable({
