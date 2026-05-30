@@ -4,7 +4,7 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { SettingsPageHeader } from '~/components/settings/primitives';
 import { PinEntry } from '~/components/staff/pin-entry';
@@ -320,6 +320,7 @@ function StaffRowGroup({
         <tr className={cn('border-b border-border/50', isArchived && 'opacity-60')}>
           <td colSpan={3} className="px-0 py-0">
             <StaffDetail
+              key={row._id}
               row={row}
               onResetPinClick={onResetPinClick}
               onArchive={onArchive}
@@ -358,14 +359,6 @@ function StaffDetail({
   // Permissions state (optimistic local copy)
   const [perms, setPerms] = useState<StaffPermissions>(() => effectivePermissions(row));
 
-  // Sync local state when row changes from Convex reactivity
-  useEffect(() => {
-    setName(row.name);
-    setPhone(row.phone ?? '');
-    setEmail(row.email ?? '');
-    setPerms(effectivePermissions(row));
-  }, [row]);
-
   const updateDetails = useMutation(api.staff.updateDetails);
   const setPermissions = useMutation(api.staff.setPermissions);
 
@@ -377,8 +370,8 @@ function StaffDetail({
       await updateDetails({
         id: row._id,
         name: name.trim(),
-        phone: phone.trim() || '',
-        email: email.trim() || '',
+        ...(phone.trim() ? { phone: phone.trim() } : {}),
+        ...(email.trim() ? { email: email.trim() } : {}),
       });
       setDetailsSaveState('saved');
       setTimeout(() => setDetailsSaveState('idle'), 2000);
@@ -388,17 +381,17 @@ function StaffDetail({
     }
   }
 
-  async function handlePermissionToggle(
+  function handlePermissionToggle(
     key: keyof StaffPermissions,
     value: boolean,
   ) {
-    const nextPerms = { ...perms, [key]: value };
-    setPerms(nextPerms); // optimistic
-    try {
-      await setPermissions({ id: row._id, permissions: nextPerms });
-    } catch {
-      setPerms(perms); // revert on error
-    }
+    setPerms((prev) => {
+      const next = { ...prev, [key]: value };
+      void setPermissions({ id: row._id, permissions: next }).catch(() => {
+        setPerms(prev);
+      });
+      return next;
+    });
   }
 
   const isOwner = row.role === 'owner';
@@ -469,58 +462,57 @@ function StaffDetail({
         <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
           <Trans>Izin akses</Trans>
         </p>
-        {isOwner ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <PermissionRow
+            label={t`Void transaksi`}
+            checked={isOwner ? true : perms.canVoid}
+            disabled={isOwner}
+            onCheckedChange={(v) => {
+              // eslint-disable-next-line lingui/no-unlocalized-strings
+              if (!isOwner) void handlePermissionToggle('canVoid', v);
+            }}
+          />
+          <PermissionRow
+            label={t`Beri diskon`}
+            checked={isOwner ? true : perms.canDiscount}
+            disabled={isOwner}
+            onCheckedChange={(v) => {
+              // eslint-disable-next-line lingui/no-unlocalized-strings
+              if (!isOwner) void handlePermissionToggle('canDiscount', v);
+            }}
+          />
+          <PermissionRow
+            label={t`Buka/tutup shift`}
+            checked={isOwner ? true : perms.canManageShift}
+            disabled={isOwner}
+            onCheckedChange={(v) => {
+              // eslint-disable-next-line lingui/no-unlocalized-strings
+              if (!isOwner) void handlePermissionToggle('canManageShift', v);
+            }}
+          />
+          <PermissionRow
+            label={t`Lihat laporan`}
+            checked={isOwner ? true : perms.canViewReports}
+            disabled={isOwner}
+            onCheckedChange={(v) => {
+              // eslint-disable-next-line lingui/no-unlocalized-strings
+              if (!isOwner) void handlePermissionToggle('canViewReports', v);
+            }}
+          />
+          <PermissionRow
+            label={t`Edit menu`}
+            checked={isOwner ? true : perms.canEditMenu}
+            disabled={isOwner}
+            onCheckedChange={(v) => {
+              // eslint-disable-next-line lingui/no-unlocalized-strings
+              if (!isOwner) void handlePermissionToggle('canEditMenu', v);
+            }}
+          />
+        </div>
+        {isOwner && (
           <p className="text-sm text-muted-foreground">
             <Trans>Pemilik memiliki semua izin.</Trans>
           </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <PermissionRow
-              label={t`Void transaksi`}
-              checked={perms.canVoid}
-              disabled={isOwner}
-              onCheckedChange={(v) => {
-                // eslint-disable-next-line lingui/no-unlocalized-strings
-                void handlePermissionToggle('canVoid', v);
-              }}
-            />
-            <PermissionRow
-              label={t`Beri diskon`}
-              checked={perms.canDiscount}
-              disabled={isOwner}
-              onCheckedChange={(v) => {
-                // eslint-disable-next-line lingui/no-unlocalized-strings
-                void handlePermissionToggle('canDiscount', v);
-              }}
-            />
-            <PermissionRow
-              label={t`Buka/tutup shift`}
-              checked={perms.canManageShift}
-              disabled={isOwner}
-              onCheckedChange={(v) => {
-                // eslint-disable-next-line lingui/no-unlocalized-strings
-                void handlePermissionToggle('canManageShift', v);
-              }}
-            />
-            <PermissionRow
-              label={t`Lihat laporan`}
-              checked={perms.canViewReports}
-              disabled={isOwner}
-              onCheckedChange={(v) => {
-                // eslint-disable-next-line lingui/no-unlocalized-strings
-                void handlePermissionToggle('canViewReports', v);
-              }}
-            />
-            <PermissionRow
-              label={t`Edit menu`}
-              checked={perms.canEditMenu}
-              disabled={isOwner}
-              onCheckedChange={(v) => {
-                // eslint-disable-next-line lingui/no-unlocalized-strings
-                void handlePermissionToggle('canEditMenu', v);
-              }}
-            />
-          </div>
         )}
       </div>
 
