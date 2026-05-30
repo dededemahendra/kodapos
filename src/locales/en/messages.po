@@ -272,8 +272,12 @@ msgid "Bahasa tampilan aplikasi."
 msgstr "App display language."
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Bahasa, kepadatan tampilan, dan format tanggal & waktu berlaku langsung. Preferensi lain menyusul."
-msgstr "Language, display density, and date & time formats apply instantly. Other preferences are coming soon."
+msgid "Bahasa, kepadatan tampilan, dan format tanggal & waktu berlaku langsung. Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
+msgstr "Language, display density, and date & time format apply instantly. Receipt & payment settings are now on the Receipt & Printer and Tax & Payment pages."
+
+#: src/routes/_pos/settings/general.tsx
+#~ msgid "Bahasa, kepadatan tampilan, dan format tanggal & waktu berlaku langsung. Preferensi lain menyusul."
+#~ msgstr "Language, display density, and date & time formats apply instantly. Other preferences are coming soon."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Bakery"
@@ -1548,8 +1552,8 @@ msgid "Pengaturan"
 msgstr "Settings"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
-msgstr "Receipt & payment settings are now on the Receipt & Printer and Tax & Payment pages."
+#~ msgid "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
+#~ msgstr "Receipt & payment settings are now on the Receipt & Printer and Tax & Payment pages."
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Pengiriman masuk"

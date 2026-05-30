@@ -24,7 +24,8 @@ import {
   useBoolPreference,
   usePreference,
 } from '~/lib/preferences';
-import { cn } from '~/lib/utils';
+import { Badge } from '~/components/ui/badge';
+import { SettingsPageHeader } from '~/components/settings/primitives';
 
 export const Route = createFileRoute('/_pos/settings/general')({
   component: GeneralSettings,
@@ -33,13 +34,6 @@ export const Route = createFileRoute('/_pos/settings/general')({
 // ---------------------------------------------------------------------------
 // Section IDs
 // ---------------------------------------------------------------------------
-
-type SectionId =
-  | 'region'
-  | 'appearance'
-  | 'orders'
-  | 'notifications'
-  | 'security';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -433,29 +427,28 @@ function SecuritySection({
 }
 
 // ---------------------------------------------------------------------------
-// Section nav definitions
-// ---------------------------------------------------------------------------
-
-// Sections marked `soon: true` are not yet wired to any live behaviour —
-// they persist to localStorage but don't affect the app yet.
-const SECTIONS: { id: SectionId; label: React.ReactNode; soon?: true }[] = [
-  { id: 'region', label: <Trans>Bahasa &amp; Wilayah</Trans> },
-  { id: 'appearance', label: <Trans>Tampilan</Trans> },
-  { id: 'orders', label: <Trans>Pesanan</Trans>, soon: true },
-  { id: 'notifications', label: <Trans>Notifikasi</Trans>, soon: true },
-  { id: 'security', label: <Trans>Keamanan</Trans>, soon: true },
-];
-
-// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
+
+// Sections wrapped in <SoonSection> are not yet wired to any live behaviour —
+// they persist to localStorage but don't affect the app yet.
+function SoonSection({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      <Badge
+        variant="secondary"
+        className="absolute right-4 top-3.5 z-10 text-[10px]"
+      >
+        <Trans>Segera</Trans>
+      </Badge>
+      {children}
+    </div>
+  );
+}
 
 function GeneralSettings() {
   const { t } = useLingui();
   const { locale, setLocale } = useLocale();
-
-  // Active section
-  const [activeSection, setActiveSection] = useState<SectionId>('region');
 
   // Tampilan — density (live)
   const [density, setDensityState] = useState<Density>(() => getDensity());
@@ -483,105 +476,61 @@ function GeneralSettings() {
   const [pinForVoid, setPinForVoid] = useBoolPreference('pinForVoid', true);
   const [autoLock, setAutoLock] = usePreference<string>('autoLock', 'off');
 
-  function renderSection() {
-    switch (activeSection) {
-      case 'region':
-        return (
-          <RegionSection
-            locale={locale}
-            setLocale={setLocale}
-            timezone={timezone}
-            setTimezone={setTimezone}
-            dateFormat={dateFormat}
-            setDateFormat={setDateFormat}
-            timeFormat={timeFormat}
-            setTimeFormat={setTimeFormat}
-          />
-        );
-      case 'appearance':
-        return (
-          <AppearanceSection
-            density={density}
-            handleDensity={handleDensity}
-          />
-        );
-      case 'orders':
-        return (
-          <OrdersSection
-            t={t}
-            confirmClearCart={confirmClearCart}
-            setConfirmClearCart={setConfirmClearCart}
-            orderPrefix={orderPrefix}
-            setOrderPrefix={setOrderPrefix}
-          />
-        );
-      case 'notifications':
-        return (
-          <NotificationsSection
-            t={t}
-            lowStockAlerts={lowStockAlerts}
-            setLowStockAlerts={setLowStockAlerts}
-            saleSound={saleSound}
-            setSaleSound={setSaleSound}
-          />
-        );
-      case 'security':
-        return (
-          <SecuritySection
-            t={t}
-            pinForVoid={pinForVoid}
-            setPinForVoid={setPinForVoid}
-            autoLock={autoLock}
-            setAutoLock={setAutoLock}
-          />
-        );
-    }
-  }
-
   return (
-    <div className="flex flex-col gap-4">
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold mb-1">
-          <Trans>Umum</Trans>
-        </h1>
-        <p className="text-muted-foreground text-xs mt-1">
-          <Trans>Bahasa, kepadatan tampilan, dan format tanggal &amp; waktu berlaku langsung. Preferensi lain menyusul.</Trans>
-        </p>
-        <p className="text-muted-foreground text-xs mt-1">
-          <Trans>Pengaturan struk &amp; pembayaran kini ada di halaman Struk &amp; Printer dan Pajak &amp; Pembayaran.</Trans>
-        </p>
-      </div>
+    <div className="space-y-6 max-w-2xl">
+      <SettingsPageHeader
+        title={<Trans>Umum</Trans>}
+        description={
+          <Trans>
+            Bahasa, kepadatan tampilan, dan format tanggal &amp; waktu berlaku
+            langsung. Pengaturan struk &amp; pembayaran kini ada di halaman Struk
+            &amp; Printer dan Pajak &amp; Pembayaran.
+          </Trans>
+        }
+      />
 
-      {/* Two-pane layout */}
-      <div className="flex gap-6">
-        {/* Section rail */}
-        <nav className="w-52 shrink-0 flex flex-col gap-1">
-          {SECTIONS.map(({ id, label, soon }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setActiveSection(id)}
-              className={cn(
-                'flex items-center justify-between text-left text-sm px-3 py-1.5 rounded-md transition-colors',
-                activeSection === id
-                  ? 'bg-accent text-accent-foreground font-medium'
-                  : 'text-muted-foreground hover:bg-muted',
-              )}
-            >
-              <span>{label}</span>
-              {soon && (
-                <span className="ml-2 shrink-0 text-[10px] leading-none px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-normal">
-                  <Trans>Segera</Trans>
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
+      <RegionSection
+        locale={locale}
+        setLocale={setLocale}
+        timezone={timezone}
+        setTimezone={setTimezone}
+        dateFormat={dateFormat}
+        setDateFormat={setDateFormat}
+        timeFormat={timeFormat}
+        setTimeFormat={setTimeFormat}
+      />
 
-        {/* Section content */}
-        <div className="flex-1 min-w-0">{renderSection()}</div>
-      </div>
+      <AppearanceSection density={density} handleDensity={handleDensity} />
+
+      <SoonSection>
+        <OrdersSection
+          t={t}
+          confirmClearCart={confirmClearCart}
+          setConfirmClearCart={setConfirmClearCart}
+          orderPrefix={orderPrefix}
+          setOrderPrefix={setOrderPrefix}
+        />
+      </SoonSection>
+
+      <SoonSection>
+        <NotificationsSection
+          t={t}
+          lowStockAlerts={lowStockAlerts}
+          setLowStockAlerts={setLowStockAlerts}
+          saleSound={saleSound}
+          setSaleSound={setSaleSound}
+        />
+      </SoonSection>
+
+      <SoonSection>
+        <SecuritySection
+          t={t}
+          pinForVoid={pinForVoid}
+          setPinForVoid={setPinForVoid}
+          autoLock={autoLock}
+          setAutoLock={setAutoLock}
+        />
+      </SoonSection>
     </div>
   );
 }
