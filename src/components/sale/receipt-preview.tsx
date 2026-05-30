@@ -4,6 +4,7 @@ import { useQuery } from 'convex/react';
 import { Trans } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent } from '~/components/ui/dialog';
+import { DEFAULT_SERVICE_CHARGE_NAME } from 'convex/lib/pricing';
 import { formatIDR } from '~/lib/money';
 
 export function ReceiptPreview({
@@ -73,7 +74,7 @@ export function ReceiptPreview({
             {(order.serviceChargeIDR ?? 0) > 0 ? (
               <div className="flex justify-between">
                 <span>
-                  {order.serviceChargeName ?? 'Biaya Layanan'} {order.serviceChargePct ?? 0}%
+                  {order.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME} {order.serviceChargePct ?? 0}%
                 </span>
                 <span className="tabular-nums">{formatIDR(order.serviceChargeIDR ?? 0)}</span>
               </div>

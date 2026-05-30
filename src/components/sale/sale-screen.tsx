@@ -1,7 +1,7 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
-import { computeOrderTotals } from 'convex/lib/pricing';
+import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals } from 'convex/lib/pricing';
 import { useReducer, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
@@ -61,10 +61,10 @@ export function SaleScreen() {
 
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
   const taxEnabled = cafe?.taxEnabled === true;
-  const taxRatePct = cafe?.taxRatePct ?? 0;
+  const taxRatePct = taxEnabled ? cafe?.taxRatePct ?? 0 : 0;
   const scEnabled = settings?.payment.serviceChargeEnabled === true;
   const scPct = scEnabled ? settings?.payment.serviceChargePct ?? 0 : 0;
-  const scName = settings?.payment.serviceChargeName ?? 'Biaya Layanan';
+  const scName = settings?.payment.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME;
   const { serviceChargeIDR, taxIDR: tax, totalIDR: total } = computeOrderTotals({
     subtotalIDR: subtotal,
     discountIDR: 0,

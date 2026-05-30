@@ -1,3 +1,6 @@
+/** Default service-charge line label when a cafe hasn't customized it. */
+export const DEFAULT_SERVICE_CHARGE_NAME = 'Biaya Layanan';
+
 export type PricingInput = {
   subtotalIDR: number;
   /** 0 today (promo engine unbuilt); kept so discount slots into the formula. */

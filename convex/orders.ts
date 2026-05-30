@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
-import { computeOrderTotals } from './lib/pricing';
+import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals } from './lib/pricing';
 import { requireActiveCashier } from './lib/staff';
 
 const lineInput = v.object({
@@ -171,7 +171,7 @@ export const createCashSale = mutation({
     const pay = settings?.payment;
     const scEnabled = pay?.serviceChargeEnabled === true;
     const scPct = scEnabled ? pay?.serviceChargePct ?? 0 : 0;
-    const scName = pay?.serviceChargeName ?? 'Biaya Layanan';
+    const scName = pay?.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME;
 
     const { serviceChargeIDR, taxIDR, totalIDR } = computeOrderTotals({
       subtotalIDR,

@@ -3,6 +3,7 @@ import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
+import { DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
 
 /**
  * Default settings used whenever a cafe has no `cafeSettings` row yet, or a
@@ -24,7 +25,7 @@ export const DEFAULT_SETTINGS = {
     quickCashButtons: [20000, 50000, 100000],
     serviceChargeEnabled: false,
     serviceChargePct: 0,
-    serviceChargeName: 'Biaya Layanan',
+    serviceChargeName: DEFAULT_SERVICE_CHARGE_NAME,
   },
   receipt: {
     showLogo: true,
