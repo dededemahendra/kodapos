@@ -24,7 +24,8 @@ import {
   useBoolPreference,
   usePreference,
 } from '~/lib/preferences';
-import { cn } from '~/lib/utils';
+import { Badge } from '~/components/ui/badge';
+import { SettingsPageHeader } from '~/components/settings/primitives';
 
 export const Route = createFileRoute('/_pos/settings/general')({
   component: GeneralSettings,
@@ -33,15 +34,6 @@ export const Route = createFileRoute('/_pos/settings/general')({
 // ---------------------------------------------------------------------------
 // Section IDs
 // ---------------------------------------------------------------------------
-
-type SectionId =
-  | 'region'
-  | 'appearance'
-  | 'receipt'
-  | 'payment'
-  | 'orders'
-  | 'notifications'
-  | 'security';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -258,187 +250,6 @@ function AppearanceSection({
   );
 }
 
-function ReceiptSection({
-  t,
-  autoPrint,
-  setAutoPrint,
-  paperSize,
-  setPaperSize,
-  receiptLogo,
-  setReceiptLogo,
-  receiptFooter,
-  setReceiptFooter,
-}: {
-  t: (s: TemplateStringsArray, ...args: unknown[]) => string;
-  autoPrint: boolean;
-  setAutoPrint: (v: boolean) => void;
-  paperSize: string;
-  setPaperSize: (v: string) => void;
-  receiptLogo: boolean;
-  setReceiptLogo: (v: boolean) => void;
-  receiptFooter: string;
-  setReceiptFooter: (v: string) => void;
-}) {
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">
-          <Trans>Struk &amp; Cetak</Trans>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <FieldGroup>
-          <SettingRow
-            label={<Trans>Cetak struk otomatis</Trans>}
-            description={<Trans>Langsung cetak setelah pembayaran berhasil.</Trans>}
-            control={
-              <Switch
-                checked={autoPrint}
-                onCheckedChange={setAutoPrint}
-                aria-label={t`Cetak struk otomatis`}
-              />
-            }
-          />
-
-          <RowSep />
-
-          <SettingRow
-            label={<Trans>Ukuran kertas</Trans>}
-            description={<Trans>Sesuaikan dengan lebar gulungan printer Anda.</Trans>}
-            control={
-              <Select value={paperSize} onValueChange={setPaperSize}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="80">80 mm</SelectItem>
-                  <SelectItem value="58">58 mm</SelectItem>
-                </SelectContent>
-              </Select>
-            }
-          />
-
-          <RowSep />
-
-          <SettingRow
-            label={<Trans>Tampilkan logo di struk</Trans>}
-            description={<Trans>Cetak logo kafe di bagian atas struk.</Trans>}
-            control={
-              <Switch
-                checked={receiptLogo}
-                onCheckedChange={setReceiptLogo}
-                aria-label={t`Tampilkan logo di struk`}
-              />
-            }
-          />
-
-          <RowSep />
-
-          <Field orientation="vertical">
-            <FieldTitle>
-              <Trans>Catatan kaki struk</Trans>
-            </FieldTitle>
-            <FieldDescription>
-              <Trans>Teks yang dicetak di bagian bawah struk.</Trans>
-            </FieldDescription>
-            <Input
-              value={receiptFooter}
-              onChange={(e) => setReceiptFooter(e.target.value)}
-              placeholder={t`mis. Terima kasih telah berbelanja`}
-              className="mt-1.5"
-            />
-          </Field>
-        </FieldGroup>
-      </CardContent>
-    </Card>
-  );
-}
-
-function PaymentSection({
-  t,
-  defaultPayment,
-  setDefaultPayment,
-  rounding,
-  setRounding,
-  quickCash,
-  setQuickCash,
-}: {
-  t: (s: TemplateStringsArray, ...args: unknown[]) => string;
-  defaultPayment: string;
-  setDefaultPayment: (v: string) => void;
-  rounding: string;
-  setRounding: (v: string) => void;
-  quickCash: boolean;
-  setQuickCash: (v: boolean) => void;
-}) {
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">
-          <Trans>Pembayaran</Trans>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <FieldGroup>
-          <SettingRow
-            label={<Trans>Metode default</Trans>}
-            description={<Trans>Metode pembayaran yang dipilih saat checkout.</Trans>}
-            control={
-              <Select value={defaultPayment} onValueChange={setDefaultPayment}>
-                <SelectTrigger className="w-36">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash">
-                    <Trans>Tunai</Trans>
-                  </SelectItem>
-                  <SelectItem value="qris">QRIS</SelectItem>
-                </SelectContent>
-              </Select>
-            }
-          />
-
-          <RowSep />
-
-          <SettingRow
-            label={<Trans>Pembulatan</Trans>}
-            description={<Trans>Bulatkan total transaksi ke satuan terdekat.</Trans>}
-            control={
-              <Select value={rounding} onValueChange={setRounding}>
-                <SelectTrigger className="w-44">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">
-                    <Trans>Tanpa pembulatan</Trans>
-                  </SelectItem>
-                  <SelectItem value="100">Rp 100</SelectItem>
-                  <SelectItem value="500">Rp 500</SelectItem>
-                  <SelectItem value="1000">Rp 1.000</SelectItem>
-                </SelectContent>
-              </Select>
-            }
-          />
-
-          <RowSep />
-
-          <SettingRow
-            label={<Trans>Tombol nominal cepat</Trans>}
-            description={<Trans>Tampilkan tombol nominal saat pembayaran tunai.</Trans>}
-            control={
-              <Switch
-                checked={quickCash}
-                onCheckedChange={setQuickCash}
-                aria-label={t`Tombol nominal cepat`}
-              />
-            }
-          />
-        </FieldGroup>
-      </CardContent>
-    </Card>
-  );
-}
-
 function OrdersSection({
   t,
   confirmClearCart,
@@ -616,31 +427,28 @@ function SecuritySection({
 }
 
 // ---------------------------------------------------------------------------
-// Section nav definitions
-// ---------------------------------------------------------------------------
-
-// Sections marked `soon: true` are not yet wired to any live behaviour —
-// they persist to localStorage but don't affect the app yet.
-const SECTIONS: { id: SectionId; label: React.ReactNode; soon?: true }[] = [
-  { id: 'region', label: <Trans>Bahasa &amp; Wilayah</Trans> },
-  { id: 'appearance', label: <Trans>Tampilan</Trans> },
-  { id: 'receipt', label: <Trans>Struk &amp; Cetak</Trans>, soon: true },
-  { id: 'payment', label: <Trans>Pembayaran</Trans>, soon: true },
-  { id: 'orders', label: <Trans>Pesanan</Trans>, soon: true },
-  { id: 'notifications', label: <Trans>Notifikasi</Trans>, soon: true },
-  { id: 'security', label: <Trans>Keamanan</Trans>, soon: true },
-];
-
-// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
+
+// Sections wrapped in <SoonSection> are not yet wired to any live behaviour —
+// they persist to localStorage but don't affect the app yet.
+function SoonSection({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      <Badge
+        variant="secondary"
+        className="absolute right-4 top-3.5 z-10 text-[10px]"
+      >
+        <Trans>Segera</Trans>
+      </Badge>
+      {children}
+    </div>
+  );
+}
 
 function GeneralSettings() {
   const { t } = useLingui();
   const { locale, setLocale } = useLocale();
-
-  // Active section
-  const [activeSection, setActiveSection] = useState<SectionId>('region');
 
   // Tampilan — density (live)
   const [density, setDensityState] = useState<Density>(() => getDensity());
@@ -656,17 +464,6 @@ function GeneralSettings() {
   const [dateFormat, setDateFormat] = usePreference<string>('dateFormat', 'dmy-short');
   const [timeFormat, setTimeFormat] = usePreference<string>('timeFormat', '24');
 
-  // Struk & Cetak
-  const [autoPrint, setAutoPrint] = useBoolPreference('autoPrint', false);
-  const [paperSize, setPaperSize] = usePreference<string>('paperSize', '80');
-  const [receiptLogo, setReceiptLogo] = useBoolPreference('receiptLogo', true);
-  const [receiptFooter, setReceiptFooter] = usePreference<string>('receiptFooter', '');
-
-  // Pembayaran
-  const [defaultPayment, setDefaultPayment] = usePreference<string>('defaultPayment', 'cash');
-  const [rounding, setRounding] = usePreference<string>('rounding', 'none');
-  const [quickCash, setQuickCash] = useBoolPreference('quickCash', true);
-
   // Pesanan
   const [confirmClearCart, setConfirmClearCart] = useBoolPreference('confirmClearCart', true);
   const [orderPrefix, setOrderPrefix] = usePreference<string>('orderPrefix', '');
@@ -679,128 +476,61 @@ function GeneralSettings() {
   const [pinForVoid, setPinForVoid] = useBoolPreference('pinForVoid', true);
   const [autoLock, setAutoLock] = usePreference<string>('autoLock', 'off');
 
-  function renderSection() {
-    switch (activeSection) {
-      case 'region':
-        return (
-          <RegionSection
-            locale={locale}
-            setLocale={setLocale}
-            timezone={timezone}
-            setTimezone={setTimezone}
-            dateFormat={dateFormat}
-            setDateFormat={setDateFormat}
-            timeFormat={timeFormat}
-            setTimeFormat={setTimeFormat}
-          />
-        );
-      case 'appearance':
-        return (
-          <AppearanceSection
-            density={density}
-            handleDensity={handleDensity}
-          />
-        );
-      case 'receipt':
-        return (
-          <ReceiptSection
-            t={t}
-            autoPrint={autoPrint}
-            setAutoPrint={setAutoPrint}
-            paperSize={paperSize}
-            setPaperSize={setPaperSize}
-            receiptLogo={receiptLogo}
-            setReceiptLogo={setReceiptLogo}
-            receiptFooter={receiptFooter}
-            setReceiptFooter={setReceiptFooter}
-          />
-        );
-      case 'payment':
-        return (
-          <PaymentSection
-            t={t}
-            defaultPayment={defaultPayment}
-            setDefaultPayment={setDefaultPayment}
-            rounding={rounding}
-            setRounding={setRounding}
-            quickCash={quickCash}
-            setQuickCash={setQuickCash}
-          />
-        );
-      case 'orders':
-        return (
-          <OrdersSection
-            t={t}
-            confirmClearCart={confirmClearCart}
-            setConfirmClearCart={setConfirmClearCart}
-            orderPrefix={orderPrefix}
-            setOrderPrefix={setOrderPrefix}
-          />
-        );
-      case 'notifications':
-        return (
-          <NotificationsSection
-            t={t}
-            lowStockAlerts={lowStockAlerts}
-            setLowStockAlerts={setLowStockAlerts}
-            saleSound={saleSound}
-            setSaleSound={setSaleSound}
-          />
-        );
-      case 'security':
-        return (
-          <SecuritySection
-            t={t}
-            pinForVoid={pinForVoid}
-            setPinForVoid={setPinForVoid}
-            autoLock={autoLock}
-            setAutoLock={setAutoLock}
-          />
-        );
-    }
-  }
-
   return (
-    <div className="flex flex-col gap-4">
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold mb-1">
-          <Trans>Umum</Trans>
-        </h1>
-        <p className="text-muted-foreground text-xs mt-1">
-          <Trans>Bahasa, kepadatan tampilan, dan format tanggal &amp; waktu berlaku langsung. Preferensi lain menyusul.</Trans>
-        </p>
-      </div>
+    <div className="space-y-6 max-w-2xl">
+      <SettingsPageHeader
+        title={<Trans>Umum</Trans>}
+        description={
+          <Trans>
+            Bahasa, kepadatan tampilan, dan format tanggal &amp; waktu berlaku
+            langsung. Pengaturan struk &amp; pembayaran kini ada di halaman Struk
+            &amp; Printer dan Pajak &amp; Pembayaran.
+          </Trans>
+        }
+      />
 
-      {/* Two-pane layout */}
-      <div className="flex gap-6">
-        {/* Section rail */}
-        <nav className="w-52 shrink-0 flex flex-col gap-1">
-          {SECTIONS.map(({ id, label, soon }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setActiveSection(id)}
-              className={cn(
-                'flex items-center justify-between text-left text-sm px-3 py-1.5 rounded-md transition-colors',
-                activeSection === id
-                  ? 'bg-accent text-accent-foreground font-medium'
-                  : 'text-muted-foreground hover:bg-muted',
-              )}
-            >
-              <span>{label}</span>
-              {soon && (
-                <span className="ml-2 shrink-0 text-[10px] leading-none px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-normal">
-                  <Trans>Segera</Trans>
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
+      <RegionSection
+        locale={locale}
+        setLocale={setLocale}
+        timezone={timezone}
+        setTimezone={setTimezone}
+        dateFormat={dateFormat}
+        setDateFormat={setDateFormat}
+        timeFormat={timeFormat}
+        setTimeFormat={setTimeFormat}
+      />
 
-        {/* Section content */}
-        <div className="flex-1 min-w-0">{renderSection()}</div>
-      </div>
+      <AppearanceSection density={density} handleDensity={handleDensity} />
+
+      <SoonSection>
+        <OrdersSection
+          t={t}
+          confirmClearCart={confirmClearCart}
+          setConfirmClearCart={setConfirmClearCart}
+          orderPrefix={orderPrefix}
+          setOrderPrefix={setOrderPrefix}
+        />
+      </SoonSection>
+
+      <SoonSection>
+        <NotificationsSection
+          t={t}
+          lowStockAlerts={lowStockAlerts}
+          setLowStockAlerts={setLowStockAlerts}
+          saleSound={saleSound}
+          setSaleSound={setSaleSound}
+        />
+      </SoonSection>
+
+      <SoonSection>
+        <SecuritySection
+          t={t}
+          pinForVoid={pinForVoid}
+          setPinForVoid={setPinForVoid}
+          autoLock={autoLock}
+          setAutoLock={setAutoLock}
+        />
+      </SoonSection>
     </div>
   );
 }
