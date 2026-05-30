@@ -313,15 +313,27 @@ export default defineSchema({
     reason: v.union(
       v.literal('sale'),
       v.literal('adjustment'),
-      // 'waste' is reserved; not written in Slice 4. Will be used by a
-      // future "Catat limbah" action in V1.1.
+      // 'waste' is written by waste.record (dedicated Catat Limbah flow).
       v.literal('waste')
     ),
     refType: v.optional(v.string()),
     refId: v.optional(v.string()),
     note: v.optional(v.string()),
+    // Waste-only fields (undefined for sale/adjustment rows). Set by waste.record.
+    wasteReason: v.optional(
+      v.union(
+        v.literal('rusak'),
+        v.literal('basi'),
+        v.literal('tumpah'),
+        v.literal('salah_masak'),
+        v.literal('lainnya')
+      )
+    ),
+    // Snapshot of ingredient.lastCostPerUnitIDR at waste time, for immutable COGS.
+    costPerUnitIDR: v.optional(v.number()),
     at: v.number(),
   })
     .index('by_cafe_ingredient', ['cafeId', 'ingredientId'])
-    .index('by_cafe_ingredient_at', ['cafeId', 'ingredientId', 'at']),
+    .index('by_cafe_ingredient_at', ['cafeId', 'ingredientId', 'at'])
+    .index('by_cafe_reason_at', ['cafeId', 'reason', 'at']),
 });
