@@ -22,7 +22,7 @@ import {
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 
-const REASONS = ['Pengiriman masuk', 'Stok opname', 'Limbah', 'Koreksi'] as const;
+const REASONS = ['Pengiriman masuk', 'Stok opname', 'Koreksi'] as const;
 
 export function StockAdjustDialog({
   open,
@@ -44,7 +44,6 @@ export function StockAdjustDialog({
   const reasonLabels: Record<typeof REASONS[number], string> = {
     'Pengiriman masuk': t`Pengiriman masuk`,
     'Stok opname': t`Stok opname`,
-    'Limbah': t`Limbah`,
     'Koreksi': t`Koreksi`,
   };
 

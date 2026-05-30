@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 
-const cafeDoc = v.object({
+const cafeFields = {
   _id: v.id('cafes'),
   _creationTime: v.number(),
   name: v.string(),
@@ -15,7 +15,25 @@ const cafeDoc = v.object({
   taxRatePct: v.optional(v.number()),
   taxEnabled: v.optional(v.boolean()),
   setupCompletedAt: v.optional(v.number()),
-});
+  businessType: v.optional(v.string()),
+  whatsapp: v.optional(v.string()),
+  email: v.optional(v.string()),
+  instagram: v.optional(v.string()),
+  city: v.optional(v.string()),
+  postalCode: v.optional(v.string()),
+  logoStorageId: v.optional(v.id('_storage')),
+  operatingHours: v.optional(
+    v.array(
+      v.object({
+        day: v.number(),
+        open: v.boolean(),
+        openTime: v.string(),
+        closeTime: v.string(),
+      })
+    )
+  ),
+};
+const cafeDoc = v.object(cafeFields);
 
 export const createForOwner = mutation({
   args: { name: v.string() },
@@ -77,7 +95,10 @@ export const mine = query({
 
 export const myCafe = query({
   args: {},
-  returns: v.union(cafeDoc, v.null()),
+  returns: v.union(
+    v.object({ ...cafeFields, logoUrl: v.optional(v.string()) }),
+    v.null()
+  ),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
@@ -89,7 +110,11 @@ export const myCafe = query({
       .query('cafes')
       .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
       .first();
-    return cafe ?? null;
+    if (!cafe) return null;
+    const logoUrl = cafe.logoStorageId
+      ? await ctx.storage.getUrl(cafe.logoStorageId)
+      : null;
+    return { ...cafe, ...(logoUrl ? { logoUrl } : {}) };
   },
 });
 
@@ -123,6 +148,88 @@ export const updateProfile = mutation({
       taxRatePct: args.taxRatePct,
       taxEnabled: args.taxEnabled,
     });
+    return null;
+  },
+});
+
+export const updateProfileDetails = mutation({
+  args: {
+    name: v.string(),
+    businessType: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
+    email: v.optional(v.string()),
+    instagram: v.optional(v.string()),
+    addressLine: v.optional(v.string()),
+    city: v.optional(v.string()),
+    postalCode: v.optional(v.string()),
+    timezone: v.string(),
+    operatingHours: v.optional(
+      v.array(
+        v.object({
+          day: v.number(),
+          open: v.boolean(),
+          openTime: v.string(),
+          closeTime: v.string(),
+        })
+      )
+    ),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const name = args.name.trim();
+    if (name.length < 1) throw new Error('Nama kafe wajib diisi.');
+    if (name.length > 80) throw new Error('Nama kafe maksimal 80 karakter.');
+    const clean = (s?: string) => s?.trim() || undefined;
+    await ctx.db.patch(cafeId, {
+      name,
+      businessType: clean(args.businessType),
+      phone: clean(args.phone),
+      whatsapp: clean(args.whatsapp),
+      email: clean(args.email),
+      instagram: clean(args.instagram),
+      addressLine: clean(args.addressLine),
+      city: clean(args.city),
+      postalCode: clean(args.postalCode),
+      timezone: args.timezone,
+      operatingHours: args.operatingHours,
+    });
+    return null;
+  },
+});
+
+export const generateUploadUrl = mutation({
+  args: {},
+  returns: v.string(),
+  handler: async (ctx) => {
+    await requireOwnerCafe(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const setLogo = mutation({
+  args: { storageId: v.id('_storage') },
+  returns: v.null(),
+  handler: async (ctx, { storageId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const cafe = await ctx.db.get(cafeId);
+    if (cafe?.logoStorageId) await ctx.storage.delete(cafe.logoStorageId);
+    await ctx.db.patch(cafeId, { logoStorageId: storageId });
+    return null;
+  },
+});
+
+export const removeLogo = mutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const cafe = await ctx.db.get(cafeId);
+    if (cafe?.logoStorageId) {
+      await ctx.storage.delete(cafe.logoStorageId);
+      await ctx.db.patch(cafeId, { logoStorageId: undefined });
+    }
     return null;
   },
 });
