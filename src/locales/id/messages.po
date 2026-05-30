@@ -2157,8 +2157,8 @@ msgid "Terhubung"
 msgstr "Terhubung"
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Terima kasih 🙏"
-msgstr "Terima kasih 🙏"
+#~ msgid "Terima kasih 🙏"
+#~ msgstr "Terima kasih 🙏"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Terima pembayaran QRIS dinamis lewat penyedia."

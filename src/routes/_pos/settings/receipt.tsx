@@ -56,6 +56,62 @@ interface ReceiptDraft {
 // Live receipt preview
 // ---------------------------------------------------------------------------
 
+// The printed receipt is ALWAYS in English, independent of the app's UI
+// locale, so this sample content is intentionally hardcoded English and kept
+// out of the i18n catalog. Menu item names keep their original names.
+/* eslint-disable lingui/no-unlocalized-strings */
+const SAMPLE_RECEIPT = {
+  tagline: 'Coffee & Eatery',
+  address: 'Jl. Merdeka No. 10, Jakarta',
+  telLabel: 'Tel:',
+  phone: '0812-3456-7890',
+  npwp: 'NPWP 01.234.567.8-901.000',
+  receiptTitle: 'SALES RECEIPT',
+  dateTime: '30/05/2026  14:32',
+  orderLabel: 'Order',
+  orderNo: '001',
+  table: 'Table 4',
+  cashier: 'Cashier: Andi',
+  orderType: 'Type: Dine-in',
+  items: [
+    { name: 'Kopi Susu', total: '18.000', qtyLine: '1 × 18.000', mod: '+ Less sugar' },
+    { name: 'Croissant', total: '40.000', qtyLine: '2 × 20.000', mod: '+ Extra butter' },
+    { name: 'Teh Tarik', total: '15.000', qtyLine: '1 × 15.000', mod: null },
+  ],
+  charges: [
+    { label: 'Subtotal', value: '73.000' },
+    { label: 'Discount', value: '0' },
+    { label: 'Service 5%', value: '3.650' },
+  ],
+  tax: { label: 'Tax 11%', value: '8.430' },
+  total: { label: 'TOTAL', value: '85.080' },
+  payments: [
+    { label: 'Cash', value: '100.000' },
+    { label: 'Change', value: '14.920' },
+  ],
+  poweredBy: 'Powered by Kodapos',
+  defaultFooter: 'Thank you for your visit',
+};
+/* eslint-enable lingui/no-unlocalized-strings */
+
+/** One left-label / right-value line on the receipt. */
+function RcptRow({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) {
+  return (
+    <div className={cn('flex justify-between gap-2', bold && 'font-bold text-[1.1em]')}>
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
 function ReceiptPreview({
   draft,
   cafeName,
@@ -69,10 +125,8 @@ function ReceiptPreview({
   cafePhone?: string;
   cafeLogoUrl?: string;
 }) {
-  const { t } = useLingui();
-
   const headerName = draft.headerText.trim() || cafeName;
-  const footerText = draft.footerText.trim() || t`Terima kasih 🙏`;
+  const footerText = draft.footerText.trim() || SAMPLE_RECEIPT.defaultFooter;
   const prefix = draft.orderNumberPrefix ?? '';
 
   return (
@@ -94,53 +148,88 @@ function ReceiptPreview({
         </div>
       )}
 
-      {/* Cafe name / header */}
-      <div className="font-bold text-center">{headerName}</div>
+      {/* Cafe name + tagline */}
+      <div className="font-bold text-center text-[1.25em] leading-tight tracking-wide uppercase">
+        {headerName}
+      </div>
+      <div className="text-center opacity-70">{SAMPLE_RECEIPT.tagline}</div>
 
       {/* Address */}
-      {draft.showAddress && cafeAddress && (
-        <div className="text-center">{cafeAddress}</div>
+      {draft.showAddress && (
+        <div className="text-center mt-1">{cafeAddress || SAMPLE_RECEIPT.address}</div>
       )}
 
       {/* Phone */}
-      {draft.showPhone && cafePhone && (
-        <div className="text-center">{cafePhone}</div>
+      {draft.showPhone && (
+        <div className="text-center">
+          {`${SAMPLE_RECEIPT.telLabel} ${cafePhone || SAMPLE_RECEIPT.phone}`}
+        </div>
       )}
+
+      {/* Tax id */}
+      <div className="text-center opacity-70">{SAMPLE_RECEIPT.npwp}</div>
 
       <div className="border-t border-dashed border-black my-1" />
 
-      {/* Order number — hardcoded sample */}
-      {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-      {draft.showOrderNumber && <div>No: {prefix}001</div>}
-
-      {/* Cashier — hardcoded sample */}
-      {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-      {draft.showCashier && <div>Kasir: Andi</div>}
-
-      {/* Items — hardcoded sample data */}
-      {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-      <div>Kopi Susu x1 ........ 18.000</div>
-      {draft.showItemModifiers && (
-        // eslint-disable-next-line lingui/no-unlocalized-strings
-        <div className="pl-2">+ Less sugar</div>
-      )}
-      {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-      <div>Croissant x2 ...... 40.000</div>
+      {/* Receipt title */}
+      <div className="text-center font-semibold tracking-[0.2em]">
+        {SAMPLE_RECEIPT.receiptTitle}
+      </div>
 
       <div className="border-t border-dashed border-black my-1" />
 
-      {/* Totals — hardcoded sample data */}
-      {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-      <div>Subtotal ... 58.000</div>
-      {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-      {draft.showTaxBreakdown && <div>Pajak 11% ... 6.380</div>}
-      {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-      <div className="font-bold">TOTAL ... 64.380</div>
+      {/* Order meta — always-English sample (see SAMPLE_RECEIPT) */}
+      {draft.showOrderNumber && (
+        <RcptRow
+          label={`${SAMPLE_RECEIPT.orderLabel} ${prefix}${SAMPLE_RECEIPT.orderNo}`}
+          value={SAMPLE_RECEIPT.table}
+        />
+      )}
+      <div>{SAMPLE_RECEIPT.dateTime}</div>
+      {draft.showCashier && <div>{SAMPLE_RECEIPT.cashier}</div>}
+      <div>{SAMPLE_RECEIPT.orderType}</div>
+
+      <div className="border-t border-dashed border-black my-1" />
+
+      {/* Items */}
+      <div className="space-y-1">
+        {SAMPLE_RECEIPT.items.map((it) => (
+          <div key={it.name}>
+            <div className="flex justify-between gap-2">
+              <span>{it.name}</span>
+              <span>{it.total}</span>
+            </div>
+            <div className="opacity-70">{it.qtyLine}</div>
+            {draft.showItemModifiers && it.mod && (
+              <div className="pl-2 opacity-70">{it.mod}</div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="border-t border-dashed border-black my-1" />
+
+      {/* Charges + total */}
+      {SAMPLE_RECEIPT.charges.map((c) => (
+        <RcptRow key={c.label} label={c.label} value={c.value} />
+      ))}
+      {draft.showTaxBreakdown && (
+        <RcptRow label={SAMPLE_RECEIPT.tax.label} value={SAMPLE_RECEIPT.tax.value} />
+      )}
+      <RcptRow label={SAMPLE_RECEIPT.total.label} value={SAMPLE_RECEIPT.total.value} bold />
+
+      <div className="border-t border-dashed border-black my-1" />
+
+      {/* Payment */}
+      {SAMPLE_RECEIPT.payments.map((p) => (
+        <RcptRow key={p.label} label={p.label} value={p.value} />
+      ))}
 
       <div className="border-t border-dashed border-black my-1" />
 
       {/* Footer */}
       <div className="text-center">{footerText}</div>
+      <div className="text-center mt-1 opacity-70">{SAMPLE_RECEIPT.poweredBy}</div>
     </div>
   );
 }
@@ -280,7 +369,7 @@ function SettingsReceipt() {
                   <Input
                     value={draft.footerText}
                     onChange={(e) => setField('footerText', e.target.value)}
-                    placeholder={t`Terima kasih 🙏`}
+                    placeholder={SAMPLE_RECEIPT.defaultFooter}
                     className="w-56"
                   />
                 }
