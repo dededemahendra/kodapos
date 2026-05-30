@@ -8,22 +8,31 @@ import { CartLineRow } from './cart-line-row';
 export function CartPane({
   cart,
   dispatch,
+  subtotalIDR,
+  serviceChargeIDR,
+  serviceChargeName,
+  serviceChargePct,
   taxEnabled,
   taxRatePct,
+  taxIDR,
+  totalIDR,
   onBayar,
   onKosongkan,
 }: {
   cart: CartState;
   dispatch: (a: CartAction) => void;
+  subtotalIDR: number;
+  serviceChargeIDR: number;
+  serviceChargeName: string;
+  serviceChargePct: number;
   taxEnabled: boolean;
   taxRatePct: number;
+  taxIDR: number;
+  totalIDR: number;
   onBayar: () => void;
   onKosongkan: () => void;
 }) {
   const { t } = useLingui();
-  const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
-  const tax = taxEnabled ? Math.round((subtotal * taxRatePct) / 100) : 0;
-  const total = subtotal + tax;
   const empty = cart.lines.length === 0;
 
   return (
@@ -63,9 +72,15 @@ export function CartPane({
         )}
       </div>
       <div className="border-t border-border px-3 py-3 space-y-1 text-sm">
-        <Row label={t`Subtotal`} value={formatIDR(subtotal)} />
-        {taxEnabled ? <Row label={t`PPN ${taxRatePct}%`} value={formatIDR(tax)} /> : null}
-        <Row label={t`Total`} value={formatIDR(total)} bold large />
+        <Row label={t`Subtotal`} value={formatIDR(subtotalIDR)} />
+        {serviceChargeIDR > 0 ? (
+          <Row
+            label={`${serviceChargeName} ${serviceChargePct}%`}
+            value={formatIDR(serviceChargeIDR)}
+          />
+        ) : null}
+        {taxEnabled ? <Row label={t`PPN ${taxRatePct}%`} value={formatIDR(taxIDR)} /> : null}
+        <Row label={t`Total`} value={formatIDR(totalIDR)} bold large />
         <Button
           type="button"
           onClick={onBayar}

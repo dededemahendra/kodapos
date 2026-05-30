@@ -246,6 +246,12 @@ export default defineSchema({
     taxRatePct: v.number(),
     taxIDR: v.number(),
     discountIDR: v.number(),
+    // Service charge (added in the service-charge slice). Optional for
+    // backward-compat with orders created before it existed; createCashSale
+    // always writes them going forward (serviceChargeIDR 0 when disabled).
+    serviceChargeIDR: v.optional(v.number()),
+    serviceChargePct: v.optional(v.number()),
+    serviceChargeName: v.optional(v.string()),
     totalIDR: v.number(),
     paymentMethod: v.union(
       v.literal('cash'),
