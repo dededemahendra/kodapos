@@ -257,6 +257,9 @@ const orderSummary = v.object({
   taxRatePct: v.number(),
   taxIDR: v.number(),
   discountIDR: v.number(),
+  serviceChargeIDR: v.optional(v.number()),
+  serviceChargePct: v.optional(v.number()),
+  serviceChargeName: v.optional(v.string()),
   totalIDR: v.number(),
   paymentMethod: v.union(
     v.literal('cash'),
