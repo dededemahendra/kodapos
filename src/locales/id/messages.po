@@ -82,6 +82,11 @@ msgstr "+ Tambah"
 msgid "+ Tambah Bahan"
 msgstr "+ Tambah Bahan"
 
+#. placeholder {0}: data.count - data.items.length
+#: src/components/billing-health.tsx
+msgid "+{0} lainnya"
+msgstr "+{0} lainnya"
+
 #: src/routes/_pos/menu/index.tsx
 msgid "○ Off"
 msgstr "○ Off"
@@ -107,8 +112,8 @@ msgid "15 menit"
 msgstr "15 menit"
 
 #: src/components/dashboard-activity.tsx
-msgid "2 days ago"
-msgstr "2 days ago"
+#~ msgid "2 days ago"
+#~ msgstr "2 days ago"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "24 jam"
@@ -131,20 +136,20 @@ msgid "80 mm"
 msgstr "80 mm"
 
 #: src/components/dashboard-activity.tsx
-msgid "About 2 hours ago"
-msgstr "About 2 hours ago"
+#~ msgid "About 2 hours ago"
+#~ msgstr "About 2 hours ago"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Accurate"
 msgstr "Accurate"
 
 #: src/components/stats.tsx
-msgid "Active users"
-msgstr "Active users"
+#~ msgid "Active users"
+#~ msgstr "Active users"
 
 #: src/components/dashboard-activity.tsx
-msgid "Activity"
-msgstr "Activity"
+#~ msgid "Activity"
+#~ msgstr "Activity"
 
 #: src/routes/_public/index.tsx
 msgid "AI-native POS untuk kafe & QSR Indonesia."
@@ -169,6 +174,14 @@ msgstr "Aktifkan pajak"
 #: src/components/menu/cafe-profile-form.tsx
 msgid "Aktifkan PPN di kasir"
 msgstr "Aktifkan PPN di kasir"
+
+#: src/components/dashboard-activity.tsx
+msgid "Aktivitas"
+msgstr "Aktivitas"
+
+#: src/components/dashboard-activity.tsx
+msgid "Aktivitas terbaru di kafe Anda."
+msgstr "Aktivitas terbaru di kafe Anda."
 
 #: src/components/app-shared.tsx
 msgid "Akun"
@@ -201,8 +214,8 @@ msgid "Ambang isi ulang"
 msgstr "Ambang isi ulang"
 
 #: src/components/dashboard-invoices.tsx
-msgid "Amount"
-msgstr "Amount"
+#~ msgid "Amount"
+#~ msgstr "Amount"
 
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
@@ -267,6 +280,10 @@ msgstr "bahan"
 msgid "Bahan"
 msgstr "Bahan"
 
+#: src/components/billing-health.tsx
+msgid "Bahan yang perlu diisi ulang."
+msgstr "Bahan yang perlu diisi ulang."
+
 #: src/routes/_pos/settings/general.tsx
 msgid "Bahasa"
 msgstr "Bahasa"
@@ -292,8 +309,8 @@ msgid "Bakery"
 msgstr "Bakery"
 
 #: src/components/billing-health.tsx
-msgid "Balances and payouts look fine. nothing overdue in this snapshot."
-msgstr "Balances and payouts look fine. nothing overdue in this snapshot."
+#~ msgid "Balances and payouts look fine. nothing overdue in this snapshot."
+#~ msgstr "Balances and payouts look fine. nothing overdue in this snapshot."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Bar"
@@ -319,9 +336,18 @@ msgstr "Basi/Kedaluwarsa"
 msgid "Batal"
 msgstr "Batal"
 
+#: src/components/dashboard-invoices.tsx
+msgctxt "order status"
+msgid "Batal"
+msgstr "Batal"
+
 #: src/components/sale/cart-pane.tsx
 msgid "Bayar"
 msgstr "Bayar"
+
+#: src/components/dashboard-activity.tsx
+msgid "Belum ada aktivitas."
+msgstr "Belum ada aktivitas."
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
@@ -363,6 +389,10 @@ msgstr "Belum ada pesanan di shift ini."
 msgid "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
 msgstr "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
 
+#: src/components/dashboard-invoices.tsx
+msgid "Belum ada transaksi."
+msgstr "Belum ada transaksi."
+
 #: src/routes/_public/signin.tsx
 msgid "Belum punya akun?"
 msgstr "Belum punya akun?"
@@ -392,8 +422,8 @@ msgid "Biaya per satuan (Rp)"
 msgstr "Biaya per satuan (Rp)"
 
 #: src/components/billing-health.tsx
-msgid "Billing health"
-msgstr "Billing health"
+#~ msgid "Billing health"
+#~ msgstr "Billing health"
 
 #: src/routes/_pos/onboarding/profile.tsx
 msgid "Bisa diubah kapan saja di Pengaturan."
@@ -525,16 +555,16 @@ msgid "Cetak struk otomatis setelah pembayaran."
 msgstr "Cetak struk otomatis setelah pembayaran."
 
 #: src/components/channel-sales-chart.tsx
-msgid "Channel sales"
-msgstr "Channel sales"
+#~ msgid "Channel sales"
+#~ msgstr "Channel sales"
 
 #: src/components/stats.tsx
-msgid "Conversion Rate"
-msgstr "Conversion Rate"
+#~ msgid "Conversion Rate"
+#~ msgstr "Conversion Rate"
 
 #: src/components/dashboard-invoices.tsx
-msgid "Customer"
-msgstr "Customer"
+#~ msgid "Customer"
+#~ msgstr "Customer"
 
 #: src/routes/_public/index.tsx
 #: src/routes/_public/signin.tsx
@@ -543,12 +573,12 @@ msgid "Daftar"
 msgstr "Daftar"
 
 #: src/components/net-revenue-chart.tsx
-msgid "Daily net sales, last 7 days."
-msgstr "Daily net sales, last 7 days."
+#~ msgid "Daily net sales, last 7 days."
+#~ msgstr "Daily net sales, last 7 days."
 
 #: src/components/channel-sales-chart.tsx
-msgid "Daily sales count by channel, last {VISIBLE_DAYS} days."
-msgstr "Daily sales count by channel, last {VISIBLE_DAYS} days."
+#~ msgid "Daily sales count by channel, last {VISIBLE_DAYS} days."
+#~ msgstr "Daily sales count by channel, last {VISIBLE_DAYS} days."
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "DANA"
@@ -567,12 +597,12 @@ msgid "Dasbor baru"
 msgstr "Dasbor baru"
 
 #: src/components/dashboard-activity.tsx
-msgid "Dashboard v2 shipped to prod"
-msgstr "Dashboard v2 shipped to prod"
+#~ msgid "Dashboard v2 shipped to prod"
+#~ msgstr "Dashboard v2 shipped to prod"
 
 #: src/components/dashboard.tsx
-msgid "Data contoh: dasbor belum terhubung ke data kafe."
-msgstr "Data contoh: dasbor belum terhubung ke data kafe."
+#~ msgid "Data contoh: dasbor belum terhubung ke data kafe."
+#~ msgstr "Data contoh: dasbor belum terhubung ke data kafe."
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Detail kontak"
@@ -861,12 +891,12 @@ msgid "Inventaris"
 msgstr "Inventaris"
 
 #: src/components/dashboard-invoices.tsx
-msgid "Invoice"
-msgstr "Invoice"
+#~ msgid "Invoice"
+#~ msgstr "Invoice"
 
 #: src/components/dashboard-activity.tsx
-msgid "Invoice #1045 marked paid"
-msgstr "Invoice #1045 marked paid"
+#~ msgid "Invoice #1045 marked paid"
+#~ msgstr "Invoice #1045 marked paid"
 
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Item baru"
@@ -875,6 +905,10 @@ msgstr "Item baru"
 #: src/components/app-shared.tsx
 msgid "Item Menu"
 msgstr "Item Menu"
+
+#: src/components/stats.tsx
+msgid "Item terjual"
+msgstr "Item terjual"
 
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Item tidak ditemukan."
@@ -910,8 +944,8 @@ msgid "Jika aktif, harga menu dianggap sudah termasuk pajak."
 msgstr "Jika aktif, harga menu dianggap sudah termasuk pajak."
 
 #: src/components/dashboard-activity.tsx
-msgid "Jordan joined the team"
-msgstr "Jordan joined the team"
+#~ msgid "Jordan joined the team"
+#~ msgstr "Jordan joined the team"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Jumat"
@@ -936,6 +970,10 @@ msgstr "Jumlah dibuang"
 msgid "Jumlah salinan"
 msgstr "Jumlah salinan"
 
+#: src/components/channel-sales-chart.tsx
+msgid "Jumlah transaksi per metode, 7 hari terakhir."
+msgstr "Jumlah transaksi per metode, 7 hari terakhir."
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kafe"
 msgstr "Kafe"
@@ -958,6 +996,7 @@ msgid "Kartu debit/kredit"
 msgstr "Kartu debit/kredit"
 
 #: src/components/app-shared.tsx
+#: src/components/dashboard-invoices.tsx
 #: src/components/staff/staff-picker-card.tsx
 #: src/routes/_pos/onboarding/route.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -1063,6 +1102,10 @@ msgstr "Kerugian"
 msgid "Kerugian limbah (30 hari):"
 msgstr "Kerugian limbah (30 hari):"
 
+#: src/components/billing-health.tsx
+msgid "Kesehatan stok"
+msgstr "Kesehatan stok"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Kirim struk & notifikasi via WhatsApp."
 msgstr "Kirim struk & notifikasi via WhatsApp."
@@ -1167,8 +1210,8 @@ msgid "Laporan Produk"
 msgstr "Laporan Produk"
 
 #: src/components/dashboard-activity.tsx
-msgid "Latest updates in your workspace."
-msgstr "Latest updates in your workspace."
+#~ msgid "Latest updates in your workspace."
+#~ msgstr "Latest updates in your workspace."
 
 #: src/lib/auth-validation.ts
 msgid "Lemah"
@@ -1186,6 +1229,10 @@ msgstr "Lewati semua"
 msgid "Lihat laporan"
 msgstr "Lihat laporan"
 
+#: src/components/dashboard-invoices.tsx
+msgid "Lihat semua"
+msgstr "Lihat semua"
+
 #: src/components/app-shared.tsx
 msgid "Limbah"
 msgstr "Limbah"
@@ -1202,6 +1249,10 @@ msgstr "Logo kafe"
 #: src/routes/_pos/loyalty.tsx
 msgid "Loyalitas"
 msgstr "Loyalitas"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Lunas"
+msgstr "Lunas"
 
 #: src/routes/_public/index.tsx
 #: src/routes/_public/signin.tsx
@@ -1291,6 +1342,10 @@ msgstr "Mengikuti sistem."
 msgid "Menu"
 msgstr "Menu"
 
+#: src/components/dashboard-invoices.tsx
+msgid "Menunggu"
+msgstr "Menunggu"
+
 #: src/routes/_pos/shift/close.tsx
 msgid "Menutup…"
 msgstr "Menutup…"
@@ -1309,6 +1364,7 @@ msgstr "Menyimpan…"
 msgid "Metode default"
 msgstr "Metode default"
 
+#: src/components/channel-sales-chart.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Metode pembayaran"
 msgstr "Metode pembayaran"
@@ -1454,12 +1510,12 @@ msgid "Navigasi sidebar & dasbor."
 msgstr "Navigasi sidebar & dasbor."
 
 #: src/components/net-revenue-chart.tsx
-msgid "Net revenue"
-msgstr "Net revenue"
+#~ msgid "Net revenue"
+#~ msgstr "Net revenue"
 
 #: src/components/stats.tsx
-msgid "New signups"
-msgstr "New signups"
+#~ msgid "New signups"
+#~ msgstr "New signups"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "NMID"
@@ -1475,8 +1531,8 @@ msgid "Normal"
 msgstr "Normal"
 
 #: src/components/billing-health.tsx
-msgid "Nothing urgent needs your attention."
-msgstr "Nothing urgent needs your attention."
+#~ msgid "Nothing urgent needs your attention."
+#~ msgstr "Nothing urgent needs your attention."
 
 #: src/components/app-header.tsx
 #: src/routes/_pos/settings/general.tsx
@@ -1492,12 +1548,12 @@ msgid "Nyaman"
 msgstr "Nyaman"
 
 #: src/components/channel-sales-chart.tsx
-msgid "Online"
-msgstr "Online"
+#~ msgid "Online"
+#~ msgstr "Online"
 
 #: src/components/dashboard-invoices.tsx
-msgid "Open amounts and payment status."
-msgstr "Open amounts and payment status."
+#~ msgid "Open amounts and payment status."
+#~ msgstr "Open amounts and payment status."
 
 #: src/components/app-shared.tsx
 msgid "Operasional"
@@ -1562,6 +1618,10 @@ msgstr "PEMBARUAN"
 msgid "Pembayaran"
 msgstr "Pembayaran"
 
+#: src/components/dashboard-activity.tsx
+msgid "Pembayaran diterima"
+msgstr "Pembayaran diterima"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pembayaran e-wallet DANA."
 msgstr "Pembayaran e-wallet DANA."
@@ -1596,6 +1656,18 @@ msgstr "Pemilik"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Pemilik memiliki semua izin."
 msgstr "Pemilik memiliki semua izin."
+
+#: src/components/net-revenue-chart.tsx
+msgid "Pendapatan"
+msgstr "Pendapatan"
+
+#: src/components/stats.tsx
+msgid "Pendapatan hari ini"
+msgstr "Pendapatan hari ini"
+
+#: src/components/net-revenue-chart.tsx
+msgid "Pendapatan harian, 7 hari terakhir."
+msgstr "Pendapatan harian, 7 hari terakhir."
 
 #: src/components/app-shared.tsx
 #: src/components/nav-user.tsx
@@ -1662,6 +1734,10 @@ msgstr "Pesanan"
 #: src/components/sale/cart-pane.tsx
 msgid "Pesanan ({0})"
 msgstr "Pesanan ({0})"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Pesanan terakhir dan statusnya."
+msgstr "Pesanan terakhir dan statusnya."
 
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan tidak ditemukan."
@@ -1800,6 +1876,7 @@ msgstr "Putar suara konfirmasi setelah pembayaran selesai."
 msgid "Putuskan"
 msgstr "Putuskan"
 
+#: src/components/channel-sales-chart.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "QRIS"
 msgstr "QRIS"
@@ -1820,13 +1897,17 @@ msgstr "QRIS statis"
 msgid "Rabu"
 msgstr "Rabu"
 
-#: src/components/dashboard-invoices.tsx
-msgid "Recent invoices"
-msgstr "Recent invoices"
+#: src/components/stats.tsx
+msgid "Rata-rata transaksi"
+msgstr "Rata-rata transaksi"
 
 #: src/components/dashboard-invoices.tsx
-msgid "Recent invoices with customer, amount, and status."
-msgstr "Recent invoices with customer, amount, and status."
+#~ msgid "Recent invoices"
+#~ msgstr "Recent invoices"
+
+#: src/components/dashboard-invoices.tsx
+#~ msgid "Recent invoices with customer, amount, and status."
+#~ msgstr "Recent invoices with customer, amount, and status."
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Regional"
@@ -1847,16 +1928,16 @@ msgid "Restoran"
 msgstr "Restoran"
 
 #: src/components/channel-sales-chart.tsx
-msgid "Retail"
-msgstr "Retail"
+#~ msgid "Retail"
+#~ msgstr "Retail"
 
 #: src/components/stats.tsx
-msgid "Revenue"
-msgstr "Revenue"
+#~ msgid "Revenue"
+#~ msgstr "Revenue"
 
 #: src/components/billing-health.tsx
-msgid "Review open invoices"
-msgstr "Review open invoices"
+#~ msgid "Review open invoices"
+#~ msgstr "Review open invoices"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Ringkas"
@@ -1905,8 +1986,8 @@ msgid "Salah masak"
 msgstr "Salah masak"
 
 #: src/components/net-revenue-chart.tsx
-msgid "Sales"
-msgstr "Sales"
+#~ msgid "Sales"
+#~ msgstr "Sales"
 
 #: src/components/inventory/ingredient-form.tsx
 msgid "Satuan"
@@ -1999,6 +2080,11 @@ msgstr "Set PIN"
 msgid "Shift"
 msgstr "Shift"
 
+#: src/components/dashboard-activity.tsx
+msgid "Shift dibuka"
+msgstr "Shift dibuka"
+
+#: src/components/dashboard-activity.tsx
 #: src/routes/_pos/shift/close.tsx
 msgid "Shift ditutup"
 msgstr "Shift ditutup"
@@ -2062,6 +2148,10 @@ msgstr "Status"
 #: src/routes/_pos/inventory/index.tsx
 msgid "Stok"
 msgstr "Stok"
+
+#: src/components/billing-health.tsx
+msgid "Stok aman."
+msgstr "Stok aman."
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Stok baru"
@@ -2272,8 +2362,8 @@ msgid "Test cetak"
 msgstr "Test cetak"
 
 #: src/components/dashboard-activity.tsx
-msgid "This morning"
-msgstr "This morning"
+#~ msgid "This morning"
+#~ msgstr "This morning"
 
 #: src/components/inventory/ingredient-picker.tsx
 msgid "Tidak ada bahan cocok."
@@ -2282,6 +2372,10 @@ msgstr "Tidak ada bahan cocok."
 #: src/routes/_pos/inventory/index.tsx
 msgid "Tidak ada bahan dengan stok rendah."
 msgstr "Tidak ada bahan dengan stok rendah."
+
+#: src/components/billing-health.tsx
+msgid "Tidak ada bahan di bawah ambang."
+msgstr "Tidak ada bahan di bawah ambang."
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Tidak ada bahan diarsipkan."
@@ -2303,6 +2397,10 @@ msgstr "Tidak ada shift terbuka."
 msgid "Tidak ada staf yang ditemukan."
 msgstr "Tidak ada staf yang ditemukan."
 
+#: src/components/billing-health.tsx
+msgid "Tinjau inventaris"
+msgstr "Tinjau inventaris"
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Tombol nominal cepat"
 #~ msgstr "Tombol nominal cepat"
@@ -2311,6 +2409,7 @@ msgstr "Tidak ada staf yang ditemukan."
 msgid "Tombol uang cepat"
 msgstr "Tombol uang cepat"
 
+#: src/components/dashboard-invoices.tsx
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
 msgid "Total"
@@ -2325,6 +2424,18 @@ msgstr "Total <0>{0}</0>"
 msgid "Total tagihan"
 msgstr "Total tagihan"
 
+#: src/components/stats.tsx
+msgid "Transaksi"
+msgstr "Transaksi"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Transaksi terbaru"
+msgstr "Transaksi terbaru"
+
+#: src/components/dashboard-invoices.tsx
+msgid "Transaksi terbaru dengan kasir, waktu, dan total."
+msgstr "Transaksi terbaru dengan kasir, waktu, dan total."
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "Transfer"
 msgstr "Transfer"
@@ -2338,6 +2449,7 @@ msgstr "Transfer bank"
 msgid "Tumpah"
 msgstr "Tumpah"
 
+#: src/components/channel-sales-chart.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/history.tsx
 #: src/routes/_pos/settings/tax.tsx
@@ -2423,16 +2535,20 @@ msgid "USB"
 msgstr "USB"
 
 #: src/components/dashboard-invoices.tsx
-msgid "View All"
-msgstr "View All"
+#~ msgid "View All"
+#~ msgstr "View All"
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Void transaksi"
 msgstr "Void transaksi"
 
 #: src/components/stats.tsx
-msgid "vs last week"
-msgstr "vs last week"
+msgid "vs kemarin"
+msgstr "vs kemarin"
+
+#: src/components/stats.tsx
+#~ msgid "vs last week"
+#~ msgstr "vs last week"
 
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -2453,9 +2569,13 @@ msgstr "Wajib PIN untuk void/refund"
 msgid "Wajib?"
 msgstr "Wajib?"
 
+#: src/components/dashboard-invoices.tsx
+msgid "Waktu"
+msgstr "Waktu"
+
 #: src/components/dashboard-activity.tsx
-msgid "Weekly summary exported"
-msgstr "Weekly summary exported"
+#~ msgid "Weekly summary exported"
+#~ msgstr "Weekly summary exported"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "WhatsApp"
@@ -2497,12 +2617,12 @@ msgid "WITA (Makassar)"
 msgstr "WITA (Makassar)"
 
 #: src/components/dashboard-activity.tsx
-msgid "Yesterday"
-msgstr "Yesterday"
+#~ msgid "Yesterday"
+#~ msgstr "Yesterday"
 
 #: src/components/billing-health.tsx
-msgid "You're caught up."
-msgstr "You're caught up."
+#~ msgid "You're caught up."
+#~ msgstr "You're caught up."
 
 #: src/components/menu/cafe-profile-form.tsx
 #: src/routes/_pos/settings/profile.tsx
