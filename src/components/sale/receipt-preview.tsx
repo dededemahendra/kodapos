@@ -70,6 +70,14 @@ export function ReceiptPreview({
               <span><Trans>Subtotal</Trans></span>
               <span className="tabular-nums">{formatIDR(order.subtotalIDR)}</span>
             </div>
+            {(order.serviceChargeIDR ?? 0) > 0 ? (
+              <div className="flex justify-between">
+                <span>
+                  {order.serviceChargeName ?? 'Biaya Layanan'} {order.serviceChargePct}%
+                </span>
+                <span className="tabular-nums">{formatIDR(order.serviceChargeIDR ?? 0)}</span>
+              </div>
+            ) : null}
             {order.taxIDR > 0 ? (
               <div className="flex justify-between">
                 <span><Trans>PPN {order.taxRatePct}%</Trans></span>
