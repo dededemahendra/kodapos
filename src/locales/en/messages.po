@@ -52,6 +52,10 @@ msgstr "@cafename"
 msgid "← Kembali"
 msgstr "← Back"
 
+#: src/routes/_pos/inventory/waste.tsx
+msgid "+ Catat Limbah"
+msgstr "+ Record Waste"
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "+ Grup baru"
 msgstr "+ New group"
@@ -183,6 +187,8 @@ msgid "Alamat (opsional)"
 msgstr "Address (optional)"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/waste.tsx
 msgid "Alasan"
 msgstr "Reason"
 
@@ -256,6 +262,8 @@ msgid "bahan"
 msgstr "ingredient"
 
 #: src/components/inventory/recipe-editor.tsx
+#: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/waste.tsx
 msgid "Bahan"
 msgstr "Ingredient"
 
@@ -295,8 +303,14 @@ msgstr "Bar"
 msgid "Baru"
 msgstr "New"
 
+#: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Basi/Kedaluwarsa"
+msgstr "Spoiled/Expired"
+
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/confirm-archive.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/sale-screen.tsx
@@ -328,6 +342,10 @@ msgstr "No items yet."
 #: src/components/menu/category-table.tsx
 msgid "Belum ada kategori."
 msgstr "No categories yet."
+
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Belum ada limbah tercatat dalam 30 hari terakhir."
+msgstr "No waste recorded in the last 30 days."
 
 #: src/components/menu/modifier-group-form.tsx
 msgid "Belum ada opsi. Tambahkan minimal satu."
@@ -449,6 +467,10 @@ msgstr "Search staff name…"
 msgid "Cashier harus memilih"
 msgstr "Cashier must select"
 
+#: src/components/inventory/waste-dialog.tsx
+msgid "Catat limbah"
+msgstr "Record waste"
+
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Catat Limbah"
 msgstr "Log Waste"
@@ -461,7 +483,12 @@ msgstr "Record Stock"
 msgid "Catat stok:"
 msgstr "Record stock:"
 
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Catatan"
+msgstr "Notes"
+
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/waste-dialog.tsx
 msgid "Catatan (opsional)"
 msgstr "Note (optional)"
 
@@ -645,6 +672,10 @@ msgstr "Failed to add cashier."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Gagal menambah staf."
 msgstr "Failed to add staff."
+
+#: src/components/inventory/waste-dialog.tsx
+msgid "Gagal mencatat limbah."
+msgstr "Failed to record waste."
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Gagal mencatat stok."
@@ -884,6 +915,7 @@ msgstr "Friday"
 
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
+#: src/routes/_pos/inventory/waste.tsx
 msgid "Jumlah"
 msgstr "Quantity"
 
@@ -891,6 +923,10 @@ msgstr "Quantity"
 #: src/components/sale/cart-line-row.tsx
 msgid "Jumlah {0}"
 msgstr "Quantity {0}"
+
+#: src/components/inventory/waste-dialog.tsx
+msgid "Jumlah dibuang"
+msgstr "Quantity wasted"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Jumlah salinan"
@@ -1015,6 +1051,14 @@ msgstr "Change"
 msgid "Kepadatan tampilan"
 msgstr "Display density"
 
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Kerugian"
+msgstr "Loss"
+
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Kerugian limbah (30 hari):"
+msgstr "Waste loss (30 days):"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Kirim struk & notifikasi via WhatsApp."
 msgstr "Send receipts & notifications via WhatsApp."
@@ -1072,6 +1116,8 @@ msgstr "Auto-lock when idle"
 msgid "Kurangi jumlah"
 msgstr "Decrease quantity"
 
+#: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Lainnya"
 msgstr "Other"
@@ -1137,7 +1183,6 @@ msgid "Lihat laporan"
 msgstr "View reports"
 
 #: src/components/app-shared.tsx
-#: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Limbah"
 msgstr "Waste"
 
@@ -1214,6 +1259,7 @@ msgstr "Loading receipt…"
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
 #: src/routes/_pos/menu/modifiers.$groupId.tsx
@@ -1248,6 +1294,7 @@ msgstr "Closing…"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/cafe-profile-form.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/components/menu/modifier-group-form.tsx
@@ -1579,6 +1626,10 @@ msgstr "Role"
 msgid "Peringatan stok rendah"
 msgstr "Low-stock alerts"
 
+#: src/components/inventory/waste-dialog.tsx
+msgid "Perkiraan kerugian:"
+msgstr "Estimated loss:"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "Persentase"
 msgstr "Percentage"
@@ -1611,6 +1662,10 @@ msgstr "Order ({0})"
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan tidak ditemukan."
 msgstr "Order not found."
+
+#: src/components/inventory/waste-dialog.tsx
+msgid "Pilih bahan"
+msgstr "Select ingredient"
 
 #: src/components/inventory/ingredient-picker.tsx
 msgid "Pilih bahan…"
@@ -1831,9 +1886,19 @@ msgstr "Nearest Rp100"
 msgid "Rp500 terdekat"
 msgstr "Nearest Rp500"
 
+#: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Rusak"
+msgstr "Damaged"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Sabtu"
 msgstr "Saturday"
+
+#: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Salah masak"
+msgstr "Mis-cooked"
 
 #: src/components/net-revenue-chart.tsx
 msgid "Sales"
@@ -1944,6 +2009,7 @@ msgstr "Who's on duty?"
 
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -2012,6 +2078,7 @@ msgid "Stok rendah: {0}"
 msgstr "Low stock: {0}"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/waste-dialog.tsx
 msgid "Stok saat ini:"
 msgstr "Current stock:"
 
@@ -2136,6 +2203,10 @@ msgstr "Show tax breakdown"
 #~ msgid "Tampilkan tombol nominal saat pembayaran tunai."
 #~ msgstr "Show quick-amount buttons during cash payment."
 
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Tanggal"
+msgstr "Date"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tanpa pembulatan"
 msgstr "No rounding"
@@ -2257,6 +2328,11 @@ msgstr "Transfer"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Transfer bank"
 msgstr "Bank transfer"
+
+#: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/waste.tsx
+msgid "Tumpah"
+msgstr "Spilled"
 
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/history.tsx
