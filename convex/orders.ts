@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { computeOrderTotals } from './lib/pricing';
 import { requireActiveCashier } from './lib/staff';
 
 const lineInput = v.object({
@@ -162,8 +163,24 @@ export const createCashSale = mutation({
     const cafe = await ctx.db.get(cafeId);
     const taxEnabled = cafe?.taxEnabled === true;
     const taxRatePct = taxEnabled ? cafe?.taxRatePct ?? 0 : 0;
-    const taxIDR = Math.round((subtotalIDR * taxRatePct) / 100);
-    const totalIDR = subtotalIDR + taxIDR;
+
+    const settings = await ctx.db
+      .query('cafeSettings')
+      .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+      .first();
+    const pay = settings?.payment;
+    const scEnabled = pay?.serviceChargeEnabled === true;
+    const scPct = scEnabled ? pay?.serviceChargePct ?? 0 : 0;
+    const scName = pay?.serviceChargeName ?? 'Biaya Layanan';
+
+    const { serviceChargeIDR, taxIDR, totalIDR } = computeOrderTotals({
+      subtotalIDR,
+      discountIDR: 0,
+      serviceChargeEnabled: scEnabled,
+      serviceChargePct: scPct,
+      taxEnabled,
+      taxRatePct,
+    });
 
     if (tendered < totalIDR) {
       throw new Error('Uang yang diterima kurang dari total.');
@@ -180,6 +197,9 @@ export const createCashSale = mutation({
       taxRatePct,
       taxIDR,
       discountIDR: 0,
+      serviceChargeIDR,
+      serviceChargePct: scPct,
+      serviceChargeName: scName,
       totalIDR,
       paymentMethod: 'cash',
       paymentStatus: 'paid',

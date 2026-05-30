@@ -602,6 +602,83 @@ describe('orders read queries', () => {
   });
 });
 
+async function enableServiceCharge(
+  asOwner: Setup['asOwner'],
+  pct: number
+): Promise<void> {
+  await asOwner.mutation(api.settings.updatePayment, {
+    payment: {
+      methods: {
+        cash: true,
+        qrisStatic: true,
+        qrisDynamic: false,
+        card: false,
+        ewallet: false,
+        transfer: false,
+      },
+      defaultMethod: 'cash',
+      cashRounding: 'none',
+      quickCashButtons: [20000, 50000, 100000],
+      serviceChargeEnabled: true,
+      serviceChargePct: pct,
+      serviceChargeName: 'Biaya Layanan',
+    },
+  });
+}
+
+describe('orders.createCashSale service charge', () => {
+  it('applies service charge then taxes subtotal + service charge (PB1 after SC)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t, {
+      taxEnabled: true,
+      taxRatePct: 11,
+    });
+    await enableServiceCharge(asOwner, 5);
+
+    // Espresso 18000 → subtotal 18000; SC 5% = 900; taxBase 18900; tax 11% = 2079; total 20979
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'sc-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 21000,
+      createdAtClient: 1700000000000,
+    });
+    expect(result.totalIDR).toBe(20979);
+
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.subtotalIDR).toBe(18000);
+    expect(order?.serviceChargeIDR).toBe(900);
+    expect(order?.serviceChargePct).toBe(5);
+    expect(order?.serviceChargeName).toBe('Biaya Layanan');
+    expect(order?.taxIDR).toBe(2079);
+    expect(order?.totalIDR).toBe(20979);
+  });
+
+  it('records serviceChargeIDR 0 and taxes only the subtotal when disabled', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t, {
+      taxEnabled: true,
+      taxRatePct: 11,
+    });
+    // service charge never enabled → no cafeSettings row
+
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'sc-2',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    // subtotal 18000; tax 11% = 1980; total 19980
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.serviceChargeIDR).toBe(0);
+    expect(order?.taxIDR).toBe(1980);
+    expect(order?.totalIDR).toBe(19980);
+  });
+});
+
 describe('orders.createCashSale — inventory deduction', () => {
   it('writes one inventoryMovements row per recipe ingredient', async () => {
     const t = convexTest(schema, modules);
