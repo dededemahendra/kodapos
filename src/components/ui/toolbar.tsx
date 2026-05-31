@@ -17,8 +17,9 @@ export function Toolbar({
   onFilter,
   children,
 }: {
-  search: string;
-  onSearch: (value: string) => void;
+  /** Omit search + onSearch to render a toolbar without a search box. */
+  search?: string;
+  onSearch?: (value: string) => void;
   searchPlaceholder?: string;
   filters: ToolbarFilter[];
   active: string;
@@ -27,13 +28,15 @@ export function Toolbar({
 }) {
   return (
     <div className="flex items-center gap-2 mb-3 flex-wrap">
-      <Input
-        aria-label={searchPlaceholder}
-        placeholder={searchPlaceholder}
-        value={search}
-        onChange={(e) => onSearch(e.target.value)}
-        className="max-w-xs"
-      />
+      {onSearch ? (
+        <Input
+          aria-label={searchPlaceholder}
+          placeholder={searchPlaceholder}
+          value={search ?? ''}
+          onChange={(e) => onSearch(e.target.value)}
+          className="max-w-xs"
+        />
+      ) : null}
       <div className="flex items-center gap-1">
         {filters.map((f) => (
           <button

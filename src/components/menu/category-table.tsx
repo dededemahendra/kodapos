@@ -29,6 +29,8 @@ export function CategoryTable() {
   const [archiveTarget, setArchiveTarget] = useState<Category | null>(null);
 
   const categories = useQuery(api.menu.categories.list, { includeArchived: true });
+  // Counts reflect active items per category (default list excludes archived /
+  // inactive). The "Item" column is an at-a-glance active-menu indicator.
   const items = useQuery(api.menu.items.list, {});
   const archiveCategory = useMutation(api.menu.categories.archive);
   const setOrder = useMutation(api.menu.categories.setOrder);
@@ -145,8 +147,6 @@ export function CategoryTable() {
       />
 
       <Toolbar
-        search=""
-        onSearch={() => {}}
         active={filter}
         onFilter={(v) => setFilter(v as Filter)}
         filters={[
