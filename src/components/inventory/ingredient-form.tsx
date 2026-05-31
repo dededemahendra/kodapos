@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
+import { toast } from '~/lib/toast';
 
 type CanonicalUnit = 'g' | 'ml' | 'piece';
 
@@ -84,9 +85,12 @@ export function IngredientForm({
         reorderThreshold: Number.parseInt(reorderThreshold, 10) || 0,
         lastCostPerUnitIDR: Number.parseInt(lastCostPerUnitIDR, 10) || 0,
       });
+      toast.success(isEdit ? t`Bahan diperbarui.` : t`Bahan ditambahkan.`);
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t`Gagal menyimpan bahan.`);
+      const message = err instanceof Error ? err.message : t`Gagal menyimpan bahan.`;
+      setError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -165,6 +169,7 @@ export function IngredientForm({
                 }
                 onConfirm={async () => {
                   await archive({ id: ingredientId });
+                  toast.success(t`Bahan diarsipkan.`);
                   onOpenChange(false);
                 }}
               />
