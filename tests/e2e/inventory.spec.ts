@@ -1,6 +1,48 @@
 import { expect, test } from '@playwright/test';
 import { gotoHydrated, waitForUrlHydrated } from './_helpers';
 
+async function signupAndAddSusu(page: import('@playwright/test').Page) {
+  const email = `e2e+${Date.now()}@kodapos.test`;
+  const password = 'Sa{ngat-Aman-123';
+
+  await gotoHydrated(page, '/signup');
+  await page.getByLabel('Nama Anda').fill('E2E Owner');
+  await page.getByLabel('Nama kafe').fill('Kopi E2E Kit');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.locator('#terms').click();
+  await page.getByRole('button', { name: /Daftar/ }).click();
+
+  await waitForUrlHydrated(page, /\/onboarding\/profile$/, { timeout: 15_000 });
+  await page.getByLabel('Persentase PPN').fill('11');
+  await page.getByRole('button', { name: /Lanjut/ }).click();
+
+  await waitForUrlHydrated(page, /\/onboarding\/menu$/);
+  await page.goto('/onboarding/cashier');
+  await waitForUrlHydrated(page, /\/onboarding\/cashier$/);
+  await page.getByRole('button', { name: /Atur PIN/ }).click();
+  for (const digit of '1234') await page.keyboard.type(digit);
+  await expect(page.getByRole('button', { name: /Ganti PIN/ })).toBeVisible({ timeout: 5_000 });
+  await page.getByRole('button', { name: /Selesai/ }).click();
+
+  await page.goto('/pin');
+  await waitForUrlHydrated(page, /\/pin$/);
+  await page.getByRole('button', { name: /E2E Owner/ }).click();
+  for (const digit of '1234') await page.keyboard.type(digit);
+  await waitForUrlHydrated(page, /\/shift\/open$/);
+
+  await page.goto('/inventory');
+  await waitForUrlHydrated(page, /\/inventory$/);
+  await page.getByRole('button', { name: /Tambah Bahan/ }).click();
+  await page.getByLabel('Nama').fill('Susu');
+  await page.getByLabel('Satuan', { exact: true }).click();
+  await page.getByRole('option', { name: /Mililiter/ }).click();
+  await page.getByLabel('Ambang isi ulang').fill('500');
+  await page.getByLabel('Biaya per satuan (Rp)').fill('25');
+  await page.getByRole('button', { name: /^Simpan$/ }).click();
+  await expect(page.getByText(/Bahan ditambahkan/)).toBeVisible();
+}
+
 test.describe('inventory + recipes (auth-gated)', () => {
   test.skip(!process.env.RUN_AUTH_E2E, 'set RUN_AUTH_E2E=1 to run');
   test.setTimeout(180_000);
@@ -64,7 +106,7 @@ test.describe('inventory + recipes (auth-gated)', () => {
     // 6. /inventory: add Susu
     await page.goto('/inventory');
     await waitForUrlHydrated(page, /\/inventory$/);
-    await page.getByRole('button', { name: /\+ Tambah Bahan/ }).click();
+    await page.getByRole('button', { name: /Tambah Bahan/ }).click();
     await page.getByLabel('Nama').fill('Susu');
     // Unit select - shadcn Select. Use exact match because "Satuan" also
     // appears in "Biaya per satuan (Rp)".
@@ -76,7 +118,8 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await expect(page.getByText(/Susu/)).toBeVisible();
 
     // 6. /menu - find the Espresso item link and click into recipe editor
-    await page.getByRole('link', { name: /Menu/ }).click();
+    // The "Menu" sidebar entry is now a collapsible button, not a direct link — navigate directly.
+    await page.goto('/menu');
     await waitForUrlHydrated(page, /\/menu$/);
     await page.getByRole('link', { name: /Espresso/ }).click();
     await expect(page).toHaveURL(/\/menu\/items\/[^/]+$/);
@@ -113,5 +156,30 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.goto('/inventory');
     await waitForUrlHydrated(page, /\/inventory$/);
     await expect(page.getByText(/-200 ml/)).toBeVisible();
+  });
+
+  test('Stock page: sort, ⋯ menu, cancel archive, adjust-stock toast', async ({ page }) => {
+    await signupAndAddSusu(page);
+
+    // Sort the "Bahan" column — header is a button (exact to avoid matching "Tambah Bahan").
+    await page.getByRole('button', { name: 'Bahan', exact: true }).click();
+
+    // Open the ⋯ row menu for Susu.
+    await page.getByRole('button', { name: /Aksi baris/ }).first().click();
+    await expect(page.getByRole('menuitem', { name: /Arsipkan/ })).toBeVisible();
+
+    // Open the archive confirm, then cancel it — row stays.
+    await page.getByRole('menuitem', { name: /Arsipkan/ }).click();
+    await expect(page.getByRole('alertdialog')).toBeVisible();
+    await page.getByRole('button', { name: /Batal/ }).click();
+    // Row must still be visible after cancel — match the name cell text.
+    await expect(page.getByRole('cell', { name: /Susu/ }).first()).toBeVisible();
+
+    // Adjust stock from the ⋯ menu → success toast.
+    await page.getByRole('button', { name: /Aksi baris/ }).first().click();
+    await page.getByRole('menuitem', { name: /Catat stok masuk/ }).click();
+    await page.getByLabel(/Stok baru/).fill('1000');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Stok dicatat/)).toBeVisible();
   });
 });

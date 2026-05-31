@@ -1,172 +1,249 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
-import type { Id } from 'convex/_generated/dataModel';
+import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { type FormEvent, useState } from 'react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
-import { ConfirmArchive } from '~/components/menu/confirm-archive';
+import { Archive, Pencil, Plus } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { CategoryFormDialog } from '~/components/menu/category-form-dialog';
 import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { Spinner } from '~/components/ui/spinner';
+import { ConfirmDialog } from '~/components/ui/confirm-dialog';
+import { Empty, EmptyHeader, EmptyTitle } from '~/components/ui/empty';
+import { PageHeader } from '~/components/ui/page-header';
+import {
+  ReorderableTable,
+  type ReorderableColumn,
+} from '~/components/ui/reorderable-table';
+import { RowActions } from '~/components/ui/row-actions';
+import { StatusBadge } from '~/components/ui/status-badge';
+import { Toolbar } from '~/components/ui/toolbar';
+import { toast } from '~/lib/toast';
+
+type Category = Doc<'categories'>;
+type Filter = 'active' | 'archived';
 
 export function CategoryTable() {
   const { t } = useLingui();
-  const categories = useQuery(api.menu.categories.list, {});
-  const createCategory = useMutation(api.menu.categories.create);
-  const updateCategory = useMutation(api.menu.categories.update);
-  const reorderCategory = useMutation(api.menu.categories.reorder);
-  const archiveCategory = useMutation(api.menu.categories.archive);
-  const [editingId, setEditingId] = useState<Id<'categories'> | null>(null);
-  const [creating, setCreating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>('active');
+  const [formCategory, setFormCategory] = useState<Category | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [archiveTarget, setArchiveTarget] = useState<Category | null>(null);
 
-  async function handleCreate(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setCreating(true);
-    setError(null);
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    try {
-      await createCategory({ name: String(fd.get('name') ?? '') });
-      form.reset();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t`Gagal membuat kategori.`);
-    } finally {
-      setCreating(false);
+  const categories = useQuery(api.menu.categories.list, { includeArchived: true });
+  // Counts reflect active items per category (default list excludes archived /
+  // inactive). The "Item" column is an at-a-glance active-menu indicator.
+  const items = useQuery(api.menu.items.list, {});
+  const archiveCategory = useMutation(api.menu.categories.archive);
+  const setOrder = useMutation(api.menu.categories.setOrder);
+
+  const itemCounts = useMemo(() => {
+    const map = new Map<Id<'categories'>, number>();
+    for (const it of items ?? []) {
+      map.set(it.categoryId, (map.get(it.categoryId) ?? 0) + 1);
     }
+    return map;
+  }, [items]);
+
+  const counts = useMemo(() => {
+    if (!categories) return undefined;
+    return {
+      active: categories.filter((c) => !c.archived).length,
+      archived: categories.filter((c) => c.archived).length,
+    };
+  }, [categories]);
+
+  // Active view is drag-orderable; archived view is read-only.
+  const activeRows = useMemo<Category[] | undefined>(
+    () => (categories ? categories.filter((c) => !c.archived) : undefined),
+    [categories]
+  );
+  const archivedRows = useMemo<Category[] | undefined>(
+    () => (categories ? categories.filter((c) => c.archived) : undefined),
+    [categories]
+  );
+
+  function openCreate() {
+    setFormCategory(null);
+    setFormOpen(true);
+  }
+  function openRename(c: Category) {
+    setFormCategory(c);
+    setFormOpen(true);
   }
 
-  if (categories === undefined) return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
+  const columns: ReorderableColumn<Category>[] = [
+    {
+      id: 'name',
+      header: <Trans>Nama</Trans>,
+      cell: (c) => <span className="font-medium">{c.name}</span>,
+    },
+    {
+      id: 'items',
+      header: <Trans>Item</Trans>,
+      cell: (c) => <span className="tabular-nums">{itemCounts.get(c._id) ?? 0}</span>,
+    },
+    {
+      id: 'status',
+      header: <Trans>Status</Trans>,
+      cell: () => (
+        <StatusBadge variant="success">
+          <Trans>Aktif</Trans>
+        </StatusBadge>
+      ),
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: (c) => (
+        <div className="text-right">
+          <RowActions
+            label={t`Aksi baris`}
+            items={[
+              {
+                label: <Trans>Ubah nama</Trans>,
+                icon: <Pencil />,
+                onSelect: () => openRename(c),
+              },
+              {
+                label: <Trans>Arsipkan</Trans>,
+                icon: <Archive />,
+                destructive: true,
+                separatorBefore: true,
+                onSelect: () => setArchiveTarget(c),
+              },
+            ]}
+          />
+        </div>
+      ),
+    },
+  ];
+
+  const emptyState = (
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle>
+          {filter === 'archived' ? (
+            <Trans>Tidak ada kategori diarsipkan.</Trans>
+          ) : (
+            <Trans>Belum ada kategori.</Trans>
+          )}
+        </EmptyTitle>
+      </EmptyHeader>
+    </Empty>
+  );
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleCreate} className="flex gap-2 items-end max-w-md">
-        <div className="flex-1">
-          <label htmlFor="newName" className="text-xs text-muted-foreground">
-            <Trans>Nama kategori baru</Trans>
-          </label>
-          <Input id="newName" name="name" placeholder={t`mis. Kopi`} required maxLength={60} />
-        </div>
-        <Button type="submit" disabled={creating}>
-          {creating && <Spinner data-icon="inline-start" />}
-          {creating ? '…' : <Trans>+ Tambah</Trans>}
-        </Button>
-      </form>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
-            <th className="py-2 px-2 w-12">#</th>
-            <th className="py-2 px-2"><Trans>Nama</Trans></th>
-            <th className="py-2 px-2 w-32 text-right"><Trans>Urutan</Trans></th>
-            <th className="py-2 px-2 w-24"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.length === 0 && (
-            <tr>
-              <td colSpan={4} className="py-6 text-center text-muted-foreground">
-                <Trans>Belum ada kategori.</Trans>
-              </td>
-            </tr>
-          )}
-          {categories.map((c, i) => (
-            <tr key={c._id} className="border-b border-border/50">
-              <td className="py-2 px-2 text-muted-foreground">{i + 1}</td>
-              <td className="py-2 px-2">
-                {editingId === c._id ? (
-                  <InlineEdit
-                    initial={c.name}
-                    onSave={async (name) => {
-                      await updateCategory({ id: c._id, name });
-                      setEditingId(null);
-                    }}
-                    onCancel={() => setEditingId(null)}
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    className="text-left hover:underline"
-                    onClick={() => setEditingId(c._id)}
-                  >
-                    {c.name}
-                  </button>
-                )}
-              </td>
-              <td className="py-2 px-2 text-right">
-                <button
-                  type="button"
-                  className="px-1 disabled:opacity-30"
-                  disabled={i === 0}
-                  onClick={() => reorderCategory({ id: c._id, direction: 'up' })}
-                  aria-label={t`Naikkan urutan`}
-                >
-                  ▲
-                </button>
-                <button
-                  type="button"
-                  className="px-1 disabled:opacity-30"
-                  disabled={i === categories.length - 1}
-                  onClick={() => reorderCategory({ id: c._id, direction: 'down' })}
-                  aria-label={t`Turunkan urutan`}
-                >
-                  ▼
-                </button>
-              </td>
-              <td className="py-2 px-2 text-right">
-                <ConfirmArchive
-                  noun="kategori"
-                  name={c.name}
-                  onConfirm={() => archiveCategory({ id: c._id })}
-                  trigger={
-                    <button type="button" className="text-xs text-destructive hover:underline">
-                      <Trans>Arsipkan</Trans>
-                    </button>
-                  }
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <PageHeader
+        title={<Trans>Kategori</Trans>}
+        description={
+          <Trans>Kategori muncul sebagai filter di daftar Items dan di layar kasir.</Trans>
+        }
+        actions={
+          <Button type="button" onClick={openCreate}>
+            <Plus />
+            <Trans>Tambah Kategori</Trans>
+          </Button>
+        }
+      />
+
+      <Toolbar
+        active={filter}
+        onFilter={(v) => setFilter(v as Filter)}
+        filters={[
+          { label: <Trans>Aktif</Trans>, value: 'active', ...(counts !== undefined && { count: counts.active }) },
+          { label: <Trans>Arsip</Trans>, value: 'archived', ...(counts !== undefined && { count: counts.archived }) },
+        ]}
+      />
+
+      {filter === 'active' ? (
+        <ReorderableTable
+          columns={columns}
+          data={activeRows}
+          getRowId={(c) => c._id}
+          reorderLabel={t`Seret untuk menata ulang`}
+          emptyState={emptyState}
+          onReorder={async (orderedIds) => {
+            try {
+              await setOrder({ orderedIds: orderedIds as Id<'categories'>[] });
+            } catch (err) {
+              toast.error(
+                err instanceof Error ? err.message : t`Gagal menyimpan urutan.`
+              );
+            }
+          }}
+        />
+      ) : (
+        <ArchivedCategoryList rows={archivedRows} itemCounts={itemCounts} empty={emptyState} />
+      )}
+
+      <CategoryFormDialog
+        open={formOpen}
+        category={formCategory}
+        onOpenChange={(open) => {
+          setFormOpen(open);
+          if (!open) setFormCategory(null);
+        }}
+      />
+      <ConfirmDialog
+        open={archiveTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setArchiveTarget(null);
+        }}
+        title={<Trans>Arsipkan kategori?</Trans>}
+        description={
+          archiveTarget ? (
+            <Trans>
+              "{archiveTarget.name}" akan disembunyikan dari daftar aktif dan layar kasir.
+            </Trans>
+          ) : undefined
+        }
+        confirmLabel={<Trans>Arsipkan</Trans>}
+        destructive
+        onConfirm={async () => {
+          if (!archiveTarget) return;
+          try {
+            await archiveCategory({ id: archiveTarget._id });
+            toast.success(t`Kategori diarsipkan.`);
+          } catch (err) {
+            const message =
+              err instanceof Error ? err.message : t`Gagal mengarsipkan kategori.`;
+            toast.error(message);
+            throw err;
+          }
+        }}
+      />
     </div>
   );
 }
 
-function InlineEdit({
-  initial,
-  onSave,
-  onCancel,
+// Read-only list for archived categories (no reorder, no actions — there is
+// no unarchive flow, consistent with the Stock page's archived view).
+function ArchivedCategoryList({
+  rows,
+  itemCounts,
+  empty,
 }: {
-  initial: string;
-  onSave: (name: string) => Promise<void>;
-  onCancel: () => void;
+  rows: Category[] | undefined;
+  itemCounts: Map<Id<'categories'>, number>;
+  empty: React.ReactNode;
 }) {
-  const [name, setName] = useState(initial);
-  const [saving, setSaving] = useState(false);
+  if (rows === undefined) return null;
+  if (rows.length === 0) return <div className="rounded-md border bg-card">{empty}</div>;
   return (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        await onSave(name);
-        setSaving(false);
-      }}
-      className="flex gap-2 items-center"
-    >
-      <Input
-        autoFocus
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        onBlur={onCancel}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') onCancel();
-        }}
-        maxLength={60}
-      />
-      <Button type="submit" size="sm" disabled={saving}>
-        <Trans>Simpan</Trans>
-      </Button>
-    </form>
+    <div className="rounded-md border bg-card divide-y divide-border">
+      {rows.map((c) => (
+        <div key={c._id} className="flex items-center justify-between px-4 py-2 text-sm">
+          <span className="font-medium">{c.name}</span>
+          <span className="flex items-center gap-4">
+            <span className="tabular-nums text-muted-foreground">
+              {itemCounts.get(c._id) ?? 0}
+            </span>
+            <StatusBadge variant="muted">
+              <Trans>Arsip</Trans>
+            </StatusBadge>
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }

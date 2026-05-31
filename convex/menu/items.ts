@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 import { mutation, query, type QueryCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from '../lib/auth';
+import { itemRecipeStatus } from './itemStock';
 
 const menuItemDoc = v.object({
   _id: v.id('menuItems'),
@@ -14,6 +15,21 @@ const menuItemDoc = v.object({
   archived: v.boolean(),
   position: v.number(),
   createdAt: v.number(),
+});
+
+const menuItemWithStatus = v.object({
+  _id: v.id('menuItems'),
+  _creationTime: v.number(),
+  cafeId: v.id('cafes'),
+  categoryId: v.id('categories'),
+  name: v.string(),
+  priceIDR: v.number(),
+  isActive: v.boolean(),
+  archived: v.boolean(),
+  position: v.number(),
+  createdAt: v.number(),
+  hasRecipe: v.boolean(),
+  lowStockIngredientNames: v.array(v.string()),
 });
 
 const modifierGroupDoc = v.object({
@@ -211,9 +227,13 @@ export const list = query({
     includeArchived: v.optional(v.boolean()),
     includeInactive: v.optional(v.boolean()),
   },
-  returns: v.array(menuItemDoc),
+  returns: v.array(menuItemWithStatus),
   handler: async (ctx, args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
+    // Catalog admin view: fetch all of the cafe's items (only the cafeId index
+    // prefix is constrained) and filter archived/inactive in JS, because this
+    // endpoint optionally includes both via flags. Café-scale (dozens of rows),
+    // so the JS filter + per-item enrichment below is acceptable.
     const rows = args.categoryId
       ? await ctx.db
           .query('menuItems')
@@ -225,10 +245,16 @@ export const list = query({
           .query('menuItems')
           .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
           .collect();
-    return rows
+    const visible = rows
       .filter((r) => (args.includeArchived ? true : !r.archived))
       .filter((r) => (args.includeInactive ? true : r.isActive))
       .sort((a, b) => a.position - b.position);
+    return await Promise.all(
+      visible.map(async (r) => ({
+        ...r,
+        ...(await itemRecipeStatus(ctx, cafeId, r._id)),
+      }))
+    );
   },
 });
 
@@ -257,32 +283,7 @@ export const listForSale = query({
     const result = [];
     for (const item of active) {
       const attachedGroups = await resolveAttachedGroups(ctx, item._id);
-
-      // Load this item's recipe (if any) and resolve low-stock ingredients.
-      const recipe = await ctx.db
-        .query('recipes')
-        .withIndex('by_cafe_item', (q) =>
-          q.eq('cafeId', cafeId).eq('menuItemId', item._id)
-        )
-        .unique();
-      const lowStockIngredientNames: string[] = [];
-      if (recipe) {
-        for (const recipeLine of recipe.lines) {
-          const ing = await ctx.db.get(recipeLine.ingredientId);
-          if (!ing || ing.cafeId !== cafeId || ing.archived) continue;
-          const movements = await ctx.db
-            .query('inventoryMovements')
-            .withIndex('by_cafe_ingredient', (q) =>
-              q.eq('cafeId', cafeId).eq('ingredientId', ing._id)
-            )
-            .collect();
-          const stock = movements.reduce((sum, m) => sum + m.delta, 0);
-          if (stock < ing.reorderThreshold) {
-            lowStockIngredientNames.push(ing.name);
-          }
-        }
-      }
-
+      const { lowStockIngredientNames } = await itemRecipeStatus(ctx, cafeId, item._id);
       result.push({ item, attachedGroups, lowStockIngredientNames });
     }
     return result;

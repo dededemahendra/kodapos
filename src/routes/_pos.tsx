@@ -7,6 +7,7 @@ import { AppHeader } from '~/components/app-header';
 import { AppSidebar } from '~/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Spinner } from '~/components/ui/spinner';
+import { Toaster } from '~/components/ui/sonner';
 
 export const Route = createFileRoute('/_pos')({
   component: PosLayout,
@@ -53,6 +54,7 @@ function PosLayout() {
             <Outlet />
           )}
         </OnboardingGate>
+        <Toaster />
       </Authenticated>
     </div>
   );

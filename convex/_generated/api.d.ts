@@ -20,6 +20,7 @@ import type * as lib_pricing from "../lib/pricing.js";
 import type * as lib_staff from "../lib/staff.js";
 import type * as menu_categories from "../menu/categories.js";
 import type * as menu_itemGroups from "../menu/itemGroups.js";
+import type * as menu_itemStock from "../menu/itemStock.js";
 import type * as menu_items from "../menu/items.js";
 import type * as menu_modifierGroups from "../menu/modifierGroups.js";
 import type * as orders from "../orders.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   "lib/staff": typeof lib_staff;
   "menu/categories": typeof menu_categories;
   "menu/itemGroups": typeof menu_itemGroups;
+  "menu/itemStock": typeof menu_itemStock;
   "menu/items": typeof menu_items;
   "menu/modifierGroups": typeof menu_modifierGroups;
   orders: typeof orders;

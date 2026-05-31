@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
+import { toast } from '~/lib/toast';
 
 const REASONS = ['Pengiriman masuk', 'Stok opname', 'Koreksi'] as const;
 
@@ -74,9 +75,12 @@ export function StockAdjustDialog({
         reasonLabel: reason,
         ...(note.trim() ? { note: note.trim() } : {}),
       });
+      toast.success(t`Stok dicatat.`);
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t`Gagal mencatat stok.`);
+      const message = err instanceof Error ? err.message : t`Gagal mencatat stok.`;
+      setError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
