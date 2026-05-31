@@ -143,7 +143,8 @@ describe('ingredients.adjustStock', () => {
     const movement = await t.run(async (ctx) => await ctx.db.get(movementId!));
     expect(movement?.delta).toBe(1000);
     expect(movement?.reason).toBe('adjustment');
-    expect(movement?.note).toBe('Pengiriman masuk — PT Sumber Susu');
+    expect(movement?.reasonLabel).toBe('Pengiriman masuk');
+    expect(movement?.note).toBe('PT Sumber Susu');
   });
 
   it('is a no-op when newQty equals currentStock', async () => {
@@ -261,5 +262,82 @@ describe('ingredients.listMovements', () => {
     await expect(
       ownerB.query(api.ingredients.listMovements, { ingredientId: aIng })
     ).rejects.toThrow();
+  });
+});
+
+describe('ingredients.recentAdjustments', () => {
+  it('returns adjustment rows newest-first with ingredient name + reasonLabel', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 100,
+      lastCostPerUnitIDR: 25,
+    });
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: susuId,
+      newQty: 1000,
+      reasonLabel: 'Pengiriman masuk',
+      note: 'PT Sumber Susu',
+    });
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: susuId,
+      newQty: 950,
+      reasonLabel: 'Koreksi',
+    });
+    const rows = await asOwner.query(api.ingredients.recentAdjustments, {});
+    expect(rows).toHaveLength(2);
+    // Newest first: the -50 Koreksi.
+    expect(rows[0]?.delta).toBe(-50);
+    expect(rows[0]?.reasonLabel).toBe('Koreksi');
+    expect(rows[0]?.ingredientName).toBe('Susu');
+    expect(rows[0]?.unit).toBe('ml');
+    expect(rows[1]?.delta).toBe(1000);
+    expect(rows[1]?.reasonLabel).toBe('Pengiriman masuk');
+    expect(rows[1]?.note).toBe('PT Sumber Susu');
+  });
+
+  it('excludes sale and waste movements', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 100,
+      lastCostPerUnitIDR: 25,
+    });
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: susuId,
+      newQty: 500,
+      reasonLabel: 'Stok opname',
+    });
+    // A waste movement should NOT appear in adjustments.
+    await asOwner.mutation(api.waste.record, {
+      ingredientId: susuId,
+      qtyWasted: 50,
+      wasteReason: 'tumpah',
+    });
+    const rows = await asOwner.query(api.ingredients.recentAdjustments, {});
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.reasonLabel).toBe('Stok opname');
+  });
+
+  it("does not return another cafe's adjustments", async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: ownerA } = await setupOwner(t, 'a@x.com');
+    const { asOwner: ownerB } = await setupOwner(t, 'b@x.com');
+    const aIng = await ownerA.mutation(api.ingredients.upsert, {
+      name: 'A-Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 1,
+    });
+    await ownerA.mutation(api.ingredients.adjustStock, {
+      ingredientId: aIng,
+      newQty: 10,
+      reasonLabel: 'Koreksi',
+    });
+    expect(await ownerB.query(api.ingredients.recentAdjustments, {})).toHaveLength(0);
   });
 });

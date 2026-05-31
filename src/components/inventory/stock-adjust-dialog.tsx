@@ -3,6 +3,7 @@ import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { type FormEvent, useEffect, useState } from 'react';
+import { ADJUST_REASONS as REASONS } from '~/components/inventory/adjust-reasons';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
@@ -22,8 +23,6 @@ import {
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { toast } from '~/lib/toast';
-
-const REASONS = ['Pengiriman masuk', 'Stok opname', 'Koreksi'] as const;
 
 export function StockAdjustDialog({
   open,

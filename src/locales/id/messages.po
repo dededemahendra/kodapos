@@ -75,6 +75,11 @@ msgstr "{0} item"
 msgid "{0} item · {1} stok rendah"
 msgstr "{0} item · {1} stok rendah"
 
+#. placeholder {0}: counts.all
+#: src/routes/_pos/inventory/adjustments.tsx
+msgid "{0} penyesuaian · 30 hari"
+msgstr "{0} penyesuaian · 30 hari"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "@namakafe"
 msgstr "@namakafe"
@@ -250,6 +255,7 @@ msgstr "Alamat (opsional)"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Alasan"
 msgstr "Alasan"
@@ -350,6 +356,7 @@ msgstr "bahan"
 
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Bahan"
@@ -483,6 +490,10 @@ msgstr "Belum ada limbah tercatat dalam 30 hari terakhir."
 #: src/components/menu/modifier-group-form.tsx
 msgid "Belum ada opsi. Tambahkan minimal satu."
 msgstr "Belum ada opsi. Tambahkan minimal satu."
+
+#: src/routes/_pos/inventory/adjustments.tsx
+msgid "Belum ada penyesuaian."
+msgstr "Belum ada penyesuaian."
 
 #: src/components/inventory/movement-history-sheet.tsx
 msgid "Belum ada pergerakan stok."
@@ -624,6 +635,14 @@ msgstr "Catat limbah"
 msgid "Catat Limbah"
 msgstr "Catat Limbah"
 
+#: src/routes/_pos/inventory/adjustments.tsx
+msgid "Catat Penyesuaian"
+msgstr "Catat Penyesuaian"
+
+#: src/routes/_pos/inventory/adjustments.tsx
+msgid "Catat penyesuaian stok untuk mulai melacak koreksi dan pengiriman."
+msgstr "Catat penyesuaian stok untuk mulai melacak koreksi dan pengiriman."
+
 #: src/routes/_pos/inventory/index.tsx
 #~ msgid "Catat Stok"
 #~ msgstr "Catat Stok"
@@ -636,6 +655,7 @@ msgstr "Catat stok masuk"
 msgid "Catat stok:"
 msgstr "Catat stok:"
 
+#: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Catatan"
 msgstr "Catatan"
@@ -1319,6 +1339,7 @@ msgid "Konten struk"
 msgstr "Konten struk"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/routes/_pos/inventory/adjustments.tsx
 msgid "Koreksi"
 msgstr "Koreksi"
 
@@ -1895,6 +1916,7 @@ msgstr "Pengaturan"
 #~ msgstr "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/routes/_pos/inventory/adjustments.tsx
 msgid "Pengiriman masuk"
 msgstr "Pengiriman masuk"
 
@@ -1937,6 +1959,7 @@ msgid "Persentase PPN"
 msgstr "Persentase PPN"
 
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/routes/_pos/inventory/adjustments.tsx
 msgid "Perubahan"
 msgstr "Perubahan"
 
@@ -1968,6 +1991,10 @@ msgstr "Pesanan tidak ditemukan."
 #: src/components/inventory/waste-dialog.tsx
 msgid "Pilih bahan"
 msgstr "Pilih bahan"
+
+#: src/routes/_pos/inventory/adjustments.tsx
+msgid "Pilih bahan untuk disesuaikan"
+msgstr "Pilih bahan untuk disesuaikan"
 
 #: src/components/inventory/ingredient-picker.tsx
 msgid "Pilih bahan…"
@@ -2276,6 +2303,7 @@ msgstr "Selisih harga"
 msgid "Sembunyikan password"
 msgstr "Sembunyikan password"
 
+#: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/index.tsx
 msgid "Semua"
 msgstr "Semua"
@@ -2406,6 +2434,7 @@ msgid "Stok dicatat."
 msgstr "Stok dicatat."
 
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/routes/_pos/inventory/adjustments.tsx
 msgid "Stok opname"
 msgstr "Stok opname"
 
@@ -2570,6 +2599,7 @@ msgstr "Tampilkan rincian pajak"
 #~ msgstr "Tampilkan tombol nominal saat pembayaran tunai."
 
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Tanggal"
 msgstr "Tanggal"

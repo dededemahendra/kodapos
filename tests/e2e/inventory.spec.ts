@@ -193,4 +193,23 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await expect(sheet.getByRole('heading', { name: /Riwayat/ })).toBeVisible();
     await expect(sheet.getByText(/Saldo/)).toBeVisible();
   });
+
+  test('Adjustments page: record an adjustment appears in the log', async ({ page }) => {
+    await signupAndAddSusu(page);
+
+    await page.goto('/inventory/adjustments');
+    await waitForUrlHydrated(page, /\/inventory\/adjustments$/);
+
+    await page.getByRole('button', { name: /Catat Penyesuaian/ }).click();
+    // Pick the ingredient in the picker dialog.
+    await page.getByPlaceholder('Pilih bahan…').click();
+    await page.getByRole('button', { name: /^Susu/ }).click();
+    // The StockAdjustDialog opens; set a new quantity and save.
+    await page.getByLabel(/Stok baru/).fill('1000');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Stok dicatat/)).toBeVisible();
+
+    // The new adjustment shows in the log (a +1000 ml change row).
+    await expect(page.getByRole('cell', { name: /\+1000 ml/ })).toBeVisible();
+  });
 });
