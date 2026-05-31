@@ -212,4 +212,78 @@ test.describe('inventory + recipes (auth-gated)', () => {
     // The new adjustment shows in the log (a +1000 ml change row).
     await expect(page.getByRole('cell', { name: /\+1000 ml/ })).toBeVisible();
   });
+
+  test('Recipes page: add a recipe via the edit sheet flips status to Lengkap', async ({ page }) => {
+    const email = `e2e+${Date.now()}@kodapos.test`;
+    const password = 'Sa{ngat-Aman-123';
+
+    // Signup + onboarding (category "Kopi" + item "Espresso").
+    await gotoHydrated(page, '/signup');
+    await page.getByLabel('Nama Anda').fill('E2E Owner');
+    await page.getByLabel('Nama kafe').fill('Kopi E2E Resep');
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password', { exact: true }).fill(password);
+    await page.locator('#terms').click();
+    await page.getByRole('button', { name: /Daftar/ }).click();
+    await waitForUrlHydrated(page, /\/onboarding\/profile$/, { timeout: 15_000 });
+    await page.getByLabel('Persentase PPN').fill('11');
+    await page.getByRole('button', { name: /Lanjut/ }).click();
+    await waitForUrlHydrated(page, /\/onboarding\/menu$/);
+    await page.getByRole('button', { name: /Mulai dengan kategori/ }).click();
+    await waitForUrlHydrated(page, /\/menu\/categories$/);
+    await page.getByRole('button', { name: /Tambah Kategori/ }).click();
+    await page.getByLabel('Nama kategori').fill('Kopi');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Kategori ditambahkan/)).toBeVisible();
+    await page.getByRole('link', { name: 'Items' }).click();
+    await page.getByRole('link', { name: /Tambah Item/ }).click();
+    await waitForUrlHydrated(page, /\/menu\/items\/new$/);
+    await page.getByLabel('Nama').fill('Espresso');
+    await page.getByLabel('Kategori').selectOption({ label: 'Kopi' });
+    await page.getByLabel('Harga (Rp)').fill('18000');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await waitForUrlHydrated(page, /\/menu$/);
+
+    // Cashier PIN so /inventory + /recipes are reachable.
+    await page.goto('/onboarding/cashier');
+    await waitForUrlHydrated(page, /\/onboarding\/cashier$/);
+    await page.getByRole('button', { name: /Atur PIN/ }).click();
+    for (const digit of '1234') await page.keyboard.type(digit);
+    await expect(page.getByRole('button', { name: /Ganti PIN/ })).toBeVisible({ timeout: 5_000 });
+    await page.getByRole('button', { name: /Selesai/ }).click();
+    await page.goto('/pin');
+    await waitForUrlHydrated(page, /\/pin$/);
+    await page.getByRole('button', { name: /E2E Owner/ }).click();
+    for (const digit of '1234') await page.keyboard.type(digit);
+    await waitForUrlHydrated(page, /\/shift\/open$/);
+
+    // Add ingredient "Susu".
+    await page.goto('/inventory');
+    await waitForUrlHydrated(page, /\/inventory$/);
+    await page.getByRole('button', { name: /Tambah Bahan/ }).click();
+    await page.getByLabel('Nama').fill('Susu');
+    await page.getByLabel('Satuan', { exact: true }).click();
+    await page.getByRole('option', { name: /Mililiter/ }).click();
+    await page.getByLabel('Ambang isi ulang').fill('500');
+    await page.getByLabel('Biaya per satuan (Rp)').fill('25');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Bahan ditambahkan/)).toBeVisible();
+
+    // Recipes page: Espresso starts "Belum"; open its edit sheet and add Susu.
+    await page.goto('/recipes');
+    await waitForUrlHydrated(page, /\/recipes$/);
+    await page.getByRole('button', { name: 'Espresso' }).click();
+    const sheet = page.getByRole('dialog');
+    await expect(sheet).toBeVisible();
+    await sheet.getByRole('button', { name: /Tambah bahan/ }).click();
+    await sheet.getByPlaceholder('Pilih bahan…').click();
+    await page.getByRole('button', { name: /^Susu/ }).click();
+    await sheet.getByLabel('Jumlah').fill('200');
+    await sheet.getByRole('button', { name: /Simpan resep/ }).click();
+    await expect(sheet.getByText(/Tersimpan/)).toBeVisible();
+
+    // Close the sheet; the row now reads "Lengkap".
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('cell', { name: /Lengkap/ })).toBeVisible();
+  });
 });
