@@ -5,7 +5,7 @@ import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { Archive, BadgePercent, Pencil, Plus } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { PromoFormDialog } from '~/components/promo/promo-form-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
@@ -58,10 +58,11 @@ function PromosPage() {
     setFormPromo(null);
     setFormOpen(true);
   }
-  function openEdit(p: Promo) {
+  // Stable so the `columns` memo (dep [t]) doesn't capture a changing ref.
+  const openEdit = useCallback((p: Promo) => {
     setFormPromo(p);
     setFormOpen(true);
-  }
+  }, []);
 
   const columns = useMemo<ColumnDef<Promo, unknown>[]>(
     () => [
