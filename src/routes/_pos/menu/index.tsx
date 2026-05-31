@@ -1,167 +1,320 @@
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
-import type { Id } from 'convex/_generated/dataModel';
-import { useQuery } from 'convex/react';
+import type { Doc, Id } from 'convex/_generated/dataModel';
+import { useMutation, useQuery } from 'convex/react';
+import { Archive, Plus, Power } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
+import { ConfirmDialog } from '~/components/ui/confirm-dialog';
+import { DataTable } from '~/components/ui/data-table';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '~/components/ui/empty';
+import { PageHeader } from '~/components/ui/page-header';
+import { RowActions } from '~/components/ui/row-actions';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
+import { StatusBadge } from '~/components/ui/status-badge';
+import { Toolbar } from '~/components/ui/toolbar';
 import { formatIDR } from '~/lib/money';
+import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/menu/')({
   component: ItemsListPage,
 });
 
-type CategoryFilter = 'all' | 'archived' | Id<'categories'>;
+type ItemRow = Doc<'menuItems'> & {
+  hasRecipe: boolean;
+  lowStockIngredientNames: string[];
+};
+type Filter = 'active' | 'archived';
+
+function isLow(row: ItemRow): boolean {
+  return !row.archived && row.lowStockIngredientNames.length > 0;
+}
 
 function ItemsListPage() {
   const { t } = useLingui();
-  const categories = useQuery(api.menu.categories.list, {});
-  const allItems = useQuery(api.menu.items.list, {});
-  const [filter, setFilter] = useState<CategoryFilter>('all');
+  const [filter, setFilter] = useState<Filter>('active');
   const [search, setSearch] = useState('');
+  const [categoryId, setCategoryId] = useState<string>('all');
+  const [archiveTarget, setArchiveTarget] = useState<ItemRow | null>(null);
 
-  const visible = useMemo(() => {
-    if (!allItems) return [];
-    let rows = allItems;
-    if (filter === 'archived') {
-      rows = []; // populated by archived list below
-    } else if (filter !== 'all') {
-      rows = rows.filter((r) => r.categoryId === filter);
+  const categories = useQuery(api.menu.categories.list, {});
+  const allItems = useQuery(api.menu.items.list, {
+    includeArchived: true,
+    includeInactive: true,
+  }) as ItemRow[] | undefined;
+  const setActive = useMutation(api.menu.items.setActive);
+  const archive = useMutation(api.menu.items.archive);
+
+  const categoryName = useMemo(() => {
+    const map = new Map<Id<'categories'>, string>();
+    for (const c of categories ?? []) map.set(c._id, c.name);
+    return map;
+  }, [categories]);
+
+  const categoryCounts = useMemo(() => {
+    const map = new Map<Id<'categories'>, number>();
+    for (const it of allItems ?? []) {
+      if (it.archived) continue;
+      map.set(it.categoryId, (map.get(it.categoryId) ?? 0) + 1);
+    }
+    return map;
+  }, [allItems]);
+
+  const counts = useMemo(() => {
+    if (!allItems) return undefined;
+    const active = allItems.filter((r) => !r.archived);
+    return {
+      active: active.length,
+      archived: allItems.filter((r) => r.archived).length,
+      low: active.filter(isLow).length,
+    };
+  }, [allItems]);
+
+  const visible = useMemo<ItemRow[] | undefined>(() => {
+    if (!allItems) return undefined;
+    let rows = allItems.filter((r) => (filter === 'archived' ? r.archived : !r.archived));
+    if (categoryId !== 'all') {
+      rows = rows.filter((r) => r.categoryId === (categoryId as Id<'categories'>));
     }
     if (search.trim()) {
       const q = search.toLowerCase();
       rows = rows.filter((r) => r.name.toLowerCase().includes(q));
     }
     return rows;
-  }, [allItems, filter, search]);
+  }, [allItems, filter, categoryId, search]);
 
-  const archivedItems = useQuery(
-    api.menu.items.list,
-    filter === 'archived' ? { includeArchived: true, includeInactive: true } : 'skip'
+  const columns = useMemo<ColumnDef<ItemRow, unknown>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: () => <Trans>Nama</Trans>,
+        cell: ({ row }) => (
+          <Link
+            to="/menu/items/$itemId"
+            params={{ itemId: row.original._id }}
+            className="font-medium hover:underline"
+          >
+            {isLow(row.original) ? <span aria-hidden="true" className="mr-1">⚠</span> : null}
+            {row.original.name}
+          </Link>
+        ),
+      },
+      {
+        id: 'category',
+        enableSorting: false,
+        header: () => <Trans>Kategori</Trans>,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {categoryName.get(row.original.categoryId) ?? '—'}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'priceIDR',
+        header: () => <Trans>Harga</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">{formatIDR(row.original.priceIDR)}</span>
+        ),
+      },
+      {
+        id: 'recipe',
+        enableSorting: false,
+        header: () => <Trans>Resep</Trans>,
+        cell: ({ row }) =>
+          row.original.hasRecipe ? (
+            <StatusBadge variant="success">
+              <Trans>Ada</Trans>
+            </StatusBadge>
+          ) : (
+            <StatusBadge variant="muted">
+              <Trans>Belum</Trans>
+            </StatusBadge>
+          ),
+      },
+      {
+        id: 'status',
+        enableSorting: false,
+        header: () => <Trans>Status</Trans>,
+        cell: ({ row }) => {
+          const r = row.original;
+          if (r.archived)
+            return (
+              <StatusBadge variant="muted">
+                <Trans>Arsip</Trans>
+              </StatusBadge>
+            );
+          if (r.isActive)
+            return (
+              <StatusBadge variant="success">
+                <Trans>Aktif</Trans>
+              </StatusBadge>
+            );
+          return (
+            <StatusBadge variant="muted">
+              <Trans>Nonaktif</Trans>
+            </StatusBadge>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        enableSorting: false,
+        header: () => null,
+        cell: ({ row }) => {
+          const r = row.original;
+          return (
+            <div className="text-right">
+              <RowActions
+                label={t`Aksi baris`}
+                items={[
+                  {
+                    label: r.isActive ? <Trans>Nonaktifkan</Trans> : <Trans>Aktifkan</Trans>,
+                    icon: <Power />,
+                    onSelect: async () => {
+                      try {
+                        await setActive({ id: r._id, isActive: !r.isActive });
+                        toast.success(
+                          r.isActive ? t`Item dinonaktifkan.` : t`Item diaktifkan.`
+                        );
+                      } catch (err) {
+                        toast.error(
+                          err instanceof Error ? err.message : t`Gagal memperbarui item.`
+                        );
+                      }
+                    },
+                  },
+                  {
+                    label: <Trans>Arsipkan</Trans>,
+                    icon: <Archive />,
+                    destructive: true,
+                    separatorBefore: true,
+                    onSelect: () => setArchiveTarget(r),
+                  },
+                ]}
+              />
+            </div>
+          );
+        },
+      },
+    ],
+    [t, categoryName, setActive]
   );
 
-  const archivedVisible = useMemo(() => {
-    if (!archivedItems) return [];
-    return archivedItems.filter((r) => r.archived);
-  }, [archivedItems]);
-
-  const rows = filter === 'archived' ? archivedVisible : visible;
-  const isLoading = categories === undefined || allItems === undefined;
+  const emptyState = (
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle>
+          {filter === 'archived' ? (
+            <Trans>Tidak ada item diarsipkan.</Trans>
+          ) : (
+            <Trans>Belum ada item.</Trans>
+          )}
+        </EmptyTitle>
+        {filter === 'active' ? (
+          <EmptyDescription>
+            <Trans>Tambah item pertama untuk mulai berjualan.</Trans>
+          </EmptyDescription>
+        ) : null}
+      </EmptyHeader>
+    </Empty>
+  );
 
   return (
-    <div className="flex gap-6">
-      <aside className="w-52 shrink-0 text-sm">
-        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2"><Trans>Kategori</Trans></h2>
-        <nav className="space-y-1">
-          <FilterButton
-            active={filter === 'all'}
-            onClick={() => setFilter('all')}
-            label={t`Semua (${allItems?.length ?? 0})`}
-          />
-          {(categories ?? []).map((c) => {
-            const count = allItems?.filter((i) => i.categoryId === c._id).length ?? 0;
-            return (
-              <FilterButton
-                key={c._id}
-                active={filter === c._id}
-                onClick={() => setFilter(c._id)}
-                label={`${c.name} (${count})`}
-              />
-            );
-          })}
-          <FilterButton
-            active={filter === 'archived'}
-            onClick={() => setFilter('archived')}
-            label={t`Arsip`}
-            muted
-          />
-        </nav>
-      </aside>
-      <section className="flex-1">
-        <div className="flex gap-2 mb-3">
-          <Input
-            placeholder={t`Cari item…`}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-xs"
-          />
+    <div>
+      <PageHeader
+        title={<Trans>Item Menu</Trans>}
+        meta={
+          counts ? (
+            <Trans>
+              {counts.active} item · {counts.low} stok rendah
+            </Trans>
+          ) : null
+        }
+        actions={
           <Button asChild>
             <Link to="/menu/items/$itemId" params={{ itemId: 'new' }}>
-              <Trans>+ Item</Trans>
+              <Plus />
+              <Trans>Tambah Item</Trans>
             </Link>
           </Button>
-        </div>
-        {isLoading ? (
-          <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>
-        ) : rows.length === 0 ? (
-          <p className="text-muted-foreground"><Trans>Tidak ada item.</Trans></p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs uppercase text-muted-foreground border-b border-border">
-                <th className="py-2 px-2"><Trans>Nama</Trans></th>
-                <th className="py-2 px-2 w-24"><Trans>Kategori</Trans></th>
-                <th className="py-2 px-2 w-28 text-right"><Trans>Harga</Trans></th>
-                <th className="py-2 px-2 w-24"><Trans>Status</Trans></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r._id} className="border-b border-border/50 hover:bg-muted">
-                  <td className="py-2 px-2">
-                    <Link
-                      to="/menu/items/$itemId"
-                      params={{ itemId: r._id }}
-                      className="hover:underline"
-                    >
-                      {r.name}
-                    </Link>
-                  </td>
-                  <td className="py-2 px-2 text-muted-foreground">
-                    {categories?.find((c) => c._id === r.categoryId)?.name ?? '—'}
-                  </td>
-                  <td className="py-2 px-2 text-right">{formatIDR(r.priceIDR)}</td>
-                  <td className="py-2 px-2">
-                    {r.archived ? (
-                      <span className="text-xs text-muted-foreground"><Trans>● Arsip</Trans></span>
-                    ) : r.isActive ? (
-                      <span className="text-xs text-primary"><Trans>● Aktif</Trans></span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground"><Trans>○ Off</Trans></span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-    </div>
-  );
-}
+        }
+      />
 
-function FilterButton({
-  active,
-  onClick,
-  label,
-  muted,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  muted?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full text-left px-2 py-1 rounded ${
-        active ? 'bg-accent text-primary font-medium' : 'hover:bg-muted'
-      } ${muted ? 'text-muted-foreground' : ''}`}
-    >
-      {label}
-    </button>
+      <Toolbar
+        search={search}
+        onSearch={setSearch}
+        searchPlaceholder={t`Cari item…`}
+        active={filter}
+        onFilter={(v) => setFilter(v as Filter)}
+        filters={[
+          {
+            label: <Trans>Aktif</Trans>,
+            value: 'active',
+            ...(counts !== undefined && { count: counts.active }),
+          },
+          {
+            label: <Trans>Arsip</Trans>,
+            value: 'archived',
+            ...(counts !== undefined && { count: counts.archived }),
+          },
+        ]}
+      >
+        <Select value={categoryId} onValueChange={setCategoryId}>
+          <SelectTrigger className="w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t`Semua kategori`}</SelectItem>
+            {(categories ?? []).map((c) => (
+              <SelectItem key={c._id} value={c._id}>
+                {c.name} ({categoryCounts.get(c._id) ?? 0})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Toolbar>
+
+      <DataTable
+        columns={columns}
+        data={visible}
+        emptyState={emptyState}
+        getRowClassName={(row) => (isLow(row) ? 'bg-destructive/10' : '')}
+        initialSort={[{ id: 'name', desc: false }]}
+      />
+
+      <ConfirmDialog
+        open={archiveTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setArchiveTarget(null);
+        }}
+        title={<Trans>Arsipkan item?</Trans>}
+        description={
+          archiveTarget ? (
+            <Trans>"{archiveTarget.name}" akan disembunyikan dari menu dan layar kasir.</Trans>
+          ) : undefined
+        }
+        confirmLabel={<Trans>Arsipkan</Trans>}
+        destructive
+        onConfirm={async () => {
+          if (!archiveTarget) return;
+          try {
+            await archive({ id: archiveTarget._id });
+            toast.success(t`Item diarsipkan.`);
+          } catch (err) {
+            const message = err instanceof Error ? err.message : t`Gagal mengarsipkan item.`;
+            toast.error(message);
+            throw err;
+          }
+        }}
+      />
+    </div>
   );
 }
