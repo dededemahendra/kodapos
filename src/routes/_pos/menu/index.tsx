@@ -70,6 +70,8 @@ function ItemsListPage() {
 
   const counts = useMemo(() => {
     if (!allItems) return undefined;
+    // "active" here means non-archived (the live catalog: both Aktif and
+    // Nonaktif items), matching what the Aktif tab shows — not isActive only.
     const active = allItems.filter((r) => !r.archived);
     return {
       active: active.length,
