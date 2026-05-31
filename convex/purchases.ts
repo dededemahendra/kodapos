@@ -86,3 +86,47 @@ export const record = mutation({
     return purchaseId;
   },
 });
+
+const purchaseDetail = v.object({
+  id: v.id('purchases'),
+  at: v.number(),
+  supplierName: v.optional(v.string()),
+  totalIDR: v.number(),
+  lines: v.array(
+    v.object({
+      ingredientName: v.string(),
+      unit: v.union(v.literal('g'), v.literal('ml'), v.literal('piece')),
+      qty: v.number(),
+      unitCostIDR: v.number(),
+      subtotalIDR: v.number(),
+    })
+  ),
+});
+
+export const get = query({
+  args: { id: v.id('purchases') },
+  returns: v.union(purchaseDetail, v.null()),
+  handler: async (ctx, { id }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const p = await ctx.db.get(id);
+    if (!p || p.cafeId !== cafeId) return null;
+    const lines = [];
+    for (const line of p.lines) {
+      const ing = await ctx.db.get(line.ingredientId);
+      lines.push({
+        ingredientName: ing?.name ?? '—',
+        unit: ing?.canonicalUnit ?? ('piece' as const),
+        qty: line.qty,
+        unitCostIDR: line.unitCostIDR,
+        subtotalIDR: line.qty * line.unitCostIDR,
+      });
+    }
+    return {
+      id: p._id,
+      at: p.at,
+      ...(p.supplierName ? { supplierName: p.supplierName } : {}),
+      totalIDR: p.totalIDR,
+      lines,
+    };
+  },
+});

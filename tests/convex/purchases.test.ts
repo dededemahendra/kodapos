@@ -80,3 +80,41 @@ describe('purchases.record', () => {
     ).rejects.toThrow(/tidak ditemukan/i);
   });
 });
+
+describe('purchases.recent / get', () => {
+  it('lists purchases newest-first and resolves detail lines', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, biji, susu } = await setup(t);
+    const id = await asOwner.mutation(api.purchases.record, {
+      supplierName: 'Kopi Jaya',
+      lines: [
+        { ingredientId: biji, qty: 5000, unitCostIDR: 50 },
+        { ingredientId: susu, qty: 10000, unitCostIDR: 25 },
+      ],
+    });
+    const recent = await asOwner.query(api.purchases.recent, {});
+    expect(recent).toHaveLength(1);
+    expect(recent[0]?.id).toBe(id);
+    expect(recent[0]?.lineCount).toBe(2);
+    const detail = await asOwner.query(api.purchases.get, { id });
+    expect(detail?.supplierName).toBe('Kopi Jaya');
+    expect(detail?.totalIDR).toBe(500000);
+    expect(detail?.lines).toHaveLength(2);
+    const bijiLine = detail?.lines.find((l) => l.ingredientName === 'Biji');
+    expect(bijiLine?.qty).toBe(5000);
+    expect(bijiLine?.unit).toBe('g');
+    expect(bijiLine?.unitCostIDR).toBe(50);
+    expect(bijiLine?.subtotalIDR).toBe(250000);
+  });
+
+  it('get + recent are cafe-scoped', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, biji } = await setup(t);
+    const id = await asOwner.mutation(api.purchases.record, {
+      lines: [{ ingredientId: biji, qty: 100, unitCostIDR: 40 }],
+    });
+    const { asOwner: ownerB } = await setup(t, 'b@x.com');
+    expect(await ownerB.query(api.purchases.recent, {})).toHaveLength(0);
+    expect(await ownerB.query(api.purchases.get, { id })).toBeNull();
+  });
+});
