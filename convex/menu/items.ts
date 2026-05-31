@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 import { mutation, query, type QueryCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from '../lib/auth';
+import { itemRecipeStatus } from './itemStock';
 
 const menuItemDoc = v.object({
   _id: v.id('menuItems'),
@@ -257,32 +258,7 @@ export const listForSale = query({
     const result = [];
     for (const item of active) {
       const attachedGroups = await resolveAttachedGroups(ctx, item._id);
-
-      // Load this item's recipe (if any) and resolve low-stock ingredients.
-      const recipe = await ctx.db
-        .query('recipes')
-        .withIndex('by_cafe_item', (q) =>
-          q.eq('cafeId', cafeId).eq('menuItemId', item._id)
-        )
-        .unique();
-      const lowStockIngredientNames: string[] = [];
-      if (recipe) {
-        for (const recipeLine of recipe.lines) {
-          const ing = await ctx.db.get(recipeLine.ingredientId);
-          if (!ing || ing.cafeId !== cafeId || ing.archived) continue;
-          const movements = await ctx.db
-            .query('inventoryMovements')
-            .withIndex('by_cafe_ingredient', (q) =>
-              q.eq('cafeId', cafeId).eq('ingredientId', ing._id)
-            )
-            .collect();
-          const stock = movements.reduce((sum, m) => sum + m.delta, 0);
-          if (stock < ing.reorderThreshold) {
-            lowStockIngredientNames.push(ing.name);
-          }
-        }
-      }
-
+      const { lowStockIngredientNames } = await itemRecipeStatus(ctx, cafeId, item._id);
       result.push({ item, attachedGroups, lowStockIngredientNames });
     }
     return result;
