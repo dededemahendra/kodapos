@@ -2179,6 +2179,10 @@ msgstr "Report Summary"
 msgid "Riwayat"
 msgstr "History"
 
+#: src/components/inventory/movement-history-sheet.tsx
+msgid "Riwayat pergerakan stok untuk bahan ini."
+msgstr "Stock movement history for this ingredient."
+
 #: src/routes/_pos/history.tsx
 msgid "Riwayat shift ini"
 msgstr "This shift's history"

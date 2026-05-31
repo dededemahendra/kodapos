@@ -6,6 +6,7 @@ import { WASTE_REASON_LABELS } from '~/components/inventory/waste-reason';
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '~/components/ui/sheet';
@@ -38,6 +39,9 @@ export function MovementHistorySheet({
           <SheetTitle>
             <Trans>Riwayat</Trans> — {ingredient?.name}
           </SheetTitle>
+          <SheetDescription className="sr-only">
+            <Trans>Riwayat pergerakan stok untuk bahan ini.</Trans>
+          </SheetDescription>
         </SheetHeader>
         <div className="mt-4 text-sm">
           {data === undefined ? (

@@ -1,4 +1,4 @@
-import { Trans, useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
@@ -37,7 +37,6 @@ type WasteRow = {
 };
 
 function WastePage() {
-  const { t } = useLingui();
   const [open, setOpen] = useState(false);
   const rows = useQuery(api.waste.recent, {}) as WasteRow[] | undefined;
   const totalLoss = (rows ?? []).reduce((sum, r) => sum + r.totalCostIDR, 0);
