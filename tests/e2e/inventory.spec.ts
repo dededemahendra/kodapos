@@ -213,6 +213,50 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await expect(page.getByRole('cell', { name: /\+1000 ml/ })).toBeVisible();
   });
 
+  test('Purchases page: record a delivery raises stock and shows in the log', async ({ page }) => {
+    await signupAndAddSusu(page);
+
+    // Add a second ingredient "Biji" so the purchase has two lines.
+    await page.getByRole('button', { name: /Tambah Bahan/ }).click();
+    await page.getByLabel('Nama').fill('Biji');
+    await page.getByLabel('Satuan', { exact: true }).click();
+    await page.getByRole('option', { name: /Gram/ }).click();
+    await page.getByLabel('Ambang isi ulang').fill('0');
+    await page.getByLabel('Biaya per satuan (Rp)').fill('40');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Bahan ditambahkan/)).toBeVisible();
+
+    // Record a 2-line purchase.
+    await page.goto('/inventory/purchases');
+    await waitForUrlHydrated(page, /\/inventory\/purchases$/);
+    await page.getByRole('button', { name: /Catat Pembelian/ }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel(/Pemasok/).fill('Kopi Jaya');
+    // Line 1: Susu, qty 1000, cost 25.
+    const pickers = dialog.getByPlaceholder('Pilih bahan…');
+    await pickers.first().click();
+    await page.getByRole('button', { name: /^Susu/ }).click();
+    await dialog.getByPlaceholder(/Qty/).first().fill('1000');
+    await dialog.getByPlaceholder('Biaya/satuan').first().fill('25');
+    // Add line 2: Biji, qty 5000, cost 50.
+    await dialog.getByRole('button', { name: /Tambah bahan/ }).click();
+    await dialog.getByPlaceholder('Pilih bahan…').last().click();
+    await page.getByRole('button', { name: /^Biji/ }).click();
+    await dialog.getByPlaceholder(/Qty/).last().fill('5000');
+    await dialog.getByPlaceholder('Biaya/satuan').last().fill('50');
+    await dialog.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Pembelian dicatat/)).toBeVisible();
+
+    // Appears in the log with the right total (1000×25 + 5000×50 = 275.000).
+    await expect(page.getByRole('cell', { name: /Kopi Jaya/ })).toBeVisible();
+    await expect(page.getByRole('cell', { name: /Rp 275\.000/ })).toBeVisible();
+
+    // Stock on the Stock page reflects the added Biji qty.
+    await page.goto('/inventory');
+    await waitForUrlHydrated(page, /\/inventory$/);
+    await expect(page.getByRole('cell', { name: /5000 g/ })).toBeVisible();
+  });
+
   test('Recipes page: add a recipe via the edit sheet flips status to Lengkap', async ({ page }) => {
     const email = `e2e+${Date.now()}@kodapos.test`;
     const password = 'Sa{ngat-Aman-123';
