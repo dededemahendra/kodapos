@@ -183,6 +183,53 @@ export const archive = mutation({
   },
 });
 
+const adjustmentRow = v.object({
+  id: v.id('inventoryMovements'),
+  at: v.number(),
+  ingredientName: v.string(),
+  unit: v.union(v.literal('g'), v.literal('ml'), v.literal('piece')),
+  delta: v.number(),
+  reasonLabel: v.optional(v.string()),
+  note: v.optional(v.string()),
+});
+
+export const recentAdjustments = query({
+  args: { days: v.optional(v.number()) },
+  returns: v.array(adjustmentRow),
+  handler: async (ctx, { days = 30 }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const cutoff = Date.now() - days * 86_400_000;
+    const movements = await ctx.db
+      .query('inventoryMovements')
+      .withIndex('by_cafe_reason_at', (q) =>
+        q.eq('cafeId', cafeId).eq('reason', 'adjustment').gt('at', cutoff)
+      )
+      .order('desc')
+      .collect();
+    // Cache ingredient name/unit per id to avoid refetching for repeats.
+    const info = new Map<string, { name: string; unit: 'g' | 'ml' | 'piece' }>();
+    const out = [];
+    for (const m of movements) {
+      let ing = info.get(m.ingredientId);
+      if (!ing) {
+        const doc = await ctx.db.get(m.ingredientId);
+        ing = { name: doc?.name ?? '—', unit: doc?.canonicalUnit ?? 'piece' };
+        info.set(m.ingredientId, ing);
+      }
+      out.push({
+        id: m._id,
+        at: m.at,
+        ingredientName: ing.name,
+        unit: ing.unit,
+        delta: m.delta,
+        ...(m.reasonLabel ? { reasonLabel: m.reasonLabel } : {}),
+        ...(m.note ? { note: m.note } : {}),
+      });
+    }
+    return out;
+  },
+});
+
 export const adjustStock = mutation({
   args: {
     ingredientId: v.id('ingredients'),
