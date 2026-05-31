@@ -76,6 +76,12 @@ msgid "{0} item · {1} stok rendah"
 msgstr "{0} items · {1} low stock"
 
 #. placeholder {0}: counts.all
+#. placeholder {1}: counts.missing
+#: src/routes/_pos/recipes.tsx
+msgid "{0} item · {1} tanpa resep"
+msgstr "{0} items · {1} without recipe"
+
+#. placeholder {0}: counts.all
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "{0} penyesuaian · 30 hari"
 msgstr "{0} adjustments · 30 days"
@@ -359,6 +365,7 @@ msgstr "ingredient"
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/inventory/waste.tsx
+#: src/routes/_pos/recipes.tsx
 msgid "Bahan"
 msgstr "Ingredient"
 
@@ -443,6 +450,7 @@ msgid "Bayar"
 msgstr "Pay"
 
 #: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/recipes.tsx
 msgid "Belum"
 msgstr "Not set"
 
@@ -472,6 +480,7 @@ msgstr "No groups attached."
 
 #: src/components/sale/cart-pane.tsx
 #: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/recipes.tsx
 msgid "Belum ada item."
 msgstr "No items yet."
 
@@ -616,6 +625,7 @@ msgid "Cari grup…"
 msgstr "Search groups…"
 
 #: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/recipes.tsx
 msgid "Cari item…"
 msgstr "Search items…"
 
@@ -1019,6 +1029,7 @@ msgid "Hapus baris"
 msgstr "Remove row"
 
 #: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/recipes.tsx
 msgid "Harga"
 msgstr "Price"
 
@@ -1034,6 +1045,10 @@ msgstr "Base price {0}"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Harga sudah termasuk pajak"
 msgstr "Price includes tax"
+
+#: src/routes/_pos/recipes.tsx
+msgid "HPP/cup"
+msgstr "Cost/cup"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan"
@@ -1073,6 +1088,7 @@ msgstr "Inventory"
 #~ msgstr "Invoice #1045 marked paid"
 
 #: src/components/menu/category-table.tsx
+#: src/routes/_pos/recipes.tsx
 msgid "Item"
 msgstr "Items"
 
@@ -1426,6 +1442,10 @@ msgstr "Product Report"
 msgid "Lemah"
 msgstr "Weak"
 
+#: src/routes/_pos/recipes.tsx
+msgid "Lengkap"
+msgstr "Complete"
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Lepas"
 msgstr "Detach"
@@ -1472,6 +1492,10 @@ msgstr "Loyalty"
 #: src/components/dashboard-invoices.tsx
 msgid "Lunas"
 msgstr "Paid"
+
+#: src/routes/_pos/recipes.tsx
+msgid "Margin"
+msgstr "Margin"
 
 #: src/routes/_public/index.tsx
 #: src/routes/_public/signin.tsx
@@ -2305,6 +2329,7 @@ msgstr "Hide password"
 
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/recipes.tsx
 msgid "Semua"
 msgstr "All"
 
@@ -2409,6 +2434,7 @@ msgstr "Staff"
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/recipes.tsx
 msgid "Status"
 msgstr "Status"
 
@@ -2479,6 +2505,10 @@ msgstr "A shift is already open"
 msgid "Sudah punya akun?"
 msgstr "Already have an account?"
 
+#: src/routes/_pos/recipes.tsx
+msgid "Sunting bahan dan jumlah untuk resep item ini."
+msgstr "Edit ingredients and quantities for this item's recipe."
+
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Susun menu kafe"
 msgstr "Build your cafe menu"
@@ -2507,6 +2537,10 @@ msgstr "Add your first ingredient to start tracking stock."
 #: src/routes/_pos/menu/index.tsx
 msgid "Tambah Item"
 msgstr "Add Item"
+
+#: src/routes/_pos/recipes.tsx
+msgid "Tambah item menu dulu untuk mulai menyusun resep."
+msgstr "Add menu items first to start building recipes."
 
 #: src/routes/_pos/menu/index.tsx
 msgid "Tambah item pertama untuk mulai berjualan."
