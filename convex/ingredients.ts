@@ -20,6 +20,24 @@ const ingredientWithStock = v.object({
   currentStockQty: v.number(),
 });
 
+const movementRow = v.object({
+  id: v.id('inventoryMovements'),
+  at: v.number(),
+  delta: v.number(),
+  reason: v.union(v.literal('sale'), v.literal('adjustment'), v.literal('waste')),
+  note: v.optional(v.string()),
+  wasteReason: v.optional(
+    v.union(
+      v.literal('rusak'),
+      v.literal('basi'),
+      v.literal('tumpah'),
+      v.literal('salah_masak'),
+      v.literal('lainnya')
+    )
+  ),
+  balanceAfter: v.number(),
+});
+
 function assertIngredient(
   name: string,
   reorderThreshold: number,
@@ -65,6 +83,41 @@ export const get = query({
     const row = await ctx.db.get(id);
     if (!row || row.cafeId !== cafeId) return null;
     return { ...row, currentStockQty: await currentStockQty(ctx, cafeId, row._id) };
+  },
+});
+
+export const listMovements = query({
+  args: { ingredientId: v.id('ingredients') },
+  returns: v.object({ rows: v.array(movementRow), truncated: v.boolean() }),
+  handler: async (ctx, { ingredientId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await requireOwned(ctx, cafeId, ingredientId, 'Bahan');
+    // Oldest→newest so we can accumulate a running balance; the newest row's
+    // balance then equals current stock.
+    const movements = await ctx.db
+      .query('inventoryMovements')
+      .withIndex('by_cafe_ingredient_at', (q) =>
+        q.eq('cafeId', cafeId).eq('ingredientId', ingredientId)
+      )
+      .order('asc')
+      .collect();
+    let balance = 0;
+    const withBalance = movements.map((m) => {
+      balance += m.delta;
+      return {
+        id: m._id,
+        at: m.at,
+        delta: m.delta,
+        reason: m.reason,
+        ...(m.note ? { note: m.note } : {}),
+        ...(m.wasteReason ? { wasteReason: m.wasteReason } : {}),
+        balanceAfter: balance,
+      };
+    });
+    const truncated = withBalance.length > 100;
+    // Most recent 100, newest first (each keeps its already-correct balance).
+    const rows = withBalance.slice(-100).reverse();
+    return { rows, truncated };
   },
 });
 

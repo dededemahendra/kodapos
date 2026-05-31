@@ -188,3 +188,78 @@ describe('ingredients.adjustStock', () => {
     ).rejects.toThrow(/bulat/i);
   });
 });
+
+describe('ingredients.listMovements', () => {
+  it('returns movements newest-first with a running balance', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 100,
+      lastCostPerUnitIDR: 25,
+    });
+    // Two adjustments: 0 → 1000, then 1000 → 800.
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: susuId,
+      newQty: 1000,
+      reasonLabel: 'Pengiriman masuk',
+    });
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: susuId,
+      newQty: 800,
+      reasonLabel: 'Koreksi',
+    });
+    const { rows, truncated } = await asOwner.query(api.ingredients.listMovements, {
+      ingredientId: susuId,
+    });
+    expect(truncated).toBe(false);
+    expect(rows).toHaveLength(2);
+    // Newest first: the -200 correction, balance 800.
+    expect(rows[0]?.delta).toBe(-200);
+    expect(rows[0]?.balanceAfter).toBe(800);
+    expect(rows[1]?.delta).toBe(1000);
+    expect(rows[1]?.balanceAfter).toBe(1000);
+  });
+
+  it('caps at 100 rows but keeps the newest balance equal to current stock', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const id = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Biji',
+      canonicalUnit: 'g',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 100,
+    });
+    // 101 adjustments of +1 each: 1, 2, …, 101.
+    for (let qty = 1; qty <= 101; qty++) {
+      await asOwner.mutation(api.ingredients.adjustStock, {
+        ingredientId: id,
+        newQty: qty,
+        reasonLabel: 'Stok opname',
+      });
+    }
+    const { rows, truncated } = await asOwner.query(api.ingredients.listMovements, {
+      ingredientId: id,
+    });
+    expect(truncated).toBe(true);
+    expect(rows).toHaveLength(100);
+    // Newest row's balance is the current stock (101), not a truncated partial.
+    expect(rows[0]?.balanceAfter).toBe(101);
+  });
+
+  it("rejects reading another cafe's ingredient", async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: ownerA } = await setupOwner(t, 'a@x.com');
+    const { asOwner: ownerB } = await setupOwner(t, 'b@x.com');
+    const aIng = await ownerA.mutation(api.ingredients.upsert, {
+      name: 'A-only',
+      canonicalUnit: 'ml',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 1,
+    });
+    await expect(
+      ownerB.query(api.ingredients.listMovements, { ingredientId: aIng })
+    ).rejects.toThrow();
+  });
+});
