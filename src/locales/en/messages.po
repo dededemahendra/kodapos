@@ -762,6 +762,10 @@ msgstr "Failed to record stock."
 msgid "Gagal mendaftar."
 msgstr "Sign up failed."
 
+#: src/routes/_pos/inventory/index.tsx
+msgid "Gagal mengarsipkan bahan."
+msgstr "Failed to archive ingredient."
+
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Gagal mengatur PIN."
 msgstr "Failed to set PIN."

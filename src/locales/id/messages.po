@@ -762,6 +762,10 @@ msgstr "Gagal mencatat stok."
 msgid "Gagal mendaftar."
 msgstr "Gagal mendaftar."
 
+#: src/routes/_pos/inventory/index.tsx
+msgid "Gagal mengarsipkan bahan."
+msgstr "Gagal mengarsipkan bahan."
+
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Gagal mengatur PIN."
 msgstr "Gagal mengatur PIN."
