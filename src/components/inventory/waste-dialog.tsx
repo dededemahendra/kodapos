@@ -22,6 +22,7 @@ import {
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
+import { toast } from '~/lib/toast';
 
 // Raw enum values match convex/waste.ts; labels are translated at render time.
 const REASONS = ['rusak', 'basi', 'tumpah', 'salah_masak', 'lainnya'] as const;
@@ -79,9 +80,12 @@ export function WasteDialog({
         wasteReason: reason,
         ...(note.trim() ? { note: note.trim() } : {}),
       });
+      toast.success(t`Limbah dicatat.`);
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t`Gagal mencatat limbah.`);
+      const message = err instanceof Error ? err.message : t`Gagal mencatat limbah.`;
+      setError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
