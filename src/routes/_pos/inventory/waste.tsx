@@ -1,11 +1,14 @@
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
+import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { WasteDialog } from '~/components/inventory/waste-dialog';
+import { WASTE_REASON_LABELS } from '~/components/inventory/waste-reason';
 import { Button } from '~/components/ui/button';
+import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
   EmptyDescription,
@@ -13,7 +16,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
-import { Spinner } from '~/components/ui/spinner';
+import { PageHeader } from '~/components/ui/page-header';
+import { StatusBadge } from '~/components/ui/status-badge';
 import { formatDate } from '~/lib/formater';
 import { formatIDR } from '~/lib/money';
 
@@ -21,102 +25,117 @@ export const Route = createFileRoute('/_pos/inventory/waste')({
   component: WastePage,
 });
 
-// Raw → translated labels, mirroring the dialog so the table reads in the UI locale.
-const REASON_LABELS: Record<string, React.ReactNode> = {
-  rusak: <Trans>Rusak</Trans>,
-  basi: <Trans>Basi/Kedaluwarsa</Trans>,
-  tumpah: <Trans>Tumpah</Trans>,
-  salah_masak: <Trans>Salah masak</Trans>,
-  lainnya: <Trans>Lainnya</Trans>,
+type WasteRow = {
+  id: string;
+  at: number;
+  ingredientName: string;
+  unit: 'g' | 'ml' | 'piece';
+  qtyWasted: number;
+  wasteReason: string;
+  note?: string;
+  totalCostIDR: number;
 };
 
 function WastePage() {
   const [open, setOpen] = useState(false);
-  const rows = useQuery(api.waste.recent, {});
-  const isLoading = rows === undefined;
+  const rows = useQuery(api.waste.recent, {}) as WasteRow[] | undefined;
   const totalLoss = (rows ?? []).reduce((sum, r) => sum + r.totalCostIDR, 0);
+
+  const columns = useMemo<ColumnDef<WasteRow, unknown>[]>(
+    () => [
+      {
+        accessorKey: 'at',
+        header: () => <Trans>Tanggal</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">
+            {formatDate(new Date(row.original.at).toISOString(), 'day-month')}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'ingredientName',
+        enableSorting: false,
+        header: () => <Trans>Bahan</Trans>,
+        cell: ({ row }) => row.original.ingredientName,
+      },
+      {
+        id: 'qty',
+        enableSorting: false,
+        header: () => <Trans>Jumlah</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">
+            {row.original.qtyWasted} {row.original.unit}
+          </span>
+        ),
+      },
+      {
+        id: 'reason',
+        enableSorting: false,
+        header: () => <Trans>Alasan</Trans>,
+        cell: ({ row }) => (
+          <StatusBadge variant="danger">
+            {WASTE_REASON_LABELS[row.original.wasteReason] ?? row.original.wasteReason}
+          </StatusBadge>
+        ),
+      },
+      {
+        accessorKey: 'totalCostIDR',
+        header: () => <Trans>Kerugian</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">{formatIDR(row.original.totalCostIDR)}</span>
+        ),
+      },
+      {
+        id: 'note',
+        enableSorting: false,
+        header: () => <Trans>Catatan</Trans>,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">{row.original.note ?? '—'}</span>
+        ),
+      },
+    ],
+    []
+  );
+
+  const emptyState = (
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Trash2 />
+        </EmptyMedia>
+        <EmptyTitle>
+          <Trans>Belum ada limbah</Trans>
+        </EmptyTitle>
+        <EmptyDescription>
+          <Trans>Belum ada limbah tercatat dalam 30 hari terakhir.</Trans>
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  );
 
   return (
     <main className="p-6">
-      <header className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">
-          <Trans>Catat Limbah</Trans>
-        </h1>
-        <Button type="button" onClick={() => setOpen(true)}>
-          <Trans>+ Catat Limbah</Trans>
-        </Button>
-      </header>
+      <PageHeader
+        title={<Trans>Limbah</Trans>}
+        meta={
+          rows ? (
+            <Trans>Kerugian 30 hari · {formatIDR(totalLoss)}</Trans>
+          ) : null
+        }
+        actions={
+          <Button type="button" onClick={() => setOpen(true)}>
+            <Trash2 />
+            <Trans>Catat Limbah</Trans>
+          </Button>
+        }
+      />
 
-      <div className="mb-4 rounded-md border border-border bg-muted/40 px-4 py-3 text-sm">
-        <Trans>Kerugian limbah (30 hari):</Trans>{' '}
-        <span className="font-semibold tabular-nums">{formatIDR(totalLoss)}</span>
-      </div>
-
-      {isLoading ? (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Spinner />
-          <span>
-            <Trans>Memuat…</Trans>
-          </span>
-        </div>
-      ) : rows.length === 0 ? (
-        <Empty className="border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Trash2 />
-            </EmptyMedia>
-            <EmptyTitle>
-              <Trans>Belum ada limbah</Trans>
-            </EmptyTitle>
-            <EmptyDescription>
-              <Trans>Belum ada limbah tercatat dalam 30 hari terakhir.</Trans>
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
-              <th className="px-2 py-2">
-                <Trans>Tanggal</Trans>
-              </th>
-              <th className="px-2 py-2">
-                <Trans>Bahan</Trans>
-              </th>
-              <th className="w-24 px-2 py-2 text-right">
-                <Trans>Jumlah</Trans>
-              </th>
-              <th className="w-40 px-2 py-2">
-                <Trans>Alasan</Trans>
-              </th>
-              <th className="w-32 px-2 py-2 text-right">
-                <Trans>Kerugian</Trans>
-              </th>
-              <th className="px-2 py-2">
-                <Trans>Catatan</Trans>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} className="border-b border-border/50 hover:bg-muted">
-                <td className="px-2 py-2 tabular-nums">
-                  {formatDate(new Date(r.at).toISOString(), 'day-month')}
-                </td>
-                <td className="px-2 py-2">{r.ingredientName}</td>
-                <td className="px-2 py-2 text-right tabular-nums">
-                  {r.qtyWasted} {r.unit}
-                </td>
-                <td className="px-2 py-2">{REASON_LABELS[r.wasteReason] ?? r.wasteReason}</td>
-                <td className="px-2 py-2 text-right tabular-nums">
-                  {formatIDR(r.totalCostIDR)}
-                </td>
-                <td className="px-2 py-2 text-muted-foreground">{r.note ?? '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <DataTable
+        columns={columns}
+        data={rows}
+        emptyState={emptyState}
+        initialSort={[{ id: 'at', desc: true }]}
+      />
 
       <WasteDialog open={open} onOpenChange={setOpen} />
     </main>
