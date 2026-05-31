@@ -29,6 +29,11 @@ msgstr "— Pilih —"
 msgid "…"
 msgstr "…"
 
+#. placeholder {0}: archiveRow.name
+#: src/routes/_pos/inventory/index.tsx
+msgid "\"{0}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
+msgstr "\"{0}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
+
 #: src/components/menu/confirm-archive.tsx
 msgid "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
 msgstr "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
@@ -37,6 +42,12 @@ msgstr "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari ta
 #: src/components/sale/cart-line-row.tsx
 msgid "{0} / item"
 msgstr "{0} / item"
+
+#. placeholder {0}: counts.all
+#. placeholder {1}: counts.low
+#: src/routes/_pos/inventory/index.tsx
+msgid "{0} bahan · {1} stok rendah"
+msgstr "{0} bahan · {1} stok rendah"
 
 #. placeholder {0}: o.lines.length
 #: src/routes/_pos/history.tsx
@@ -79,8 +90,8 @@ msgid "+ Tambah"
 msgstr "+ Tambah"
 
 #: src/routes/_pos/inventory/index.tsx
-msgid "+ Tambah Bahan"
-msgstr "+ Tambah Bahan"
+#~ msgid "+ Tambah Bahan"
+#~ msgstr "+ Tambah Bahan"
 
 #. placeholder {0}: data.count - data.items.length
 #: src/components/billing-health.tsx
@@ -156,6 +167,10 @@ msgid "AI-native POS untuk kafe & QSR Indonesia."
 msgstr "AI-native POS untuk kafe & QSR Indonesia."
 
 #: src/routes/_pos/inventory/index.tsx
+msgid "Aksi baris"
+msgstr "Aksi baris"
+
+#: src/routes/_pos/inventory/index.tsx
 msgid "Aktif"
 msgstr "Aktif"
 
@@ -226,6 +241,7 @@ msgstr "Arsip"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/confirm-archive.tsx
+#: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Arsipkan"
 msgstr "Arsipkan"
@@ -233,6 +249,10 @@ msgstr "Arsipkan"
 #: src/components/menu/confirm-archive.tsx
 msgid "Arsipkan {noun}?"
 msgstr "Arsipkan {noun}?"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Arsipkan bahan?"
+msgstr "Arsipkan bahan?"
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Arsipkan item"
@@ -276,9 +296,23 @@ msgstr "bahan"
 
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/waste-dialog.tsx
+#: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Bahan"
 msgstr "Bahan"
+
+#: src/components/inventory/ingredient-form.tsx
+#: src/routes/_pos/inventory/index.tsx
+msgid "Bahan diarsipkan."
+msgstr "Bahan diarsipkan."
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Bahan diperbarui."
+msgstr "Bahan diperbarui."
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Bahan ditambahkan."
+msgstr "Bahan ditambahkan."
 
 #: src/components/billing-health.tsx
 msgid "Bahan yang perlu diisi ulang."
@@ -332,6 +366,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/sale-screen.tsx
 #: src/components/settings/save-bar.tsx
+#: src/components/ui/confirm-dialog.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Batal"
 msgstr "Batal"
@@ -350,8 +385,12 @@ msgid "Belum ada aktivitas."
 msgstr "Belum ada aktivitas."
 
 #: src/routes/_pos/inventory/index.tsx
-msgid "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
-msgstr "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
+msgid "Belum ada bahan."
+msgstr "Belum ada bahan."
+
+#: src/routes/_pos/inventory/index.tsx
+#~ msgid "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
+#~ msgstr "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
 
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Belum ada grup modifier. Buat satu untuk mulai."
@@ -510,8 +549,12 @@ msgid "Catat Limbah"
 msgstr "Catat Limbah"
 
 #: src/routes/_pos/inventory/index.tsx
-msgid "Catat Stok"
-msgstr "Catat Stok"
+#~ msgid "Catat Stok"
+#~ msgstr "Catat Stok"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Catat stok masuk"
+msgstr "Catat stok masuk"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Catat stok:"
@@ -886,7 +929,6 @@ msgid "Integrasi"
 msgstr "Integrasi"
 
 #: src/components/app-shared.tsx
-#: src/routes/_pos/inventory/index.tsx
 msgid "Inventaris"
 msgstr "Inventaris"
 
@@ -1229,6 +1271,10 @@ msgstr "Lewati semua"
 msgid "Lihat laporan"
 msgstr "Lihat laporan"
 
+#: src/routes/_pos/inventory/index.tsx
+msgid "Lihat riwayat"
+msgstr "Lihat riwayat"
+
 #: src/components/dashboard-invoices.tsx
 msgid "Lihat semua"
 msgstr "Lihat semua"
@@ -1313,7 +1359,6 @@ msgstr "Memuat struk…"
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/menu/category-table.tsx
-#: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
@@ -1446,7 +1491,6 @@ msgstr "Naikkan urutan"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
-#: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -2153,9 +2197,17 @@ msgstr "Stok"
 msgid "Stok aman."
 msgstr "Stok aman."
 
+#: src/routes/_pos/inventory/index.tsx
+msgid "Stok Bahan"
+msgstr "Stok Bahan"
+
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Stok baru"
 msgstr "Stok baru"
+
+#: src/components/inventory/stock-adjust-dialog.tsx
+msgid "Stok dicatat."
+msgstr "Stok dicatat."
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Stok opname"
@@ -2218,6 +2270,14 @@ msgstr "Tambah"
 #: src/components/inventory/recipe-editor.tsx
 msgid "Tambah bahan"
 msgstr "Tambah bahan"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Tambah Bahan"
+msgstr "Tambah Bahan"
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Tambah bahan pertama untuk mulai melacak stok."
+msgstr "Tambah bahan pertama untuk mulai melacak stok."
 
 #: src/components/sale/cart-line-row.tsx
 msgid "Tambah jumlah"
@@ -2482,10 +2542,11 @@ msgid "Uang terhitung (Rp)"
 msgstr "Uang terhitung (Rp)"
 
 #: src/routes/_pos/inventory/index.tsx
-msgid "Ubah"
-msgstr "Ubah"
+#~ msgid "Ubah"
+#~ msgstr "Ubah"
 
 #: src/components/inventory/ingredient-form.tsx
+#: src/routes/_pos/inventory/index.tsx
 msgid "Ubah bahan"
 msgstr "Ubah bahan"
 
