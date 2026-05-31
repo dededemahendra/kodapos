@@ -282,8 +282,15 @@ function InventoryIndex() {
         destructive
         onConfirm={async () => {
           if (!archiveRow) return;
-          await archive({ id: archiveRow._id });
-          toast.success(t`Bahan diarsipkan.`);
+          try {
+            await archive({ id: archiveRow._id });
+            toast.success(t`Bahan diarsipkan.`);
+          } catch (err) {
+            const message =
+              err instanceof Error ? err.message : t`Gagal mengarsipkan bahan.`;
+            toast.error(message);
+            throw err; // keep the ConfirmDialog open for retry
+          }
         }}
       />
     </main>

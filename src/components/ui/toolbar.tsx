@@ -28,6 +28,7 @@ export function Toolbar({
   return (
     <div className="flex items-center gap-2 mb-3 flex-wrap">
       <Input
+        aria-label={searchPlaceholder}
         placeholder={searchPlaceholder}
         value={search}
         onChange={(e) => onSearch(e.target.value)}
@@ -38,6 +39,7 @@ export function Toolbar({
           <button
             key={f.value}
             type="button"
+            aria-pressed={active === f.value}
             onClick={() => onFilter(f.value)}
             className={cn(
               'text-sm px-3 py-1.5 rounded-md',
