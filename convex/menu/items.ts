@@ -230,6 +230,10 @@ export const list = query({
   returns: v.array(menuItemWithStatus),
   handler: async (ctx, args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
+    // Catalog admin view: fetch all of the cafe's items (only the cafeId index
+    // prefix is constrained) and filter archived/inactive in JS, because this
+    // endpoint optionally includes both via flags. Café-scale (dozens of rows),
+    // so the JS filter + per-item enrichment below is acceptable.
     const rows = args.categoryId
       ? await ctx.db
           .query('menuItems')
