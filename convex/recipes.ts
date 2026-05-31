@@ -27,6 +27,15 @@ const recipeDetail = v.object({
   costPerCupIDR: v.number(),
 });
 
+const recipeCatalogRow = v.object({
+  itemId: v.id('menuItems'),
+  name: v.string(),
+  priceIDR: v.number(),
+  hasRecipe: v.boolean(),
+  lineCount: v.number(),
+  costPerCupIDR: v.number(),
+});
+
 function assertRecipeLine(qty: number, wastageFactor: number): void {
   if (qty <= 0) throw new Error('Jumlah harus lebih besar dari nol.');
   if (wastageFactor < 1.0 || wastageFactor > 5.0) {
@@ -61,6 +70,52 @@ export const getForItem = query({
       cost += line.qty * line.wastageFactor * ing.lastCostPerUnitIDR;
     }
     return { recipeId: recipe._id, lines, costPerCupIDR: Math.round(cost) };
+  },
+});
+
+export const listForCatalog = query({
+  args: {},
+  returns: v.array(recipeCatalogRow),
+  handler: async (ctx) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    // Non-archived items; per-item recipe + ingredient reads (café-scale,
+    // dozens of items). Cost mirrors getForItem.
+    const items = await ctx.db
+      .query('menuItems')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
+      .collect();
+    const out = [];
+    for (const item of items) {
+      if (item.archived) continue;
+      const recipe = await ctx.db
+        .query('recipes')
+        .withIndex('by_cafe_item', (q) =>
+          q.eq('cafeId', cafeId).eq('menuItemId', item._id)
+        )
+        .unique();
+      let lineCount = 0;
+      let costPerCupIDR = 0;
+      if (recipe) {
+        lineCount = recipe.lines.length;
+        let cost = 0;
+        for (const line of recipe.lines) {
+          const ing = await ctx.db.get(line.ingredientId);
+          if (!ing || ing.cafeId !== cafeId) continue;
+          cost += line.qty * line.wastageFactor * ing.lastCostPerUnitIDR;
+        }
+        costPerCupIDR = Math.round(cost);
+      }
+      out.push({
+        itemId: item._id,
+        name: item.name,
+        priceIDR: item.priceIDR,
+        hasRecipe: recipe !== null,
+        lineCount,
+        costPerCupIDR,
+      });
+    }
+    out.sort((a, b) => a.name.localeCompare(b.name, 'id-ID'));
+    return out;
   },
 });
 

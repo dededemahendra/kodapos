@@ -127,3 +127,50 @@ describe('recipes.upsert / getForItem', () => {
     ).rejects.toThrow(/tidak ditemukan/i);
   });
 });
+
+describe('recipes.listForCatalog', () => {
+  it('returns each non-archived item with recipe status + cost-per-cup', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, itemId, susuId } = await setup(t);
+    // Item with a recipe: 200 ml × 1.0 × Rp 25 = Rp 5.000.
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId: susuId, qty: 200, wastageFactor: 1.0 }],
+    });
+    const rows = await asOwner.query(api.recipes.listForCatalog, {});
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.name).toBe('Espresso');
+    expect(rows[0]?.priceIDR).toBe(18000);
+    expect(rows[0]?.hasRecipe).toBe(true);
+    expect(rows[0]?.lineCount).toBe(1);
+    expect(rows[0]?.costPerCupIDR).toBe(5000);
+  });
+
+  it('reports items without a recipe as hasRecipe=false, cost 0', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setup(t);
+    const rows = await asOwner.query(api.recipes.listForCatalog, {});
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.hasRecipe).toBe(false);
+    expect(rows[0]?.lineCount).toBe(0);
+    expect(rows[0]?.costPerCupIDR).toBe(0);
+  });
+
+  it('excludes archived items', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, itemId } = await setup(t);
+    await asOwner.mutation(api.menu.items.archive, { id: itemId });
+    expect(await asOwner.query(api.recipes.listForCatalog, {})).toHaveLength(0);
+  });
+
+  it("does not return another cafe's items", async () => {
+    const t = convexTest(schema, modules);
+    await setup(t); // owner A (o@x.com) with an item
+    const otherUserId = await t.run(async (ctx) =>
+      ctx.db.insert('users', { name: 'B', email: 'b@x.com' })
+    );
+    const ownerB = t.withIdentity({ subject: `${otherUserId}|test_session` });
+    await ownerB.mutation(api.cafes.createForOwner, { name: 'Cafe B' });
+    expect(await ownerB.query(api.recipes.listForCatalog, {})).toHaveLength(0);
+  });
+});
