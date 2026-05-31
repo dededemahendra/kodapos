@@ -7,6 +7,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { Archive, History, PackagePlus, Pencil, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { IngredientForm } from '~/components/inventory/ingredient-form';
+import { MovementHistorySheet } from '~/components/inventory/movement-history-sheet';
 import { StockAdjustDialog } from '~/components/inventory/stock-adjust-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
@@ -43,6 +44,7 @@ function InventoryIndex() {
   const [editId, setEditId] = useState<Id<'ingredients'> | null>(null);
   const [adjustId, setAdjustId] = useState<Id<'ingredients'> | null>(null);
   const [archiveRow, setArchiveRow] = useState<Ingredient | null>(null);
+  const [historyRow, setHistoryRow] = useState<Ingredient | null>(null);
 
   const archive = useMutation(api.ingredients.archive);
   const ingredients = useQuery(api.ingredients.list, { includeArchived: true });
@@ -167,8 +169,7 @@ function InventoryIndex() {
                 {
                   label: <Trans>Lihat riwayat</Trans>,
                   icon: <History />,
-                  // Destination view ships in sub-project 2 (Inventory polish).
-                  onSelect: () => {},
+                  onSelect: () => setHistoryRow(row.original),
                 },
                 {
                   label: <Trans>Arsipkan</Trans>,
@@ -291,6 +292,12 @@ function InventoryIndex() {
             toast.error(message);
             throw err; // keep the ConfirmDialog open for retry
           }
+        }}
+      />
+      <MovementHistorySheet
+        ingredient={historyRow}
+        onOpenChange={(open) => {
+          if (!open) setHistoryRow(null);
         }}
       />
     </main>
