@@ -45,9 +45,7 @@ function InventoryIndex() {
   const [archiveRow, setArchiveRow] = useState<Ingredient | null>(null);
 
   const archive = useMutation(api.ingredients.archive);
-  const ingredients = useQuery(api.ingredients.list, {
-    includeArchived: filter === 'archived',
-  });
+  const ingredients = useQuery(api.ingredients.list, { includeArchived: true });
 
   // Counts for the filter chips (computed off the unfiltered, non-archived set
   // where relevant). While loading, ingredients is undefined → counts hidden.
@@ -89,7 +87,7 @@ function InventoryIndex() {
           const low = isLow(row.original);
           return (
             <span className="font-medium">
-              {low ? <span className="mr-1">⚠</span> : null}
+              {low ? <span aria-hidden="true" className="mr-1">⚠</span> : null}
               {row.original.name}
             </span>
           );
