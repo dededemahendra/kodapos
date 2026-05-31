@@ -71,10 +71,12 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await waitForUrlHydrated(page, /\/onboarding\/menu$/);
     await page.getByRole('button', { name: /Mulai dengan kategori/ }).click();
     await waitForUrlHydrated(page, /\/menu\/categories$/);
-    await page.getByLabel('Nama kategori baru').fill('Kopi');
-    await page.getByRole('button', { name: /\+ Tambah/ }).click();
+    await page.getByRole('button', { name: /Tambah Kategori/ }).click();
+    await page.getByLabel('Nama kategori').fill('Kopi');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Kategori ditambahkan/)).toBeVisible();
     await page.getByRole('link', { name: 'Items' }).click();
-    await page.getByRole('link', { name: /\+ Item/ }).click();
+    await page.getByRole('link', { name: /Tambah Item/ }).click();
     await page.getByLabel('Nama').fill('Espresso');
     await page.getByLabel('Kategori').selectOption({ label: 'Kopi' });
     await page.getByLabel('Harga (Rp)').fill('18000');
@@ -185,8 +187,10 @@ test.describe('inventory + recipes (auth-gated)', () => {
     // Open the movement history from the ⋯ menu → the sheet shows a balance.
     await page.getByRole('button', { name: /Aksi baris/ }).first().click();
     await page.getByRole('menuitem', { name: /Lihat riwayat/ }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.getByText(/Riwayat/)).toBeVisible();
-    await expect(page.getByText(/Saldo/)).toBeVisible();
+    const sheet = page.getByRole('dialog');
+    await expect(sheet).toBeVisible();
+    // Scope to the sheet — "Riwayat" also appears in the sidebar nav.
+    await expect(sheet.getByRole('heading', { name: /Riwayat/ })).toBeVisible();
+    await expect(sheet.getByText(/Saldo/)).toBeVisible();
   });
 });
