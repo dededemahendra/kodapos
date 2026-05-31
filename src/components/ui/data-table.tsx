@@ -99,12 +99,10 @@ export function DataTable<T>({
         <TableBody>
           {view === 'loading' ? (
             Array.from({ length: skeletonRows }).map((_, r) => (
-              // Skeleton rows are positional and never reorder, so index keys
-              // are safe here.
-              // eslint-disable-next-line react/no-array-index-key
+              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton rows are positional and never reorder
               <TableRow key={`skeleton-${r}`}>
                 {columns.map((_col, c) => (
-                  // eslint-disable-next-line react/no-array-index-key
+                  // biome-ignore lint/suspicious/noArrayIndexKey: skeleton cells are positional and never reorder
                   <TableCell key={`skeleton-${r}-${c}`}>
                     <Skeleton className="h-4 w-full" />
                   </TableCell>

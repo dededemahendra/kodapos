@@ -34,8 +34,7 @@ export function RowActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {items.map((item, i) => (
-          // Action lists are static per render; index keys are stable here.
-          // eslint-disable-next-line react/no-array-index-key
+          // biome-ignore lint/suspicious/noArrayIndexKey: action list is static per render
           <Fragment key={i}>
             {item.separatorBefore ? <DropdownMenuSeparator /> : null}
             <DropdownMenuItem
