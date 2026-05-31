@@ -5,7 +5,7 @@ export function moveId<T>(ids: T[], activeId: T, overId: T): T[] {
   const to = ids.indexOf(overId);
   if (from === -1 || to === -1 || from === to) return ids;
   const next = ids.slice();
-  const [moved] = next.splice(from, 1);
+  const [moved] = next.splice(from, 1) as [T];
   next.splice(to, 0, moved);
   return next;
 }
