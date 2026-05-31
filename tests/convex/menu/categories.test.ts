@@ -83,3 +83,28 @@ describe('menu.categories', () => {
     ).rejects.toThrow(/tidak ditemukan|akses|not found|forbidden/i);
   });
 });
+
+describe('menu.categories.setOrder', () => {
+  it('reassigns positions to match the given order', async () => {
+    const t = convexTest(schema, modules);
+    const asOwner = await setupOwner(t);
+    const a = await asOwner.mutation(api.menu.categories.create, { name: 'A' });
+    const b = await asOwner.mutation(api.menu.categories.create, { name: 'B' });
+    const c = await asOwner.mutation(api.menu.categories.create, { name: 'C' });
+    // Initial order is A, B, C. Reorder to C, A, B.
+    await asOwner.mutation(api.menu.categories.setOrder, { orderedIds: [c, a, b] });
+    const list = await asOwner.query(api.menu.categories.list, {});
+    expect(list.map((cat) => cat._id)).toEqual([c, a, b]);
+  });
+
+  it('rejects an order that does not match the cafe category set', async () => {
+    const t = convexTest(schema, modules);
+    const asOwner = await setupOwner(t);
+    const a = await asOwner.mutation(api.menu.categories.create, { name: 'A' });
+    await asOwner.mutation(api.menu.categories.create, { name: 'B' });
+    // Missing one id → reject.
+    await expect(
+      asOwner.mutation(api.menu.categories.setOrder, { orderedIds: [a] })
+    ).rejects.toThrow(/urutan/i);
+  });
+});

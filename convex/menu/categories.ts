@@ -72,6 +72,31 @@ export const reorder = mutation({
   },
 });
 
+export const setOrder = mutation({
+  args: { orderedIds: v.array(v.id('categories')) },
+  returns: v.null(),
+  handler: async (ctx, { orderedIds }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const current = await ctx.db
+      .query('categories')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
+      .collect();
+    const currentIds = new Set(current.map((c) => c._id));
+    // The provided order must be a permutation of the cafe's active categories.
+    const unique = new Set(orderedIds);
+    if (unique.size !== orderedIds.length || orderedIds.length !== currentIds.size) {
+      throw new Error('Urutan kategori tidak lengkap.');
+    }
+    for (const id of orderedIds) {
+      if (!currentIds.has(id)) throw new Error('Urutan kategori tidak dikenal.');
+    }
+    for (const [i, id] of orderedIds.entries()) {
+      await ctx.db.patch(id, { position: (i + 1) * 100 });
+    }
+    return null;
+  },
+});
+
 export const archive = mutation({
   args: { id: v.id('categories') },
   returns: v.null(),
