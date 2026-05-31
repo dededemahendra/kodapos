@@ -160,8 +160,8 @@ test.describe('inventory + recipes (auth-gated)', () => {
   test('Stock page: sort, ⋯ menu, cancel archive, adjust-stock toast', async ({ page }) => {
     await signupAndAddSusu(page);
 
-    // Sort the "Bahan" column — header is a button.
-    await page.getByRole('button', { name: /Bahan/ }).click();
+    // Sort the "Bahan" column — header is a button (exact to avoid matching "Tambah Bahan").
+    await page.getByRole('button', { name: 'Bahan', exact: true }).click();
 
     // Open the ⋯ row menu for Susu.
     await page.getByRole('button', { name: /Aksi baris/ }).first().click();
@@ -171,7 +171,8 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.getByRole('menuitem', { name: /Arsipkan/ }).click();
     await expect(page.getByRole('alertdialog')).toBeVisible();
     await page.getByRole('button', { name: /Batal/ }).click();
-    await expect(page.getByText(/^Susu/)).toBeVisible();
+    // Row must still be visible after cancel — match the name cell text.
+    await expect(page.getByRole('cell', { name: /Susu/ }).first()).toBeVisible();
 
     // Adjust stock from the ⋯ menu → success toast.
     await page.getByRole('button', { name: /Aksi baris/ }).first().click();
