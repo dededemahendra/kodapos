@@ -17,6 +17,21 @@ const menuItemDoc = v.object({
   createdAt: v.number(),
 });
 
+const menuItemWithStatus = v.object({
+  _id: v.id('menuItems'),
+  _creationTime: v.number(),
+  cafeId: v.id('cafes'),
+  categoryId: v.id('categories'),
+  name: v.string(),
+  priceIDR: v.number(),
+  isActive: v.boolean(),
+  archived: v.boolean(),
+  position: v.number(),
+  createdAt: v.number(),
+  hasRecipe: v.boolean(),
+  lowStockIngredientNames: v.array(v.string()),
+});
+
 const modifierGroupDoc = v.object({
   _id: v.id('modifierGroups'),
   _creationTime: v.number(),
@@ -212,7 +227,7 @@ export const list = query({
     includeArchived: v.optional(v.boolean()),
     includeInactive: v.optional(v.boolean()),
   },
-  returns: v.array(menuItemDoc),
+  returns: v.array(menuItemWithStatus),
   handler: async (ctx, args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const rows = args.categoryId
@@ -226,10 +241,16 @@ export const list = query({
           .query('menuItems')
           .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
           .collect();
-    return rows
+    const visible = rows
       .filter((r) => (args.includeArchived ? true : !r.archived))
       .filter((r) => (args.includeInactive ? true : r.isActive))
       .sort((a, b) => a.position - b.position);
+    return await Promise.all(
+      visible.map(async (r) => ({
+        ...r,
+        ...(await itemRecipeStatus(ctx, cafeId, r._id)),
+      }))
+    );
   },
 });
 

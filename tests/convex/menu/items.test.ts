@@ -401,3 +401,47 @@ describe('menu.items.listForSale — low-stock ingredients', () => {
     expect(rows[0]?.lowStockIngredientNames).toEqual([]);
   });
 });
+
+describe('menu.items.list — recipe/stock enrichment', () => {
+  it('reports hasRecipe=false and empty low-stock for an item with no recipe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Plain',
+      priceIDR: 10000,
+    });
+    const rows = await asOwner.query(api.menu.items.list, {});
+    expect(rows[0]?.hasRecipe).toBe(false);
+    expect(rows[0]?.lowStockIngredientNames).toEqual([]);
+  });
+
+  it('reports hasRecipe=true and flags a low-stock ingredient', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Espresso',
+      priceIDR: 18000,
+    });
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 25,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId: susuId, qty: 200, wastageFactor: 1.0 }],
+    });
+    // Stock 100 < threshold 500.
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: susuId,
+      newQty: 100,
+      reasonLabel: 'Stok opname',
+    });
+    const rows = await asOwner.query(api.menu.items.list, {});
+    expect(rows[0]?.hasRecipe).toBe(true);
+    expect(rows[0]?.lowStockIngredientNames).toEqual(['Susu']);
+  });
+});
