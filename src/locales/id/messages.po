@@ -85,8 +85,8 @@ msgid "← Kembali"
 msgstr "← Kembali"
 
 #: src/routes/_pos/inventory/waste.tsx
-msgid "+ Catat Limbah"
-msgstr "+ Catat Limbah"
+#~ msgid "+ Catat Limbah"
+#~ msgstr "+ Catat Limbah"
 
 #: src/routes/_pos/menu/modifiers.tsx
 #~ msgid "+ Grup baru"
@@ -409,7 +409,7 @@ msgid "Baru"
 msgstr "Baru"
 
 #: src/components/inventory/waste-dialog.tsx
-#: src/routes/_pos/inventory/waste.tsx
+#: src/components/inventory/waste-reason.tsx
 msgid "Basi/Kedaluwarsa"
 msgstr "Basi/Kedaluwarsa"
 
@@ -483,6 +483,10 @@ msgstr "Belum ada limbah tercatat dalam 30 hari terakhir."
 #: src/components/menu/modifier-group-form.tsx
 msgid "Belum ada opsi. Tambahkan minimal satu."
 msgstr "Belum ada opsi. Tambahkan minimal satu."
+
+#: src/components/inventory/movement-history-sheet.tsx
+msgid "Belum ada pergerakan stok."
+msgstr "Belum ada pergerakan stok."
 
 #: src/routes/_pos/history.tsx
 msgid "Belum ada pesanan di shift ini."
@@ -1277,9 +1281,14 @@ msgstr "Kepadatan tampilan"
 msgid "Kerugian"
 msgstr "Kerugian"
 
+#. placeholder {0}: formatIDR(totalLoss)
 #: src/routes/_pos/inventory/waste.tsx
-msgid "Kerugian limbah (30 hari):"
-msgstr "Kerugian limbah (30 hari):"
+msgid "Kerugian 30 hari · {0}"
+msgstr "Kerugian 30 hari · {0}"
+
+#: src/routes/_pos/inventory/waste.tsx
+#~ msgid "Kerugian limbah (30 hari):"
+#~ msgstr "Kerugian limbah (30 hari):"
 
 #: src/components/billing-health.tsx
 msgid "Kesehatan stok"
@@ -1343,7 +1352,7 @@ msgid "Kurangi jumlah"
 msgstr "Kurangi jumlah"
 
 #: src/components/inventory/waste-dialog.tsx
-#: src/routes/_pos/inventory/waste.tsx
+#: src/components/inventory/waste-reason.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Lainnya"
 msgstr "Lainnya"
@@ -1417,8 +1426,14 @@ msgid "Lihat semua"
 msgstr "Lihat semua"
 
 #: src/components/app-shared.tsx
+#: src/components/inventory/movement-history-sheet.tsx
+#: src/routes/_pos/inventory/waste.tsx
 msgid "Limbah"
 msgstr "Limbah"
+
+#: src/components/inventory/waste-dialog.tsx
+msgid "Limbah dicatat."
+msgstr "Limbah dicatat."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Logo"
@@ -1495,7 +1510,6 @@ msgstr "Memuat struk…"
 
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
-#: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
 #: src/routes/_pos/menu/modifiers.$groupId.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
@@ -1510,6 +1524,10 @@ msgstr "Memuat struk…"
 #: src/routes/_pos/shift/open.tsx
 msgid "Memuat…"
 msgstr "Memuat…"
+
+#: src/components/inventory/movement-history-sheet.tsx
+msgid "Menampilkan 100 pergerakan terbaru."
+msgstr "Menampilkan 100 pergerakan terbaru."
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Mengikuti sistem."
@@ -1881,10 +1899,12 @@ msgid "Pengiriman masuk"
 msgstr "Pengiriman masuk"
 
 #: src/components/app-shared.tsx
+#: src/components/inventory/movement-history-sheet.tsx
 msgid "Penjualan"
 msgstr "Penjualan"
 
 #: src/components/app-shared.tsx
+#: src/components/inventory/movement-history-sheet.tsx
 msgid "Penyesuaian"
 msgstr "Penyesuaian"
 
@@ -1915,6 +1935,10 @@ msgstr "Persentase pajak"
 #: src/components/menu/cafe-profile-form.tsx
 msgid "Persentase PPN"
 msgstr "Persentase PPN"
+
+#: src/components/inventory/movement-history-sheet.tsx
+msgid "Perubahan"
+msgstr "Perubahan"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pesan"
@@ -2151,6 +2175,7 @@ msgid "Ringkasan Laporan"
 msgstr "Ringkasan Laporan"
 
 #: src/components/app-shared.tsx
+#: src/components/inventory/movement-history-sheet.tsx
 msgid "Riwayat"
 msgstr "Riwayat"
 
@@ -2171,7 +2196,7 @@ msgid "Rp500 terdekat"
 msgstr "Rp500 terdekat"
 
 #: src/components/inventory/waste-dialog.tsx
-#: src/routes/_pos/inventory/waste.tsx
+#: src/components/inventory/waste-reason.tsx
 msgid "Rusak"
 msgstr "Rusak"
 
@@ -2180,9 +2205,13 @@ msgid "Sabtu"
 msgstr "Sabtu"
 
 #: src/components/inventory/waste-dialog.tsx
-#: src/routes/_pos/inventory/waste.tsx
+#: src/components/inventory/waste-reason.tsx
 msgid "Salah masak"
 msgstr "Salah masak"
+
+#: src/components/inventory/movement-history-sheet.tsx
+msgid "Saldo"
+msgstr "Saldo"
 
 #: src/components/net-revenue-chart.tsx
 #~ msgid "Sales"
@@ -2536,6 +2565,7 @@ msgstr "Tampilkan rincian pajak"
 #~ msgid "Tampilkan tombol nominal saat pembayaran tunai."
 #~ msgstr "Tampilkan tombol nominal saat pembayaran tunai."
 
+#: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Tanggal"
 msgstr "Tanggal"
@@ -2652,6 +2682,7 @@ msgstr "Tidak ada staf yang ditemukan."
 msgid "Tinjau inventaris"
 msgstr "Tinjau inventaris"
 
+#: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Tipe"
 msgstr "Tipe"
@@ -2700,7 +2731,7 @@ msgid "Transfer bank"
 msgstr "Transfer bank"
 
 #: src/components/inventory/waste-dialog.tsx
-#: src/routes/_pos/inventory/waste.tsx
+#: src/components/inventory/waste-reason.tsx
 msgid "Tumpah"
 msgstr "Tumpah"
 
