@@ -143,7 +143,8 @@ describe('ingredients.adjustStock', () => {
     const movement = await t.run(async (ctx) => await ctx.db.get(movementId!));
     expect(movement?.delta).toBe(1000);
     expect(movement?.reason).toBe('adjustment');
-    expect(movement?.note).toBe('Pengiriman masuk — PT Sumber Susu');
+    expect(movement?.reasonLabel).toBe('Pengiriman masuk');
+    expect(movement?.note).toBe('PT Sumber Susu');
   });
 
   it('is a no-op when newQty equals currentStock', async () => {

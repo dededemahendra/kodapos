@@ -200,15 +200,13 @@ export const adjustStock = mutation({
     const current = await currentStockQty(ctx, cafeId, args.ingredientId);
     const delta = args.newQty - current;
     if (delta === 0) return null;
-    const noteText = args.note?.trim()
-      ? `${args.reasonLabel} — ${args.note.trim()}`
-      : args.reasonLabel;
     return await ctx.db.insert('inventoryMovements', {
       cafeId,
       ingredientId: args.ingredientId,
       delta,
       reason: 'adjustment',
-      note: noteText,
+      reasonLabel: args.reasonLabel,
+      ...(args.note?.trim() ? { note: args.note.trim() } : {}),
       at: Date.now(),
     });
   },

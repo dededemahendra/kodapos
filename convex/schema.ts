@@ -325,6 +325,9 @@ export default defineSchema({
     refType: v.optional(v.string()),
     refId: v.optional(v.string()),
     note: v.optional(v.string()),
+    // Adjustment reason (e.g. "Pengiriman masuk"); set by adjustStock. Optional
+    // so legacy rows (reason folded into note) still validate.
+    reasonLabel: v.optional(v.string()),
     // Waste-only fields (undefined for sale/adjustment rows). Set by waste.record.
     wasteReason: v.optional(
       v.union(
