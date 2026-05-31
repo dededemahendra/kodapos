@@ -29,10 +29,25 @@ msgstr "— Select —"
 msgid "…"
 msgstr "…"
 
+#. placeholder {0}: archiveTarget.name
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "\"{0}\" akan dilepas dari item dan disembunyikan."
+msgstr "\"{0}\" will be detached from items and hidden."
+
+#. placeholder {0}: archiveTarget.name
+#: src/components/menu/category-table.tsx
+msgid "\"{0}\" akan disembunyikan dari daftar aktif dan layar kasir."
+msgstr "\"{0}\" will be hidden from the active list and cashier screen."
+
 #. placeholder {0}: archiveRow.name
 #: src/routes/_pos/inventory/index.tsx
 msgid "\"{0}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
 msgstr "\"{0}\" will be hidden from the active list. It can be restored from the archive view."
+
+#. placeholder {0}: archiveTarget.name
+#: src/routes/_pos/menu/index.tsx
+msgid "\"{0}\" akan disembunyikan dari menu dan layar kasir."
+msgstr "\"{0}\" will be hidden from the menu and cashier screen."
 
 #: src/components/menu/confirm-archive.tsx
 msgid "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
@@ -54,6 +69,12 @@ msgstr "{0} ingredients · {1} low stock"
 msgid "{0} item"
 msgstr "{0} item"
 
+#. placeholder {0}: counts.active
+#. placeholder {1}: counts.low
+#: src/routes/_pos/menu/index.tsx
+msgid "{0} item · {1} stok rendah"
+msgstr "{0} items · {1} low stock"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "@namakafe"
 msgstr "@cafename"
@@ -68,12 +89,12 @@ msgid "+ Catat Limbah"
 msgstr "+ Record Waste"
 
 #: src/routes/_pos/menu/modifiers.tsx
-msgid "+ Grup baru"
-msgstr "+ New group"
+#~ msgid "+ Grup baru"
+#~ msgstr "+ New group"
 
 #: src/routes/_pos/menu/index.tsx
-msgid "+ Item"
-msgstr "+ Item"
+#~ msgid "+ Item"
+#~ msgstr "+ Item"
 
 #: src/components/menu/modifier-group-form.tsx
 msgid "+ Opsi"
@@ -83,7 +104,6 @@ msgstr "+ Option"
 msgid "+ Pasang grup…"
 msgstr "+ Attach group…"
 
-#: src/components/menu/category-table.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "+ Tambah"
@@ -99,16 +119,16 @@ msgid "+{0} lainnya"
 msgstr "+{0} more"
 
 #: src/routes/_pos/menu/index.tsx
-msgid "○ Off"
-msgstr "○ Off"
+#~ msgid "○ Off"
+#~ msgstr "○ Off"
 
 #: src/routes/_pos/menu/index.tsx
-msgid "● Aktif"
-msgstr "● Active"
+#~ msgid "● Aktif"
+#~ msgstr "● Active"
 
 #: src/routes/_pos/menu/index.tsx
-msgid "● Arsip"
-msgstr "● Archive"
+#~ msgid "● Arsip"
+#~ msgstr "● Archive"
 
 #: src/components/menu/cafe-profile-form.tsx
 msgid "08xx-xxxx-xxxx"
@@ -162,21 +182,35 @@ msgstr "Accurate"
 #~ msgid "Activity"
 #~ msgstr "Activity"
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Ada"
+msgstr "Set"
+
 #: src/routes/_public/index.tsx
 msgid "AI-native POS untuk kafe & QSR Indonesia."
 msgstr "AI-native POS for Indonesian cafes & QSRs."
 
+#: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/modifiers.tsx
 msgid "Aksi baris"
 msgstr "Row actions"
 
+#: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/modifiers.tsx
 msgid "Aktif"
 msgstr "Active"
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Aktif (tampil ke kasir)"
 msgstr "Active (visible to cashier)"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Aktifkan"
+msgstr "Activate"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Aktifkan biaya layanan"
@@ -232,8 +266,10 @@ msgstr "Reorder threshold"
 #~ msgid "Amount"
 #~ msgstr "Amount"
 
+#: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Arsip"
 msgstr "Archive"
@@ -242,6 +278,8 @@ msgstr "Archive"
 #: src/components/menu/category-table.tsx
 #: src/components/menu/confirm-archive.tsx
 #: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Arsipkan"
 msgstr "Archive"
@@ -254,9 +292,21 @@ msgstr "Archive {noun}?"
 msgid "Arsipkan bahan?"
 msgstr "Archive ingredient?"
 
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Arsipkan grup?"
+msgstr "Archive group?"
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Arsipkan item"
 msgstr "Archive item"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Arsipkan item?"
+msgstr "Archive item?"
+
+#: src/components/menu/category-table.tsx
+msgid "Arsipkan kategori?"
+msgstr "Archive category?"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Atur isi struk, ukuran kertas, dan printer."
@@ -281,6 +331,10 @@ msgstr "Set a 4-digit PIN for yourself. You can also add additional cashiers (op
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Atur PIN Pemilik"
 msgstr "Set Owner PIN"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Aturan"
+msgstr "Rule"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Awalan nomor order"
@@ -362,6 +416,7 @@ msgstr "Spoiled/Expired"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
+#: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/confirm-archive.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/sale-screen.tsx
@@ -380,6 +435,10 @@ msgstr "Void"
 msgid "Bayar"
 msgstr "Pay"
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Belum"
+msgstr "Not set"
+
 #: src/components/dashboard-activity.tsx
 msgid "Belum ada aktivitas."
 msgstr "No activity yet."
@@ -393,14 +452,19 @@ msgstr "No ingredients yet."
 #~ msgstr "No ingredients yet. Add your first ingredient to start tracking stock."
 
 #: src/routes/_pos/menu/modifiers.tsx
-msgid "Belum ada grup modifier. Buat satu untuk mulai."
-msgstr "No modifier groups yet. Create one to get started."
+msgid "Belum ada grup modifier."
+msgstr "No modifier groups yet."
+
+#: src/routes/_pos/menu/modifiers.tsx
+#~ msgid "Belum ada grup modifier. Buat satu untuk mulai."
+#~ msgstr "No modifier groups yet. Create one to get started."
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Belum ada grup terpasang."
 msgstr "No groups attached."
 
 #: src/components/sale/cart-pane.tsx
+#: src/routes/_pos/menu/index.tsx
 msgid "Belum ada item."
 msgstr "No items yet."
 
@@ -496,6 +560,10 @@ msgstr "Create modifier groups (e.g. Size) and attach them to items."
 msgid "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
 msgstr "Create categories, add items, and group reusable modifiers. You can finish now or continue anytime from the main menu."
 
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Buat satu grup untuk dipakai ulang di banyak item."
+msgstr "Create a group to reuse across many items."
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Buka detail"
 msgstr "Open details"
@@ -527,6 +595,10 @@ msgstr "How dates are displayed on receipts and reports."
 #: src/routes/_pos/inventory/index.tsx
 msgid "Cari bahan…"
 msgstr "Search ingredients…"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Cari grup…"
+msgstr "Search groups…"
 
 #: src/routes/_pos/menu/index.tsx
 msgid "Cari item…"
@@ -727,12 +799,16 @@ msgid "Format Waktu"
 msgstr "Time format"
 
 #: src/components/menu/category-table.tsx
-msgid "Gagal membuat kategori."
-msgstr "Failed to create category."
+#~ msgid "Gagal membuat kategori."
+#~ msgstr "Failed to create category."
 
 #: src/routes/_pos/shift/open.tsx
 msgid "Gagal membuka shift."
 msgstr "Failed to open shift."
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Gagal memperbarui item."
+msgstr "Failed to update item."
 
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Gagal memproses pembayaran."
@@ -765,6 +841,18 @@ msgstr "Sign up failed."
 #: src/routes/_pos/inventory/index.tsx
 msgid "Gagal mengarsipkan bahan."
 msgstr "Failed to archive ingredient."
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Gagal mengarsipkan grup."
+msgstr "Failed to archive group."
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Gagal mengarsipkan item."
+msgstr "Failed to archive item."
+
+#: src/components/menu/category-table.tsx
+msgid "Gagal mengarsipkan kategori."
+msgstr "Failed to archive category."
 
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Gagal mengatur PIN."
@@ -802,6 +890,10 @@ msgstr "Failed to save group."
 msgid "Gagal menyimpan item."
 msgstr "Failed to save item."
 
+#: src/components/menu/category-form-dialog.tsx
+msgid "Gagal menyimpan kategori."
+msgstr "Failed to save category."
+
 #: src/components/menu/cafe-profile-form.tsx
 msgid "Gagal menyimpan profil."
 msgstr "Failed to save profile."
@@ -809,6 +901,10 @@ msgstr "Failed to save profile."
 #: src/components/inventory/recipe-editor.tsx
 msgid "Gagal menyimpan resep."
 msgstr "Failed to save recipe."
+
+#: src/components/menu/category-table.tsx
+msgid "Gagal menyimpan urutan."
+msgstr "Failed to save order."
 
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/receipt.tsx
@@ -845,6 +941,14 @@ msgstr "GrabFood"
 #: src/components/inventory/ingredient-form.tsx
 msgid "Gram (g)"
 msgstr "Gram (g)"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Grup baru"
+msgstr "New group"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Grup diarsipkan."
+msgstr "Group archived."
 
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/menu/route.tsx
@@ -944,11 +1048,28 @@ msgstr "Inventory"
 #~ msgid "Invoice #1045 marked paid"
 #~ msgstr "Invoice #1045 marked paid"
 
+#: src/components/menu/category-table.tsx
+msgid "Item"
+msgstr "Items"
+
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Item baru"
 msgstr "New item"
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Item diaktifkan."
+msgstr "Item activated."
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Item diarsipkan."
+msgstr "Item archived."
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Item dinonaktifkan."
+msgstr "Item deactivated."
+
 #: src/components/app-shared.tsx
+#: src/routes/_pos/menu/index.tsx
 msgid "Item Menu"
 msgstr "Menu Items"
 
@@ -1071,14 +1192,26 @@ msgid "Katalog"
 msgstr "Catalog"
 
 #: src/components/app-shared.tsx
+#: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
-#: src/routes/_pos/menu/categories.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/route.tsx
 msgid "Kategori"
 msgstr "Category"
 
-#: src/routes/_pos/menu/categories.tsx
+#: src/components/menu/category-table.tsx
+msgid "Kategori diarsipkan."
+msgstr "Category archived."
+
+#: src/components/menu/category-form-dialog.tsx
+msgid "Kategori diperbarui."
+msgstr "Category updated."
+
+#: src/components/menu/category-form-dialog.tsx
+msgid "Kategori ditambahkan."
+msgstr "Category added."
+
+#: src/components/menu/category-table.tsx
 msgid "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
 msgstr "Categories appear as filters in the Items list and on the cashier screen."
 
@@ -1362,12 +1495,9 @@ msgstr "Loading receipt…"
 
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
-#: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/waste.tsx
-#: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
 #: src/routes/_pos/menu/modifiers.$groupId.tsx
-#: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/onboarding/profile.tsx
 #: src/routes/_pos/pin.tsx
@@ -1404,6 +1534,7 @@ msgstr "Closing…"
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/cafe-profile-form.tsx
+#: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/components/menu/modifier-group-form.tsx
 msgid "Menyimpan…"
@@ -1448,8 +1579,8 @@ msgstr "e.g. Alex"
 #~ msgstr "e.g. INV-"
 
 #: src/components/menu/category-table.tsx
-msgid "mis. Kopi"
-msgstr "e.g. Coffee"
+#~ msgid "mis. Kopi"
+#~ msgstr "e.g. Coffee"
 
 #: src/routes/_public/signup.tsx
 msgid "mis. Kopi Senja"
@@ -1487,7 +1618,6 @@ msgstr "Modifiers"
 msgid "Mulai dengan kategori →"
 msgstr "Start with categories →"
 
-#: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
 msgid "Naikkan urutan"
 msgstr "Move up"
@@ -1496,6 +1626,7 @@ msgstr "Move up"
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/settings/tax.tsx
@@ -1533,9 +1664,13 @@ msgstr "Cafe name is required."
 msgid "Nama kasir baru"
 msgstr "New cashier name"
 
+#: src/components/menu/category-form-dialog.tsx
+msgid "Nama kategori"
+msgstr "Category name"
+
 #: src/components/menu/category-table.tsx
-msgid "Nama kategori baru"
-msgstr "New category name"
+#~ msgid "Nama kategori baru"
+#~ msgstr "New category name"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Nama merchant"
@@ -1574,6 +1709,14 @@ msgstr "NMID"
 msgid "Nomor HP"
 msgstr "Phone number"
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Nonaktif"
+msgstr "Inactive"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Nonaktifkan"
+msgstr "Deactivate"
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Normal"
 msgstr "Normal"
@@ -1608,8 +1751,12 @@ msgid "Operasional"
 msgstr "Operations"
 
 #: src/routes/_pos/menu/modifiers.tsx
-msgid "opsi"
-msgstr "options"
+#~ msgid "opsi"
+#~ msgstr "options"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Opsi"
+msgstr "Options"
 
 #. placeholder {0}: options.length
 #: src/components/menu/modifier-group-form.tsx
@@ -1617,9 +1764,12 @@ msgid "Opsi ({0})"
 msgstr "Options ({0})"
 
 #: src/components/menu/item-edit-form.tsx
-#: src/routes/_pos/menu/modifiers.tsx
 msgid "opsional"
 msgstr "optional"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Opsional"
+msgstr "Optional"
 
 #. placeholder {0}: ag.group.maxSelect
 #: src/components/sale/modifier-picker-dialog.tsx
@@ -1967,6 +2117,7 @@ msgstr "Low"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/recipe-editor.tsx
+#: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Resep"
 msgstr "Recipes"
@@ -2096,16 +2247,18 @@ msgstr "Hide password"
 msgid "Semua"
 msgstr "All"
 
-#. placeholder {0}: allItems?.length ?? 0
 #. placeholder {0}: items.length
 #: src/components/sale/menu-pane.tsx
-#: src/routes/_pos/menu/index.tsx
 msgid "Semua ({0})"
 msgstr "All ({0})"
 
 #: src/components/sale/sale-screen.tsx
 msgid "Semua item akan dihapus dari pesanan ini."
 msgstr "All items will be removed from this order."
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Semua kategori"
+msgstr "All categories"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Semua transaksi dalam Rupiah."
@@ -2114,6 +2267,10 @@ msgstr "All transactions are in Rupiah."
 #: src/routes/_pos/settings/profile.tsx
 msgid "Senin"
 msgstr "Monday"
+
+#: src/components/menu/category-table.tsx
+msgid "Seret untuk menata ulang"
+msgstr "Drag to reorder"
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Sesuaikan dengan lebar gulungan printer Anda."
@@ -2148,7 +2305,7 @@ msgstr "Who's on duty?"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
-#: src/components/menu/category-table.tsx
+#: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Simpan"
@@ -2187,8 +2344,10 @@ msgstr "Staff"
 #~ msgid "Staff"
 #~ msgstr "Staff"
 
+#: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/modifiers.tsx
 msgid "Status"
 msgstr "Status"
 
@@ -2283,6 +2442,14 @@ msgstr "Add Ingredient"
 msgid "Tambah bahan pertama untuk mulai melacak stok."
 msgstr "Add your first ingredient to start tracking stock."
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Tambah Item"
+msgstr "Add Item"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Tambah item pertama untuk mulai berjualan."
+msgstr "Add your first item to start selling."
+
 #: src/components/sale/cart-line-row.tsx
 msgid "Tambah jumlah"
 msgstr "Increase quantity"
@@ -2290,6 +2457,14 @@ msgstr "Increase quantity"
 #: src/routes/_pos/settings/staff.tsx
 #~ msgid "Tambah kasir, ganti PIN, atau arsipkan staf."
 #~ msgstr "Add cashiers, change PINs, or archive staff."
+
+#: src/components/menu/category-form-dialog.tsx
+msgid "Tambah kategori"
+msgstr "Add category"
+
+#: src/components/menu/category-table.tsx
+msgid "Tambah Kategori"
+msgstr "Add Category"
 
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Tambah ke pesanan"
@@ -2445,13 +2620,25 @@ msgstr "No ingredients below threshold."
 msgid "Tidak ada bahan diarsipkan."
 msgstr "No archived ingredients."
 
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Tidak ada grup diarsipkan."
+msgstr "No archived groups."
+
 #: src/components/sale/menu-pane.tsx
 msgid "Tidak ada item di kategori ini."
 msgstr "No items in this category."
 
 #: src/routes/_pos/menu/index.tsx
-msgid "Tidak ada item."
-msgstr "No items."
+msgid "Tidak ada item diarsipkan."
+msgstr "No archived items."
+
+#: src/routes/_pos/menu/index.tsx
+#~ msgid "Tidak ada item."
+#~ msgstr "No items."
+
+#: src/components/menu/category-table.tsx
+msgid "Tidak ada kategori diarsipkan."
+msgstr "No archived categories."
 
 #: src/routes/_pos/shift/close.tsx
 msgid "Tidak ada shift terbuka."
@@ -2464,6 +2651,10 @@ msgstr "No staff found."
 #: src/components/billing-health.tsx
 msgid "Tinjau inventaris"
 msgstr "Review inventory"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Tipe"
+msgstr "Type"
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Tombol nominal cepat"
@@ -2520,7 +2711,6 @@ msgstr "Spilled"
 msgid "Tunai"
 msgstr "Cash"
 
-#: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
 msgid "Turunkan urutan"
 msgstr "Move down"
@@ -2558,9 +2748,21 @@ msgstr "Edit ingredient"
 #~ msgid "Ubah di Profil kafe."
 #~ msgstr "Change in Cafe profile."
 
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Ubah grup"
+msgstr "Edit group"
+
 #: src/routes/_pos/settings/profile.tsx
 #~ msgid "Ubah informasi dasar kafe Anda."
 #~ msgstr "Update your cafe's basic information."
+
+#: src/components/menu/category-form-dialog.tsx
+msgid "Ubah kategori"
+msgstr "Edit category"
+
+#: src/components/menu/category-table.tsx
+msgid "Ubah nama"
+msgstr "Rename"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Ukuran font"
@@ -2592,8 +2794,8 @@ msgid "URL yang kamu buka tidak ada di kodapos."
 msgstr "The URL you opened doesn't exist in kodapos."
 
 #: src/components/menu/category-table.tsx
-msgid "Urutan"
-msgstr "Order"
+#~ msgid "Urutan"
+#~ msgstr "Order"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "USB"
@@ -2616,9 +2818,12 @@ msgstr "vs yesterday"
 #~ msgstr "vs last week"
 
 #: src/components/menu/item-edit-form.tsx
-#: src/routes/_pos/menu/modifiers.tsx
 msgid "wajib"
 msgstr "required"
+
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Wajib"
+msgstr "Required"
 
 #. placeholder {0}: ag.group.minSelect
 #. placeholder {1}: ag.group.maxSelect > ag.group.minSelect ? `-${ag.group.maxSelect}` : ''
