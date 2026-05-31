@@ -181,5 +181,12 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.getByLabel(/Stok baru/).fill('1000');
     await page.getByRole('button', { name: /^Simpan$/ }).click();
     await expect(page.getByText(/Stok dicatat/)).toBeVisible();
+
+    // Open the movement history from the ⋯ menu → the sheet shows a balance.
+    await page.getByRole('button', { name: /Aksi baris/ }).first().click();
+    await page.getByRole('menuitem', { name: /Lihat riwayat/ }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByText(/Riwayat/)).toBeVisible();
+    await expect(page.getByText(/Saldo/)).toBeVisible();
   });
 });
