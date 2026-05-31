@@ -1,6 +1,6 @@
 import type { StatusBadgeVariant } from '~/components/ui/status-badge-variant';
 
-export type MovementReason = 'sale' | 'adjustment' | 'waste';
+export type MovementReason = 'sale' | 'adjustment' | 'waste' | 'purchase';
 
 // Semantic colour for a movement row's type badge. Pure → unit-testable.
 export function movementTypeVariant(reason: MovementReason): StatusBadgeVariant {
@@ -11,5 +11,7 @@ export function movementTypeVariant(reason: MovementReason): StatusBadgeVariant 
       return 'success';
     case 'waste':
       return 'danger';
+    case 'purchase':
+      return 'success';
   }
 }
