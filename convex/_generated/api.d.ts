@@ -24,6 +24,7 @@ import type * as menu_itemStock from "../menu/itemStock.js";
 import type * as menu_items from "../menu/items.js";
 import type * as menu_modifierGroups from "../menu/modifierGroups.js";
 import type * as orders from "../orders.js";
+import type * as promotions from "../promotions.js";
 import type * as purchases from "../purchases.js";
 import type * as recipes from "../recipes.js";
 import type * as settings from "../settings.js";
@@ -55,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "menu/items": typeof menu_items;
   "menu/modifierGroups": typeof menu_modifierGroups;
   orders: typeof orders;
+  promotions: typeof promotions;
   purchases: typeof purchases;
   recipes: typeof recipes;
   settings: typeof settings;

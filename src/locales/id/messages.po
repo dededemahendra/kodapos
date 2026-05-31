@@ -49,6 +49,11 @@ msgstr "\"{0}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampi
 msgid "\"{0}\" akan disembunyikan dari menu dan layar kasir."
 msgstr "\"{0}\" akan disembunyikan dari menu dan layar kasir."
 
+#. placeholder {0}: archiveTarget.name
+#: src/routes/_pos/promos.tsx
+msgid "\"{0}\" tidak akan bisa dipakai di kasir."
+msgstr "\"{0}\" tidak akan bisa dipakai di kasir."
+
 #: src/components/menu/confirm-archive.tsx
 msgid "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
 msgstr "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
@@ -90,6 +95,11 @@ msgstr "{0} pembelian · 30 hari"
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "{0} penyesuaian · 30 hari"
 msgstr "{0} penyesuaian · 30 hari"
+
+#. placeholder {0}: counts.active
+#: src/routes/_pos/promos.tsx
+msgid "{0} promo aktif"
+msgstr "{0} promo aktif"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "@namakafe"
@@ -214,6 +224,7 @@ msgstr "AI-native POS untuk kafe & QSR Indonesia."
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/promos.tsx
 msgid "Aksi baris"
 msgstr "Aksi baris"
 
@@ -221,6 +232,7 @@ msgstr "Aksi baris"
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/promos.tsx
 msgid "Aktif"
 msgstr "Aktif"
 
@@ -291,6 +303,7 @@ msgstr "Ambang isi ulang"
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Arsip"
 msgstr "Arsip"
@@ -301,6 +314,7 @@ msgstr "Arsip"
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Arsipkan"
 msgstr "Arsipkan"
@@ -328,6 +342,10 @@ msgstr "Arsipkan item?"
 #: src/components/menu/category-table.tsx
 msgid "Arsipkan kategori?"
 msgstr "Arsipkan kategori?"
+
+#: src/routes/_pos/promos.tsx
+msgid "Arsipkan promo?"
+msgstr "Arsipkan promo?"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Atur isi struk, ukuran kertas, dan printer."
@@ -443,6 +461,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/confirm-archive.tsx
+#: src/components/promo/promo-form-dialog.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/sale-screen.tsx
 #: src/components/settings/save-bar.tsx
@@ -527,6 +546,10 @@ msgstr "Belum ada pergerakan stok."
 msgid "Belum ada pesanan di shift ini."
 msgstr "Belum ada pesanan di shift ini."
 
+#: src/routes/_pos/promos.tsx
+msgid "Belum ada promo."
+msgstr "Belum ada promo."
+
 #: src/components/inventory/recipe-editor.tsx
 msgid "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
 msgstr "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
@@ -603,6 +626,10 @@ msgstr "Buat grup modifier (mis. Ukuran) dan pasang ke item."
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
 msgstr "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
+
+#: src/routes/_pos/promos.tsx
+msgid "Buat promo untuk memberi diskon di kasir."
+msgstr "Buat promo untuk memberi diskon di kasir."
 
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Buat satu grup untuk dipakai ulang di banyak item."
@@ -921,6 +948,10 @@ msgstr "Gagal mengarsipkan item."
 msgid "Gagal mengarsipkan kategori."
 msgstr "Gagal mengarsipkan kategori."
 
+#: src/routes/_pos/promos.tsx
+msgid "Gagal mengarsipkan promo."
+msgstr "Gagal mengarsipkan promo."
+
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Gagal mengatur PIN."
 msgstr "Gagal mengatur PIN."
@@ -964,6 +995,10 @@ msgstr "Gagal menyimpan kategori."
 #: src/components/menu/cafe-profile-form.tsx
 msgid "Gagal menyimpan profil."
 msgstr "Gagal menyimpan profil."
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Gagal menyimpan promo."
+msgstr "Gagal menyimpan promo."
 
 #: src/components/inventory/recipe-editor.tsx
 msgid "Gagal menyimpan resep."
@@ -1637,6 +1672,7 @@ msgstr "Menutup…"
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/components/menu/modifier-group-form.tsx
+#: src/components/promo/promo-form-dialog.tsx
 msgid "Menyimpan…"
 msgstr "Menyimpan…"
 
@@ -1728,6 +1764,7 @@ msgstr "Naikkan urutan"
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Nama"
@@ -1784,6 +1821,10 @@ msgstr "Nama opsi (mis. Large)"
 msgid "Nama pajak"
 msgstr "Nama pajak"
 
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Nama promo"
+msgstr "Nama promo"
+
 #: src/lib/auth-validation.ts
 msgid "Nama wajib diisi."
 msgstr "Nama wajib diisi."
@@ -1800,9 +1841,26 @@ msgstr "Navigasi sidebar & dasbor."
 #~ msgid "New signups"
 #~ msgstr "New signups"
 
+#: src/routes/_pos/promos.tsx
+msgid "Nilai"
+msgstr "Nilai"
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Nilai (%)"
+msgstr "Nilai (%)"
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Nilai (Rp)"
+msgstr "Nilai (Rp)"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "NMID"
 msgstr "NMID"
+
+#: src/components/promo/promo-form-dialog.tsx
+#: src/routes/_pos/promos.tsx
+msgid "Nominal"
+msgstr "Nominal"
 
 #: src/components/menu/cafe-profile-form.tsx
 #: src/routes/_pos/settings/profile.tsx
@@ -2024,6 +2082,11 @@ msgstr "Peringatan stok rendah"
 msgid "Perkiraan kerugian:"
 msgstr "Perkiraan kerugian:"
 
+#: src/components/promo/promo-form-dialog.tsx
+#: src/routes/_pos/promos.tsx
+msgid "Persen"
+msgstr "Persen"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "Persentase"
 msgstr "Persentase"
@@ -2189,6 +2252,18 @@ msgstr "Promo"
 #: src/routes/_pos/promos.tsx
 msgid "Promo & Diskon"
 msgstr "Promo & Diskon"
+
+#: src/routes/_pos/promos.tsx
+msgid "Promo diarsipkan."
+msgstr "Promo diarsipkan."
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Promo diperbarui."
+msgstr "Promo diperbarui."
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Promo ditambahkan."
+msgstr "Promo ditambahkan."
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/help.tsx
@@ -2461,6 +2536,7 @@ msgstr "Siapa yang bertugas?"
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
+#: src/components/promo/promo-form-dialog.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Simpan"
 msgstr "Simpan"
@@ -2502,6 +2578,7 @@ msgstr "Staf"
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/promos.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Status"
 msgstr "Status"
@@ -2634,6 +2711,14 @@ msgstr "Tambah Kategori"
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Tambah ke pesanan"
 msgstr "Tambah ke pesanan"
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Tambah promo"
+msgstr "Tambah promo"
+
+#: src/routes/_pos/promos.tsx
+msgid "Tambah Promo"
+msgstr "Tambah Promo"
 
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Tambahkan beberapa item beserta harganya."
@@ -2812,6 +2897,10 @@ msgstr "Tidak ada item diarsipkan."
 msgid "Tidak ada kategori diarsipkan."
 msgstr "Tidak ada kategori diarsipkan."
 
+#: src/routes/_pos/promos.tsx
+msgid "Tidak ada promo diarsipkan."
+msgstr "Tidak ada promo diarsipkan."
+
 #: src/routes/_pos/shift/close.tsx
 msgid "Tidak ada shift terbuka."
 msgstr "Tidak ada shift terbuka."
@@ -2825,7 +2914,9 @@ msgid "Tinjau inventaris"
 msgstr "Tinjau inventaris"
 
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/components/promo/promo-form-dialog.tsx
 #: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/promos.tsx
 msgid "Tipe"
 msgstr "Tipe"
 
@@ -2910,9 +3001,9 @@ msgstr "Uang terhitung"
 msgid "Uang terhitung (Rp)"
 msgstr "Uang terhitung (Rp)"
 
-#: src/routes/_pos/inventory/index.tsx
-#~ msgid "Ubah"
-#~ msgstr "Ubah"
+#: src/routes/_pos/promos.tsx
+msgid "Ubah"
+msgstr "Ubah"
 
 #: src/components/inventory/ingredient-form.tsx
 #: src/routes/_pos/inventory/index.tsx
@@ -2938,6 +3029,10 @@ msgstr "Ubah kategori"
 #: src/components/menu/category-table.tsx
 msgid "Ubah nama"
 msgstr "Ubah nama"
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Ubah promo"
+msgstr "Ubah promo"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Ukuran font"

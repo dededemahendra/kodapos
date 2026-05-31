@@ -312,6 +312,15 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index('by_cafe_item', ['cafeId', 'menuItemId']),
 
+  promotions: defineTable({
+    cafeId: v.id('cafes'),
+    name: v.string(),
+    type: v.union(v.literal('percent'), v.literal('fixed')),
+    value: v.number(),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  }).index('by_cafe_active', ['cafeId', 'archived']),
+
   purchases: defineTable({
     cafeId: v.id('cafes'),
     supplierName: v.optional(v.string()),
