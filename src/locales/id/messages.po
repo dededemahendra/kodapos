@@ -81,6 +81,11 @@ msgstr "{0} item · {1} stok rendah"
 msgid "{0} item · {1} tanpa resep"
 msgstr "{0} item · {1} tanpa resep"
 
+#. placeholder {0}: rows.length
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "{0} pembelian · 30 hari"
+msgstr "{0} pembelian · 30 hari"
+
 #. placeholder {0}: counts.all
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "{0} penyesuaian · 30 hari"
@@ -119,6 +124,10 @@ msgstr "+ Pasang grup…"
 #: src/routes/_pos/settings/staff.tsx
 msgid "+ Tambah"
 msgstr "+ Tambah"
+
+#: src/components/inventory/purchase-form.tsx
+msgid "+ Tambah bahan"
+msgstr "+ Tambah bahan"
 
 #: src/routes/_pos/inventory/index.tsx
 #~ msgid "+ Tambah Bahan"
@@ -364,6 +373,7 @@ msgstr "bahan"
 #: src/components/inventory/waste-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Bahan"
@@ -428,6 +438,7 @@ msgid "Basi/Kedaluwarsa"
 msgstr "Basi/Kedaluwarsa"
 
 #: src/components/inventory/ingredient-form.tsx
+#: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/category-form-dialog.tsx
@@ -500,6 +511,10 @@ msgstr "Belum ada limbah tercatat dalam 30 hari terakhir."
 msgid "Belum ada opsi. Tambahkan minimal satu."
 msgstr "Belum ada opsi. Tambahkan minimal satu."
 
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Belum ada pembelian."
+msgstr "Belum ada pembelian."
+
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Belum ada penyesuaian."
 msgstr "Belum ada penyesuaian."
@@ -547,6 +562,11 @@ msgstr "Biaya layanan"
 #: src/components/inventory/ingredient-form.tsx
 msgid "Biaya per satuan (Rp)"
 msgstr "Biaya per satuan (Rp)"
+
+#: src/components/inventory/purchase-form.tsx
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Biaya/satuan"
+msgstr "Biaya/satuan"
 
 #: src/components/billing-health.tsx
 #~ msgid "Billing health"
@@ -644,6 +664,15 @@ msgstr "Catat limbah"
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Catat Limbah"
 msgstr "Catat Limbah"
+
+#: src/components/inventory/purchase-form.tsx
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Catat Pembelian"
+msgstr "Catat Pembelian"
+
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Catat pembelian untuk menambah stok dan memperbarui biaya bahan."
+msgstr "Catat pembelian untuk menambah stok dan memperbarui biaya bahan."
 
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Catat Penyesuaian"
@@ -864,6 +893,10 @@ msgstr "Gagal menambah staf."
 msgid "Gagal mencatat limbah."
 msgstr "Gagal mencatat limbah."
 
+#: src/components/inventory/purchase-form.tsx
+msgid "Gagal mencatat pembelian."
+msgstr "Gagal mencatat pembelian."
+
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Gagal mencatat stok."
 msgstr "Gagal mencatat stok."
@@ -1023,6 +1056,7 @@ msgstr "Halaman tidak ditemukan"
 msgid "Hapus"
 msgstr "Hapus"
 
+#: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/sale/cart-line-row.tsx
 msgid "Hapus baris"
@@ -1088,6 +1122,7 @@ msgstr "Inventaris"
 #~ msgstr "Invoice #1045 marked paid"
 
 #: src/components/menu/category-table.tsx
+#: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Item"
 msgstr "Item"
@@ -1555,6 +1590,7 @@ msgstr "Memuat struk…"
 
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
 #: src/routes/_pos/menu/modifiers.$groupId.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
@@ -1593,6 +1629,7 @@ msgid "Menutup…"
 msgstr "Menutup…"
 
 #: src/components/inventory/ingredient-form.tsx
+#: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
@@ -1869,6 +1906,14 @@ msgstr "Password wajib diisi."
 msgid "Pelanggan"
 msgstr "Pelanggan"
 
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Pemasok"
+msgstr "Pemasok"
+
+#: src/components/inventory/purchase-form.tsx
+msgid "Pemasok (opsional)"
+msgstr "Pemasok (opsional)"
+
 #: src/components/latest-change.tsx
 msgid "PEMBARUAN"
 msgstr "PEMBARUAN"
@@ -1900,9 +1945,18 @@ msgid "Pembayaran Tunai"
 msgstr "Pembayaran Tunai"
 
 #: src/components/app-shared.tsx
+#: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 msgid "Pembelian"
 msgstr "Pembelian"
+
+#: src/components/inventory/purchase-form.tsx
+msgid "Pembelian dicatat."
+msgstr "Pembelian dicatat."
+
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Pembelian tidak ditemukan."
+msgstr "Pembelian tidak ditemukan."
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Pembulatan"
@@ -2166,6 +2220,15 @@ msgstr "QRIS dinamis"
 msgid "QRIS statis"
 msgstr "QRIS statis"
 
+#: src/components/inventory/purchase-form.tsx
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Qty"
+msgstr "Qty"
+
+#: src/components/inventory/purchase-form.tsx
+msgid "Qty ({unit})"
+msgstr "Qty ({unit})"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Rabu"
 msgstr "Rabu"
@@ -2212,6 +2275,10 @@ msgstr "Restoran"
 #: src/components/billing-health.tsx
 #~ msgid "Review open invoices"
 #~ msgstr "Review open invoices"
+
+#: src/routes/_pos/inventory/purchases.tsx
+msgid "Rincian baris pembelian."
+msgstr "Rincian baris pembelian."
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Ringkas"
@@ -2389,6 +2456,7 @@ msgid "Siapa yang bertugas?"
 msgstr "Siapa yang bertugas?"
 
 #: src/components/inventory/ingredient-form.tsx
+#: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/category-form-dialog.tsx
@@ -2494,6 +2562,7 @@ msgstr "Suara saat transaksi berhasil"
 
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
+#: src/routes/_pos/inventory/purchases.tsx
 msgid "Subtotal"
 msgstr "Subtotal"
 
@@ -2570,6 +2639,10 @@ msgstr "Tambah ke pesanan"
 msgid "Tambahkan beberapa item beserta harganya."
 msgstr "Tambahkan beberapa item beserta harganya."
 
+#: src/components/inventory/purchase-form.tsx
+msgid "Tambahkan minimal satu bahan dengan jumlah dan biaya."
+msgstr "Tambahkan minimal satu bahan dengan jumlah dan biaya."
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Tampil di struk dan halaman kafe."
 msgstr "Tampil di struk dan halaman kafe."
@@ -2634,6 +2707,7 @@ msgstr "Tampilkan rincian pajak"
 
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
+#: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Tanggal"
 msgstr "Tanggal"
@@ -2764,8 +2838,10 @@ msgid "Tombol uang cepat"
 msgstr "Tombol uang cepat"
 
 #: src/components/dashboard-invoices.tsx
+#: src/components/inventory/purchase-form.tsx
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
+#: src/routes/_pos/inventory/purchases.tsx
 msgid "Total"
 msgstr "Total"
 
