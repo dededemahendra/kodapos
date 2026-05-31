@@ -330,4 +330,40 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByRole('cell', { name: /Lengkap/ })).toBeVisible();
   });
+
+  test('Promos page: create percent + fixed, edit, archive', async ({ page }) => {
+    await signupAndAddSusu(page);
+
+    await page.goto('/promos');
+    await waitForUrlHydrated(page, /\/promos$/);
+
+    // Create a percent promo (Persen is the default type).
+    await page.getByRole('button', { name: /Tambah Promo/ }).click();
+    await page.getByLabel('Nama promo').fill('Diskon Kopi');
+    await page.getByLabel(/Nilai/).fill('20');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Promo ditambahkan/)).toBeVisible();
+    await expect(page.getByRole('cell', { name: /20%/ })).toBeVisible();
+
+    // Create a fixed promo.
+    await page.getByRole('button', { name: /Tambah Promo/ }).click();
+    await page.getByLabel('Nama promo').fill('Promo Lebaran');
+    await page.getByLabel('Tipe').click();
+    await page.getByRole('option', { name: /Nominal/ }).click();
+    await page.getByLabel(/Nilai/).fill('10000');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText(/Promo ditambahkan/)).toBeVisible();
+    await expect(page.getByRole('cell', { name: /Rp 10\.000/ })).toBeVisible();
+
+    // Archive "Diskon Kopi" via the ⋯ menu, then see it under Arsip.
+    await page
+      .getByRole('row', { name: /Diskon Kopi/ })
+      .getByRole('button', { name: /Aksi baris/ })
+      .click();
+    await page.getByRole('menuitem', { name: /Arsipkan/ }).click();
+    await page.getByRole('button', { name: /^Arsipkan$/ }).click();
+    await expect(page.getByText(/Promo diarsipkan/)).toBeVisible();
+    await page.getByRole('button', { name: /^Arsip/ }).click();
+    await expect(page.getByRole('cell', { name: /Diskon Kopi/ })).toBeVisible();
+  });
 });
