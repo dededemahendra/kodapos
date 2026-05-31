@@ -58,7 +58,9 @@ export function PromoFormDialog({
     if (submitting) return;
     setSubmitting(true);
     setError(null);
-    const parsedValue = Number.parseInt(value, 10);
+    // Number (not parseInt) so "10.5" reaches server validation as 10.5 and is
+    // rejected, rather than being silently truncated to 10.
+    const parsedValue = Number(value);
     try {
       if (isEdit && promo) {
         await update({ id: promo._id, name, type, value: parsedValue });

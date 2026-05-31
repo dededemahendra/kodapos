@@ -36,11 +36,11 @@ export const list = query({
     const { cafeId } = await requireOwnerCafe(ctx);
     const rows = await ctx.db
       .query('promotions')
-      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
+      .withIndex('by_cafe_active', (q) =>
+        includeArchived ? q.eq('cafeId', cafeId) : q.eq('cafeId', cafeId).eq('archived', false)
+      )
       .collect();
-    return rows
-      .filter((p) => includeArchived || !p.archived)
-      .sort((a, b) => a.name.localeCompare(b.name, 'id-ID'));
+    return rows.sort((a, b) => a.name.localeCompare(b.name, 'id-ID'));
   },
 });
 

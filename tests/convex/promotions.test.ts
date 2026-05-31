@@ -59,6 +59,12 @@ describe('promotions CRUD', () => {
     await expect(
       asOwner.mutation(api.promotions.create, { name: 'P', type: 'fixed', value: 0 })
     ).rejects.toThrow(/nominal|≥ 1/i);
+    await expect(
+      asOwner.mutation(api.promotions.create, { name: 'P', type: 'percent', value: 10.5 })
+    ).rejects.toThrow(/1.*100|persentase/i);
+    await expect(
+      asOwner.mutation(api.promotions.create, { name: 'P', type: 'fixed', value: 1.5 })
+    ).rejects.toThrow(/nominal|≥ 1/i);
   });
 
   it('tenant isolation: cafe B cannot list or archive cafe A promos', async () => {
