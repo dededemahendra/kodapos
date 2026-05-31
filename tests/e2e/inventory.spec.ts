@@ -106,7 +106,7 @@ test.describe('inventory + recipes (auth-gated)', () => {
     // 6. /inventory: add Susu
     await page.goto('/inventory');
     await waitForUrlHydrated(page, /\/inventory$/);
-    await page.getByRole('button', { name: /\+ Tambah Bahan/ }).click();
+    await page.getByRole('button', { name: /Tambah Bahan/ }).click();
     await page.getByLabel('Nama').fill('Susu');
     // Unit select - shadcn Select. Use exact match because "Satuan" also
     // appears in "Biaya per satuan (Rp)".
@@ -118,7 +118,8 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await expect(page.getByText(/Susu/)).toBeVisible();
 
     // 6. /menu - find the Espresso item link and click into recipe editor
-    await page.getByRole('link', { name: /Menu/ }).click();
+    // The "Menu" sidebar entry is now a collapsible button, not a direct link — navigate directly.
+    await page.goto('/menu');
     await waitForUrlHydrated(page, /\/menu$/);
     await page.getByRole('link', { name: /Espresso/ }).click();
     await expect(page).toHaveURL(/\/menu\/items\/[^/]+$/);
