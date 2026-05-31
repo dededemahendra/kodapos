@@ -1,8 +1,10 @@
 import { Trans } from '@lingui/react/macro';
+import { History } from 'lucide-react';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { WASTE_REASON_LABELS } from '~/components/inventory/waste-reason';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import {
   Sheet,
   SheetContent,
@@ -52,9 +54,16 @@ export function MovementHistorySheet({
               ))}
             </div>
           ) : data.rows.length === 0 ? (
-            <p className="text-muted-foreground">
-              <Trans>Belum ada pergerakan stok.</Trans>
-            </p>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <History />
+                </EmptyMedia>
+                <EmptyTitle>
+                  <Trans>Belum ada pergerakan stok.</Trans>
+                </EmptyTitle>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <>
               <table className="w-full">

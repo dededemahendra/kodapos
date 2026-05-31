@@ -9,6 +9,7 @@ import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { SettingsPageHeader } from '~/components/settings/primitives';
 import { PinEntry } from '~/components/staff/pin-entry';
 import { Badge } from '~/components/ui/badge';
+import { Empty, EmptyHeader, EmptyTitle } from '~/components/ui/empty';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
@@ -186,8 +187,12 @@ function StaffSettingsPage() {
           <tbody>
             {filtered && filtered.length === 0 && (
               <tr>
-                <td colSpan={3} className="py-6 text-center text-muted-foreground">
-                  <Trans>Tidak ada staf yang ditemukan.</Trans>
+                <td colSpan={3} className="p-0">
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyTitle><Trans>Tidak ada staf yang ditemukan.</Trans></EmptyTitle>
+                    </EmptyHeader>
+                  </Empty>
                 </td>
               </tr>
             )}

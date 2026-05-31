@@ -4,10 +4,12 @@ import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
+import { Receipt } from 'lucide-react';
 import { useState } from 'react';
 import { PinGate } from '~/components/staff/pin-gate';
 import { ReceiptPreview } from '~/components/sale/receipt-preview';
 import { ShiftGate } from '~/components/shift/shift-gate';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 
@@ -52,7 +54,14 @@ function HistoryList() {
         </Link>
       </div>
       {orders.length === 0 ? (
-        <p className="text-muted-foreground"><Trans>Belum ada pesanan di shift ini.</Trans></p>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Receipt />
+            </EmptyMedia>
+            <EmptyTitle><Trans>Belum ada pesanan di shift ini.</Trans></EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <ul className="divide-y divide-border border border-border rounded-md">
           {orders.map((o) => (
