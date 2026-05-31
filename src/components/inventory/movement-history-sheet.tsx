@@ -87,6 +87,8 @@ export function MovementHistorySheet({
                             <Trans>Penjualan</Trans>
                           ) : r.reason === 'adjustment' ? (
                             <Trans>Penyesuaian</Trans>
+                          ) : r.reason === 'purchase' ? (
+                            <Trans>Pembelian</Trans>
                           ) : (
                             <Trans>Limbah</Trans>
                           )}

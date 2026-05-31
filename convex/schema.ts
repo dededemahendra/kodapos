@@ -312,6 +312,21 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index('by_cafe_item', ['cafeId', 'menuItemId']),
 
+  purchases: defineTable({
+    cafeId: v.id('cafes'),
+    supplierName: v.optional(v.string()),
+    at: v.number(),
+    lines: v.array(
+      v.object({
+        ingredientId: v.id('ingredients'),
+        qty: v.number(),
+        unitCostIDR: v.number(),
+      })
+    ),
+    totalIDR: v.number(),
+    createdAt: v.number(),
+  }).index('by_cafe_at', ['cafeId', 'at']),
+
   inventoryMovements: defineTable({
     cafeId: v.id('cafes'),
     ingredientId: v.id('ingredients'),
@@ -320,7 +335,9 @@ export default defineSchema({
       v.literal('sale'),
       v.literal('adjustment'),
       // 'waste' is written by waste.record (dedicated Catat Limbah flow).
-      v.literal('waste')
+      v.literal('waste'),
+      // 'purchase' is written by purchases.record (Pembelian flow).
+      v.literal('purchase')
     ),
     refType: v.optional(v.string()),
     refId: v.optional(v.string()),

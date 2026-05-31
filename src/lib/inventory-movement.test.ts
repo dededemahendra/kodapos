@@ -6,5 +6,6 @@ describe('movementTypeVariant', () => {
     expect(movementTypeVariant('sale')).toBe('muted');
     expect(movementTypeVariant('adjustment')).toBe('success');
     expect(movementTypeVariant('waste')).toBe('danger');
+    expect(movementTypeVariant('purchase')).toBe('success');
   });
 });

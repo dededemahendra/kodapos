@@ -24,7 +24,12 @@ const movementRow = v.object({
   id: v.id('inventoryMovements'),
   at: v.number(),
   delta: v.number(),
-  reason: v.union(v.literal('sale'), v.literal('adjustment'), v.literal('waste')),
+  reason: v.union(
+    v.literal('sale'),
+    v.literal('adjustment'),
+    v.literal('waste'),
+    v.literal('purchase')
+  ),
   note: v.optional(v.string()),
   wasteReason: v.optional(
     v.union(
