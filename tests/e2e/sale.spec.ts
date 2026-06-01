@@ -233,4 +233,24 @@ test.describe('sale (auth-gated)', () => {
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/penjualan-.*\.csv/);
   });
+
+  test('forecast: a fresh cafe sees the cold-start learning message', async ({ page }) => {
+    const email = `e2e+forecast+${Date.now()}@kodapos.test`;
+    const password = 'Sa{ngat-Aman-123';
+
+    await gotoHydrated(page, '/signup');
+    await page.getByLabel('Nama Anda').fill('E2E Forecast');
+    await page.getByLabel('Nama kafe').fill('Kopi Forecast');
+    await page.getByLabel('Email').fill(email);
+    await page.getByRole('textbox', { name: 'Password' }).fill(password);
+    await page.getByRole('button', { name: /Daftar/ }).click();
+
+    await waitForUrlHydrated(page, /\/onboarding\/profile$/, { timeout: 15_000 });
+    await page.getByRole('button', { name: /Lanjut/ }).click();
+    await waitForUrlHydrated(page, /\/onboarding\/menu$/);
+
+    await page.goto('/forecast');
+    await waitForUrlHydrated(page, /\/forecast$/);
+    await expect(page.getByText(/sedang belajar/i)).toBeVisible();
+  });
 });
