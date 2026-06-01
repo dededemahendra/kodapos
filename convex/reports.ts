@@ -65,8 +65,9 @@ export const salesDaily = query({
   handler: async (ctx, { range }) => {
     const { tz, fromKey, toKey, paid } = await paidInRange(ctx, range);
     const keyOf = dayKeyFn(tz);
+    const dayKeys = eachDayKey(fromKey, toKey);
     const byDay = new Map<string, { revenueIDR: number; orders: number }>();
-    for (const key of eachDayKey(fromKey, toKey)) byDay.set(key, { revenueIDR: 0, orders: 0 });
+    for (const key of dayKeys) byDay.set(key, { revenueIDR: 0, orders: 0 });
     for (const o of paid) {
       const b = byDay.get(keyOf(o.createdAtClient));
       if (b) {
@@ -74,7 +75,7 @@ export const salesDaily = query({
         b.orders += 1;
       }
     }
-    const days = eachDayKey(fromKey, toKey).map((day) => ({ day, ...byDay.get(day)! }));
+    const days = dayKeys.map((day) => ({ day, ...byDay.get(day)! }));
     return { days, fromKey, toKey };
   },
 });

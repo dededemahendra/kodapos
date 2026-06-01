@@ -104,6 +104,33 @@ describe('reports.overview + salesDaily', () => {
     ]);
   });
 
+  it('overview excludes void/pending orders inside the range', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner } = refs;
+    await t.run((ctx) =>
+      ctx.db.insert('orders', {
+        cafeId: refs.cafeId,
+        shiftId: refs.shiftId,
+        cashierId: refs.cashierId,
+        clientId: 'c-void',
+        lines: [],
+        subtotalIDR: 10000,
+        taxRatePct: 0,
+        taxIDR: 0,
+        discountIDR: 0,
+        totalIDR: 10000,
+        paymentMethod: 'cash',
+        paymentStatus: 'void',
+        createdAtClient: wib(2026, 5, 10),
+        syncedAt: wib(2026, 5, 10),
+      })
+    );
+    const r = await asOwner.query(api.reports.overview, { range: { from: '2026-05-10', to: '2026-05-10' } });
+    expect(r.revenueIDR).toBe(0);
+    expect(r.orders).toBe(0);
+  });
+
   it('tenant isolation: cafe B sees none of cafe A orders', async () => {
     const t = convexTest(schema, modules);
     const a = await setup(t, 'a@x.com');
