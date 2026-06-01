@@ -27,7 +27,7 @@
 
 ## File structure
 
-**New:** `convex/lib/forecast.ts` (+ `convex/lib/forecast.test.ts`), `convex/forecast.ts` (+ `tests/convex/forecast.test.ts`), `src/components/forecast/render-driver.tsx`, `src/routes/_pos/forecast.tsx`.
+**New:** `convex/lib/forecast.ts` (+ `tests/convex/forecast-engine.test.ts`), `convex/forecast.ts` (+ `tests/convex/forecast.test.ts`), `src/components/forecast/render-driver.tsx`, `src/routes/_pos/forecast.tsx`.
 **Modified:** `convex/lib/time.ts` (+ `dowOfKey`/`addDaysToKey`) + `tests/convex/time.test.ts`, `convex/_generated/*` (codegen), `src/components/app-shared.tsx` (nav entry), Lingui catalogs, `tests/e2e/sale.spec.ts`.
 
 ---
@@ -103,9 +103,9 @@ git commit -m "feat(forecast): add dowOfKey + addDaysToKey time helpers"
 
 ## Task 2: forecast engine — core stats
 
-**Files:** Create `convex/lib/forecast.ts`, `convex/lib/forecast.test.ts`.
+**Files:** Create `convex/lib/forecast.ts`, `tests/convex/forecast-engine.test.ts` (pure convex-helper tests live in `tests/convex/`, matching `pricing.test.ts`/`time.test.ts` — the vitest config covers `tests/`, not `convex/lib/`).
 
-- [ ] **Step 1: Write the failing tests** — create `convex/lib/forecast.test.ts`:
+- [ ] **Step 1: Write the failing tests** — create `tests/convex/forecast-engine.test.ts`:
 ```ts
 import { describe, expect, it } from 'vitest';
 import {
@@ -116,7 +116,7 @@ import {
   dayOfWeekMultiplier,
   predictedQty,
   weatherMultiplier,
-} from './forecast';
+} from '../../convex/lib/forecast';
 
 const sample = (daysAgo: number, dow: number, qty: number): DaySample => ({ daysAgo, dow, qty });
 
@@ -204,7 +204,7 @@ describe('weatherMultiplier', () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `pnpm test -- convex/lib/forecast.test.ts`
+Run: `pnpm test -- tests/convex/forecast-engine.test.ts`
 Expected: FAIL — `./forecast` does not exist.
 
 - [ ] **Step 3: Implement** — create `convex/lib/forecast.ts`:
@@ -234,7 +234,9 @@ export function baseEstimate(samples: DaySample[], lambda = 0.05): number {
   const recent = [...samples].sort((a, b) => a.daysAgo - b.daysAgo).slice(0, 28);
   const drop = Math.floor(0.1 * recent.length);
   const byQty = [...recent].sort((a, b) => a.qty - b.qty);
-  const pool = drop > 0 ? byQty.slice(drop, byQty.length - drop) : recent;
+  // Trim outliers only once there are >=14 days; with sparser data a single
+  // recent sale must not be trimmed away (it carries the recency signal).
+  const pool = recent.length >= 14 && drop > 0 ? byQty.slice(drop, byQty.length - drop) : recent;
   let wsum = 0;
   let num = 0;
   for (const s of pool) {
@@ -275,13 +277,13 @@ export function predictedQty(base: number, dow: number, weather: number, holiday
 
 - [ ] **Step 4: Run to verify pass**
 
-Run: `pnpm test -- convex/lib/forecast.test.ts`
+Run: `pnpm test -- tests/convex/forecast-engine.test.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add convex/lib/forecast.ts convex/lib/forecast.test.ts
+git add convex/lib/forecast.ts tests/convex/forecast-engine.test.ts
 git commit -m "feat(forecast): add core stats engine (base/dow/confidence/predict)"
 ```
 
@@ -289,11 +291,11 @@ git commit -m "feat(forecast): add core stats engine (base/dow/confidence/predic
 
 ## Task 3: forecast engine — holidays + drivers
 
-**Files:** Modify `convex/lib/forecast.ts`; append to `convex/lib/forecast.test.ts`.
+**Files:** Modify `convex/lib/forecast.ts`; append to `tests/convex/forecast-engine.test.ts`.
 
-- [ ] **Step 1: Write the failing tests** — append to `convex/lib/forecast.test.ts`:
+- [ ] **Step 1: Write the failing tests** — append to `tests/convex/forecast-engine.test.ts`:
 ```ts
-import { holidayMultiplier, driversFor, type Driver } from './forecast';
+import { holidayMultiplier, driversFor, type Driver } from '../../convex/lib/forecast';
 
 describe('holidayMultiplier', () => {
   it('Lebaran three-day rule', () => {
@@ -341,7 +343,7 @@ describe('driversFor', () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `pnpm test -- convex/lib/forecast.test.ts`
+Run: `pnpm test -- tests/convex/forecast-engine.test.ts`
 Expected: FAIL — `holidayMultiplier`/`driversFor`/`Driver` not exported.
 
 - [ ] **Step 3: Implement** — add to `convex/lib/forecast.ts`. First extend the import at the top of the file (add a new import line):
@@ -408,13 +410,13 @@ export function driversFor(args: { dowMult: number; dow: number; holiday?: Drive
 
 - [ ] **Step 4: Run to verify pass**
 
-Run: `pnpm test -- convex/lib/forecast.test.ts && pnpm typecheck`
+Run: `pnpm test -- tests/convex/forecast-engine.test.ts && pnpm typecheck`
 Expected: PASS; typecheck clean.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add convex/lib/forecast.ts convex/lib/forecast.test.ts
+git add convex/lib/forecast.ts tests/convex/forecast-engine.test.ts
 git commit -m "feat(forecast): add holiday table + structured drivers"
 ```
 
