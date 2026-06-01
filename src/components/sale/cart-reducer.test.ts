@@ -85,3 +85,34 @@ describe('cartReducer', () => {
     expect(subtotalOf(state)).toBe(2 * 18000 + 1 * 18000);
   });
 });
+
+describe('cartReducer — promo', () => {
+  const promo = {
+    _id: 'promo_1' as unknown as import('convex/_generated/dataModel').Id<'promotions'>,
+    name: 'Diskon Kopi',
+    type: 'percent' as const,
+    value: 20,
+  };
+
+  it('initialCart has no promo', () => {
+    expect(initialCart.promo).toBeNull();
+  });
+
+  it('setPromo stores the promo', () => {
+    const next = cartReducer(initialCart, { type: 'setPromo', promo });
+    expect(next.promo).toEqual(promo);
+  });
+
+  it('setPromo with null clears the promo', () => {
+    const withPromo = cartReducer(initialCart, { type: 'setPromo', promo });
+    const cleared = cartReducer(withPromo, { type: 'setPromo', promo: null });
+    expect(cleared.promo).toBeNull();
+  });
+
+  it('clearCart resets lines and promo', () => {
+    const withPromo = cartReducer(initialCart, { type: 'setPromo', promo });
+    const cleared = cartReducer(withPromo, { type: 'clearCart' });
+    expect(cleared.lines).toEqual([]);
+    expect(cleared.promo).toBeNull();
+  });
+});

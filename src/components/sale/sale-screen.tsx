@@ -1,7 +1,7 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
-import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals } from 'convex/lib/pricing';
+import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals, promoDiscountIDR } from 'convex/lib/pricing';
 import { useReducer, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
@@ -22,6 +22,7 @@ import { cartReducer, initialCart } from './cart-reducer';
 import { CartPane } from './cart-pane';
 import { MenuPane, type ItemForSale } from './menu-pane';
 import { ModifierPickerDialog } from './modifier-picker-dialog';
+import { PromoPickerDialog } from './promo-picker-dialog';
 
 function genLineKey(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -40,6 +41,7 @@ export function SaleScreen() {
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
 
   if (
@@ -60,6 +62,9 @@ export function SaleScreen() {
   }
 
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
+  const discount = cart.promo
+    ? promoDiscountIDR(cart.promo.type, cart.promo.value, subtotal)
+    : 0;
   const taxEnabled = cafe?.taxEnabled === true;
   const taxRatePct = taxEnabled ? cafe?.taxRatePct ?? 0 : 0;
   const scEnabled = settings?.payment.serviceChargeEnabled === true;
@@ -67,7 +72,7 @@ export function SaleScreen() {
   const scName = settings?.payment.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME;
   const { serviceChargeIDR, taxIDR: tax, totalIDR: total } = computeOrderTotals({
     subtotalIDR: subtotal,
-    discountIDR: 0,
+    discountIDR: discount,
     serviceChargeEnabled: scEnabled,
     serviceChargePct: scPct,
     taxEnabled,
@@ -107,6 +112,10 @@ export function SaleScreen() {
         taxRatePct={taxRatePct}
         taxIDR={tax}
         totalIDR={total}
+        promo={cart.promo}
+        discountIDR={discount}
+        onAddPromo={() => setPromoPickerOpen(true)}
+        onRemovePromo={() => dispatch({ type: 'setPromo', promo: null })}
         onBayar={() => {
           if (cart.lines.length > 0) setPaymentOpen(true);
         }}
@@ -165,6 +174,7 @@ export function SaleScreen() {
           open={paymentOpen}
           onOpenChange={setPaymentOpen}
           totalIDR={total}
+          {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
           cart={cart}
           shiftId={shift._id}
           cashierId={cashierId}
@@ -181,6 +191,11 @@ export function SaleScreen() {
         }}
         orderId={receiptOrderId}
         onDone={() => setReceiptOrderId(null)}
+      />
+      <PromoPickerDialog
+        open={promoPickerOpen}
+        onOpenChange={setPromoPickerOpen}
+        onSelect={(promo) => dispatch({ type: 'setPromo', promo })}
       />
     </div>
   );

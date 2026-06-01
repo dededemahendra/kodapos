@@ -546,6 +546,10 @@ msgstr "No stock movements yet."
 msgid "Belum ada pesanan di shift ini."
 msgstr "No orders in this shift."
 
+#: src/components/sale/promo-picker-dialog.tsx
+msgid "Belum ada promo aktif."
+msgstr "No active promos yet."
+
 #: src/routes/_pos/promos.tsx
 msgid "Belum ada promo."
 msgstr "No promos yet."
@@ -626,6 +630,10 @@ msgstr "Create modifier groups (e.g. Size) and attach them to items."
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
 msgstr "Create categories, add items, and group reusable modifiers. You can finish now or continue anytime from the main menu."
+
+#: src/components/sale/promo-picker-dialog.tsx
+msgid "Buat promo di halaman Promo & Diskon."
+msgstr "Create one on the Promos & Discounts page."
 
 #: src/routes/_pos/promos.tsx
 msgid "Buat promo untuk memberi diskon di kasir."
@@ -833,6 +841,11 @@ msgstr "Digit {0}"
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Dipakai ulang di banyak item, ubah di satu tempat."
 msgstr "Reused across many items, change in one place."
+
+#: src/components/sale/cart-pane.tsx
+#: src/components/sale/receipt-preview.tsx
+msgid "Diskon"
+msgstr "Discount"
 
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Ditutup pada"
@@ -1096,6 +1109,10 @@ msgstr "Remove"
 #: src/components/sale/cart-line-row.tsx
 msgid "Hapus baris"
 msgstr "Remove row"
+
+#: src/components/sale/cart-pane.tsx
+msgid "Hapus promo"
+msgstr "Remove promo"
 
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/recipes.tsx
@@ -2161,6 +2178,10 @@ msgstr "Select a category first."
 msgid "Pilih nama Anda dan masukkan PIN 4 digit."
 msgstr "Select your name and enter your 4-digit PIN."
 
+#: src/components/sale/promo-picker-dialog.tsx
+msgid "Pilih promo"
+msgstr "Choose a promo"
+
 #: src/routes/_pos/shift/open.tsx
 msgid "Pilih ulang"
 msgstr "Reselect"
@@ -2713,6 +2734,7 @@ msgid "Tambah ke pesanan"
 msgstr "Add to order"
 
 #: src/components/promo/promo-form-dialog.tsx
+#: src/components/sale/cart-pane.tsx
 msgid "Tambah promo"
 msgstr "Add promo"
 

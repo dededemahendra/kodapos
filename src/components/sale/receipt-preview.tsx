@@ -6,6 +6,7 @@ import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent } from '~/components/ui/dialog';
 import { DEFAULT_SERVICE_CHARGE_NAME } from 'convex/lib/pricing';
 import { formatIDR } from '~/lib/money';
+import { formatPromoValue } from '~/lib/promo';
 
 export function ReceiptPreview({
   open,
@@ -71,6 +72,17 @@ export function ReceiptPreview({
               <span><Trans>Subtotal</Trans></span>
               <span className="tabular-nums">{formatIDR(order.subtotalIDR)}</span>
             </div>
+            {(order.discountIDR ?? 0) > 0 ? (
+              <div className="flex justify-between">
+                <span>
+                  <Trans>Diskon</Trans>
+                  {order.appliedPromo
+                    ? ` ${order.appliedPromo.name} (${formatPromoValue(order.appliedPromo.type, order.appliedPromo.value)})`
+                    : ''}
+                </span>
+                <span className="tabular-nums">−{formatIDR(order.discountIDR)}</span>
+              </div>
+            ) : null}
             {(order.serviceChargeIDR ?? 0) > 0 ? (
               <div className="flex justify-between">
                 <span>

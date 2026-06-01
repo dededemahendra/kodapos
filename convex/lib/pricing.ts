@@ -18,6 +18,21 @@ export type PricingResult = {
 };
 
 /**
+ * Discount amount in IDR for a promo applied to an order subtotal. Pure, so
+ * `createCashSale` (authoritative) and the sale screen (preview) compute it
+ * identically. Clamped to [0, subtotal] — a fixed promo never exceeds the
+ * subtotal, so the discounted base floors at 0.
+ */
+export function promoDiscountIDR(
+  type: 'percent' | 'fixed',
+  value: number,
+  subtotalIDR: number,
+): number {
+  const raw = type === 'percent' ? Math.round((subtotalIDR * value) / 100) : value;
+  return Math.max(0, Math.min(raw, subtotalIDR));
+}
+
+/**
  * Single source of truth for order totals. Pure (no ctx/React/convex-server
  * imports) so both `createCashSale` (server) and the sale screen (client) can
  * import it and never drift. PB1 tax is applied AFTER service charge.

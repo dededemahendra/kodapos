@@ -246,6 +246,17 @@ export default defineSchema({
     taxRatePct: v.number(),
     taxIDR: v.number(),
     discountIDR: v.number(),
+    // Promo snapshot frozen at sale time (5b). Optional: omitted when no promo
+    // applied, and absent on pre-5b orders. Mirrors the lines/service-charge
+    // snapshots so history + receipts survive later promo edits/archival.
+    appliedPromo: v.optional(
+      v.object({
+        promoId: v.id('promotions'),
+        name: v.string(),
+        type: v.union(v.literal('percent'), v.literal('fixed')),
+        value: v.number(),
+      })
+    ),
     // Service charge (added in the service-charge slice). Optional for
     // backward-compat with orders created before it existed; createCashSale
     // always writes them going forward (serviceChargeIDR 0 when disabled).
