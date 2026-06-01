@@ -1,0 +1,80 @@
+import { v } from 'convex/values';
+import { query } from './_generated/server';
+import type { QueryCtx } from './_generated/server';
+import { requireOwnerCafe } from './lib/auth';
+import { type RangeArgs, dayKeyFn, eachDayKey, resolveRange, tzFor } from './lib/time';
+
+const rangeArg = v.union(
+  v.object({
+    preset: v.union(
+      v.literal('today'),
+      v.literal('yesterday'),
+      v.literal('last7'),
+      v.literal('last30')
+    ),
+  }),
+  v.object({ from: v.string(), to: v.string() })
+);
+
+// Resolves the cafe + tz + window, then returns paid orders in range.
+async function paidInRange(
+  ctx: QueryCtx,
+  range: RangeArgs
+) {
+  const { cafeId } = await requireOwnerCafe(ctx);
+  const tz = await tzFor(ctx, cafeId);
+  const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, Date.now());
+  const rows = await ctx.db
+    .query('orders')
+    .withIndex('by_cafe_created', (q) =>
+      q.eq('cafeId', cafeId).gte('createdAtClient', startMs).lte('createdAtClient', endMs)
+    )
+    .collect();
+  return { cafeId, tz, fromKey, toKey, paid: rows.filter((o) => o.paymentStatus === 'paid') };
+}
+
+export const overview = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    revenueIDR: v.number(),
+    orders: v.number(),
+    aovIDR: v.number(),
+    itemsSold: v.number(),
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const { fromKey, toKey, paid } = await paidInRange(ctx, range);
+    const revenueIDR = paid.reduce((s, o) => s + o.totalIDR, 0);
+    const orders = paid.length;
+    const itemsSold = paid.reduce((s, o) => s + o.lines.reduce((n, l) => n + l.qty, 0), 0);
+    const aovIDR = orders === 0 ? 0 : Math.round(revenueIDR / orders);
+    return { revenueIDR, orders, aovIDR, itemsSold, fromKey, toKey };
+  },
+});
+
+export const salesDaily = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    days: v.array(
+      v.object({ day: v.string(), revenueIDR: v.number(), orders: v.number() })
+    ),
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const { tz, fromKey, toKey, paid } = await paidInRange(ctx, range);
+    const keyOf = dayKeyFn(tz);
+    const byDay = new Map<string, { revenueIDR: number; orders: number }>();
+    for (const key of eachDayKey(fromKey, toKey)) byDay.set(key, { revenueIDR: 0, orders: 0 });
+    for (const o of paid) {
+      const b = byDay.get(keyOf(o.createdAtClient));
+      if (b) {
+        b.revenueIDR += o.totalIDR;
+        b.orders += 1;
+      }
+    }
+    const days = eachDayKey(fromKey, toKey).map((day) => ({ day, ...byDay.get(day)! }));
+    return { days, fromKey, toKey };
+  },
+});

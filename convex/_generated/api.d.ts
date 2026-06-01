@@ -28,6 +28,7 @@ import type * as orders from "../orders.js";
 import type * as promotions from "../promotions.js";
 import type * as purchases from "../purchases.js";
 import type * as recipes from "../recipes.js";
+import type * as reports from "../reports.js";
 import type * as settings from "../settings.js";
 import type * as shifts from "../shifts.js";
 import type * as staff from "../staff.js";
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   promotions: typeof promotions;
   purchases: typeof purchases;
   recipes: typeof recipes;
+  reports: typeof reports;
   settings: typeof settings;
   shifts: typeof shifts;
   staff: typeof staff;
