@@ -5,7 +5,9 @@ import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { BarChart3 } from 'lucide-react';
 import { useMemo } from 'react';
+import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 import { Button } from '~/components/ui/button';
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart';
 import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
@@ -52,6 +54,10 @@ function SalesReport() {
     []
   );
 
+  const chartConfig = {
+    revenueIDR: { label: t`Pendapatan`, color: 'var(--chart-2)' },
+  } satisfies ChartConfig;
+
   if (data === undefined) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -92,6 +98,23 @@ function SalesReport() {
           <Trans>Unduh CSV</Trans>
         </Button>
       </div>
+      <ChartContainer config={chartConfig} className="aspect-auto h-60 w-full">
+        <BarChart accessibilityLayer data={data.days}>
+          <CartesianGrid vertical={false} />
+          <XAxis
+            dataKey="day"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tickFormatter={(value) => String(value).slice(5)}
+          />
+          <ChartTooltip
+            content={<ChartTooltipContent formatter={(value) => formatIDR(Number(value))} />}
+            cursor={false}
+          />
+          <Bar dataKey="revenueIDR" fill="var(--color-revenueIDR)" radius={4} />
+        </BarChart>
+      </ChartContainer>
       <DataTable
         columns={columns}
         data={data.days}
