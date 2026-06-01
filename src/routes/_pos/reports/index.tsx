@@ -2,6 +2,8 @@ import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
+import { BarChart3 } from 'lucide-react';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 import { useReportRange } from '~/components/reports/use-report-range';
@@ -18,6 +20,20 @@ function OverviewReport() {
       <div className="flex items-center justify-center py-12 text-muted-foreground">
         <Spinner />
       </div>
+    );
+  }
+  if (data.orders === 0) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <BarChart3 />
+          </EmptyMedia>
+          <EmptyTitle>
+            <Trans>Belum ada data pada rentang ini.</Trans>
+          </EmptyTitle>
+        </EmptyHeader>
+      </Empty>
     );
   }
   const cards: Array<{ label: React.ReactNode; value: string }> = [

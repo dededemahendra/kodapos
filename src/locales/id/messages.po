@@ -504,6 +504,10 @@ msgstr "Belum ada bahan."
 #~ msgid "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
 #~ msgstr "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
 
+#: src/routes/_pos/reports/index.tsx
+msgid "Belum ada data pada rentang ini."
+msgstr "Belum ada data pada rentang ini."
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Belum ada grup modifier."
 msgstr "Belum ada grup modifier."

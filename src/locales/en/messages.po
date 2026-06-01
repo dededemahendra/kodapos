@@ -504,6 +504,10 @@ msgstr "No ingredients yet."
 #~ msgid "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
 #~ msgstr "No ingredients yet. Add your first ingredient to start tracking stock."
 
+#: src/routes/_pos/reports/index.tsx
+msgid "Belum ada data pada rentang ini."
+msgstr "No data in this range yet."
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Belum ada grup modifier."
 msgstr "No modifier groups yet."
