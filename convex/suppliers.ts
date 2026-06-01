@@ -18,7 +18,7 @@ function assertSupplier(name: string, phone: string): { name: string; phone: str
   if (trimmedName.length < 1) throw new Error('Nama pemasok wajib diisi.');
   if (trimmedName.length > 60) throw new Error('Nama pemasok maksimal 60 karakter.');
   const trimmedPhone = phone.trim();
-  if (normalizePhone(trimmedPhone).length < 5) throw new Error('Nomor telepon tidak valid.');
+  if (normalizePhone(trimmedPhone).length < 8) throw new Error('Nomor telepon tidak valid.');
   return { name: trimmedName, phone: trimmedPhone };
 }
 

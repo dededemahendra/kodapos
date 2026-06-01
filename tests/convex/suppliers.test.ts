@@ -16,8 +16,8 @@ describe('suppliers CRUD', () => {
   it('creates + lists (sorted, non-archived by default)', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
-    await asOwner.mutation(api.suppliers.create, { name: 'Sumber Susu', phone: '0812-1' });
-    await asOwner.mutation(api.suppliers.create, { name: 'Aneka Kopi', phone: '0813-2' });
+    await asOwner.mutation(api.suppliers.create, { name: 'Sumber Susu', phone: '0812-1111-111' });
+    await asOwner.mutation(api.suppliers.create, { name: 'Aneka Kopi', phone: '0813-2222-222' });
     const list = await asOwner.query(api.suppliers.list, {});
     expect(list).toHaveLength(2);
     expect(list[0]?.name).toBe('Aneka Kopi'); // id-ID sort
