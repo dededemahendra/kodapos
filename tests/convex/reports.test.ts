@@ -160,3 +160,29 @@ describe('reports.products', () => {
     ]);
   });
 });
+
+describe('reports.payments + cashiers', () => {
+  it('payments splits by method with a total', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner } = refs;
+    await seedOrder(t, refs, { at: wib(2026, 5, 10), total: 20000, method: 'cash', lines: [{ name: 'A', qty: 1, lineTotal: 20000 }] });
+    await seedOrder(t, refs, { at: wib(2026, 5, 10), total: 30000, method: 'qris_static', lines: [{ name: 'A', qty: 1, lineTotal: 30000 }] });
+    const r = await asOwner.query(api.reports.payments, { range: { from: '2026-05-10', to: '2026-05-10' } });
+    expect(r.totalIDR).toBe(50000);
+    const cash = r.methods.find((m) => m.method === 'cash');
+    const qris = r.methods.find((m) => m.method === 'qris_static');
+    expect(cash).toEqual({ method: 'cash', count: 1, amountIDR: 20000 });
+    expect(qris).toEqual({ method: 'qris_static', count: 1, amountIDR: 30000 });
+  });
+
+  it('cashiers aggregates per cashier with resolved name', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner, cashierId } = refs;
+    await seedOrder(t, refs, { at: wib(2026, 5, 10), total: 20000, lines: [{ name: 'A', qty: 1, lineTotal: 20000 }] });
+    await seedOrder(t, refs, { at: wib(2026, 5, 10), total: 15000, lines: [{ name: 'A', qty: 1, lineTotal: 15000 }] });
+    const r = await asOwner.query(api.reports.cashiers, { range: { from: '2026-05-10', to: '2026-05-10' } });
+    expect(r.rows).toEqual([{ cashierId, name: 'Andi', orders: 2, revenueIDR: 35000 }]);
+  });
+});

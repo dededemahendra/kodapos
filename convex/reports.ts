@@ -100,9 +100,78 @@ export const products = query({
         byName.set(l.nameSnapshot, cur);
       }
     }
-    const items = Array.from(byName, ([name, v]) => ({ name, ...v })).sort(
+    const items = Array.from(byName, ([name, agg]) => ({ name, ...agg })).sort(
       (a, b) => b.revenueIDR - a.revenueIDR || b.qty - a.qty || a.name.localeCompare(b.name, 'id-ID')
     );
     return { items, fromKey, toKey };
+  },
+});
+
+export const payments = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    methods: v.array(
+      v.object({
+        method: v.union(
+          v.literal('cash'),
+          v.literal('qris_static'),
+          v.literal('qris_dynamic')
+        ),
+        count: v.number(),
+        amountIDR: v.number(),
+      })
+    ),
+    totalIDR: v.number(),
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const { fromKey, toKey, paid } = await paidInRange(ctx, range);
+    const order: Array<'cash' | 'qris_static' | 'qris_dynamic'> = ['cash', 'qris_static', 'qris_dynamic'];
+    const byMethod = new Map<string, { count: number; amountIDR: number }>();
+    for (const o of paid) {
+      const cur = byMethod.get(o.paymentMethod) ?? { count: 0, amountIDR: 0 };
+      cur.count += 1;
+      cur.amountIDR += o.totalIDR;
+      byMethod.set(o.paymentMethod, cur);
+    }
+    const methods = order
+      .filter((m) => byMethod.has(m))
+      .map((method) => ({ method, ...byMethod.get(method)! }));
+    const totalIDR = paid.reduce((s, o) => s + o.totalIDR, 0);
+    return { methods, totalIDR, fromKey, toKey };
+  },
+});
+
+export const cashiers = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    rows: v.array(
+      v.object({
+        cashierId: v.id('cafeStaff'),
+        name: v.string(),
+        orders: v.number(),
+        revenueIDR: v.number(),
+      })
+    ),
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const { fromKey, toKey, paid } = await paidInRange(ctx, range);
+    const agg = new Map<string, { cashierId: typeof paid[number]['cashierId']; orders: number; revenueIDR: number }>();
+    for (const o of paid) {
+      const cur = agg.get(o.cashierId) ?? { cashierId: o.cashierId, orders: 0, revenueIDR: 0 };
+      cur.orders += 1;
+      cur.revenueIDR += o.totalIDR;
+      agg.set(o.cashierId, cur);
+    }
+    const rows = [];
+    for (const a of agg.values()) {
+      const staff = await ctx.db.get(a.cashierId);
+      rows.push({ cashierId: a.cashierId, name: staff?.name ?? '—', orders: a.orders, revenueIDR: a.revenueIDR });
+    }
+    rows.sort((x, y) => y.revenueIDR - x.revenueIDR || x.name.localeCompare(y.name, 'id-ID'));
+    return { rows, fromKey, toKey };
   },
 });
