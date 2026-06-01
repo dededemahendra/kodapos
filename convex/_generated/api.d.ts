@@ -35,6 +35,7 @@ import type * as reports from "../reports.js";
 import type * as settings from "../settings.js";
 import type * as shifts from "../shifts.js";
 import type * as staff from "../staff.js";
+import type * as suppliers from "../suppliers.js";
 import type * as users from "../users.js";
 import type * as waste from "../waste.js";
 
@@ -72,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   settings: typeof settings;
   shifts: typeof shifts;
   staff: typeof staff;
+  suppliers: typeof suppliers;
   users: typeof users;
   waste: typeof waste;
 }>;
