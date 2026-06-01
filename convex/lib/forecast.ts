@@ -94,8 +94,10 @@ function isWeekendNearHoliday(dateKey: string): boolean {
   const t = utcOfDayKey(dateKey);
   const utcDow = new Date(t).getUTCDay(); // 0=Sun..6=Sat
   if (utcDow !== 0 && utcDow !== 6) return false;
-  const year = dateKey.slice(0, 4);
-  const holidays = [...Object.keys(LEBARAN), ...Object.keys(FIXED).map((mmdd) => `${year}-${mmdd}`)];
+  const year = Number(dateKey.slice(0, 4));
+  const years = [year - 1, year, year + 1];
+  const fixedDates = years.flatMap((y) => Object.keys(FIXED).map((mmdd) => `${y}-${mmdd}`));
+  const holidays = [...Object.keys(LEBARAN), ...fixedDates];
   return holidays.some((hk) => Math.abs(utcOfDayKey(hk) - t) <= 2 * DAY_MS);
 }
 

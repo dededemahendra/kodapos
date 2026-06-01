@@ -123,7 +123,11 @@ describe('holidayMultiplier', () => {
     expect(holidayMultiplier('2026-08-15')).toEqual({ mult: 1.1 });
   });
   it('weekend NOT near a holiday → 1', () => {
-    expect(holidayMultiplier('2026-06-06').mult).toBe(1); // a plain Saturday
+    expect(holidayMultiplier('2026-06-06')).toEqual({ mult: 1 }); // a plain Saturday
+  });
+  it('weekend near New Year across the year boundary → 1.1', () => {
+    // 2023-12-31 is a Sunday, 1 day before 2024-01-01 (next year)
+    expect(holidayMultiplier('2023-12-31')).toEqual({ mult: 1.1 });
   });
 });
 
