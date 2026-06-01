@@ -2,10 +2,12 @@ export type CSVColumn = { key: string; header: string };
 
 function escapeCSV(value: unknown): string {
   const s = value === null || value === undefined ? '' : String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-/** RFC 4180 CSV from rows + ordered columns. Header-only when rows is empty. */
+/** CSV from rows + ordered columns: RFC 4180 quoting (fields with " , or
+ *  newline are quoted; internal " doubled), LF row separator. Header-only
+ *  when rows is empty. */
 export function toCSV(
   rows: Array<Record<string, string | number | undefined>>,
   columns: CSVColumn[]
@@ -26,5 +28,5 @@ export function downloadCSV(filename: string, csv: string): void {
   a.href = url;
   a.download = filename;
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
