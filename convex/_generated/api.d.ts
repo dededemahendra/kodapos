@@ -15,6 +15,7 @@ import type * as forecast from "../forecast.js";
 import type * as http from "../http.js";
 import type * as ingredients from "../ingredients.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_demand from "../lib/demand.js";
 import type * as lib_forecast from "../lib/forecast.js";
 import type * as lib_inventory from "../lib/inventory.js";
 import type * as lib_phone from "../lib/phone.js";
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   ingredients: typeof ingredients;
   "lib/auth": typeof lib_auth;
+  "lib/demand": typeof lib_demand;
   "lib/forecast": typeof lib_forecast;
   "lib/inventory": typeof lib_inventory;
   "lib/phone": typeof lib_phone;
