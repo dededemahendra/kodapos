@@ -3,9 +3,7 @@ import type { Doc } from './_generated/dataModel';
 import { query } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
-
-const DAY_MS = 86_400_000;
-const DEFAULT_TZ = 'Asia/Jakarta';
+import { DAY_MS, dayKeyFn, startOfLocalDay, tzFor } from './lib/time';
 
 const paymentStatus = v.union(
   v.literal('pending'),
@@ -17,58 +15,6 @@ const canonicalUnit = v.union(
   v.literal('ml'),
   v.literal('piece')
 );
-
-/** Offset (ms) of `tz` from UTC at the given instant. Indonesia zones are
- *  fixed-offset, so this is stable across the dashboard windows. */
-function tzOffsetMs(tz: string, atMs: number): number {
-  try {
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      hourCycle: 'h23',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }).formatToParts(new Date(atMs));
-    const p = Object.fromEntries(parts.map((x) => [x.type, x.value]));
-    const asIfUtc = Date.UTC(
-      Number(p.year),
-      Number(p.month) - 1,
-      Number(p.day),
-      Number(p.hour),
-      Number(p.minute),
-      Number(p.second)
-    );
-    return asIfUtc - atMs;
-  } catch {
-    return 0;
-  }
-}
-
-/** UTC ms of local-midnight for the day `daysAgo` days before `nowMs`, in `tz`. */
-function startOfLocalDay(tz: string, daysAgo: number, nowMs: number): number {
-  const asUtc = utcOfDayKey(dayKeyFn(tz)(nowMs - daysAgo * DAY_MS));
-  return asUtc - tzOffsetMs(tz, asUtc);
-}
-
-/** Maps an instant (ms) to its cafe-local calendar day, "YYYY-MM-DD". The
- *  formatter is built once per `tz` so per-order bucketing stays cheap. */
-function dayKeyFn(tz: string): (atMs: number) => string {
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: tz,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-  return (atMs) => fmt.format(new Date(atMs));
-}
-
-function utcOfDayKey(key: string): number {
-  const [y, m, d] = key.split('-');
-  return Date.UTC(Number(y), Number(m) - 1, Number(d));
-}
 
 /** Buckets the last 7 cafe-local days (oldest → newest), keyed by day. Returns
  *  the ordered buckets plus a `windowStart` instant for the index range scan
@@ -102,11 +48,6 @@ function pctDelta(cur: number, prev: number): number {
 
 function lineItemQty(o: Doc<'orders'>): number {
   return o.lines.reduce((sum, l) => sum + l.qty, 0);
-}
-
-async function tzFor(ctx: Parameters<typeof requireOwnerCafe>[0], cafeId: Doc<'cafes'>['_id']) {
-  const cafe = await ctx.db.get(cafeId);
-  return cafe?.timezone ?? DEFAULT_TZ;
 }
 
 /** Today's KPIs with deltas vs yesterday. */

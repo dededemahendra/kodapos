@@ -180,6 +180,10 @@ msgstr "15 minutes"
 msgid "24 jam"
 msgstr "24-hour"
 
+#: src/components/reports/range-picker.tsx
+msgid "30 hari"
+msgstr "30 days"
+
 #: src/routes/_pos/settings/general.tsx
 msgid "30 menit"
 msgstr "30 minutes"
@@ -191,6 +195,10 @@ msgstr "5 minutes"
 #: src/routes/_pos/settings/receipt.tsx
 msgid "58 mm"
 msgstr "58 mm"
+
+#: src/components/reports/range-picker.tsx
+msgid "7 hari"
+msgstr "7 days"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "80 mm"
@@ -496,6 +504,10 @@ msgstr "No ingredients yet."
 #~ msgid "Belum ada bahan. Tambah bahan pertama untuk mulai melacak stok."
 #~ msgstr "No ingredients yet. Add your first ingredient to start tracking stock."
 
+#: src/routes/_pos/reports/index.tsx
+msgid "Belum ada data pada rentang ini."
+msgstr "No data in this range yet."
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Belum ada grup modifier."
 msgstr "No modifier groups yet."
@@ -530,9 +542,17 @@ msgstr "No waste recorded in the last 30 days."
 msgid "Belum ada opsi. Tambahkan minimal satu."
 msgstr "No options yet. Add at least one."
 
+#: src/routes/_pos/reports/payments.tsx
+msgid "Belum ada pembayaran pada rentang ini."
+msgstr "No payments in this range yet."
+
 #: src/routes/_pos/inventory/purchases.tsx
 msgid "Belum ada pembelian."
 msgstr "No purchases yet."
+
+#: src/routes/_pos/reports/sales.tsx
+msgid "Belum ada penjualan pada rentang ini."
+msgstr "No sales in this range yet."
 
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Belum ada penyesuaian."
@@ -546,6 +566,10 @@ msgstr "No stock movements yet."
 msgid "Belum ada pesanan di shift ini."
 msgstr "No orders in this shift."
 
+#: src/routes/_pos/reports/products.tsx
+msgid "Belum ada produk terjual pada rentang ini."
+msgstr "No products sold in this range yet."
+
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "Belum ada promo aktif."
 msgstr "No active promos yet."
@@ -557,6 +581,10 @@ msgstr "No promos yet."
 #: src/components/inventory/recipe-editor.tsx
 msgid "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
 msgstr "No recipe yet. The item can still be sold, but ingredient stock won't be deducted automatically."
+
+#: src/routes/_pos/reports/cashiers.tsx
+msgid "Belum ada transaksi kasir pada rentang ini."
+msgstr "No cashier transactions in this range yet."
 
 #: src/components/dashboard-invoices.tsx
 msgid "Belum ada transaksi."
@@ -1132,6 +1160,10 @@ msgstr "Base price {0}"
 msgid "Harga sudah termasuk pajak"
 msgstr "Price includes tax"
 
+#: src/components/reports/range-picker.tsx
+msgid "Hari ini"
+msgstr "Today"
+
 #: src/routes/_pos/recipes.tsx
 msgid "HPP/cup"
 msgstr "Cost/cup"
@@ -1201,6 +1233,7 @@ msgid "Item Menu"
 msgstr "Menu Items"
 
 #: src/components/stats.tsx
+#: src/routes/_pos/reports/index.tsx
 msgid "Item terjual"
 msgstr "Items sold"
 
@@ -1248,8 +1281,14 @@ msgstr "Friday"
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/routes/_pos/inventory/waste.tsx
+#: src/routes/_pos/reports/payments.tsx
+#: src/routes/_pos/reports/products.tsx
 msgid "Jumlah"
 msgstr "Quantity"
+
+#: src/routes/_pos/reports/payments.tsx
+msgid "Jumlah (Rp)"
+msgstr "Amount (Rp)"
 
 #. placeholder {0}: line.qty
 #: src/components/sale/cart-line-row.tsx
@@ -1293,6 +1332,8 @@ msgstr "Debit/credit card"
 #: src/components/dashboard-invoices.tsx
 #: src/components/staff/staff-picker-card.tsx
 #: src/routes/_pos/onboarding/route.tsx
+#: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/route.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Kasir"
 msgstr "Cashier"
@@ -1369,6 +1410,10 @@ msgstr "Manage cashiers, contact info, access permissions, and PINs."
 #: src/components/nav-user.tsx
 msgid "Keluar"
 msgstr "Log out"
+
+#: src/components/reports/range-picker.tsx
+msgid "Kemarin"
+msgstr "Yesterday"
 
 #: src/routes/_public/privacy.tsx
 #: src/routes/_public/terms.tsx
@@ -1502,24 +1547,25 @@ msgid "Lanjut: PIN & Kasir →"
 msgstr "Next: PIN & Cashier →"
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Laporan"
 msgstr "Reports"
 
 #: src/routes/_pos/reports/cashiers.tsx
-msgid "Laporan Kasir"
-msgstr "Cashier Report"
+#~ msgid "Laporan Kasir"
+#~ msgstr "Cashier Report"
 
 #: src/routes/_pos/reports/payments.tsx
-msgid "Laporan Pembayaran"
-msgstr "Payment Report"
+#~ msgid "Laporan Pembayaran"
+#~ msgstr "Payment Report"
 
 #: src/routes/_pos/reports/sales.tsx
-msgid "Laporan Penjualan"
-msgstr "Sales Report"
+#~ msgid "Laporan Penjualan"
+#~ msgstr "Sales Report"
 
 #: src/routes/_pos/reports/products.tsx
-msgid "Laporan Produk"
-msgstr "Product Report"
+#~ msgid "Laporan Produk"
+#~ msgstr "Product Report"
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Latest updates in your workspace."
@@ -1692,6 +1738,10 @@ msgstr "Closing…"
 #: src/components/promo/promo-form-dialog.tsx
 msgid "Menyimpan…"
 msgstr "Saving…"
+
+#: src/routes/_pos/reports/payments.tsx
+msgid "Metode"
+msgstr "Method"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Metode default"
@@ -1995,6 +2045,7 @@ msgstr "UPDATE"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/onboarding/route.tsx
+#: src/routes/_pos/reports/route.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pembayaran"
 msgstr "Payment"
@@ -2048,8 +2099,18 @@ msgid "Pemilik memiliki semua izin."
 msgstr "Owner has all permissions."
 
 #: src/components/net-revenue-chart.tsx
+#: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/index.tsx
+#: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/sales.tsx
 msgid "Pendapatan"
 msgstr "Revenue"
+
+#: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/sales.tsx
+msgid "Pendapatan (Rp)"
+msgstr "Revenue (Rp)"
 
 #: src/components/stats.tsx
 msgid "Pendapatan hari ini"
@@ -2075,6 +2136,7 @@ msgstr "Incoming delivery"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Penjualan"
 msgstr "Sales"
 
@@ -2182,6 +2244,10 @@ msgstr "Select your name and enter your 4-digit PIN."
 msgid "Pilih promo"
 msgstr "Choose a promo"
 
+#: src/components/reports/range-picker.tsx
+msgid "Pilih tanggal"
+msgstr "Pick dates"
+
 #: src/routes/_pos/shift/open.tsx
 msgid "Pilih ulang"
 msgstr "Reselect"
@@ -2220,6 +2286,14 @@ msgstr "PIN for {0}"
 msgid "porsi"
 msgstr "serving"
 
+#: src/routes/_pos/reports/payments.tsx
+msgid "Porsi"
+msgstr "Share"
+
+#: src/routes/_pos/reports/payments.tsx
+msgid "Porsi (%)"
+msgstr "Share (%)"
+
 #. placeholder {0}: order.taxRatePct
 #: src/components/sale/receipt-preview.tsx
 msgid "PPN {0}%"
@@ -2250,6 +2324,8 @@ msgid "Printer"
 msgstr "Printer"
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Produk"
 msgstr "Products"
 
@@ -2333,6 +2409,10 @@ msgstr "Wednesday"
 msgid "Rata-rata transaksi"
 msgstr "Average transaction"
 
+#: src/routes/_pos/reports/index.tsx
+msgid "Rata-rata/transaksi"
+msgstr "Avg / transaction"
+
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Recent invoices"
 #~ msgstr "Recent invoices"
@@ -2381,12 +2461,13 @@ msgid "Ringkas"
 msgstr "Compact"
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Ringkasan"
 msgstr "Summary"
 
 #: src/routes/_pos/reports/index.tsx
-msgid "Ringkasan Laporan"
-msgstr "Report Summary"
+#~ msgid "Ringkasan Laporan"
+#~ msgstr "Report Summary"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
@@ -2816,6 +2897,7 @@ msgstr "Show tax breakdown"
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/inventory/waste.tsx
+#: src/routes/_pos/reports/sales.tsx
 msgid "Tanggal"
 msgstr "Date"
 
@@ -2838,6 +2920,10 @@ msgstr "Header text"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Telepon"
 msgstr "Phone"
+
+#: src/components/reports/range-picker.tsx
+#~ msgid "Terapkan"
+#~ msgstr "Apply"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Terhubung"
@@ -2968,6 +3054,10 @@ msgid "Total tagihan"
 msgstr "Total bill"
 
 #: src/components/stats.tsx
+#: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/index.tsx
+#: src/routes/_pos/reports/payments.tsx
+#: src/routes/_pos/reports/sales.tsx
 msgid "Transaksi"
 msgstr "Transactions"
 
@@ -3076,6 +3166,13 @@ msgstr "Paper size"
 #: src/routes/_pos/settings/general.tsx
 msgid "Umum"
 msgstr "General"
+
+#: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/payments.tsx
+#: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/sales.tsx
+msgid "Unduh CSV"
+msgstr "Download CSV"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Unggah logo"
