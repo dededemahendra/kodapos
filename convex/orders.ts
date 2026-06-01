@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
-import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals } from './lib/pricing';
+import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals, promoDiscountIDR } from './lib/pricing';
 import { requireActiveCashier } from './lib/staff';
 
 const lineInput = v.object({
@@ -30,6 +30,7 @@ export const createCashSale = mutation({
     cashierId: v.id('cafeStaff'),
     lines: v.array(lineInput),
     cashTenderedIDR: v.number(),
+    promoId: v.optional(v.id('promotions')),
     createdAtClient: v.optional(v.number()),
   },
   returns: createCashSaleResult,
@@ -160,6 +161,21 @@ export const createCashSale = mutation({
 
     const subtotalIDR = builtLines.reduce((sum, l) => sum + l.lineTotalIDR, 0);
 
+    // Promo: re-fetch + recompute authoritatively (never trust a client amount).
+    let discountIDR = 0;
+    let appliedPromo: Doc<'orders'>['appliedPromo'];
+    if (args.promoId) {
+      const promo = await requireOwned(ctx, cafeId, args.promoId, 'Promo');
+      if (promo.archived) throw new Error('Promo tidak tersedia.');
+      discountIDR = promoDiscountIDR(promo.type, promo.value, subtotalIDR);
+      appliedPromo = {
+        promoId: promo._id,
+        name: promo.name,
+        type: promo.type,
+        value: promo.value,
+      };
+    }
+
     const cafe = await ctx.db.get(cafeId);
     const taxEnabled = cafe?.taxEnabled === true;
     const taxRatePct = taxEnabled ? cafe?.taxRatePct ?? 0 : 0;
@@ -175,7 +191,7 @@ export const createCashSale = mutation({
 
     const { serviceChargeIDR, taxIDR, totalIDR } = computeOrderTotals({
       subtotalIDR,
-      discountIDR: 0,
+      discountIDR,
       serviceChargeEnabled: scEnabled,
       serviceChargePct: scPct,
       taxEnabled,
@@ -196,7 +212,8 @@ export const createCashSale = mutation({
       subtotalIDR,
       taxRatePct,
       taxIDR,
-      discountIDR: 0,
+      discountIDR,
+      ...(appliedPromo ? { appliedPromo } : {}),
       serviceChargeIDR,
       serviceChargePct: scPct,
       serviceChargeName: scName,

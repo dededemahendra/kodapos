@@ -543,6 +543,118 @@ describe('orders.createCashSale', () => {
       })
     ).rejects.toThrow(/tidak tersedia/i);
   });
+
+  it('applies a percent promo: discounts subtotal, snapshots the promo', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const promoId = await asOwner.mutation(api.promotions.create, {
+      name: 'Diskon 25',
+      type: 'percent',
+      value: 25,
+    });
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'order-promo-pct',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      promoId,
+      createdAtClient: 1700000000000,
+    });
+    // subtotal 18000; 25% = 4500; no tax → total 13500
+    expect(result.totalIDR).toBe(13500);
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.discountIDR).toBe(4500);
+    expect(order?.appliedPromo).toEqual({
+      promoId,
+      name: 'Diskon 25',
+      type: 'percent',
+      value: 25,
+    });
+  });
+
+  it('clamps a fixed promo that exceeds the subtotal', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const promoId = await asOwner.mutation(api.promotions.create, {
+      name: 'Gratis',
+      type: 'fixed',
+      value: 50000, // > 18000 subtotal
+    });
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'order-promo-clamp',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 0,
+      promoId,
+      createdAtClient: 1700000000000,
+    });
+    expect(result.totalIDR).toBe(0);
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.discountIDR).toBe(18000);
+  });
+
+  it('rejects an archived promo', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const promoId = await asOwner.mutation(api.promotions.create, {
+      name: 'Lama',
+      type: 'percent',
+      value: 10,
+    });
+    await asOwner.mutation(api.promotions.archive, { id: promoId });
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'order-promo-archived',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+        promoId,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/tidak tersedia/i);
+  });
+
+  it("rejects a promo owned by another cafe", async () => {
+    const t = convexTest(schema, modules);
+    const a = await setup(t, { email: 'a@x.com' });
+    const b = await setup(t, { email: 'b@x.com' });
+    const foreignPromo = await a.asOwner.mutation(api.promotions.create, {
+      name: 'A only',
+      type: 'percent',
+      value: 10,
+    });
+    await expect(
+      b.asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'order-promo-foreign',
+        shiftId: b.shiftId,
+        cashierId: b.cashierId,
+        lines: [{ menuItemId: b.itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+        promoId: foreignPromo,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow();
+  });
+
+  it('no promoId → discountIDR 0 and no appliedPromo (regression)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'order-no-promo',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.discountIDR).toBe(0);
+    expect(order?.appliedPromo).toBeUndefined();
+    expect(result.totalIDR).toBe(18000);
+  });
 });
 
 describe('orders read queries', () => {
