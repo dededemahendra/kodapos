@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveRange, eachDayKey } from '../../convex/lib/time';
+import { resolveRange, eachDayKey, dowOfKey, addDaysToKey } from '../../convex/lib/time';
 
 const TZ = 'Asia/Jakarta'; // fixed +07:00
 // 2026-06-01T03:00:00Z === 2026-06-01 10:00 WIB
@@ -54,5 +54,25 @@ describe('eachDayKey', () => {
   });
   it('single day → one entry', () => {
     expect(eachDayKey('2026-06-01', '2026-06-01')).toEqual(['2026-06-01']);
+  });
+});
+
+describe('dowOfKey (0=Mon..6=Sun)', () => {
+  it('maps known dates', () => {
+    expect(dowOfKey('2026-06-01')).toBe(0); // Monday
+    expect(dowOfKey('2026-06-06')).toBe(5); // Saturday
+    expect(dowOfKey('2026-06-07')).toBe(6); // Sunday
+  });
+});
+
+describe('addDaysToKey', () => {
+  it('adds days across a month boundary', () => {
+    expect(addDaysToKey('2026-05-30', 3)).toBe('2026-06-02');
+  });
+  it('subtracts with negative n', () => {
+    expect(addDaysToKey('2026-06-02', -3)).toBe('2026-05-30');
+  });
+  it('zero is identity', () => {
+    expect(addDaysToKey('2026-06-01', 0)).toBe('2026-06-01');
   });
 });

@@ -122,6 +122,23 @@ export function resolveRange(tz: string, args: RangeArgs, nowMs: number): Resolv
   return { startMs, endMs, fromKey, toKey };
 }
 
+/** Weekday of a calendar day key, 0=Mon .. 6=Sun. */
+export function dowOfKey(dateKey: string): number {
+  const utcDow = new Date(utcOfDayKey(dateKey)).getUTCDay(); // 0=Sun..6=Sat
+  return (utcDow + 6) % 7; // shift to 0=Mon..6=Sun
+}
+
+/** Calendar day key `n` days after `dateKey` (n may be negative). */
+export function addDaysToKey(dateKey: string, n: number): string {
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  return fmt.format(new Date(utcOfDayKey(dateKey) + n * DAY_MS));
+}
+
 /** Inclusive list of calendar day keys from `fromKey` to `toKey`. */
 export function eachDayKey(fromKey: string, toKey: string): string[] {
   const fmt = new Intl.DateTimeFormat('en-CA', {

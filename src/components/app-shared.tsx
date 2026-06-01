@@ -14,6 +14,7 @@ import {
 	NotebookText,
 	Package,
 	Settings,
+	TrendingUp,
 	UtensilsCrossed,
 	Users,
 } from "lucide-react";
@@ -72,6 +73,7 @@ export const navGroups: SidebarNavGroup[] = [
 	{
 		label: msg`Laporan`,
 		items: [
+			{ title: msg`Prediksi`, path: "/forecast", icon: <TrendingUp /> },
 			{
 				title: msg`Laporan`,
 				icon: <BarChart3 />,
