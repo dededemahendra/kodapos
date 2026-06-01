@@ -121,4 +121,37 @@ describe('forecast.demand', () => {
     const rb = await b.asOwner.query(api.forecast.demand, {});
     expect(rb.status).toBe('learning'); // cafe B sees none of cafe A's orders
   });
+
+  it('void orders in range do not count as active days', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const now = Date.now();
+    for (let d = 2; d <= 6; d++) {
+      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 3, price: 15000 }], now);
+    }
+    const at = now - 1 * DAY;
+    await t.run((ctx) =>
+      ctx.db.insert('orders', {
+        cafeId: refs.cafeId,
+        shiftId: refs.shiftId,
+        cashierId: refs.cashierId,
+        clientId: 'void-order',
+        lines: [{ menuItemId: refs.itemKopi, nameSnapshot: 'Kopi', qty: 5, unitPriceIDR: 15000, modifiersSnapshot: [], lineTotalIDR: 75000 }],
+        subtotalIDR: 75000,
+        taxRatePct: 0,
+        taxIDR: 0,
+        discountIDR: 0,
+        totalIDR: 75000,
+        paymentMethod: 'cash',
+        paymentStatus: 'void',
+        createdAtClient: at,
+        syncedAt: at,
+      })
+    );
+    const r = await refs.asOwner.query(api.forecast.demand, {});
+    expect(r.status).toBe('learning');
+    if (r.status === 'learning') {
+      expect(r.daysCollected).toBe(5); // the void day is not counted
+    }
+  });
 });
