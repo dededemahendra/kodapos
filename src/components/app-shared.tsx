@@ -15,6 +15,7 @@ import {
 	Package,
 	Settings,
 	TrendingUp,
+	Truck,
 	UtensilsCrossed,
 	Users,
 } from "lucide-react";
@@ -65,6 +66,7 @@ export const navGroups: SidebarNavGroup[] = [
 					{ title: msg`Penyesuaian`, path: "/inventory/adjustments" },
 					{ title: msg`Limbah`, path: "/inventory/waste" },
 					{ title: msg`Pembelian`, path: "/inventory/purchases" },
+					{ title: msg`Pemasok`, path: "/suppliers" },
 				],
 			},
 			{ title: msg`Promo`, path: "/promos", icon: <BadgePercent /> },
