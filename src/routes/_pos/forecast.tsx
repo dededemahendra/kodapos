@@ -1,19 +1,110 @@
-import { Trans } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
+import type { ColumnDef } from '@tanstack/react-table';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { TrendingUp } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
+import { DataTable } from '~/components/ui/data-table';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { Input } from '~/components/ui/input';
 import { PageHeader } from '~/components/ui/page-header';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { StatusBadge } from '~/components/ui/status-badge';
+import { waUrl, formatRestockText } from '~/lib/whatsapp';
 import { RenderDriver, type ForecastDriver } from '~/components/forecast/render-driver';
 
 export const Route = createFileRoute('/_pos/forecast')({
   component: ForecastPage,
 });
+
+type RestockLine = { ingredientId: string; name: string; unit: string; suggestedQty: number; currentStockQty: number };
+
+function RestockPanel() {
+  const { t } = useLingui();
+  const data = useQuery(api.restock.suggestion, {});
+  const cafe = useQuery(api.cafes.myCafe, {});
+  const suppliers = useQuery(api.suppliers.list, {});
+  const [supplierId, setSupplierId] = useState<string>('');
+  const [edits, setEdits] = useState<Map<string, number>>(new Map());
+
+  const lines = data?.status === 'ready' ? data.lines : [];
+  const qtyOf = (l: RestockLine) => edits.get(l.ingredientId) ?? l.suggestedQty;
+
+  const columns = useMemo<ColumnDef<RestockLine, unknown>[]>(
+    () => [
+      { accessorKey: 'name', header: () => <Trans>Bahan</Trans> },
+      {
+        id: 'suggested',
+        header: () => <Trans>Saran</Trans>,
+        cell: ({ row }) => (
+          <Input
+            type="number"
+            min="0"
+            className="h-8 w-20 text-right tabular-nums"
+            value={qtyOf(row.original)}
+            onChange={(e) => {
+              const n = Math.max(0, Number(e.target.value));
+              setEdits((m) => new Map(m).set(row.original.ingredientId, n));
+            }}
+          />
+        ),
+      },
+      { id: 'unit', header: () => <Trans>Satuan</Trans>, cell: ({ row }) => <span>{row.original.unit}</span> },
+      {
+        accessorKey: 'currentStockQty',
+        header: () => <Trans>Stok kini</Trans>,
+        cell: ({ row }) => <span className="tabular-nums">{row.original.currentStockQty}</span>,
+      },
+    ],
+    [edits]
+  );
+
+  function onSend() {
+    const supplier = suppliers?.find((s) => s._id === supplierId);
+    if (!supplier) return;
+    const text = formatRestockText(
+      cafe?.name ?? '',
+      lines.map((l) => ({ name: l.name, qty: qtyOf(l), unit: l.unit }))
+    );
+    window.open(waUrl(supplier.phone, text), '_blank', 'noopener');
+  }
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-lg font-semibold"><Trans>Daftar Belanja</Trans></h2>
+      {data === undefined ? (
+        <div className="mt-4 flex items-center justify-center py-8 text-muted-foreground"><Spinner /></div>
+      ) : data.status === 'learning' ? (
+        <p className="mt-2 text-sm text-muted-foreground"><Trans>Daftar belanja akan muncul setelah perkiraan aktif.</Trans></p>
+      ) : lines.length === 0 ? (
+        <Empty className="mt-4">
+          <EmptyHeader>
+            <EmptyMedia variant="icon"><TrendingUp /></EmptyMedia>
+            <EmptyTitle><Trans>Stok cukup untuk minggu ini.</Trans></EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <div className="mt-4 space-y-4">
+          <DataTable columns={columns} data={lines as RestockLine[]} emptyState={null} initialSort={[{ id: 'name', desc: false }]} />
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={supplierId} onValueChange={setSupplierId}>
+              <SelectTrigger className="w-56"><SelectValue placeholder={t`Pilih pemasok`} /></SelectTrigger>
+              <SelectContent>
+                {(suppliers ?? []).map((s) => (
+                  <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="button" disabled={!supplierId} onClick={onSend}><Trans>Kirim ke WhatsApp</Trans></Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 type Horizon = 'tomorrow' | 'week';
 
@@ -76,6 +167,7 @@ function ForecastPage() {
           </ul>
         </div>
       )}
+      <RestockPanel />
     </main>
   );
 }
