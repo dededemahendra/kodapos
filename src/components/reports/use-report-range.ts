@@ -1,4 +1,4 @@
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { getRouteApi } from '@tanstack/react-router';
 import type { RangeArgs } from 'convex/lib/time';
 
 export type ReportPreset = 'today' | 'yesterday' | 'last7' | 'last30';
@@ -21,17 +21,17 @@ export function parseReportSearch(search: Record<string, unknown>): ReportSearch
   return { preset: 'today' };
 }
 
+const routeApi = getRouteApi('/_pos/reports');
+
 /** Reads/writes the report range from URL search on the /_pos/reports route. */
 export function useReportRange() {
-  const search = useSearch({ from: '/_pos/reports' }) as ReportSearch;
-  const navigate = useNavigate();
+  const search = routeApi.useSearch();
+  const navigate = routeApi.useNavigate();
   const range: RangeArgs = 'from' in search ? { from: search.from, to: search.to } : { preset: search.preset };
-  // useNavigate() returns a generic navigate; we narrow the search type for this route.
-  const nav = navigate as unknown as (opts: { search: ReportSearch }) => void;
   return {
     search,
     range,
-    setPreset: (preset: ReportPreset) => nav({ search: { preset } }),
-    setCustom: (from: string, to: string) => nav({ search: { from, to } }),
+    setPreset: (preset: ReportPreset) => navigate({ search: { preset } }),
+    setCustom: (from: string, to: string) => navigate({ search: { from, to } }),
   };
 }
