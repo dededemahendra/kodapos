@@ -140,3 +140,23 @@ describe('reports.overview + salesDaily', () => {
     expect(r.revenueIDR).toBe(0);
   });
 });
+
+describe('reports.products', () => {
+  it('aggregates qty + revenue per item name, sorted by revenue desc', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner } = refs;
+    await seedOrder(t, refs, { at: wib(2026, 5, 10), total: 50000, lines: [
+      { name: 'Espresso', qty: 2, lineTotal: 20000 },
+      { name: 'Latte', qty: 1, lineTotal: 30000 },
+    ] });
+    await seedOrder(t, refs, { at: wib(2026, 5, 10), total: 10000, lines: [
+      { name: 'Espresso', qty: 1, lineTotal: 10000 },
+    ] });
+    const r = await asOwner.query(api.reports.products, { range: { from: '2026-05-10', to: '2026-05-10' } });
+    expect(r.items).toEqual([
+      { name: 'Espresso', qty: 3, revenueIDR: 30000 },
+      { name: 'Latte', qty: 1, revenueIDR: 30000 },
+    ]);
+  });
+});

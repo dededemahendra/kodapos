@@ -79,3 +79,30 @@ export const salesDaily = query({
     return { days, fromKey, toKey };
   },
 });
+
+export const products = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    items: v.array(
+      v.object({ name: v.string(), qty: v.number(), revenueIDR: v.number() })
+    ),
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const { fromKey, toKey, paid } = await paidInRange(ctx, range);
+    const byName = new Map<string, { qty: number; revenueIDR: number }>();
+    for (const o of paid) {
+      for (const l of o.lines) {
+        const cur = byName.get(l.nameSnapshot) ?? { qty: 0, revenueIDR: 0 };
+        cur.qty += l.qty;
+        cur.revenueIDR += l.lineTotalIDR;
+        byName.set(l.nameSnapshot, cur);
+      }
+    }
+    const items = Array.from(byName, ([name, v]) => ({ name, ...v })).sort(
+      (a, b) => b.revenueIDR - a.revenueIDR || b.qty - a.qty || a.name.localeCompare(b.name, 'id-ID')
+    );
+    return { items, fromKey, toKey };
+  },
+});
