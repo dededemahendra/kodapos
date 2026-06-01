@@ -17,6 +17,12 @@ export function RangePicker() {
   const [from, setFrom] = useState('from' in search ? search.from : '');
   const [to, setTo] = useState('to' in search ? search.to : '');
 
+  function applyPreset(preset: ReportPreset) {
+    setFrom('');
+    setTo('');
+    setPreset(preset);
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       {PRESET_LABELS.map((p) => (
@@ -25,7 +31,7 @@ export function RangePicker() {
           type="button"
           size="sm"
           variant={activePreset === p.value ? 'default' : 'outline'}
-          onClick={() => setPreset(p.value)}
+          onClick={() => applyPreset(p.value)}
         >
           {p.label}
         </Button>

@@ -11,7 +11,13 @@ const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 export function parseReportSearch(search: Record<string, unknown>): ReportSearch {
   const from = search.from;
   const to = search.to;
-  if (typeof from === 'string' && typeof to === 'string' && DATE_KEY.test(from) && DATE_KEY.test(to)) {
+  if (
+    typeof from === 'string' &&
+    typeof to === 'string' &&
+    DATE_KEY.test(from) &&
+    DATE_KEY.test(to) &&
+    from <= to
+  ) {
     return { from, to };
   }
   const preset = search.preset;

@@ -27,6 +27,8 @@ function ReportsLayout() {
           <Link
             key={t.to}
             to={t.to}
+            // TanStack merges sibling-route search into an all-optional type;
+            // validateSearch guarantees prev is already a valid ReportSearch.
             search={(prev) => prev as ReportSearch}
             activeOptions={{ exact: t.to === '/reports' }}
             className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
