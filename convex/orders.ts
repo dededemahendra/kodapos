@@ -294,6 +294,14 @@ const orderSummary = v.object({
   taxRatePct: v.number(),
   taxIDR: v.number(),
   discountIDR: v.number(),
+  appliedPromo: v.optional(
+    v.object({
+      promoId: v.id('promotions'),
+      name: v.string(),
+      type: v.union(v.literal('percent'), v.literal('fixed')),
+      value: v.number(),
+    })
+  ),
   serviceChargeIDR: v.optional(v.number()),
   serviceChargePct: v.optional(v.number()),
   serviceChargeName: v.optional(v.string()),
