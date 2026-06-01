@@ -101,6 +101,11 @@ msgstr "{0} penyesuaian · 30 hari"
 msgid "{0} promo aktif"
 msgstr "{0} promo aktif"
 
+#. placeholder {0}: driver.pct
+#: src/components/forecast/render-driver.tsx
+msgid "{0}% — biasanya sepi di hari {day}"
+msgstr "{0}% — biasanya sepi di hari {day}"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "@namakafe"
 msgstr "@namakafe"
@@ -147,6 +152,11 @@ msgstr "+ Tambah bahan"
 #: src/components/billing-health.tsx
 msgid "+{0} lainnya"
 msgstr "+{0} lainnya"
+
+#. placeholder {0}: driver.pct
+#: src/components/forecast/render-driver.tsx
+msgid "+{0}% — biasanya ramai di hari {day}"
+msgstr "+{0}% — biasanya ramai di hari {day}"
 
 #: src/routes/_pos/menu/index.tsx
 #~ msgid "○ Off"
@@ -197,6 +207,7 @@ msgid "58 mm"
 msgstr "58 mm"
 
 #: src/components/reports/range-picker.tsx
+#: src/routes/_pos/forecast.tsx
 msgid "7 hari"
 msgstr "7 hari"
 
@@ -605,6 +616,10 @@ msgstr "Beri diskon"
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Besar"
 msgstr "Besar"
+
+#: src/routes/_pos/forecast.tsx
+msgid "Besok"
+msgstr "Besok"
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Biaya / satuan"
@@ -1316,6 +1331,10 @@ msgstr "Kafe"
 msgid "Kafe tidak ditemukan."
 msgstr "Kafe tidak ditemukan."
 
+#: src/routes/_pos/forecast.tsx
+msgid "Kami sedang belajar"
+msgstr "Kami sedang belajar"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kamis"
 msgstr "Kamis"
@@ -1587,6 +1606,15 @@ msgstr "Lepas"
 msgid "Lewati semua"
 msgstr "Lewati semua"
 
+#: src/components/forecast/render-driver.tsx
+msgid "Libur {label} — perkiraan naik {pct}%"
+msgstr "Libur {label} — perkiraan naik {pct}%"
+
+#. placeholder {0}: Math.abs(pct)
+#: src/components/forecast/render-driver.tsx
+msgid "Libur {label} — perkiraan turun {0}%"
+msgstr "Libur {label} — perkiraan turun {0}%"
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Lihat laporan"
 msgstr "Lihat laporan"
@@ -1659,6 +1687,13 @@ msgstr "Mekari Jurnal"
 #: src/routes/_pos/shift/open.tsx
 msgid "Membuka…"
 msgstr "Membuka…"
+
+#. placeholder {0}: data.daysNeeded
+#. placeholder {1}: data.daysCollected
+#. placeholder {2}: data.etaDateKey
+#: src/routes/_pos/forecast.tsx
+msgid "Memerlukan minimal {0} hari data (terkumpul {1}). Perkiraan akan aktif sekitar {2}."
+msgstr "Memerlukan minimal {0} hari data (terkumpul {1}). Perkiraan akan aktif sekitar {2}."
 
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/routes/_public/signin.tsx
@@ -2307,6 +2342,14 @@ msgstr "PPN {taxRatePct}%"
 msgid "Pratinjau"
 msgstr "Pratinjau"
 
+#: src/components/app-shared.tsx
+msgid "Prediksi"
+msgstr "Prediksi"
+
+#: src/routes/_pos/forecast.tsx
+msgid "Prediksi Permintaan"
+msgstr "Prediksi Permintaan"
+
 #: src/routes/_pos/settings/route.tsx
 #~ msgid "Preferensi"
 #~ msgstr "Preferensi"
@@ -2425,6 +2468,7 @@ msgstr "Rata-rata/transaksi"
 #~ msgid "Regional"
 #~ msgstr "Regional"
 
+#: src/routes/_pos/forecast.tsx
 #: src/routes/_pos/inventory/index.tsx
 msgid "Rendah"
 msgstr "Rendah"
@@ -2534,6 +2578,7 @@ msgstr "Sebagai: {0}"
 #~ msgstr "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 
 #: src/lib/auth-validation.ts
+#: src/routes/_pos/forecast.tsx
 msgid "Sedang"
 msgstr "Sedang"
 
@@ -3016,6 +3061,10 @@ msgstr "Tidak ada shift terbuka."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Tidak ada staf yang ditemukan."
 msgstr "Tidak ada staf yang ditemukan."
+
+#: src/routes/_pos/forecast.tsx
+msgid "Tinggi"
+msgstr "Tinggi"
 
 #: src/components/billing-health.tsx
 msgid "Tinjau inventaris"
