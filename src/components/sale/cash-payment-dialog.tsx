@@ -44,7 +44,7 @@ export function CashPaymentDialog({
   shiftId: Id<'shifts'>;
   cashierId: Id<'cafeStaff'>;
   promoId?: Id<'promotions'>;
-  onPaid: (orderId: Id<'orders'>, totalIDR: number, changeIDR: number) => void;
+  onPaid: (orderId: Id<'orders'>) => void;
 }) {
   const { t } = useLingui();
   const createCashSale = useMutation(api.orders.createCashSale);
@@ -88,7 +88,7 @@ export function CashPaymentDialog({
         ...(promoId ? { promoId } : {}),
         createdAtClient: Date.now(),
       });
-      onPaid(result.orderId, result.totalIDR, result.changeIDR);
+      onPaid(result.orderId);
       onOpenChange(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : t`Gagal memproses pembayaran.`);

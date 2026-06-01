@@ -38,6 +38,8 @@ export const createCashSale = mutation({
     const { cafeId } = await requireOwnerCafe(ctx);
 
     // Idempotency check first — return existing order if clientId already used.
+    // promoId is intentionally NOT re-evaluated here — the original sale's discount
+    // and appliedPromo snapshot win. A different promo requires a new clientId.
     const existing = await ctx.db
       .query('orders')
       .withIndex('by_cafe_clientId', (q) =>
