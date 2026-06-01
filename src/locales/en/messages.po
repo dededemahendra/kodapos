@@ -180,6 +180,10 @@ msgstr "15 minutes"
 msgid "24 jam"
 msgstr "24-hour"
 
+#: src/components/reports/range-picker.tsx
+msgid "30 hari"
+msgstr "30 days"
+
 #: src/routes/_pos/settings/general.tsx
 msgid "30 menit"
 msgstr "30 minutes"
@@ -191,6 +195,10 @@ msgstr "5 minutes"
 #: src/routes/_pos/settings/receipt.tsx
 msgid "58 mm"
 msgstr "58 mm"
+
+#: src/components/reports/range-picker.tsx
+msgid "7 hari"
+msgstr "7 days"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "80 mm"
@@ -1132,6 +1140,10 @@ msgstr "Base price {0}"
 msgid "Harga sudah termasuk pajak"
 msgstr "Price includes tax"
 
+#: src/components/reports/range-picker.tsx
+msgid "Hari ini"
+msgstr "Today"
+
 #: src/routes/_pos/recipes.tsx
 msgid "HPP/cup"
 msgstr "Cost/cup"
@@ -1293,6 +1305,7 @@ msgstr "Debit/credit card"
 #: src/components/dashboard-invoices.tsx
 #: src/components/staff/staff-picker-card.tsx
 #: src/routes/_pos/onboarding/route.tsx
+#: src/routes/_pos/reports/route.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Kasir"
 msgstr "Cashier"
@@ -1369,6 +1382,10 @@ msgstr "Manage cashiers, contact info, access permissions, and PINs."
 #: src/components/nav-user.tsx
 msgid "Keluar"
 msgstr "Log out"
+
+#: src/components/reports/range-picker.tsx
+msgid "Kemarin"
+msgstr "Yesterday"
 
 #: src/routes/_public/privacy.tsx
 #: src/routes/_public/terms.tsx
@@ -1502,6 +1519,7 @@ msgid "Lanjut: PIN & Kasir →"
 msgstr "Next: PIN & Cashier →"
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Laporan"
 msgstr "Reports"
 
@@ -1995,6 +2013,7 @@ msgstr "UPDATE"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/onboarding/route.tsx
+#: src/routes/_pos/reports/route.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pembayaran"
 msgstr "Payment"
@@ -2075,6 +2094,7 @@ msgstr "Incoming delivery"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Penjualan"
 msgstr "Sales"
 
@@ -2250,6 +2270,7 @@ msgid "Printer"
 msgstr "Printer"
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Produk"
 msgstr "Products"
 
@@ -2381,6 +2402,7 @@ msgid "Ringkas"
 msgstr "Compact"
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Ringkasan"
 msgstr "Summary"
 
@@ -2838,6 +2860,10 @@ msgstr "Header text"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Telepon"
 msgstr "Phone"
+
+#: src/components/reports/range-picker.tsx
+msgid "Terapkan"
+msgstr "Apply"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Terhubung"
