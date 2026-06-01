@@ -739,7 +739,7 @@ export type ForecastDriver =
 // 0=Mon..6=Sun
 const DAY_NAMES = ['Senin', 'Selasa', 'Rabu', 'Kamis', "Jumat", 'Sabtu', 'Minggu'];
 
-function HolidayText({ pct, key: hkey }: { pct: number; key: string }) {
+function HolidayText({ pct, hkey }: { pct: number; hkey: string }) {
   const label = hkey.startsWith('lebaran')
     ? 'Lebaran'
     : hkey === 'independence'
@@ -759,7 +759,7 @@ function HolidayText({ pct, key: hkey }: { pct: number; key: string }) {
 /** Renders a single forecast driver as a localized line. */
 export function RenderDriver({ driver }: { driver: ForecastDriver }) {
   const { t } = useLingui();
-  if (driver.code === 'holiday') return <HolidayText pct={driver.pct} key={driver.key} />;
+  if (driver.code === 'holiday') return <HolidayText pct={driver.pct} hkey={driver.key} />;
   const day = DAY_NAMES[driver.dow] ?? '';
   return driver.code === 'dow_busy' ? (
     <Trans>+{driver.pct}% — biasanya ramai di hari {day}</Trans>
