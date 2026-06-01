@@ -1,7 +1,10 @@
 import { Trans } from '@lingui/react/macro';
+import { CalendarDays } from 'lucide-react';
 import { useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
+import { Calendar } from '~/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { type ReportPreset, useReportRange } from './use-report-range';
 
 const PRESET_LABELS: Array<{ value: ReportPreset; label: React.ReactNode }> = [
@@ -11,17 +14,29 @@ const PRESET_LABELS: Array<{ value: ReportPreset; label: React.ReactNode }> = [
   { value: 'last30', label: <Trans>30 hari</Trans> },
 ];
 
+// Local calendar date <-> 'YYYY-MM-DD' key (no timezone conversion).
+function toKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function keyToDate(key: string): Date {
+  const parts = key.split('-').map(Number);
+  const y = parts[0] ?? new Date().getFullYear();
+  const m = parts[1] ?? 1;
+  const d = parts[2] ?? 1;
+  return new Date(y, m - 1, d);
+}
+
 export function RangePicker() {
   const { search, setPreset, setCustom } = useReportRange();
   const activePreset = 'preset' in search ? search.preset : null;
-  const [from, setFrom] = useState('from' in search ? search.from : '');
-  const [to, setTo] = useState('to' in search ? search.to : '');
+  const [open, setOpen] = useState(false);
 
-  function applyPreset(preset: ReportPreset) {
-    setFrom('');
-    setTo('');
-    setPreset(preset);
-  }
+  const selected: DateRange | undefined =
+    'from' in search ? { from: keyToDate(search.from), to: keyToDate(search.to) } : undefined;
+  const customLabel = 'from' in search ? `${search.from} – ${search.to}` : null;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -31,25 +46,33 @@ export function RangePicker() {
           type="button"
           size="sm"
           variant={activePreset === p.value ? 'default' : 'outline'}
-          onClick={() => applyPreset(p.value)}
+          onClick={() => setPreset(p.value)}
         >
           {p.label}
         </Button>
       ))}
-      <span className="flex items-center gap-1">
-        <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="h-8 w-auto" />
-        <span className="text-muted-foreground">–</span>
-        <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="h-8 w-auto" />
-        <Button
-          type="button"
-          size="sm"
-          variant={activePreset === null ? 'default' : 'outline'}
-          disabled={!from || !to}
-          onClick={() => setCustom(from, to)}
-        >
-          <Trans>Terapkan</Trans>
-        </Button>
-      </span>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button type="button" size="sm" variant={activePreset === null ? 'default' : 'outline'}>
+            <CalendarDays />
+            {customLabel ?? <Trans>Pilih tanggal</Trans>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="range"
+            numberOfMonths={2}
+            {...(selected?.from ? { defaultMonth: selected.from } : {})}
+            selected={selected}
+            onSelect={(next) => {
+              if (next?.from && next?.to) {
+                setCustom(toKey(next.from), toKey(next.to));
+                setOpen(false);
+              }
+            }}
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
