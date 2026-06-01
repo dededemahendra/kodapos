@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeOrderTotals } from '../../convex/lib/pricing';
+import { computeOrderTotals, promoDiscountIDR } from '../../convex/lib/pricing';
 
 describe('computeOrderTotals', () => {
   it('no service charge, no tax → total equals subtotal', () => {
@@ -90,5 +90,25 @@ describe('computeOrderTotals', () => {
         taxRatePct: 11,
       })
     ).toEqual({ serviceChargeIDR: 4000, taxIDR: 9240, totalIDR: 93240 });
+  });
+});
+
+describe('promoDiscountIDR', () => {
+  it('percent: rounds to the nearest rupiah', () => {
+    // 11% of 9090 = 999.9 → 1000
+    expect(promoDiscountIDR('percent', 11, 9090)).toBe(1000);
+  });
+  it('percent: 20% of 50000 = 10000', () => {
+    expect(promoDiscountIDR('percent', 20, 50000)).toBe(10000);
+  });
+  it('fixed: applies the full value when under subtotal', () => {
+    expect(promoDiscountIDR('fixed', 10000, 50000)).toBe(10000);
+  });
+  it('fixed: clamps to subtotal when value exceeds it', () => {
+    expect(promoDiscountIDR('fixed', 10000, 6000)).toBe(6000);
+  });
+  it('returns 0 on a zero subtotal (both types)', () => {
+    expect(promoDiscountIDR('percent', 20, 0)).toBe(0);
+    expect(promoDiscountIDR('fixed', 5000, 0)).toBe(0);
   });
 });
