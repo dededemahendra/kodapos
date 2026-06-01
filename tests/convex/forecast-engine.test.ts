@@ -32,6 +32,12 @@ describe('baseEstimate', () => {
     ];
     expect(baseEstimate(s)).toBeLessThan(50);
   });
+  it('does NOT trim when n < 14 (recency signal preserved)', () => {
+    // 9 zeros + 1 outlier at daysAgo=0; n=10 < 14 so trim is suppressed.
+    // Untrimmed exp-decay mean ~= 12.4; if the outlier were trimmed it would be 0.
+    const s = [sample(0, 0, 100), ...Array.from({ length: 9 }, (_, i) => sample(i + 1, 0, 0))];
+    expect(baseEstimate(s)).toBeGreaterThan(5); // a trimmed result would be 0
+  });
 });
 
 describe('dayOfWeekMultiplier', () => {
@@ -51,6 +57,10 @@ describe('dayOfWeekMultiplier', () => {
   it('overall avg 0 → 1', () => {
     const s = [sample(0, 0, 0), sample(7, 1, 0)];
     expect(dayOfWeekMultiplier(s, 0)).toBe(1);
+  });
+  it('dow never observed → 1', () => {
+    const s = [sample(0, 0, 5), sample(7, 1, 5), sample(14, 0, 5)];
+    expect(dayOfWeekMultiplier(s, 5)).toBe(1); // dow=5 never seen, but >=2 week-buckets
   });
 });
 
@@ -80,6 +90,9 @@ describe('predictedQty', () => {
     expect(predictedQty(10, 1.2, 1, 1)).toBe(12);
     expect(predictedQty(10, 0, 1, 0.2)).toBe(0);
     expect(predictedQty(2.4, 1, 1, 1)).toBe(2);
+  });
+  it('clamps a negative product to 0', () => {
+    expect(predictedQty(-5, 1, 1, 1)).toBe(0);
   });
 });
 
