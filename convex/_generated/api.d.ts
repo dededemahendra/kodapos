@@ -18,6 +18,7 @@ import type * as lib_inventory from "../lib/inventory.js";
 import type * as lib_pin from "../lib/pin.js";
 import type * as lib_pricing from "../lib/pricing.js";
 import type * as lib_staff from "../lib/staff.js";
+import type * as lib_time from "../lib/time.js";
 import type * as menu_categories from "../menu/categories.js";
 import type * as menu_itemGroups from "../menu/itemGroups.js";
 import type * as menu_itemStock from "../menu/itemStock.js";
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   "lib/pin": typeof lib_pin;
   "lib/pricing": typeof lib_pricing;
   "lib/staff": typeof lib_staff;
+  "lib/time": typeof lib_time;
   "menu/categories": typeof menu_categories;
   "menu/itemGroups": typeof menu_itemGroups;
   "menu/itemStock": typeof menu_itemStock;
