@@ -593,6 +593,7 @@ describe('orders.createCashSale', () => {
     expect(result.totalIDR).toBe(0);
     const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
     expect(order?.discountIDR).toBe(18000);
+    expect(order?.appliedPromo).toMatchObject({ name: 'Gratis', type: 'fixed', value: 50000 });
   });
 
   it('rejects an archived promo', async () => {
@@ -636,7 +637,7 @@ describe('orders.createCashSale', () => {
         promoId: foreignPromo,
         createdAtClient: 1700000000000,
       })
-    ).rejects.toThrow();
+    ).rejects.toThrow(/tidak ditemukan/i);
   });
 
   it('no promoId → discountIDR 0 and no appliedPromo (regression)', async () => {
