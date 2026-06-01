@@ -8,6 +8,7 @@ import {
   predictedQty,
   weatherMultiplier,
 } from '../../convex/lib/forecast';
+import { holidayMultiplier, driversFor, type Driver } from '../../convex/lib/forecast';
 
 const sample = (daysAgo: number, dow: number, qty: number): DaySample => ({ daysAgo, dow, qty });
 
@@ -99,5 +100,48 @@ describe('predictedQty', () => {
 describe('weatherMultiplier', () => {
   it('is the 1.0 stub in slice A', () => {
     expect(weatherMultiplier()).toBe(1);
+  });
+});
+
+describe('holidayMultiplier', () => {
+  it('Lebaran three-day rule', () => {
+    expect(holidayMultiplier('2026-03-19').mult).toBe(0.5);
+    expect(holidayMultiplier('2026-03-20').mult).toBe(0.2);
+    expect(holidayMultiplier('2026-03-21').mult).toBe(1.2);
+    expect(holidayMultiplier('2026-03-20').driver).toEqual({ code: 'holiday', pct: -80, key: 'lebaran_day' });
+  });
+  it('fixed-date nationals by MM-DD across years', () => {
+    expect(holidayMultiplier('2026-08-17').mult).toBe(0.7);
+    expect(holidayMultiplier('2027-12-25').mult).toBe(0.8);
+    expect(holidayMultiplier('2026-01-01').driver).toEqual({ code: 'holiday', pct: -20, key: 'new_year' });
+  });
+  it('ordinary weekday → 1, no driver', () => {
+    expect(holidayMultiplier('2026-06-03')).toEqual({ mult: 1 });
+  });
+  it('weekend within 2 days of a holiday → 1.1, no driver key', () => {
+    // 2026-08-15 is the Saturday two days before 08-17 (Mon)
+    expect(holidayMultiplier('2026-08-15')).toEqual({ mult: 1.1 });
+  });
+  it('weekend NOT near a holiday → 1', () => {
+    expect(holidayMultiplier('2026-06-06').mult).toBe(1); // a plain Saturday
+  });
+});
+
+describe('driversFor', () => {
+  it('emits a busy dow driver past the 0.1 threshold', () => {
+    expect(driversFor({ dowMult: 1.2, dow: 5 })).toEqual([{ code: 'dow_busy', pct: 20, dow: 5 }]);
+  });
+  it('emits a quiet dow driver for < 1', () => {
+    expect(driversFor({ dowMult: 0.8, dow: 1 })).toEqual([{ code: 'dow_quiet', pct: -20, dow: 1 }]);
+  });
+  it('suppresses dow driver within the +/-0.1 deadband', () => {
+    expect(driversFor({ dowMult: 1.05, dow: 2 })).toEqual([]);
+  });
+  it('includes the holiday driver and caps at 2', () => {
+    const holiday: Driver = { code: 'holiday', pct: -80, key: 'lebaran_day' };
+    expect(driversFor({ dowMult: 1.3, dow: 6, holiday })).toEqual([
+      { code: 'dow_busy', pct: 30, dow: 6 },
+      holiday,
+    ]);
   });
 });

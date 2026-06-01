@@ -1,3 +1,5 @@
+import { DAY_MS, utcOfDayKey } from './time';
+
 export type Confidence = 'low' | 'med' | 'high';
 
 // An item's qty on each ACTIVE day (a day the cafe had >=1 paid order).
@@ -61,4 +63,59 @@ export function confidence(itemSpanDays: number, cov: number): Confidence {
 
 export function predictedQty(base: number, dow: number, weather: number, holiday: number): number {
   return Math.max(0, Math.round(base * dow * weather * holiday));
+}
+
+export type HolidayKey =
+  | 'lebaran_eve' | 'lebaran_day' | 'lebaran_after'
+  | 'independence' | 'christmas' | 'new_year';
+
+export type Driver =
+  | { code: 'dow_busy' | 'dow_quiet'; pct: number; dow: number }
+  | { code: 'holiday'; pct: number; key: HolidayKey };
+
+// Fixed-date holidays keyed by MM-DD.
+const FIXED: Record<string, { mult: number; key: HolidayKey }> = {
+  '08-17': { mult: 0.7, key: 'independence' },
+  '12-25': { mult: 0.8, key: 'christmas' },
+  '01-01': { mult: 0.8, key: 'new_year' },
+};
+// Lebaran is lunar — list per-year (extend as future dates become known).
+const LEBARAN: Record<string, { mult: number; key: HolidayKey }> = {
+  '2026-03-19': { mult: 0.5, key: 'lebaran_eve' },
+  '2026-03-20': { mult: 0.2, key: 'lebaran_day' },
+  '2026-03-21': { mult: 1.2, key: 'lebaran_after' },
+};
+
+function holidayDriver(mult: number, key: HolidayKey): Driver {
+  return { code: 'holiday', pct: Math.round((mult - 1) * 100), key };
+}
+
+function isWeekendNearHoliday(dateKey: string): boolean {
+  const t = utcOfDayKey(dateKey);
+  const utcDow = new Date(t).getUTCDay(); // 0=Sun..6=Sat
+  if (utcDow !== 0 && utcDow !== 6) return false;
+  const year = dateKey.slice(0, 4);
+  const holidays = [...Object.keys(LEBARAN), ...Object.keys(FIXED).map((mmdd) => `${year}-${mmdd}`)];
+  return holidays.some((hk) => Math.abs(utcOfDayKey(hk) - t) <= 2 * DAY_MS);
+}
+
+/** Holiday multiplier + optional driver for a calendar day key. */
+export function holidayMultiplier(dateKey: string): { mult: number; driver?: Driver } {
+  const leb = LEBARAN[dateKey];
+  if (leb) return { mult: leb.mult, driver: holidayDriver(leb.mult, leb.key) };
+  const fixed = FIXED[dateKey.slice(5)];
+  if (fixed) return { mult: fixed.mult, driver: holidayDriver(fixed.mult, fixed.key) };
+  if (isWeekendNearHoliday(dateKey)) return { mult: 1.1 };
+  return { mult: 1 };
+}
+
+/** Up to 2 structured drivers for a prediction (dow first, then holiday). */
+export function driversFor(args: { dowMult: number; dow: number; holiday?: Driver }): Driver[] {
+  const out: Driver[] = [];
+  if (Math.abs(args.dowMult - 1) >= 0.1) {
+    const pct = Math.round((args.dowMult - 1) * 100);
+    out.push({ code: pct >= 0 ? 'dow_busy' : 'dow_quiet', pct, dow: args.dow });
+  }
+  if (args.holiday) out.push(args.holiday);
+  return out.slice(0, 2);
 }
