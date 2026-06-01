@@ -1,8 +1,10 @@
 import { useLingui } from '@lingui/react/macro';
 import { Trans } from '@lingui/react/macro';
+import { X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { formatIDR } from '~/lib/money';
-import type { CartAction, CartState } from './cart-reducer';
+import { formatPromoValue } from '~/lib/promo';
+import type { CartAction, CartPromo, CartState } from './cart-reducer';
 import { CartLineRow } from './cart-line-row';
 
 export function CartPane({
@@ -16,6 +18,10 @@ export function CartPane({
   taxRatePct,
   taxIDR,
   totalIDR,
+  promo,
+  discountIDR,
+  onAddPromo,
+  onRemovePromo,
   onBayar,
   onKosongkan,
 }: {
@@ -29,6 +35,10 @@ export function CartPane({
   taxRatePct: number;
   taxIDR: number;
   totalIDR: number;
+  promo: CartPromo | null;
+  discountIDR: number;
+  onAddPromo: () => void;
+  onRemovePromo: () => void;
   onBayar: () => void;
   onKosongkan: () => void;
 }) {
@@ -73,6 +83,30 @@ export function CartPane({
       </div>
       <div className="border-t border-border px-3 py-3 space-y-1 text-sm">
         <Row label={t`Subtotal`} value={formatIDR(subtotalIDR)} />
+        {promo ? (
+          <div className="flex items-center justify-between text-emerald-700">
+            <span className="flex items-center gap-1">
+              <Trans>Diskon</Trans> {promo.name} ({formatPromoValue(promo.type, promo.value)})
+              <button
+                type="button"
+                onClick={onRemovePromo}
+                aria-label={t`Hapus promo`}
+                className="ml-0.5 rounded p-0.5 hover:bg-muted"
+              >
+                <X className="size-3.5" />
+              </button>
+            </span>
+            <span className="tabular-nums">−{formatIDR(discountIDR)}</span>
+          </div>
+        ) : !empty ? (
+          <button
+            type="button"
+            onClick={onAddPromo}
+            className="text-left text-primary hover:underline"
+          >
+            + <Trans>Tambah promo</Trans>
+          </button>
+        ) : null}
         {serviceChargeIDR > 0 ? (
           <Row
             label={`${serviceChargeName} ${serviceChargePct}%`}
