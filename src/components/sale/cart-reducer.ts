@@ -17,16 +17,24 @@ export type CartLine = {
   modifierLabels: CartLineModifier[];
 };
 
-export type CartState = { lines: CartLine[] };
+export type CartPromo = {
+  _id: Id<'promotions'>;
+  name: string;
+  type: 'percent' | 'fixed';
+  value: number;
+};
+
+export type CartState = { lines: CartLine[]; promo: CartPromo | null };
 
 export type CartAction =
   | { type: 'addLine'; line: Omit<CartLine, 'lineKey'>; lineKey: string }
   | { type: 'incrementQty'; lineKey: string }
   | { type: 'decrementQty'; lineKey: string }
   | { type: 'removeLine'; lineKey: string }
-  | { type: 'clearCart' };
+  | { type: 'clearCart' }
+  | { type: 'setPromo'; promo: CartPromo | null };
 
-export const initialCart: CartState = { lines: [] };
+export const initialCart: CartState = { lines: [], promo: null };
 
 export function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -45,15 +53,14 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
           const merged = { ...existing, qty: Math.min(99, existing.qty + incoming.qty) };
           const lines = [...state.lines];
           lines[idx] = merged;
-          return { lines };
+          return { ...state, lines };
         }
       }
-      return {
-        lines: [...state.lines, { ...incoming, lineKey: action.lineKey }],
-      };
+      return { ...state, lines: [...state.lines, { ...incoming, lineKey: action.lineKey }] };
     }
     case 'incrementQty': {
       return {
+        ...state,
         lines: state.lines.map((l) =>
           l.lineKey === action.lineKey ? { ...l, qty: Math.min(99, l.qty + 1) } : l
         ),
@@ -63,19 +70,23 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       const line = state.lines.find((l) => l.lineKey === action.lineKey);
       if (!line) return state;
       if (line.qty <= 1) {
-        return { lines: state.lines.filter((l) => l.lineKey !== action.lineKey) };
+        return { ...state, lines: state.lines.filter((l) => l.lineKey !== action.lineKey) };
       }
       return {
+        ...state,
         lines: state.lines.map((l) =>
           l.lineKey === action.lineKey ? { ...l, qty: l.qty - 1 } : l
         ),
       };
     }
     case 'removeLine': {
-      return { lines: state.lines.filter((l) => l.lineKey !== action.lineKey) };
+      return { ...state, lines: state.lines.filter((l) => l.lineKey !== action.lineKey) };
+    }
+    case 'setPromo': {
+      return { ...state, promo: action.promo };
     }
     case 'clearCart': {
-      return { lines: [] };
+      return { lines: [], promo: null };
     }
   }
 }
