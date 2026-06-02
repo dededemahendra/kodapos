@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { query } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
-import { computeRestock } from './lib/restock-compute';
+import { computeRestock } from './lib/restockCompute';
 
 export const suggestion = query({
   args: {},

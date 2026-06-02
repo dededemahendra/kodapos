@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { internalMutation, query } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
-import { computeRestock } from './lib/restock-compute';
+import { computeRestock } from './lib/restockCompute';
 
 const confidenceV = v.union(v.literal('low'), v.literal('med'), v.literal('high'));
 const driverV = v.union(
