@@ -1,7 +1,10 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { internal } from './_generated/api';
+import { action, internalMutation, internalQuery, mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 import { requireOwnerCafe } from './lib/auth';
+import { parseGeocode } from './lib/weather';
 
 const cafeFields = {
   _id: v.id('cafes'),
@@ -21,6 +24,8 @@ const cafeFields = {
   instagram: v.optional(v.string()),
   city: v.optional(v.string()),
   postalCode: v.optional(v.string()),
+  latitude: v.optional(v.number()),
+  longitude: v.optional(v.number()),
   logoStorageId: v.optional(v.id('_storage')),
   operatingHours: v.optional(
     v.array(
@@ -332,5 +337,65 @@ export const markSetupComplete = mutation({
     }
     await ctx.db.patch(cafeId, { setupCompletedAt: Date.now() });
     return null;
+  },
+});
+
+/** The signed-in owner's cafe id + city, for the geocode action (which can't read ctx.db). */
+export const myCafeForGeocode = internalQuery({
+  args: {},
+  returns: v.object({ cafeId: v.id('cafes'), city: v.union(v.string(), v.null()) }),
+  handler: async (ctx) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const cafe = await ctx.db.get(cafeId);
+    return { cafeId, city: cafe?.city ?? null };
+  },
+});
+
+/** Patch a cafe's weather coordinates. Internal: only geocodeFromCity calls it. */
+export const setLocation = internalMutation({
+  args: { cafeId: v.id('cafes'), latitude: v.number(), longitude: v.number() },
+  returns: v.null(),
+  handler: async (ctx, { cafeId, latitude, longitude }) => {
+    await ctx.db.patch(cafeId, { latitude, longitude });
+    return null;
+  },
+});
+
+/**
+ * Owner-triggered: geocode the cafe's city to lat/long via Open-Meteo and
+ * store the coordinates (used by the nightly weather fetch). Returns
+ * { found } so the UI can toast success vs "city not found". No city, a
+ * geocode miss, or a fetch failure all return { found: false } without
+ * patching.
+ */
+export const geocodeFromCity = action({
+  args: {},
+  returns: v.object({ found: v.boolean() }),
+  handler: async (ctx): Promise<{ found: boolean }> => {
+    const info: { cafeId: Id<'cafes'>; city: string | null } = await ctx.runQuery(
+      internal.cafes.myCafeForGeocode,
+      {}
+    );
+    if (!info.city) return { found: false };
+    let coords: { latitude: number; longitude: number } | null = null;
+    try {
+      const url =
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(info.city)}` +
+        `&count=1&language=id&format=json`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Open-Meteo geocode ${res.status}`);
+      const json = await res.json();
+      coords = parseGeocode(json);
+    } catch (err) {
+      console.warn(`geocode failed for cafe ${info.cafeId}:`, err);
+      coords = null;
+    }
+    if (!coords) return { found: false };
+    await ctx.runMutation(internal.cafes.setLocation, {
+      cafeId: info.cafeId,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    });
+    return { found: true };
   },
 });
