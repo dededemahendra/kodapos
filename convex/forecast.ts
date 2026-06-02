@@ -39,6 +39,9 @@ export const generateNightly = internalMutation({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
+    // TODO(C-fan-out): processes all cafes in one mutation transaction. Fine at
+    // V1 scale; if cafe/order volume grows past Convex's per-transaction read
+    // limit, fan out per-cafe via ctx.scheduler.runAfter(0, ...).
     const cafes = await ctx.db.query('cafes').collect();
     const now = Date.now();
     for (const cafe of cafes) {

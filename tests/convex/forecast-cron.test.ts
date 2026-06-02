@@ -80,9 +80,10 @@ describe('generateNightly', () => {
     const t = convexTest(schema, modules);
     const a = await setup(t, 'a@x.com');
     await seedSales(t, a, 20, Date.now());
-    await setup(t, 'b@x.com');
+    const b = await setup(t, 'b@x.com');
     await t.mutation(internal.forecast.generateNightly, {});
     const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
     expect(forecasts).toHaveLength(2);
+    expect(forecasts.map((f) => f.cafeId).sort()).toEqual([a.cafeId, b.cafeId].sort());
   });
 });
