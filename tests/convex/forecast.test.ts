@@ -155,7 +155,7 @@ describe('forecast.demand', () => {
     }
   });
 
-  it('serves the persisted snapshot, ignoring orders added after the cron', async () => {
+  it('serves the persisted snapshot even after the underlying orders are gone', async () => {
     const t = convexTest(schema, modules);
     const refs = await setup(t);
     const now = Date.now();
@@ -163,13 +163,14 @@ describe('forecast.demand', () => {
       await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
     }
     await t.mutation(internal.forecast.generateNightly, {});
-    // a fresh spike AFTER the snapshot — must be ignored by the snapshot read
-    await seedOrder(t, refs, 0, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 9999, price: 15000 }], now);
+    // wipe all orders AFTER the snapshot — live compute would now be 'learning'
+    await t.run(async (ctx) => {
+      for (const o of await ctx.db.query('orders').collect()) await ctx.db.delete(o._id);
+    });
     const r = await refs.asOwner.query(api.forecast.demand, {});
-    expect(r.status).toBe('ready');
+    expect(r.status).toBe('ready'); // served from the snapshot, not recomputed live
     if (r.status === 'ready') {
-      const kopi = r.lines.find((l) => l.name === 'Kopi')!;
-      expect(kopi.tomorrowQty).toBeLessThan(1000); // reflects the pre-cron snapshot, not the 9999 spike
+      expect(r.lines.some((l) => l.name === 'Kopi')).toBe(true);
     }
   });
 });
