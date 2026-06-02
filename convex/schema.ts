@@ -355,6 +355,53 @@ export default defineSchema({
     createdAt: v.number(),
   }).index('by_cafe_at', ['cafeId', 'at']),
 
+  forecasts: defineTable({
+    cafeId: v.id('cafes'),
+    generatedAt: v.number(),
+    method: v.literal('rule_v1'),
+    status: v.union(v.literal('learning'), v.literal('ready')),
+    daysCollected: v.optional(v.number()),
+    etaDateKey: v.optional(v.string()),
+    forDateKey: v.optional(v.string()),
+    lines: v.optional(
+      v.array(
+        v.object({
+          menuItemId: v.id('menuItems'),
+          name: v.string(),
+          tomorrowQty: v.number(),
+          sevenDayQty: v.number(),
+          confidence: v.union(v.literal('low'), v.literal('med'), v.literal('high')),
+          drivers: v.array(
+            v.union(
+              v.object({ code: v.union(v.literal('dow_busy'), v.literal('dow_quiet')), pct: v.number(), dow: v.number() }),
+              v.object({ code: v.literal('holiday'), pct: v.number(), key: v.string() })
+            )
+          ),
+        })
+      )
+    ),
+    weatherSignal: v.optional(v.string()),
+  }).index('by_cafe_generated', ['cafeId', 'generatedAt']),
+
+  restockSuggestions: defineTable({
+    cafeId: v.id('cafes'),
+    forecastId: v.id('forecasts'),
+    generatedAt: v.number(),
+    status: v.union(v.literal('draft'), v.literal('sent'), v.literal('dismissed')),
+    lines: v.array(
+      v.object({
+        ingredientId: v.id('ingredients'),
+        name: v.string(),
+        unit: v.union(v.literal('g'), v.literal('ml'), v.literal('piece')),
+        suggestedQty: v.number(),
+        currentStockQty: v.number(),
+      })
+    ),
+    supplierId: v.optional(v.id('suppliers')),
+    sentLines: v.optional(v.array(v.object({ name: v.string(), qty: v.number(), unit: v.string() }))),
+    exportedAt: v.optional(v.number()),
+  }).index('by_cafe_generated', ['cafeId', 'generatedAt']),
+
   inventoryMovements: defineTable({
     cafeId: v.id('cafes'),
     ingredientId: v.id('ingredients'),
