@@ -3091,6 +3091,10 @@ msgstr "Terima pesanan dari GrabFood."
 msgid "Terima pesanan dari ShopeeFood."
 msgstr "Terima pesanan dari ShopeeFood."
 
+#: src/routes/_pos/forecast.tsx
+msgid "Terkirim"
+msgstr "Terkirim"
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Tersimpan"
 msgstr "Tersimpan"

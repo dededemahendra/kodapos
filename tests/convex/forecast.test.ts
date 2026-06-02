@@ -1,6 +1,6 @@
 import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
-import { api } from '../../convex/_generated/api';
+import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
 
@@ -152,6 +152,25 @@ describe('forecast.demand', () => {
     expect(r.status).toBe('learning');
     if (r.status === 'learning') {
       expect(r.daysCollected).toBe(5); // the void day is not counted
+    }
+  });
+
+  it('serves the persisted snapshot even after the underlying orders are gone', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const now = Date.now();
+    for (let d = 1; d <= 20; d++) {
+      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+    }
+    await t.mutation(internal.forecast.generateNightly, {});
+    // wipe all orders AFTER the snapshot — live compute would now be 'learning'
+    await t.run(async (ctx) => {
+      for (const o of await ctx.db.query('orders').collect()) await ctx.db.delete(o._id);
+    });
+    const r = await refs.asOwner.query(api.forecast.demand, {});
+    expect(r.status).toBe('ready'); // served from the snapshot, not recomputed live
+    if (r.status === 'ready') {
+      expect(r.lines.some((l) => l.name === 'Kopi')).toBe(true);
     }
   });
 });

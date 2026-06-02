@@ -1,57 +1,66 @@
 import { v } from 'convex/values';
-import { query } from './_generated/server';
-import type { Id } from './_generated/dataModel';
-import { requireOwnerCafe } from './lib/auth';
+import { mutation, query } from './_generated/server';
+import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
-import { currentStockQty } from './lib/inventory';
-import { suggestRestock } from './lib/restock';
+import { computeRestock } from './lib/restockCompute';
+
+const learningV = v.object({
+  status: v.literal('learning'),
+  daysCollected: v.number(),
+  daysNeeded: v.number(),
+  etaDateKey: v.string(),
+});
+const restockLineV = v.object({
+  ingredientId: v.id('ingredients'),
+  name: v.string(),
+  unit: v.union(v.literal('g'), v.literal('ml'), v.literal('piece')),
+  suggestedQty: v.number(),
+  currentStockQty: v.number(),
+});
 
 export const suggestion = query({
   args: {},
   returns: v.union(
-    v.object({ status: v.literal('learning'), daysCollected: v.number(), daysNeeded: v.number(), etaDateKey: v.string() }),
+    learningV,
     v.object({
       status: v.literal('ready'),
-      lines: v.array(
-        v.object({
-          ingredientId: v.id('ingredients'),
-          name: v.string(),
-          unit: v.union(v.literal('g'), v.literal('ml'), v.literal('piece')),
-          suggestedQty: v.number(),
-          currentStockQty: v.number(),
-        })
-      ),
+      suggestionId: v.union(v.id('restockSuggestions'), v.null()),
+      suggestionStatus: v.union(v.literal('draft'), v.literal('sent'), v.literal('dismissed')),
+      lines: v.array(restockLineV),
     })
   ),
   handler: async (ctx, _args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
+    const snap = await ctx.db
+      .query('restockSuggestions')
+      .withIndex('by_cafe_generated', (q) => q.eq('cafeId', cafeId))
+      .order('desc')
+      .first();
+    if (snap) {
+      return { status: 'ready' as const, suggestionId: snap._id, suggestionStatus: snap.status, lines: snap.lines };
+    }
     const demand = await computeDemand(ctx, cafeId);
     if (demand.status === 'learning') return demand;
+    const lines = await computeRestock(ctx, cafeId, demand.lines);
+    return { status: 'ready' as const, suggestionId: null, suggestionStatus: 'draft' as const, lines };
+  },
+});
 
-    const required = new Map<string, number>();
-    for (const line of demand.lines) {
-      const recipe = await ctx.db
-        .query('recipes')
-        .withIndex('by_cafe_item', (q) => q.eq('cafeId', cafeId).eq('menuItemId', line.menuItemId))
-        .unique();
-      if (!recipe) continue;
-      for (const rl of recipe.lines) {
-        const id = rl.ingredientId as string;
-        required.set(id, (required.get(id) ?? 0) + line.sevenDayQty * rl.qty * rl.wastageFactor);
-      }
+export const markSent = mutation({
+  args: {
+    id: v.id('restockSuggestions'),
+    supplierId: v.id('suppliers'),
+    sentLines: v.array(v.object({ name: v.string(), qty: v.number(), unit: v.string() })),
+  },
+  returns: v.null(),
+  handler: async (ctx, { id, supplierId, sentLines }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const suggestion = await requireOwned(ctx, cafeId, id, 'Saran belanja');
+    if (suggestion.status !== 'draft') {
+      throw new Error('Saran belanja sudah dikirim atau ditolak.');
     }
-
-    const lines = [];
-    for (const [idStr, req] of required) {
-      const ing = await ctx.db.get(idStr as unknown as Id<'ingredients'>);
-      if (!ing || ing.cafeId !== cafeId || ing.archived) continue;
-      const stock = await currentStockQty(ctx, cafeId, ing._id);
-      const suggestedQty = suggestRestock(req, stock, ing.reorderThreshold);
-      if (suggestedQty > 0) {
-        lines.push({ ingredientId: ing._id, name: ing.name, unit: ing.canonicalUnit, suggestedQty, currentStockQty: stock });
-      }
-    }
-    lines.sort((a, b) => a.name.localeCompare(b.name, 'id-ID'));
-    return { status: 'ready' as const, lines };
+    await requireOwned(ctx, cafeId, supplierId, 'Pemasok');
+    await ctx.db.patch(id, { status: 'sent', supplierId, sentLines, exportedAt: Date.now() });
+    return null;
   },
 });

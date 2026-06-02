@@ -1,7 +1,8 @@
 import { v } from 'convex/values';
-import { query } from './_generated/server';
+import { internalMutation, query } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
+import { computeRestock } from './lib/restockCompute';
 
 const confidenceV = v.union(v.literal('low'), v.literal('med'), v.literal('high'));
 const driverV = v.union(
@@ -30,6 +31,56 @@ export const demand = query({
   ),
   handler: async (ctx, _args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
+    const snap = await ctx.db
+      .query('forecasts')
+      .withIndex('by_cafe_generated', (q) => q.eq('cafeId', cafeId))
+      .order('desc')
+      .first();
+    if (snap) {
+      if (snap.status === 'ready') {
+        return { status: 'ready' as const, forDateKey: snap.forDateKey ?? '', lines: snap.lines ?? [] };
+      }
+      return {
+        status: 'learning' as const,
+        daysCollected: snap.daysCollected ?? 0,
+        daysNeeded: 14,
+        etaDateKey: snap.etaDateKey ?? '',
+      };
+    }
     return await computeDemand(ctx, cafeId);
+  },
+});
+
+export const generateNightly = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    // TODO(C-fan-out): processes all cafes in one mutation transaction. Fine at
+    // V1 scale; if cafe/order volume grows past Convex's per-transaction read
+    // limit, fan out per-cafe via ctx.scheduler.runAfter(0, ...).
+    const cafes = await ctx.db.query('cafes').collect();
+    const now = Date.now();
+    for (const cafe of cafes) {
+      const demand = await computeDemand(ctx, cafe._id);
+      const forecastId =
+        demand.status === 'ready'
+          ? await ctx.db.insert('forecasts', {
+              cafeId: cafe._id, generatedAt: now, method: 'rule_v1', status: 'ready',
+              forDateKey: demand.forDateKey, lines: demand.lines,
+            })
+          : await ctx.db.insert('forecasts', {
+              cafeId: cafe._id, generatedAt: now, method: 'rule_v1', status: 'learning',
+              daysCollected: demand.daysCollected, etaDateKey: demand.etaDateKey,
+            });
+      if (demand.status === 'ready') {
+        const lines = await computeRestock(ctx, cafe._id, demand.lines);
+        if (lines.length > 0) {
+          await ctx.db.insert('restockSuggestions', {
+            cafeId: cafe._id, forecastId, generatedAt: now, status: 'draft', lines,
+          });
+        }
+      }
+    }
+    return null;
   },
 });
