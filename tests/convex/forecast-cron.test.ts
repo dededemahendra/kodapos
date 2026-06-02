@@ -1,5 +1,5 @@
 import { convexTest } from 'convex-test';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
@@ -85,5 +85,84 @@ describe('generateNightly', () => {
     const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
     expect(forecasts).toHaveLength(2);
     expect(forecasts.map((f) => f.cafeId).sort()).toEqual([a.cafeId, b.cafeId].sort());
+  });
+});
+
+function stubForecastFetch(days: number) {
+  const time: string[] = [];
+  const temperature_2m_max: number[] = [];
+  const precipitation_sum: number[] = [];
+  for (let i = 0; i < days; i++) {
+    time.push(`2026-06-${String(3 + i).padStart(2, '0')}`);
+    temperature_2m_max.push(33); // hot
+    precipitation_sum.push(0);
+  }
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue({ ok: true, json: async () => ({ daily: { time, temperature_2m_max, precipitation_sum } }) })
+  );
+}
+
+describe('generateNightly weather (C2a)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('stores a weatherSignal when the cafe has coordinates', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await seedSales(t, refs, 20, Date.now());
+    await t.run((ctx) => ctx.db.patch(refs.cafeId, { latitude: -6.2, longitude: 106.8 }));
+    stubForecastFetch(7);
+    await t.action(internal.forecast.generateNightly, {});
+    const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
+    const signal = forecasts[0]?.weatherSignal;
+    expect(signal).toHaveLength(7);
+    expect(signal?.[0]).toMatchObject({ condition: 'hot', tempMaxC: 33, precipMm: 0 });
+    expect(typeof signal?.[0]?.dateKey).toBe('string');
+  });
+
+  it('no coordinates → forecast persisted, weatherSignal undefined (no fetch)', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await seedSales(t, refs, 20, Date.now());
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    await t.action(internal.forecast.generateNightly, {});
+    const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
+    expect(forecasts[0]?.status).toBe('ready');
+    expect(forecasts[0]?.weatherSignal).toBeUndefined();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('fetch failure → degrades to a forecast with no weatherSignal', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await seedSales(t, refs, 20, Date.now());
+    await t.run((ctx) => ctx.db.patch(refs.cafeId, { latitude: -6.2, longitude: 106.8 }));
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
+    await t.action(internal.forecast.generateNightly, {});
+    const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
+    expect(forecasts).toHaveLength(1);
+    expect(forecasts[0]?.status).toBe('ready');
+    expect(forecasts[0]?.weatherSignal).toBeUndefined();
+  });
+
+  it('fetch failure on one cafe does not prevent the other from persisting', async () => {
+    const t = convexTest(schema, modules);
+    const a = await setup(t, 'a@x.com');
+    const b = await setup(t, 'b@x.com');
+    await seedSales(t, a, 20, Date.now());
+    await seedSales(t, b, 20, Date.now());
+    // Only cafe a has coords, so fetch is attempted (and made to fail) only for a.
+    await t.run((ctx) => ctx.db.patch(a.cafeId, { latitude: -6.2, longitude: 106.8 }));
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
+    await t.action(internal.forecast.generateNightly, {});
+    const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
+    expect(forecasts).toHaveLength(2);
+    const aForecast = forecasts.find((f) => f.cafeId === a.cafeId);
+    const bForecast = forecasts.find((f) => f.cafeId === b.cafeId);
+    expect(aForecast?.weatherSignal).toBeUndefined(); // degraded
+    expect(bForecast?.status).toBe('ready'); // unaffected
   });
 });

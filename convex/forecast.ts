@@ -5,7 +5,7 @@ import type { Id } from './_generated/dataModel';
 import { requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
 import { computeRestock } from './lib/restockCompute';
-import { weatherSignalV } from './lib/weather';
+import { type WeatherDay, parseForecast, weatherSignalV } from './lib/weather';
 
 const confidenceV = v.union(v.literal('low'), v.literal('med'), v.literal('high'));
 const driverV = v.union(
@@ -125,8 +125,33 @@ export const generateNightly = internalAction({
   handler: async (ctx) => {
     const cafes: { cafeId: Id<'cafes'>; latitude?: number; longitude?: number }[] =
       await ctx.runQuery(internal.forecast.listCafesForCron, {});
+    // Fetches are sequential and the timezone is hardcoded to Asia/Jakarta —
+    // both fine at V1 (Indonesia, small cafe count). Revisit (per-cafe timezone,
+    // bounded-concurrency fetch) if either assumption stops holding.
     for (const cafe of cafes) {
-      await ctx.runMutation(internal.forecast.persistForecast, { cafeId: cafe.cafeId });
+      let weatherSignal: WeatherDay[] | undefined;
+      if (cafe.latitude !== undefined && cafe.longitude !== undefined) {
+        try {
+          const url =
+            `https://api.open-meteo.com/v1/forecast?latitude=${cafe.latitude}` +
+            `&longitude=${cafe.longitude}` +
+            `&daily=temperature_2m_max,precipitation_sum&timezone=Asia%2FJakarta&forecast_days=7`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
+          const json = await res.json();
+          const days = parseForecast(json);
+          if (days.length > 0) weatherSignal = days;
+        } catch (err) {
+          // Graceful degradation (§6.2): this cafe gets a forecast with no
+          // weatherSignal; the others still proceed. Log so it's observable.
+          console.warn(`weather fetch failed for cafe ${cafe.cafeId}:`, err);
+          weatherSignal = undefined;
+        }
+      }
+      await ctx.runMutation(internal.forecast.persistForecast, {
+        cafeId: cafe.cafeId,
+        ...(weatherSignal ? { weatherSignal } : {}),
+      });
     }
     return null;
   },
