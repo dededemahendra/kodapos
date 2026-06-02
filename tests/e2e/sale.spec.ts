@@ -253,4 +253,28 @@ test.describe('sale (auth-gated)', () => {
     await waitForUrlHydrated(page, /\/forecast$/);
     await expect(page.getByText(/sedang belajar/i)).toBeVisible();
   });
+
+  test('suppliers: create a supplier and see it listed', async ({ page }) => {
+    const email = `e2e+supplier+${Date.now()}@kodapos.test`;
+    const password = 'Sa{ngat-Aman-123';
+
+    await gotoHydrated(page, '/signup');
+    await page.getByLabel('Nama Anda').fill('E2E Supplier');
+    await page.getByLabel('Nama kafe').fill('Kopi Supplier');
+    await page.getByLabel('Email').fill(email);
+    await page.getByRole('textbox', { name: 'Password' }).fill(password);
+    await page.getByRole('button', { name: /Daftar/ }).click();
+
+    await waitForUrlHydrated(page, /\/onboarding\/profile$/, { timeout: 15_000 });
+    await page.getByRole('button', { name: /Lanjut/ }).click();
+    await waitForUrlHydrated(page, /\/onboarding\/menu$/);
+
+    await page.goto('/suppliers');
+    await waitForUrlHydrated(page, /\/suppliers$/);
+    await page.getByRole('button', { name: /Tambah Pemasok/ }).click();
+    await page.getByLabel('Nama pemasok').fill('Sumber Susu');
+    await page.getByLabel('Telepon').fill('0812-3456-7890');
+    await page.getByRole('button', { name: /^Simpan$/ }).click();
+    await expect(page.getByText('Sumber Susu')).toBeVisible();
+  });
 });
