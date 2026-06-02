@@ -1,6 +1,7 @@
 import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
+import { internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
 
@@ -96,5 +97,51 @@ describe('restock.suggestion', () => {
     const b = await setup(t, 'b@x.com');
     const rb = await b.asOwner.query(api.restock.suggestion, {});
     expect(rb.status).toBe('learning');
+  });
+
+  it('serves the persisted draft suggestion after the cron', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await seedSales(t, refs, 20, Date.now());
+    await t.mutation(internal.forecast.generateNightly, {});
+    const r = await refs.asOwner.query(api.restock.suggestion, {});
+    expect(r.status).toBe('ready');
+    if (r.status === 'ready') {
+      expect(r.suggestionId).not.toBeNull();
+      expect(r.suggestionStatus).toBe('draft');
+      expect(r.lines.some((l) => l.name === 'Susu')).toBe(true);
+    }
+  });
+
+  it('markSent marks the suggestion sent with supplier + sentLines', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await seedSales(t, refs, 20, Date.now());
+    await t.mutation(internal.forecast.generateNightly, {});
+    const supplierId = await refs.asOwner.mutation(api.suppliers.create, { name: 'Sumber Susu', phone: '08123456789' });
+    const r = await refs.asOwner.query(api.restock.suggestion, {});
+    if (r.status !== 'ready' || r.suggestionId === null) throw new Error('expected a persisted draft');
+    await refs.asOwner.mutation(api.restock.markSent, {
+      id: r.suggestionId,
+      supplierId,
+      sentLines: [{ name: 'Susu', qty: 5000, unit: 'ml' }],
+    });
+    const row = await t.run((ctx) => ctx.db.get(r.suggestionId!));
+    expect(row?.status).toBe('sent');
+    expect(row?.supplierId).toBe(supplierId);
+    expect(row?.sentLines).toEqual([{ name: 'Susu', qty: 5000, unit: 'ml' }]);
+    expect(typeof row?.exportedAt).toBe('number');
+  });
+
+  it('live fallback when no snapshot → suggestionId null', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await seedSales(t, refs, 20, Date.now());
+    const r = await refs.asOwner.query(api.restock.suggestion, {});
+    expect(r.status).toBe('ready');
+    if (r.status === 'ready') {
+      expect(r.suggestionId).toBeNull();
+      expect(r.suggestionStatus).toBe('draft');
+    }
   });
 });
