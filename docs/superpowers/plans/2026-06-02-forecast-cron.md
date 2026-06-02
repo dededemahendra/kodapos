@@ -25,7 +25,7 @@
 
 ## File structure
 
-**New:** `convex/lib/restock-compute.ts` (extracted `computeRestock`); `convex/crons.ts`; `tests/convex/forecast-cron.test.ts`.
+**New:** `convex/lib/restockCompute.ts` (extracted `computeRestock`); `convex/crons.ts`; `tests/convex/forecast-cron.test.ts`.
 **Modified:** `convex/schema.ts` (two tables), `convex/_generated/*`, `convex/lib/demand.ts` (widen ctx type), `convex/forecast.ts` (`generateNightly` + snapshot-read in `demand`), `convex/restock.ts` (use `computeRestock`, snapshot-read in `suggestion`, `markSent`), `src/routes/_pos/forecast.tsx` (panel), `tests/convex/{forecast,restock}.test.ts`, Lingui catalogs.
 
 ---
@@ -98,7 +98,7 @@ git commit -m "feat(forecast): add forecasts + restockSuggestions tables"
 
 ## Task 2: Extract `computeRestock` + widen ctx types
 
-**Files:** Create `convex/lib/restock-compute.ts`; Modify `convex/lib/demand.ts` (ctx type), `convex/restock.ts` (use the helper).
+**Files:** Create `convex/lib/restockCompute.ts`; Modify `convex/lib/demand.ts` (ctx type), `convex/restock.ts` (use the helper).
 
 - [ ] **Step 1: Widen `computeDemand`'s ctx type** — in `convex/lib/demand.ts`, change the import + signature so it accepts a mutation ctx too:
 ```ts
@@ -114,7 +114,7 @@ export async function computeDemand(ctx: QueryCtx | MutationCtx, cafeId: Id<'caf
 ```
 (No body change.)
 
-- [ ] **Step 2: Create `convex/lib/restock-compute.ts`** — extract the per-ingredient derivation from `restock.suggestion`:
+- [ ] **Step 2: Create `convex/lib/restockCompute.ts`** — extract the per-ingredient derivation from `restock.suggestion`:
 ```ts
 import type { MutationCtx, QueryCtx } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
@@ -175,7 +175,7 @@ export async function computeRestock(
 ```
 and update the imports at the top of `convex/restock.ts` (remove the now-unused `currentStockQty`/`suggestRestock`/`Id` if no longer referenced; add `computeRestock`):
 ```ts
-import { computeRestock } from './lib/restock-compute';
+import { computeRestock } from './lib/restockCompute';
 ```
 (Keep `v`, `query`, `requireOwnerCafe`, `computeDemand`. The big inline `required`/`lines` block is gone.)
 
@@ -183,7 +183,7 @@ import { computeRestock } from './lib/restock-compute';
 
 - [ ] **Step 5: Commit**
 ```bash
-git add convex/lib/restock-compute.ts convex/lib/demand.ts convex/restock.ts
+git add convex/lib/restockCompute.ts convex/lib/demand.ts convex/restock.ts
 git commit -m "refactor(restock): extract computeRestock for reuse by the cron"
 ```
 
@@ -292,7 +292,7 @@ describe('generateNightly', () => {
 ```ts
 import { internalMutation, query } from './_generated/server';
 import { computeDemand } from './lib/demand';
-import { computeRestock } from './lib/restock-compute';
+import { computeRestock } from './lib/restockCompute';
 ```
 (merge with the existing `query`/`computeDemand` imports — don't duplicate) and append:
 ```ts
@@ -484,7 +484,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
-import { computeRestock } from './lib/restock-compute';
+import { computeRestock } from './lib/restockCompute';
 ```
 The file body:
 ```ts
