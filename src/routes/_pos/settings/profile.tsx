@@ -3,8 +3,9 @@ import { useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRef, useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { SaveBar } from '~/components/settings/save-bar';
 import {
   RowSep,
@@ -91,6 +92,8 @@ function SettingsProfile() {
   const generateUploadUrl = useMutation(api.cafes.generateUploadUrl);
   const setLogo = useMutation(api.cafes.setLogo);
   const removeLogo = useMutation(api.cafes.removeLogo);
+  const geocodeFromCity = useAction(api.cafes.geocodeFromCity);
+  const [geocoding, setGeocoding] = useState(false);
 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -209,6 +212,22 @@ function SettingsProfile() {
       await removeLogo();
     } catch (e) {
       setError(e instanceof Error ? e.message : t`Gagal menghapus logo.`);
+    }
+  }
+
+  async function handleUpdateWeatherLocation() {
+    setGeocoding(true);
+    try {
+      const res = await geocodeFromCity();
+      if (res.found) {
+        toast.success(t`Lokasi cuaca diperbarui.`);
+      } else {
+        toast.error(t`Kota tidak ditemukan.`);
+      }
+    } catch {
+      toast.error(t`Gagal memperbarui lokasi cuaca.`);
+    } finally {
+      setGeocoding(false);
     }
   }
 
@@ -460,6 +479,27 @@ function SettingsProfile() {
                   </SelectItem>
                 </SelectContent>
               </Select>
+            }
+          />
+
+          <RowSep />
+
+          <SettingRow
+            label={<Trans>Lokasi cuaca</Trans>}
+            description={
+              <Trans>Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan.</Trans>
+            }
+            control={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={geocoding}
+                onClick={handleUpdateWeatherLocation}
+              >
+                {geocoding && <Spinner data-icon="inline-start" />}
+                <Trans>Perbarui lokasi cuaca</Trans>
+              </Button>
             }
           />
         </FieldGroup>

@@ -988,6 +988,10 @@ msgstr "Gagal membuka shift."
 msgid "Gagal memperbarui item."
 msgstr "Gagal memperbarui item."
 
+#: src/routes/_pos/settings/profile.tsx
+msgid "Gagal memperbarui lokasi cuaca."
+msgstr "Gagal memperbarui lokasi cuaca."
+
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Gagal memproses pembayaran."
 msgstr "Gagal memproses pembayaran."
@@ -1165,6 +1169,10 @@ msgstr "Grup modifier baru"
 #: src/routes/_pos/menu/modifiers.$groupId.tsx
 msgid "Grup tidak ditemukan."
 msgstr "Grup tidak ditemukan."
+
+#: src/routes/_pos/settings/profile.tsx
+msgid "Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan."
+msgstr "Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan."
 
 #: src/routes/_public/privacy.tsx
 msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
@@ -1567,6 +1575,10 @@ msgstr "Kosongkan keranjang?"
 msgid "Kota"
 msgstr "Kota"
 
+#: src/routes/_pos/settings/profile.tsx
+msgid "Kota tidak ditemukan."
+msgstr "Kota tidak ditemukan."
+
 #: src/lib/auth-validation.ts
 msgid "Kuat"
 msgstr "Kuat"
@@ -1688,6 +1700,14 @@ msgstr "Logo"
 #: src/routes/_pos/settings/profile.tsx
 msgid "Logo kafe"
 msgstr "Logo kafe"
+
+#: src/routes/_pos/settings/profile.tsx
+msgid "Lokasi cuaca"
+msgstr "Lokasi cuaca"
+
+#: src/routes/_pos/settings/profile.tsx
+msgid "Lokasi cuaca diperbarui."
+msgstr "Lokasi cuaca diperbarui."
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/loyalty.tsx
@@ -2251,6 +2271,10 @@ msgstr "Penyesuaian Stok"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Peran"
 msgstr "Peran"
+
+#: src/routes/_pos/settings/profile.tsx
+msgid "Perbarui lokasi cuaca"
+msgstr "Perbarui lokasi cuaca"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Peringatan stok rendah"
