@@ -16,6 +16,7 @@ import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PosSuppliersRouteImport } from './routes/_pos/suppliers'
 import { Route as PosShiftsRouteImport } from './routes/_pos/shifts'
 import { Route as PosRecipesRouteImport } from './routes/_pos/recipes'
 import { Route as PosPromosRouteImport } from './routes/_pos/promos'
@@ -93,6 +94,11 @@ const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
   getParentRoute: () => PublicRoute,
+} as any)
+const PosSuppliersRoute = PosSuppliersRouteImport.update({
+  id: '/suppliers',
+  path: '/suppliers',
+  getParentRoute: () => PosRoute,
 } as any)
 const PosShiftsRoute = PosShiftsRouteImport.update({
   id: '/shifts',
@@ -335,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/promos': typeof PosPromosRoute
   '/recipes': typeof PosRecipesRoute
   '/shifts': typeof PosShiftsRoute
+  '/suppliers': typeof PosSuppliersRoute
   '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
@@ -382,6 +389,7 @@ export interface FileRoutesByTo {
   '/promos': typeof PosPromosRoute
   '/recipes': typeof PosRecipesRoute
   '/shifts': typeof PosShiftsRoute
+  '/suppliers': typeof PosSuppliersRoute
   '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
@@ -435,6 +443,7 @@ export interface FileRoutesById {
   '/_pos/promos': typeof PosPromosRoute
   '/_pos/recipes': typeof PosRecipesRoute
   '/_pos/shifts': typeof PosShiftsRoute
+  '/_pos/suppliers': typeof PosSuppliersRoute
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
@@ -489,6 +498,7 @@ export interface FileRouteTypes {
     | '/promos'
     | '/recipes'
     | '/shifts'
+    | '/suppliers'
     | '/privacy'
     | '/signin'
     | '/signup'
@@ -536,6 +546,7 @@ export interface FileRouteTypes {
     | '/promos'
     | '/recipes'
     | '/shifts'
+    | '/suppliers'
     | '/privacy'
     | '/signin'
     | '/signup'
@@ -588,6 +599,7 @@ export interface FileRouteTypes {
     | '/_pos/promos'
     | '/_pos/recipes'
     | '/_pos/shifts'
+    | '/_pos/suppliers'
     | '/_public/privacy'
     | '/_public/signin'
     | '/_public/signup'
@@ -676,6 +688,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/privacy'
       preLoaderRoute: typeof PublicPrivacyRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/_pos/suppliers': {
+      id: '/_pos/suppliers'
+      path: '/suppliers'
+      fullPath: '/suppliers'
+      preLoaderRoute: typeof PosSuppliersRouteImport
+      parentRoute: typeof PosRoute
     }
     '/_pos/shifts': {
       id: '/_pos/shifts'
@@ -1135,6 +1154,7 @@ interface PosRouteChildren {
   PosPromosRoute: typeof PosPromosRoute
   PosRecipesRoute: typeof PosRecipesRoute
   PosShiftsRoute: typeof PosShiftsRoute
+  PosSuppliersRoute: typeof PosSuppliersRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
@@ -1156,6 +1176,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosPromosRoute: PosPromosRoute,
   PosRecipesRoute: PosRecipesRoute,
   PosShiftsRoute: PosShiftsRoute,
+  PosSuppliersRoute: PosSuppliersRoute,
 }
 
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)

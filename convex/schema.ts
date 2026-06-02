@@ -332,6 +332,14 @@ export default defineSchema({
     createdAt: v.number(),
   }).index('by_cafe_active', ['cafeId', 'archived']),
 
+  suppliers: defineTable({
+    cafeId: v.id('cafes'),
+    name: v.string(),
+    phone: v.string(),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  }).index('by_cafe_active', ['cafeId', 'archived']),
+
   purchases: defineTable({
     cafeId: v.id('cafes'),
     supplierName: v.optional(v.string()),
