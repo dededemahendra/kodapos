@@ -2,7 +2,7 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import type { ColumnDef } from '@tanstack/react-table';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
@@ -30,7 +30,11 @@ function RestockPanel() {
   const [supplierId, setSupplierId] = useState<string>('');
   const [edits, setEdits] = useState<Map<string, number>>(new Map());
 
-  const lines = data?.status === 'ready' ? data.lines : [];
+  const markSent = useMutation(api.restock.markSent);
+  const ready = data?.status === 'ready' ? data : null;
+  const lines = ready?.lines ?? [];
+  const suggestionId = ready?.suggestionId ?? null;
+  const isSent = ready?.suggestionStatus === 'sent';
   const qtyOf = (l: RestockLine) => edits.get(l.ingredientId) ?? l.suggestedQty;
 
   const columns = useMemo<ColumnDef<RestockLine, unknown>[]>(
@@ -62,19 +66,21 @@ function RestockPanel() {
     [edits]
   );
 
-  function onSend() {
+  async function onSend() {
     const supplier = suppliers?.find((s) => s._id === supplierId);
     if (!supplier) return;
-    const text = formatRestockText(
-      cafe?.name ?? '',
-      lines.map((l) => ({ name: l.name, qty: qtyOf(l), unit: l.unit }))
-    );
+    const sentLines = lines.map((l) => ({ name: l.name, qty: qtyOf(l), unit: l.unit }));
+    if (suggestionId) {
+      await markSent({ id: suggestionId, supplierId: supplier._id, sentLines });
+    }
+    const text = formatRestockText(cafe?.name ?? '', sentLines);
     window.open(waUrl(supplier.phone, text), '_blank', 'noopener,noreferrer');
   }
 
   return (
     <section className="mt-8">
       <h2 className="text-lg font-semibold"><Trans>Daftar Belanja</Trans></h2>
+      {isSent ? <StatusBadge variant="success"><Trans>Terkirim</Trans></StatusBadge> : null}
       {data === undefined ? (
         <div className="mt-4 flex items-center justify-center py-8 text-muted-foreground"><Spinner /></div>
       ) : data.status === 'learning' ? (
