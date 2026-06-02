@@ -1,7 +1,6 @@
 import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
-import { api } from '../../convex/_generated/api';
-import { internal } from '../../convex/_generated/api';
+import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
 
@@ -143,5 +142,19 @@ describe('restock.suggestion', () => {
       expect(r.suggestionId).toBeNull();
       expect(r.suggestionStatus).toBe('draft');
     }
+  });
+
+  it('markSent: cafe B cannot mark cafe A\'s suggestion', async () => {
+    const t = convexTest(schema, modules);
+    const a = await setup(t, 'a@x.com');
+    await seedSales(t, a, 20, Date.now());
+    await t.mutation(internal.forecast.generateNightly, {});
+    const ra = await a.asOwner.query(api.restock.suggestion, {});
+    if (ra.status !== 'ready' || ra.suggestionId === null) throw new Error('expected a@ draft');
+    const b = await setup(t, 'b@x.com');
+    const supplierB = await b.asOwner.mutation(api.suppliers.create, { name: 'B Supp', phone: '08123456789' });
+    await expect(
+      b.asOwner.mutation(api.restock.markSent, { id: ra.suggestionId, supplierId: supplierB, sentLines: [] })
+    ).rejects.toThrow();
   });
 });

@@ -55,7 +55,10 @@ export const markSent = mutation({
   returns: v.null(),
   handler: async (ctx, { id, supplierId, sentLines }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    await requireOwned(ctx, cafeId, id, 'Saran belanja');
+    const suggestion = await requireOwned(ctx, cafeId, id, 'Saran belanja');
+    if (suggestion.status !== 'draft') {
+      throw new Error('Saran belanja sudah dikirim atau ditolak.');
+    }
     await requireOwned(ctx, cafeId, supplierId, 'Pemasok');
     await ctx.db.patch(id, { status: 'sent', supplierId, sentLines, exportedAt: Date.now() });
     return null;
