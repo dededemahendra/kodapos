@@ -70,7 +70,7 @@ function RestockPanel() {
     const supplier = suppliers?.find((s) => s._id === supplierId);
     if (!supplier) return;
     const sentLines = lines.map((l) => ({ name: l.name, qty: qtyOf(l), unit: l.unit }));
-    if (suggestionId) {
+    if (suggestionId && !isSent) {
       await markSent({ id: suggestionId, supplierId: supplier._id, sentLines });
     }
     const text = formatRestockText(cafe?.name ?? '', sentLines);
