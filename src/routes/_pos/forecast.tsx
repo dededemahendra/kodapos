@@ -69,7 +69,7 @@ function RestockPanel() {
       cafe?.name ?? '',
       lines.map((l) => ({ name: l.name, qty: qtyOf(l), unit: l.unit }))
     );
-    window.open(waUrl(supplier.phone, text), '_blank', 'noopener');
+    window.open(waUrl(supplier.phone, text), '_blank', 'noopener,noreferrer');
   }
 
   return (

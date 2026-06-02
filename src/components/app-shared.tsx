@@ -15,7 +15,6 @@ import {
 	Package,
 	Settings,
 	TrendingUp,
-	Truck,
 	UtensilsCrossed,
 	Users,
 } from "lucide-react";
