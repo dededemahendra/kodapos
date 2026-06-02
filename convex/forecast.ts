@@ -1,8 +1,11 @@
 import { v } from 'convex/values';
-import { internalMutation, query } from './_generated/server';
+import { internal } from './_generated/api';
+import { internalAction, internalMutation, internalQuery, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 import { requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
 import { computeRestock } from './lib/restockCompute';
+import { weatherSignalV } from './lib/weather';
 
 const confidenceV = v.union(v.literal('low'), v.literal('med'), v.literal('high'));
 const driverV = v.union(
@@ -51,35 +54,79 @@ export const demand = query({
   },
 });
 
-export const generateNightly = internalMutation({
+/**
+ * Persist one cafe's nightly snapshot: a forecasts row, plus a draft
+ * restockSuggestions row when the forecast is ready and there's something to
+ * buy. Called once per cafe by generateNightly. weatherSignal (C2a) is stored
+ * on the ready forecast when the action fetched it; absent on degradation.
+ */
+export const persistForecast = internalMutation({
+  args: {
+    cafeId: v.id('cafes'),
+    weatherSignal: v.optional(weatherSignalV),
+  },
+  returns: v.null(),
+  handler: async (ctx, { cafeId, weatherSignal }) => {
+    const now = Date.now();
+    const demand = await computeDemand(ctx, cafeId);
+    const forecastId =
+      demand.status === 'ready'
+        ? await ctx.db.insert('forecasts', {
+            cafeId, generatedAt: now, method: 'rule_v1', status: 'ready',
+            forDateKey: demand.forDateKey, lines: demand.lines,
+            ...(weatherSignal ? { weatherSignal } : {}),
+          })
+        : await ctx.db.insert('forecasts', {
+            cafeId, generatedAt: now, method: 'rule_v1', status: 'learning',
+            daysCollected: demand.daysCollected, etaDateKey: demand.etaDateKey,
+          });
+    if (demand.status === 'ready') {
+      const lines = await computeRestock(ctx, cafeId, demand.lines);
+      if (lines.length > 0) {
+        await ctx.db.insert('restockSuggestions', {
+          cafeId, forecastId, generatedAt: now, status: 'draft', lines,
+        });
+      }
+    }
+    return null;
+  },
+});
+
+/** All cafes + their coordinates, for the nightly action (actions can't read ctx.db). */
+export const listCafesForCron = internalQuery({
+  args: {},
+  returns: v.array(
+    v.object({
+      cafeId: v.id('cafes'),
+      latitude: v.optional(v.number()),
+      longitude: v.optional(v.number()),
+    })
+  ),
+  handler: async (ctx) => {
+    const cafes = await ctx.db.query('cafes').collect();
+    return cafes.map((c) => ({
+      cafeId: c._id,
+      ...(c.latitude !== undefined ? { latitude: c.latitude } : {}),
+      ...(c.longitude !== undefined ? { longitude: c.longitude } : {}),
+    }));
+  },
+});
+
+/**
+ * Nightly forecast generation. An action (not a mutation) because it fetches
+ * weather over HTTP (C2a). For each cafe: fetch its 7-day forecast when it has
+ * coordinates, then persist via persistForecast. Each cafe's fetch is wrapped
+ * so one failure (or the weather API being down) doesn't abort the others —
+ * that cafe simply gets a forecast with no weatherSignal (§6.2 degradation).
+ */
+export const generateNightly = internalAction({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
-    // TODO(C-fan-out): processes all cafes in one mutation transaction. Fine at
-    // V1 scale; if cafe/order volume grows past Convex's per-transaction read
-    // limit, fan out per-cafe via ctx.scheduler.runAfter(0, ...).
-    const cafes = await ctx.db.query('cafes').collect();
-    const now = Date.now();
+    const cafes: { cafeId: Id<'cafes'>; latitude?: number; longitude?: number }[] =
+      await ctx.runQuery(internal.forecast.listCafesForCron, {});
     for (const cafe of cafes) {
-      const demand = await computeDemand(ctx, cafe._id);
-      const forecastId =
-        demand.status === 'ready'
-          ? await ctx.db.insert('forecasts', {
-              cafeId: cafe._id, generatedAt: now, method: 'rule_v1', status: 'ready',
-              forDateKey: demand.forDateKey, lines: demand.lines,
-            })
-          : await ctx.db.insert('forecasts', {
-              cafeId: cafe._id, generatedAt: now, method: 'rule_v1', status: 'learning',
-              daysCollected: demand.daysCollected, etaDateKey: demand.etaDateKey,
-            });
-      if (demand.status === 'ready') {
-        const lines = await computeRestock(ctx, cafe._id, demand.lines);
-        if (lines.length > 0) {
-          await ctx.db.insert('restockSuggestions', {
-            cafeId: cafe._id, forecastId, generatedAt: now, status: 'draft', lines,
-          });
-        }
-      }
+      await ctx.runMutation(internal.forecast.persistForecast, { cafeId: cafe.cafeId });
     }
     return null;
   },

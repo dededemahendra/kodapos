@@ -102,7 +102,7 @@ describe('restock.suggestion', () => {
     const t = convexTest(schema, modules);
     const refs = await setup(t);
     await seedSales(t, refs, 20, Date.now());
-    await t.mutation(internal.forecast.generateNightly, {});
+    await t.action(internal.forecast.generateNightly, {});
     const r = await refs.asOwner.query(api.restock.suggestion, {});
     expect(r.status).toBe('ready');
     if (r.status === 'ready') {
@@ -116,7 +116,7 @@ describe('restock.suggestion', () => {
     const t = convexTest(schema, modules);
     const refs = await setup(t);
     await seedSales(t, refs, 20, Date.now());
-    await t.mutation(internal.forecast.generateNightly, {});
+    await t.action(internal.forecast.generateNightly, {});
     const supplierId = await refs.asOwner.mutation(api.suppliers.create, { name: 'Sumber Susu', phone: '08123456789' });
     const r = await refs.asOwner.query(api.restock.suggestion, {});
     if (r.status !== 'ready' || r.suggestionId === null) throw new Error('expected a persisted draft');
@@ -148,7 +148,7 @@ describe('restock.suggestion', () => {
     const t = convexTest(schema, modules);
     const a = await setup(t, 'a@x.com');
     await seedSales(t, a, 20, Date.now());
-    await t.mutation(internal.forecast.generateNightly, {});
+    await t.action(internal.forecast.generateNightly, {});
     const ra = await a.asOwner.query(api.restock.suggestion, {});
     if (ra.status !== 'ready' || ra.suggestionId === null) throw new Error('expected a@ draft');
     const b = await setup(t, 'b@x.com');

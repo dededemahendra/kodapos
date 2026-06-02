@@ -162,7 +162,7 @@ describe('forecast.demand', () => {
     for (let d = 1; d <= 20; d++) {
       await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
     }
-    await t.mutation(internal.forecast.generateNightly, {});
+    await t.action(internal.forecast.generateNightly, {});
     // wipe all orders AFTER the snapshot — live compute would now be 'learning'
     await t.run(async (ctx) => {
       for (const o of await ctx.db.query('orders').collect()) await ctx.db.delete(o._id);

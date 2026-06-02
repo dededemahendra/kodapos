@@ -53,7 +53,7 @@ describe('generateNightly', () => {
     const t = convexTest(schema, modules);
     const refs = await setup(t);
     await seedSales(t, refs, 20, Date.now());
-    await t.mutation(internal.forecast.generateNightly, {});
+    await t.action(internal.forecast.generateNightly, {});
     const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
     const restocks = await t.run((ctx) => ctx.db.query('restockSuggestions').collect());
     expect(forecasts).toHaveLength(1);
@@ -69,7 +69,7 @@ describe('generateNightly', () => {
     const t = convexTest(schema, modules);
     const refs = await setup(t);
     await seedSales(t, refs, 5, Date.now());
-    await t.mutation(internal.forecast.generateNightly, {});
+    await t.action(internal.forecast.generateNightly, {});
     const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
     const restocks = await t.run((ctx) => ctx.db.query('restockSuggestions').collect());
     expect(forecasts[0]?.status).toBe('learning');
@@ -81,7 +81,7 @@ describe('generateNightly', () => {
     const a = await setup(t, 'a@x.com');
     await seedSales(t, a, 20, Date.now());
     const b = await setup(t, 'b@x.com');
-    await t.mutation(internal.forecast.generateNightly, {});
+    await t.action(internal.forecast.generateNightly, {});
     const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
     expect(forecasts).toHaveLength(2);
     expect(forecasts.map((f) => f.cafeId).sort()).toEqual([a.cafeId, b.cafeId].sort());
