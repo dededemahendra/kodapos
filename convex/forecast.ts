@@ -31,6 +31,22 @@ export const demand = query({
   ),
   handler: async (ctx, _args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
+    const snap = await ctx.db
+      .query('forecasts')
+      .withIndex('by_cafe_generated', (q) => q.eq('cafeId', cafeId))
+      .order('desc')
+      .first();
+    if (snap) {
+      if (snap.status === 'ready') {
+        return { status: 'ready' as const, forDateKey: snap.forDateKey ?? '', lines: snap.lines ?? [] };
+      }
+      return {
+        status: 'learning' as const,
+        daysCollected: snap.daysCollected ?? 0,
+        daysNeeded: 14,
+        etaDateKey: snap.etaDateKey ?? '',
+      };
+    }
     return await computeDemand(ctx, cafeId);
   },
 });

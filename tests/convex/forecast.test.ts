@@ -1,6 +1,6 @@
 import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
-import { api } from '../../convex/_generated/api';
+import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
 
@@ -152,6 +152,24 @@ describe('forecast.demand', () => {
     expect(r.status).toBe('learning');
     if (r.status === 'learning') {
       expect(r.daysCollected).toBe(5); // the void day is not counted
+    }
+  });
+
+  it('serves the persisted snapshot, ignoring orders added after the cron', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const now = Date.now();
+    for (let d = 1; d <= 20; d++) {
+      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+    }
+    await t.mutation(internal.forecast.generateNightly, {});
+    // a fresh spike AFTER the snapshot — must be ignored by the snapshot read
+    await seedOrder(t, refs, 0, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 9999, price: 15000 }], now);
+    const r = await refs.asOwner.query(api.forecast.demand, {});
+    expect(r.status).toBe('ready');
+    if (r.status === 'ready') {
+      const kopi = r.lines.find((l) => l.name === 'Kopi')!;
+      expect(kopi.tomorrowQty).toBeLessThan(1000); // reflects the pre-cron snapshot, not the 9999 spike
     }
   });
 });
