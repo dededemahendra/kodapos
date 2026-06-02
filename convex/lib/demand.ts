@@ -1,4 +1,4 @@
-import type { QueryCtx } from '../_generated/server';
+import type { MutationCtx, QueryCtx } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
 import { DAY_MS, addDaysToKey, dayKeyFn, dowOfKey, startOfLocalDay, tzFor, utcOfDayKey } from './time';
 import {
@@ -29,7 +29,7 @@ export type DemandResult =
   | { status: 'ready'; forDateKey: string; lines: DemandLine[] };
 
 /** Live per-item 7-day forecast over the trailing 56 days of paid orders. */
-export async function computeDemand(ctx: QueryCtx, cafeId: Id<'cafes'>): Promise<DemandResult> {
+export async function computeDemand(ctx: QueryCtx | MutationCtx, cafeId: Id<'cafes'>): Promise<DemandResult> {
   const tz = await tzFor(ctx, cafeId);
   const now = Date.now();
   const windowStart = startOfLocalDay(tz, 55, now);
