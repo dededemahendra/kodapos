@@ -1,6 +1,7 @@
 import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { weatherSignalV } from './lib/weather';
 
 export default defineSchema({
   ...authTables,
@@ -24,6 +25,8 @@ export default defineSchema({
     instagram: v.optional(v.string()),
     city: v.optional(v.string()),
     postalCode: v.optional(v.string()),
+    latitude: v.optional(v.number()),
+    longitude: v.optional(v.number()),
     logoStorageId: v.optional(v.id('_storage')),
     operatingHours: v.optional(
       v.array(
@@ -380,7 +383,7 @@ export default defineSchema({
         })
       )
     ),
-    weatherSignal: v.optional(v.string()),
+    weatherSignal: v.optional(weatherSignalV),
   }).index('by_cafe_generated', ['cafeId', 'generatedAt']),
 
   restockSuggestions: defineTable({

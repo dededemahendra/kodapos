@@ -1,9 +1,22 @@
 import { convexTest } from 'convex-test';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
+
+async function ownerWithCafe(t: ReturnType<typeof convexTest>, city?: string) {
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' }));
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+  const cafe = await asOwner.query(api.cafes.myCafe, {});
+  const cafeId = cafe!._id as Id<'cafes'>;
+  if (city !== undefined) {
+    await t.run((ctx) => ctx.db.patch(cafeId, { city }));
+  }
+  return { asOwner, cafeId };
+}
 
 describe('cafes.createForOwner / cafes.mine', () => {
   it('creates a cafe owned by the authenticated user and returns it from mine()', async () => {
@@ -51,5 +64,112 @@ describe('cafes.createForOwner / cafes.mine', () => {
     await expect(t.mutation(api.cafes.createForOwner, { name: 'Anon Cafe' })).rejects.toThrow(
       /not authenticated/i
     );
+  });
+});
+
+describe('cafes.geocodeFromCity', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('sets latitude/longitude from the geocode hit', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await ownerWithCafe(t, 'Bandung');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [{ latitude: -6.9, longitude: 107.6 }] }) })
+    );
+    const res = await asOwner.action(api.cafes.geocodeFromCity, {});
+    expect(res).toEqual({ status: 'ok' });
+    const cafe = await t.run((ctx) => ctx.db.get(cafeId));
+    expect(cafe?.latitude).toBe(-6.9);
+    expect(cafe?.longitude).toBe(107.6);
+  });
+
+  it('returns no_city and does not fetch when the cafe has no city', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await ownerWithCafe(t); // no city
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const res = await asOwner.action(api.cafes.geocodeFromCity, {});
+    expect(res).toEqual({ status: 'no_city' });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('returns not_found on an empty geocode result (no patch)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await ownerWithCafe(t, 'Atlantis');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [] }) }));
+    const res = await asOwner.action(api.cafes.geocodeFromCity, {});
+    expect(res).toEqual({ status: 'not_found' });
+    const cafe = await t.run((ctx) => ctx.db.get(cafeId));
+    expect(cafe?.latitude).toBeUndefined();
+  });
+
+  it('returns error (not not_found) when Open-Meteo is unreachable', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await ownerWithCafe(t, 'Bandung');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
+    const res = await asOwner.action(api.cafes.geocodeFromCity, {});
+    expect(res).toEqual({ status: 'error' });
+    const cafe = await t.run((ctx) => ctx.db.get(cafeId));
+    expect(cafe?.latitude).toBeUndefined(); // no patch on failure
+  });
+
+  it('a second owner can only geocode their own cafe, not another owner\'s', async () => {
+    const t = convexTest(schema, modules);
+    const { cafeId: cafeA } = await ownerWithCafe(t, 'Bandung'); // owner o@x.com, has a city
+
+    // A second owner, with their own cafe.
+    const userId2 = await t.run((ctx) => ctx.db.insert('users', { name: 'B', email: 'b@x.com' }));
+    const asOwner2 = t.withIdentity({ subject: `${userId2}|test_session` });
+    await asOwner2.mutation(api.cafes.createForOwner, { name: 'Kopi B' });
+    const cafeB = (await asOwner2.query(api.cafes.myCafe, {}))!._id as Id<'cafes'>;
+    await t.run((ctx) => ctx.db.patch(cafeB, { city: 'Surabaya' }));
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [{ latitude: 1, longitude: 2 }] }) })
+    );
+
+    // Owner B geocodes — must patch ONLY cafe B.
+    const res = await asOwner2.action(api.cafes.geocodeFromCity, {});
+    expect(res).toEqual({ status: 'ok' });
+    const aDoc = await t.run((ctx) => ctx.db.get(cafeA));
+    const bDoc = await t.run((ctx) => ctx.db.get(cafeB));
+    expect(bDoc?.latitude).toBe(1);
+    expect(aDoc?.latitude).toBeUndefined(); // owner A's cafe untouched
+  });
+});
+
+describe('cafes.updateProfileDetails — weather coordinates', () => {
+  it('clears stored coordinates when the city changes', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await ownerWithCafe(t, 'Bandung');
+    // Pretend the cafe was geocoded for Bandung.
+    await t.run((ctx) => ctx.db.patch(cafeId, { latitude: -6.9, longitude: 107.6 }));
+    await asOwner.mutation(api.cafes.updateProfileDetails, {
+      name: 'Kopi Senja',
+      city: 'Surabaya', // changed
+      timezone: 'Asia/Jakarta',
+    });
+    const cafe = await t.run((ctx) => ctx.db.get(cafeId));
+    expect(cafe?.city).toBe('Surabaya');
+    expect(cafe?.latitude).toBeUndefined();
+    expect(cafe?.longitude).toBeUndefined();
+  });
+
+  it('keeps coordinates when the city is unchanged', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await ownerWithCafe(t, 'Bandung');
+    await t.run((ctx) => ctx.db.patch(cafeId, { latitude: -6.9, longitude: 107.6 }));
+    await asOwner.mutation(api.cafes.updateProfileDetails, {
+      name: 'Kopi Pagi', // other field changed, city same
+      city: 'Bandung',
+      timezone: 'Asia/Jakarta',
+    });
+    const cafe = await t.run((ctx) => ctx.db.get(cafeId));
+    expect(cafe?.latitude).toBe(-6.9);
+    expect(cafe?.longitude).toBe(107.6);
   });
 });

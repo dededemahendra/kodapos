@@ -1,7 +1,10 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { internal } from './_generated/api';
+import { action, internalMutation, internalQuery, mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 import { requireOwnerCafe } from './lib/auth';
+import { parseGeocode } from './lib/weather';
 
 const cafeFields = {
   _id: v.id('cafes'),
@@ -21,6 +24,8 @@ const cafeFields = {
   instagram: v.optional(v.string()),
   city: v.optional(v.string()),
   postalCode: v.optional(v.string()),
+  latitude: v.optional(v.number()),
+  longitude: v.optional(v.number()),
   logoStorageId: v.optional(v.id('_storage')),
   operatingHours: v.optional(
     v.array(
@@ -182,6 +187,12 @@ export const updateProfileDetails = mutation({
     if (name.length < 1) throw new Error('Nama kafe wajib diisi.');
     if (name.length > 80) throw new Error('Nama kafe maksimal 80 karakter.');
     const clean = (s?: string) => s?.trim() || undefined;
+    const existing = await ctx.db.get(cafeId);
+    const newCity = clean(args.city);
+    // When the city changes, the stored weather coordinates no longer match it.
+    // Clear them so the nightly weather fetch doesn't keep using a stale
+    // location until the owner re-geocodes (Settings → "Perbarui lokasi cuaca").
+    const cityChanged = existing?.city !== newCity;
     await ctx.db.patch(cafeId, {
       name,
       businessType: clean(args.businessType),
@@ -190,10 +201,11 @@ export const updateProfileDetails = mutation({
       email: clean(args.email),
       instagram: clean(args.instagram),
       addressLine: clean(args.addressLine),
-      city: clean(args.city),
+      city: newCity,
       postalCode: clean(args.postalCode),
       timezone: args.timezone,
       operatingHours: args.operatingHours,
+      ...(cityChanged ? { latitude: undefined, longitude: undefined } : {}),
     });
     return null;
   },
@@ -332,5 +344,73 @@ export const markSetupComplete = mutation({
     }
     await ctx.db.patch(cafeId, { setupCompletedAt: Date.now() });
     return null;
+  },
+});
+
+/** The signed-in owner's cafe id + city, for the geocode action (which can't read ctx.db). */
+export const myCafeForGeocode = internalQuery({
+  args: {},
+  returns: v.object({ cafeId: v.id('cafes'), city: v.union(v.string(), v.null()) }),
+  handler: async (ctx) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const cafe = await ctx.db.get(cafeId);
+    return { cafeId, city: cafe?.city ?? null };
+  },
+});
+
+/** Patch a cafe's weather coordinates. Internal: only geocodeFromCity calls it. */
+export const setLocation = internalMutation({
+  args: { cafeId: v.id('cafes'), latitude: v.number(), longitude: v.number() },
+  returns: v.null(),
+  handler: async (ctx, { cafeId, latitude, longitude }) => {
+    await ctx.db.patch(cafeId, { latitude, longitude });
+    return null;
+  },
+});
+
+/**
+ * Owner-triggered: geocode the cafe's city to lat/long via Open-Meteo and
+ * store the coordinates (used by the nightly weather fetch). Returns a status
+ * so the UI can distinguish the outcomes: 'ok' (stored), 'no_city' (nothing to
+ * geocode), 'not_found' (the city didn't resolve), and 'error' (Open-Meteo was
+ * unreachable) — the last must NOT be reported to the owner as "city not found".
+ */
+export const geocodeFromCity = action({
+  args: {},
+  returns: v.object({
+    status: v.union(
+      v.literal('ok'),
+      v.literal('no_city'),
+      v.literal('not_found'),
+      v.literal('error')
+    ),
+  }),
+  handler: async (ctx): Promise<{ status: 'ok' | 'no_city' | 'not_found' | 'error' }> => {
+    const info: { cafeId: Id<'cafes'>; city: string | null } = await ctx.runQuery(
+      internal.cafes.myCafeForGeocode,
+      {}
+    );
+    if (!info.city) return { status: 'no_city' };
+    let coords: { latitude: number; longitude: number } | null = null;
+    try {
+      const url =
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(info.city)}` +
+        `&count=1&language=id&format=json`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Open-Meteo geocode ${res.status}`);
+      const json = await res.json();
+      coords = parseGeocode(json);
+    } catch (err) {
+      // Transient/network failure — distinct from a genuine geocode miss.
+      console.warn(`geocode failed for cafe ${info.cafeId}:`, err);
+      return { status: 'error' };
+    }
+    if (!coords) return { status: 'not_found' };
+    await ctx.runMutation(internal.cafes.setLocation, {
+      cafeId: info.cafeId,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    });
+    return { status: 'ok' };
   },
 });

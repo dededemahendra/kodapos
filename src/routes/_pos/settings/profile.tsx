@@ -3,8 +3,9 @@ import { useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRef, useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { SaveBar } from '~/components/settings/save-bar';
 import {
   RowSep,
@@ -91,6 +92,8 @@ function SettingsProfile() {
   const generateUploadUrl = useMutation(api.cafes.generateUploadUrl);
   const setLogo = useMutation(api.cafes.setLogo);
   const removeLogo = useMutation(api.cafes.removeLogo);
+  const geocodeFromCity = useAction(api.cafes.geocodeFromCity);
+  const [geocoding, setGeocoding] = useState(false);
 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -209,6 +212,26 @@ function SettingsProfile() {
       await removeLogo();
     } catch (e) {
       setError(e instanceof Error ? e.message : t`Gagal menghapus logo.`);
+    }
+  }
+
+  async function handleUpdateWeatherLocation() {
+    setGeocoding(true);
+    try {
+      const res = await geocodeFromCity();
+      if (res.status === 'ok') {
+        toast.success(t`Lokasi cuaca diperbarui.`);
+      } else if (res.status === 'error') {
+        // Open-Meteo unreachable — don't mislead the owner into thinking their
+        // city is wrong.
+        toast.error(t`Gagal memperbarui lokasi cuaca.`);
+      } else {
+        toast.error(t`Kota tidak ditemukan.`);
+      }
+    } catch {
+      toast.error(t`Gagal memperbarui lokasi cuaca.`);
+    } finally {
+      setGeocoding(false);
     }
   }
 
@@ -460,6 +483,30 @@ function SettingsProfile() {
                   </SelectItem>
                 </SelectContent>
               </Select>
+            }
+          />
+
+          <RowSep />
+
+          <SettingRow
+            label={<Trans>Lokasi cuaca</Trans>}
+            description={
+              <Trans>Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan.</Trans>
+            }
+            control={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                // Geocoding uses the SAVED city. Disable until edits are saved
+                // (dirty) so it never geocodes a stale city behind the user's
+                // back, and when there's no city to geocode.
+                disabled={geocoding || dirty || !draft.city.trim()}
+                onClick={handleUpdateWeatherLocation}
+              >
+                {geocoding && <Spinner data-icon="inline-start" />}
+                <Trans>Perbarui lokasi cuaca</Trans>
+              </Button>
             }
           />
         </FieldGroup>

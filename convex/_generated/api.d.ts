@@ -26,6 +26,7 @@ import type * as lib_restock from "../lib/restock.js";
 import type * as lib_restockCompute from "../lib/restockCompute.js";
 import type * as lib_staff from "../lib/staff.js";
 import type * as lib_time from "../lib/time.js";
+import type * as lib_weather from "../lib/weather.js";
 import type * as menu_categories from "../menu/categories.js";
 import type * as menu_itemGroups from "../menu/itemGroups.js";
 import type * as menu_itemStock from "../menu/itemStock.js";
@@ -69,6 +70,7 @@ declare const fullApi: ApiFromModules<{
   "lib/restockCompute": typeof lib_restockCompute;
   "lib/staff": typeof lib_staff;
   "lib/time": typeof lib_time;
+  "lib/weather": typeof lib_weather;
   "menu/categories": typeof menu_categories;
   "menu/itemGroups": typeof menu_itemGroups;
   "menu/itemStock": typeof menu_itemStock;
