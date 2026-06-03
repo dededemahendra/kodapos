@@ -31,6 +31,10 @@ describe('redemptionIDR', () => {
     expect(redemptionIDR(50, cfg)).toBe(0);
     expect(redemptionIDR(100, { ...cfg, enabled: false })).toBe(0);
   });
+  it('returns 0 when redeemBlockIDR is non-positive (corrupt config)', () => {
+    expect(redemptionIDR(100, { ...cfg, redeemBlockIDR: 0 })).toBe(0);
+    expect(redemptionIDR(100, { ...cfg, redeemBlockIDR: -5000 })).toBe(0);
+  });
 });
 
 describe('maxRedeemablePoints', () => {

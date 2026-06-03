@@ -21,7 +21,7 @@ export function pointsEarned(baseIDR: number, cfg: LoyaltyConfig): number {
 
 /** Rp value of redeeming `points`, counting only whole blocks. */
 export function redemptionIDR(points: number, cfg: LoyaltyConfig): number {
-  if (!cfg.enabled || cfg.redeemBlockPoints <= 0) return 0;
+  if (!cfg.enabled || cfg.redeemBlockPoints <= 0 || cfg.redeemBlockIDR <= 0) return 0;
   const blocks = Math.floor(points / cfg.redeemBlockPoints);
   return Math.max(0, blocks) * cfg.redeemBlockIDR;
 }
