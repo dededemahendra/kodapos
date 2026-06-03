@@ -82,8 +82,12 @@ function SigninPage() {
         password: password.value,
       });
       navigate({ to: '/menu' });
-    } catch (err) {
-      setAuthError(err instanceof Error ? err.message : t`Email atau password salah.`);
+    } catch {
+      // @convex-dev/auth throws InvalidAccountId (wrong email/password) and other
+      // auth errors as uncaught errors; Convex masks them to a generic "Server
+      // Error" with no detail reaching the client. Show a friendly message rather
+      // than that raw string.
+      setAuthError(t`Email atau password salah.`);
     } finally {
       setSubmitting(false);
     }

@@ -122,8 +122,11 @@ function SignupPage() {
       });
       await createCafeWhenAuthReady(convex, cafeName.value.trim());
       navigate({ to: '/onboarding/profile' });
-    } catch (err) {
-      setAuthError(err instanceof Error ? err.message : t`Gagal mendaftar.`);
+    } catch {
+      // signUp failures (e.g. email already registered) and cafe-creation errors
+      // surface as a masked "Server Error" on the client; show a friendly message
+      // rather than that raw string.
+      setAuthError(t`Gagal mendaftar.`);
     } finally {
       setSubmitting(false);
     }
