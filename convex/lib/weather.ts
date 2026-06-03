@@ -9,7 +9,7 @@ export type WeatherDay = {
 };
 
 // Shared Convex validators — imported by schema.ts (forecasts.weatherSignal)
-// and forecast.ts (persistForecast args) so the shape is defined once.
+// and forecast.ts (attachWeatherSignal args) so the shape is defined once.
 export const weatherConditionV = v.union(
   v.literal('hot'),
   v.literal('rainy'),

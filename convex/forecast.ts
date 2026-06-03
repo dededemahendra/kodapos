@@ -5,7 +5,8 @@ import type { Id } from './_generated/dataModel';
 import { requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
 import { computeRestock } from './lib/restockCompute';
-import { type WeatherDay, parseForecast, weatherSignalV } from './lib/weather';
+import { DAY_MS, DEFAULT_TZ, dayKeyFn } from './lib/time';
+import { parseForecast, weatherSignalV } from './lib/weather';
 
 const confidenceV = v.union(v.literal('low'), v.literal('med'), v.literal('high'));
 const driverV = v.union(
@@ -57,101 +58,140 @@ export const demand = query({
 /**
  * Persist one cafe's nightly snapshot: a forecasts row, plus a draft
  * restockSuggestions row when the forecast is ready and there's something to
- * buy. Called once per cafe by generateNightly. weatherSignal (C2a) is stored
- * on the ready forecast when the action fetched it; absent on degradation.
+ * buy. Called once per cafe by generateNightly. Returns the new forecast id
+ * and whether it's ready, so the action knows whether to fetch+attach weather
+ * (weather only matters for a ready forecast — see attachWeatherSignal).
  */
 export const persistForecast = internalMutation({
-  args: {
-    cafeId: v.id('cafes'),
-    weatherSignal: v.optional(weatherSignalV),
-  },
-  returns: v.null(),
-  handler: async (ctx, { cafeId, weatherSignal }) => {
+  args: { cafeId: v.id('cafes') },
+  returns: v.object({ ready: v.boolean(), forecastId: v.id('forecasts') }),
+  handler: async (ctx, { cafeId }) => {
     const now = Date.now();
     const demand = await computeDemand(ctx, cafeId);
-    const forecastId =
-      demand.status === 'ready'
-        ? await ctx.db.insert('forecasts', {
-            cafeId, generatedAt: now, method: 'rule_v1', status: 'ready',
-            forDateKey: demand.forDateKey, lines: demand.lines,
-            ...(weatherSignal ? { weatherSignal } : {}),
-          })
-        : await ctx.db.insert('forecasts', {
-            cafeId, generatedAt: now, method: 'rule_v1', status: 'learning',
-            daysCollected: demand.daysCollected, etaDateKey: demand.etaDateKey,
-          });
     if (demand.status === 'ready') {
+      const forecastId = await ctx.db.insert('forecasts', {
+        cafeId, generatedAt: now, method: 'rule_v1', status: 'ready',
+        forDateKey: demand.forDateKey, lines: demand.lines,
+      });
       const lines = await computeRestock(ctx, cafeId, demand.lines);
       if (lines.length > 0) {
         await ctx.db.insert('restockSuggestions', {
           cafeId, forecastId, generatedAt: now, status: 'draft', lines,
         });
       }
+      return { ready: true, forecastId };
     }
+    const forecastId = await ctx.db.insert('forecasts', {
+      cafeId, generatedAt: now, method: 'rule_v1', status: 'learning',
+      daysCollected: demand.daysCollected, etaDateKey: demand.etaDateKey,
+    });
+    return { ready: false, forecastId };
+  },
+});
+
+/** Attach a freshly-fetched weather signal to an already-persisted forecast (C2a). */
+export const attachWeatherSignal = internalMutation({
+  args: { forecastId: v.id('forecasts'), weatherSignal: weatherSignalV },
+  returns: v.null(),
+  handler: async (ctx, { forecastId, weatherSignal }) => {
+    await ctx.db.patch(forecastId, { weatherSignal });
     return null;
   },
 });
 
-/** All cafes + their coordinates, for the nightly action (actions can't read ctx.db). */
+/**
+ * One page of cafes + their timezone/coordinates, for the nightly action
+ * (actions can't read ctx.db). Paginated so the cron never loads the entire
+ * cafes table — across all tenants — into a single query's read set.
+ */
 export const listCafesForCron = internalQuery({
-  args: {},
-  returns: v.array(
-    v.object({
-      cafeId: v.id('cafes'),
-      latitude: v.optional(v.number()),
-      longitude: v.optional(v.number()),
-    })
-  ),
-  handler: async (ctx) => {
-    const cafes = await ctx.db.query('cafes').collect();
-    return cafes.map((c) => ({
-      cafeId: c._id,
-      ...(c.latitude !== undefined ? { latitude: c.latitude } : {}),
-      ...(c.longitude !== undefined ? { longitude: c.longitude } : {}),
-    }));
+  args: { cursor: v.union(v.string(), v.null()) },
+  returns: v.object({
+    cafes: v.array(
+      v.object({
+        cafeId: v.id('cafes'),
+        timezone: v.optional(v.string()),
+        latitude: v.optional(v.number()),
+        longitude: v.optional(v.number()),
+      })
+    ),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, { cursor }) => {
+    const result = await ctx.db.query('cafes').paginate({ numItems: 200, cursor });
+    return {
+      cafes: result.page.map((c) => ({
+        cafeId: c._id,
+        ...(c.timezone !== undefined ? { timezone: c.timezone } : {}),
+        ...(c.latitude !== undefined ? { latitude: c.latitude } : {}),
+        ...(c.longitude !== undefined ? { longitude: c.longitude } : {}),
+      })),
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   },
 });
 
+type CronCafe = { cafeId: Id<'cafes'>; timezone?: string; latitude?: number; longitude?: number };
+
 /**
  * Nightly forecast generation. An action (not a mutation) because it fetches
- * weather over HTTP (C2a). For each cafe: fetch its 7-day forecast when it has
- * coordinates, then persist via persistForecast. Each cafe's fetch is wrapped
- * so one failure (or the weather API being down) doesn't abort the others —
- * that cafe simply gets a forecast with no weatherSignal (§6.2 degradation).
+ * weather over HTTP (C2a). For each cafe: persist its forecast first, then —
+ * only when that forecast is ready and the cafe has coordinates — fetch its
+ * 7-day Open-Meteo forecast and attach it. Skipping the fetch for learning
+ * cafes avoids HTTP calls whose result would be discarded.
+ *
+ * Each fetch is wrapped so one failure (or the weather API being down) doesn't
+ * abort the others — that cafe simply keeps its forecast with no weatherSignal
+ * (§6.2 degradation). Fetches are sequential (fine at V1's cafe count); revisit
+ * bounded-concurrency if that stops holding.
  */
 export const generateNightly = internalAction({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
-    const cafes: { cafeId: Id<'cafes'>; latitude?: number; longitude?: number }[] =
-      await ctx.runQuery(internal.forecast.listCafesForCron, {});
-    // Fetches are sequential and the timezone is hardcoded to Asia/Jakarta —
-    // both fine at V1 (Indonesia, small cafe count). Revisit (per-cafe timezone,
-    // bounded-concurrency fetch) if either assumption stops holding.
-    for (const cafe of cafes) {
-      let weatherSignal: WeatherDay[] | undefined;
-      if (cafe.latitude !== undefined && cafe.longitude !== undefined) {
+    let cursor: string | null = null;
+    for (;;) {
+      const page: { cafes: CronCafe[]; isDone: boolean; continueCursor: string } =
+        await ctx.runQuery(internal.forecast.listCafesForCron, { cursor });
+      for (const cafe of page.cafes) {
+        const { ready, forecastId }: { ready: boolean; forecastId: Id<'forecasts'> } =
+          await ctx.runMutation(internal.forecast.persistForecast, { cafeId: cafe.cafeId });
+        if (!ready || cafe.latitude === undefined || cafe.longitude === undefined) continue;
         try {
+          // Match the demand model's window exactly: tomorrow..today+7 keyed in
+          // the cafe's own timezone (computeDemand keys days with dayKeyFn(tz)).
+          // A bare forecast_days=7 would return today..today+6 — off by one,
+          // omitting today+7 and wasting a row on today.
+          const tz = cafe.timezone ?? DEFAULT_TZ;
+          const keyOf = dayKeyFn(tz);
+          const now = Date.now();
+          const startDate = keyOf(now + DAY_MS);
+          const endDate = keyOf(now + 7 * DAY_MS);
           const url =
             `https://api.open-meteo.com/v1/forecast?latitude=${cafe.latitude}` +
             `&longitude=${cafe.longitude}` +
-            `&daily=temperature_2m_max,precipitation_sum&timezone=Asia%2FJakarta&forecast_days=7`;
+            `&daily=temperature_2m_max,precipitation_sum` +
+            `&timezone=${encodeURIComponent(tz)}&start_date=${startDate}&end_date=${endDate}`;
           const res = await fetch(url);
           if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
           const json = await res.json();
           const days = parseForecast(json);
-          if (days.length > 0) weatherSignal = days;
+          if (days.length > 0) {
+            await ctx.runMutation(internal.forecast.attachWeatherSignal, {
+              forecastId,
+              weatherSignal: days,
+            });
+          }
         } catch (err) {
-          // Graceful degradation (§6.2): this cafe gets a forecast with no
-          // weatherSignal; the others still proceed. Log so it's observable.
+          // Graceful degradation (§6.2): the forecast is already persisted
+          // without weather; the other cafes still proceed. Log so it's observable.
           console.warn(`weather fetch failed for cafe ${cafe.cafeId}:`, err);
-          weatherSignal = undefined;
         }
       }
-      await ctx.runMutation(internal.forecast.persistForecast, {
-        cafeId: cafe.cafeId,
-        ...(weatherSignal ? { weatherSignal } : {}),
-      });
+      if (page.isDone) break;
+      cursor = page.continueCursor;
     }
     return null;
   },

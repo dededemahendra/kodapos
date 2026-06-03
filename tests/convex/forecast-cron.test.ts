@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
+import { dayKeyFn } from '../../convex/lib/time';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
 const TZ = 'Asia/Jakarta';
@@ -164,5 +165,40 @@ describe('generateNightly weather (C2a)', () => {
     const bForecast = forecasts.find((f) => f.cafeId === b.cafeId);
     expect(aForecast?.weatherSignal).toBeUndefined(); // degraded
     expect(bForecast?.status).toBe('ready'); // unaffected
+  });
+
+  it('requests tomorrow..today+7 in the cafe timezone (not today, no forecast_days)', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t); // tz Asia/Jakarta
+    await seedSales(t, refs, 20, Date.now());
+    await t.run((ctx) => ctx.db.patch(refs.cafeId, { latitude: -6.2, longitude: 106.8 }));
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ daily: { time: [], temperature_2m_max: [], precipitation_sum: [] } }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    await t.action(internal.forecast.generateNightly, {});
+    const url = fetchMock.mock.calls[0]?.[0] as string;
+    const keyOf = dayKeyFn(TZ);
+    const now = Date.now();
+    // The demand model forecasts tomorrow..today+7; the weather window must match.
+    expect(url).toContain(`start_date=${keyOf(now + DAY)}`);
+    expect(url).toContain(`end_date=${keyOf(now + 7 * DAY)}`);
+    expect(url).not.toContain(`start_date=${keyOf(now)}`); // never today (off-by-one guard)
+    expect(url).not.toContain('forecast_days');
+    expect(url).toContain('timezone=Asia%2FJakarta');
+  });
+
+  it('learning cafe with coordinates → no weather fetch (result would be discarded)', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await seedSales(t, refs, 5, Date.now()); // < 14 days → learning
+    await t.run((ctx) => ctx.db.patch(refs.cafeId, { latitude: -6.2, longitude: 106.8 }));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    await t.action(internal.forecast.generateNightly, {});
+    const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
+    expect(forecasts[0]?.status).toBe('learning');
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
