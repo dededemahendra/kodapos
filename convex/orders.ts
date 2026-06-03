@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
-import { DEFAULT_LOYALTY, pointsEarned } from './lib/loyalty';
+import { DEFAULT_LOYALTY, pointsEarned, redemptionIDR } from './lib/loyalty';
 import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals, promoDiscountIDR } from './lib/pricing';
 import { requireActiveCashier } from './lib/staff';
 
@@ -188,14 +188,33 @@ export const createCashSale = mutation({
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
       .first();
 
-    // Loyalty: resolve customer + program config. Redemption handled in a later task.
+    // Loyalty: resolve customer + program config, then fold any point redemption
+    // into discountIDR (promo first, points off the remainder) BEFORE totals are
+    // computed so tax/service charge and the tendered check use the reduced total.
     let customer: Doc<'customers'> | null = null;
     let loyaltyCfg = DEFAULT_LOYALTY;
+    let pointsRedeemed = 0;
+    let pointsRedeemedIDR = 0;
     if (args.customerId) {
       const c = await requireOwned(ctx, cafeId, args.customerId, 'Pelanggan');
       if (c.archived) throw new Error('Pelanggan sudah diarsipkan.');
       customer = c;
       loyaltyCfg = { ...DEFAULT_LOYALTY, ...(settings?.loyalty ?? {}) };
+
+      const redeem = args.redeemPoints ?? 0;
+      if (redeem > 0) {
+        if (!loyaltyCfg.enabled) throw new Error('Program loyalitas tidak aktif.');
+        if (!Number.isInteger(redeem) || redeem % loyaltyCfg.redeemBlockPoints !== 0) {
+          throw new Error('Poin harus kelipatan blok penukaran.');
+        }
+        if (redeem > customer.pointsBalance) throw new Error('Poin tidak mencukupi.');
+        const afterPromo = subtotalIDR - discountIDR;
+        const redeemIDR = redemptionIDR(redeem, loyaltyCfg);
+        if (redeemIDR > afterPromo) throw new Error('Penukaran poin melebihi total.');
+        pointsRedeemed = redeem;
+        pointsRedeemedIDR = redeemIDR;
+        discountIDR += redeemIDR;
+      }
     }
 
     const cafe = await ctx.db.get(cafeId);
@@ -239,6 +258,7 @@ export const createCashSale = mutation({
       serviceChargePct: scPct,
       serviceChargeName: scName,
       ...(customer ? { customerId: customer._id, pointsEarned: earned } : {}),
+      ...(pointsRedeemed > 0 ? { pointsRedeemed, pointsRedeemedIDR } : {}),
       totalIDR,
       paymentMethod: 'cash',
       paymentStatus: 'paid',
@@ -275,6 +295,16 @@ export const createCashSale = mutation({
     }
 
     if (customer) {
+      if (pointsRedeemed > 0) {
+        await ctx.db.insert('loyaltyTransactions', {
+          cafeId,
+          customerId: customer._id,
+          orderId,
+          type: 'redeem',
+          points: -pointsRedeemed,
+          at: now,
+        });
+      }
       if (earned > 0) {
         await ctx.db.insert('loyaltyTransactions', {
           cafeId,
@@ -289,7 +319,7 @@ export const createCashSale = mutation({
       // accumulates spend, even when earned points round to 0 (e.g. sub-rate or
       // fully-discounted orders) — this is intentional.
       await ctx.db.patch(customer._id, {
-        pointsBalance: customer.pointsBalance + earned,
+        pointsBalance: customer.pointsBalance + earned - pointsRedeemed,
         visitCount: customer.visitCount + 1,
         totalSpentIDR: customer.totalSpentIDR + totalIDR,
         lastVisitAt: now,
