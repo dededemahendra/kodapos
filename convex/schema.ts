@@ -1,7 +1,7 @@
 import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
-import { weatherSignalV } from './lib/weather';
+import { weatherConditionV, weatherSignalV } from './lib/weather';
 
 export default defineSchema({
   ...authTables,
@@ -377,7 +377,8 @@ export default defineSchema({
           drivers: v.array(
             v.union(
               v.object({ code: v.union(v.literal('dow_busy'), v.literal('dow_quiet')), pct: v.number(), dow: v.number() }),
-              v.object({ code: v.literal('holiday'), pct: v.number(), key: v.string() })
+              v.object({ code: v.literal('holiday'), pct: v.number(), key: v.string() }),
+              v.object({ code: v.literal('weather'), pct: v.number(), condition: weatherConditionV })
             )
           ),
         })

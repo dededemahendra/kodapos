@@ -14,6 +14,7 @@ import {
   predictedQty,
   weatherMultiplier,
 } from './forecast';
+import type { WeatherDay } from './weather';
 
 export type DemandLine = {
   menuItemId: Id<'menuItems'>;
@@ -29,7 +30,11 @@ export type DemandResult =
   | { status: 'ready'; forDateKey: string; lines: DemandLine[] };
 
 /** Live per-item 7-day forecast over the trailing 56 days of paid orders. */
-export async function computeDemand(ctx: QueryCtx | MutationCtx, cafeId: Id<'cafes'>): Promise<DemandResult> {
+export async function computeDemand(
+  ctx: QueryCtx | MutationCtx,
+  cafeId: Id<'cafes'>,
+  weatherSignal?: WeatherDay[]
+): Promise<DemandResult> {
   const tz = await tzFor(ctx, cafeId);
   const now = Date.now();
   const windowStart = startOfLocalDay(tz, 55, now);
@@ -73,6 +78,7 @@ export async function computeDemand(ctx: QueryCtx | MutationCtx, cafeId: Id<'caf
     .sort((a, b) => a.daysAgo - b.daysAgo);
   const futureKeys = Array.from({ length: 7 }, (_, i) => keyOf(now + (i + 1) * DAY_MS));
   const tomorrowKey = futureKeys[0]!;
+  const condByDate = new Map((weatherSignal ?? []).map((d) => [d.dateKey, d.condition]));
 
   const lines: DemandLine[] = [];
   for (const [id, it] of items) {
@@ -83,14 +89,21 @@ export async function computeDemand(ctx: QueryCtx | MutationCtx, cafeId: Id<'caf
     const spanQtys = samples.filter((s) => s.daysAgo <= firstSaleDaysAgo).map((s) => s.qty);
     const conf = confidence(spanQtys.length, coeffOfVariation(spanQtys));
     const dayQty = (dk: string) =>
-      predictedQty(base, dayOfWeekMultiplier(samples, dowOfKey(dk)), weatherMultiplier(), holidayMultiplier(dk).mult);
+      predictedQty(base, dayOfWeekMultiplier(samples, dowOfKey(dk)), weatherMultiplier(condByDate.get(dk)), holidayMultiplier(dk).mult);
     const tomorrowQty = dayQty(tomorrowKey);
     const sevenDayQty = futureKeys.reduce((s, dk) => s + dayQty(dk), 0);
     const tomorrowHoliday = holidayMultiplier(tomorrowKey).driver;
+    const tomorrowCond = condByDate.get(tomorrowKey);
+    const weatherMult = weatherMultiplier(tomorrowCond);
+    const weatherDriver: Driver | undefined =
+      tomorrowCond && Math.abs(weatherMult - 1) >= 0.1
+        ? { code: 'weather', pct: Math.round((weatherMult - 1) * 100), condition: tomorrowCond }
+        : undefined;
     const drivers: Driver[] = driversFor({
       dowMult: dayOfWeekMultiplier(samples, dowOfKey(tomorrowKey)),
       dow: dowOfKey(tomorrowKey),
       ...(tomorrowHoliday ? { holiday: tomorrowHoliday } : {}),
+      ...(weatherDriver ? { weather: weatherDriver } : {}),
     });
     lines.push({ menuItemId: id as unknown as Id<'menuItems'>, name: it.name, tomorrowQty, sevenDayQty, confidence: conf, drivers });
   }

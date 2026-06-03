@@ -6,12 +6,16 @@ import { requireOwnerCafe } from './lib/auth';
 import { computeDemand } from './lib/demand';
 import { computeRestock } from './lib/restockCompute';
 import { DAY_MS, DEFAULT_TZ, dayKeyFn } from './lib/time';
-import { parseForecast, weatherSignalV } from './lib/weather';
+import { type WeatherDay, parseForecast, weatherConditionV, weatherSignalV } from './lib/weather';
 
 const confidenceV = v.union(v.literal('low'), v.literal('med'), v.literal('high'));
+// The weather arm matches the persisted forecasts.lines[].drivers schema: the
+// nightly job can store weather drivers, so this query's return validator must
+// accept them. (weatherAvailable on the result is wired separately.)
 const driverV = v.union(
   v.object({ code: v.union(v.literal('dow_busy'), v.literal('dow_quiet')), pct: v.number(), dow: v.number() }),
-  v.object({ code: v.literal('holiday'), pct: v.number(), key: v.string() })
+  v.object({ code: v.literal('holiday'), pct: v.number(), key: v.string() }),
+  v.object({ code: v.literal('weather'), pct: v.number(), condition: weatherConditionV })
 );
 
 export const demand = query({
@@ -56,22 +60,23 @@ export const demand = query({
 });
 
 /**
- * Persist one cafe's nightly snapshot: a forecasts row, plus a draft
- * restockSuggestions row when the forecast is ready and there's something to
- * buy. Called once per cafe by generateNightly. Returns the new forecast id
- * and whether it's ready, so the action knows whether to fetch+attach weather
- * (weather only matters for a ready forecast — see attachWeatherSignal).
+ * Persist one cafe's nightly snapshot: a forecasts row (carrying the fetched
+ * weatherSignal when present), plus a draft restockSuggestions row when the
+ * forecast is ready and there's something to buy. Called once per cafe by
+ * generateNightly. weatherSignal is threaded into computeDemand so the persisted
+ * lines already reflect that day's weather (C2b).
  */
 export const persistForecast = internalMutation({
-  args: { cafeId: v.id('cafes') },
-  returns: v.object({ ready: v.boolean(), forecastId: v.id('forecasts') }),
-  handler: async (ctx, { cafeId }) => {
+  args: { cafeId: v.id('cafes'), weatherSignal: v.optional(weatherSignalV) },
+  returns: v.null(),
+  handler: async (ctx, { cafeId, weatherSignal }) => {
     const now = Date.now();
-    const demand = await computeDemand(ctx, cafeId);
+    const demand = await computeDemand(ctx, cafeId, weatherSignal);
     if (demand.status === 'ready') {
       const forecastId = await ctx.db.insert('forecasts', {
         cafeId, generatedAt: now, method: 'rule_v1', status: 'ready',
         forDateKey: demand.forDateKey, lines: demand.lines,
+        ...(weatherSignal ? { weatherSignal } : {}),
       });
       const lines = await computeRestock(ctx, cafeId, demand.lines);
       if (lines.length > 0) {
@@ -79,22 +84,12 @@ export const persistForecast = internalMutation({
           cafeId, forecastId, generatedAt: now, status: 'draft', lines,
         });
       }
-      return { ready: true, forecastId };
+      return null;
     }
-    const forecastId = await ctx.db.insert('forecasts', {
+    await ctx.db.insert('forecasts', {
       cafeId, generatedAt: now, method: 'rule_v1', status: 'learning',
       daysCollected: demand.daysCollected, etaDateKey: demand.etaDateKey,
     });
-    return { ready: false, forecastId };
-  },
-});
-
-/** Attach a freshly-fetched weather signal to an already-persisted forecast (C2a). */
-export const attachWeatherSignal = internalMutation({
-  args: { forecastId: v.id('forecasts'), weatherSignal: weatherSignalV },
-  returns: v.null(),
-  handler: async (ctx, { forecastId, weatherSignal }) => {
-    await ctx.db.patch(forecastId, { weatherSignal });
     return null;
   },
 });
@@ -137,15 +132,13 @@ type CronCafe = { cafeId: Id<'cafes'>; timezone?: string; latitude?: number; lon
 
 /**
  * Nightly forecast generation. An action (not a mutation) because it fetches
- * weather over HTTP (C2a). For each cafe: persist its forecast first, then —
- * only when that forecast is ready and the cafe has coordinates — fetch its
- * 7-day Open-Meteo forecast and attach it. Skipping the fetch for learning
- * cafes avoids HTTP calls whose result would be discarded.
- *
- * Each fetch is wrapped so one failure (or the weather API being down) doesn't
- * abort the others — that cafe simply keeps its forecast with no weatherSignal
- * (§6.2 degradation). Fetches are sequential (fine at V1's cafe count); revisit
- * bounded-concurrency if that stops holding.
+ * weather over HTTP. For each cafe with coordinates, fetch its 7-day Open-Meteo
+ * forecast, then persist via persistForecast — passing the signal so computeDemand
+ * bakes that day's weather into the lines (C2b). Each fetch is wrapped so one
+ * failure (or the API being down) doesn't abort the others — that cafe simply
+ * gets a forecast with no weatherSignal (§6.2 degradation). Cafes are paginated so
+ * the cron never loads the whole all-tenant table at once; fetches are sequential
+ * (fine at V1's cafe count).
  */
 export const generateNightly = internalAction({
   args: {},
@@ -156,39 +149,35 @@ export const generateNightly = internalAction({
       const page: { cafes: CronCafe[]; isDone: boolean; continueCursor: string } =
         await ctx.runQuery(internal.forecast.listCafesForCron, { cursor });
       for (const cafe of page.cafes) {
-        const { ready, forecastId }: { ready: boolean; forecastId: Id<'forecasts'> } =
-          await ctx.runMutation(internal.forecast.persistForecast, { cafeId: cafe.cafeId });
-        if (!ready || cafe.latitude === undefined || cafe.longitude === undefined) continue;
-        try {
-          // Match the demand model's window exactly: tomorrow..today+7 keyed in
-          // the cafe's own timezone (computeDemand keys days with dayKeyFn(tz)).
-          // A bare forecast_days=7 would return today..today+6 — off by one,
-          // omitting today+7 and wasting a row on today.
-          const tz = cafe.timezone ?? DEFAULT_TZ;
-          const keyOf = dayKeyFn(tz);
-          const now = Date.now();
-          const startDate = keyOf(now + DAY_MS);
-          const endDate = keyOf(now + 7 * DAY_MS);
-          const url =
-            `https://api.open-meteo.com/v1/forecast?latitude=${cafe.latitude}` +
-            `&longitude=${cafe.longitude}` +
-            `&daily=temperature_2m_max,precipitation_sum` +
-            `&timezone=${encodeURIComponent(tz)}&start_date=${startDate}&end_date=${endDate}`;
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
-          const json = await res.json();
-          const days = parseForecast(json);
-          if (days.length > 0) {
-            await ctx.runMutation(internal.forecast.attachWeatherSignal, {
-              forecastId,
-              weatherSignal: days,
-            });
+        let weatherSignal: WeatherDay[] | undefined;
+        if (cafe.latitude !== undefined && cafe.longitude !== undefined) {
+          try {
+            // Match the demand model's window exactly: tomorrow..today+7 keyed in
+            // the cafe's own timezone (computeDemand keys days with dayKeyFn(tz)).
+            const tz = cafe.timezone ?? DEFAULT_TZ;
+            const keyOf = dayKeyFn(tz);
+            const now = Date.now();
+            const startDate = keyOf(now + DAY_MS);
+            const endDate = keyOf(now + 7 * DAY_MS);
+            const url =
+              `https://api.open-meteo.com/v1/forecast?latitude=${cafe.latitude}` +
+              `&longitude=${cafe.longitude}` +
+              `&daily=temperature_2m_max,precipitation_sum` +
+              `&timezone=${encodeURIComponent(tz)}&start_date=${startDate}&end_date=${endDate}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
+            const json = await res.json();
+            const days = parseForecast(json);
+            if (days.length > 0) weatherSignal = days;
+          } catch (err) {
+            // Graceful degradation (§6.2): persist without weather; others proceed.
+            console.warn(`weather fetch failed for cafe ${cafe.cafeId}:`, err);
           }
-        } catch (err) {
-          // Graceful degradation (§6.2): the forecast is already persisted
-          // without weather; the other cafes still proceed. Log so it's observable.
-          console.warn(`weather fetch failed for cafe ${cafe.cafeId}:`, err);
         }
+        await ctx.runMutation(internal.forecast.persistForecast, {
+          cafeId: cafe.cafeId,
+          ...(weatherSignal ? { weatherSignal } : {}),
+        });
       }
       if (page.isDone) break;
       cursor = page.continueCursor;

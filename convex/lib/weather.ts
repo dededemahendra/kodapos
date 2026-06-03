@@ -8,8 +8,9 @@ export type WeatherDay = {
   precipMm: number;
 };
 
-// Shared Convex validators — imported by schema.ts (forecasts.weatherSignal)
-// and forecast.ts (attachWeatherSignal args) so the shape is defined once.
+// Shared Convex validators — imported by schema.ts (forecasts.weatherSignal +
+// the weather driver arm), forecast.ts (persistForecast args + driverV), and
+// demand.ts (computeDemand signature) so the shape is defined once.
 export const weatherConditionV = v.union(
   v.literal('hot'),
   v.literal('rainy'),
