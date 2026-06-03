@@ -98,8 +98,16 @@ describe('predictedQty', () => {
 });
 
 describe('weatherMultiplier', () => {
-  it('is the 1.0 stub in slice A', () => {
+  it('no condition → 1', () => {
     expect(weatherMultiplier()).toBe(1);
+  });
+  it('rain dampens by 15%', () => {
+    expect(weatherMultiplier('rainy')).toBe(0.85);
+  });
+  it('hot/cool/normal are neutral in C2b (global rain-only model)', () => {
+    expect(weatherMultiplier('hot')).toBe(1);
+    expect(weatherMultiplier('cool')).toBe(1);
+    expect(weatherMultiplier('normal')).toBe(1);
   });
 });
 
@@ -144,6 +152,18 @@ describe('driversFor', () => {
   it('includes the holiday driver and caps at 2', () => {
     const holiday: Driver = { code: 'holiday', pct: -80, key: 'lebaran_day' };
     expect(driversFor({ dowMult: 1.3, dow: 6, holiday })).toEqual([
+      { code: 'dow_busy', pct: 30, dow: 6 },
+      holiday,
+    ]);
+  });
+  it('appends the weather driver after dow/holiday', () => {
+    const weather: Driver = { code: 'weather', pct: -15, condition: 'rainy' };
+    expect(driversFor({ dowMult: 1.05, dow: 2, weather })).toEqual([weather]);
+  });
+  it('drops the weather driver when dow + holiday already fill the 2-cap', () => {
+    const holiday: Driver = { code: 'holiday', pct: -80, key: 'lebaran_day' };
+    const weather: Driver = { code: 'weather', pct: -15, condition: 'rainy' };
+    expect(driversFor({ dowMult: 1.3, dow: 6, holiday, weather })).toEqual([
       { code: 'dow_busy', pct: 30, dow: 6 },
       holiday,
     ]);
