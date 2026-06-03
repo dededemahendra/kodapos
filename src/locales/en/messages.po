@@ -842,6 +842,16 @@ msgstr "Automatically print receipt after payment."
 #~ msgid "Conversion Rate"
 #~ msgstr "Conversion Rate"
 
+#. placeholder {0}: Math.abs(driver.pct)
+#: src/components/forecast/render-driver.tsx
+msgid "Cuaca — perkiraan naik {0}%"
+msgstr "Weather — expected up {0}%"
+
+#. placeholder {0}: Math.abs(driver.pct)
+#: src/components/forecast/render-driver.tsx
+msgid "Cuaca — perkiraan turun {0}%"
+msgstr "Weather — expected down {0}%"
+
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Customer"
 #~ msgstr "Customer"
@@ -891,6 +901,10 @@ msgstr "New dashboard"
 #: src/components/dashboard.tsx
 #~ msgid "Data contoh: dasbor belum terhubung ke data kafe."
 #~ msgstr "Sample data: the dashboard isn't connected to cafe data yet."
+
+#: src/routes/_pos/forecast.tsx
+msgid "Data cuaca tidak tersedia."
+msgstr "Weather data unavailable."
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Detail kontak"
@@ -1242,6 +1256,11 @@ msgstr "Connect {dialogEntryName}"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
 msgstr "Connect your restaurant/POS to other services. (Settings are saved; full activation coming soon.)"
+
+#. placeholder {0}: Math.abs(driver.pct)
+#: src/components/forecast/render-driver.tsx
+msgid "Hujan — perkiraan turun {0}%"
+msgstr "Rain — expected down {0}%"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Identitas"
