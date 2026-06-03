@@ -35,6 +35,7 @@ export const demand = query({
           drivers: v.array(driverV),
         })
       ),
+      weatherAvailable: v.boolean(),
     })
   ),
   handler: async (ctx, _args) => {
@@ -46,7 +47,12 @@ export const demand = query({
       .first();
     if (snap) {
       if (snap.status === 'ready') {
-        return { status: 'ready' as const, forDateKey: snap.forDateKey ?? '', lines: snap.lines ?? [] };
+        return {
+          status: 'ready' as const,
+          forDateKey: snap.forDateKey ?? '',
+          lines: snap.lines ?? [],
+          weatherAvailable: (snap.weatherSignal?.length ?? 0) > 0,
+        };
       }
       return {
         status: 'learning' as const,
@@ -55,7 +61,8 @@ export const demand = query({
         etaDateKey: snap.etaDateKey ?? '',
       };
     }
-    return await computeDemand(ctx, cafeId);
+    const live = await computeDemand(ctx, cafeId);
+    return live.status === 'ready' ? { ...live, weatherAvailable: false } : live;
   },
 });
 

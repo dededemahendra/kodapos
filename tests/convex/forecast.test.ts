@@ -1,8 +1,9 @@
 import { convexTest } from 'convex-test';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
+import { dayKeyFn } from '../../convex/lib/time';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
 const TZ = 'Asia/Jakarta';
@@ -172,5 +173,76 @@ describe('forecast.demand', () => {
     if (r.status === 'ready') {
       expect(r.lines.some((l) => l.name === 'Kopi')).toBe(true);
     }
+  });
+});
+
+function stubRainyFetch(days: number) {
+  const keyOf = dayKeyFn(TZ);
+  const now = Date.now();
+  const time: string[] = [];
+  const temperature_2m_max: number[] = [];
+  const precipitation_sum: number[] = [];
+  for (let i = 0; i < days; i++) {
+    time.push(keyOf(now + (i + 1) * DAY)); // tomorrow..today+days, matching futureKeys
+    temperature_2m_max.push(28);
+    precipitation_sum.push(10);
+  }
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue({ ok: true, json: async () => ({ daily: { time, temperature_2m_max, precipitation_sum } }) })
+  );
+}
+
+describe('forecast.demand — weatherAvailable', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('true and exposes the weather driver when the snapshot has a signal', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const now = Date.now();
+    for (let d = 1; d <= 20; d++) {
+      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+    }
+    await t.run((ctx) => ctx.db.patch(refs.cafeId, { latitude: -6.2, longitude: 106.8 }));
+    stubRainyFetch(7);
+    await t.action(internal.forecast.generateNightly, {});
+    const r = await refs.asOwner.query(api.forecast.demand, {});
+    expect(r.status).toBe('ready');
+    if (r.status === 'ready') {
+      expect(r.weatherAvailable).toBe(true);
+      const kopi = r.lines.find((l) => l.name === 'Kopi')!;
+      expect(kopi.drivers.some((d) => d.code === 'weather' && d.pct === -15 && d.condition === 'rainy')).toBe(true);
+    }
+  });
+
+  it('false when the ready snapshot has no signal (no coordinates)', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const now = Date.now();
+    for (let d = 1; d <= 20; d++) {
+      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+    }
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    await t.action(internal.forecast.generateNightly, {});
+    const r = await refs.asOwner.query(api.forecast.demand, {});
+    expect(r.status).toBe('ready');
+    if (r.status === 'ready') expect(r.weatherAvailable).toBe(false);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('false for a live-computed ready result (no snapshot yet)', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const now = Date.now();
+    for (let d = 1; d <= 20; d++) {
+      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+    }
+    // No generateNightly run → the query computes live.
+    const r = await refs.asOwner.query(api.forecast.demand, {});
+    expect(r.status).toBe('ready');
+    if (r.status === 'ready') expect(r.weatherAvailable).toBe(false);
   });
 });
