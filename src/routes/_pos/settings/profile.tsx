@@ -219,8 +219,12 @@ function SettingsProfile() {
     setGeocoding(true);
     try {
       const res = await geocodeFromCity();
-      if (res.found) {
+      if (res.status === 'ok') {
         toast.success(t`Lokasi cuaca diperbarui.`);
+      } else if (res.status === 'error') {
+        // Open-Meteo unreachable — don't mislead the owner into thinking their
+        // city is wrong.
+        toast.error(t`Gagal memperbarui lokasi cuaca.`);
       } else {
         toast.error(t`Kota tidak ditemukan.`);
       }
@@ -494,7 +498,10 @@ function SettingsProfile() {
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={geocoding}
+                // Geocoding uses the SAVED city. Disable until edits are saved
+                // (dirty) so it never geocodes a stale city behind the user's
+                // back, and when there's no city to geocode.
+                disabled={geocoding || dirty || !draft.city.trim()}
                 onClick={handleUpdateWeatherLocation}
               >
                 {geocoding && <Spinner data-icon="inline-start" />}

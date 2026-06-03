@@ -187,6 +187,12 @@ export const updateProfileDetails = mutation({
     if (name.length < 1) throw new Error('Nama kafe wajib diisi.');
     if (name.length > 80) throw new Error('Nama kafe maksimal 80 karakter.');
     const clean = (s?: string) => s?.trim() || undefined;
+    const existing = await ctx.db.get(cafeId);
+    const newCity = clean(args.city);
+    // When the city changes, the stored weather coordinates no longer match it.
+    // Clear them so the nightly weather fetch doesn't keep using a stale
+    // location until the owner re-geocodes (Settings → "Perbarui lokasi cuaca").
+    const cityChanged = existing?.city !== newCity;
     await ctx.db.patch(cafeId, {
       name,
       businessType: clean(args.businessType),
@@ -195,10 +201,11 @@ export const updateProfileDetails = mutation({
       email: clean(args.email),
       instagram: clean(args.instagram),
       addressLine: clean(args.addressLine),
-      city: clean(args.city),
+      city: newCity,
       postalCode: clean(args.postalCode),
       timezone: args.timezone,
       operatingHours: args.operatingHours,
+      ...(cityChanged ? { latitude: undefined, longitude: undefined } : {}),
     });
     return null;
   },
@@ -363,20 +370,27 @@ export const setLocation = internalMutation({
 
 /**
  * Owner-triggered: geocode the cafe's city to lat/long via Open-Meteo and
- * store the coordinates (used by the nightly weather fetch). Returns
- * { found } so the UI can toast success vs "city not found". No city, a
- * geocode miss, or a fetch failure all return { found: false } without
- * patching.
+ * store the coordinates (used by the nightly weather fetch). Returns a status
+ * so the UI can distinguish the outcomes: 'ok' (stored), 'no_city' (nothing to
+ * geocode), 'not_found' (the city didn't resolve), and 'error' (Open-Meteo was
+ * unreachable) — the last must NOT be reported to the owner as "city not found".
  */
 export const geocodeFromCity = action({
   args: {},
-  returns: v.object({ found: v.boolean() }),
-  handler: async (ctx): Promise<{ found: boolean }> => {
+  returns: v.object({
+    status: v.union(
+      v.literal('ok'),
+      v.literal('no_city'),
+      v.literal('not_found'),
+      v.literal('error')
+    ),
+  }),
+  handler: async (ctx): Promise<{ status: 'ok' | 'no_city' | 'not_found' | 'error' }> => {
     const info: { cafeId: Id<'cafes'>; city: string | null } = await ctx.runQuery(
       internal.cafes.myCafeForGeocode,
       {}
     );
-    if (!info.city) return { found: false };
+    if (!info.city) return { status: 'no_city' };
     let coords: { latitude: number; longitude: number } | null = null;
     try {
       const url =
@@ -387,15 +401,16 @@ export const geocodeFromCity = action({
       const json = await res.json();
       coords = parseGeocode(json);
     } catch (err) {
+      // Transient/network failure — distinct from a genuine geocode miss.
       console.warn(`geocode failed for cafe ${info.cafeId}:`, err);
-      coords = null;
+      return { status: 'error' };
     }
-    if (!coords) return { found: false };
+    if (!coords) return { status: 'not_found' };
     await ctx.runMutation(internal.cafes.setLocation, {
       cafeId: info.cafeId,
       latitude: coords.latitude,
       longitude: coords.longitude,
     });
-    return { found: true };
+    return { status: 'ok' };
   },
 });
