@@ -32,6 +32,8 @@ export const updateConfig = mutation({
     if (cfg.redeemBlockPoints <= 0 || cfg.redeemBlockIDR <= 0) {
       throw new Error('Nilai penukaran poin harus lebih dari 0.');
     }
+    // settings.ts keeps its `getOrCreateSettingsId` helper private, so we inline the same
+    // patch-or-insert here; keep in sync if that helper gains required-field initialization.
     const existing = await ctx.db
       .query('cafeSettings')
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))

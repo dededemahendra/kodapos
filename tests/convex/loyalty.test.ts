@@ -33,6 +33,21 @@ describe('loyalty config', () => {
       })
     ).rejects.toThrow();
   });
+
+  it('rejects non-positive redeem block values', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    await expect(
+      asOwner.mutation(api.loyalty.updateConfig, {
+        enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 0, redeemBlockIDR: 10000,
+      })
+    ).rejects.toThrow();
+    await expect(
+      asOwner.mutation(api.loyalty.updateConfig, {
+        enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 0,
+      })
+    ).rejects.toThrow();
+  });
 });
 
 describe('loyalty stats', () => {
