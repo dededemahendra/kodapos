@@ -121,7 +121,7 @@ function stubRainyFetch(days: number) {
   );
 }
 
-describe('generateNightly weather (C2a)', () => {
+describe('generateNightly weather (C2a storage + C2b application)', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
