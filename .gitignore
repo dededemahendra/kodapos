@@ -8,6 +8,8 @@ dist/
 .vinxi/
 .tanstack/
 .wrangler/
+.dev.vars
+worker-configuration.d.ts
 
 # Environment files (never commit secrets)
 .env

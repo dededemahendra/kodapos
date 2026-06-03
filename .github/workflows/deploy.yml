@@ -1,0 +1,47 @@
+name: Deploy to Cloudflare Workers
+
+# Auto-deploy on every push to main (i.e. after a PR merges). main is already
+# gated by the `check` workflow on the PR, so this job just builds and ships.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {} # allow a manual re-deploy from the Actions tab
+
+concurrency:
+  group: deploy-cf-workers
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # reads packageManager from package.json
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        # VITE_* vars are inlined into the client bundle at build time. They are
+        # public (shipped to the browser), so they live in repo *variables*, not
+        # secrets. Point them at the desired Convex deployment.
+        run: pnpm build
+        env:
+          VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL }}
+          VITE_CONVEX_SITE_URL: ${{ vars.VITE_CONVEX_SITE_URL }}
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
