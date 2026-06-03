@@ -31,13 +31,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        # VITE_* vars are inlined into the client bundle at build time. They are
-        # public (shipped to the browser), so they live in repo *variables*, not
-        # secrets. Point them at the desired Convex deployment.
+        # VITE_* values are inlined into the client bundle at build time (they
+        # end up public in the browser either way). Stored as repo secrets here,
+        # so GitHub masks them in logs. Point them at the desired Convex deployment.
         run: pnpm build
         env:
-          VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL }}
-          VITE_CONVEX_SITE_URL: ${{ vars.VITE_CONVEX_SITE_URL }}
+          VITE_CONVEX_URL: ${{ secrets.VITE_CONVEX_URL }}
+          VITE_CONVEX_SITE_URL: ${{ secrets.VITE_CONVEX_SITE_URL }}
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
