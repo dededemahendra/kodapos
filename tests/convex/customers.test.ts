@@ -65,6 +65,21 @@ describe('customers CRUD', () => {
     await expect(asOwner.mutation(api.customers.create, { name: 'OK', phone: '12' })).rejects.toThrow(/telepon/i);
   });
 
+  it('update changes name/phone; rejects a phone already used by another customer', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const id = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08120000001' });
+    const other = await asOwner.mutation(api.customers.create, { name: 'Ani', phone: '08120000002' });
+    // self-update keeping same phone is allowed
+    await asOwner.mutation(api.customers.update, { id, name: 'Budi S', phone: '08120000001' });
+    const list = await asOwner.query(api.customers.list, {});
+    expect(list.find((c) => c._id === id)?.name).toBe('Budi S');
+    // changing to another customer's phone is rejected
+    await expect(
+      asOwner.mutation(api.customers.update, { id, name: 'Budi S', phone: '0812-0000-002' })
+    ).rejects.toThrow(/terdaftar/i);
+  });
+
   it('tenant isolation: cafe B cannot read or archive cafe A customer', async () => {
     const t = convexTest(schema, modules);
     const a = await setupOwner(t, 'a@x.com');

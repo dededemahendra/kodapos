@@ -52,6 +52,8 @@ async function findActiveByPhone(
     .query('customers')
     .withIndex('by_cafe_phone', (q) => q.eq('cafeId', cafeId).eq('phone', norm))
     .collect();
+  // Use collect()+find rather than .first() because an archived customer and an active one
+  // can share the same phone (create only de-dupes against active), so we must return the active match specifically.
   return rows.find((r) => !r.archived) ?? null;
 }
 
