@@ -6,6 +6,8 @@ import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig({
   plugins: [
     tsconfigPaths(),
@@ -14,5 +16,10 @@ export default defineConfig({
     babel({ presets: [linguiTransformerBabelPreset()] }),
     tailwindcss(),
     viteReact(),
+    cloudflare({
+      viteEnvironment: {
+        name: "ssr"
+      }
+    })
   ],
 });
