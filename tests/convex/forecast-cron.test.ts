@@ -104,7 +104,24 @@ function stubForecastFetch(days: number) {
   );
 }
 
-describe('generateNightly weather (C2a)', () => {
+function stubRainyFetch(days: number) {
+  const keyOf = dayKeyFn(TZ);
+  const now = Date.now();
+  const time: string[] = [];
+  const temperature_2m_max: number[] = [];
+  const precipitation_sum: number[] = [];
+  for (let i = 0; i < days; i++) {
+    time.push(keyOf(now + (i + 1) * DAY)); // tomorrow..today+days, matching futureKeys
+    temperature_2m_max.push(28); // not hot
+    precipitation_sum.push(10); // >= 5mm → rainy
+  }
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue({ ok: true, json: async () => ({ daily: { time, temperature_2m_max, precipitation_sum } }) })
+  );
+}
+
+describe('generateNightly weather (C2a storage + C2b application)', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -189,16 +206,46 @@ describe('generateNightly weather (C2a)', () => {
     expect(url).toContain('timezone=Asia%2FJakarta');
   });
 
-  it('learning cafe with coordinates → no weather fetch (result would be discarded)', async () => {
+  it('bakes the weather multiplier into the persisted lines (rain ⇒ lower qty)', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await seedSales(t, refs, 20, Date.now());
+
+    // First run with NO weather → capture the dry-baseline tomorrowQty.
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    await t.action(internal.forecast.generateNightly, {});
+    const dry = await t.run((ctx) => ctx.db.query('forecasts').collect());
+    const dryQty = dry[0]?.lines?.find((l) => l.name === 'Kopi')?.tomorrowQty ?? 0;
+    expect(dryQty).toBeGreaterThan(0);
+    vi.unstubAllGlobals();
+
+    // Second run with coords + a rainy forecast → tomorrowQty should drop.
+    await t.run((ctx) => ctx.db.patch(refs.cafeId, { latitude: -6.2, longitude: 106.8 }));
+    stubRainyFetch(7);
+    await t.action(internal.forecast.generateNightly, {});
+    const wet = await t.run((ctx) => ctx.db.query('forecasts').collect());
+    const latest = wet.sort((a, b) => b.generatedAt - a.generatedAt)[0];
+    const wetLine = latest?.lines?.find((l) => l.name === 'Kopi');
+    expect(latest?.weatherSignal?.every((d) => d.condition === 'rainy')).toBe(true);
+    expect(wetLine?.tomorrowQty).toBe(Math.max(0, Math.round(dryQty * 0.85)));
+    expect(wetLine?.drivers.some((d) => d.code === 'weather' && d.pct === -15)).toBe(true);
+  });
+
+  it('coord+learning cafe still fetches (Approach A) but persists learning with no signal', async () => {
     const t = convexTest(schema, modules);
     const refs = await setup(t);
     await seedSales(t, refs, 5, Date.now()); // < 14 days → learning
     await t.run((ctx) => ctx.db.patch(refs.cafeId, { latitude: -6.2, longitude: 106.8 }));
-    const fetchSpy = vi.fn();
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ daily: { time: [], temperature_2m_max: [], precipitation_sum: [] } }),
+    });
     vi.stubGlobal('fetch', fetchSpy);
     await t.action(internal.forecast.generateNightly, {});
     const forecasts = await t.run((ctx) => ctx.db.query('forecasts').collect());
     expect(forecasts[0]?.status).toBe('learning');
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(forecasts[0]?.weatherSignal).toBeUndefined();
+    expect(fetchSpy).toHaveBeenCalled(); // Approach A fetches before persisting
   });
 });

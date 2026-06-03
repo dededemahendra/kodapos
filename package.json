@@ -8,9 +8,12 @@
     "dev": "vite dev",
     "dev:all": "concurrently -k -n vite,convex \"pnpm dev\" \"pnpm convex:dev\"",
     "build": "vite build",
-    "start": "node .output/server/index.mjs",
+    "start": "wrangler dev",
     "convex:dev": "convex dev",
     "convex:deploy": "convex deploy",
+    "deploy": "pnpm build && wrangler deploy",
+    "preview": "pnpm build && wrangler dev",
+    "cf-typegen": "wrangler types",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -68,6 +71,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@biomejs/biome": "^2",
+    "@cloudflare/vite-plugin": "^1.39.2",
     "@edge-runtime/vm": "^5.0.0",
     "@lingui/babel-plugin-lingui-macro": "^6.0.1",
     "@lingui/cli": "^6.0.1",
@@ -92,6 +96,7 @@
     "typescript-eslint": "^8.60.0",
     "vite": "^8.0.13",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "wrangler": "^4.97.0"
   }
 }

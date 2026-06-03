@@ -1,4 +1,5 @@
 import { DAY_MS, utcOfDayKey } from './time';
+import type { WeatherCondition } from './weather';
 
 export type Confidence = 'low' | 'med' | 'high';
 
@@ -51,8 +52,18 @@ export function dayOfWeekMultiplier(samples: DaySample[], forDow: number): numbe
   return Math.min(2, Math.max(0.5, mult));
 }
 
-export function weatherMultiplier(): number {
-  return 1; // stub in Slice A; Slice C wires a real weather signal
+// Tunable. Rain is the only globally-applicable foot-traffic effect for a cafe;
+// hot/cool diverge per item (iced vs hot drinks) and are neutral until the C2c
+// category-sensitivity taxonomy lands.
+export const WEATHER_MULT: Record<WeatherCondition, number> = {
+  rainy: 0.85,
+  hot: 1,
+  cool: 1,
+  normal: 1,
+};
+
+export function weatherMultiplier(condition?: WeatherCondition): number {
+  return condition ? WEATHER_MULT[condition] : 1;
 }
 
 export function confidence(itemSpanDays: number, cov: number): Confidence {
@@ -71,7 +82,8 @@ export type HolidayKey =
 
 export type Driver =
   | { code: 'dow_busy' | 'dow_quiet'; pct: number; dow: number }
-  | { code: 'holiday'; pct: number; key: HolidayKey };
+  | { code: 'holiday'; pct: number; key: HolidayKey }
+  | { code: 'weather'; pct: number; condition: WeatherCondition };
 
 // Fixed-date holidays keyed by MM-DD.
 const FIXED: Record<string, { mult: number; key: HolidayKey }> = {
@@ -111,13 +123,14 @@ export function holidayMultiplier(dateKey: string): { mult: number; driver?: Dri
   return { mult: 1 };
 }
 
-/** Up to 2 structured drivers for a prediction (dow first, then holiday). */
-export function driversFor(args: { dowMult: number; dow: number; holiday?: Driver }): Driver[] {
+/** Up to 2 structured drivers for a prediction (dow → holiday → weather, highest-priority first). */
+export function driversFor(args: { dowMult: number; dow: number; holiday?: Driver; weather?: Driver }): Driver[] {
   const out: Driver[] = [];
   if (Math.abs(args.dowMult - 1) >= 0.1) {
     const pct = Math.round((args.dowMult - 1) * 100);
     out.push({ code: pct >= 0 ? 'dow_busy' : 'dow_quiet', pct, dow: args.dow });
   }
   if (args.holiday) out.push(args.holiday);
+  if (args.weather) out.push(args.weather);
   return out.slice(0, 2);
 }
