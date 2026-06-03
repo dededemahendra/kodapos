@@ -181,6 +181,10 @@ export const createCashSale = mutation({
       };
     }
 
+    if ((args.redeemPoints ?? 0) > 0 && !args.customerId) {
+      throw new Error('Penukaran poin memerlukan pelanggan.');
+    }
+
     // Single cafeSettings read for the whole checkout path — reused by both the
     // loyalty config merge below and the service-charge block further down.
     const settings = await ctx.db

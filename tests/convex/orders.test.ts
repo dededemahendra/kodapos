@@ -1121,4 +1121,19 @@ describe('orders.createCashSale — inventory deduction', () => {
       })
     ).rejects.toThrow(/poin/i);
   });
+
+  it('rejects redeemPoints without a customer', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.loyalty.updateConfig, {
+      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+    });
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'order-redeem-nocust', shiftId, cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000, redeemPoints: 100,
+      })
+    ).rejects.toThrow(/pelanggan/i);
+  });
 });
