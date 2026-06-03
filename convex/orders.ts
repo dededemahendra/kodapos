@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { DEFAULT_LOYALTY, pointsEarned } from './lib/loyalty';
 import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals, promoDiscountIDR } from './lib/pricing';
 import { requireActiveCashier } from './lib/staff';
 
@@ -31,6 +32,8 @@ export const createCashSale = mutation({
     lines: v.array(lineInput),
     cashTenderedIDR: v.number(),
     promoId: v.optional(v.id('promotions')),
+    customerId: v.optional(v.id('customers')),
+    redeemPoints: v.optional(v.number()),
     createdAtClient: v.optional(v.number()),
   },
   returns: createCashSaleResult,
@@ -178,6 +181,20 @@ export const createCashSale = mutation({
       };
     }
 
+    // Loyalty: resolve customer + program config. Redemption handled in a later task.
+    let customer: Doc<'customers'> | null = null;
+    let loyaltyCfg = DEFAULT_LOYALTY;
+    if (args.customerId) {
+      const c = await requireOwned(ctx, cafeId, args.customerId, 'Pelanggan');
+      if (c.archived) throw new Error('Pelanggan sudah diarsipkan.');
+      customer = c;
+      const settings0 = await ctx.db
+        .query('cafeSettings')
+        .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+        .first();
+      loyaltyCfg = { ...DEFAULT_LOYALTY, ...(settings0?.loyalty ?? {}) };
+    }
+
     const cafe = await ctx.db.get(cafeId);
     const taxEnabled = cafe?.taxEnabled === true;
     const taxRatePct = taxEnabled ? cafe?.taxRatePct ?? 0 : 0;
@@ -204,6 +221,9 @@ export const createCashSale = mutation({
       throw new Error('Uang yang diterima kurang dari total.');
     }
 
+    const earnBase = subtotalIDR - discountIDR;
+    const earned = customer ? pointsEarned(earnBase, loyaltyCfg) : 0;
+
     const now = Date.now();
     const orderId = await ctx.db.insert('orders', {
       cafeId,
@@ -219,6 +239,7 @@ export const createCashSale = mutation({
       serviceChargeIDR,
       serviceChargePct: scPct,
       serviceChargeName: scName,
+      ...(customer ? { customerId: customer._id, pointsEarned: earned } : {}),
       totalIDR,
       paymentMethod: 'cash',
       paymentStatus: 'paid',
@@ -252,6 +273,25 @@ export const createCashSale = mutation({
           at: now,
         });
       }
+    }
+
+    if (customer) {
+      if (earned > 0) {
+        await ctx.db.insert('loyaltyTransactions', {
+          cafeId,
+          customerId: customer._id,
+          orderId,
+          type: 'earn',
+          points: earned,
+          at: now,
+        });
+      }
+      await ctx.db.patch(customer._id, {
+        pointsBalance: customer.pointsBalance + earned,
+        visitCount: customer.visitCount + 1,
+        totalSpentIDR: customer.totalSpentIDR + totalIDR,
+        lastVisitAt: now,
+      });
     }
 
     return { orderId, totalIDR, changeIDR };
@@ -307,6 +347,10 @@ const orderSummary = v.object({
   serviceChargeIDR: v.optional(v.number()),
   serviceChargePct: v.optional(v.number()),
   serviceChargeName: v.optional(v.string()),
+  customerId: v.optional(v.id('customers')),
+  pointsRedeemed: v.optional(v.number()),
+  pointsRedeemedIDR: v.optional(v.number()),
+  pointsEarned: v.optional(v.number()),
   totalIDR: v.number(),
   paymentMethod: v.union(
     v.literal('cash'),

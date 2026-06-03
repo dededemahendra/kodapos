@@ -656,6 +656,47 @@ describe('orders.createCashSale', () => {
     expect(order?.appliedPromo).toBeUndefined();
     expect(result.totalIDR).toBe(18000);
   });
+
+  it('attaches a customer and earns points on the net base', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.loyalty.updateConfig, {
+      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+    });
+    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const res = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'order-loyal-1', shiftId, cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }], // Espresso 18000
+      cashTenderedIDR: 20000, customerId, createdAtClient: 1700000000000,
+    });
+    const order = await t.run((ctx) => ctx.db.get(res.orderId));
+    expect(order?.customerId).toBe(customerId);
+    expect(order?.pointsEarned).toBe(18); // floor(18000 / 1000)
+    const detail = await asOwner.query(api.customers.getDetail, { id: customerId });
+    expect(detail?.pointsBalance).toBe(18);
+    expect(detail?.visitCount).toBe(1);
+    expect(detail?.totalSpentIDR).toBe(18000);
+    expect(detail?.transactions[0]?.type).toBe('earn');
+  });
+
+  it('idempotent replay does not double-earn', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.loyalty.updateConfig, {
+      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+    });
+    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const args = {
+      clientId: 'order-loyal-2', shiftId, cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000, customerId, createdAtClient: 1700000000000,
+    };
+    await asOwner.mutation(api.orders.createCashSale, args);
+    await asOwner.mutation(api.orders.createCashSale, args); // replay
+    const detail = await asOwner.query(api.customers.getDetail, { id: customerId });
+    expect(detail?.pointsBalance).toBe(18);
+    expect(detail?.visitCount).toBe(1);
+  });
 });
 
 describe('orders read queries', () => {
