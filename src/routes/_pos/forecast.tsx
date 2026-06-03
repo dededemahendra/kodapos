@@ -151,6 +151,11 @@ function ForecastPage() {
               <Trans>7 hari</Trans>
             </Button>
           </div>
+          {!data.weatherAvailable ? (
+            <p className="text-xs text-muted-foreground">
+              <Trans>Data cuaca tidak tersedia.</Trans>
+            </p>
+          ) : null}
           <ul className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
             {data.lines.map((line) => (
               <li key={line.menuItemId} className="bg-background p-4">

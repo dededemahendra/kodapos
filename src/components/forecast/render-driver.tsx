@@ -4,7 +4,8 @@ import { Trans } from '@lingui/react/macro';
 // query returns plain objects; we render them localized here).
 export type ForecastDriver =
   | { code: 'dow_busy' | 'dow_quiet'; pct: number; dow: number }
-  | { code: 'holiday'; pct: number; key: string };
+  | { code: 'holiday'; pct: number; key: string }
+  | { code: 'weather'; pct: number; condition: 'hot' | 'rainy' | 'cool' | 'normal' };
 
 // 0=Mon..6=Sun
 const DAY_NAMES = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
@@ -29,6 +30,15 @@ function HolidayText({ pct, hkey }: { pct: number; hkey: string }) {
 /** Renders a single forecast driver as a localized line. */
 export function RenderDriver({ driver }: { driver: ForecastDriver }) {
   if (driver.code === 'holiday') return <HolidayText pct={driver.pct} hkey={driver.key} />;
+  if (driver.code === 'weather') {
+    if (driver.condition === 'rainy') return <Trans>Hujan — perkiraan turun {Math.abs(driver.pct)}%</Trans>;
+    // Defensive: only 'rainy' is emitted in C2b; the C2c taxonomy may add hot/cool.
+    return driver.pct >= 0 ? (
+      <Trans>Cuaca — perkiraan naik {Math.abs(driver.pct)}%</Trans>
+    ) : (
+      <Trans>Cuaca — perkiraan turun {Math.abs(driver.pct)}%</Trans>
+    );
+  }
   const day = DAY_NAMES[driver.dow] ?? '';
   return driver.code === 'dow_busy' ? (
     <Trans>+{driver.pct}% — biasanya ramai di hari {day}</Trans>
