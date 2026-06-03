@@ -181,6 +181,13 @@ export const createCashSale = mutation({
       };
     }
 
+    // Single cafeSettings read for the whole checkout path — reused by both the
+    // loyalty config merge below and the service-charge block further down.
+    const settings = await ctx.db
+      .query('cafeSettings')
+      .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+      .first();
+
     // Loyalty: resolve customer + program config. Redemption handled in a later task.
     let customer: Doc<'customers'> | null = null;
     let loyaltyCfg = DEFAULT_LOYALTY;
@@ -188,21 +195,13 @@ export const createCashSale = mutation({
       const c = await requireOwned(ctx, cafeId, args.customerId, 'Pelanggan');
       if (c.archived) throw new Error('Pelanggan sudah diarsipkan.');
       customer = c;
-      const settings0 = await ctx.db
-        .query('cafeSettings')
-        .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
-        .first();
-      loyaltyCfg = { ...DEFAULT_LOYALTY, ...(settings0?.loyalty ?? {}) };
+      loyaltyCfg = { ...DEFAULT_LOYALTY, ...(settings?.loyalty ?? {}) };
     }
 
     const cafe = await ctx.db.get(cafeId);
     const taxEnabled = cafe?.taxEnabled === true;
     const taxRatePct = taxEnabled ? cafe?.taxRatePct ?? 0 : 0;
 
-    const settings = await ctx.db
-      .query('cafeSettings')
-      .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
-      .first();
     const pay = settings?.payment;
     const scEnabled = pay?.serviceChargeEnabled === true;
     const scPct = scEnabled ? pay?.serviceChargePct ?? 0 : 0;
@@ -286,6 +285,9 @@ export const createCashSale = mutation({
           at: now,
         });
       }
+      // A completed sale with an attached customer always counts as a visit and
+      // accumulates spend, even when earned points round to 0 (e.g. sub-rate or
+      // fully-discounted orders) — this is intentional.
       await ctx.db.patch(customer._id, {
         pointsBalance: customer.pointsBalance + earned,
         visitCount: customer.visitCount + 1,
