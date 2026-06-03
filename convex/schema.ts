@@ -187,6 +187,15 @@ export default defineSchema({
       )
     ),
 
+    loyalty: v.optional(
+      v.object({
+        enabled: v.boolean(),
+        earnRatePerIDR: v.number(),
+        redeemBlockPoints: v.number(),
+        redeemBlockIDR: v.number(),
+      })
+    ),
+
     taxName: v.optional(v.string()),
     taxInclusive: v.optional(v.boolean()),
     npwp: v.optional(v.string()),
@@ -266,6 +275,10 @@ export default defineSchema({
     serviceChargeIDR: v.optional(v.number()),
     serviceChargePct: v.optional(v.number()),
     serviceChargeName: v.optional(v.string()),
+    customerId: v.optional(v.id('customers')),
+    pointsRedeemed: v.optional(v.number()),
+    pointsRedeemedIDR: v.optional(v.number()),
+    pointsEarned: v.optional(v.number()),
     totalIDR: v.number(),
     paymentMethod: v.union(
       v.literal('cash'),
@@ -342,6 +355,32 @@ export default defineSchema({
     archived: v.boolean(),
     createdAt: v.number(),
   }).index('by_cafe_active', ['cafeId', 'archived']),
+
+  customers: defineTable({
+    cafeId: v.id('cafes'),
+    name: v.string(),
+    phone: v.string(),
+    note: v.optional(v.string()),
+    pointsBalance: v.number(),
+    visitCount: v.number(),
+    totalSpentIDR: v.number(),
+    lastVisitAt: v.optional(v.number()),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index('by_cafe_phone', ['cafeId', 'phone'])
+    .index('by_cafe_active', ['cafeId', 'archived'])
+    .index('by_cafe_points', ['cafeId', 'pointsBalance']),
+
+  loyaltyTransactions: defineTable({
+    cafeId: v.id('cafes'),
+    customerId: v.id('customers'),
+    orderId: v.optional(v.id('orders')),
+    type: v.union(v.literal('earn'), v.literal('redeem'), v.literal('adjust')),
+    points: v.number(),
+    note: v.optional(v.string()),
+    at: v.number(),
+  }).index('by_customer_at', ['customerId', 'at']),
 
   purchases: defineTable({
     cafeId: v.id('cafes'),
