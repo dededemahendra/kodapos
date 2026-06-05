@@ -214,7 +214,11 @@ function LoyaltyPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {stats && stats.topCustomers.length === 0 ? (
+            {stats === undefined ? (
+              <p className="text-muted-foreground text-sm">
+                <Trans>Memuat…</Trans>
+              </p>
+            ) : stats.topCustomers.length === 0 ? (
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
@@ -241,7 +245,7 @@ function LoyaltyPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {stats?.topCustomers.map((c) => (
+                  {stats.topCustomers.map((c) => (
                     <TableRow key={c._id}>
                       <TableCell className="font-medium">{c.name}</TableCell>
                       <TableCell className="text-right tabular-nums">
