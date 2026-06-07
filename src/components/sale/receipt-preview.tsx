@@ -1,10 +1,10 @@
+import { Trans } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
+import { DEFAULT_SERVICE_CHARGE_NAME } from 'convex/lib/pricing';
 import { useQuery } from 'convex/react';
-import { Trans } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent } from '~/components/ui/dialog';
-import { DEFAULT_SERVICE_CHARGE_NAME } from 'convex/lib/pricing';
 import { formatIDR } from '~/lib/money';
 import { formatPromoValue } from '~/lib/promo';
 
@@ -23,6 +23,12 @@ export function ReceiptPreview({
   const order = useQuery(api.orders.getById, orderId ? { id: orderId } : 'skip');
 
   if (!orderId) return null;
+
+  // Persisted discountIDR includes any point redemption (server folds promo +
+  // redeem into one discount). Split them back out so the receipt shows the promo
+  // discount and the points redeemed on separate lines.
+  const pointsRedeemedIDR = order?.pointsRedeemedIDR ?? 0;
+  const promoDiscountIDR = (order?.discountIDR ?? 0) - pointsRedeemedIDR;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -69,10 +75,12 @@ export function ReceiptPreview({
             ))}
             <hr className="border-dashed border-border my-2" />
             <div className="flex justify-between">
-              <span><Trans>Subtotal</Trans></span>
+              <span>
+                <Trans>Subtotal</Trans>
+              </span>
               <span className="tabular-nums">{formatIDR(order.subtotalIDR)}</span>
             </div>
-            {(order.discountIDR ?? 0) > 0 ? (
+            {promoDiscountIDR > 0 ? (
               <div className="flex justify-between">
                 <span>
                   <Trans>Diskon</Trans>
@@ -80,37 +88,62 @@ export function ReceiptPreview({
                     ? ` ${order.appliedPromo.name} (${formatPromoValue(order.appliedPromo.type, order.appliedPromo.value)})`
                     : ''}
                 </span>
-                <span className="tabular-nums">−{formatIDR(order.discountIDR)}</span>
+                <span className="tabular-nums">−{formatIDR(promoDiscountIDR)}</span>
+              </div>
+            ) : null}
+            {pointsRedeemedIDR > 0 ? (
+              <div className="flex justify-between">
+                {/* Printed receipt is always English, kept out of the i18n catalog. */}
+                <span>Points redeemed</span>
+                <span className="tabular-nums">-{formatIDR(pointsRedeemedIDR)}</span>
               </div>
             ) : null}
             {(order.serviceChargeIDR ?? 0) > 0 ? (
               <div className="flex justify-between">
                 <span>
-                  {order.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME} {order.serviceChargePct ?? 0}%
+                  {order.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME}{' '}
+                  {order.serviceChargePct ?? 0}%
                 </span>
                 <span className="tabular-nums">{formatIDR(order.serviceChargeIDR ?? 0)}</span>
               </div>
             ) : null}
             {order.taxIDR > 0 ? (
               <div className="flex justify-between">
-                <span><Trans>PPN {order.taxRatePct}%</Trans></span>
+                <span>
+                  <Trans>PPN {order.taxRatePct}%</Trans>
+                </span>
                 <span className="tabular-nums">{formatIDR(order.taxIDR)}</span>
               </div>
             ) : null}
             <div className="flex justify-between font-semibold text-base">
-              <span><Trans>Total</Trans></span>
+              <span>
+                <Trans>Total</Trans>
+              </span>
               <span className="tabular-nums">{formatIDR(order.totalIDR)}</span>
             </div>
             {order.payment?.method === 'cash' ? (
               <>
                 <div className="flex justify-between mt-1">
-                  <span><Trans>Tunai</Trans></span>
-                  <span className="tabular-nums">{formatIDR(order.payment.cashTenderedIDR ?? 0)}</span>
+                  <span>
+                    <Trans>Tunai</Trans>
+                  </span>
+                  <span className="tabular-nums">
+                    {formatIDR(order.payment.cashTenderedIDR ?? 0)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span><Trans>Kembalian</Trans></span>
+                  <span>
+                    <Trans>Kembalian</Trans>
+                  </span>
                   <span className="tabular-nums">{formatIDR(order.payment.changeIDR ?? 0)}</span>
                 </div>
+              </>
+            ) : null}
+            {order.customerId && order.pointsEarned !== undefined ? (
+              <>
+                <hr className="border-dashed border-border my-2" />
+                {/* Printed receipt is always English, kept out of the i18n catalog. */}
+                <div className="text-center text-xs">Points earned: +{order.pointsEarned}</div>
               </>
             ) : null}
           </div>
