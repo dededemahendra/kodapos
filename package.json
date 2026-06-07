@@ -14,7 +14,7 @@
     "deploy": "pnpm build && wrangler deploy",
     "preview": "pnpm build && wrangler dev",
     "cf-typegen": "wrangler types",
-    "cf:deploy": "convex deploy --cmd 'pnpm build' --cmd-url-env-var-name VITE_CONVEX_URL",
+    "cf:deploy": "node scripts/cf-deploy.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

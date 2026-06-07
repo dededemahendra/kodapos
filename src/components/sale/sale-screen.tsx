@@ -173,7 +173,12 @@ export function SaleScreen() {
         <CashPaymentDialog
           open={paymentOpen}
           onOpenChange={setPaymentOpen}
-          totalIDR={total}
+          subtotalIDR={subtotal}
+          promoDiscountIDR={discount}
+          serviceChargeEnabled={scEnabled}
+          serviceChargePct={scPct}
+          taxEnabled={taxEnabled}
+          taxRatePct={taxRatePct}
           {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
           cart={cart}
           shiftId={shift._id}

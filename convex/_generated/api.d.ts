@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as cafes from "../cafes.js";
 import type * as crons from "../crons.js";
+import type * as customers from "../customers.js";
 import type * as dashboard from "../dashboard.js";
 import type * as forecast from "../forecast.js";
 import type * as http from "../http.js";
@@ -19,6 +20,7 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as lib_demand from "../lib/demand.js";
 import type * as lib_forecast from "../lib/forecast.js";
 import type * as lib_inventory from "../lib/inventory.js";
+import type * as lib_loyalty from "../lib/loyalty.js";
 import type * as lib_phone from "../lib/phone.js";
 import type * as lib_pin from "../lib/pin.js";
 import type * as lib_pricing from "../lib/pricing.js";
@@ -27,6 +29,7 @@ import type * as lib_restockCompute from "../lib/restockCompute.js";
 import type * as lib_staff from "../lib/staff.js";
 import type * as lib_time from "../lib/time.js";
 import type * as lib_weather from "../lib/weather.js";
+import type * as loyalty from "../loyalty.js";
 import type * as menu_categories from "../menu/categories.js";
 import type * as menu_itemGroups from "../menu/itemGroups.js";
 import type * as menu_itemStock from "../menu/itemStock.js";
@@ -55,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   cafes: typeof cafes;
   crons: typeof crons;
+  customers: typeof customers;
   dashboard: typeof dashboard;
   forecast: typeof forecast;
   http: typeof http;
@@ -63,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   "lib/demand": typeof lib_demand;
   "lib/forecast": typeof lib_forecast;
   "lib/inventory": typeof lib_inventory;
+  "lib/loyalty": typeof lib_loyalty;
   "lib/phone": typeof lib_phone;
   "lib/pin": typeof lib_pin;
   "lib/pricing": typeof lib_pricing;
@@ -71,6 +76,7 @@ declare const fullApi: ApiFromModules<{
   "lib/staff": typeof lib_staff;
   "lib/time": typeof lib_time;
   "lib/weather": typeof lib_weather;
+  loyalty: typeof loyalty;
   "menu/categories": typeof menu_categories;
   "menu/itemGroups": typeof menu_itemGroups;
   "menu/itemStock": typeof menu_itemStock;

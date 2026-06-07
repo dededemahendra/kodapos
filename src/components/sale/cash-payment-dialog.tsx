@@ -1,14 +1,16 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { useMutation } from 'convex/react';
+import { DEFAULT_LOYALTY, redemptionIDR } from 'convex/lib/loyalty';
+import { computeOrderTotals } from 'convex/lib/pricing';
+import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLingui } from '@lingui/react/macro';
-import { Trans } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 import type { CartState } from './cart-reducer';
+import { CustomerSection, type CustomerSelection } from './customer-section';
 
 function genUUID(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -30,7 +32,12 @@ function computeDenominations(total: number): number[] {
 export function CashPaymentDialog({
   open,
   onOpenChange,
-  totalIDR,
+  subtotalIDR,
+  promoDiscountIDR,
+  serviceChargeEnabled,
+  serviceChargePct,
+  taxEnabled,
+  taxRatePct,
   cart,
   shiftId,
   cashierId,
@@ -39,7 +46,13 @@ export function CashPaymentDialog({
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  totalIDR: number;
+  subtotalIDR: number;
+  /** Promo discount already applied to the cart (0 when no promo). */
+  promoDiscountIDR: number;
+  serviceChargeEnabled: boolean;
+  serviceChargePct: number;
+  taxEnabled: boolean;
+  taxRatePct: number;
   cart: CartState;
   shiftId: Id<'shifts'>;
   cashierId: Id<'cafeStaff'>;
@@ -48,9 +61,11 @@ export function CashPaymentDialog({
 }) {
   const { t } = useLingui();
   const createCashSale = useMutation(api.orders.createCashSale);
+  const loyaltyCfg = useQuery(api.loyalty.getConfig) ?? DEFAULT_LOYALTY;
   const [tendered, setTendered] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [customer, setCustomer] = useState<CustomerSelection>({ redeemPoints: 0 });
   const clientIdRef = useRef<string>('');
 
   // Generate clientId once when the dialog opens; reset on close.
@@ -59,8 +74,24 @@ export function CashPaymentDialog({
       clientIdRef.current = genUUID();
       setTendered('');
       setError(null);
+      setCustomer({ redeemPoints: 0 });
     }
   }, [open]);
+
+  // Redemption folds into the EXISTING totals math: promo first, then points off
+  // the remainder, then service charge + PB1 — same order the server uses. We pass
+  // a single combined discountIDR (promo + redeem) into computeOrderTotals.
+  const afterPromoIDR = subtotalIDR - promoDiscountIDR;
+  const redeemIDR = redemptionIDR(customer.redeemPoints, loyaltyCfg);
+  const discountIDR = promoDiscountIDR + redeemIDR;
+  const { totalIDR } = computeOrderTotals({
+    subtotalIDR,
+    discountIDR,
+    serviceChargeEnabled,
+    serviceChargePct,
+    taxEnabled,
+    taxRatePct,
+  });
 
   const tenderedNum = useMemo(() => {
     if (!tendered) return 0;
@@ -86,6 +117,8 @@ export function CashPaymentDialog({
         })),
         cashTenderedIDR: tenderedNum,
         ...(promoId ? { promoId } : {}),
+        ...(customer.customerId ? { customerId: customer.customerId } : {}),
+        ...(customer.redeemPoints > 0 ? { redeemPoints: customer.redeemPoints } : {}),
         createdAtClient: Date.now(),
       });
       onPaid(result.orderId);
@@ -114,12 +147,29 @@ export function CashPaymentDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="rounded-md bg-muted px-3 py-2 text-center">
-            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-              <Trans>Total tagihan</Trans>
-            </div>
-            <div className="text-2xl font-semibold text-primary tabular-nums">
-              {formatIDR(totalIDR)}
+          <CustomerSection
+            cafeLoyalty={loyaltyCfg}
+            afterPromoIDR={afterPromoIDR}
+            value={customer}
+            onChange={setCustomer}
+          />
+
+          <div className="rounded-md bg-muted px-3 py-2 space-y-1">
+            {redeemIDR > 0 ? (
+              <div className="flex justify-between text-xs text-emerald-700">
+                <span>
+                  <Trans>Poin ditukar</Trans>
+                </span>
+                <span className="tabular-nums">−{formatIDR(redeemIDR)}</span>
+              </div>
+            ) : null}
+            <div className="text-center">
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                <Trans>Total tagihan</Trans>
+              </div>
+              <div className="text-2xl font-semibold text-primary tabular-nums">
+                {formatIDR(totalIDR)}
+              </div>
             </div>
           </div>
 

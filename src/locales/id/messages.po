@@ -55,6 +55,11 @@ msgid "\"{0}\" tidak akan bisa dipakai di kasir."
 msgstr "\"{0}\" tidak akan bisa dipakai di kasir."
 
 #. placeholder {0}: archiveTarget.name
+#: src/routes/_pos/customers.tsx
+msgid "\"{0}\" tidak akan muncul di daftar pelanggan."
+msgstr "\"{0}\" tidak akan muncul di daftar pelanggan."
+
+#. placeholder {0}: archiveTarget.name
 #: src/routes/_pos/suppliers.tsx
 msgid "\"{0}\" tidak akan muncul di pilihan pemasok."
 msgstr "\"{0}\" tidak akan muncul di pilihan pemasok."
@@ -91,6 +96,11 @@ msgstr "{0} item · {1} stok rendah"
 msgid "{0} item · {1} tanpa resep"
 msgstr "{0} item · {1} tanpa resep"
 
+#. placeholder {0}: detail.visitCount
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "{0} kunjungan"
+msgstr "{0} kunjungan"
+
 #. placeholder {0}: counts.active
 #: src/routes/_pos/suppliers.tsx
 msgid "{0} pemasok aktif"
@@ -105,6 +115,12 @@ msgstr "{0} pembelian · 30 hari"
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "{0} penyesuaian · 30 hari"
 msgstr "{0} penyesuaian · 30 hari"
+
+#. placeholder {0}: formatCount(draft.redeemBlockPoints)
+#. placeholder {1}: formatIDR(draft.redeemBlockIDR)
+#: src/routes/_pos/loyalty.tsx
+msgid "{0} poin = {1}."
+msgstr "{0} poin = {1}."
 
 #. placeholder {0}: counts.active
 #: src/routes/_pos/promos.tsx
@@ -184,6 +200,15 @@ msgstr "+{0}% — biasanya ramai di hari {day}"
 msgid "08xx-xxxx-xxxx"
 msgstr "08xx-xxxx-xxxx"
 
+#: src/routes/_pos/loyalty.tsx
+msgid "1 poin / Rp"
+msgstr "1 poin / Rp"
+
+#. placeholder {0}: formatIDR(draft.earnRatePerIDR)
+#: src/routes/_pos/loyalty.tsx
+msgid "1 poin per {0} belanja."
+msgstr "1 poin per {0} belanja."
+
 #: src/routes/_pos/settings/general.tsx
 msgid "12 jam (AM/PM)"
 msgstr "12 jam (AM/PM)"
@@ -250,6 +275,7 @@ msgid "AI-native POS untuk kafe & QSR Indonesia."
 msgstr "AI-native POS untuk kafe & QSR Indonesia."
 
 #: src/components/menu/category-table.tsx
+#: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -259,6 +285,7 @@ msgid "Aksi baris"
 msgstr "Aksi baris"
 
 #: src/components/menu/category-table.tsx
+#: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -330,7 +357,12 @@ msgstr "Ambang isi ulang"
 #~ msgid "Amount"
 #~ msgstr "Amount"
 
+#: src/routes/_pos/loyalty.tsx
+msgid "Anggota"
+msgstr "Anggota"
+
 #: src/components/menu/category-table.tsx
+#: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -343,6 +375,7 @@ msgstr "Arsip"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/confirm-archive.tsx
+#: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -376,6 +409,10 @@ msgstr "Arsipkan item?"
 msgid "Arsipkan kategori?"
 msgstr "Arsipkan kategori?"
 
+#: src/routes/_pos/customers.tsx
+msgid "Arsipkan pelanggan?"
+msgstr "Arsipkan pelanggan?"
+
 #: src/routes/_pos/suppliers.tsx
 msgid "Arsipkan pemasok?"
 msgstr "Arsipkan pemasok?"
@@ -383,6 +420,10 @@ msgstr "Arsipkan pemasok?"
 #: src/routes/_pos/promos.tsx
 msgid "Arsipkan promo?"
 msgstr "Arsipkan promo?"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Atur cara pelanggan memperoleh dan menukar poin."
+msgstr "Atur cara pelanggan memperoleh dan menukar poin."
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Atur isi struk, ukuran kertas, dan printer."
@@ -407,6 +448,10 @@ msgstr "Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Atur PIN Pemilik"
 msgstr "Atur PIN Pemilik"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Atur program poin dan lihat ringkasannya."
+msgstr "Atur program poin dan lihat ringkasannya."
 
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Aturan"
@@ -493,6 +538,8 @@ msgstr "Baru"
 msgid "Basi/Kedaluwarsa"
 msgstr "Basi/Kedaluwarsa"
 
+#: src/components/customer/customer-detail-sheet.tsx
+#: src/components/customer/customer-form-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
@@ -500,6 +547,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/confirm-archive.tsx
 #: src/components/promo/promo-form-dialog.tsx
+#: src/components/sale/customer-section.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/sale-screen.tsx
 #: src/components/settings/save-bar.tsx
@@ -526,6 +574,10 @@ msgstr "Belum"
 #: src/components/dashboard-activity.tsx
 msgid "Belum ada aktivitas."
 msgstr "Belum ada aktivitas."
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Belum ada anggota."
+msgstr "Belum ada anggota."
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Belum ada bahan."
@@ -572,6 +624,10 @@ msgstr "Belum ada limbah tercatat dalam 30 hari terakhir."
 #: src/components/menu/modifier-group-form.tsx
 msgid "Belum ada opsi. Tambahkan minimal satu."
 msgstr "Belum ada opsi. Tambahkan minimal satu."
+
+#: src/routes/_pos/customers.tsx
+msgid "Belum ada pelanggan."
+msgstr "Belum ada pelanggan."
 
 #: src/routes/_pos/suppliers.tsx
 msgid "Belum ada pemasok."
@@ -620,6 +676,10 @@ msgstr "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang
 #: src/routes/_pos/reports/cashiers.tsx
 msgid "Belum ada transaksi kasir pada rentang ini."
 msgstr "Belum ada transaksi kasir pada rentang ini."
+
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Belum ada transaksi poin."
+msgstr "Belum ada transaksi poin."
 
 #: src/components/dashboard-invoices.tsx
 msgid "Belum ada transaksi."
@@ -751,6 +811,10 @@ msgstr "Cari grup…"
 msgid "Cari item…"
 msgstr "Cari item…"
 
+#: src/routes/_pos/customers.tsx
+msgid "Cari nama atau telepon…"
+msgstr "Cari nama atau telepon…"
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Cari nama staf…"
 msgstr "Cari nama staf…"
@@ -796,6 +860,8 @@ msgstr "Catat stok masuk"
 msgid "Catat stok:"
 msgstr "Catat stok:"
 
+#: src/components/customer/customer-detail-sheet.tsx
+#: src/components/customer/customer-form-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Catatan"
@@ -1018,6 +1084,10 @@ msgstr "Gagal memutuskan integrasi."
 msgid "Gagal menambah kasir."
 msgstr "Gagal menambah kasir."
 
+#: src/components/sale/customer-section.tsx
+msgid "Gagal menambah pelanggan."
+msgstr "Gagal menambah pelanggan."
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Gagal menambah staf."
 msgstr "Gagal menambah staf."
@@ -1054,6 +1124,10 @@ msgstr "Gagal mengarsipkan item."
 msgid "Gagal mengarsipkan kategori."
 msgstr "Gagal mengarsipkan kategori."
 
+#: src/routes/_pos/customers.tsx
+msgid "Gagal mengarsipkan pelanggan."
+msgstr "Gagal mengarsipkan pelanggan."
+
 #: src/routes/_pos/suppliers.tsx
 msgid "Gagal mengarsipkan pemasok."
 msgstr "Gagal mengarsipkan pemasok."
@@ -1086,6 +1160,10 @@ msgstr "Gagal mengunggah logo."
 msgid "Gagal menutup shift."
 msgstr "Gagal menutup shift."
 
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Gagal menyesuaikan poin."
+msgstr "Gagal menyesuaikan poin."
+
 #: src/components/inventory/ingredient-form.tsx
 msgid "Gagal menyimpan bahan."
 msgstr "Gagal menyimpan bahan."
@@ -1101,6 +1179,10 @@ msgstr "Gagal menyimpan item."
 #: src/components/menu/category-form-dialog.tsx
 msgid "Gagal menyimpan kategori."
 msgstr "Gagal menyimpan kategori."
+
+#: src/components/customer/customer-form-dialog.tsx
+msgid "Gagal menyimpan pelanggan."
+msgstr "Gagal menyimpan pelanggan."
 
 #: src/components/supplier/supplier-form-dialog.tsx
 msgid "Gagal menyimpan pemasok."
@@ -1122,12 +1204,17 @@ msgstr "Gagal menyimpan resep."
 msgid "Gagal menyimpan urutan."
 msgstr "Gagal menyimpan urutan."
 
+#: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/receipt.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Gagal menyimpan."
 msgstr "Gagal menyimpan."
+
+#: src/components/sale/customer-section.tsx
+msgid "Ganti"
+msgstr "Ganti"
 
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -1205,6 +1292,7 @@ msgid "Halaman tidak ditemukan"
 msgstr "Halaman tidak ditemukan"
 
 #: src/components/menu/modifier-group-form.tsx
+#: src/components/sale/customer-section.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Hapus"
 msgstr "Hapus"
@@ -1352,6 +1440,10 @@ msgstr "Jenis usaha"
 msgid "Jika aktif, harga menu dianggap sudah termasuk pajak."
 msgstr "Jika aktif, harga menu dianggap sudah termasuk pajak."
 
+#: src/routes/_pos/loyalty.tsx
+msgid "Jika nonaktif, pelanggan tidak memperoleh poin."
+msgstr "Jika nonaktif, pelanggan tidak memperoleh poin."
+
 #: src/components/dashboard-activity.tsx
 #~ msgid "Jordan joined the team"
 #~ msgstr "Jordan joined the team"
@@ -1380,6 +1472,10 @@ msgstr "Jumlah {0}"
 #: src/components/inventory/waste-dialog.tsx
 msgid "Jumlah dibuang"
 msgstr "Jumlah dibuang"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Jumlah poin"
+msgstr "Jumlah poin"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Jumlah salinan"
@@ -1610,6 +1706,10 @@ msgstr "Kunci API"
 msgid "Kunci otomatis saat tidak aktif"
 msgstr "Kunci otomatis saat tidak aktif"
 
+#: src/routes/_pos/customers.tsx
+msgid "Kunjungan"
+msgstr "Kunjungan"
+
 #: src/components/sale/cart-line-row.tsx
 msgid "Kurangi jumlah"
 msgstr "Kurangi jumlah"
@@ -1737,6 +1837,14 @@ msgstr "Loyalitas"
 msgid "Lunas"
 msgstr "Lunas"
 
+#: src/components/sale/customer-section.tsx
+msgid "Maks"
+msgstr "Maks"
+
+#: src/components/sale/customer-section.tsx
+msgid "Maks ({maxPoints})"
+msgstr "Maks ({maxPoints})"
+
 #: src/routes/_pos/recipes.tsx
 msgid "Margin"
 msgstr "Margin"
@@ -1807,6 +1915,7 @@ msgstr "Memuat struk…"
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/routes/_pos/inventory/purchases.tsx
+#: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
 #: src/routes/_pos/menu/modifiers.$groupId.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
@@ -1826,6 +1935,14 @@ msgstr "Memuat…"
 msgid "Menampilkan 100 pergerakan terbaru."
 msgstr "Menampilkan 100 pergerakan terbaru."
 
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Menampilkan 100 transaksi terakhir."
+msgstr "Menampilkan 100 transaksi terakhir."
+
+#: src/components/sale/customer-section.tsx
+msgid "Mencari…"
+msgstr "Mencari…"
+
 #: src/routes/_pos/settings/general.tsx
 msgid "Mengikuti sistem."
 msgstr "Mengikuti sistem."
@@ -1844,6 +1961,8 @@ msgstr "Menunggu"
 msgid "Menutup…"
 msgstr "Menutup…"
 
+#: src/components/customer/customer-detail-sheet.tsx
+#: src/components/customer/customer-form-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/recipe-editor.tsx
@@ -1944,9 +2063,12 @@ msgstr "Mulai dengan kategori →"
 msgid "Naikkan urutan"
 msgstr "Naikkan urutan"
 
+#: src/components/customer/customer-form-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
+#: src/routes/_pos/customers.tsx
+#: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
@@ -2008,6 +2130,10 @@ msgstr "Nama opsi (mis. Large)"
 msgid "Nama pajak"
 msgstr "Nama pajak"
 
+#: src/components/sale/customer-section.tsx
+msgid "Nama pelanggan"
+msgstr "Nama pelanggan"
+
 #: src/components/supplier/supplier-form-dialog.tsx
 msgid "Nama pemasok"
 msgstr "Nama pemasok"
@@ -2044,9 +2170,17 @@ msgstr "Nilai (%)"
 msgid "Nilai (Rp)"
 msgstr "Nilai (Rp)"
 
+#: src/routes/_pos/loyalty.tsx
+msgid "Nilai rupiah"
+msgstr "Nilai rupiah"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "NMID"
 msgstr "NMID"
+
+#: src/components/sale/customer-section.tsx
+msgid "No. HP pelanggan"
+msgstr "No. HP pelanggan"
 
 #: src/components/promo/promo-form-dialog.tsx
 #: src/routes/_pos/promos.tsx
@@ -2151,9 +2285,34 @@ msgid "Password wajib diisi."
 msgstr "Password wajib diisi."
 
 #: src/components/app-shared.tsx
+#: src/components/customer/customer-detail-sheet.tsx
 #: src/routes/_pos/customers.tsx
 msgid "Pelanggan"
 msgstr "Pelanggan"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Pelanggan dengan poin akan muncul di sini."
+msgstr "Pelanggan dengan poin akan muncul di sini."
+
+#: src/routes/_pos/customers.tsx
+msgid "Pelanggan diarsipkan."
+msgstr "Pelanggan diarsipkan."
+
+#: src/components/customer/customer-form-dialog.tsx
+msgid "Pelanggan diperbarui."
+msgstr "Pelanggan diperbarui."
+
+#: src/components/customer/customer-form-dialog.tsx
+msgid "Pelanggan ditambahkan."
+msgstr "Pelanggan ditambahkan."
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Pelanggan teratas"
+msgstr "Pelanggan teratas"
+
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Pelanggan tidak ditemukan."
+msgstr "Pelanggan tidak ditemukan."
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -2263,6 +2422,10 @@ msgstr "Pendapatan harian, 7 hari terakhir."
 msgid "Pengaturan"
 msgstr "Pengaturan"
 
+#: src/routes/_pos/loyalty.tsx
+msgid "Pengaturan loyalitas disimpan."
+msgstr "Pengaturan loyalitas disimpan."
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 #~ msgstr "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
@@ -2278,7 +2441,16 @@ msgstr "Pengiriman masuk"
 msgid "Penjualan"
 msgstr "Penjualan"
 
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Penukaran"
+msgstr "Penukaran"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Penukaran poin"
+msgstr "Penukaran poin"
+
 #: src/components/app-shared.tsx
+#: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 msgid "Penyesuaian"
 msgstr "Penyesuaian"
@@ -2302,6 +2474,14 @@ msgstr "Peringatan stok rendah"
 #: src/components/inventory/waste-dialog.tsx
 msgid "Perkiraan kerugian:"
 msgstr "Perkiraan kerugian:"
+
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Perolehan"
+msgstr "Perolehan"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Perolehan poin"
+msgstr "Perolehan poin"
 
 #: src/components/promo/promo-form-dialog.tsx
 #: src/routes/_pos/promos.tsx
@@ -2428,6 +2608,41 @@ msgstr "PIN salah."
 msgid "PIN untuk {0}"
 msgstr "PIN untuk {0}"
 
+#: src/components/customer/customer-detail-sheet.tsx
+#: src/routes/_pos/customers.tsx
+#: src/routes/_pos/loyalty.tsx
+msgid "Poin"
+msgstr "Poin"
+
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Poin (boleh negatif)"
+msgstr "Poin (boleh negatif)"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "poin = Rp"
+msgstr "poin = Rp"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Poin beredar"
+msgstr "Poin beredar"
+
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Poin disesuaikan."
+msgstr "Poin disesuaikan."
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Poin ditukar"
+msgstr "Poin ditukar"
+
+#. placeholder {0}: value.redeemPoints
+#: src/components/sale/customer-section.tsx
+msgid "Poin ditukar ({0})"
+msgstr "Poin ditukar ({0})"
+
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Poin tidak valid."
+msgstr "Poin tidak valid."
+
 #: src/components/inventory/recipe-editor.tsx
 msgid "porsi"
 msgstr "porsi"
@@ -2495,6 +2710,14 @@ msgstr "Profil kafe"
 #: src/routes/_pos/onboarding/route.tsx
 msgid "Profil Kafe"
 msgstr "Profil Kafe"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Program aktif"
+msgstr "Program aktif"
+
+#: src/routes/_pos/loyalty.tsx
+msgid "Program poin"
+msgstr "Program poin"
 
 #: src/components/app-shared.tsx
 msgid "Promo"
@@ -2633,6 +2856,10 @@ msgstr "Riwayat"
 msgid "Riwayat pergerakan stok untuk bahan ini."
 msgstr "Riwayat pergerakan stok untuk bahan ini."
 
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Riwayat poin"
+msgstr "Riwayat poin"
+
 #: src/routes/_pos/history.tsx
 msgid "Riwayat shift ini"
 msgstr "Riwayat shift ini"
@@ -2666,6 +2893,15 @@ msgstr "Salah masak"
 #: src/components/inventory/movement-history-sheet.tsx
 msgid "Saldo"
 msgstr "Saldo"
+
+#. placeholder {0}: detail.pointsBalance
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Saldo poin: {0}"
+msgstr "Saldo poin: {0}"
+
+#: src/components/sale/customer-section.tsx
+msgid "Saldo: {balance} poin"
+msgstr "Saldo: {balance} poin"
 
 #: src/components/net-revenue-chart.tsx
 #~ msgid "Sales"
@@ -2767,6 +3003,10 @@ msgstr "Seret untuk menata ulang"
 #~ msgid "Sesuaikan dengan lebar gulungan printer Anda."
 #~ msgstr "Sesuaikan dengan lebar gulungan printer Anda."
 
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Sesuaikan poin"
+msgstr "Sesuaikan poin"
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Set PIN"
 msgstr "Set PIN"
@@ -2793,6 +3033,8 @@ msgstr "ShopeeFood"
 msgid "Siapa yang bertugas?"
 msgstr "Siapa yang bertugas?"
 
+#: src/components/customer/customer-detail-sheet.tsx
+#: src/components/customer/customer-form-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
@@ -2800,6 +3042,7 @@ msgstr "Siapa yang bertugas?"
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/components/promo/promo-form-dialog.tsx
+#: src/components/sale/customer-section.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Simpan"
@@ -2985,6 +3228,19 @@ msgstr "Tambah Kategori"
 msgid "Tambah ke pesanan"
 msgstr "Tambah ke pesanan"
 
+#: src/components/customer/customer-form-dialog.tsx
+#: src/routes/_pos/customers.tsx
+msgid "Tambah pelanggan"
+msgstr "Tambah pelanggan"
+
+#: src/components/sale/customer-section.tsx
+msgid "Tambah pelanggan baru"
+msgstr "Tambah pelanggan baru"
+
+#: src/routes/_pos/customers.tsx
+msgid "Tambah pelanggan untuk melacak poin dan kunjungan."
+msgstr "Tambah pelanggan untuk melacak poin dan kunjungan."
+
 #: src/components/supplier/supplier-form-dialog.tsx
 msgid "Tambah pemasok"
 msgstr "Tambah pemasok"
@@ -3076,6 +3332,7 @@ msgstr "Tampilkan rincian pajak"
 #~ msgid "Tampilkan tombol nominal saat pembayaran tunai."
 #~ msgstr "Tampilkan tombol nominal saat pembayaran tunai."
 
+#: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -3100,11 +3357,16 @@ msgstr "Teks header"
 #~ msgid "Teks yang dicetak di bagian bawah struk."
 #~ msgstr "Teks yang dicetak di bagian bawah struk."
 
+#: src/components/customer/customer-form-dialog.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Telepon"
 msgstr "Telepon"
+
+#: src/routes/_pos/customers.tsx
+msgid "Telp"
+msgstr "Telp"
 
 #: src/components/reports/range-picker.tsx
 #~ msgid "Terapkan"
@@ -3194,6 +3456,14 @@ msgstr "Tidak ada item diarsipkan."
 msgid "Tidak ada kategori diarsipkan."
 msgstr "Tidak ada kategori diarsipkan."
 
+#: src/routes/_pos/customers.tsx
+msgid "Tidak ada pelanggan cocok."
+msgstr "Tidak ada pelanggan cocok."
+
+#: src/routes/_pos/customers.tsx
+msgid "Tidak ada pelanggan diarsipkan."
+msgstr "Tidak ada pelanggan diarsipkan."
+
 #: src/routes/_pos/suppliers.tsx
 msgid "Tidak ada pemasok diarsipkan."
 msgstr "Tidak ada pemasok diarsipkan."
@@ -3218,6 +3488,7 @@ msgstr "Tinggi"
 msgid "Tinjau inventaris"
 msgstr "Tinjau inventaris"
 
+#: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/components/promo/promo-form-dialog.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -3237,6 +3508,7 @@ msgstr "Tombol uang cepat"
 #: src/components/inventory/purchase-form.tsx
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
+#: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 msgid "Total"
 msgstr "Total"
@@ -3274,6 +3546,10 @@ msgstr "Transfer"
 msgid "Transfer bank"
 msgstr "Transfer bank"
 
+#: src/components/sale/customer-section.tsx
+msgid "Tukar poin"
+msgstr "Tukar poin"
+
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/inventory/waste-reason.tsx
 msgid "Tumpah"
@@ -3310,6 +3586,8 @@ msgstr "Uang terhitung"
 msgid "Uang terhitung (Rp)"
 msgstr "Uang terhitung (Rp)"
 
+#: src/components/customer/customer-detail-sheet.tsx
+#: src/routes/_pos/customers.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Ubah"
@@ -3339,6 +3617,10 @@ msgstr "Ubah kategori"
 #: src/components/menu/category-table.tsx
 msgid "Ubah nama"
 msgstr "Ubah nama"
+
+#: src/components/customer/customer-form-dialog.tsx
+msgid "Ubah pelanggan"
+msgstr "Ubah pelanggan"
 
 #: src/components/supplier/supplier-form-dialog.tsx
 msgid "Ubah pemasok"
