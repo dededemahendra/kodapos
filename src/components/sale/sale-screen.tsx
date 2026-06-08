@@ -195,6 +195,7 @@ export function SaleScreen() {
             serviceChargePct={scPct}
             taxEnabled={taxEnabled}
             taxRatePct={taxRatePct}
+            quickCashButtons={settings.payment.quickCashButtons}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             cart={cart}
             shiftId={shift._id}

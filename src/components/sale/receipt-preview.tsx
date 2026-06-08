@@ -139,6 +139,13 @@ export function ReceiptPreview({
                 </div>
               </>
             ) : null}
+            {order.payment && order.payment.method !== 'cash' ? (
+              <div className="flex justify-between mt-1">
+                {/* Printed receipt is always English, kept out of the i18n catalog. */}
+                <span>Payment</span>
+                <span>{order.payment.method === 'qris_static' ? 'QRIS' : order.payment.method}</span>
+              </div>
+            ) : null}
             {order.customerId && order.pointsEarned !== undefined ? (
               <>
                 <hr className="border-dashed border-border my-2" />

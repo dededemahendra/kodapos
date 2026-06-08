@@ -33,6 +33,7 @@ export function CashPaymentDialog({
   serviceChargePct,
   taxEnabled,
   taxRatePct,
+  quickCashButtons,
   cart,
   shiftId,
   cashierId,
@@ -48,6 +49,7 @@ export function CashPaymentDialog({
   serviceChargePct: number;
   taxEnabled: boolean;
   taxRatePct: number;
+  quickCashButtons: number[];
   cart: CartState;
   shiftId: Id<'shifts'>;
   cashierId: Id<'cafeStaff'>;
@@ -94,7 +96,10 @@ export function CashPaymentDialog({
     return Number.isFinite(n) ? n : 0;
   }, [tendered]);
   const changeNum = tenderedNum - totalIDR;
-  const denoms = computeDenominations(totalIDR);
+  // computeDenominations puts the exact total first; drop it in the fallback since
+  // the standalone "Pas" button already covers paying the exact amount.
+  const denoms =
+    quickCashButtons.length > 0 ? quickCashButtons : computeDenominations(totalIDR).slice(1);
 
   async function confirm() {
     if (tenderedNum < totalIDR || submitting) return;
@@ -187,14 +192,21 @@ export function CashPaymentDialog({
           </div>
 
           <div className="grid grid-cols-4 gap-1.5">
-            {denoms.map((d, i) => (
+            <button
+              type="button"
+              onClick={() => setTendered(String(totalIDR))}
+              className="text-xs px-2 py-2 rounded-md border border-border bg-background hover:bg-muted"
+            >
+              <Trans>Pas</Trans>
+            </button>
+            {denoms.slice(0, 3).map((d, i) => (
               <button
                 type="button"
                 key={`${d}-${i}`}
                 onClick={() => setTendered(String(d))}
                 className="text-xs px-2 py-2 rounded-md border border-border bg-background hover:bg-muted"
               >
-                {d === totalIDR ? <Trans>Pas</Trans> : `${(d / 1000).toLocaleString('id-ID')}k`}
+                {`${(d / 1000).toLocaleString('id-ID')}k`}
               </button>
             ))}
           </div>
