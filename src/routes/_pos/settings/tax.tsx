@@ -1,8 +1,9 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
+import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   RowSep,
   SettingRow,
@@ -21,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
+import { Spinner } from '~/components/ui/spinner';
 import { Switch } from '~/components/ui/switch';
 
 export const Route = createFileRoute('/_pos/settings/tax')({
@@ -51,6 +53,7 @@ interface PaymentDraft {
   // Use string (never undefined) locally — map to optional only on save
   qrisMerchantName: string;
   qrisNmid: string;
+  qrisImageStorageId?: Id<'_storage'>;
 }
 
 interface TaxPaymentDraft {
@@ -72,6 +75,10 @@ function SettingsTax() {
 
   const updateTaxPayment = useMutation(api.settings.updateTaxPayment);
   const updatePayment = useMutation(api.settings.updatePayment);
+  const generateUploadUrl = useMutation(api.cafes.generateUploadUrl);
+  const qrisImageUrl = s?.qrisImageUrl;
+  const [uploadingQr, setUploadingQr] = useState(false);
+  const qrFileRef = useRef<HTMLInputElement>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [newQuickCash, setNewQuickCash] = useState('');
@@ -95,6 +102,9 @@ function SettingsTax() {
         qrisMerchantName:
           ('qrisMerchantName' in s.payment ? s.payment.qrisMerchantName : undefined) ?? '',
         qrisNmid: ('qrisNmid' in s.payment ? s.payment.qrisNmid : undefined) ?? '',
+        ...('qrisImageStorageId' in s.payment && s.payment.qrisImageStorageId
+          ? { qrisImageStorageId: s.payment.qrisImageStorageId }
+          : {}),
       },
     };
   }, [s]);
@@ -147,6 +157,28 @@ function SettingsTax() {
     patchPayment({ quickCashButtons: updated });
   }
 
+  async function handleQrFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setUploadingQr(true);
+    try {
+      const url = await generateUploadUrl();
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      const json = (await res.json()) as { storageId: Id<'_storage'> };
+      patchPayment({ qrisImageStorageId: json.storageId });
+    } catch {
+      setError(t`Gagal mengunggah QRIS.`);
+    } finally {
+      setUploadingQr(false);
+      if (qrFileRef.current) qrFileRef.current.value = '';
+    }
+  }
+
   async function handleSave() {
     const d = draft;
     if (!d) return;
@@ -159,7 +191,16 @@ function SettingsTax() {
       // Build payment payload — avoid assigning `undefined` to optional fields
       // (exactOptionalPropertyTypes requires the property to be absent, not undefined)
       const paymentPayload = {
-        methods: d.payment.methods,
+        methods: {
+          ...d.payment.methods,
+          // Unsupported methods have no checkout flow yet and are shown disabled
+          // ("Segera hadir"). Always persist false so the stored state matches the
+          // UI, even if a row carried a stale true. Drop an override when its flow ships.
+          qrisDynamic: false,
+          card: false,
+          ewallet: false,
+          transfer: false,
+        },
         defaultMethod: d.payment.defaultMethod,
         cashRounding: d.payment.cashRounding,
         quickCashButtons: d.payment.quickCashButtons,
@@ -168,6 +209,7 @@ function SettingsTax() {
         serviceChargeName: d.payment.serviceChargeName,
         ...(qrisMerchantName !== undefined ? { qrisMerchantName } : {}),
         ...(qrisNmid !== undefined ? { qrisNmid } : {}),
+        ...(d.payment.qrisImageStorageId ? { qrisImageStorageId: d.payment.qrisImageStorageId } : {}),
       };
 
       await Promise.all([
@@ -355,48 +397,32 @@ function SettingsTax() {
 
           <SettingRow
             label={<Trans>QRIS dinamis</Trans>}
-            control={
-              <Switch
-                checked={draft.payment.methods.qrisDynamic}
-                onCheckedChange={(checked) => patchMethods({ qrisDynamic: checked })}
-              />
-            }
+            description={<Trans>Segera hadir.</Trans>}
+            control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
           />
 
           <RowSep />
 
           <SettingRow
             label={<Trans>Kartu debit/kredit</Trans>}
-            control={
-              <Switch
-                checked={draft.payment.methods.card}
-                onCheckedChange={(checked) => patchMethods({ card: checked })}
-              />
-            }
+            description={<Trans>Segera hadir.</Trans>}
+            control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
           />
 
           <RowSep />
 
           <SettingRow
             label={<Trans>E-wallet</Trans>}
-            control={
-              <Switch
-                checked={draft.payment.methods.ewallet}
-                onCheckedChange={(checked) => patchMethods({ ewallet: checked })}
-              />
-            }
+            description={<Trans>Segera hadir.</Trans>}
+            control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
           />
 
           <RowSep />
 
           <SettingRow
             label={<Trans>Transfer bank</Trans>}
-            control={
-              <Switch
-                checked={draft.payment.methods.transfer}
-                onCheckedChange={(checked) => patchMethods({ transfer: checked })}
-              />
-            }
+            description={<Trans>Segera hadir.</Trans>}
+            control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
           />
 
           <RowSep />
@@ -440,6 +466,70 @@ function SettingsTax() {
           />
         </FieldGroup>
       </SettingsSection>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* 3b. QRIS Statis (shown only when qrisStatic is enabled)             */}
+      {/* ------------------------------------------------------------------ */}
+      {draft.payment.methods.qrisStatic ? (
+        <SettingsSection title={<Trans>QRIS Statis</Trans>}>
+          <FieldGroup>
+            <SettingRow
+              label={<Trans>Gambar QRIS</Trans>}
+              description={<Trans>Unggah QR statis dari penyedia Anda.</Trans>}
+              control={
+                <div className="flex flex-col items-end gap-2">
+                  {qrisImageUrl ? (
+                    <img
+                      src={qrisImageUrl}
+                      alt={t`QRIS statis`}
+                      className="size-24 rounded border border-border object-contain"
+                    />
+                  ) : null}
+                  <input
+                    ref={qrFileRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleQrFileChange}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploadingQr}
+                    onClick={() => qrFileRef.current?.click()}
+                  >
+                    {uploadingQr ? <Spinner data-icon="inline-start" /> : null}
+                    {qrisImageUrl ? <Trans>Ganti gambar</Trans> : <Trans>Unggah gambar</Trans>}
+                  </Button>
+                </div>
+              }
+            />
+            <RowSep />
+            <SettingRow
+              label={<Trans>Nama merchant</Trans>}
+              control={
+                <Input
+                  value={draft.payment.qrisMerchantName}
+                  onChange={(e) => patchPayment({ qrisMerchantName: e.target.value })}
+                  className="w-52"
+                />
+              }
+            />
+            <RowSep />
+            <SettingRow
+              label={<Trans>NMID</Trans>}
+              control={
+                <Input
+                  value={draft.payment.qrisNmid}
+                  onChange={(e) => patchPayment({ qrisNmid: e.target.value })}
+                  className="w-52"
+                />
+              }
+            />
+          </FieldGroup>
+        </SettingsSection>
+      ) : null}
 
       {/* ------------------------------------------------------------------ */}
       {/* 4. Tunai                                                             */}
@@ -517,37 +607,6 @@ function SettingsTax() {
                   </Button>
                 </div>
               </div>
-            }
-          />
-        </FieldGroup>
-      </SettingsSection>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* 5. QRIS                                                              */}
-      {/* ------------------------------------------------------------------ */}
-      <SettingsSection title={<Trans>QRIS</Trans>}>
-        <FieldGroup>
-          <SettingRow
-            label={<Trans>Nama merchant</Trans>}
-            control={
-              <Input
-                value={draft.payment.qrisMerchantName ?? ''}
-                onChange={(e) => patchPayment({ qrisMerchantName: e.target.value })}
-                className="w-52"
-              />
-            }
-          />
-
-          <RowSep />
-
-          <SettingRow
-            label={<Trans>NMID</Trans>}
-            control={
-              <Input
-                value={draft.payment.qrisNmid ?? ''}
-                onChange={(e) => patchPayment({ qrisNmid: e.target.value })}
-                className="w-52"
-              />
             }
           />
         </FieldGroup>
