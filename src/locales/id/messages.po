@@ -563,8 +563,8 @@ msgid "Batal"
 msgstr "Batal"
 
 #: src/components/sale/cart-pane.tsx
-msgid "Bayar"
-msgstr "Bayar"
+#~ msgid "Bayar"
+#~ msgstr "Bayar"
 
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/recipes.tsx
@@ -1073,6 +1073,7 @@ msgid "Gagal memperbarui lokasi cuaca."
 msgstr "Gagal memperbarui lokasi cuaca."
 
 #: src/components/sale/cash-payment-dialog.tsx
+#: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Gagal memproses pembayaran."
 msgstr "Gagal memproses pembayaran."
 
@@ -1156,6 +1157,10 @@ msgstr "Gagal menghubungkan integrasi."
 msgid "Gagal mengunggah logo."
 msgstr "Gagal mengunggah logo."
 
+#: src/routes/_pos/settings/tax.tsx
+msgid "Gagal mengunggah QRIS."
+msgstr "Gagal mengunggah QRIS."
+
 #: src/routes/_pos/shift/close.tsx
 msgid "Gagal menutup shift."
 msgstr "Gagal menutup shift."
@@ -1212,9 +1217,21 @@ msgstr "Gagal menyimpan urutan."
 msgid "Gagal menyimpan."
 msgstr "Gagal menyimpan."
 
+#: src/routes/_pos/settings/tax.tsx
+msgid "Gambar QRIS"
+msgstr "Gambar QRIS"
+
+#: src/components/sale/qris-static-payment-dialog.tsx
+msgid "Gambar QRIS belum diunggah."
+msgstr "Gambar QRIS belum diunggah."
+
 #: src/components/sale/customer-section.tsx
 msgid "Ganti"
 msgstr "Ganti"
+
+#: src/routes/_pos/settings/tax.tsx
+msgid "Ganti gambar"
+msgstr "Ganti gambar"
 
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -1656,6 +1673,10 @@ msgstr "Kirim struk & notifikasi via WhatsApp."
 msgid "Kode pos"
 msgstr "Kode pos"
 
+#: src/components/sale/qris-static-payment-dialog.tsx
+msgid "Kode QRIS"
+msgstr "Kode QRIS"
+
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Konfirmasi"
 msgstr "Konfirmasi"
@@ -1887,6 +1908,7 @@ msgid "Memerlukan minimal {0} hari data (terkumpul {1}). Perkiraan akan aktif se
 msgstr "Memerlukan minimal {0} hari data (terkumpul {1}). Perkiraan akan aktif sekitar {2}."
 
 #: src/components/sale/cash-payment-dialog.tsx
+#: src/components/sale/qris-static-payment-dialog.tsx
 #: src/routes/_public/signin.tsx
 #: src/routes/_public/signup.tsx
 msgid "Memproses…"
@@ -2363,6 +2385,10 @@ msgstr "Pembayaran e-wallet GoPay."
 msgid "Pembayaran e-wallet OVO."
 msgstr "Pembayaran e-wallet OVO."
 
+#: src/components/sale/qris-static-payment-dialog.tsx
+msgid "Pembayaran QRIS"
+msgstr "Pembayaran QRIS"
+
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Pembayaran Tunai"
 msgstr "Pembayaran Tunai"
@@ -2631,6 +2657,7 @@ msgid "Poin disesuaikan."
 msgstr "Poin disesuaikan."
 
 #: src/components/sale/cash-payment-dialog.tsx
+#: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Poin ditukar"
 msgstr "Poin ditukar"
 
@@ -2753,7 +2780,7 @@ msgid "Putuskan"
 msgstr "Putuskan"
 
 #: src/components/channel-sales-chart.tsx
-#: src/routes/_pos/settings/tax.tsx
+#: src/components/sale/cart-pane.tsx
 msgid "QRIS"
 msgstr "QRIS"
 
@@ -2768,6 +2795,10 @@ msgstr "QRIS dinamis"
 #: src/routes/_pos/settings/tax.tsx
 msgid "QRIS statis"
 msgstr "QRIS statis"
+
+#: src/routes/_pos/settings/tax.tsx
+msgid "QRIS Statis"
+msgstr "QRIS Statis"
 
 #: src/components/inventory/purchase-form.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -2937,6 +2968,10 @@ msgstr "Sedang"
 #: src/routes/_pos/settings/general.tsx
 msgid "Segera"
 msgstr "Segera"
+
+#: src/routes/_pos/settings/tax.tsx
+msgid "Segera hadir."
+msgstr "Segera hadir."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Selasa"
@@ -3162,6 +3197,10 @@ msgstr "Subtotal"
 #: src/routes/_pos/shift/open.tsx
 msgid "Sudah ada shift terbuka"
 msgstr "Sudah ada shift terbuka"
+
+#: src/components/sale/qris-static-payment-dialog.tsx
+msgid "Sudah dibayar"
+msgstr "Sudah dibayar"
 
 #: src/routes/_public/signup.tsx
 msgid "Sudah punya akun?"
@@ -3519,6 +3558,7 @@ msgid "Total <0>{0}</0>"
 msgstr "Total <0>{0}</0>"
 
 #: src/components/sale/cash-payment-dialog.tsx
+#: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Total tagihan"
 msgstr "Total tagihan"
 
@@ -3556,6 +3596,7 @@ msgid "Tumpah"
 msgstr "Tumpah"
 
 #: src/components/channel-sales-chart.tsx
+#: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/history.tsx
 #: src/routes/_pos/settings/tax.tsx
@@ -3658,9 +3699,17 @@ msgstr "Umum"
 msgid "Unduh CSV"
 msgstr "Unduh CSV"
 
+#: src/routes/_pos/settings/tax.tsx
+msgid "Unggah gambar"
+msgstr "Unggah gambar"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Unggah logo"
 msgstr "Unggah logo"
+
+#: src/routes/_pos/settings/tax.tsx
+msgid "Unggah QR statis dari penyedia Anda."
+msgstr "Unggah QR statis dari penyedia Anda."
 
 #: src/routes/__root.tsx
 msgid "URL yang kamu buka tidak ada di kodapos."

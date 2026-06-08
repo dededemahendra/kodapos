@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { expect, test } from '@playwright/test';
 import { gotoHydrated, waitForUrlHydrated } from './_helpers';
 
@@ -276,5 +277,89 @@ test.describe('sale (auth-gated)', () => {
     await page.getByLabel('Telepon').fill('0812-3456-7890');
     await page.getByRole('button', { name: /^Simpan$/ }).click();
     await expect(page.getByText('Sumber Susu')).toBeVisible();
+  });
+
+  test('static QRIS: upload QR image → QRIS payment → receipt shows QRIS', async ({ page }) => {
+    const email = `e2e+qris+${Date.now()}@kodapos.test`;
+    const password = 'Sa{ngat-Aman-123';
+
+    // 1. Signup
+    await gotoHydrated(page, '/signup');
+    await page.getByLabel('Nama Anda').fill('E2E Owner');
+    await page.getByLabel('Nama kafe').fill('Kopi QRIS E2E');
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password').fill(password);
+    await page.getByRole('button', { name: /Daftar/ }).click();
+
+    // 2. Onboarding/profile — set PPN 11%
+    await waitForUrlHydrated(page, /\/onboarding\/profile$/, { timeout: 15_000 });
+    await page.getByLabel('Persentase PPN').fill('11');
+    await page.getByRole('button', { name: /Lanjut/ }).click();
+
+    // 3. Onboarding/menu — add category "Kopi", then item "Espresso" Rp 18.000
+    await waitForUrlHydrated(page, /\/onboarding\/menu$/);
+    await page.getByRole('button', { name: /Mulai dengan kategori/ }).click();
+    await waitForUrlHydrated(page, /\/menu\/categories$/);
+    await page.getByLabel('Nama kategori baru').fill('Kopi');
+    await page.getByRole('button', { name: /\+ Tambah/ }).click();
+    await page.getByRole('link', { name: 'Items' }).click();
+    await page.getByRole('link', { name: /\+ Item/ }).click();
+    await page.getByLabel('Nama').fill('Espresso');
+    await page.getByLabel('Kategori').selectOption({ label: 'Kopi' });
+    await page.getByLabel('Harga (Rp)').fill('18000');
+    await page.getByRole('button', { name: /Simpan/ }).click();
+    await waitForUrlHydrated(page, /\/menu$/);
+
+    // 4. Onboarding/cashier — owner sets PIN 1234
+    await page.goto('/onboarding/cashier');
+    await waitForUrlHydrated(page, /\/onboarding\/cashier$/);
+    await page.getByRole('button', { name: /Atur PIN/ }).click();
+    // PIN dialog opens; fill 4 cells via keyboard input.
+    for (const digit of '1234') {
+      await page.keyboard.type(digit);
+    }
+    // Dialog auto-submits on 4th digit; button should now say "Ganti PIN".
+    await expect(page.getByRole('button', { name: /Ganti PIN/ })).toBeVisible({ timeout: 5_000 });
+    await page.getByRole('button', { name: /Selesai/ }).click();
+    await waitForUrlHydrated(page, /\/menu$/);
+
+    // 5. /sale → PinGate → /pin → enter PIN
+    await page.goto('/sale');
+    await waitForUrlHydrated(page, /\/pin$/);
+    await page.getByRole('button', { name: /E2E Owner/ }).click();
+    for (const digit of '1234') {
+      await page.keyboard.type(digit);
+    }
+
+    // 6. ShiftGate redirects to /shift/open; open shift Rp 100.000
+    await waitForUrlHydrated(page, /\/shift\/open$/);
+    await page.getByLabel('Modal awal').fill('100000');
+    await page.getByRole('button', { name: /Buka Shift/ }).click();
+    await waitForUrlHydrated(page, /\/shift\/close$/);
+
+    // Upload a static QRIS image in settings (QRIS statis is enabled by default)
+    await page.goto('/settings/tax');
+    await waitForUrlHydrated(page, '/settings/tax');
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'qr.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+        'base64'
+      ),
+    });
+    await page.getByRole('button', { name: /Simpan perubahan/ }).click();
+    await expect(page.getByText(/Tersimpan/)).toBeVisible();
+
+    // Sale: add an item and pay via QRIS
+    await page.goto('/sale');
+    await waitForUrlHydrated(page, '/sale');
+    await page.getByRole('button', { name: /Espresso/ }).first().click();
+    await page.getByRole('button', { name: /^QRIS$/ }).click();
+    await page.getByRole('button', { name: /Sudah dibayar/ }).click();
+
+    // Receipt shows the QRIS payment line
+    await expect(page.getByText(/QRIS/)).toBeVisible();
+    await page.getByRole('button', { name: /Selesai/ }).click();
   });
 });
