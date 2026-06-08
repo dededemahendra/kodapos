@@ -120,6 +120,7 @@ const settingsValidator = v.object({
   npwp: v.optional(v.string()),
   taxRatePct: v.number(),
   taxEnabled: v.boolean(),
+  qrisImageUrl: v.optional(v.string()),
 });
 
 export const get = query({
@@ -133,8 +134,15 @@ export const get = query({
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
       .first();
 
+    const payment = row?.payment ?? DEFAULT_SETTINGS.payment;
+    // Resolve from `row` (a Doc, whose payment carries the optional storage id),
+    // not the merged `payment` — DEFAULT_SETTINGS.payment is a literal without
+    // the field, so the union would not type-check a direct property access.
+    const storageId = row?.payment?.qrisImageStorageId;
+    const qrisImageUrl = storageId ? await ctx.storage.getUrl(storageId) : null;
+
     return {
-      payment: row?.payment ?? DEFAULT_SETTINGS.payment,
+      payment,
       receipt: row?.receipt ?? DEFAULT_SETTINGS.receipt,
       integrations: row?.integrations ?? DEFAULT_SETTINGS.integrations,
       taxName: row?.taxName ?? DEFAULT_SETTINGS.taxName,
@@ -142,6 +150,7 @@ export const get = query({
       ...(row?.npwp !== undefined ? { npwp: row.npwp } : {}),
       taxRatePct: cafe?.taxRatePct ?? 11,
       taxEnabled: cafe?.taxEnabled ?? true,
+      ...(qrisImageUrl ? { qrisImageUrl } : {}),
     };
   },
 });
