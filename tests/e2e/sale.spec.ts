@@ -72,8 +72,8 @@ test.describe('sale (auth-gated)', () => {
     await expect(page.getByText(/Espresso/).first()).toBeVisible();
     await expect(page.getByText(/Rp 19\.980/).first()).toBeVisible();
 
-    // 9. Bayar → cash payment dialog
-    await page.getByRole('button', { name: /^Bayar$/ }).click();
+    // 9. Tunai → cash payment dialog
+    await page.getByRole('button', { name: /^Tunai$/ }).click();
 
     // 10. Tap 100k chip → tendered = 100.000, change = Rp 80.020
     await page.getByRole('button', { name: /^100k$/ }).click();
@@ -164,7 +164,7 @@ test.describe('sale (auth-gated)', () => {
     await expect(page.getByText(/Rp 15\.000/).first()).toBeVisible();
 
     // Pay exact → receipt shows the discount row
-    await page.getByRole('button', { name: /^Bayar$/ }).click();
+    await page.getByRole('button', { name: /^Tunai$/ }).click();
     await page.getByRole('button', { name: /^Pas$/ }).click();
     await page.getByRole('button', { name: /Konfirmasi/ }).click();
     await expect(page.getByText(/Diskon Kopi/)).toBeVisible();
@@ -217,7 +217,7 @@ test.describe('sale (auth-gated)', () => {
     await page.goto('/sale');
     await waitForUrlHydrated(page, /\/sale$/);
     await page.getByRole('button', { name: /Espresso/ }).first().click();
-    await page.getByRole('button', { name: /^Bayar$/ }).click();
+    await page.getByRole('button', { name: /^Tunai$/ }).click();
     await page.getByRole('button', { name: /^Pas$/ }).click();
     await page.getByRole('button', { name: /Konfirmasi/ }).click();
     await page.getByRole('button', { name: /Selesai/ }).click();

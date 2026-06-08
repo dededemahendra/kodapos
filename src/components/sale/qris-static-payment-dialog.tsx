@@ -4,7 +4,7 @@ import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_LOYALTY, redemptionIDR } from 'convex/lib/loyalty';
 import { computeOrderTotals } from 'convex/lib/pricing';
 import { useMutation, useQuery } from 'convex/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
@@ -13,18 +13,7 @@ import { genUUID } from '~/lib/uuid';
 import type { CartState } from './cart-reducer';
 import { CustomerSection, type CustomerSelection } from './customer-section';
 
-function computeDenominations(total: number): number[] {
-  const nextFive = Math.ceil(total / 5000) * 5000;
-  const nextHundred = Math.max(100000, Math.ceil(total / 100000) * 100000);
-  const out: number[] = [total];
-  if (nextFive !== total) out.push(nextFive);
-  if (!out.includes(nextHundred)) out.push(nextHundred);
-  const fourth = nextHundred + 100000;
-  if (!out.includes(fourth)) out.push(fourth);
-  return out.slice(0, 4);
-}
-
-export function CashPaymentDialog({
+export function QrisStaticPaymentDialog({
   open,
   onOpenChange,
   subtotalIDR,
@@ -33,6 +22,9 @@ export function CashPaymentDialog({
   serviceChargePct,
   taxEnabled,
   taxRatePct,
+  qrisImageUrl,
+  qrisMerchantName,
+  qrisNmid,
   cart,
   shiftId,
   cashierId,
@@ -48,6 +40,9 @@ export function CashPaymentDialog({
   serviceChargePct: number;
   taxEnabled: boolean;
   taxRatePct: number;
+  qrisImageUrl?: string;
+  qrisMerchantName?: string;
+  qrisNmid?: string;
   cart: CartState;
   shiftId: Id<'shifts'>;
   cashierId: Id<'cafeStaff'>;
@@ -55,27 +50,21 @@ export function CashPaymentDialog({
   onPaid: (orderId: Id<'orders'>) => void;
 }) {
   const { t } = useLingui();
-  const createCashSale = useMutation(api.orders.createCashSale);
+  const createQrisStaticSale = useMutation(api.orders.createQrisStaticSale);
   const loyaltyCfg = useQuery(api.loyalty.getConfig) ?? DEFAULT_LOYALTY;
-  const [tendered, setTendered] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [customer, setCustomer] = useState<CustomerSelection>({ redeemPoints: 0 });
   const clientIdRef = useRef<string>('');
 
-  // Generate clientId once when the dialog opens; reset on close.
   useEffect(() => {
     if (open) {
       clientIdRef.current = genUUID();
-      setTendered('');
       setError(null);
       setCustomer({ redeemPoints: 0 });
     }
   }, [open]);
 
-  // Redemption folds into the EXISTING totals math: promo first, then points off
-  // the remainder, then service charge + PB1 — same order the server uses. We pass
-  // a single combined discountIDR (promo + redeem) into computeOrderTotals.
   const afterPromoIDR = subtotalIDR - promoDiscountIDR;
   const redeemIDR = redemptionIDR(customer.redeemPoints, loyaltyCfg);
   const discountIDR = promoDiscountIDR + redeemIDR;
@@ -88,20 +77,12 @@ export function CashPaymentDialog({
     taxRatePct,
   });
 
-  const tenderedNum = useMemo(() => {
-    if (!tendered) return 0;
-    const n = Number.parseInt(tendered, 10);
-    return Number.isFinite(n) ? n : 0;
-  }, [tendered]);
-  const changeNum = tenderedNum - totalIDR;
-  const denoms = computeDenominations(totalIDR);
-
   async function confirm() {
-    if (tenderedNum < totalIDR || submitting) return;
+    if (submitting) return;
     setSubmitting(true);
     setError(null);
     try {
-      const result = await createCashSale({
+      const result = await createQrisStaticSale({
         clientId: clientIdRef.current,
         shiftId,
         cashierId,
@@ -110,7 +91,6 @@ export function CashPaymentDialog({
           qty: l.qty,
           modifierOptionIds: l.modifierOptionIds,
         })),
-        cashTenderedIDR: tenderedNum,
         ...(promoId ? { promoId } : {}),
         ...(customer.customerId ? { customerId: customer.customerId } : {}),
         ...(customer.redeemPoints > 0 ? { redeemPoints: customer.redeemPoints } : {}),
@@ -125,20 +105,12 @@ export function CashPaymentDialog({
     }
   }
 
-  function pressKey(key: string) {
-    if (key === '⌫') {
-      setTendered((s) => s.slice(0, -1));
-    } else {
-      setTendered((s) => (s + key).slice(0, 12));
-    }
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>
-            <Trans>Pembayaran Tunai</Trans>
+            <Trans>Pembayaran QRIS</Trans>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
@@ -168,61 +140,23 @@ export function CashPaymentDialog({
             </div>
           </div>
 
-          <div
-            className={`rounded-md border-2 px-3 py-2 text-right font-mono text-2xl tabular-nums ${
-              tenderedNum >= totalIDR && tenderedNum > 0
-                ? 'border-ring bg-accent text-primary'
-                : 'border-border text-foreground'
-            }`}
-          >
-            {tenderedNum > 0 ? tenderedNum.toLocaleString('id-ID') : '0'}
-          </div>
-          <div className="flex justify-between text-xs px-1">
-            <span className="text-muted-foreground">
-              <Trans>Kembalian</Trans>
-            </span>
-            <span className="font-semibold tabular-nums">
-              {changeNum >= 0 ? formatIDR(changeNum) : '—'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-4 gap-1.5">
-            {denoms.map((d, i) => (
-              <button
-                type="button"
-                key={`${d}-${i}`}
-                onClick={() => setTendered(String(d))}
-                className="text-xs px-2 py-2 rounded-md border border-border bg-background hover:bg-muted"
-              >
-                {d === totalIDR ? <Trans>Pas</Trans> : `${(d / 1000).toLocaleString('id-ID')}k`}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-3 gap-1.5">
-            {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '000', '⌫'].map((k) => (
-              <button
-                type="button"
-                key={k}
-                onClick={() => pressKey(k)}
-                className="text-base px-2 py-3 rounded-md border border-border bg-background hover:bg-muted font-medium"
-              >
-                {k}
-              </button>
-            ))}
+          <div className="flex flex-col items-center gap-1 rounded-md border border-border px-3 py-3">
+            {qrisImageUrl ? (
+              <img src={qrisImageUrl} alt={t`Kode QRIS`} className="size-56 object-contain" />
+            ) : (
+              <p className="text-sm text-muted-foreground py-8">
+                <Trans>Gambar QRIS belum diunggah.</Trans>
+              </p>
+            )}
+            {qrisMerchantName ? <div className="text-sm font-medium">{qrisMerchantName}</div> : null}
+            {qrisNmid ? <div className="text-xs text-muted-foreground">NMID: {qrisNmid}</div> : null}
           </div>
 
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-          <Button
-            type="button"
-            onClick={confirm}
-            disabled={tenderedNum < totalIDR || submitting}
-            className="w-full"
-            size="lg"
-          >
+          <Button type="button" onClick={confirm} disabled={submitting} className="w-full" size="lg">
             {submitting ? <Spinner data-icon="inline-start" /> : null}
-            {submitting ? <Trans>Memproses…</Trans> : <Trans>Konfirmasi</Trans>}
+            {submitting ? <Trans>Memproses…</Trans> : <Trans>Sudah dibayar</Trans>}
           </Button>
         </div>
       </DialogContent>

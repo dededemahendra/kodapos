@@ -6,6 +6,7 @@ import { useReducer, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { CashPaymentDialog } from './cash-payment-dialog';
+import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
 import { ReceiptPreview } from './receipt-preview';
 import {
   AlertDialog,
@@ -40,7 +41,8 @@ export function SaleScreen() {
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
-  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [cashOpen, setCashOpen] = useState(false);
+  const [qrisOpen, setQrisOpen] = useState(false);
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
 
@@ -79,6 +81,16 @@ export function SaleScreen() {
     taxRatePct,
   });
 
+  const methods = settings.payment.methods;
+  const defaultMethod = settings.payment.defaultMethod;
+  const supported: Array<'cash' | 'qris_static'> = [];
+  if (methods.cash) supported.push('cash');
+  if (methods.qrisStatic && settings.qrisImageUrl) supported.push('qris_static');
+  // Put the configured default first when it is in the supported set.
+  const payMethods = [...supported].sort((a, b) =>
+    a === defaultMethod ? -1 : b === defaultMethod ? 1 : 0
+  );
+
   function onItemTap(row: ItemForSale) {
     if (row.attachedGroups.length > 0) {
       setPickerRow(row);
@@ -116,8 +128,11 @@ export function SaleScreen() {
         discountIDR={discount}
         onAddPromo={() => setPromoPickerOpen(true)}
         onRemovePromo={() => dispatch({ type: 'setPromo', promo: null })}
-        onBayar={() => {
-          if (cart.lines.length > 0) setPaymentOpen(true);
+        payMethods={payMethods}
+        onPay={(method) => {
+          if (cart.lines.length === 0) return;
+          if (method === 'cash') setCashOpen(true);
+          else setQrisOpen(true);
         }}
         onKosongkan={() => setClearOpen(true)}
       />
@@ -170,24 +185,47 @@ export function SaleScreen() {
         </AlertDialogContent>
       </AlertDialog>
       {shift && cashierId ? (
-        <CashPaymentDialog
-          open={paymentOpen}
-          onOpenChange={setPaymentOpen}
-          subtotalIDR={subtotal}
-          promoDiscountIDR={discount}
-          serviceChargeEnabled={scEnabled}
-          serviceChargePct={scPct}
-          taxEnabled={taxEnabled}
-          taxRatePct={taxRatePct}
-          {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
-          cart={cart}
-          shiftId={shift._id}
-          cashierId={cashierId}
-          onPaid={(orderId) => {
-            setReceiptOrderId(orderId);
-            dispatch({ type: 'clearCart' });
-          }}
-        />
+        <>
+          <CashPaymentDialog
+            open={cashOpen}
+            onOpenChange={setCashOpen}
+            subtotalIDR={subtotal}
+            promoDiscountIDR={discount}
+            serviceChargeEnabled={scEnabled}
+            serviceChargePct={scPct}
+            taxEnabled={taxEnabled}
+            taxRatePct={taxRatePct}
+            {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            cart={cart}
+            shiftId={shift._id}
+            cashierId={cashierId}
+            onPaid={(orderId) => {
+              setReceiptOrderId(orderId);
+              dispatch({ type: 'clearCart' });
+            }}
+          />
+          <QrisStaticPaymentDialog
+            open={qrisOpen}
+            onOpenChange={setQrisOpen}
+            subtotalIDR={subtotal}
+            promoDiscountIDR={discount}
+            serviceChargeEnabled={scEnabled}
+            serviceChargePct={scPct}
+            taxEnabled={taxEnabled}
+            taxRatePct={taxRatePct}
+            {...(settings.qrisImageUrl ? { qrisImageUrl: settings.qrisImageUrl } : {})}
+            {...('qrisMerchantName' in settings.payment && settings.payment.qrisMerchantName ? { qrisMerchantName: settings.payment.qrisMerchantName } : {})}
+            {...('qrisNmid' in settings.payment && settings.payment.qrisNmid ? { qrisNmid: settings.payment.qrisNmid } : {})}
+            {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            cart={cart}
+            shiftId={shift._id}
+            cashierId={cashierId}
+            onPaid={(orderId) => {
+              setReceiptOrderId(orderId);
+              dispatch({ type: 'clearCart' });
+            }}
+          />
+        </>
       ) : null}
       <ReceiptPreview
         open={receiptOrderId !== null}
