@@ -24,6 +24,7 @@ import {
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { Switch } from '~/components/ui/switch';
+import { uploadToStorage } from '~/lib/upload';
 
 export const Route = createFileRoute('/_pos/settings/tax')({
   component: SettingsTax,
@@ -63,6 +64,18 @@ interface TaxPaymentDraft {
   taxInclusive: boolean;
   npwp: string;
   payment: PaymentDraft;
+}
+
+// A payment method whose checkout flow hasn't shipped yet: shown disabled with a
+// "Segera hadir" hint. Replace with a live row when its flow lands.
+function ComingSoonRow({ label }: { label: React.ReactNode }) {
+  return (
+    <SettingRow
+      label={label}
+      description={<Trans>Segera hadir.</Trans>}
+      control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
+    />
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -163,20 +176,23 @@ function SettingsTax() {
     setError(null);
     setUploadingQr(true);
     try {
-      const url = await generateUploadUrl();
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      const json = (await res.json()) as { storageId: Id<'_storage'> };
-      patchPayment({ qrisImageStorageId: json.storageId });
+      const storageId = await uploadToStorage(generateUploadUrl, file);
+      patchPayment({ qrisImageStorageId: storageId });
     } catch {
       setError(t`Gagal mengunggah QRIS.`);
     } finally {
       setUploadingQr(false);
       if (qrFileRef.current) qrFileRef.current.value = '';
     }
+  }
+
+  function handleRemoveQrImage() {
+    if (!draft) return;
+    // Strip the key entirely (rather than assigning undefined) so the draft type
+    // stays valid under exactOptionalPropertyTypes; handleSave omits it on save,
+    // which clears the stored image.
+    const { qrisImageStorageId: _removed, ...rest } = draft.payment;
+    setDraft({ ...draft, payment: rest });
   }
 
   async function handleSave() {
@@ -395,35 +411,19 @@ function SettingsTax() {
 
           <RowSep />
 
-          <SettingRow
-            label={<Trans>QRIS dinamis</Trans>}
-            description={<Trans>Segera hadir.</Trans>}
-            control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
-          />
+          <ComingSoonRow label={<Trans>QRIS dinamis</Trans>} />
 
           <RowSep />
 
-          <SettingRow
-            label={<Trans>Kartu debit/kredit</Trans>}
-            description={<Trans>Segera hadir.</Trans>}
-            control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
-          />
+          <ComingSoonRow label={<Trans>Kartu debit/kredit</Trans>} />
 
           <RowSep />
 
-          <SettingRow
-            label={<Trans>E-wallet</Trans>}
-            description={<Trans>Segera hadir.</Trans>}
-            control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
-          />
+          <ComingSoonRow label={<Trans>E-wallet</Trans>} />
 
           <RowSep />
 
-          <SettingRow
-            label={<Trans>Transfer bank</Trans>}
-            description={<Trans>Segera hadir.</Trans>}
-            control={<Switch checked={false} disabled onCheckedChange={() => {}} />}
-          />
+          <ComingSoonRow label={<Trans>Transfer bank</Trans>} />
 
           <RowSep />
 
@@ -478,7 +478,7 @@ function SettingsTax() {
               description={<Trans>Unggah QR statis dari penyedia Anda.</Trans>}
               control={
                 <div className="flex flex-col items-end gap-2">
-                  {qrisImageUrl ? (
+                  {draft.payment.qrisImageStorageId && qrisImageUrl ? (
                     <img
                       src={qrisImageUrl}
                       alt={t`QRIS statis`}
@@ -492,16 +492,33 @@ function SettingsTax() {
                     onChange={handleQrFileChange}
                     className="hidden"
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={uploadingQr}
-                    onClick={() => qrFileRef.current?.click()}
-                  >
-                    {uploadingQr ? <Spinner data-icon="inline-start" /> : null}
-                    {qrisImageUrl ? <Trans>Ganti gambar</Trans> : <Trans>Unggah gambar</Trans>}
-                  </Button>
+                  <div className="flex gap-2">
+                    {draft.payment.qrisImageStorageId ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={uploadingQr}
+                        onClick={handleRemoveQrImage}
+                      >
+                        <Trans>Hapus gambar</Trans>
+                      </Button>
+                    ) : null}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={uploadingQr}
+                      onClick={() => qrFileRef.current?.click()}
+                    >
+                      {uploadingQr ? <Spinner data-icon="inline-start" /> : null}
+                      {draft.payment.qrisImageStorageId ? (
+                        <Trans>Ganti gambar</Trans>
+                      ) : (
+                        <Trans>Unggah gambar</Trans>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               }
             />

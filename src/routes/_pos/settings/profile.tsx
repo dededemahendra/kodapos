@@ -2,7 +2,6 @@ import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import type { Id } from 'convex/_generated/dataModel';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { useRef, useState, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -26,6 +25,7 @@ import {
 import { Spinner } from '~/components/ui/spinner';
 import { Switch } from '~/components/ui/switch';
 import { FieldGroup } from '~/components/ui/field';
+import { uploadToStorage } from '~/lib/upload';
 
 export const Route = createFileRoute('/_pos/settings/profile')({
   component: SettingsProfile,
@@ -190,14 +190,8 @@ function SettingsProfile() {
     setError(null);
     setUploading(true);
     try {
-      const url = await generateUploadUrl();
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      const json = (await res.json()) as { storageId: Id<'_storage'> };
-      await setLogo({ storageId: json.storageId });
+      const storageId = await uploadToStorage(generateUploadUrl, file);
+      await setLogo({ storageId });
     } catch {
       setError(t`Gagal mengunggah logo.`);
     } finally {
