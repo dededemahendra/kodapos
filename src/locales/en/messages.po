@@ -433,6 +433,10 @@ msgstr "Configure receipt content, paper size, and printer."
 msgid "Atur kerapatan elemen antarmuka."
 msgstr "Adjust the density of interface elements."
 
+#: src/components/sale/cart-pane.tsx
+msgid "Atur metode pembayaran"
+msgstr "Set up a payment method"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "Atur pajak, biaya layanan, dan metode pembayaran."
 msgstr "Configure tax, service charge, and payment methods."
@@ -1319,6 +1323,10 @@ msgstr "Remove"
 #: src/components/sale/cart-line-row.tsx
 msgid "Hapus baris"
 msgstr "Remove row"
+
+#: src/routes/_pos/settings/tax.tsx
+msgid "Hapus gambar"
+msgstr "Remove image"
 
 #: src/components/sale/cart-pane.tsx
 msgid "Hapus promo"

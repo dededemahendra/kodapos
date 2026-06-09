@@ -433,6 +433,10 @@ msgstr "Atur isi struk, ukuran kertas, dan printer."
 msgid "Atur kerapatan elemen antarmuka."
 msgstr "Atur kerapatan elemen antarmuka."
 
+#: src/components/sale/cart-pane.tsx
+msgid "Atur metode pembayaran"
+msgstr "Atur metode pembayaran"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "Atur pajak, biaya layanan, dan metode pembayaran."
 msgstr "Atur pajak, biaya layanan, dan metode pembayaran."
@@ -1319,6 +1323,10 @@ msgstr "Hapus"
 #: src/components/sale/cart-line-row.tsx
 msgid "Hapus baris"
 msgstr "Hapus baris"
+
+#: src/routes/_pos/settings/tax.tsx
+msgid "Hapus gambar"
+msgstr "Hapus gambar"
 
 #: src/components/sale/cart-pane.tsx
 msgid "Hapus promo"
