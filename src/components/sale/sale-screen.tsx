@@ -6,6 +6,7 @@ import { useReducer, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { CashPaymentDialog } from './cash-payment-dialog';
+import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
 import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
 import { ReceiptPreview } from './receipt-preview';
 import {
@@ -24,6 +25,7 @@ import { CartPane } from './cart-pane';
 import { MenuPane, type ItemForSale } from './menu-pane';
 import { ModifierPickerDialog } from './modifier-picker-dialog';
 import { PromoPickerDialog } from './promo-picker-dialog';
+import { PAYMENT_METHODS, type PaymentMethod } from './payment-methods';
 
 function genLineKey(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -41,8 +43,7 @@ export function SaleScreen() {
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
-  const [cashOpen, setCashOpen] = useState(false);
-  const [qrisOpen, setQrisOpen] = useState(false);
+  const [openMethod, setOpenMethod] = useState<PaymentMethod | null>(null);
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
 
@@ -81,11 +82,13 @@ export function SaleScreen() {
     taxRatePct,
   });
 
-  const methods = settings.payment.methods;
   const defaultMethod = settings.payment.defaultMethod;
-  const supported: Array<'cash' | 'qris_static'> = [];
-  if (methods.cash) supported.push('cash');
-  if (methods.qrisStatic && settings.qrisImageUrl) supported.push('qris_static');
+  const ready = PAYMENT_METHODS.filter((m) => m.isReady(settings)).map((m) => m.method);
+  // Dynamic QRIS supersedes static on the same rail: it auto-confirms via webhook
+  // and is strictly preferable, so never show two identical "QRIS" buttons.
+  const supported = ready.includes('qris_dynamic')
+    ? ready.filter((m) => m !== 'qris_static')
+    : ready;
   // Put the configured default first when it is in the supported set. Sort on a
   // boolean key so the comparator stays a valid total order as methods are added.
   const payMethods = [...supported].sort(
@@ -131,9 +134,7 @@ export function SaleScreen() {
         onRemovePromo={() => dispatch({ type: 'setPromo', promo: null })}
         payMethods={payMethods}
         onPay={(method) => {
-          if (cart.lines.length === 0) return;
-          if (method === 'cash') setCashOpen(true);
-          else setQrisOpen(true);
+          if (cart.lines.length > 0) setOpenMethod(method);
         }}
         onKosongkan={() => setClearOpen(true)}
       />
@@ -188,8 +189,10 @@ export function SaleScreen() {
       {shift && cashierId ? (
         <>
           <CashPaymentDialog
-            open={cashOpen}
-            onOpenChange={setCashOpen}
+            open={openMethod === 'cash'}
+            onOpenChange={(o) => {
+              if (!o) setOpenMethod(null);
+            }}
             subtotalIDR={subtotal}
             promoDiscountIDR={discount}
             serviceChargeEnabled={scEnabled}
@@ -207,8 +210,10 @@ export function SaleScreen() {
             }}
           />
           <QrisStaticPaymentDialog
-            open={qrisOpen}
-            onOpenChange={setQrisOpen}
+            open={openMethod === 'qris_static'}
+            onOpenChange={(o) => {
+              if (!o) setOpenMethod(null);
+            }}
             subtotalIDR={subtotal}
             promoDiscountIDR={discount}
             serviceChargeEnabled={scEnabled}
@@ -218,6 +223,26 @@ export function SaleScreen() {
             {...(settings.qrisImageUrl ? { qrisImageUrl: settings.qrisImageUrl } : {})}
             {...('qrisMerchantName' in settings.payment && settings.payment.qrisMerchantName ? { qrisMerchantName: settings.payment.qrisMerchantName } : {})}
             {...('qrisNmid' in settings.payment && settings.payment.qrisNmid ? { qrisNmid: settings.payment.qrisNmid } : {})}
+            {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            cart={cart}
+            shiftId={shift._id}
+            cashierId={cashierId}
+            onPaid={(orderId) => {
+              setReceiptOrderId(orderId);
+              dispatch({ type: 'clearCart' });
+            }}
+          />
+          <QrisDynamicPaymentDialog
+            open={openMethod === 'qris_dynamic'}
+            onOpenChange={(o) => {
+              if (!o) setOpenMethod(null);
+            }}
+            subtotalIDR={subtotal}
+            promoDiscountIDR={discount}
+            serviceChargeEnabled={scEnabled}
+            serviceChargePct={scPct}
+            taxEnabled={taxEnabled}
+            taxRatePct={taxRatePct}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             cart={cart}
             shiftId={shift._id}

@@ -411,7 +411,23 @@ function SettingsTax() {
 
           <RowSep />
 
-          <ComingSoonRow label={<Trans>QRIS dinamis</Trans>} />
+          <SettingRow
+            label={<Trans>QRIS dinamis</Trans>}
+            description={
+              s.integrations.some((i) => i.key === 'qris' && i.connected) ? (
+                <Trans>Terhubung lewat integrasi penyedia.</Trans>
+              ) : (
+                <Trans>Hubungkan penyedia di halaman Integrasi.</Trans>
+              )
+            }
+            control={
+              <Switch
+                checked={s.integrations.some((i) => i.key === 'qris' && i.connected)}
+                disabled
+                onCheckedChange={() => {}}
+              />
+            }
+          />
 
           <RowSep />
 

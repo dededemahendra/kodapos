@@ -4,5 +4,6 @@ import { internal } from './_generated/api';
 const crons = cronJobs();
 // 15:00 UTC = 22:00 WIB, nightly per cafe.
 crons.cron('nightly forecast', '0 15 * * *', internal.forecast.generateNightly, {});
+crons.interval('sweep expired qris', { minutes: 5 }, internal.payments.qrisDynamic.sweepExpired, {});
 
 export default crons;
