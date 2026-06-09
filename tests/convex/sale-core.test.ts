@@ -71,4 +71,24 @@ describe('sale core: cash sale still settles in one mutation', () => {
     );
     expect(payment?.confirmedAt).toEqual(expect.any(Number));
   });
+
+  it('is idempotent: repeated clientId does not double-settle', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const args = {
+      clientId: 'core-dupe',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    };
+    const a = await asOwner.mutation(api.orders.createCashSale, args);
+    const b = await asOwner.mutation(api.orders.createCashSale, args);
+    expect(b.orderId).toBe(a.orderId);
+    const orders = await t.run((ctx) => ctx.db.query('orders').collect());
+    expect(orders).toHaveLength(1);
+    const payments = await t.run((ctx) => ctx.db.query('payments').collect());
+    expect(payments).toHaveLength(1);
+  });
 });

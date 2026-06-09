@@ -1,4 +1,4 @@
-import { v } from 'convex/values';
+import { type Infer, v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from './auth';
@@ -29,20 +29,8 @@ export const saleResult = v.object({
   changeIDR: v.number(),
 });
 
-export type SaleArgs = {
-  clientId: string;
-  shiftId: Id<'shifts'>;
-  cashierId: Id<'cafeStaff'>;
-  lines: Array<{
-    menuItemId: Id<'menuItems'>;
-    qty: number;
-    modifierOptionIds: Array<Id<'modifierOptions'>>;
-  }>;
-  promoId?: Id<'promotions'>;
-  customerId?: Id<'customers'>;
-  redeemPoints?: number;
-  createdAtClient?: number;
-};
+const saleArgsValidator = v.object(saleArgs);
+export type SaleArgs = Infer<typeof saleArgsValidator>;
 
 export type PaymentInput =
   | { method: 'cash'; tenderedIDR: number }
