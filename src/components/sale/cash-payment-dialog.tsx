@@ -1,8 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { DEFAULT_LOYALTY, redemptionIDR } from 'convex/lib/loyalty';
-import { computeOrderTotals } from 'convex/lib/pricing';
+import { DEFAULT_LOYALTY } from 'convex/lib/loyalty';
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
@@ -12,6 +11,7 @@ import { formatIDR } from '~/lib/money';
 import { genUUID } from '~/lib/uuid';
 import type { CartState } from './cart-reducer';
 import { CustomerSection, type CustomerSelection } from './customer-section';
+import { usePaymentTotals } from './use-payment-totals';
 
 function computeDenominations(total: number): number[] {
   const nextFive = Math.ceil(total / 5000) * 5000;
@@ -75,15 +75,11 @@ export function CashPaymentDialog({
     }
   }, [open]);
 
-  // Redemption folds into the EXISTING totals math: promo first, then points off
-  // the remainder, then service charge + PB1 — same order the server uses. We pass
-  // a single combined discountIDR (promo + redeem) into computeOrderTotals.
-  const afterPromoIDR = subtotalIDR - promoDiscountIDR;
-  const redeemIDR = redemptionIDR(customer.redeemPoints, loyaltyCfg);
-  const discountIDR = promoDiscountIDR + redeemIDR;
-  const { totalIDR } = computeOrderTotals({
+  const { afterPromoIDR, redeemIDR, totalIDR } = usePaymentTotals({
     subtotalIDR,
-    discountIDR,
+    promoDiscountIDR,
+    redeemPoints: customer.redeemPoints,
+    loyaltyCfg,
     serviceChargeEnabled,
     serviceChargePct,
     taxEnabled,
@@ -96,10 +92,13 @@ export function CashPaymentDialog({
     return Number.isFinite(n) ? n : 0;
   }, [tendered]);
   const changeNum = tenderedNum - totalIDR;
-  // computeDenominations puts the exact total first; drop it in the fallback since
-  // the standalone "Pas" button already covers paying the exact amount.
+  // Only show configured quick-cash amounts that actually cover the total — a
+  // button below the total just disables Konfirmasi (dead tap). When none
+  // qualify, fall back to computed denominations. computeDenominations puts the
+  // exact total first; drop it since the standalone "Pas" button covers exact.
+  const usableQuickCash = quickCashButtons.filter((d) => d > totalIDR);
   const denoms =
-    quickCashButtons.length > 0 ? quickCashButtons : computeDenominations(totalIDR).slice(1);
+    usableQuickCash.length > 0 ? usableQuickCash : computeDenominations(totalIDR).slice(1);
 
   async function confirm() {
     if (tenderedNum < totalIDR || submitting) return;

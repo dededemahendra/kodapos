@@ -1,8 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { DEFAULT_LOYALTY, redemptionIDR } from 'convex/lib/loyalty';
-import { computeOrderTotals } from 'convex/lib/pricing';
+import { DEFAULT_LOYALTY } from 'convex/lib/loyalty';
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
@@ -12,6 +11,7 @@ import { formatIDR } from '~/lib/money';
 import { genUUID } from '~/lib/uuid';
 import type { CartState } from './cart-reducer';
 import { CustomerSection, type CustomerSelection } from './customer-section';
+import { usePaymentTotals } from './use-payment-totals';
 
 export function QrisStaticPaymentDialog({
   open,
@@ -65,12 +65,11 @@ export function QrisStaticPaymentDialog({
     }
   }, [open]);
 
-  const afterPromoIDR = subtotalIDR - promoDiscountIDR;
-  const redeemIDR = redemptionIDR(customer.redeemPoints, loyaltyCfg);
-  const discountIDR = promoDiscountIDR + redeemIDR;
-  const { totalIDR } = computeOrderTotals({
+  const { afterPromoIDR, redeemIDR, totalIDR } = usePaymentTotals({
     subtotalIDR,
-    discountIDR,
+    promoDiscountIDR,
+    redeemPoints: customer.redeemPoints,
+    loyaltyCfg,
     serviceChargeEnabled,
     serviceChargePct,
     taxEnabled,
