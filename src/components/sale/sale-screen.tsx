@@ -24,6 +24,7 @@ import { CartPane } from './cart-pane';
 import { MenuPane, type ItemForSale } from './menu-pane';
 import { ModifierPickerDialog } from './modifier-picker-dialog';
 import { PromoPickerDialog } from './promo-picker-dialog';
+import { PAYMENT_METHODS, type PaymentMethod } from './payment-methods';
 
 function genLineKey(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -41,8 +42,7 @@ export function SaleScreen() {
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
-  const [cashOpen, setCashOpen] = useState(false);
-  const [qrisOpen, setQrisOpen] = useState(false);
+  const [openMethod, setOpenMethod] = useState<PaymentMethod | null>(null);
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
 
@@ -81,11 +81,8 @@ export function SaleScreen() {
     taxRatePct,
   });
 
-  const methods = settings.payment.methods;
   const defaultMethod = settings.payment.defaultMethod;
-  const supported: Array<'cash' | 'qris_static'> = [];
-  if (methods.cash) supported.push('cash');
-  if (methods.qrisStatic && settings.qrisImageUrl) supported.push('qris_static');
+  const supported = PAYMENT_METHODS.filter((m) => m.isReady(settings)).map((m) => m.method);
   // Put the configured default first when it is in the supported set. Sort on a
   // boolean key so the comparator stays a valid total order as methods are added.
   const payMethods = [...supported].sort(
@@ -131,9 +128,7 @@ export function SaleScreen() {
         onRemovePromo={() => dispatch({ type: 'setPromo', promo: null })}
         payMethods={payMethods}
         onPay={(method) => {
-          if (cart.lines.length === 0) return;
-          if (method === 'cash') setCashOpen(true);
-          else setQrisOpen(true);
+          if (cart.lines.length > 0) setOpenMethod(method);
         }}
         onKosongkan={() => setClearOpen(true)}
       />
@@ -188,8 +183,10 @@ export function SaleScreen() {
       {shift && cashierId ? (
         <>
           <CashPaymentDialog
-            open={cashOpen}
-            onOpenChange={setCashOpen}
+            open={openMethod === 'cash'}
+            onOpenChange={(o) => {
+              if (!o) setOpenMethod(null);
+            }}
             subtotalIDR={subtotal}
             promoDiscountIDR={discount}
             serviceChargeEnabled={scEnabled}
@@ -207,8 +204,10 @@ export function SaleScreen() {
             }}
           />
           <QrisStaticPaymentDialog
-            open={qrisOpen}
-            onOpenChange={setQrisOpen}
+            open={openMethod === 'qris_static'}
+            onOpenChange={(o) => {
+              if (!o) setOpenMethod(null);
+            }}
             subtotalIDR={subtotal}
             promoDiscountIDR={discount}
             serviceChargeEnabled={scEnabled}

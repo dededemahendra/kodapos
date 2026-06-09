@@ -6,6 +6,7 @@ import { formatIDR } from '~/lib/money';
 import { formatPromoValue } from '~/lib/promo';
 import type { CartAction, CartPromo, CartState } from './cart-reducer';
 import { CartLineRow } from './cart-line-row';
+import { methodLabel, type PaymentMethod } from './payment-methods';
 
 export function CartPane({
   cart,
@@ -40,8 +41,8 @@ export function CartPane({
   discountIDR: number;
   onAddPromo: () => void;
   onRemovePromo: () => void;
-  payMethods: Array<'cash' | 'qris_static'>;
-  onPay: (method: 'cash' | 'qris_static') => void;
+  payMethods: PaymentMethod[];
+  onPay: (method: PaymentMethod) => void;
   onKosongkan: () => void;
 }) {
   const { t } = useLingui();
@@ -135,7 +136,7 @@ export function CartPane({
                 className={payMethods.length === 1 ? 'col-span-2' : ''}
                 size="lg"
               >
-                {m === 'cash' ? <Trans>Tunai</Trans> : <Trans>QRIS</Trans>}
+                {methodLabel(m)}
               </Button>
             ))}
           </div>
