@@ -4,7 +4,8 @@ import type { Id } from '../_generated/dataModel';
 import { action, internalMutation, internalQuery, mutation } from '../_generated/server';
 import { requireOwnerCafe } from '../lib/auth';
 import { buildOrder, settleSale, saleArgs } from '../lib/sale';
-import { resolveProvider } from './providers';
+import { resolveProvider, qrisWebhookSecret } from './providers';
+import { signMockBody } from './providers/mock';
 
 /** Internal: connected-integration check for the action (which can't read ctx.db). */
 export const assertQrisConnected = internalQuery({
@@ -129,5 +130,19 @@ export const sweepExpired = internalMutation({
       }
     }
     return voided;
+  },
+});
+
+/** Dev-only: POST a correctly-signed webhook event to the local route (full round-trip). */
+export const simulateWebhook = action({
+  args: { providerRef: v.string(), status: v.union(v.literal('paid'), v.literal('expired'), v.literal('failed')) },
+  returns: v.number(),
+  handler: async (_ctx, { providerRef, status }) => {
+    const body = JSON.stringify({ providerRef, status });
+    const sig = await signMockBody(qrisWebhookSecret(), body);
+    const res = await fetch(`${process.env.CONVEX_SITE_URL}/webhooks/qris`, {
+      method: 'POST', headers: { 'x-signature': sig, 'content-type': 'application/json' }, body,
+    });
+    return res.status;
   },
 });

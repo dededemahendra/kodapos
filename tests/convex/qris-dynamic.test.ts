@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
+import { signMockBody } from '../../convex/payments/providers/mock';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
 
@@ -175,5 +176,61 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
         .unique()
     );
     expect(payment?.providerStatus).toBe('void');
+  });
+});
+
+describe('POST /webhooks/qris', () => {
+  it('returns 401 for an invalid signature', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const res = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'wh-1')
+    );
+    const payment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+        .unique()
+    );
+    const providerRef = payment!.providerRef!;
+    const body = JSON.stringify({ providerRef, status: 'paid' });
+    const response = await t.fetch('/webhooks/qris', {
+      method: 'POST',
+      headers: { 'x-signature': 'nope', 'content-type': 'application/json' },
+      body,
+    });
+    expect(response.status).toBe(401);
+    // Order must still be pending after the rejected call
+    const order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
+    expect(order?.paymentStatus).toBe('pending');
+  });
+
+  it('returns 200 and flips order to paid with a valid signature', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const res = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'wh-2')
+    );
+    const payment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+        .unique()
+    );
+    const providerRef = payment!.providerRef!;
+    const body = JSON.stringify({ providerRef, status: 'paid' });
+    const sig = await signMockBody('dev-qris-secret', body);
+    const response = await t.fetch('/webhooks/qris', {
+      method: 'POST',
+      headers: { 'x-signature': sig, 'content-type': 'application/json' },
+      body,
+    });
+    expect(response.status).toBe(200);
+    const order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
+    expect(order?.paymentStatus).toBe('paid');
   });
 });
