@@ -308,11 +308,13 @@ export default defineSchema({
     changeIDR: v.optional(v.number()),
     providerRef: v.optional(v.string()),
     providerStatus: v.optional(v.string()),
+    expiresAt: v.optional(v.number()),
     // Set on insert for cash; optional reserved for Slice 5 QRIS dynamic where the row exists in 'pending' state until the provider webhook fires.
     confirmedAt: v.optional(v.number()),
   })
     .index('by_order', ['orderId'])
-    .index('by_cafe_method_confirmed', ['cafeId', 'method', 'confirmedAt']),
+    .index('by_cafe_method_confirmed', ['cafeId', 'method', 'confirmedAt'])
+    .index('by_provider_ref', ['providerRef']),
 
   ingredients: defineTable({
     cafeId: v.id('cafes'),
