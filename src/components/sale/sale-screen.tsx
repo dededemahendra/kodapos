@@ -83,7 +83,12 @@ export function SaleScreen() {
   });
 
   const defaultMethod = settings.payment.defaultMethod;
-  const supported = PAYMENT_METHODS.filter((m) => m.isReady(settings)).map((m) => m.method);
+  const ready = PAYMENT_METHODS.filter((m) => m.isReady(settings)).map((m) => m.method);
+  // Dynamic QRIS supersedes static on the same rail: it auto-confirms via webhook
+  // and is strictly preferable, so never show two identical "QRIS" buttons.
+  const supported = ready.includes('qris_dynamic')
+    ? ready.filter((m) => m !== 'qris_static')
+    : ready;
   // Put the configured default first when it is in the supported set. Sort on a
   // boolean key so the comparator stays a valid total order as methods are added.
   const payMethods = [...supported].sort(

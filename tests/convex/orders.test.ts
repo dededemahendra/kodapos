@@ -756,6 +756,34 @@ describe('orders read queries', () => {
     expect(rows[1]?.totalIDR).toBe(18000);
   });
 
+  it('listForShift excludes non-paid orders (pending dynamic) and keeps paid ones', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    // A paid cash sale — should appear.
+    const paid = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'paid-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    // A pending dynamic order — should NOT appear.
+    await asOwner.mutation(api.settings.connectIntegration, { key: 'qris', config: { apiKey: 'k' } });
+    const pending = await asOwner.action(api.payments.qrisDynamic.createQrisDynamicSale, {
+      clientId: 'pending-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] as Id<'modifierOptions'>[] }],
+      createdAtClient: 1700000001000,
+    });
+
+    const rows = await asOwner.query(api.orders.listForShift, { shiftId });
+    const ids = rows.map((r) => r._id);
+    expect(ids).toContain(paid.orderId);
+    expect(ids).not.toContain(pending.orderId);
+  });
+
   it('listForShift rejects a shift from another cafe', async () => {
     const t = convexTest(schema, modules);
     const { asOwner: ownerA } = await setup(t, { email: 'a@x.com' });

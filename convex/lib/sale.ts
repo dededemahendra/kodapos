@@ -394,3 +394,20 @@ export async function settleSale(ctx: MutationCtx, orderId: Id<'orders'>): Promi
     });
   }
 }
+
+/** Void a pending order + stamp its payment providerStatus. No-op unless pending. Idempotent. */
+export async function voidPendingOrder(
+  ctx: MutationCtx,
+  orderId: Id<'orders'>,
+  providerStatus: string
+): Promise<boolean> {
+  const order = await ctx.db.get(orderId);
+  if (order?.paymentStatus !== 'pending') return false;
+  await ctx.db.patch(orderId, { paymentStatus: 'void' });
+  const payment = await ctx.db
+    .query('payments')
+    .withIndex('by_order', (q) => q.eq('orderId', orderId))
+    .unique();
+  if (payment) await ctx.db.patch(payment._id, { providerStatus });
+  return true;
+}

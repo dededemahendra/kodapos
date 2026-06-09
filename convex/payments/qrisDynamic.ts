@@ -3,7 +3,7 @@ import { internal } from '../_generated/api';
 import type { Id } from '../_generated/dataModel';
 import { action, internalAction, internalMutation, internalQuery, mutation } from '../_generated/server';
 import { requireOwnerCafe } from '../lib/auth';
-import { buildOrder, settleSale, saleArgs } from '../lib/sale';
+import { buildOrder, settleSale, saleArgs, voidPendingOrder } from '../lib/sale';
 import { resolveProvider, qrisWebhookSecret } from './providers';
 import { signMockBody } from './providers/mock';
 
@@ -84,11 +84,7 @@ export const voidByRef = internalMutation({
       .withIndex('by_provider_ref', (q) => q.eq('providerRef', providerRef))
       .unique();
     if (!payment) return null;
-    const order = await ctx.db.get(payment.orderId);
-    if (order?.paymentStatus === 'pending') {
-      await ctx.db.patch(order._id, { paymentStatus: 'void' });
-      await ctx.db.patch(payment._id, { providerStatus: 'void' });
-    }
+    await voidPendingOrder(ctx, payment.orderId, 'void');
     return null;
   },
 });
@@ -101,13 +97,7 @@ export const cancelQrisDynamicSale = mutation({
     const { cafeId } = await requireOwnerCafe(ctx);
     const order = await ctx.db.get(orderId);
     if (!order || order.cafeId !== cafeId) throw new Error('Pesanan tidak ditemukan.');
-    if (order.paymentStatus !== 'pending') return null;
-    await ctx.db.patch(orderId, { paymentStatus: 'void' });
-    const payment = await ctx.db
-      .query('payments')
-      .withIndex('by_order', (q) => q.eq('orderId', orderId))
-      .unique();
-    if (payment) await ctx.db.patch(payment._id, { providerStatus: 'void' });
+    await voidPendingOrder(ctx, orderId, 'void');
     return null;
   },
 });
@@ -127,12 +117,7 @@ export const sweepExpired = internalMutation({
     let voided = 0;
     for (const p of candidates) {
       if (!p.expiresAt || p.expiresAt > cutoff) continue;
-      const order = await ctx.db.get(p.orderId);
-      if (order?.paymentStatus === 'pending') {
-        await ctx.db.patch(order._id, { paymentStatus: 'void' });
-        await ctx.db.patch(p._id, { providerStatus: 'expired' });
-        voided++;
-      }
+      if (await voidPendingOrder(ctx, p.orderId, 'expired')) voided++;
     }
     return voided;
   },

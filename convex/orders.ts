@@ -108,7 +108,9 @@ export const listForShift = query({
       .query('orders')
       .withIndex('by_shift', (q) => q.eq('shiftId', shiftId))
       .collect();
-    return rows.sort((a, b) => b.createdAtClient - a.createdAtClient);
+    return rows
+      .filter((o) => o.paymentStatus === 'paid')
+      .sort((a, b) => b.createdAtClient - a.createdAtClient);
   },
 });
 

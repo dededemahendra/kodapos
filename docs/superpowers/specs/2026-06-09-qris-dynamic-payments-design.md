@@ -206,3 +206,38 @@ runs `settleSale` only when the webhook confirms.
 - Replacing `createCashSale`/`createQrisStaticSale` with a single synchronous
   `createSale` — mooted: dynamic is inherently two-phase (action + webhook), so
   the build/settle split is the right shared seam, not a unified mutation.
+
+## Known limitations / real-adapter follow-ups
+
+These are deliberately deferred to when a real Midtrans/Xendit adapter replaces
+the `MockProvider`. The mock confirms by HMAC signature (not amount) and mints a
+deterministic `providerRef` from the `clientId`, which papers over several
+issues that a real gateway would expose:
+
+- **Charge created with a placeholder amount.** `createQrisDynamicSale` calls
+  `createCharge` with `amountIDR: 0` because the authoritative total is only
+  computed later in `buildOrder`. Real gateways bind the QR to the amount, so the
+  real adapter must obtain the authoritative total before creating the charge
+  (e.g. compute totals in a read step first).
+- **Charge created before the idempotency check.** The charge is created before
+  `buildOrder`'s `clientId` idempotency check runs. With a non-deterministic real
+  `providerRef`, a retried action could mint an orphan gateway charge. The real
+  adapter should reconcile, or move charge creation to after the order insert.
+- **Webhook acks 200 for unknown refs.** The webhook returns HTTP 200 even for an
+  unknown `providerRef` (`'unknown'`). A real gateway that treats 200 as delivered
+  won't retry, so a webhook arriving before the order commits could be lost.
+  Consider returning a retryable status for not-yet-found refs, plus a
+  reconciliation poll.
+- **Sweep races a delayed `paid` webhook.** `sweepExpired` voids on a local
+  5-min-grace clock; a real gateway's delayed `paid` webhook could lose a race
+  with the sweep. The gateway should be the authority — reconcile via status
+  polling rather than voiding purely on local time.
+- **Settle after shift close.** A dynamic order can settle via webhook AFTER its
+  shift is closed (the order keeps its original `shiftId`). Shift reconciliation
+  with outstanding pending payments is unhandled.
+- **Provider seam shortcuts.** The webhook reads a hardcoded `x-signature` header;
+  the QR is rendered as a raw string; `resolveProvider(integrationConfig)` ignores
+  its arg and the webhook resolves the provider without cafe context. A real
+  adapter needs provider-specific header/scheme verification, QR-image rendering,
+  per-cafe credentials (the webhook must look up the payment → cafe before
+  resolving), and amount verification against the order total.
