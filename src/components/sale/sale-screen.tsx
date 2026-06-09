@@ -6,6 +6,7 @@ import { useReducer, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { CashPaymentDialog } from './cash-payment-dialog';
+import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
 import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
 import { ReceiptPreview } from './receipt-preview';
 import {
@@ -217,6 +218,26 @@ export function SaleScreen() {
             {...(settings.qrisImageUrl ? { qrisImageUrl: settings.qrisImageUrl } : {})}
             {...('qrisMerchantName' in settings.payment && settings.payment.qrisMerchantName ? { qrisMerchantName: settings.payment.qrisMerchantName } : {})}
             {...('qrisNmid' in settings.payment && settings.payment.qrisNmid ? { qrisNmid: settings.payment.qrisNmid } : {})}
+            {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            cart={cart}
+            shiftId={shift._id}
+            cashierId={cashierId}
+            onPaid={(orderId) => {
+              setReceiptOrderId(orderId);
+              dispatch({ type: 'clearCart' });
+            }}
+          />
+          <QrisDynamicPaymentDialog
+            open={openMethod === 'qris_dynamic'}
+            onOpenChange={(o) => {
+              if (!o) setOpenMethod(null);
+            }}
+            subtotalIDR={subtotal}
+            promoDiscountIDR={discount}
+            serviceChargeEnabled={scEnabled}
+            serviceChargePct={scPct}
+            taxEnabled={taxEnabled}
+            taxRatePct={taxRatePct}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             cart={cart}
             shiftId={shift._id}
