@@ -1,0 +1,179 @@
+import { convexTest } from 'convex-test';
+import { describe, expect, it } from 'vitest';
+import { api, internal } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+import schema from '../../convex/schema';
+
+const modules = import.meta.glob('../../convex/**/*.*s');
+
+type Setup = {
+  asOwner: ReturnType<ReturnType<typeof convexTest>['withIdentity']>;
+  cafeId: Id<'cafes'>;
+  cashierId: Id<'cafeStaff'>;
+  shiftId: Id<'shifts'>;
+  categoryId: Id<'categories'>;
+  itemId: Id<'menuItems'>;
+};
+
+async function setup(
+  t: ReturnType<typeof convexTest>,
+  opts: { email?: string; taxEnabled?: boolean; taxRatePct?: number } = {}
+): Promise<Setup> {
+  const email = opts.email ?? 'o@x.com';
+  const taxEnabled = opts.taxEnabled ?? false;
+  const taxRatePct = opts.taxRatePct ?? 0;
+  const userId = await t.run(async (ctx) => {
+    return await ctx.db.insert('users', { name: 'Owner', email });
+  });
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+  await asOwner.mutation(api.cafes.updateProfile, {
+    name: 'Kopi Senja',
+    timezone: 'Asia/Jakarta',
+    taxRatePct,
+    taxEnabled,
+  });
+  const cafe = await asOwner.query(api.cafes.myCafe, {});
+  const cafeId = cafe!._id;
+  const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
+  const shiftId = await asOwner.mutation(api.shifts.open, {
+    cashierId,
+    openingFloatIDR: 100000,
+  });
+  const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
+  const itemId = await asOwner.mutation(api.menu.items.create, {
+    categoryId,
+    name: 'Espresso',
+    priceIDR: 18000,
+  });
+  return { asOwner, cafeId, cashierId, shiftId, categoryId, itemId };
+}
+
+async function connectQris(asOwner: Setup['asOwner']): Promise<void> {
+  await asOwner.mutation(api.settings.connectIntegration, { key: 'qris', config: { apiKey: 'k' } });
+}
+
+function saleArgs(s: Setup, clientId: string) {
+  return {
+    clientId,
+    shiftId: s.shiftId,
+    cashierId: s.cashierId,
+    lines: [{ menuItemId: s.itemId, qty: 1, modifierOptionIds: [] as Id<'modifierOptions'>[] }],
+    createdAtClient: 1700000000000,
+  };
+}
+
+describe('payments.qrisDynamic.createQrisDynamicSale', () => {
+  it('throws when the qris integration is NOT connected', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await expect(
+      s.asOwner.action(api.payments.qrisDynamic.createQrisDynamicSale, saleArgs(s, 'qd-1'))
+    ).rejects.toThrow(/belum terhubung/i);
+  });
+
+  it('returns a mock qrString, leaves the order pending, writes no inventory movements', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const res = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'qd-2')
+    );
+    expect(res.qrString).toContain('MOCKQR');
+    expect(res.expiresAt).toEqual(expect.any(Number));
+
+    const order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
+    expect(order?.paymentMethod).toBe('qris_dynamic');
+    expect(order?.paymentStatus).toBe('pending');
+    expect(order?.totalIDR).toBe(18000);
+
+    const payment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+        .unique()
+    );
+    expect(payment?.method).toBe('qris_dynamic');
+    expect(payment?.providerStatus).toBe('pending');
+    expect(payment?.providerRef).toEqual(expect.any(String));
+    expect(payment?.confirmedAt).toBeUndefined();
+
+    // Espresso has no recipe, so no side effects until the webhook confirms.
+    const movements = await t.run(async (ctx) =>
+      await ctx.db.query('inventoryMovements').collect()
+    );
+    expect(movements).toHaveLength(0);
+  });
+
+  it('confirmFromWebhook flips the order to paid and is idempotent', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const res = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'qd-3')
+    );
+    const payment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+        .unique()
+    );
+    const providerRef = payment!.providerRef!;
+
+    const first = await t.mutation(internal.payments.qrisDynamic.confirmFromWebhook, {
+      providerRef,
+    });
+    expect(first).toBe('settled');
+    let order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
+    expect(order?.paymentStatus).toBe('paid');
+
+    // Idempotent replay — no error, stays paid.
+    const second = await t.mutation(internal.payments.qrisDynamic.confirmFromWebhook, {
+      providerRef,
+    });
+    expect(second).toBe('settled');
+    order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
+    expect(order?.paymentStatus).toBe('paid');
+
+    const confirmed = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+        .unique()
+    );
+    expect(confirmed?.providerStatus).toBe('paid');
+    expect(confirmed?.confirmedAt).toEqual(expect.any(Number));
+  });
+
+  it('confirmFromWebhook returns unknown for an unrecognized ref', async () => {
+    const t = convexTest(schema, modules);
+    const result = await t.mutation(internal.payments.qrisDynamic.confirmFromWebhook, {
+      providerRef: 'nope',
+    });
+    expect(result).toBe('unknown');
+  });
+
+  it('cancelQrisDynamicSale voids a pending order', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const res = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'qd-4')
+    );
+    await s.asOwner.mutation(api.payments.qrisDynamic.cancelQrisDynamicSale, {
+      orderId: res.orderId,
+    });
+    const order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
+    expect(order?.paymentStatus).toBe('void');
+    const payment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+        .unique()
+    );
+    expect(payment?.providerStatus).toBe('void');
+  });
+});
