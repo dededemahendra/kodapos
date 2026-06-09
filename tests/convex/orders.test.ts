@@ -49,6 +49,37 @@ async function setup(
   return { asOwner, cafeId, cashierId, shiftId, categoryId, itemId };
 }
 
+const DEFAULT_PAYMENT = {
+  methods: {
+    cash: true,
+    qrisStatic: true,
+    qrisDynamic: false,
+    card: false,
+    ewallet: false,
+    transfer: false,
+  },
+  defaultMethod: 'cash' as const,
+  cashRounding: 'none' as const,
+  quickCashButtons: [20000, 50000, 100000],
+  serviceChargeEnabled: false,
+  serviceChargePct: 0,
+  serviceChargeName: 'Biaya Layanan',
+};
+
+/** Upload a placeholder QR and enable qrisStatic so createQrisStaticSale passes
+ * its server-side "image configured" guard. */
+async function configureQrisImage(
+  t: ReturnType<typeof convexTest>,
+  asOwner: Setup['asOwner']
+): Promise<void> {
+  const storageId = await t.run(
+    async (ctx) => await ctx.storage.store(new Blob(['qr'], { type: 'image/png' }))
+  );
+  await asOwner.mutation(api.settings.updatePayment, {
+    payment: { ...DEFAULT_PAYMENT, qrisImageStorageId: storageId },
+  });
+}
+
 describe('orders.createCashSale', () => {
   it('creates an order with a single no-modifier line and a paired cash payment', async () => {
     const t = convexTest(schema, modules);
@@ -1142,6 +1173,7 @@ describe('orders.createQrisStaticSale', () => {
   it('creates a qris_static/paid order with a qris_static payment (no tendered/change)', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await configureQrisImage(t, asOwner);
     const result = await asOwner.mutation(api.orders.createQrisStaticSale, {
       clientId: 'qris-1',
       shiftId,
@@ -1174,6 +1206,7 @@ describe('orders.createQrisStaticSale', () => {
   it('is idempotent on repeated clientId', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await configureQrisImage(t, asOwner);
     const args = {
       clientId: 'qris-dupe',
       shiftId,
@@ -1215,6 +1248,20 @@ describe('orders.createQrisStaticSale', () => {
     ).rejects.toThrow(/QRIS statis tidak aktif/i);
   });
 
+  it('throws when no QRIS image has been configured', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await expect(
+      asOwner.mutation(api.orders.createQrisStaticSale, {
+        clientId: 'qris-no-image',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/belum dikonfigurasi/i);
+  });
+
   it('rejects point redemption without a customer', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
@@ -1233,6 +1280,7 @@ describe('orders.createQrisStaticSale', () => {
   it('produces the same totals as a cash sale for the same cart', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t, { taxEnabled: true, taxRatePct: 11 });
+    await configureQrisImage(t, asOwner);
     const lines = [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }];
     const cash = await asOwner.mutation(api.orders.createCashSale, {
       clientId: 'parity-cash', shiftId, cashierId, lines, cashTenderedIDR: 100000, createdAtClient: 1700000000000,

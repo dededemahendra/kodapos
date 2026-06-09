@@ -200,10 +200,22 @@ async function buildAndInsertSale(
     .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
     .first();
 
-  // method-specific: a qris_static sale requires the method to be enabled.
-  // Default settings enable qrisStatic, so treat "no row / unset" as enabled.
-  if (payment.method === 'qris_static' && settings?.payment?.methods.qrisStatic === false) {
-    throw new Error('Metode QRIS statis tidak aktif.');
+  // method-specific availability guards. Default settings enable cash +
+  // qrisStatic, so treat "no row / unset" as enabled.
+  const methods = settings?.payment?.methods;
+  if (payment.method === 'cash' && methods?.cash === false) {
+    throw new Error('Metode tunai tidak aktif.');
+  }
+  if (payment.method === 'qris_static') {
+    if (methods?.qrisStatic === false) {
+      throw new Error('Metode QRIS statis tidak aktif.');
+    }
+    // A static-QRIS sale is meaningless without a QR for the customer to scan;
+    // the checkout UI hides the button until one is uploaded, so enforce the
+    // same precondition server-side for direct/replayed calls.
+    if (!settings?.payment?.qrisImageStorageId) {
+      throw new Error('QRIS statis belum dikonfigurasi.');
+    }
   }
 
   // Loyalty: resolve customer + program config, then fold any point redemption
