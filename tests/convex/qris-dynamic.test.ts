@@ -177,6 +177,80 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
     );
     expect(payment?.providerStatus).toBe('void');
   });
+
+  it('voidByRef voids a pending order, no-ops on a paid one', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+
+    // Pending order — voidByRef should void it.
+    const pending = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'qd-void-1')
+    );
+    const pendingPayment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', pending.orderId))
+        .unique()
+    );
+    await t.mutation(internal.payments.qrisDynamic.voidByRef, {
+      providerRef: pendingPayment!.providerRef!,
+    });
+    const voidedOrder = await t.run(async (ctx) => await ctx.db.get(pending.orderId));
+    expect(voidedOrder?.paymentStatus).toBe('void');
+
+    // Paid order — voidByRef must leave it paid (pending-guard).
+    const paid = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'qd-void-2')
+    );
+    const paidPayment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', paid.orderId))
+        .unique()
+    );
+    const paidRef = paidPayment!.providerRef!;
+    await t.mutation(internal.payments.qrisDynamic.confirmFromWebhook, { providerRef: paidRef });
+    await t.mutation(internal.payments.qrisDynamic.voidByRef, { providerRef: paidRef });
+    const stillPaid = await t.run(async (ctx) => await ctx.db.get(paid.orderId));
+    expect(stillPaid?.paymentStatus).toBe('paid');
+  });
+
+  it('sweepExpired voids a stale pending order but leaves a fresh one', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+
+    // Stale order — patch expiresAt into the distant past.
+    const stale = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'qd-sweep-1')
+    );
+    const stalePayment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', stale.orderId))
+        .unique()
+    );
+    await t.run((ctx) => ctx.db.patch(stalePayment!._id, { expiresAt: 1 }));
+
+    const voided = await t.mutation(internal.payments.qrisDynamic.sweepExpired, {});
+    expect(voided).toBe(1);
+    const staleOrder = await t.run(async (ctx) => await ctx.db.get(stale.orderId));
+    expect(staleOrder?.paymentStatus).toBe('void');
+
+    // Fresh order — default expiresAt is now+15min, so it must survive a sweep.
+    const fresh = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'qd-sweep-2')
+    );
+    const sweptAgain = await t.mutation(internal.payments.qrisDynamic.sweepExpired, {});
+    expect(sweptAgain).toBe(0);
+    const freshOrder = await t.run(async (ctx) => await ctx.db.get(fresh.orderId));
+    expect(freshOrder?.paymentStatus).toBe('pending');
+  });
 });
 
 describe('POST /webhooks/qris', () => {

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { internal } from '../_generated/api';
 import type { Id } from '../_generated/dataModel';
-import { action, internalMutation, internalQuery, mutation } from '../_generated/server';
+import { action, internalAction, internalMutation, internalQuery, mutation } from '../_generated/server';
 import { requireOwnerCafe } from '../lib/auth';
 import { buildOrder, settleSale, saleArgs } from '../lib/sale';
 import { resolveProvider, qrisWebhookSecret } from './providers';
@@ -118,10 +118,15 @@ export const sweepExpired = internalMutation({
   returns: v.number(),
   handler: async (ctx) => {
     const cutoff = Date.now() - 5 * 60 * 1000;
-    const candidates = await ctx.db.query('payments').withIndex('by_provider_ref').collect();
+    const candidates = await ctx.db
+      .query('payments')
+      .withIndex('by_method_provider_status', (q) =>
+        q.eq('method', 'qris_dynamic').eq('providerStatus', 'pending')
+      )
+      .collect();
     let voided = 0;
     for (const p of candidates) {
-      if (p.method !== 'qris_dynamic' || !p.expiresAt || p.expiresAt > cutoff) continue;
+      if (!p.expiresAt || p.expiresAt > cutoff) continue;
       const order = await ctx.db.get(p.orderId);
       if (order?.paymentStatus === 'pending') {
         await ctx.db.patch(order._id, { paymentStatus: 'void' });
@@ -134,7 +139,7 @@ export const sweepExpired = internalMutation({
 });
 
 /** Dev-only: POST a correctly-signed webhook event to the local route (full round-trip). */
-export const simulateWebhook = action({
+export const simulateWebhook = internalAction({
   args: { providerRef: v.string(), status: v.union(v.literal('paid'), v.literal('expired'), v.literal('failed')) },
   returns: v.number(),
   handler: async (_ctx, { providerRef, status }) => {

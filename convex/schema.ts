@@ -314,7 +314,8 @@ export default defineSchema({
   })
     .index('by_order', ['orderId'])
     .index('by_cafe_method_confirmed', ['cafeId', 'method', 'confirmedAt'])
-    .index('by_provider_ref', ['providerRef']),
+    .index('by_provider_ref', ['providerRef'])
+    .index('by_method_provider_status', ['method', 'providerStatus']),
 
   ingredients: defineTable({
     cafeId: v.id('cafes'),
