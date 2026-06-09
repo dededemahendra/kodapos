@@ -553,6 +553,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/promo/promo-form-dialog.tsx
 #: src/components/sale/customer-section.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
+#: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/sale-screen.tsx
 #: src/components/settings/save-bar.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
@@ -769,6 +770,10 @@ msgstr "Buat promo di halaman Promo & Diskon."
 #: src/routes/_pos/promos.tsx
 msgid "Buat promo untuk memberi diskon di kasir."
 msgstr "Buat promo untuk memberi diskon di kasir."
+
+#: src/components/sale/qris-dynamic-payment-dialog.tsx
+msgid "Buat QRIS"
+msgstr "Buat QRIS"
 
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Buat satu grup untuk dipakai ulang di banyak item."
@@ -1063,6 +1068,10 @@ msgstr "Format Waktu"
 #: src/components/menu/category-table.tsx
 #~ msgid "Gagal membuat kategori."
 #~ msgstr "Gagal membuat kategori."
+
+#: src/components/sale/qris-dynamic-payment-dialog.tsx
+msgid "Gagal membuat tagihan QRIS."
+msgstr "Gagal membuat tagihan QRIS."
 
 #: src/routes/_pos/shift/open.tsx
 msgid "Gagal membuka shift."
@@ -1369,6 +1378,10 @@ msgstr "Hubungkan {dialogEntryName}"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
 msgstr "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
+
+#: src/routes/_pos/settings/tax.tsx
+msgid "Hubungkan penyedia di halaman Integrasi."
+msgstr "Hubungkan penyedia di halaman Integrasi."
 
 #. placeholder {0}: Math.abs(driver.pct)
 #: src/components/forecast/render-driver.tsx
@@ -1904,6 +1917,10 @@ msgstr "Max"
 msgid "Mekari Jurnal"
 msgstr "Mekari Jurnal"
 
+#: src/components/sale/qris-dynamic-payment-dialog.tsx
+msgid "Membuat tagihan…"
+msgstr "Membuat tagihan…"
+
 #: src/routes/_pos/shift/open.tsx
 msgid "Membuka…"
 msgstr "Membuka…"
@@ -1986,6 +2003,10 @@ msgstr "Menu"
 #: src/components/dashboard-invoices.tsx
 msgid "Menunggu"
 msgstr "Menunggu"
+
+#: src/components/sale/qris-dynamic-payment-dialog.tsx
+msgid "Menunggu pembayaran…"
+msgstr "Menunggu pembayaran…"
 
 #: src/routes/_pos/shift/close.tsx
 msgid "Menutup…"
@@ -2393,6 +2414,7 @@ msgstr "Pembayaran e-wallet GoPay."
 msgid "Pembayaran e-wallet OVO."
 msgstr "Pembayaran e-wallet OVO."
 
+#: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Pembayaran QRIS"
 msgstr "Pembayaran QRIS"
@@ -2665,6 +2687,7 @@ msgid "Poin disesuaikan."
 msgstr "Poin disesuaikan."
 
 #: src/components/sale/cash-payment-dialog.tsx
+#: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Poin ditukar"
 msgstr "Poin ditukar"
@@ -2788,7 +2811,7 @@ msgid "Putuskan"
 msgstr "Putuskan"
 
 #: src/components/channel-sales-chart.tsx
-#: src/components/sale/cart-pane.tsx
+#: src/components/sale/payment-methods.tsx
 msgid "QRIS"
 msgstr "QRIS"
 
@@ -3423,6 +3446,10 @@ msgstr "Telp"
 msgid "Terhubung"
 msgstr "Terhubung"
 
+#: src/routes/_pos/settings/tax.tsx
+msgid "Terhubung lewat integrasi penyedia."
+msgstr "Terhubung lewat integrasi penyedia."
+
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Terima kasih 🙏"
 #~ msgstr "Terima kasih 🙏"
@@ -3566,6 +3593,7 @@ msgid "Total <0>{0}</0>"
 msgstr "Total <0>{0}</0>"
 
 #: src/components/sale/cash-payment-dialog.tsx
+#: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Total tagihan"
 msgstr "Total tagihan"
@@ -3604,7 +3632,7 @@ msgid "Tumpah"
 msgstr "Tumpah"
 
 #: src/components/channel-sales-chart.tsx
-#: src/components/sale/cart-pane.tsx
+#: src/components/sale/payment-methods.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/history.tsx
 #: src/routes/_pos/settings/tax.tsx
