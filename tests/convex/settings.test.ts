@@ -91,6 +91,37 @@ describe('settings.get', () => {
     expect(s.payment.defaultMethod).toBe('cash');
   });
 
+  it('omits qrisImageUrl when no QR image is set', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedOwner(t);
+    const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+    const s = await asOwner.query(api.settings.get);
+    expect(s.qrisImageUrl).toBeUndefined();
+  });
+
+  it('resolves qrisImageUrl after a QR image is saved', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedOwner(t);
+    const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+    const storageId = await t.run(async (ctx) =>
+      await ctx.storage.store(new Blob(['fake-qr'], { type: 'image/png' }))
+    );
+    await asOwner.mutation(api.settings.updatePayment, {
+      payment: {
+        methods: { cash: true, qrisStatic: true, qrisDynamic: false, card: false, ewallet: false, transfer: false },
+        defaultMethod: 'cash',
+        cashRounding: 'none',
+        quickCashButtons: [20000, 50000, 100000],
+        serviceChargeEnabled: false,
+        serviceChargePct: 0,
+        serviceChargeName: 'Biaya Layanan',
+        qrisImageStorageId: storageId,
+      },
+    });
+    const s = await asOwner.query(api.settings.get);
+    expect(typeof s.qrisImageUrl).toBe('string');
+  });
+
   it('returns npwp only when stored, passing through empty string', async () => {
     const t = convexTest(schema, modules);
     const userId = await seedOwner(t);

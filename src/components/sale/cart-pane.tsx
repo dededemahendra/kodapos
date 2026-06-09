@@ -22,7 +22,8 @@ export function CartPane({
   discountIDR,
   onAddPromo,
   onRemovePromo,
-  onBayar,
+  payMethods,
+  onPay,
   onKosongkan,
 }: {
   cart: CartState;
@@ -39,7 +40,8 @@ export function CartPane({
   discountIDR: number;
   onAddPromo: () => void;
   onRemovePromo: () => void;
-  onBayar: () => void;
+  payMethods: Array<'cash' | 'qris_static'>;
+  onPay: (method: 'cash' | 'qris_static') => void;
   onKosongkan: () => void;
 }) {
   const { t } = useLingui();
@@ -115,15 +117,29 @@ export function CartPane({
         ) : null}
         {taxEnabled ? <Row label={t`PPN ${taxRatePct}%`} value={formatIDR(taxIDR)} /> : null}
         <Row label={t`Total`} value={formatIDR(totalIDR)} bold large />
-        <Button
-          type="button"
-          onClick={onBayar}
-          disabled={empty}
-          className="w-full mt-2"
-          size="lg"
-        >
-          <Trans>Bayar</Trans>
-        </Button>
+        {payMethods.length === 0 ? (
+          // No payment method is usable (all disabled, or QRIS enabled without an
+          // uploaded image). Never leave the cart with zero buttons — surface a
+          // disabled prompt that points the owner back to settings.
+          <Button type="button" disabled className="w-full mt-2" size="lg">
+            <Trans>Atur metode pembayaran</Trans>
+          </Button>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {payMethods.map((m) => (
+              <Button
+                key={m}
+                type="button"
+                onClick={() => onPay(m)}
+                disabled={empty}
+                className={payMethods.length === 1 ? 'col-span-2' : ''}
+                size="lg"
+              >
+                {m === 'cash' ? <Trans>Tunai</Trans> : <Trans>QRIS</Trans>}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
     </aside>
   );

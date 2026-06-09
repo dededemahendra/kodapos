@@ -49,6 +49,37 @@ async function setup(
   return { asOwner, cafeId, cashierId, shiftId, categoryId, itemId };
 }
 
+const DEFAULT_PAYMENT = {
+  methods: {
+    cash: true,
+    qrisStatic: true,
+    qrisDynamic: false,
+    card: false,
+    ewallet: false,
+    transfer: false,
+  },
+  defaultMethod: 'cash' as const,
+  cashRounding: 'none' as const,
+  quickCashButtons: [20000, 50000, 100000],
+  serviceChargeEnabled: false,
+  serviceChargePct: 0,
+  serviceChargeName: 'Biaya Layanan',
+};
+
+/** Upload a placeholder QR and enable qrisStatic so createQrisStaticSale passes
+ * its server-side "image configured" guard. */
+async function configureQrisImage(
+  t: ReturnType<typeof convexTest>,
+  asOwner: Setup['asOwner']
+): Promise<void> {
+  const storageId = await t.run(
+    async (ctx) => await ctx.storage.store(new Blob(['qr'], { type: 'image/png' }))
+  );
+  await asOwner.mutation(api.settings.updatePayment, {
+    payment: { ...DEFAULT_PAYMENT, qrisImageStorageId: storageId },
+  });
+}
+
 describe('orders.createCashSale', () => {
   it('creates an order with a single no-modifier line and a paired cash payment', async () => {
     const t = convexTest(schema, modules);
@@ -1135,5 +1166,128 @@ describe('orders.createCashSale — inventory deduction', () => {
         cashTenderedIDR: 20000, redeemPoints: 100,
       })
     ).rejects.toThrow(/pelanggan/i);
+  });
+});
+
+describe('orders.createQrisStaticSale', () => {
+  it('creates a qris_static/paid order with a qris_static payment (no tendered/change)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await configureQrisImage(t, asOwner);
+    const result = await asOwner.mutation(api.orders.createQrisStaticSale, {
+      clientId: 'qris-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 2, modifierOptionIds: [] }],
+      createdAtClient: 1700000000000,
+    });
+    expect(result.totalIDR).toBe(36000);
+    expect(result.changeIDR).toBe(0);
+
+    const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(order?.paymentMethod).toBe('qris_static');
+    expect(order?.paymentStatus).toBe('paid');
+    expect(order?.totalIDR).toBe(36000);
+
+    const payments = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', result.orderId))
+        .collect()
+    );
+    expect(payments).toHaveLength(1);
+    expect(payments?.[0]?.method).toBe('qris_static');
+    expect(payments?.[0]?.amountIDR).toBe(36000);
+    expect(payments?.[0]?.cashTenderedIDR).toBeUndefined();
+    expect(payments?.[0]?.changeIDR).toBeUndefined();
+    expect(payments?.[0]?.confirmedAt).toEqual(expect.any(Number));
+  });
+
+  it('is idempotent on repeated clientId', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await configureQrisImage(t, asOwner);
+    const args = {
+      clientId: 'qris-dupe',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      createdAtClient: 1700000000000,
+    };
+    const a = await asOwner.mutation(api.orders.createQrisStaticSale, args);
+    const b = await asOwner.mutation(api.orders.createQrisStaticSale, args);
+    expect(b.orderId).toBe(a.orderId);
+    const orders = await t.run(async (ctx) =>
+      await ctx.db.query('orders').collect()
+    );
+    expect(orders).toHaveLength(1);
+  });
+
+  it('throws when qrisStatic method is disabled in settings', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.settings.updatePayment, {
+      payment: {
+        methods: { cash: true, qrisStatic: false, qrisDynamic: false, card: false, ewallet: false, transfer: false },
+        defaultMethod: 'cash',
+        cashRounding: 'none',
+        quickCashButtons: [20000, 50000, 100000],
+        serviceChargeEnabled: false,
+        serviceChargePct: 0,
+        serviceChargeName: 'Biaya Layanan',
+      },
+    });
+    await expect(
+      asOwner.mutation(api.orders.createQrisStaticSale, {
+        clientId: 'qris-off',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/QRIS statis tidak aktif/i);
+  });
+
+  it('throws when no QRIS image has been configured', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await expect(
+      asOwner.mutation(api.orders.createQrisStaticSale, {
+        clientId: 'qris-no-image',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/belum dikonfigurasi/i);
+  });
+
+  it('rejects point redemption without a customer', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await expect(
+      asOwner.mutation(api.orders.createQrisStaticSale, {
+        clientId: 'qris-redeem',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        redeemPoints: 100,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/pelanggan/i);
+  });
+
+  it('produces the same totals as a cash sale for the same cart', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t, { taxEnabled: true, taxRatePct: 11 });
+    await configureQrisImage(t, asOwner);
+    const lines = [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }];
+    const cash = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'parity-cash', shiftId, cashierId, lines, cashTenderedIDR: 100000, createdAtClient: 1700000000000,
+    });
+    const qris = await asOwner.mutation(api.orders.createQrisStaticSale, {
+      clientId: 'parity-qris', shiftId, cashierId, lines, createdAtClient: 1700000000000,
+    });
+    expect(qris.totalIDR).toBe(cash.totalIDR);
   });
 });

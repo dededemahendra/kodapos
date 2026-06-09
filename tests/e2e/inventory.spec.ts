@@ -148,7 +148,7 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.goto('/sale');
     await waitForUrlHydrated(page, /\/sale$/);
     await page.getByRole('button', { name: /Espresso/ }).click();
-    await page.getByRole('button', { name: /^Bayar$/ }).click();
+    await page.getByRole('button', { name: /^Tunai$/ }).click();
     await page.getByRole('button', { name: /^100k$/ }).click();
     await page.getByRole('button', { name: /Konfirmasi/ }).click();
     await expect(page.getByText(/Rp 19\.980/).first()).toBeVisible();

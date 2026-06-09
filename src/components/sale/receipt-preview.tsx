@@ -8,6 +8,16 @@ import { Dialog, DialogContent } from '~/components/ui/dialog';
 import { formatIDR } from '~/lib/money';
 import { formatPromoValue } from '~/lib/promo';
 
+// Printed receipt is always English, kept out of the i18n catalog. Maps a stored
+// payment method to its human label (cash is rendered separately above).
+const PAYMENT_LABELS: Record<string, string> = {
+  qris_static: 'QRIS',
+  qris_dynamic: 'QRIS',
+  card: 'Card',
+  ewallet: 'E-Wallet',
+  transfer: 'Bank Transfer',
+};
+
 export function ReceiptPreview({
   open,
   onOpenChange,
@@ -138,6 +148,13 @@ export function ReceiptPreview({
                   <span className="tabular-nums">{formatIDR(order.payment.changeIDR ?? 0)}</span>
                 </div>
               </>
+            ) : null}
+            {order.payment && order.payment.method !== 'cash' ? (
+              <div className="flex justify-between mt-1">
+                {/* Printed receipt is always English, kept out of the i18n catalog. */}
+                <span>Payment</span>
+                <span>{PAYMENT_LABELS[order.payment.method] ?? order.payment.method}</span>
+              </div>
             ) : null}
             {order.customerId && order.pointsEarned !== undefined ? (
               <>
