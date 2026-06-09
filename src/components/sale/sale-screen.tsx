@@ -86,9 +86,10 @@ export function SaleScreen() {
   const supported: Array<'cash' | 'qris_static'> = [];
   if (methods.cash) supported.push('cash');
   if (methods.qrisStatic && settings.qrisImageUrl) supported.push('qris_static');
-  // Put the configured default first when it is in the supported set.
-  const payMethods = [...supported].sort((a, b) =>
-    a === defaultMethod ? -1 : b === defaultMethod ? 1 : 0
+  // Put the configured default first when it is in the supported set. Sort on a
+  // boolean key so the comparator stays a valid total order as methods are added.
+  const payMethods = [...supported].sort(
+    (a, b) => Number(b === defaultMethod) - Number(a === defaultMethod)
   );
 
   function onItemTap(row: ItemForSale) {
