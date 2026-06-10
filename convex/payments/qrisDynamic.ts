@@ -160,24 +160,72 @@ export const cancelQrisDynamicSale = mutation({
   },
 });
 
-/** Internal cron: void pending dynamic orders past expiry + grace (5 min). */
-export const sweepExpired = internalMutation({
+/** Internal: list up to 50 pending dynamic payments whose order is still pending (reconcile candidates). */
+export const listPendingDynamic = internalQuery({
   args: {},
-  returns: v.number(),
+  returns: v.array(
+    v.object({ orderId: v.id('orders'), cafeId: v.id('cafes'), providerRef: v.string(), expiresAt: v.number() })
+  ),
   handler: async (ctx) => {
-    const cutoff = Date.now() - 5 * 60 * 1000;
-    const candidates = await ctx.db
+    const payments = await ctx.db
       .query('payments')
       .withIndex('by_method_provider_status', (q) =>
         q.eq('method', 'qris_dynamic').eq('providerStatus', 'pending')
       )
-      .collect();
-    let voided = 0;
-    for (const p of candidates) {
-      if (!p.expiresAt || p.expiresAt > cutoff) continue;
-      if (await voidPendingOrder(ctx, p.orderId, 'expired')) voided++;
+      .take(50);
+    const out: Array<{ orderId: Id<'orders'>; cafeId: Id<'cafes'>; providerRef: string; expiresAt: number }> = [];
+    for (const p of payments) {
+      if (!p.providerRef || p.expiresAt === undefined) continue;
+      const order = await ctx.db.get(p.orderId);
+      if (order?.paymentStatus === 'pending') {
+        out.push({ orderId: p.orderId, cafeId: order.cafeId, providerRef: p.providerRef, expiresAt: p.expiresAt });
+      }
     }
-    return voided;
+    return out;
+  },
+});
+
+const FAILSAFE_GRACE_MS = 60 * 60 * 1000;
+
+/**
+ * Internal cron: poll the provider for each pending dynamic order and reconcile.
+ * Xendit is the source of truth: paid→settle, expired/failed→void, pending→leave,
+ * unknown→void only when far past expiry (failsafe). Reuses idempotent, pending-guarded mutations.
+ */
+export const reconcilePending = internalAction({
+  args: {},
+  returns: v.object({ settled: v.number(), voided: v.number(), left: v.number() }),
+  handler: async (ctx): Promise<{ settled: number; voided: number; left: number }> => {
+    const candidates = await ctx.runQuery(internal.payments.qrisDynamic.listPendingDynamic, {});
+    const now = Date.now();
+    let settled = 0;
+    let voided = 0;
+    let left = 0;
+    for (const c of candidates) {
+      try {
+        const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, { cafeId: c.cafeId });
+        const status = config ? await resolveProvider(config).fetchStatus(c.providerRef) : 'unknown';
+        if (status === 'paid') {
+          await ctx.runMutation(internal.payments.qrisDynamic.confirmFromWebhook, { providerRef: c.providerRef });
+          settled++;
+        } else if (status === 'expired' || status === 'failed') {
+          await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, { providerRef: c.providerRef });
+          voided++;
+        } else if (status === 'pending') {
+          left++;
+        } else {
+          if (now > c.expiresAt + FAILSAFE_GRACE_MS) {
+            await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, { providerRef: c.providerRef });
+            voided++;
+          } else {
+            left++;
+          }
+        }
+      } catch {
+        left++;
+      }
+    }
+    return { settled, voided, left };
   },
 });
 
