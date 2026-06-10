@@ -47,8 +47,7 @@ export const createQrisDynamicSale = action({
     // pass the recomputed total instead.
     const charge = await provider.createCharge({
       amountIDR: 0,
-      ref: args.clientId,
-      idempotencyKey: args.clientId,
+      referenceId: args.clientId,
     });
     const res = await ctx.runMutation(internal.payments.qrisDynamic.buildPendingDynamicOrder, {
       ...args,

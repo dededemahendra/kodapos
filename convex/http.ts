@@ -2,7 +2,8 @@ import { httpRouter } from 'convex/server';
 import { httpAction } from './_generated/server';
 import { internal } from './_generated/api';
 import { auth } from './auth';
-import { resolveProvider } from './payments/providers';
+import { MockProvider } from './payments/providers/mock';
+import { qrisWebhookSecret } from './payments/providers';
 
 const http = httpRouter();
 auth.addHttpRoutes(http);
@@ -12,8 +13,7 @@ http.route({
   method: 'POST',
   handler: httpAction(async (ctx, req) => {
     const body = await req.text();
-    const signature = req.headers.get('x-signature');
-    const event = await resolveProvider().verifyWebhook({ body, signature });
+    const event = await new MockProvider(qrisWebhookSecret()).verifyWebhook({ body, headers: req.headers });
     if (!event) return new Response('invalid signature', { status: 401 });
 
     if (event.status === 'paid') {
