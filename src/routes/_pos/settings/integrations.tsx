@@ -128,10 +128,13 @@ function SettingsIntegrations() {
   const { t } = useLinguiMacro();
   const s = useQuery(api.settings.get);
   const connect = useMutation(api.settings.connectIntegration);
+  const connectQris = useMutation(api.settings.connectQrisProvider);
   const disconnect = useMutation(api.settings.disconnectIntegration);
 
   const [dialogKey, setDialogKey] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState('');
+  const [xnditKey, setXnditKey] = useState('');
+  const [xnditToken, setXnditToken] = useState('');
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -151,6 +154,8 @@ function SettingsIntegrations() {
 
   function openDialog(key: string) {
     setApiKey('');
+    setXnditKey('');
+    setXnditToken('');
     setError(null);
     setDialogKey(key);
   }
@@ -158,17 +163,23 @@ function SettingsIntegrations() {
   function closeDialog() {
     setDialogKey(null);
     setApiKey('');
+    setXnditKey('');
+    setXnditToken('');
   }
 
   async function handleConnect(key: string) {
     setError(null);
     setBusyKey(key);
     try {
-      const trimmed = apiKey.trim();
-      if (trimmed) {
-        await connect({ key, config: { apiKey: trimmed } });
+      if (key === 'qris') {
+        await connectQris({ secretApiKey: xnditKey.trim(), callbackToken: xnditToken.trim() });
       } else {
-        await connect({ key });
+        const trimmed = apiKey.trim();
+        if (trimmed) {
+          await connect({ key, config: { apiKey: trimmed } });
+        } else {
+          await connect({ key });
+        }
       }
       closeDialog();
     } catch (e) {
@@ -284,18 +295,48 @@ function SettingsIntegrations() {
             <DialogTitle>{dialogTitle}</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-2">
-            <label htmlFor="apiKey" className="text-sm font-medium">
-              <Trans>Kunci API</Trans>
-            </label>
-            <Input
-              id="apiKey"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder={t`Masukkan kunci API (opsional)`}
-              autoFocus
-            />
-          </div>
+          {dialogKey === 'qris' ? (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <label htmlFor="xnditKey" className="text-sm font-medium">
+                  <Trans>Secret API Key</Trans>
+                </label>
+                <Input
+                  id="xnditKey"
+                  value={xnditKey}
+                  onChange={(e) => setXnditKey(e.target.value)}
+                  placeholder="xnd_..."
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="xnditToken" className="text-sm font-medium">
+                  <Trans>Callback Token</Trans>
+                </label>
+                <Input
+                  id="xnditToken"
+                  value={xnditToken}
+                  onChange={(e) => setXnditToken(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                <Trans>Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server.</Trans>
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label htmlFor="apiKey" className="text-sm font-medium">
+                <Trans>Kunci API</Trans>
+              </label>
+              <Input
+                id="apiKey"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder={t`Masukkan kunci API (opsional)`}
+                autoFocus
+              />
+            </div>
+          )}
 
           <DialogFooter>
             <Button variant="outline" onClick={closeDialog} disabled={busyKey !== null}>
