@@ -122,6 +122,32 @@ describe('settings.get', () => {
     expect(typeof s.qrisImageUrl).toBe('string');
   });
 
+  it('connectQrisProvider stores creds; settings.get masks the secret', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedOwner(t);
+    const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+
+    await asOwner.mutation(api.settings.connectQrisProvider, {
+      secretApiKey: 'xnd_test_abc12345',
+      callbackToken: 'tok_secret',
+    });
+    const s = await asOwner.query(api.settings.get);
+    const qris = s.integrations.find((i) => i.key === 'qris');
+    expect(qris?.connected).toBe(true);
+    expect((qris?.config as Record<string, unknown>).keyHint).toContain('xnd_test');
+    expect(JSON.stringify(s)).not.toContain('tok_secret');
+    expect(JSON.stringify(s)).not.toContain('xnd_test_abc12345');
+  });
+
+  it('connectQrisProvider rejects a non-Xendit key', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedOwner(t);
+    const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+    await expect(
+      asOwner.mutation(api.settings.connectQrisProvider, { secretApiKey: 'bogus', callbackToken: 't' })
+    ).rejects.toThrow(/tidak valid/i);
+  });
+
   it('returns npwp only when stored, passing through empty string', async () => {
     const t = convexTest(schema, modules);
     const userId = await seedOwner(t);

@@ -141,10 +141,26 @@ export const get = query({
     const storageId = row?.payment?.qrisImageStorageId;
     const qrisImageUrl = storageId ? await ctx.storage.getUrl(storageId) : null;
 
+    // Strip server-only secrets (Xendit creds) from the qris integration before
+    // returning to the client — only the non-sensitive provider + key hint leak.
+    const integrations = (row?.integrations ?? DEFAULT_SETTINGS.integrations).map((i) =>
+      i.key === 'qris'
+        ? {
+            key: i.key,
+            connected: i.connected,
+            ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
+            config: {
+              provider: 'xendit',
+              keyHint: (i.config as { keyHint?: string } | undefined)?.keyHint ?? '',
+            },
+          }
+        : i
+    );
+
     return {
       payment,
       receipt: row?.receipt ?? DEFAULT_SETTINGS.receipt,
-      integrations: row?.integrations ?? DEFAULT_SETTINGS.integrations,
+      integrations,
       taxName: row?.taxName ?? DEFAULT_SETTINGS.taxName,
       taxInclusive: row?.taxInclusive ?? DEFAULT_SETTINGS.taxInclusive,
       ...(row?.npwp !== undefined ? { npwp: row.npwp } : {}),
@@ -239,6 +255,30 @@ export const connectIntegration = mutation({
       ...(config !== undefined ? { config } : {}),
     });
     await ctx.db.patch(id, { integrations: items, updatedAt: Date.now() });
+    return null;
+  },
+});
+
+export const connectQrisProvider = mutation({
+  args: { secretApiKey: v.string(), callbackToken: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { secretApiKey, callbackToken }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const key = secretApiKey.trim();
+    const token = callbackToken.trim();
+    if (!key.startsWith('xnd_')) throw new Error('Secret API Key Xendit tidak valid.');
+    if (!token) throw new Error('Callback token wajib diisi.');
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    const row = await ctx.db.get(id);
+    const keyHint = `${key.slice(0, 8)}…${key.slice(-4)}`;
+    const existing = (row?.integrations ?? []).filter((i) => i.key !== 'qris');
+    existing.push({
+      key: 'qris',
+      connected: true,
+      connectedAt: Date.now(),
+      config: { provider: 'xendit', secretApiKey: key, callbackToken: token, keyHint },
+    });
+    await ctx.db.patch(id, { integrations: existing, updatedAt: Date.now() });
     return null;
   },
 });

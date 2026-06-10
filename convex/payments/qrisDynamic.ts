@@ -27,6 +27,33 @@ export const assertQrisConnected = internalQuery({
   },
 });
 
+/** Internal: resolve the order + cafe owning a payment by its provider ref (webhook lookup). */
+export const getPaymentCafeByRef = internalQuery({
+  args: { providerRef: v.string() },
+  returns: v.union(v.object({ orderId: v.id('orders'), cafeId: v.id('cafes') }), v.null()),
+  handler: async (ctx, { providerRef }) => {
+    const p = await ctx.db
+      .query('payments')
+      .withIndex('by_provider_ref', (q) => q.eq('providerRef', providerRef))
+      .unique();
+    return p ? { orderId: p.orderId, cafeId: p.cafeId } : null;
+  },
+});
+
+/** Internal: a cafe's connected qris integration config (creds — server-only). */
+export const getQrisConfig = internalQuery({
+  args: { cafeId: v.id('cafes') },
+  returns: v.any(),
+  handler: async (ctx, { cafeId }) => {
+    const row = await ctx.db
+      .query('cafeSettings')
+      .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+      .first();
+    const qris = (row?.integrations ?? []).find((i) => i.key === 'qris' && i.connected);
+    return qris?.config ?? null;
+  },
+});
+
 /** Internal: insert the pending order via the shared buildOrder (no charge yet). */
 export const buildPendingDynamicOrder = internalMutation({
   args: saleArgs,
