@@ -221,6 +221,12 @@ provider-specific header verification (B/C), QR image rendering (E),
   decision.
 - Credential encryption-at-rest (env-key envelope encryption of
   `secretApiKey`/`callbackToken`).
+- Disconnecting the QRIS integration while a dynamic order is still pending
+  strands that order: a later genuine 'paid' webhook can't be verified (no cafe
+  config → falls back to Mock → 401), so the order is eventually swept to void
+  even though the customer paid. Proper fix is the deferred
+  status-reconciliation poll (and/or blocking disconnect while pending
+  qris_dynamic payments exist).
 
 ## Conventions
 

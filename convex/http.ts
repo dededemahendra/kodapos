@@ -42,6 +42,7 @@ http.route({
     const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, {
       cafeId: payment.cafeId,
     });
+    // If the cafe disconnected QRIS, config is null → Mock → 401; order is reconciled/swept later (see spec follow-ups).
     const event = await resolveProvider(config).verifyWebhook({ body, headers: req.headers });
     if (!event) return new Response('invalid token', { status: 401 });
     if (event.status === 'paid') {

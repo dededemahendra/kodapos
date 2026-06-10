@@ -1,14 +1,7 @@
 import type { PaymentProvider, WebhookEvent } from './types';
+import { timingSafeEqual } from './util';
 
 export type XenditConfig = { secretApiKey: string; callbackToken: string };
-
-/** Constant-time string compare. Returns false on length mismatch; never short-circuits per-char. */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
 
 const XENDIT_QR_URL = 'https://api.xendit.co/qr_codes';
 
@@ -27,7 +20,9 @@ export class XenditProvider implements PaymentProvider {
       throw new Error(`Gagal membuat QRIS di Xendit (${res.status}). ${detail}`.trim());
     }
     const json = (await res.json()) as { id: string; qr_string: string; expires_at: string };
-    return { providerRef: json.id, qrString: json.qr_string, expiresAt: Date.parse(json.expires_at) };
+    const parsedExpiry = Date.parse(json.expires_at);
+    const expiresAt = Number.isFinite(parsedExpiry) ? parsedExpiry : Date.now() + 15 * 60 * 1000;
+    return { providerRef: json.id, qrString: json.qr_string, expiresAt };
   }
 
   /** Pure parse of the lookup key (qr_id); no creds. Used before the cafe is known. */

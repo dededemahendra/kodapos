@@ -27,6 +27,17 @@ describe('XenditProvider', () => {
     await expect(new XenditProvider(CFG).createCharge({ amountIDR: 1000, referenceId: 'x' })).rejects.toThrow(/QRIS/i);
   });
 
+  it('createCharge falls back to a finite future expiresAt when expires_at is missing', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ id: 'qr_x', qr_string: 's' }), { status: 201 })
+    );
+    const r = await new XenditProvider(CFG).createCharge({ amountIDR: 1000, referenceId: 'ord-2' });
+    expect(r.providerRef).toBe('qr_x');
+    expect(r.qrString).toBe('s');
+    expect(Number.isFinite(r.expiresAt)).toBe(true);
+    expect(r.expiresAt).toBeGreaterThan(Date.now());
+  });
+
   it('parseReference extracts data.qr_id', () => {
     const body = JSON.stringify({ event: 'qr.payment', data: { qr_id: 'qr_abc', reference_id: 'ord-1', status: 'SUCCEEDED' } });
     expect(XenditProvider.parseReference(body)).toBe('qr_abc');

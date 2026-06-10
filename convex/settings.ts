@@ -150,7 +150,7 @@ export const get = query({
             connected: i.connected,
             ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
             config: {
-              provider: 'xendit',
+              provider: (i.config as { provider?: string } | undefined)?.provider ?? 'xendit',
               keyHint: (i.config as { keyHint?: string } | undefined)?.keyHint ?? '',
             },
           }
