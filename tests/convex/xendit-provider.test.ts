@@ -62,3 +62,27 @@ describe('resolveProvider', () => {
     expect(resolveProvider(undefined)).toBeInstanceOf(MockProvider);
   });
 });
+
+describe('XenditProvider.fetchStatus', () => {
+  const CFG2 = { secretApiKey: 'xnd_test_key', callbackToken: 'cb' };
+
+  it('maps a succeeded payment to paid', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ id: 'qr_1', status: 'ACTIVE', payments: [{ status: 'SUCCEEDED' }] }), { status: 200 })
+    );
+    await expect(new XenditProvider(CFG2).fetchStatus('qr_1')).resolves.toBe('paid');
+  });
+
+  it('maps an active unpaid QR to pending and inactive to expired', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 'qr_2', status: 'ACTIVE', payments: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 'qr_3', status: 'INACTIVE', payments: [] }), { status: 200 }));
+    await expect(new XenditProvider(CFG2).fetchStatus('qr_2')).resolves.toBe('pending');
+    await expect(new XenditProvider(CFG2).fetchStatus('qr_3')).resolves.toBe('expired');
+  });
+
+  it('returns unknown on a non-2xx without throwing', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('err', { status: 500 }));
+    await expect(new XenditProvider(CFG2).fetchStatus('qr_x')).resolves.toBe('unknown');
+  });
+});

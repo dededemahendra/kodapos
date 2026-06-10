@@ -1,4 +1,4 @@
-import type { PaymentProvider, WebhookEvent } from './types';
+import type { ChargeStatus, PaymentProvider, WebhookEvent } from './types';
 import { timingSafeEqual } from './util';
 
 export type XenditConfig = { secretApiKey: string; callbackToken: string };
@@ -32,6 +32,25 @@ export class XenditProvider implements PaymentProvider {
       return data?.qr_id ?? null;
     } catch {
       return null;
+    }
+  }
+
+  async fetchStatus(providerRef: string): Promise<ChargeStatus> {
+    try {
+      const auth = btoa(`${this.config.secretApiKey}:`);
+      const res = await fetch(`${XENDIT_QR_URL}/${encodeURIComponent(providerRef)}`, {
+        method: 'GET',
+        headers: { Authorization: `Basic ${auth}`, 'api-version': '2022-07-31' },
+      });
+      if (!res.ok) return 'unknown';
+      const json = (await res.json()) as { status?: string; payments?: Array<{ status?: string }> };
+      const payments = Array.isArray(json.payments) ? json.payments : [];
+      if (payments.some((p) => p.status === 'SUCCEEDED' || p.status === 'COMPLETED')) return 'paid';
+      if (json.status === 'ACTIVE') return 'pending';
+      if (json.status === 'INACTIVE') return 'expired';
+      return 'unknown';
+    } catch {
+      return 'unknown';
     }
   }
 
