@@ -1,5 +1,8 @@
+import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import type { Doc } from './_generated/dataModel';
+import type { QueryCtx } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { requireActiveCashier } from './lib/staff';
 
@@ -81,5 +84,73 @@ export const close = mutation({
       countedCashIDR: counted,
     });
     return null;
+  },
+});
+
+const shiftSummary = v.object({
+  _id: v.id('shifts'),
+  openedAt: v.number(),
+  closedAt: v.number(),
+  cashierName: v.string(),
+  openingFloatIDR: v.number(),
+  countedCashIDR: v.union(v.number(), v.null()),
+  ordersCount: v.number(),
+  salesTotalIDR: v.number(),
+  cashSalesIDR: v.number(),
+  qrisSalesIDR: v.number(),
+  expectedCashIDR: v.number(),
+  varianceIDR: v.union(v.number(), v.null()),
+});
+
+async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
+  const orders = await ctx.db
+    .query('orders')
+    .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
+    .collect();
+  const paid = orders.filter((o) => o.paymentStatus === 'paid');
+  let salesTotalIDR = 0;
+  let cashSalesIDR = 0;
+  let qrisSalesIDR = 0;
+  for (const o of paid) {
+    salesTotalIDR += o.totalIDR;
+    if (o.paymentMethod === 'cash') cashSalesIDR += o.totalIDR;
+    else if (o.paymentMethod === 'qris_static' || o.paymentMethod === 'qris_dynamic')
+      qrisSalesIDR += o.totalIDR;
+  }
+  const cashier = await ctx.db.get(shift.cashierId);
+  const countedCashIDR = shift.countedCashIDR ?? null;
+  const expectedCashIDR = shift.openingFloatIDR + cashSalesIDR;
+  return {
+    _id: shift._id,
+    openedAt: shift.openedAt,
+    closedAt: shift.closedAt ?? shift.openedAt,
+    cashierName: cashier?.name ?? '—',
+    openingFloatIDR: shift.openingFloatIDR,
+    countedCashIDR,
+    ordersCount: paid.length,
+    salesTotalIDR,
+    cashSalesIDR,
+    qrisSalesIDR,
+    expectedCashIDR,
+    varianceIDR: countedCashIDR !== null ? countedCashIDR - expectedCashIDR : null,
+  };
+}
+
+export const listClosed = query({
+  args: { paginationOpts: paginationOptsValidator },
+  returns: v.object({
+    page: v.array(shiftSummary),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, { paginationOpts }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const result = await ctx.db
+      .query('shifts')
+      .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'closed'))
+      .order('desc')
+      .paginate(paginationOpts);
+    const page = await Promise.all(result.page.map((s) => summarizeShift(ctx, s)));
+    return { page, isDone: result.isDone, continueCursor: result.continueCursor };
   },
 });
