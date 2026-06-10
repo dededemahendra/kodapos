@@ -68,6 +68,14 @@ msgstr "\"{0}\" tidak akan muncul di pilihan pemasok."
 msgid "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
 msgstr "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
 
+#: src/routes/_pos/shifts.tsx
+msgid "(Kurang)"
+msgstr "(Kurang)"
+
+#: src/routes/_pos/shifts.tsx
+msgid "(Lebih)"
+msgstr "(Lebih)"
+
 #. placeholder {0}: formatIDR(line.unitPriceIDR)
 #: src/components/sale/cart-line-row.tsx
 msgid "{0} / item"
@@ -80,7 +88,7 @@ msgid "{0} bahan · {1} stok rendah"
 msgstr "{0} bahan · {1} stok rendah"
 
 #. placeholder {0}: o.lines.length
-#: src/routes/_pos/history.tsx
+#: src/components/shift/shift-order-list.tsx
 msgid "{0} item"
 msgstr "{0} item"
 
@@ -116,6 +124,11 @@ msgstr "{0} pembelian · 30 hari"
 msgid "{0} penyesuaian · 30 hari"
 msgstr "{0} penyesuaian · 30 hari"
 
+#. placeholder {0}: s.ordersCount
+#: src/routes/_pos/shifts.tsx
+msgid "{0} pesanan"
+msgstr "{0} pesanan"
+
 #. placeholder {0}: formatCount(draft.redeemBlockPoints)
 #. placeholder {1}: formatIDR(draft.redeemBlockIDR)
 #: src/routes/_pos/loyalty.tsx
@@ -140,6 +153,10 @@ msgstr "@namakafe"
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "← Kembali"
 msgstr "← Kembali"
+
+#: src/routes/_pos/shifts.tsx
+msgid "← Kembali ke daftar shift"
+msgstr "← Kembali ke daftar shift"
 
 #: src/routes/_pos/inventory/waste.tsx
 #~ msgid "+ Catat Limbah"
@@ -658,7 +675,7 @@ msgstr "Belum ada penyesuaian."
 msgid "Belum ada pergerakan stok."
 msgstr "Belum ada pergerakan stok."
 
-#: src/routes/_pos/history.tsx
+#: src/components/shift/shift-order-list.tsx
 msgid "Belum ada pesanan di shift ini."
 msgstr "Belum ada pesanan di shift ini."
 
@@ -677,6 +694,10 @@ msgstr "Belum ada promo."
 #: src/components/inventory/recipe-editor.tsx
 msgid "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
 msgstr "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
+
+#: src/routes/_pos/shifts.tsx
+msgid "Belum ada shift yang ditutup."
+msgstr "Belum ada shift yang ditutup."
 
 #: src/routes/_pos/reports/cashiers.tsx
 msgid "Belum ada transaksi kasir pada rentang ini."
@@ -1552,6 +1573,10 @@ msgstr "Kartu"
 msgid "Kartu debit/kredit"
 msgstr "Kartu debit/kredit"
 
+#: src/routes/_pos/shifts.tsx
+msgid "Kas dihitung"
+msgstr "Kas dihitung"
+
 #: src/components/app-shared.tsx
 #: src/components/dashboard-invoices.tsx
 #: src/components/staff/staff-picker-card.tsx
@@ -1947,6 +1972,7 @@ msgstr "Memproses…"
 msgid "Memuat menu…"
 msgstr "Memuat menu…"
 
+#: src/components/shift/shift-order-list.tsx
 #: src/routes/_pos/history.tsx
 msgid "Memuat riwayat…"
 msgstr "Memuat riwayat…"
@@ -1979,6 +2005,7 @@ msgstr "Memuat struk…"
 #: src/routes/_pos/settings/tax.tsx
 #: src/routes/_pos/shift/close.tsx
 #: src/routes/_pos/shift/open.tsx
+#: src/routes/_pos/shifts.tsx
 msgid "Memuat…"
 msgstr "Memuat…"
 
@@ -2109,6 +2136,10 @@ msgstr "Mode gelap"
 #: src/components/app-shared.tsx
 msgid "Modifier"
 msgstr "Modifier"
+
+#: src/routes/_pos/shifts.tsx
+msgid "Muat lebih banyak"
+msgstr "Muat lebih banyak"
 
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Mulai dengan kategori →"
@@ -2926,6 +2957,10 @@ msgstr "Riwayat pergerakan stok untuk bahan ini."
 msgid "Riwayat poin"
 msgstr "Riwayat poin"
 
+#: src/routes/_pos/shifts.tsx
+msgid "Riwayat Shift"
+msgstr "Riwayat Shift"
+
 #: src/routes/_pos/history.tsx
 msgid "Riwayat shift ini"
 msgstr "Riwayat shift ini"
@@ -3004,6 +3039,10 @@ msgstr "Secret API Key"
 msgid "Sedang"
 msgstr "Sedang"
 
+#: src/routes/_pos/shifts.tsx
+msgid "Sedang berjalan"
+msgstr "Sedang berjalan"
+
 #: src/routes/_pos/settings/general.tsx
 msgid "Segera"
 msgstr "Segera"
@@ -3030,6 +3069,7 @@ msgid "Selesaikan nanti"
 msgstr "Selesaikan nanti"
 
 #: src/components/shift/shift-summary-panel.tsx
+#: src/routes/_pos/shifts.tsx
 msgid "Selisih"
 msgstr "Selisih"
 
@@ -3086,7 +3126,6 @@ msgid "Set PIN"
 msgstr "Set PIN"
 
 #: src/components/app-shared.tsx
-#: src/routes/_pos/shifts.tsx
 msgid "Shift"
 msgstr "Shift"
 
@@ -3646,7 +3685,7 @@ msgstr "Tumpah"
 #: src/components/channel-sales-chart.tsx
 #: src/components/sale/payment-methods.tsx
 #: src/components/sale/receipt-preview.tsx
-#: src/routes/_pos/history.tsx
+#: src/components/shift/shift-order-list.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tunai"
 msgstr "Tunai"
