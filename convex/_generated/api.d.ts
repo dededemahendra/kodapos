@@ -40,6 +40,8 @@ import type * as orders from "../orders.js";
 import type * as payments_providers_index from "../payments/providers/index.js";
 import type * as payments_providers_mock from "../payments/providers/mock.js";
 import type * as payments_providers_types from "../payments/providers/types.js";
+import type * as payments_providers_util from "../payments/providers/util.js";
+import type * as payments_providers_xendit from "../payments/providers/xendit.js";
 import type * as payments_qrisDynamic from "../payments/qrisDynamic.js";
 import type * as promotions from "../promotions.js";
 import type * as purchases from "../purchases.js";
@@ -92,6 +94,8 @@ declare const fullApi: ApiFromModules<{
   "payments/providers/index": typeof payments_providers_index;
   "payments/providers/mock": typeof payments_providers_mock;
   "payments/providers/types": typeof payments_providers_types;
+  "payments/providers/util": typeof payments_providers_util;
+  "payments/providers/xendit": typeof payments_providers_xendit;
   "payments/qrisDynamic": typeof payments_qrisDynamic;
   promotions: typeof promotions;
   purchases: typeof purchases;

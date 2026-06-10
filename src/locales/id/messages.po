@@ -803,6 +803,10 @@ msgstr "Buka/tutup shift"
 #~ msgid "Bulatkan total transaksi ke satuan terdekat."
 #~ msgstr "Bulatkan total transaksi ke satuan terdekat."
 
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Callback Token"
+msgstr "Callback Token"
+
 #: src/routes/_pos/settings/general.tsx
 msgid "Cara tanggal ditampilkan di struk dan laporan."
 msgstr "Cara tanggal ditampilkan di struk dan laporan."
@@ -2991,6 +2995,10 @@ msgstr "Sebagai: {0}"
 #~ msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 #~ msgstr "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Secret API Key"
+msgstr "Secret API Key"
+
 #: src/lib/auth-validation.ts
 #: src/routes/_pos/forecast.tsx
 msgid "Sedang"
@@ -3437,6 +3445,10 @@ msgstr "Telepon"
 #: src/routes/_pos/customers.tsx
 msgid "Telp"
 msgstr "Telp"
+
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
+msgstr "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
 
 #: src/components/reports/range-picker.tsx
 #~ msgid "Terapkan"

@@ -1,4 +1,5 @@
 import { Trans, useLingui } from '@lingui/react/macro';
+import { QRCodeSVG } from 'qrcode.react';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_LOYALTY } from 'convex/lib/loyalty';
@@ -181,7 +182,7 @@ export function QrisDynamicPaymentDialog({
                 </div>
               </div>
               <div className="flex flex-col items-center gap-2 rounded-md border border-border px-3 py-4">
-                <div className="font-mono text-xs break-all">{qrString}</div>
+                {qrString ? <QRCodeSVG value={qrString} size={224} marginSize={2} /> : null}
                 <p className="text-sm text-muted-foreground">
                   <Trans>Menunggu pembayaran…</Trans>
                 </p>

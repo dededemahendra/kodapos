@@ -1,13 +1,6 @@
-import type { ChargeInput, ChargeResult, PaymentProvider, WebhookEvent } from './types';
+import type { PaymentProvider, WebhookEvent } from './types';
 import { WEBHOOK_STATUSES } from './types';
-
-/** Constant-time string compare. Returns false on length mismatch; never short-circuits per-char. */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
+import { timingSafeEqual } from './util';
 
 /** HMAC-SHA256 hex over `body` using Web Crypto (available in the default Convex runtime). */
 export async function signMockBody(secret: string, body: string): Promise<string> {
@@ -22,17 +15,18 @@ export async function signMockBody(secret: string, body: string): Promise<string
 export class MockProvider implements PaymentProvider {
   constructor(private readonly secret: string) {}
 
-  async createCharge(input: ChargeInput): Promise<ChargeResult> {
-    const providerRef = `mock_${input.idempotencyKey}`;
+  async createCharge(input: { amountIDR: number; referenceId: string }) {
+    const providerRef = `mock_${input.referenceId}`;
     const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes
     const qrString = `MOCKQR|${providerRef}|${input.amountIDR}`;
     return { providerRef, qrString, expiresAt };
   }
 
-  async verifyWebhook(req: { body: string; signature: string | null }): Promise<WebhookEvent | null> {
-    if (!req.signature) return null;
+  async verifyWebhook(req: { body: string; headers: Headers }): Promise<WebhookEvent | null> {
+    const signature = req.headers.get('x-signature');
+    if (!signature) return null;
     const expected = await signMockBody(this.secret, req.body);
-    if (!timingSafeEqual(req.signature, expected)) return null;
+    if (!timingSafeEqual(signature, expected)) return null;
     try {
       const parsed = JSON.parse(req.body) as { providerRef?: string; status?: string };
       if (!parsed.providerRef || !(WEBHOOK_STATUSES as readonly string[]).includes(parsed.status ?? '')) {
