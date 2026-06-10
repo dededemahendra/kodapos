@@ -22,6 +22,10 @@ export class MockProvider implements PaymentProvider {
     return { providerRef, qrString, expiresAt };
   }
 
+  async fetchStatus(): Promise<import('./types').ChargeStatus> {
+    return 'pending';
+  }
+
   async verifyWebhook(req: { body: string; headers: Headers }): Promise<WebhookEvent | null> {
     const signature = req.headers.get('x-signature');
     if (!signature) return null;
