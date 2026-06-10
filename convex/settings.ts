@@ -288,6 +288,23 @@ export const disconnectIntegration = mutation({
   returns: v.null(),
   handler: async (ctx, { key }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
+    // Disconnecting QRIS while a dynamic order is awaiting payment would strand it:
+    // a later genuine webhook can't be verified (no cafe config), so the order
+    // gets swept to void even though the customer paid. Block until it resolves.
+    if (key === 'qris') {
+      const unconfirmed = await ctx.db
+        .query('payments')
+        .withIndex('by_cafe_method_confirmed', (q) =>
+          q.eq('cafeId', cafeId).eq('method', 'qris_dynamic').eq('confirmedAt', undefined)
+        )
+        .collect();
+      for (const p of unconfirmed) {
+        const order = await ctx.db.get(p.orderId);
+        if (order?.paymentStatus === 'pending') {
+          throw new Error('Tidak bisa memutuskan QRIS saat ada pembayaran QRIS dinamis yang tertunda.');
+        }
+      }
+    }
     const id = await getOrCreateSettingsId(ctx, cafeId);
     const row = await ctx.db.get(id);
     const existing = row?.integrations ?? [];

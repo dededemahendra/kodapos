@@ -149,3 +149,30 @@ describe('createQrisDynamicSale failure path', () => {
     expect(orders[0]?.paymentStatus).toBe('void');
   });
 });
+
+describe('disconnect guard while a dynamic order is pending', () => {
+  it('blocks disconnect with a pending order, then allows it after settle', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await connectXendit(asOwner, 'tokenA');
+    stubXenditCreate('qr_D');
+    const r = await asOwner.action(api.payments.qrisDynamic.createQrisDynamicSale, {
+      clientId: 'disc-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      createdAtClient: 1,
+    });
+
+    // Pending order present → disconnect is blocked.
+    await expect(asOwner.mutation(api.settings.disconnectIntegration, { key: 'qris' })).rejects.toThrow(
+      /tertunda/i
+    );
+
+    // Settle it via webhook, then disconnect succeeds.
+    const body = JSON.stringify({ data: { qr_id: 'qr_D', reference_id: r.orderId, status: 'SUCCEEDED' } });
+    await t.fetch('/webhooks/qris/xendit', { method: 'POST', body, headers: { 'x-callback-token': 'tokenA' } });
+    expect((await t.run((ctx) => ctx.db.get(r.orderId as Id<'orders'>)))?.paymentStatus).toBe('paid');
+    await expect(asOwner.mutation(api.settings.disconnectIntegration, { key: 'qris' })).resolves.toBeNull();
+  });
+});
