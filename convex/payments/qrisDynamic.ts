@@ -7,31 +7,58 @@ import { buildOrder, settleSale, saleArgs, voidPendingOrder } from '../lib/sale'
 import { resolveProvider, qrisWebhookSecret } from './providers';
 import { signMockBody } from './providers/mock';
 
-/** Internal: connected-integration check for the action (which can't read ctx.db). */
+/**
+ * Internal: connected-integration check for the action (which can't read ctx.db).
+ * Returns the connected qris integration's config (server-only — it carries creds,
+ * which is fine for an internalQuery) so the action can select/configure a provider.
+ */
 export const assertQrisConnected = internalQuery({
   args: {},
-  returns: v.null(),
+  returns: v.any(),
   handler: async (ctx) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const row = await ctx.db
       .query('cafeSettings')
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
       .first();
-    const connected = (row?.integrations ?? []).some((i) => i.key === 'qris' && i.connected);
-    if (!connected) throw new Error('Integrasi QRIS dinamis belum terhubung.');
+    const qris = (row?.integrations ?? []).find((i) => i.key === 'qris' && i.connected);
+    if (!qris) throw new Error('Integrasi QRIS dinamis belum terhubung.');
+    return qris.config ?? {};
+  },
+});
+
+/** Internal: insert the pending order via the shared buildOrder (no charge yet). */
+export const buildPendingDynamicOrder = internalMutation({
+  args: saleArgs,
+  returns: v.object({ orderId: v.id('orders'), totalIDR: v.number(), changeIDR: v.number() }),
+  handler: async (ctx, args) => buildOrder(ctx, args, { method: 'qris_dynamic' }),
+});
+
+/** Internal: patch the pending payment row with the provider ref + expiry once charged. */
+export const patchCharge = internalMutation({
+  args: { orderId: v.id('orders'), providerRef: v.string(), expiresAt: v.number() },
+  returns: v.null(),
+  handler: async (ctx, { orderId, providerRef, expiresAt }) => {
+    const payment = await ctx.db
+      .query('payments')
+      .withIndex('by_order', (q) => q.eq('orderId', orderId))
+      .unique();
+    if (payment) await ctx.db.patch(payment._id, { providerRef, expiresAt, providerStatus: 'pending' });
     return null;
   },
 });
 
-/** Internal: insert the pending order via the shared buildOrder. */
-export const buildPendingDynamicOrder = internalMutation({
-  args: { ...saleArgs, providerRef: v.string(), expiresAt: v.number() },
-  returns: v.object({ orderId: v.id('orders'), totalIDR: v.number(), changeIDR: v.number() }),
-  handler: async (ctx, { providerRef, expiresAt, ...args }) =>
-    buildOrder(ctx, args, { method: 'qris_dynamic', providerRef, expiresAt }),
+/** Internal: void a pending order by id (charge-create failed). */
+export const voidPendingOrderByRef = internalMutation({
+  args: { orderId: v.id('orders'), providerStatus: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { orderId, providerStatus }) => {
+    await voidPendingOrder(ctx, orderId, providerStatus);
+    return null;
+  },
 });
 
-/** Owner-triggered: create a charge with the provider and a pending order. */
+/** Owner-triggered: build the pending order first, then create the provider charge. */
 export const createQrisDynamicSale = action({
   args: saleArgs,
   returns: v.object({ orderId: v.id('orders'), qrString: v.string(), expiresAt: v.number() }),
@@ -39,22 +66,27 @@ export const createQrisDynamicSale = action({
     ctx,
     args
   ): Promise<{ orderId: Id<'orders'>; qrString: string; expiresAt: number }> => {
-    await ctx.runQuery(internal.payments.qrisDynamic.assertQrisConnected, {});
-    const provider = resolveProvider();
-    // amountIDR is a placeholder here: the mock provider confirms by signature,
-    // not amount, and the cashier-facing total is computed authoritatively in
-    // buildOrder (mirrored client-side by usePaymentTotals). A real adapter would
-    // pass the recomputed total instead.
-    const charge = await provider.createCharge({
-      amountIDR: 0,
-      referenceId: args.clientId,
-    });
-    const res = await ctx.runMutation(internal.payments.qrisDynamic.buildPendingDynamicOrder, {
-      ...args,
+    const config = await ctx.runQuery(internal.payments.qrisDynamic.assertQrisConnected, {});
+    const { orderId, totalIDR } = await ctx.runMutation(
+      internal.payments.qrisDynamic.buildPendingDynamicOrder,
+      args
+    );
+    let charge: { providerRef: string; qrString: string; expiresAt: number };
+    try {
+      charge = await resolveProvider(config).createCharge({ amountIDR: totalIDR, referenceId: orderId });
+    } catch (err) {
+      await ctx.runMutation(internal.payments.qrisDynamic.voidPendingOrderByRef, {
+        orderId,
+        providerStatus: 'failed',
+      });
+      throw err;
+    }
+    await ctx.runMutation(internal.payments.qrisDynamic.patchCharge, {
+      orderId,
       providerRef: charge.providerRef,
       expiresAt: charge.expiresAt,
     });
-    return { orderId: res.orderId, qrString: charge.qrString, expiresAt: charge.expiresAt };
+    return { orderId, qrString: charge.qrString, expiresAt: charge.expiresAt };
   },
 });
 

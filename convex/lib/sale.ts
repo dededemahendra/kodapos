@@ -35,7 +35,7 @@ export type SaleArgs = Infer<typeof saleArgsValidator>;
 export type PaymentInput =
   | { method: 'cash'; tenderedIDR: number }
   | { method: 'qris_static' }
-  | { method: 'qris_dynamic'; providerRef: string; expiresAt: number };
+  | { method: 'qris_dynamic' };
 
 function assertIDR(n: number, label: string): number {
   if (!Number.isInteger(n)) throw new Error(`${label} harus berupa angka bulat (rupiah).`);
@@ -297,22 +297,17 @@ export async function buildOrder(
     syncedAt: now,
   });
 
-  // method-specific: cash records tendered/change; qris_dynamic records provider
-  // ref + status + expiry; qris_static records neither. No confirmedAt until
-  // settleSale runs.
+  // method-specific: cash records tendered/change; qris_dynamic records only the
+  // pending marker here (providerRef/expiresAt are patched later by patchCharge,
+  // once the provider charge exists); qris_static records neither. No confirmedAt
+  // until settleSale runs.
   await ctx.db.insert('payments', {
     cafeId,
     orderId,
     method: payment.method,
     amountIDR: totalIDR,
     ...(payment.method === 'cash' ? { cashTenderedIDR: payment.tenderedIDR, changeIDR } : {}),
-    ...(payment.method === 'qris_dynamic'
-      ? {
-          providerRef: payment.providerRef,
-          providerStatus: 'pending',
-          expiresAt: payment.expiresAt,
-        }
-      : {}),
+    ...(payment.method === 'qris_dynamic' ? { providerStatus: 'pending' } : {}),
   });
 
   return { orderId, totalIDR, changeIDR };
