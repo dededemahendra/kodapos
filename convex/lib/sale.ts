@@ -3,6 +3,7 @@ import type { Doc, Id } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from './auth';
 import { DEFAULT_LOYALTY, pointsEarned, redemptionIDR } from './loyalty';
+import { orderTypeValidator } from './orderType';
 import { computeOrderTotals, DEFAULT_SERVICE_CHARGE_NAME, promoDiscountIDR } from './pricing';
 import { requireActiveCashier } from './staff';
 
@@ -21,6 +22,7 @@ export const saleArgs = {
   customerId: v.optional(v.id('customers')),
   redeemPoints: v.optional(v.number()),
   createdAtClient: v.optional(v.number()),
+  orderType: v.optional(orderTypeValidator),
 };
 
 export const saleResult = v.object({
@@ -291,6 +293,7 @@ export async function buildOrder(
     ...(customer ? { customerId: customer._id, pointsEarned: earned } : {}),
     ...(pointsRedeemed > 0 ? { pointsRedeemed, pointsRedeemedIDR } : {}),
     totalIDR,
+    orderType: args.orderType ?? 'dine_in',
     paymentMethod: payment.method,
     paymentStatus: 'pending',
     createdAtClient: args.createdAtClient ?? now,
