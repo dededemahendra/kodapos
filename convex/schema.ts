@@ -1,6 +1,7 @@
 import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { heldLineValidator, heldPromoValidator } from './lib/heldOrder';
 import { orderTypeValidator } from './lib/orderType';
 import { weatherConditionV, weatherSignalV } from './lib/weather';
 
@@ -239,6 +240,19 @@ export default defineSchema({
     note: v.optional(v.string()),
     at: v.number(),
   }).index('by_shift', ['shiftId']),
+
+  heldOrders: defineTable({
+    cafeId: v.id('cafes'),
+    shiftId: v.id('shifts'),
+    cashierId: v.id('cafeStaff'),
+    label: v.string(),
+    orderType: orderTypeValidator,
+    lines: v.array(heldLineValidator),
+    promo: v.optional(heldPromoValidator),
+    createdAt: v.number(),
+  })
+    .index('by_shift', ['shiftId'])
+    .index('by_cafe', ['cafeId']),
 
   orders: defineTable({
     cafeId: v.id('cafes'),
