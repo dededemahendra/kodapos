@@ -1282,12 +1282,17 @@ msgid "Gambar QRIS belum diunggah."
 msgstr "QRIS image not yet uploaded."
 
 #: src/components/sale/customer-section.tsx
+#: src/routes/_pos/shifts.tsx
 msgid "Ganti"
 msgstr "Change"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Ganti gambar"
 msgstr "Change image"
+
+#: src/components/sale/cart-pane.tsx
+msgid "Ganti kasir"
+msgstr "Switch cashier"
 
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -1699,6 +1704,7 @@ msgstr "Manage cashiers, contact info, access permissions, and PINs."
 
 #: src/components/nav-user.tsx
 #: src/components/shift/cash-movement-dialog.tsx
+#: src/routes/_pos/shifts.tsx
 msgid "Keluar"
 msgstr "Log out"
 
@@ -1964,6 +1970,7 @@ msgid "Margin"
 msgstr "Margin"
 
 #: src/components/shift/cash-movement-dialog.tsx
+#: src/routes/_pos/shifts.tsx
 #: src/routes/_public/index.tsx
 #: src/routes/_public/signin.tsx
 #: src/routes/_public/signup.tsx
@@ -2998,6 +3005,10 @@ msgstr "Summary"
 #: src/components/inventory/movement-history-sheet.tsx
 msgid "Riwayat"
 msgstr "History"
+
+#: src/routes/_pos/shifts.tsx
+msgid "Riwayat kasir"
+msgstr "Cashier activity"
 
 #: src/components/inventory/movement-history-sheet.tsx
 msgid "Riwayat pergerakan stok untuk bahan ini."
