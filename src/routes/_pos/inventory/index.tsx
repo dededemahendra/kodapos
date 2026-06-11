@@ -4,12 +4,13 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, History, PackagePlus, Pencil, Plus } from 'lucide-react';
+import { Archive, ClipboardList, History, PackagePlus, Pencil, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { IngredientForm } from '~/components/inventory/ingredient-form';
 import { MovementHistorySheet } from '~/components/inventory/movement-history-sheet';
 import { StockAdjustDialog } from '~/components/inventory/stock-adjust-dialog';
 import { StockSummary } from '~/components/inventory/stock-summary';
+import { StockTakeDialog } from '~/components/inventory/stock-take-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
@@ -42,6 +43,7 @@ function InventoryIndex() {
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
+  const [takeOpen, setTakeOpen] = useState(false);
   const [editId, setEditId] = useState<Id<'ingredients'> | null>(null);
   const [adjustId, setAdjustId] = useState<Id<'ingredients'> | null>(null);
   const [archiveRow, setArchiveRow] = useState<Ingredient | null>(null);
@@ -65,6 +67,11 @@ function InventoryIndex() {
       ),
     };
   }, [ingredients]);
+
+  const activeIngredients = useMemo(
+    () => ingredients?.filter((r) => !r.archived),
+    [ingredients]
+  );
 
   // The rows passed to DataTable: undefined while loading (so DataTable shows
   // skeletons), otherwise filtered + searched.
@@ -225,10 +232,20 @@ function InventoryIndex() {
           ) : null
         }
         actions={
-          <Button type="button" onClick={() => setCreateOpen(true)}>
-            <Plus />
-            <Trans>Tambah Bahan</Trans>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setTakeOpen(true)}
+            >
+              <ClipboardList />
+              <Trans>Stok opname</Trans>
+            </Button>
+            <Button type="button" onClick={() => setCreateOpen(true)}>
+              <Plus />
+              <Trans>Tambah Bahan</Trans>
+            </Button>
+          </div>
         }
       />
 
@@ -276,6 +293,11 @@ function InventoryIndex() {
         onOpenChange={(open) => {
           if (!open) setAdjustId(null);
         }}
+      />
+      <StockTakeDialog
+        open={takeOpen}
+        ingredients={activeIngredients}
+        onOpenChange={setTakeOpen}
       />
       <ConfirmDialog
         open={archiveRow !== null}

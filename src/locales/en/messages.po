@@ -149,6 +149,10 @@ msgstr "{0} active promos"
 msgid "{0}% — biasanya sepi di hari {day}"
 msgstr "{0}% — usually quiet on {day}"
 
+#: src/components/inventory/stock-take-dialog.tsx
+msgid "{changedCount} bahan akan disesuaikan"
+msgstr "{changedCount} items will be adjusted"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "@namakafe"
 msgstr "@cafename"
@@ -503,6 +507,7 @@ msgid "bahan"
 msgstr "ingredient"
 
 #: src/components/inventory/recipe-editor.tsx
+#: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/routes/_pos/forecast.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
@@ -576,6 +581,7 @@ msgstr "Spoiled/Expired"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/confirm-archive.tsx
@@ -613,6 +619,10 @@ msgstr "No activity yet."
 #: src/routes/_pos/loyalty.tsx
 msgid "Belum ada anggota."
 msgstr "No members yet."
+
+#: src/components/inventory/stock-take-dialog.tsx
+msgid "Belum ada bahan untuk dihitung."
+msgstr "No ingredients to count yet."
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Belum ada bahan."
@@ -923,6 +933,7 @@ msgid "Catatan"
 msgstr "Notes"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/shift/cash-movement-dialog.tsx
 msgid "Catatan (opsional)"
@@ -1273,6 +1284,10 @@ msgstr "Failed to save promo."
 msgid "Gagal menyimpan resep."
 msgstr "Failed to save recipe."
 
+#: src/components/inventory/stock-take-dialog.tsx
+msgid "Gagal menyimpan stok opname."
+msgstr "Could not save the stock take."
+
 #: src/components/menu/category-table.tsx
 msgid "Gagal menyimpan urutan."
 msgstr "Failed to save order."
@@ -1428,6 +1443,15 @@ msgstr "Price includes tax"
 #: src/components/reports/range-picker.tsx
 msgid "Hari ini"
 msgstr "Today"
+
+#: src/components/inventory/stock-take-dialog.tsx
+msgid "Hitung fisik"
+msgstr "Counted"
+
+#. placeholder {0}: r.name
+#: src/components/inventory/stock-take-dialog.tsx
+msgid "Hitung fisik {0}"
+msgstr "Counted {0}"
 
 #: src/routes/_pos/recipes.tsx
 msgid "HPP/cup"
@@ -2122,6 +2146,7 @@ msgstr "Closing…"
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/cafe-profile-form.tsx
 #: src/components/menu/category-form-dialog.tsx
@@ -3251,6 +3276,7 @@ msgstr "Who's on duty?"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
@@ -3284,6 +3310,10 @@ msgstr "Sync sales to Accurate."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Sinkronkan penjualan ke Mekari Jurnal."
 msgstr "Sync sales to Mekari Jurnal."
+
+#: src/components/inventory/stock-take-dialog.tsx
+msgid "Sistem"
+msgstr "System"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -3334,9 +3364,16 @@ msgid "Stok kini"
 msgstr "Current stock"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
+#: src/components/inventory/stock-take-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
+#: src/routes/_pos/inventory/index.tsx
 msgid "Stok opname"
 msgstr "Stock count"
+
+#. placeholder {0}: res.adjusted
+#: src/components/inventory/stock-take-dialog.tsx
+msgid "Stok opname selesai · {0} bahan disesuaikan."
+msgstr "Stock take done · {0} items adjusted."
 
 #: src/components/inventory/stock-summary.tsx
 #: src/components/sale/item-card.tsx
