@@ -32,7 +32,7 @@ export function StockSummary({
                 ⚠
               </span>
             ) : null}
-            {lowCount} <Trans>bahan</Trans>
+            {lowCount}
           </p>
         </CardContent>
       </DashboardCard>
