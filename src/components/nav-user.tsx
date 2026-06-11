@@ -3,7 +3,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Link } from "@tanstack/react-router";
 import { api } from "convex/_generated/api";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { LogOut, Settings } from "lucide-react";
 import { Trans } from "@lingui/react/macro";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -20,12 +20,14 @@ import { useActiveCashier } from "~/lib/active-cashier";
 
 export function NavUser() {
 	const { signOut } = useAuthActions();
-	const { clearCashier } = useActiveCashier();
+	const record = useMutation(api.cashierSessions.record);
+	const { cashierId, clearCashier } = useActiveCashier();
 	const cafe = useQuery(api.cafes.myCafe, {});
 	const name = cafe?.name ?? "kodapos";
 	const initial = name.charAt(0).toUpperCase();
 
 	async function handleSignOut(): Promise<void> {
+		if (cashierId) { try { await record({ cashierId, type: 'logout' }); } catch { /* best effort */ } }
 		clearCashier();
 		await signOut();
 		window.location.replace("/");

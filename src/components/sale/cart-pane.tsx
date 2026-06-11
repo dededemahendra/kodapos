@@ -1,5 +1,6 @@
 import { useLingui } from '@lingui/react/macro';
 import { Trans } from '@lingui/react/macro';
+import { Link } from '@tanstack/react-router';
 import { X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { formatIDR } from '~/lib/money';
@@ -27,6 +28,7 @@ export function CartPane({
   onPay,
   onKosongkan,
   onKas,
+  onSwitch,
 }: {
   cart: CartState;
   dispatch: (a: CartAction) => void;
@@ -46,6 +48,7 @@ export function CartPane({
   onPay: (method: PaymentMethod) => void;
   onKosongkan: () => void;
   onKas?: () => void;
+  onSwitch?: boolean;
 }) {
   const { t } = useLingui();
   const empty = cart.lines.length === 0;
@@ -57,6 +60,11 @@ export function CartPane({
           <Trans>Pesanan ({cart.lines.length})</Trans>
         </h2>
         <div className="flex items-center gap-1">
+          {onSwitch ? (
+            <Button type="button" size="sm" variant="outline" asChild>
+              <Link to="/pin"><Trans>Ganti kasir</Trans></Link>
+            </Button>
+          ) : null}
           {onKas ? (
             <Button type="button" size="sm" variant="outline" onClick={onKas}>
               <Trans>Kas</Trans>
