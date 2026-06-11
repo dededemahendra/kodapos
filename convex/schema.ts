@@ -1,6 +1,7 @@
 import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { orderTypeValidator } from './lib/orderType';
 import { weatherConditionV, weatherSignalV } from './lib/weather';
 
 export default defineSchema({
@@ -304,6 +305,7 @@ export default defineSchema({
       v.literal('qris_static'),
       v.literal('qris_dynamic')
     ),
+    orderType: v.optional(orderTypeValidator),
     // 'pending' + 'void' reserved for Slice 5 (QRIS + voids); cash always inserts 'paid'.
     paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
     createdAtClient: v.number(),

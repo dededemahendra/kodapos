@@ -382,6 +382,10 @@ msgstr "Ambang"
 msgid "Ambang isi ulang"
 msgstr "Ambang isi ulang"
 
+#: src/components/sale/order-types.tsx
+msgid "Ambil di tempat"
+msgstr "Ambil di tempat"
+
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Amount"
 #~ msgstr "Amount"
@@ -602,6 +606,10 @@ msgstr "Batal"
 msgctxt "order status"
 msgid "Batal"
 msgstr "Batal"
+
+#: src/components/sale/order-types.tsx
+msgid "Bawa pulang"
+msgstr "Bawa pulang"
 
 #: src/components/sale/cart-pane.tsx
 #~ msgid "Bayar"
@@ -2003,6 +2011,10 @@ msgstr "Loyalitas"
 msgid "Lunas"
 msgstr "Lunas"
 
+#: src/components/sale/order-types.tsx
+msgid "Makan di tempat"
+msgstr "Makan di tempat"
+
 #: src/components/sale/customer-section.tsx
 msgid "Maks"
 msgstr "Maks"
@@ -3225,6 +3237,10 @@ msgstr "Semua metode"
 #: src/routes/_pos/reports/orders.tsx
 msgid "Semua status"
 msgstr "Semua status"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Semua tipe pesanan"
+msgstr "Semua tipe pesanan"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Semua transaksi dalam Rupiah."

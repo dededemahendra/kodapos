@@ -2,6 +2,7 @@ import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { orderTypeValidator } from './lib/orderType';
 import { buildOrder, saleArgs, saleResult, settleSale } from './lib/sale';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
@@ -79,6 +80,7 @@ const orderSummary = v.object({
   pointsRedeemedIDR: v.optional(v.number()),
   pointsEarned: v.optional(v.number()),
   totalIDR: v.number(),
+  orderType: v.optional(orderTypeValidator),
   paymentMethod: v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic')),
   paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
   createdAtClient: v.number(),
@@ -120,6 +122,7 @@ const orderRow = v.object({
   _id: v.id('orders'),
   createdAtClient: v.number(),
   totalIDR: v.number(),
+  orderType: v.optional(orderTypeValidator),
   paymentMethod: v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic')),
   paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
   cashierName: v.string(),
@@ -131,11 +134,12 @@ export const search = query({
     range: rangeArg,
     cashierId: v.optional(v.id('cafeStaff')),
     paymentMethod: v.optional(v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic'))),
+    orderType: v.optional(orderTypeValidator),
     status: v.optional(v.union(v.literal('paid'), v.literal('pending'), v.literal('void'))),
     paginationOpts: paginationOptsValidator,
   },
   returns: v.object({ page: v.array(orderRow), isDone: v.boolean(), continueCursor: v.string() }),
-  handler: async (ctx, { range, cashierId, paymentMethod, status, paginationOpts }) => {
+  handler: async (ctx, { range, cashierId, paymentMethod, orderType, status, paginationOpts }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const tz = await tzFor(ctx, cafeId);
     const { startMs, endMs } = resolveRange(tz, range, Date.now());
@@ -147,6 +151,7 @@ export const search = query({
       .order('desc');
     if (cashierId) q = q.filter((f) => f.eq(f.field('cashierId'), cashierId));
     if (paymentMethod) q = q.filter((f) => f.eq(f.field('paymentMethod'), paymentMethod));
+    if (orderType) q = q.filter((f) => f.eq(f.field('orderType'), orderType));
     if (status) q = q.filter((f) => f.eq(f.field('paymentStatus'), status));
     const result = await q.paginate(paginationOpts);
     const staff = await ctx.db
@@ -158,6 +163,7 @@ export const search = query({
       _id: o._id,
       createdAtClient: o.createdAtClient,
       totalIDR: o.totalIDR,
+      ...(o.orderType !== undefined ? { orderType: o.orderType } : {}),
       paymentMethod: o.paymentMethod,
       paymentStatus: o.paymentStatus,
       cashierName: nameById.get(o.cashierId) ?? '—',

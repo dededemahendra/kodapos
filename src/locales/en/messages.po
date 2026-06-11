@@ -382,6 +382,10 @@ msgstr "Threshold"
 msgid "Ambang isi ulang"
 msgstr "Reorder threshold"
 
+#: src/components/sale/order-types.tsx
+msgid "Ambil di tempat"
+msgstr "Pickup"
+
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Amount"
 #~ msgstr "Amount"
@@ -602,6 +606,10 @@ msgstr "Cancel"
 msgctxt "order status"
 msgid "Batal"
 msgstr "Void"
+
+#: src/components/sale/order-types.tsx
+msgid "Bawa pulang"
+msgstr "Takeaway"
 
 #: src/components/sale/cart-pane.tsx
 #~ msgid "Bayar"
@@ -2003,6 +2011,10 @@ msgstr "Loyalty"
 msgid "Lunas"
 msgstr "Paid"
 
+#: src/components/sale/order-types.tsx
+msgid "Makan di tempat"
+msgstr "Dine-in"
+
 #: src/components/sale/customer-section.tsx
 msgid "Maks"
 msgstr "Max"
@@ -3225,6 +3237,10 @@ msgstr "All methods"
 #: src/routes/_pos/reports/orders.tsx
 msgid "Semua status"
 msgstr "All statuses"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Semua tipe pesanan"
+msgstr "All order types"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Semua transaksi dalam Rupiah."

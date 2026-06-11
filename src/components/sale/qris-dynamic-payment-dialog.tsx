@@ -94,6 +94,7 @@ export function QrisDynamicPaymentDialog({
         clientId: clientIdRef.current,
         shiftId,
         cashierId,
+        orderType: cart.orderType,
         lines: cart.lines.map((l) => ({
           menuItemId: l.menuItemId,
           qty: l.qty,

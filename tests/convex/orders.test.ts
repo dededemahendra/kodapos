@@ -1319,3 +1319,66 @@ describe('orders.createQrisStaticSale', () => {
     expect(qris.totalIDR).toBe(cash.totalIDR);
   });
 });
+
+describe('order types', () => {
+  it('persists orderType on a cash sale', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'ot-takeaway',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+      orderType: 'takeaway',
+    });
+    const order = await asOwner.query(api.orders.getById, { id: result.orderId });
+    expect(order?.orderType).toBe('takeaway');
+  });
+
+  it('defaults orderType to dine_in when omitted', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'ot-default',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    const order = await asOwner.query(api.orders.getById, { id: result.orderId });
+    expect(order?.orderType).toBe('dine_in');
+  });
+
+  it('filters search by orderType', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const now = Date.now();
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'ot-search-takeaway',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: now,
+      orderType: 'takeaway',
+    });
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'ot-search-default',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: now,
+    });
+    const takeaway = await asOwner.query(api.orders.search, {
+      range: { preset: 'today' },
+      orderType: 'takeaway',
+      paginationOpts: { numItems: 25, cursor: null },
+    });
+    expect(takeaway.page.length).toBeGreaterThanOrEqual(1);
+    expect(takeaway.page.every((r) => r.orderType === 'takeaway')).toBe(true);
+  });
+});
