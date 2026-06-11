@@ -26,6 +26,7 @@ export function CartPane({
   payMethods,
   onPay,
   onKosongkan,
+  onKas,
 }: {
   cart: CartState;
   dispatch: (a: CartAction) => void;
@@ -44,6 +45,7 @@ export function CartPane({
   payMethods: PaymentMethod[];
   onPay: (method: PaymentMethod) => void;
   onKosongkan: () => void;
+  onKas?: () => void;
 }) {
   const { t } = useLingui();
   const empty = cart.lines.length === 0;
@@ -54,16 +56,23 @@ export function CartPane({
         <h2 className="text-sm font-semibold">
           <Trans>Pesanan ({cart.lines.length})</Trans>
         </h2>
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={onKosongkan}
-          disabled={empty}
-          className="text-muted-foreground"
-        >
-          <Trans>Kosongkan</Trans>
-        </Button>
+        <div className="flex items-center gap-1">
+          {onKas ? (
+            <Button type="button" size="sm" variant="outline" onClick={onKas}>
+              <Trans>Kas</Trans>
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={onKosongkan}
+            disabled={empty}
+            className="text-muted-foreground"
+          >
+            <Trans>Kosongkan</Trans>
+          </Button>
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto px-3">
         {empty ? (

@@ -9,6 +9,9 @@ export interface ShiftSummary {
   openedAt: number;
   closedAt?: number;
   openingFloatIDR: number;
+  cashSalesIDR?: number;
+  cashInIDR?: number;
+  cashOutIDR?: number;
   expectedCashIDR?: number;
   countedCashIDR?: number;
   varianceIDR?: number;
@@ -35,6 +38,9 @@ export function ShiftSummaryPanel({ shift }: ShiftSummaryPanelProps) {
       )}
       <dt className="text-muted-foreground"><Trans>Modal awal</Trans></dt>
       <dd>{formatIDR(shift.openingFloatIDR)}</dd>
+      {shift.cashSalesIDR !== undefined && (<><dt className="text-muted-foreground"><Trans>Penjualan tunai</Trans></dt><dd>{formatIDR(shift.cashSalesIDR)}</dd></>)}
+      {shift.cashInIDR !== undefined && shift.cashInIDR > 0 && (<><dt className="text-muted-foreground"><Trans>Kas masuk</Trans></dt><dd>+{formatIDR(shift.cashInIDR)}</dd></>)}
+      {shift.cashOutIDR !== undefined && shift.cashOutIDR > 0 && (<><dt className="text-muted-foreground"><Trans>Kas keluar</Trans></dt><dd>−{formatIDR(shift.cashOutIDR)}</dd></>)}
       {shift.expectedCashIDR !== undefined && (
         <>
           <dt className="text-muted-foreground"><Trans>Uang seharusnya</Trans></dt>

@@ -92,8 +92,9 @@ describe('shifts', () => {
     expect(closed?.status).toBe('closed');
     expect(closed?.countedCashIDR).toBe(100000);
     expect(closed?.closedAt).toEqual(expect.any(Number));
-    expect(closed?.expectedCashIDR).toBeUndefined();
-    expect(closed?.varianceIDR).toBeUndefined();
+    // No orders/movements: expected = float (100000), variance = 0.
+    expect(closed?.expectedCashIDR).toBe(100000);
+    expect(closed?.varianceIDR).toBe(0);
   });
 
   it('close rejects already-closed shift', async () => {
@@ -241,5 +242,79 @@ describe('shifts.listClosed', () => {
     expect(resB.page).toHaveLength(1);
     expect(resB.page[0]!._id).toBe(shiftB);
     expect(resB.page.every((s) => s._id !== shiftA)).toBe(true);
+  });
+});
+
+describe('shifts.close reconciliation', () => {
+  const OPENING = 100000;
+  const ITEM_PRICE = 18000;
+
+  /** Opens a shift (float 100000) + no-tax cafe + Espresso menu item. */
+  async function setup(t: ReturnType<typeof convexTest>, email = 'o@x.com') {
+    const userId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { name: 'Owner', email });
+    });
+    const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+    await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+    await asOwner.mutation(api.cafes.updateProfile, {
+      name: 'Kopi Senja',
+      timezone: 'Asia/Jakarta',
+      taxRatePct: 0,
+      taxEnabled: false,
+    });
+    const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
+    const shiftId = await asOwner.mutation(api.shifts.open, {
+      cashierId,
+      openingFloatIDR: OPENING,
+    });
+    const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Espresso',
+      priceIDR: ITEM_PRICE,
+    });
+    return { asOwner, cashierId, shiftId, itemId };
+  }
+
+  it('stores expected = float + cashSales + in − out, and variance; listClosed reads stored', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'c1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] as Id<'modifierOptions'>[] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1,
+    }); // cash sale 18000
+    await asOwner.mutation(api.cashMovements.record, { direction: 'in', amountIDR: 5000 });
+    await asOwner.mutation(api.cashMovements.record, { direction: 'out', amountIDR: 3000 });
+    await asOwner.mutation(api.shifts.close, { id: shiftId, countedCashIDR: 121000 });
+    const shift = await t.run((ctx) => ctx.db.get(shiftId));
+    expect(shift?.expectedCashIDR).toBe(120000); // 100000 + 18000 + 5000 - 3000
+    expect(shift?.varianceIDR).toBe(1000); // 121000 - 120000
+    const res = await asOwner.query(api.shifts.listClosed, {
+      paginationOpts: { numItems: 20, cursor: null },
+    });
+    expect(res.page[0]?.expectedCashIDR).toBe(120000);
+    expect(res.page[0]?.varianceIDR).toBe(1000);
+  });
+
+  it('closeoutSummary breaks down an open shift (counted/variance null)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'c2',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] as Id<'modifierOptions'>[] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1,
+    });
+    const s = await asOwner.query(api.shifts.closeoutSummary, { shiftId });
+    expect(s.cashSalesIDR).toBe(18000);
+    expect(s.expectedCashIDR).toBe(118000);
+    expect(s.countedCashIDR).toBeNull();
+    expect(s.varianceIDR).toBeNull();
   });
 });

@@ -9,6 +9,7 @@ import { CashPaymentDialog } from './cash-payment-dialog';
 import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
 import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
 import { ReceiptPreview } from './receipt-preview';
+import { CashMovementDialog } from '~/components/shift/cash-movement-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +47,7 @@ export function SaleScreen() {
   const [openMethod, setOpenMethod] = useState<PaymentMethod | null>(null);
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
+  const [kasOpen, setKasOpen] = useState(false);
 
   if (
     categories === undefined ||
@@ -137,6 +139,7 @@ export function SaleScreen() {
           if (cart.lines.length > 0) setOpenMethod(method);
         }}
         onKosongkan={() => setClearOpen(true)}
+        {...(shift && cashierId ? { onKas: () => setKasOpen(true) } : {})}
       />
       <ModifierPickerDialog
         open={pickerRow !== null}
@@ -188,6 +191,7 @@ export function SaleScreen() {
       </AlertDialog>
       {shift && cashierId ? (
         <>
+          <CashMovementDialog open={kasOpen} onOpenChange={setKasOpen} shiftId={shift._id} />
           <CashPaymentDialog
             open={openMethod === 'cash'}
             onOpenChange={(o) => {
