@@ -68,10 +68,12 @@ msgstr "\"{0}\" tidak akan muncul di pilihan pemasok."
 msgid "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
 msgstr "\"{name}\" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari tampilan arsip."
 
+#: src/routes/_pos/shift/close.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "(Kurang)"
 msgstr "(Kurang)"
 
+#: src/routes/_pos/shift/close.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "(Lebih)"
 msgstr "(Lebih)"
@@ -857,6 +859,10 @@ msgstr "Cari nama staf…"
 msgid "Cashier harus memilih"
 msgstr "Cashier harus memilih"
 
+#: src/components/shift/cash-movement-dialog.tsx
+msgid "Catat"
+msgstr "Catat"
+
 #: src/components/inventory/waste-dialog.tsx
 msgid "Catat limbah"
 msgstr "Catat limbah"
@@ -903,6 +909,7 @@ msgstr "Catatan"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
+#: src/components/shift/cash-movement-dialog.tsx
 msgid "Catatan (opsional)"
 msgstr "Catatan (opsional)"
 
@@ -1130,6 +1137,10 @@ msgstr "Gagal menambah pelanggan."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Gagal menambah staf."
 msgstr "Gagal menambah staf."
+
+#: src/components/shift/cash-movement-dialog.tsx
+msgid "Gagal mencatat kas."
+msgstr "Gagal mencatat kas."
 
 #: src/components/inventory/waste-dialog.tsx
 msgid "Gagal mencatat limbah."
@@ -1523,6 +1534,7 @@ msgstr "Jumat"
 msgid "Jumlah"
 msgstr "Jumlah"
 
+#: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/reports/payments.tsx
 msgid "Jumlah (Rp)"
 msgstr "Jumlah (Rp)"
@@ -1535,6 +1547,10 @@ msgstr "Jumlah {0}"
 #: src/components/inventory/waste-dialog.tsx
 msgid "Jumlah dibuang"
 msgstr "Jumlah dibuang"
+
+#: src/components/shift/cash-movement-dialog.tsx
+msgid "Jumlah harus lebih dari nol."
+msgstr "Jumlah harus lebih dari nol."
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Jumlah poin"
@@ -1573,9 +1589,27 @@ msgstr "Kartu"
 msgid "Kartu debit/kredit"
 msgstr "Kartu debit/kredit"
 
+#: src/components/sale/cart-pane.tsx
+msgid "Kas"
+msgstr "Kas"
+
 #: src/routes/_pos/shifts.tsx
 msgid "Kas dihitung"
 msgstr "Kas dihitung"
+
+#: src/components/shift/cash-movement-dialog.tsx
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Kas keluar"
+msgstr "Kas keluar"
+
+#: src/components/shift/cash-movement-dialog.tsx
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Kas masuk"
+msgstr "Kas masuk"
+
+#: src/components/shift/cash-movement-dialog.tsx
+msgid "Kas masuk / keluar"
+msgstr "Kas masuk / keluar"
 
 #: src/components/app-shared.tsx
 #: src/components/dashboard-invoices.tsx
@@ -1657,6 +1691,7 @@ msgid "Kelola kasir, kontak, izin akses, dan PIN."
 msgstr "Kelola kasir, kontak, izin akses, dan PIN."
 
 #: src/components/nav-user.tsx
+#: src/components/shift/cash-movement-dialog.tsx
 msgid "Keluar"
 msgstr "Keluar"
 
@@ -1920,6 +1955,7 @@ msgstr "Maks ({maxPoints})"
 msgid "Margin"
 msgstr "Margin"
 
+#: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_public/index.tsx
 #: src/routes/_public/signin.tsx
 #: src/routes/_public/signup.tsx
@@ -2532,6 +2568,10 @@ msgstr "Pengiriman masuk"
 msgid "Penjualan"
 msgstr "Penjualan"
 
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Penjualan tunai"
+msgstr "Penjualan tunai"
+
 #: src/components/customer/customer-detail-sheet.tsx
 msgid "Penukaran"
 msgstr "Penukaran"
@@ -3069,6 +3109,7 @@ msgid "Selesaikan nanti"
 msgstr "Selesaikan nanti"
 
 #: src/components/shift/shift-summary-panel.tsx
+#: src/routes/_pos/shift/close.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Selisih"
 msgstr "Selisih"
