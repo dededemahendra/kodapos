@@ -393,6 +393,68 @@ export async function settleSale(ctx: MutationCtx, orderId: Id<'orders'>): Promi
   }
 }
 
+/**
+ * Reverses every side effect of `settleSale` for a paid order: restores inventory
+ * (positive deltas), reverses loyalty points + customer stats (floored at 0), and
+ * flips the order to `void`. Throws unless the order is currently `paid`, which
+ * doubles as a re-entrancy guard against double-voiding.
+ */
+export async function reverseSettledSale(
+  ctx: MutationCtx,
+  orderId: Id<'orders'>,
+  opts: { reason?: string; cashierId?: Id<'cafeStaff'> }
+): Promise<void> {
+  const order = await ctx.db.get(orderId);
+  if (!order) throw new Error('Pesanan tidak ditemukan.');
+  if (order.paymentStatus !== 'paid') throw new Error('Hanya pesanan lunas yang bisa dibatalkan.');
+  const now = Date.now();
+  for (const line of order.lines) {
+    for (const rl of line.recipeSnapshot ?? []) {
+      const consumed = line.qty * rl.qty * rl.wastageFactor;
+      await ctx.db.insert('inventoryMovements', {
+        cafeId: order.cafeId,
+        ingredientId: rl.ingredientId,
+        delta: consumed,
+        reason: 'adjustment',
+        reasonLabel: 'Pembatalan pesanan',
+        refType: 'order',
+        refId: orderId as unknown as string,
+        at: now,
+      });
+    }
+  }
+  if (order.customerId) {
+    const customer = await ctx.db.get(order.customerId);
+    if (customer) {
+      const redeemed = order.pointsRedeemed ?? 0;
+      const earned = order.pointsEarned ?? 0;
+      const net = redeemed - earned;
+      if (net !== 0) {
+        await ctx.db.insert('loyaltyTransactions', {
+          cafeId: order.cafeId,
+          customerId: customer._id,
+          orderId,
+          type: 'adjust',
+          points: net,
+          note: 'Pembatalan pesanan',
+          at: now,
+        });
+      }
+      await ctx.db.patch(customer._id, {
+        pointsBalance: Math.max(0, customer.pointsBalance - earned + redeemed),
+        visitCount: Math.max(0, customer.visitCount - 1),
+        totalSpentIDR: Math.max(0, customer.totalSpentIDR - order.totalIDR),
+      });
+    }
+  }
+  await ctx.db.patch(orderId, {
+    paymentStatus: 'void',
+    voidedAt: now,
+    ...(opts.reason?.trim() ? { voidReason: opts.reason.trim() } : {}),
+    ...(opts.cashierId ? { voidedByCashierId: opts.cashierId } : {}),
+  });
+}
+
 /** Void a pending order + stamp its payment providerStatus. No-op unless pending. Idempotent. */
 export async function voidPendingOrder(
   ctx: MutationCtx,

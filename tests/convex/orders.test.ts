@@ -1382,3 +1382,131 @@ describe('order types', () => {
     expect(takeaway.page.every((r) => r.orderType === 'takeaway')).toBe(true);
   });
 });
+
+describe('voidSale', () => {
+  it('restores inventory when a paid sale is voided', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const susuId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 25,
+    });
+    // Seed stock to 100 (qty 2 per item, wastage 1).
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: susuId,
+      newQty: 100,
+      reasonLabel: 'Pengiriman masuk',
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId: susuId, qty: 2, wastageFactor: 1.0 }],
+    });
+
+    const res = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'void-inv-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 100000,
+      createdAtClient: 1700000000000,
+    });
+    // 100 - 3*2*1 = 94 after the sale.
+    const afterSale = await asOwner.query(api.ingredients.get, { id: susuId });
+    expect(afterSale?.currentStockQty).toBe(94);
+
+    await asOwner.mutation(api.orders.voidSale, { orderId: res.orderId });
+    // Voiding restores: 94 + 6 = 100.
+    const afterVoid = await asOwner.query(api.ingredients.get, { id: susuId });
+    expect(afterVoid?.currentStockQty).toBe(100);
+  });
+
+  it('marks the order void and drops it from paid aggregates', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const res = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'void-status-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    await asOwner.mutation(api.orders.voidSale, { orderId: res.orderId, reason: 'salah pesan' });
+    const order = await t.run((ctx) => ctx.db.get(res.orderId));
+    expect(order?.paymentStatus).toBe('void');
+    expect(order?.voidedAt).toEqual(expect.any(Number));
+    expect(order?.voidReason).toBe('salah pesan');
+    // Voided orders drop out of paid shift listings.
+    const rows = await asOwner.query(api.orders.listForShift, { shiftId });
+    expect(rows.map((r) => r._id)).not.toContain(res.orderId);
+  });
+
+  it('reverses loyalty points and customer stats', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await asOwner.mutation(api.loyalty.updateConfig, {
+      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+    });
+    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const res = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'void-loyal-1', shiftId, cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }], // Espresso 18000, earns 18
+      cashTenderedIDR: 20000, customerId, createdAtClient: 1700000000000,
+    });
+    const afterSale = await asOwner.query(api.customers.getDetail, { id: customerId });
+    expect(afterSale?.pointsBalance).toBe(18);
+    expect(afterSale?.visitCount).toBe(1);
+    expect(afterSale?.totalSpentIDR).toBe(18000);
+
+    await asOwner.mutation(api.orders.voidSale, { orderId: res.orderId });
+
+    const afterVoid = await asOwner.query(api.customers.getDetail, { id: customerId });
+    expect(afterVoid?.pointsBalance).toBe(0);
+    expect(afterVoid?.visitCount).toBe(0);
+    expect(afterVoid?.totalSpentIDR).toBe(0);
+    // A net adjust transaction was written for the reversal.
+    const adjust = afterVoid?.transactions.find(
+      (x) => x.orderId === res.orderId && x.type === 'adjust'
+    );
+    expect(adjust).toBeTruthy();
+    expect(adjust?.points).toBe(-18); // net = redeemed(0) - earned(18)
+  });
+
+  it('rejects voiding a non-paid order (double void)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const res = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'void-twice-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    await asOwner.mutation(api.orders.voidSale, { orderId: res.orderId });
+    await expect(
+      asOwner.mutation(api.orders.voidSale, { orderId: res.orderId })
+    ).rejects.toThrow(/lunas/i);
+  });
+
+  it('is owner-scoped', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: ownerA } = await setup(t, { email: 'a@x.com' });
+    const { asOwner: ownerB, shiftId: shiftB, cashierId: cashierB, itemId: itemB } = await setup(t, {
+      email: 'b@x.com',
+    });
+    const created = await ownerB.mutation(api.orders.createCashSale, {
+      clientId: 'void-foreign-1',
+      shiftId: shiftB,
+      cashierId: cashierB,
+      lines: [{ menuItemId: itemB, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: 1700000000000,
+    });
+    await expect(
+      ownerA.mutation(api.orders.voidSale, { orderId: created.orderId })
+    ).rejects.toThrow(/tidak ditemukan/i);
+  });
+});

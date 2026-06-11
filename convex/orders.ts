@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { orderTypeValidator } from './lib/orderType';
-import { buildOrder, saleArgs, saleResult, settleSale } from './lib/sale';
+import { buildOrder, reverseSettledSale, saleArgs, saleResult, settleSale } from './lib/sale';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
 export const createCashSale = mutation({
@@ -23,6 +23,26 @@ export const createQrisStaticSale = mutation({
     const res = await buildOrder(ctx, args, { method: 'qris_static' });
     await settleSale(ctx, res.orderId);
     return res;
+  },
+});
+
+export const voidSale = mutation({
+  args: {
+    orderId: v.id('orders'),
+    reason: v.optional(v.string()),
+    cashierId: v.optional(v.id('cafeStaff')),
+  },
+  returns: v.null(),
+  handler: async (ctx, { orderId, reason, cashierId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const order = await ctx.db.get(orderId);
+    if (!order || order.cafeId !== cafeId) throw new Error('Pesanan tidak ditemukan.');
+    if (cashierId) await requireOwned(ctx, cafeId, cashierId, 'Kasir');
+    await reverseSettledSale(ctx, orderId, {
+      ...(reason ? { reason } : {}),
+      ...(cashierId ? { cashierId } : {}),
+    });
+    return null;
   },
 });
 
@@ -83,6 +103,9 @@ const orderSummary = v.object({
   orderType: v.optional(orderTypeValidator),
   paymentMethod: v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic')),
   paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
+  voidedAt: v.optional(v.number()),
+  voidReason: v.optional(v.string()),
+  voidedByCashierId: v.optional(v.id('cafeStaff')),
   createdAtClient: v.number(),
   syncedAt: v.optional(v.number()),
 });

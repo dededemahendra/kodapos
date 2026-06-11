@@ -322,6 +322,9 @@ export default defineSchema({
     orderType: v.optional(orderTypeValidator),
     // 'pending' + 'void' reserved for Slice 5 (QRIS + voids); cash always inserts 'paid'.
     paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
+    voidedAt: v.optional(v.number()),
+    voidReason: v.optional(v.string()),
+    voidedByCashierId: v.optional(v.id('cafeStaff')),
     createdAtClient: v.number(),
     // Set by server at insert time today; optional reserved for Phase 2 offline-first when the client may persist an order before the backend confirms sync.
     syncedAt: v.optional(v.number()),
