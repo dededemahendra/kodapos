@@ -1,6 +1,7 @@
 import { msg } from '@lingui/core/macro';
 import type { MessageDescriptor } from '@lingui/core';
 import type { ReactNode } from "react";
+import type { Permission } from '~/lib/permissions';
 import {
 	BadgePercent,
 	BarChart3,
@@ -25,6 +26,7 @@ export type SidebarNavItem = {
 	icon?: ReactNode;
 	isActive?: boolean;
 	subItems?: SidebarNavItem[];
+	requires?: Permission | 'owner';
 };
 
 export type SidebarNavGroup = {
@@ -38,10 +40,10 @@ export const navGroups: SidebarNavGroup[] = [
 	{
 		label: msg`Operasional`,
 		items: [
-			{ title: msg`Dasbor`, path: "/dashboard", icon: <LayoutDashboard /> },
+			{ title: msg`Dasbor`, path: "/dashboard", icon: <LayoutDashboard />, requires: 'canViewReports' },
 			{ title: msg`Kasir`, path: "/sale", icon: <Calculator /> },
 			{ title: msg`Riwayat`, path: "/history", icon: <History /> },
-			{ title: msg`Shift`, path: "/shifts", icon: <Clock /> },
+			{ title: msg`Shift`, path: "/shifts", icon: <Clock />, requires: 'canViewReports' },
 		],
 	},
 	{
@@ -50,16 +52,18 @@ export const navGroups: SidebarNavGroup[] = [
 			{
 				title: msg`Menu`,
 				icon: <UtensilsCrossed />,
+				requires: 'canEditMenu',
 				subItems: [
 					{ title: msg`Item Menu`, path: "/menu" },
 					{ title: msg`Kategori`, path: "/menu/categories" },
 					{ title: msg`Modifier`, path: "/menu/modifiers" },
 				],
 			},
-			{ title: msg`Resep`, path: "/recipes", icon: <NotebookText /> },
+			{ title: msg`Resep`, path: "/recipes", icon: <NotebookText />, requires: 'canEditMenu' },
 			{
 				title: msg`Inventaris`,
 				icon: <Package />,
+				requires: 'canEditMenu',
 				subItems: [
 					{ title: msg`Stok`, path: "/inventory" },
 					{ title: msg`Penyesuaian`, path: "/inventory/adjustments" },
@@ -68,16 +72,17 @@ export const navGroups: SidebarNavGroup[] = [
 					{ title: msg`Pemasok`, path: "/suppliers" },
 				],
 			},
-			{ title: msg`Promo`, path: "/promos", icon: <BadgePercent /> },
+			{ title: msg`Promo`, path: "/promos", icon: <BadgePercent />, requires: 'canEditMenu' },
 		],
 	},
 	{
 		label: msg`Laporan`,
 		items: [
-			{ title: msg`Prediksi`, path: "/forecast", icon: <TrendingUp /> },
+			{ title: msg`Prediksi`, path: "/forecast", icon: <TrendingUp />, requires: 'canViewReports' },
 			{
 				title: msg`Laporan`,
 				icon: <BarChart3 />,
+				requires: 'canViewReports',
 				subItems: [
 					{ title: msg`Ringkasan`, path: "/reports" },
 					{ title: msg`Penjualan`, path: "/reports/sales" },
@@ -101,6 +106,7 @@ export const navGroups: SidebarNavGroup[] = [
 			{
 				title: msg`Pengaturan`,
 				icon: <Settings />,
+				requires: 'owner',
 				subItems: [
 					{ title: msg`Umum`, path: "/settings/general" },
 					{ title: msg`Profil`, path: "/settings/profile" },

@@ -14,11 +14,19 @@ import {
 	SidebarMenuItem,
 } from "~/components/ui/sidebar";
 import { footerNavLinks, navGroups } from "~/components/app-shared";
+import type { SidebarNavItem } from "~/components/app-shared";
 import { LatestChange } from "~/components/latest-change";
 import { NavGroup } from "~/components/nav-group";
+import { usePermissions } from "~/lib/permissions";
 
 export function AppSidebar() {
 	const { i18n } = useLingui();
+	const { can, isOwner, isLoading } = usePermissions();
+	const allowed = (req?: SidebarNavItem['requires']) =>
+		!req || isLoading || (req === 'owner' ? isOwner : can(req));
+	const visibleGroups = navGroups
+		.map((g) => ({ ...g, items: g.items.filter((it) => allowed(it.requires)) }))
+		.filter((g) => g.items.length > 0);
 
 	return (
 		<Sidebar
@@ -39,7 +47,7 @@ export function AppSidebar() {
 				</SidebarMenuButton>
 			</SidebarHeader>
 			<SidebarContent>
-				{navGroups.map((group, index) => (
+				{visibleGroups.map((group, index) => (
 					<NavGroup key={`sidebar-group-${index}`} {...group} />
 				))}
 			</SidebarContent>
