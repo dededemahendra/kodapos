@@ -26,8 +26,8 @@ suite calls `createCashSale`/`createQrisStaticSale` without it. Therefore:
 - `saleArgs.orderType` is **optional**; `buildOrder` writes `args.orderType ?? 'dine_in'`
   — so new orders always store a concrete type while existing tests/callers that omit it
   keep working (defaulting to dine-in).
-- Receipt + history UI **guard** `orderType` for `undefined` (legacy orders render no
-  order-type line / a "—").
+- Receipt + history UI **guard** `orderType` for `undefined` (legacy orders simply omit
+  the order-type line/label — no placeholder, consistent between receipt and history).
 
 ## Shared definition — `convex/lib/orderType.ts` (new)
 
@@ -75,7 +75,7 @@ inherits the field with no change.
 
 ## Frontend
 
-### Shared labels — `src/components/sale/order-types.ts` (new)
+### Shared labels — `src/components/sale/order-types.tsx` (new)
 Mirror the `PAYMENT_METHODS` pattern (`src/components/sale/payment-methods.tsx`):
 ```ts
 import { Trans } from '@lingui/react/macro';
@@ -126,8 +126,10 @@ Match the surrounding hardcoded-English label style already in this file.
   selects): options `Semua tipe pesanan` (the `ALL` sentinel) + the three types
   (`ORDER_TYPE_OPTIONS` labels). Thread it into the `usePaginatedQuery` args
   (`...(orderType !== ALL ? { orderType } : {})`).
-- Add an **order-type column** to the table (a small `Badge`/text), rendering the type's
-  label or "—" when `undefined` (legacy). Reuse `ORDER_TYPE_OPTIONS` for label lookup.
+- Add an **order-type label** to each list row (an inline `·`-separated span), rendering
+  the type's label and **omitted entirely** when `undefined` (legacy) — a "—" placeholder
+  would read as noise among the `·`-separated metadata. Reuse `ORDER_TYPE_OPTIONS` for the
+  label lookup.
 
 ## Testing
 

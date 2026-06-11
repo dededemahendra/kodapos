@@ -14,7 +14,7 @@
 
 - **Create:** `convex/lib/orderType.ts` — shared union validator + `ORDER_TYPES` + type.
 - **Modify:** `convex/schema.ts` (orders field), `convex/lib/sale.ts` (saleArgs + buildOrder insert), `convex/orders.ts` (3 read validators + search arg/filter).
-- **Create:** `src/components/sale/order-types.ts` — frontend `OrderType` + labelled options.
+- **Create:** `src/components/sale/order-types.tsx` — frontend `OrderType` + labelled options.
 - **Modify:** `src/components/sale/cart-reducer.ts`, `cart-pane.tsx`, `cash-payment-dialog.tsx`, `qris-static-payment-dialog.tsx`, `qris-dynamic-payment-dialog.tsx`, `receipt-preview.tsx`, `src/routes/_pos/reports/orders.tsx`.
 - **Test:** `tests/convex/orders.test.ts` (additions only; never edit existing cases).
 - **i18n:** `src/locales/{id,en}/messages.po`.
@@ -134,9 +134,9 @@ git commit -m "feat(orders): orderType field threaded through sale + search (def
 
 ### Task 2: Frontend state — labels + cart
 
-**Files:** Create `src/components/sale/order-types.ts`; modify `src/components/sale/cart-reducer.ts`.
+**Files:** Create `src/components/sale/order-types.tsx`; modify `src/components/sale/cart-reducer.ts`.
 
-- [ ] **Step 1: `src/components/sale/order-types.ts`**
+- [ ] **Step 1: `src/components/sale/order-types.tsx`**
 
 ```tsx
 import { Trans } from '@lingui/react/macro';
