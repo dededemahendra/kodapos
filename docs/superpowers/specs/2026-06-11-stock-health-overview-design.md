@@ -72,10 +72,14 @@ Renders **two `DashboardCard` tiles** in a responsive grid
 (`grid grid-cols-1 gap-px sm:grid-cols-2`, matching how the dashboard lays tiles out),
 placed directly above the `DataTable`:
 
-- **Tile 1 — Stok rendah:** `CardTitle` "Stok rendah"; value = `lowCount` with a
-  trailing `<Trans>bahan</Trans>` unit. When `lowCount > 0`, give the value a warning
-  treatment (`text-destructive` + a leading `⚠` `aria-hidden` mark, matching the
-  table's existing low-stock marker); when `0`, neutral foreground.
+- **Tile 1 — Stok rendah:** `CardTitle` "Stok rendah"; value = a **bare `lowCount`**
+  number (no trailing unit word — the title supplies the context, matching the
+  dashboard stat-tile convention where tiles show bare numbers). When `lowCount > 0`,
+  give the value a warning treatment (`text-destructive` + a leading `⚠` `aria-hidden`
+  mark, matching the table's existing low-stock marker); when `0`, neutral foreground.
+  (An earlier draft showed a trailing `bahan` unit; dropped during build because the
+  `bahan` string already maps to the shared `ingredient` translation, which reads
+  poorly as an English count unit.)
 - **Tile 2 — Nilai stok total:** `CardTitle` "Nilai stok total"; value =
   `formatIDR(stockValueIDR)`.
 
@@ -107,10 +111,11 @@ This is presentational/derived UI with no backend. Coverage:
 
 ## i18n
 
-New Bahasa Indonesia strings: `Stok rendah`, `bahan`, `Nilai stok total`. Run
-`pnpm lingui:extract`, fill the `en` catalog (`Low stock`, `items`, `Total stock value`),
-then `pnpm lingui:compile`. (`Stok rendah` may already exist from the filter chip —
-extract reports what's actually new.)
+New Bahasa Indonesia strings: `Stok rendah`, `Nilai stok total` (the low-stock tile
+shows a bare number, so there is no unit string). Run `pnpm lingui:extract`, fill the
+`en` catalog (`Low stock`, `Total stock value`), then `pnpm lingui:compile`. In
+practice `Stok rendah` already existed (filter chip / item card → "Low stock"), so the
+only genuinely new entry was `Nilai stok total`.
 
 ## Conventions
 
