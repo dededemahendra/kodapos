@@ -12,6 +12,7 @@ export type ItemForSale = {
     position: number;
   }>;
   lowStockIngredientNames: string[];
+  imageUrl: string | null;
 };
 
 export function MenuPane({
@@ -61,6 +62,7 @@ export function MenuPane({
               <ItemCard
                 key={row.item._id}
                 item={row.item}
+                imageUrl={row.imageUrl}
                 hasModifiers={row.attachedGroups.length > 0}
                 lowStockIngredientNames={row.lowStockIngredientNames}
                 onTap={() => onItemTap(row)}

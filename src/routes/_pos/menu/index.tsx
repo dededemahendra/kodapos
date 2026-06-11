@@ -31,6 +31,7 @@ export const Route = createFileRoute('/_pos/menu/')({
 type ItemRow = Doc<'menuItems'> & {
   hasRecipe: boolean;
   lowStockIngredientNames: string[];
+  imageUrl: string | null;
 };
 type Filter = 'active' | 'archived';
 
@@ -99,14 +100,21 @@ function ItemsListPage() {
         accessorKey: 'name',
         header: () => <Trans>Nama</Trans>,
         cell: ({ row }) => (
-          <Link
-            to="/menu/items/$itemId"
-            params={{ itemId: row.original._id }}
-            className="font-medium hover:underline"
-          >
-            {isLow(row.original) ? <span aria-hidden="true" className="mr-1">⚠</span> : null}
-            {row.original.name}
-          </Link>
+          <div className="flex items-center gap-2">
+            {row.original.imageUrl ? (
+              <img src={row.original.imageUrl} alt="" className="size-8 rounded object-cover border border-border shrink-0" />
+            ) : (
+              <div className="size-8 rounded bg-muted grid place-items-center text-[10px] text-muted-foreground shrink-0">{row.original.name.charAt(0)}</div>
+            )}
+            <Link
+              to="/menu/items/$itemId"
+              params={{ itemId: row.original._id }}
+              className="font-medium hover:underline"
+            >
+              {isLow(row.original) ? <span aria-hidden="true" className="mr-1">⚠</span> : null}
+              {row.original.name}
+            </Link>
+          </div>
         ),
       },
       {

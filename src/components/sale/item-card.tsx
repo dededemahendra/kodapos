@@ -5,11 +5,13 @@ import { formatIDR } from '~/lib/money';
 
 export function ItemCard({
   item,
+  imageUrl,
   hasModifiers,
   lowStockIngredientNames,
   onTap,
 }: {
   item: Doc<'menuItems'>;
+  imageUrl: string | null;
   hasModifiers: boolean;
   lowStockIngredientNames: string[];
   onTap: () => void;
@@ -25,6 +27,11 @@ export function ItemCard({
         isLow ? 'border-destructive bg-destructive/10' : 'border-border bg-background'
       }`}
     >
+      {imageUrl ? (
+        <img src={imageUrl} alt="" className="w-full h-16 rounded object-cover mb-1" />
+      ) : (
+        <div className="w-full h-16 rounded bg-muted grid place-items-center text-muted-foreground text-xs mb-1">{item.name.charAt(0)}</div>
+      )}
       <div className="flex items-start justify-between gap-1">
         <div className="font-medium leading-tight">{item.name}</div>
         {isLow ? <span aria-label={t`Stok rendah`}>⚠</span> : null}
