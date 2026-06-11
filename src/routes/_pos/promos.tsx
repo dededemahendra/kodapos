@@ -1,5 +1,6 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
@@ -28,10 +29,18 @@ export const Route = createFileRoute('/_pos/promos')({
   component: PromosPage,
 });
 
+function PromosPage() {
+  return (
+    <RequirePermission perm="canEditMenu">
+      <PromosInner />
+    </RequirePermission>
+  );
+}
+
 type Promo = Doc<'promotions'>;
 type Filter = 'active' | 'archived';
 
-function PromosPage() {
+function PromosInner() {
   const { t } = useLingui();
   const [filter, setFilter] = useState<Filter>('active');
   const [formOpen, setFormOpen] = useState(false);

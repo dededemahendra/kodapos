@@ -1,5 +1,6 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
@@ -32,6 +33,14 @@ export const Route = createFileRoute('/_pos/recipes')({
   component: RecipesPage,
 });
 
+function RecipesPage() {
+  return (
+    <RequirePermission perm="canEditMenu">
+      <RecipesInner />
+    </RequirePermission>
+  );
+}
+
 type RecipeRow = {
   itemId: Id<'menuItems'>;
   name: string;
@@ -42,7 +51,7 @@ type RecipeRow = {
 };
 type Filter = 'all' | 'complete' | 'missing';
 
-function RecipesPage() {
+function RecipesInner() {
   const { t } = useLingui();
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');

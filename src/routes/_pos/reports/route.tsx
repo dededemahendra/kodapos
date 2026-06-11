@@ -1,5 +1,6 @@
 import { Trans } from '@lingui/react/macro';
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { PageHeader } from '~/components/ui/page-header';
 import { RangePicker } from '~/components/reports/range-picker';
 import { type ReportSearch, parseReportSearch } from '~/components/reports/use-report-range';
@@ -20,6 +21,7 @@ const TABS = [
 
 function ReportsLayout() {
   return (
+    <RequirePermission perm="canViewReports">
     <main className="p-6">
       <PageHeader title={<Trans>Laporan</Trans>} />
       <div className="mt-2"><RangePicker /></div>
@@ -43,5 +45,6 @@ function ReportsLayout() {
         <Outlet />
       </div>
     </main>
+    </RequirePermission>
   );
 }

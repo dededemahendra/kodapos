@@ -11,6 +11,9 @@ const permissionsValidator = v.object({
   canEditMenu: v.boolean(),
 });
 
+const ALL_TRUE = { canVoid: true, canDiscount: true, canManageShift: true, canViewReports: true, canEditMenu: true };
+const ALL_FALSE = { canVoid: false, canDiscount: false, canManageShift: false, canViewReports: false, canEditMenu: false };
+
 const cafeStaffDoc = v.object({
   _id: v.id('cafeStaff'),
   _creationTime: v.number(),
@@ -169,5 +172,22 @@ export const setPermissions = mutation({
     await requireOwned(ctx, cafeId, id, 'Staf');
     await ctx.db.patch(id, { permissions });
     return null;
+  },
+});
+
+export const permissionsFor = query({
+  args: { cashierId: v.id('cafeStaff') },
+  returns: v.object({
+    role: v.union(v.literal('owner'), v.literal('cashier')),
+    permissions: permissionsValidator,
+  }),
+  handler: async (ctx, { cashierId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const staff = await ctx.db.get(cashierId);
+    if (!staff || staff.cafeId !== cafeId) throw new Error('Kasir tidak ditemukan.');
+    return {
+      role: staff.role,
+      permissions: staff.role === 'owner' ? ALL_TRUE : { ...ALL_FALSE, ...(staff.permissions ?? {}) },
+    };
   },
 });

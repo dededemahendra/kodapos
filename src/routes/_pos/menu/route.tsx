@@ -1,5 +1,6 @@
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 
 export const Route = createFileRoute('/_pos/menu')({
   component: MenuLayout,
@@ -7,6 +8,7 @@ export const Route = createFileRoute('/_pos/menu')({
 
 function MenuLayout() {
   return (
+    <RequirePermission perm="canEditMenu">
     <div className="p-6">
       <nav className="flex gap-4 border-b border-border mb-4 text-sm">
         <Link
@@ -34,5 +36,6 @@ function MenuLayout() {
       </nav>
       <Outlet />
     </div>
+    </RequirePermission>
   );
 }

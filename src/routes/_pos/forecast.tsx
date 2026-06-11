@@ -1,6 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import type { ColumnDef } from '@tanstack/react-table';
 import { createFileRoute } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
 import { TrendingUp } from 'lucide-react';
@@ -19,6 +20,14 @@ import { RenderDriver, type ForecastDriver } from '~/components/forecast/render-
 export const Route = createFileRoute('/_pos/forecast')({
   component: ForecastPage,
 });
+
+function ForecastPage() {
+  return (
+    <RequirePermission perm="canViewReports">
+      <ForecastInner />
+    </RequirePermission>
+  );
+}
 
 type RestockLine = { ingredientId: string; name: string; unit: string; suggestedQty: number; currentStockQty: number };
 
@@ -120,7 +129,7 @@ function ConfidenceBadge({ level }: { level: 'low' | 'med' | 'high' }) {
   return <StatusBadge variant="muted"><Trans>Rendah</Trans></StatusBadge>;
 }
 
-function ForecastPage() {
+function ForecastInner() {
   const data = useQuery(api.forecast.demand, {});
   const [horizon, setHorizon] = useState<Horizon>('tomorrow');
 
