@@ -89,8 +89,10 @@ msgstr "{0} / item"
 msgid "{0} bahan · {1} stok rendah"
 msgstr "{0} ingredients · {1} low stock"
 
+#. placeholder {0}: o.lineCount
 #. placeholder {0}: o.lines.length
 #: src/components/shift/shift-order-list.tsx
+#: src/routes/_pos/reports/orders.tsx
 msgid "{0} item"
 msgstr "{0} item"
 
@@ -577,6 +579,7 @@ msgstr "Spoiled/Expired"
 #: src/components/settings/save-bar.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/components/ui/confirm-dialog.tsx
+#: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Batal"
 msgstr "Cancel"
@@ -680,6 +683,10 @@ msgstr "No stock movements yet."
 #: src/components/shift/shift-order-list.tsx
 msgid "Belum ada pesanan di shift ini."
 msgstr "No orders in this shift."
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Belum ada pesanan pada rentang ini."
+msgstr "No orders in this range."
 
 #: src/routes/_pos/reports/products.tsx
 msgid "Belum ada produk terjual pada rentang ini."
@@ -1940,6 +1947,7 @@ msgid "Loyalitas"
 msgstr "Loyalty"
 
 #: src/components/dashboard-invoices.tsx
+#: src/routes/_pos/reports/orders.tsx
 msgid "Lunas"
 msgstr "Paid"
 
@@ -2173,6 +2181,7 @@ msgstr "Dark mode"
 msgid "Modifier"
 msgstr "Modifiers"
 
+#: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Muat lebih banyak"
 msgstr "Load more"
@@ -2644,6 +2653,7 @@ msgstr "Message"
 msgid "Pesan-antar"
 msgstr "Delivery"
 
+#: src/routes/_pos/reports/route.tsx
 #: src/routes/_pos/settings/general.tsx
 msgid "Pesanan"
 msgstr "Orders"
@@ -3138,9 +3148,21 @@ msgstr "All ({0})"
 msgid "Semua item akan dihapus dari pesanan ini."
 msgstr "All items will be removed from this order."
 
+#: src/routes/_pos/reports/orders.tsx
+msgid "Semua kasir"
+msgstr "All cashiers"
+
 #: src/routes/_pos/menu/index.tsx
 msgid "Semua kategori"
 msgstr "All categories"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Semua metode"
+msgstr "All methods"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Semua status"
+msgstr "All statuses"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Semua transaksi dalam Rupiah."
@@ -3578,6 +3600,10 @@ msgstr "Saved ✓"
 msgid "Tersimpan."
 msgstr "Saved."
 
+#: src/routes/_pos/reports/orders.tsx
+msgid "Tertunda"
+msgstr "Pending"
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Test cetak"
 msgstr "Test print"
@@ -3727,6 +3753,7 @@ msgstr "Spilled"
 #: src/components/sale/payment-methods.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/components/shift/shift-order-list.tsx
+#: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tunai"
 msgstr "Cash"

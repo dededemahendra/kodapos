@@ -89,8 +89,10 @@ msgstr "{0} / item"
 msgid "{0} bahan · {1} stok rendah"
 msgstr "{0} bahan · {1} stok rendah"
 
+#. placeholder {0}: o.lineCount
 #. placeholder {0}: o.lines.length
 #: src/components/shift/shift-order-list.tsx
+#: src/routes/_pos/reports/orders.tsx
 msgid "{0} item"
 msgstr "{0} item"
 
@@ -577,6 +579,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/settings/save-bar.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/components/ui/confirm-dialog.tsx
+#: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Batal"
 msgstr "Batal"
@@ -680,6 +683,10 @@ msgstr "Belum ada pergerakan stok."
 #: src/components/shift/shift-order-list.tsx
 msgid "Belum ada pesanan di shift ini."
 msgstr "Belum ada pesanan di shift ini."
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Belum ada pesanan pada rentang ini."
+msgstr "Belum ada pesanan pada rentang ini."
 
 #: src/routes/_pos/reports/products.tsx
 msgid "Belum ada produk terjual pada rentang ini."
@@ -1940,6 +1947,7 @@ msgid "Loyalitas"
 msgstr "Loyalitas"
 
 #: src/components/dashboard-invoices.tsx
+#: src/routes/_pos/reports/orders.tsx
 msgid "Lunas"
 msgstr "Lunas"
 
@@ -2173,6 +2181,7 @@ msgstr "Mode gelap"
 msgid "Modifier"
 msgstr "Modifier"
 
+#: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Muat lebih banyak"
 msgstr "Muat lebih banyak"
@@ -2644,6 +2653,7 @@ msgstr "Pesan"
 msgid "Pesan-antar"
 msgstr "Pesan-antar"
 
+#: src/routes/_pos/reports/route.tsx
 #: src/routes/_pos/settings/general.tsx
 msgid "Pesanan"
 msgstr "Pesanan"
@@ -3138,9 +3148,21 @@ msgstr "Semua ({0})"
 msgid "Semua item akan dihapus dari pesanan ini."
 msgstr "Semua item akan dihapus dari pesanan ini."
 
+#: src/routes/_pos/reports/orders.tsx
+msgid "Semua kasir"
+msgstr "Semua kasir"
+
 #: src/routes/_pos/menu/index.tsx
 msgid "Semua kategori"
 msgstr "Semua kategori"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Semua metode"
+msgstr "Semua metode"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Semua status"
+msgstr "Semua status"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Semua transaksi dalam Rupiah."
@@ -3578,6 +3600,10 @@ msgstr "Tersimpan ✓"
 msgid "Tersimpan."
 msgstr "Tersimpan."
 
+#: src/routes/_pos/reports/orders.tsx
+msgid "Tertunda"
+msgstr "Tertunda"
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Test cetak"
 msgstr "Test cetak"
@@ -3727,6 +3753,7 @@ msgstr "Tumpah"
 #: src/components/sale/payment-methods.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/components/shift/shift-order-list.tsx
+#: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tunai"
 msgstr "Tunai"
