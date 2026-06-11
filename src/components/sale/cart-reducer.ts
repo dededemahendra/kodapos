@@ -1,5 +1,6 @@
 // src/components/sale/cart-reducer.ts
 import type { Id } from 'convex/_generated/dataModel';
+import type { OrderType } from './order-types';
 
 export type CartLineModifier = {
   groupName: string;
@@ -24,7 +25,7 @@ export type CartPromo = {
   value: number;
 };
 
-export type CartState = { lines: CartLine[]; promo: CartPromo | null };
+export type CartState = { lines: CartLine[]; promo: CartPromo | null; orderType: OrderType };
 
 export type CartAction =
   | { type: 'addLine'; line: Omit<CartLine, 'lineKey'>; lineKey: string }
@@ -32,9 +33,10 @@ export type CartAction =
   | { type: 'decrementQty'; lineKey: string }
   | { type: 'removeLine'; lineKey: string }
   | { type: 'clearCart' }
-  | { type: 'setPromo'; promo: CartPromo | null };
+  | { type: 'setPromo'; promo: CartPromo | null }
+  | { type: 'setOrderType'; orderType: OrderType };
 
-export const initialCart: CartState = { lines: [], promo: null };
+export const initialCart: CartState = { lines: [], promo: null, orderType: 'dine_in' };
 
 export function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -85,8 +87,11 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     case 'setPromo': {
       return { ...state, promo: action.promo };
     }
+    case 'setOrderType': {
+      return { ...state, orderType: action.orderType };
+    }
     case 'clearCart': {
-      return { lines: [], promo: null };
+      return { lines: [], promo: null, orderType: 'dine_in' };
     }
   }
 }
