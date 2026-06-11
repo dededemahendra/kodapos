@@ -57,6 +57,7 @@ export default defineSchema({
     archived: v.boolean(),
     position: v.number(),
     createdAt: v.number(),
+    imageStorageId: v.optional(v.id('_storage')),
   })
     .index('by_cafe_category', ['cafeId', 'categoryId', 'archived', 'position'])
     .index('by_cafe_active', ['cafeId', 'archived', 'isActive']),

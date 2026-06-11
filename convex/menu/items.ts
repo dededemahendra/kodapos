@@ -15,6 +15,7 @@ const menuItemDoc = v.object({
   archived: v.boolean(),
   position: v.number(),
   createdAt: v.number(),
+  imageStorageId: v.optional(v.id('_storage')),
 });
 
 const menuItemWithStatus = v.object({
@@ -28,8 +29,10 @@ const menuItemWithStatus = v.object({
   archived: v.boolean(),
   position: v.number(),
   createdAt: v.number(),
+  imageStorageId: v.optional(v.id('_storage')),
   hasRecipe: v.boolean(),
   lowStockIngredientNames: v.array(v.string()),
+  imageUrl: v.union(v.string(), v.null()),
 });
 
 const modifierGroupDoc = v.object({
@@ -65,7 +68,15 @@ const itemDetail = v.object({
       position: v.number(),
     })
   ),
+  imageUrl: v.union(v.string(), v.null()),
 });
+
+async function imageUrlFor(
+  ctx: QueryCtx,
+  storageId?: Id<'_storage'>
+): Promise<string | null> {
+  return storageId ? await ctx.storage.getUrl(storageId) : null;
+}
 
 function assertItem(name: string, priceIDR: number): string {
   const trimmed = name.trim();
@@ -113,7 +124,12 @@ async function resolveAttachedGroups(
 }
 
 export const create = mutation({
-  args: { categoryId: v.id('categories'), name: v.string(), priceIDR: v.number() },
+  args: {
+    categoryId: v.id('categories'),
+    name: v.string(),
+    priceIDR: v.number(),
+    imageStorageId: v.optional(v.id('_storage')),
+  },
   returns: v.id('menuItems'),
   handler: async (ctx, args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
@@ -136,6 +152,7 @@ export const create = mutation({
       archived: false,
       position: nextPos,
       createdAt: Date.now(),
+      ...(args.imageStorageId ? { imageStorageId: args.imageStorageId } : {}),
     });
   },
 });
@@ -146,6 +163,7 @@ export const update = mutation({
     categoryId: v.id('categories'),
     name: v.string(),
     priceIDR: v.number(),
+    imageStorageId: v.optional(v.id('_storage')),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -172,6 +190,7 @@ export const update = mutation({
       name: cleanName,
       priceIDR: args.priceIDR,
       position: nextPosition,
+      imageStorageId: args.imageStorageId,
     });
     return null;
   },
@@ -253,6 +272,7 @@ export const list = query({
       visible.map(async (r) => ({
         ...r,
         ...(await itemRecipeStatus(ctx, cafeId, r._id)),
+        imageUrl: await imageUrlFor(ctx, r.imageStorageId),
       }))
     );
   },
@@ -268,6 +288,7 @@ const itemForSale = v.object({
   item: menuItemDoc,
   attachedGroups: v.array(groupWithOptionsForSale),
   lowStockIngredientNames: v.array(v.string()),
+  imageUrl: v.union(v.string(), v.null()),
 });
 
 export const listForSale = query({
@@ -284,7 +305,7 @@ export const listForSale = query({
     for (const item of active) {
       const attachedGroups = await resolveAttachedGroups(ctx, item._id);
       const { lowStockIngredientNames } = await itemRecipeStatus(ctx, cafeId, item._id);
-      result.push({ item, attachedGroups, lowStockIngredientNames });
+      result.push({ item, attachedGroups, lowStockIngredientNames, imageUrl: await imageUrlFor(ctx, item.imageStorageId) });
     }
     return result;
   },
@@ -298,6 +319,6 @@ export const getById = query({
     const item = await ctx.db.get(id);
     if (!item || item.cafeId !== cafeId) return null;
     const attachedGroups = await resolveAttachedGroups(ctx, id);
-    return { item, attachedGroups };
+    return { item, attachedGroups, imageUrl: await imageUrlFor(ctx, item.imageStorageId) };
   },
 });
