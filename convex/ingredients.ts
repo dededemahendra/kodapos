@@ -263,3 +263,40 @@ export const adjustStock = mutation({
     });
   },
 });
+
+export const performStockTake = mutation({
+  args: {
+    counts: v.array(
+      v.object({ ingredientId: v.id('ingredients'), countedQty: v.number() })
+    ),
+    note: v.optional(v.string()),
+  },
+  returns: v.object({ adjusted: v.number() }),
+  handler: async (ctx, { counts, note }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    for (const c of counts) {
+      if (!Number.isInteger(c.countedQty) || c.countedQty < 0) {
+        throw new Error('Stok harus berupa angka bulat ≥ 0.');
+      }
+    }
+    const trimmedNote = note?.trim();
+    let adjusted = 0;
+    for (const c of counts) {
+      await requireOwned(ctx, cafeId, c.ingredientId, 'Bahan');
+      const current = await currentStockQty(ctx, cafeId, c.ingredientId);
+      const delta = c.countedQty - current;
+      if (delta === 0) continue;
+      await ctx.db.insert('inventoryMovements', {
+        cafeId,
+        ingredientId: c.ingredientId,
+        delta,
+        reason: 'adjustment',
+        reasonLabel: 'Stok opname',
+        ...(trimmedNote ? { note: trimmedNote } : {}),
+        at: Date.now(),
+      });
+      adjusted += 1;
+    }
+    return { adjusted };
+  },
+});

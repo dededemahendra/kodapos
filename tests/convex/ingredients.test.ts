@@ -341,3 +341,88 @@ describe('ingredients.recentAdjustments', () => {
     expect(await ownerB.query(api.ingredients.recentAdjustments, {})).toHaveLength(0);
   });
 });
+
+describe('ingredients.performStockTake', () => {
+  it('adjusts only changed ingredients and sets stock to counted qty', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const mk = (name: string) =>
+      asOwner.mutation(api.ingredients.upsert, {
+        name, canonicalUnit: 'piece', reorderThreshold: 0, lastCostPerUnitIDR: 100,
+      });
+    const a = await mk('A');
+    const b = await mk('B');
+    const c = await mk('C');
+    await asOwner.mutation(api.ingredients.adjustStock, { ingredientId: a, newQty: 10, reasonLabel: 'Koreksi' });
+    await asOwner.mutation(api.ingredients.adjustStock, { ingredientId: b, newQty: 5, reasonLabel: 'Koreksi' });
+
+    const res = await asOwner.mutation(api.ingredients.performStockTake, {
+      counts: [
+        { ingredientId: a, countedQty: 10 },
+        { ingredientId: b, countedQty: 8 },
+        { ingredientId: c, countedQty: 2 },
+      ],
+    });
+    expect(res.adjusted).toBe(2);
+
+    const list = await asOwner.query(api.ingredients.list, {});
+    const byName = Object.fromEntries(list.map((r) => [r.name, r.currentStockQty]));
+    expect(byName.A).toBe(10);
+    expect(byName.B).toBe(8);
+    expect(byName.C).toBe(2);
+  });
+
+  it('tags every written movement as a Stok opname adjustment', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const a = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'A', canonicalUnit: 'piece', reorderThreshold: 0, lastCostPerUnitIDR: 100,
+    });
+    await asOwner.mutation(api.ingredients.performStockTake, {
+      counts: [{ ingredientId: a, countedQty: 7 }],
+      note: 'opname juni',
+    });
+    const adj = await asOwner.query(api.ingredients.recentAdjustments, {});
+    expect(adj).toHaveLength(1);
+    expect(adj[0]?.reasonLabel).toBe('Stok opname');
+    expect(adj[0]?.delta).toBe(7);
+    expect(adj[0]?.note).toBe('opname juni');
+  });
+
+  it('rejects a negative or non-integer count and writes nothing', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const a = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'A', canonicalUnit: 'piece', reorderThreshold: 0, lastCostPerUnitIDR: 100,
+    });
+    await asOwner.mutation(api.ingredients.adjustStock, { ingredientId: a, newQty: 4, reasonLabel: 'Koreksi' });
+    await expect(
+      asOwner.mutation(api.ingredients.performStockTake, {
+        counts: [{ ingredientId: a, countedQty: -1 }],
+      })
+    ).rejects.toThrow();
+    const got = await asOwner.query(api.ingredients.get, { id: a });
+    expect(got?.currentStockQty).toBe(4);
+  });
+
+  it('returns { adjusted: 0 } for empty counts', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const res = await asOwner.mutation(api.ingredients.performStockTake, { counts: [] });
+    expect(res.adjusted).toBe(0);
+  });
+
+  it('rejects a foreign ingredient id (owner-scoped)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const { asOwner: asOther } = await setupOwner(t, 'other@x.com');
+    const foreign = await asOther.mutation(api.ingredients.upsert, {
+      name: 'X', canonicalUnit: 'piece', reorderThreshold: 0, lastCostPerUnitIDR: 100,
+    });
+    await expect(
+      asOwner.mutation(api.ingredients.performStockTake, {
+        counts: [{ ingredientId: foreign, countedQty: 3 }],
+      })
+    ).rejects.toThrow();
+  });
+});
