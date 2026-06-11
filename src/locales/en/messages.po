@@ -1217,6 +1217,10 @@ msgstr "Failed to remove logo."
 msgid "Gagal menghubungkan integrasi."
 msgstr "Failed to connect integration."
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Gagal mengunggah gambar."
+msgstr "Failed to upload the image."
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gagal mengunggah logo."
 msgstr "Failed to upload logo."
@@ -1281,6 +1285,10 @@ msgstr "Failed to save order."
 msgid "Gagal menyimpan."
 msgstr "Failed to save."
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Gambar item"
+msgstr "Item image"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "Gambar QRIS"
 msgstr "QRIS image"
@@ -1294,6 +1302,7 @@ msgstr "QRIS image not yet uploaded."
 msgid "Ganti"
 msgstr "Change"
 
+#: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Ganti gambar"
 msgstr "Change image"
@@ -1389,6 +1398,7 @@ msgstr "Remove"
 msgid "Hapus baris"
 msgstr "Remove row"
 
+#: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Hapus gambar"
 msgstr "Remove image"
@@ -3877,6 +3887,7 @@ msgstr "General"
 msgid "Unduh CSV"
 msgstr "Download CSV"
 
+#: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Unggah gambar"
 msgstr "Upload image"
