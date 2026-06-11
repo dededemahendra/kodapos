@@ -21,8 +21,10 @@ import {
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog';
 import { Spinner } from '~/components/ui/spinner';
-import { cartReducer, initialCart } from './cart-reducer';
+import { cartReducer, initialCart, type CartState } from './cart-reducer';
 import { CartPane } from './cart-pane';
+import { HoldOrderDialog } from './hold-order-dialog';
+import { HeldOrdersDialog } from './held-orders-dialog';
 import { MenuPane, type ItemForSale } from './menu-pane';
 import { ModifierPickerDialog } from './modifier-picker-dialog';
 import { PromoPickerDialog } from './promo-picker-dialog';
@@ -48,6 +50,13 @@ export function SaleScreen() {
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
   const [kasOpen, setKasOpen] = useState(false);
+  const [holdOpen, setHoldOpen] = useState(false);
+  const [heldOpen, setHeldOpen] = useState(false);
+  const [recallTarget, setRecallTarget] = useState<CartState | null>(null);
+  const held = useQuery(
+    api.heldOrders.listForShift,
+    shift ? { shiftId: shift._id } : 'skip'
+  );
 
   if (
     categories === undefined ||
@@ -139,7 +148,15 @@ export function SaleScreen() {
           if (cart.lines.length > 0) setOpenMethod(method);
         }}
         onKosongkan={() => setClearOpen(true)}
-        {...(shift && cashierId ? { onKas: () => setKasOpen(true), onSwitch: true } : {})}
+        {...(shift && cashierId
+          ? {
+              onKas: () => setKasOpen(true),
+              onSwitch: true,
+              onHold: () => setHoldOpen(true),
+              onShowHeld: () => setHeldOpen(true),
+              heldCount: held?.length ?? 0,
+            }
+          : {})}
       />
       <ModifierPickerDialog
         open={pickerRow !== null}
@@ -189,9 +206,59 @@ export function SaleScreen() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AlertDialog
+        open={recallTarget !== null}
+        onOpenChange={(o) => {
+          if (!o) setRecallTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <Trans>Ganti keranjang saat ini?</Trans>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <Trans>Keranjang berisi item. Memuat pesanan ditahan akan menggantinya.</Trans>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              <Trans>Batal</Trans>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (recallTarget) dispatch({ type: 'load', state: recallTarget });
+                setRecallTarget(null);
+              }}
+            >
+              <Trans>Muat</Trans>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {shift && cashierId ? (
         <>
           <CashMovementDialog open={kasOpen} onOpenChange={setKasOpen} shiftId={shift._id} />
+          <HoldOrderDialog
+            open={holdOpen}
+            cart={cart}
+            cashierId={cashierId}
+            onOpenChange={setHoldOpen}
+            onHeld={() => {
+              dispatch({ type: 'clearCart' });
+              setHoldOpen(false);
+            }}
+          />
+          <HeldOrdersDialog
+            open={heldOpen}
+            held={held}
+            genLineKey={genLineKey}
+            onOpenChange={setHeldOpen}
+            onRecall={(state) => {
+              if (cart.lines.length > 0) setRecallTarget(state);
+              else dispatch({ type: 'load', state });
+            }}
+          />
           <CashPaymentDialog
             open={openMethod === 'cash'}
             onOpenChange={(o) => {

@@ -34,7 +34,8 @@ export type CartAction =
   | { type: 'removeLine'; lineKey: string }
   | { type: 'clearCart' }
   | { type: 'setPromo'; promo: CartPromo | null }
-  | { type: 'setOrderType'; orderType: OrderType };
+  | { type: 'setOrderType'; orderType: OrderType }
+  | { type: 'load'; state: CartState };
 
 export const initialCart: CartState = { lines: [], promo: null, orderType: 'dine_in' };
 
@@ -89,6 +90,9 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     }
     case 'setOrderType': {
       return { ...state, orderType: action.orderType };
+    }
+    case 'load': {
+      return action.state;
     }
     case 'clearCart': {
       return { lines: [], promo: null, orderType: 'dine_in' };
