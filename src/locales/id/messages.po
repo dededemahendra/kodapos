@@ -499,6 +499,7 @@ msgid "Awalan nomor pesanan"
 msgstr "Awalan nomor pesanan"
 
 #: src/components/inventory/ingredient-form.tsx
+#: src/components/inventory/stock-summary.tsx
 msgid "bahan"
 msgstr "bahan"
 
@@ -2334,6 +2335,10 @@ msgstr "Nilai (Rp)"
 msgid "Nilai rupiah"
 msgstr "Nilai rupiah"
 
+#: src/components/inventory/stock-summary.tsx
+msgid "Nilai stok total"
+msgstr "Nilai stok total"
+
 #: src/routes/_pos/settings/tax.tsx
 msgid "NMID"
 msgstr "NMID"
@@ -3334,6 +3339,7 @@ msgstr "Stok kini"
 msgid "Stok opname"
 msgstr "Stok opname"
 
+#: src/components/inventory/stock-summary.tsx
 #: src/components/sale/item-card.tsx
 #: src/routes/_pos/inventory/index.tsx
 msgid "Stok rendah"
