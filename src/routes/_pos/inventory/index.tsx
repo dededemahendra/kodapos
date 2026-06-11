@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import { IngredientForm } from '~/components/inventory/ingredient-form';
 import { MovementHistorySheet } from '~/components/inventory/movement-history-sheet';
 import { StockAdjustDialog } from '~/components/inventory/stock-adjust-dialog';
+import { StockSummary } from '~/components/inventory/stock-summary';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
@@ -58,6 +59,10 @@ function InventoryIndex() {
       all: active.length,
       low: active.filter(isLow).length,
       archived: ingredients.filter((r) => r.archived).length,
+      stockValueIDR: active.reduce(
+        (sum, r) => sum + r.currentStockQty * r.lastCostPerUnitIDR,
+        0
+      ),
     };
   }, [ingredients]);
 
@@ -239,6 +244,13 @@ function InventoryIndex() {
           { label: <Trans>Arsip</Trans>, value: 'archived', ...(counts !== undefined && { count: counts.archived }) },
         ]}
       />
+
+      {counts ? (
+        <StockSummary
+          lowCount={counts.low}
+          stockValueIDR={counts.stockValueIDR}
+        />
+      ) : null}
 
       <DataTable
         columns={columns}
