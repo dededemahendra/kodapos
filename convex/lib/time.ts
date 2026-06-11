@@ -1,6 +1,19 @@
+import { v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 
 export const DAY_MS = 86_400_000;
+
+export const rangeArg = v.union(
+  v.object({
+    preset: v.union(
+      v.literal('today'),
+      v.literal('yesterday'),
+      v.literal('last7'),
+      v.literal('last30')
+    ),
+  }),
+  v.object({ from: v.string(), to: v.string() })
+);
 export const DEFAULT_TZ = 'Asia/Jakarta';
 
 /** Offset (ms) of `tz` from UTC at the given instant. Indonesia zones are

@@ -1,7 +1,9 @@
+import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { buildOrder, saleArgs, saleResult, settleSale } from './lib/sale';
+import { rangeArg, resolveRange, tzFor } from './lib/time';
 
 export const createCashSale = mutation({
   args: { ...saleArgs, cashTenderedIDR: v.number() },
@@ -111,6 +113,57 @@ export const listForShift = query({
     return rows
       .filter((o) => o.paymentStatus === 'paid')
       .sort((a, b) => b.createdAtClient - a.createdAtClient);
+  },
+});
+
+const orderRow = v.object({
+  _id: v.id('orders'),
+  createdAtClient: v.number(),
+  totalIDR: v.number(),
+  paymentMethod: v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic')),
+  paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
+  cashierName: v.string(),
+  lineCount: v.number(),
+});
+
+export const search = query({
+  args: {
+    range: rangeArg,
+    cashierId: v.optional(v.id('cafeStaff')),
+    paymentMethod: v.optional(v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic'))),
+    status: v.optional(v.union(v.literal('paid'), v.literal('pending'), v.literal('void'))),
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: v.object({ page: v.array(orderRow), isDone: v.boolean(), continueCursor: v.string() }),
+  handler: async (ctx, { range, cashierId, paymentMethod, status, paginationOpts }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const tz = await tzFor(ctx, cafeId);
+    const { startMs, endMs } = resolveRange(tz, range, Date.now());
+    let q = ctx.db
+      .query('orders')
+      .withIndex('by_cafe_created', (ix) =>
+        ix.eq('cafeId', cafeId).gte('createdAtClient', startMs).lte('createdAtClient', endMs)
+      )
+      .order('desc');
+    if (cashierId) q = q.filter((f) => f.eq(f.field('cashierId'), cashierId));
+    if (paymentMethod) q = q.filter((f) => f.eq(f.field('paymentMethod'), paymentMethod));
+    if (status) q = q.filter((f) => f.eq(f.field('paymentStatus'), status));
+    const result = await q.paginate(paginationOpts);
+    const staff = await ctx.db
+      .query('cafeStaff')
+      .withIndex('by_cafe_active', (ix) => ix.eq('cafeId', cafeId))
+      .collect();
+    const nameById = new Map(staff.map((s) => [s._id, s.name] as const));
+    const page = result.page.map((o) => ({
+      _id: o._id,
+      createdAtClient: o.createdAtClient,
+      totalIDR: o.totalIDR,
+      paymentMethod: o.paymentMethod,
+      paymentStatus: o.paymentStatus,
+      cashierName: nameById.get(o.cashierId) ?? '—',
+      lineCount: o.lines.length,
+    }));
+    return { page, isDone: result.isDone, continueCursor: result.continueCursor };
   },
 });
 
