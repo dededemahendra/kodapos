@@ -295,6 +295,10 @@ msgstr "Set"
 msgid "AI-native POS untuk kafe & QSR Indonesia."
 msgstr "AI-native POS for Indonesian cafes & QSRs."
 
+#: src/components/permission/require-permission.tsx
+msgid "Akses ditolak"
+msgstr "Access denied"
+
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/index.tsx
@@ -377,6 +381,10 @@ msgstr "Reorder threshold"
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Amount"
 #~ msgstr "Amount"
+
+#: src/components/permission/require-permission.tsx
+msgid "Anda tidak punya akses ke halaman ini."
+msgstr "You do not have access to this page."
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Anggota"
@@ -1724,6 +1732,10 @@ msgstr "Back to /sale"
 #: src/routes/__root.tsx
 msgid "Kembali ke beranda"
 msgstr "Back to home"
+
+#: src/components/permission/require-permission.tsx
+msgid "Kembali ke kasir"
+msgstr "Back to register"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Kembali ke layar PIN setelah periode tidak aktif."
