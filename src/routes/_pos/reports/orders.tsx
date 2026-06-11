@@ -6,6 +6,7 @@ import { usePaginatedQuery, useQuery } from 'convex/react';
 import { Receipt } from 'lucide-react';
 import { useState } from 'react';
 import { useReportRange } from '~/components/reports/use-report-range';
+import { ORDER_TYPE_OPTIONS } from '~/components/sale/order-types';
 import { ReceiptPreview } from '~/components/sale/receipt-preview';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
@@ -37,6 +38,7 @@ function OrdersReport() {
   const staff = useQuery(api.staff.list, {});
   const [cashier, setCashier] = useState<string>(ALL);
   const [method, setMethod] = useState<string>(ALL);
+  const [orderType, setOrderType] = useState<string>(ALL);
   const [status, setStatus] = useState<string>(ALL);
   const [openId, setOpenId] = useState<Id<'orders'> | null>(null);
 
@@ -51,6 +53,9 @@ function OrdersReport() {
       ...(cashier !== ALL ? { cashierId: cashier as Id<'cafeStaff'> } : {}),
       ...(method !== ALL
         ? { paymentMethod: method as 'cash' | 'qris_static' | 'qris_dynamic' }
+        : {}),
+      ...(orderType !== ALL
+        ? { orderType: orderType as 'dine_in' | 'takeaway' | 'pickup' }
         : {}),
       ...(status !== ALL
         ? { status: status as 'paid' | 'pending' | 'void' }
@@ -85,6 +90,20 @@ function OrdersReport() {
             <SelectItem value="cash">{t`Tunai`}</SelectItem>
             <SelectItem value="qris_static">QRIS statis</SelectItem>
             <SelectItem value="qris_dynamic">QRIS dinamis</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={orderType} onValueChange={setOrderType}>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>{t`Semua tipe pesanan`}</SelectItem>
+            {ORDER_TYPE_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -140,6 +159,11 @@ function OrdersReport() {
                     {o.paymentMethod === 'cash' ? t`Tunai` : 'QRIS'}
                   </span>
                   <span>· {t`${o.lineCount} item`}</span>
+                  {o.orderType ? (
+                    <span>
+                      · {ORDER_TYPE_OPTIONS.find((x) => x.value === o.orderType)?.label}
+                    </span>
+                  ) : null}
                   <Badge
                     variant={
                       o.paymentStatus === 'paid'

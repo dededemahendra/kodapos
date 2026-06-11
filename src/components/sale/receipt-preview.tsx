@@ -18,6 +18,12 @@ const PAYMENT_LABELS: Record<string, string> = {
   transfer: 'Bank Transfer',
 };
 
+const ORDER_TYPE_RECEIPT_LABEL: Record<'dine_in' | 'takeaway' | 'pickup', string> = {
+  dine_in: 'Dine-in',
+  takeaway: 'Takeaway',
+  pickup: 'Pickup',
+};
+
 export function ReceiptPreview({
   open,
   onOpenChange,
@@ -61,6 +67,11 @@ export function ReceiptPreview({
               <div className="text-xs text-muted-foreground">
                 <Trans>Kasir: {order.cashierName}</Trans>
               </div>
+              {order.orderType ? (
+                <div className="text-xs text-muted-foreground">
+                  Order type: {ORDER_TYPE_RECEIPT_LABEL[order.orderType]}
+                </div>
+              ) : null}
             </div>
             <hr className="border-dashed border-border my-2" />
             {order.lines.map((line, i) => (
