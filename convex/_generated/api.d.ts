@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as cafes from "../cafes.js";
 import type * as cashMovements from "../cashMovements.js";
+import type * as cashierSessions from "../cashierSessions.js";
 import type * as crons from "../crons.js";
 import type * as customers from "../customers.js";
 import type * as dashboard from "../dashboard.js";
@@ -66,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   cafes: typeof cafes;
   cashMovements: typeof cashMovements;
+  cashierSessions: typeof cashierSessions;
   crons: typeof crons;
   customers: typeof customers;
   dashboard: typeof dashboard;

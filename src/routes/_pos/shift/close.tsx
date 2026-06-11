@@ -21,7 +21,8 @@ function ShiftClosePage() {
   const current = useQuery(api.shifts.current, {});
   const summary = useQuery(api.shifts.closeoutSummary, current ? { shiftId: current._id } : 'skip');
   const closeShift = useMutation(api.shifts.close);
-  const { clearCashier } = useActiveCashier();
+  const record = useMutation(api.cashierSessions.record);
+  const { cashierId, clearCashier } = useActiveCashier();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [closedShift, setClosedShift] = useState<ShiftSummary | null>(null);
@@ -63,6 +64,7 @@ function ShiftClosePage() {
     setSubmitting(true);
     setError(null);
     try {
+      if (cashierId) await record({ cashierId, type: 'logout' });
       const counted = Number.parseInt(countedStr, 10);
       await closeShift({ id: current._id, countedCashIDR: counted });
       setClosedShift({

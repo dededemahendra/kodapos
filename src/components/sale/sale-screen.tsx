@@ -139,7 +139,7 @@ export function SaleScreen() {
           if (cart.lines.length > 0) setOpenMethod(method);
         }}
         onKosongkan={() => setClearOpen(true)}
-        {...(shift && cashierId ? { onKas: () => setKasOpen(true) } : {})}
+        {...(shift && cashierId ? { onKas: () => setKasOpen(true), onSwitch: true } : {})}
       />
       <ModifierPickerDialog
         open={pickerRow !== null}

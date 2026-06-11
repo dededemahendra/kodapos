@@ -220,6 +220,14 @@ export default defineSchema({
     .index('by_cafe_status', ['cafeId', 'status'])
     .index('by_cafe_opened', ['cafeId', 'openedAt']),
 
+  cashierSessions: defineTable({
+    cafeId: v.id('cafes'),
+    cashierId: v.id('cafeStaff'),
+    shiftId: v.optional(v.id('shifts')),
+    type: v.union(v.literal('login'), v.literal('switch'), v.literal('logout')),
+    at: v.number(),
+  }).index('by_shift', ['shiftId']),
+
   cashMovements: defineTable({
     cafeId: v.id('cafes'),
     shiftId: v.id('shifts'),
