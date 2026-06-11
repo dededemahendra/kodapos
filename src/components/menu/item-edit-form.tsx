@@ -1,9 +1,10 @@
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useRef, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
+import { uploadToStorage } from '~/lib/upload';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
@@ -22,6 +23,8 @@ export interface ItemEditFormProps {
     categoryId: Id<'categories'> | '';
     priceIDR: number;
     isActive: boolean;
+    imageStorageId?: Id<'_storage'>;
+    imageUrl?: string | null;
   };
   attached: AttachedGroupRow[];
   onSaved: (id: Id<'menuItems'>) => void;
@@ -31,6 +34,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
   const { t } = useLingui();
   const categories = useQuery(api.menu.categories.list, {});
   const allGroups = useQuery(api.menu.modifierGroups.list, {});
+  const generateUploadUrl = useMutation(api.cafes.generateUploadUrl);
   const createItem = useMutation(api.menu.items.create);
   const updateItem = useMutation(api.menu.items.update);
   const setActive = useMutation(api.menu.items.setActive);
@@ -43,8 +47,34 @@ export function ItemEditForm(props: ItemEditFormProps) {
   const [categoryId, setCategoryId] = useState<Id<'categories'> | ''>(props.initial.categoryId);
   const [priceIDR, setPriceIDR] = useState<number>(props.initial.priceIDR);
   const [isActive, setIsActive] = useState(props.initial.isActive);
+  const [imageStorageId, setImageStorageId] = useState<Id<'_storage'> | undefined>(props.initial.imageStorageId);
+  const [imageUrl, setImageUrl] = useState<string | null>(props.initial.imageUrl ?? null);
+  const [uploading, setUploading] = useState(false);
+  const imgRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  async function onImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const storageId = await uploadToStorage(generateUploadUrl, file);
+      setImageStorageId(storageId);
+      setImageUrl(URL.createObjectURL(file));
+    } catch {
+      setError(t`Gagal mengunggah gambar.`);
+    } finally {
+      setUploading(false);
+      if (imgRef.current) imgRef.current.value = '';
+    }
+  }
+
+  function removeImage() {
+    setImageStorageId(undefined);
+    setImageUrl(null);
+  }
 
   const attachedIds = new Set(props.attached.map((a) => a.group._id));
   const availableGroups = (allGroups ?? []).filter((g) => !attachedIds.has(g._id));
@@ -60,9 +90,9 @@ export function ItemEditForm(props: ItemEditFormProps) {
     try {
       let id: Id<'menuItems'>;
       if (props.itemId === 'new') {
-        id = await createItem({ categoryId, name, priceIDR });
+        id = await createItem({ categoryId, name, priceIDR, ...(imageStorageId ? { imageStorageId } : {}) });
       } else {
-        await updateItem({ id: props.itemId, categoryId, name, priceIDR });
+        await updateItem({ id: props.itemId, categoryId, name, priceIDR, ...(imageStorageId ? { imageStorageId } : {}) });
         id = props.itemId;
       }
       if (props.itemId !== 'new' && isActive !== props.initial.isActive) {
@@ -119,6 +149,26 @@ export function ItemEditForm(props: ItemEditFormProps) {
               onChange={(e) => setPriceIDR(Number(e.target.value))}
               required
             />
+          </Field>
+          <Field>
+            <FieldLabel><Trans>Gambar item</Trans></FieldLabel>
+            <div className="flex items-center gap-3">
+              {imageUrl ? (
+                <img src={imageUrl} alt="" className="size-16 rounded object-cover border border-border" />
+              ) : (
+                <div className="size-16 rounded bg-muted grid place-items-center text-muted-foreground text-xs">—</div>
+              )}
+              <input ref={imgRef} type="file" accept="image/*" onChange={onImageChange} className="hidden" />
+              <div className="flex flex-col gap-1">
+                <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => imgRef.current?.click()}>
+                  {uploading ? <Spinner data-icon="inline-start" /> : null}
+                  {imageStorageId ? <Trans>Ganti gambar</Trans> : <Trans>Unggah gambar</Trans>}
+                </Button>
+                {imageStorageId ? (
+                  <Button type="button" variant="ghost" size="sm" onClick={removeImage}><Trans>Hapus gambar</Trans></Button>
+                ) : null}
+              </div>
+            </div>
           </Field>
           {props.itemId !== 'new' && (
             <Field>
