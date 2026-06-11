@@ -2,7 +2,7 @@ import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import type { Doc } from './_generated/dataModel';
-import type { QueryCtx } from './_generated/server';
+import type { MutationCtx, QueryCtx } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { requireActiveCashier } from './lib/staff';
 
@@ -25,6 +25,28 @@ function assertIDR(n: number, label: string): number {
   if (!Number.isInteger(n)) throw new Error(`${label} harus berupa angka bulat (rupiah).`);
   if (n < 0) throw new Error(`${label} tidak boleh negatif.`);
   return n;
+}
+
+async function shiftCashBreakdown(ctx: QueryCtx | MutationCtx, shift: Doc<'shifts'>) {
+  const orders = await ctx.db
+    .query('orders')
+    .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
+    .collect();
+  const cashSalesIDR = orders
+    .filter((o) => o.paymentStatus === 'paid' && o.paymentMethod === 'cash')
+    .reduce((s, o) => s + o.totalIDR, 0);
+  const movements = await ctx.db
+    .query('cashMovements')
+    .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
+    .collect();
+  let cashInIDR = 0;
+  let cashOutIDR = 0;
+  for (const m of movements) {
+    if (m.direction === 'in') cashInIDR += m.amountIDR;
+    else cashOutIDR += m.amountIDR;
+  }
+  const expectedCashIDR = shift.openingFloatIDR + cashSalesIDR + cashInIDR - cashOutIDR;
+  return { cashSalesIDR, cashInIDR, cashOutIDR, expectedCashIDR };
 }
 
 export const current = query({
@@ -78,12 +100,49 @@ export const close = mutation({
       throw new Error('Shift sudah ditutup.');
     }
     const counted = assertIDR(countedCashIDR, 'Uang terhitung');
+    const { expectedCashIDR } = await shiftCashBreakdown(ctx, shift);
     await ctx.db.patch(id, {
       status: 'closed',
       closedAt: Date.now(),
       countedCashIDR: counted,
+      expectedCashIDR,
+      varianceIDR: counted - expectedCashIDR,
     });
     return null;
+  },
+});
+
+export const closeoutSummary = query({
+  args: { shiftId: v.id('shifts') },
+  returns: v.object({
+    cashierName: v.string(),
+    openingFloatIDR: v.number(),
+    cashSalesIDR: v.number(),
+    cashInIDR: v.number(),
+    cashOutIDR: v.number(),
+    expectedCashIDR: v.number(),
+    countedCashIDR: v.union(v.number(), v.null()),
+    varianceIDR: v.union(v.number(), v.null()),
+  }),
+  handler: async (ctx, { shiftId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const shift = await requireOwned(ctx, cafeId, shiftId, 'Shift');
+    const { cashSalesIDR, cashInIDR, cashOutIDR, expectedCashIDR } = await shiftCashBreakdown(
+      ctx,
+      shift
+    );
+    const cashier = await ctx.db.get(shift.cashierId);
+    const countedCashIDR = shift.countedCashIDR ?? null;
+    return {
+      cashierName: cashier?.name ?? '—',
+      openingFloatIDR: shift.openingFloatIDR,
+      cashSalesIDR,
+      cashInIDR,
+      cashOutIDR,
+      expectedCashIDR,
+      countedCashIDR,
+      varianceIDR: countedCashIDR !== null ? countedCashIDR - expectedCashIDR : null,
+    };
   },
 });
 
@@ -119,7 +178,7 @@ async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
   }
   const cashier = await ctx.db.get(shift.cashierId);
   const countedCashIDR = shift.countedCashIDR ?? null;
-  const expectedCashIDR = shift.openingFloatIDR + cashSalesIDR;
+  const expectedCashIDR = shift.expectedCashIDR ?? shift.openingFloatIDR + cashSalesIDR;
   return {
     _id: shift._id,
     openedAt: shift.openedAt,
@@ -132,7 +191,8 @@ async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
     cashSalesIDR,
     qrisSalesIDR,
     expectedCashIDR,
-    varianceIDR: countedCashIDR !== null ? countedCashIDR - expectedCashIDR : null,
+    varianceIDR:
+      shift.varianceIDR ?? (countedCashIDR !== null ? countedCashIDR - expectedCashIDR : null),
   };
 }
 
