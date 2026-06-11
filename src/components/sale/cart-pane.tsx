@@ -8,6 +8,7 @@ import { usePermissions } from '~/lib/permissions';
 import { formatPromoValue } from '~/lib/promo';
 import type { CartAction, CartPromo, CartState } from './cart-reducer';
 import { CartLineRow } from './cart-line-row';
+import { ORDER_TYPE_OPTIONS } from './order-types';
 import { methodLabel, type PaymentMethod } from './payment-methods';
 
 export function CartPane({
@@ -57,31 +58,46 @@ export function CartPane({
 
   return (
     <aside className="border-l border-border flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-        <h2 className="text-sm font-semibold">
-          <Trans>Pesanan ({cart.lines.length})</Trans>
-        </h2>
-        <div className="flex items-center gap-1">
-          {onSwitch ? (
-            <Button type="button" size="sm" variant="outline" asChild>
-              <Link to="/pin"><Trans>Ganti kasir</Trans></Link>
+      <div className="px-3 py-2 border-b border-border">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">
+            <Trans>Pesanan ({cart.lines.length})</Trans>
+          </h2>
+          <div className="flex items-center gap-1">
+            {onSwitch ? (
+              <Button type="button" size="sm" variant="outline" asChild>
+                <Link to="/pin"><Trans>Ganti kasir</Trans></Link>
+              </Button>
+            ) : null}
+            {onKas ? (
+              <Button type="button" size="sm" variant="outline" onClick={onKas}>
+                <Trans>Kas</Trans>
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={onKosongkan}
+              disabled={empty}
+              className="text-muted-foreground"
+            >
+              <Trans>Kosongkan</Trans>
             </Button>
-          ) : null}
-          {onKas ? (
-            <Button type="button" size="sm" variant="outline" onClick={onKas}>
-              <Trans>Kas</Trans>
+          </div>
+        </div>
+        <div className="mt-2 flex gap-1">
+          {ORDER_TYPE_OPTIONS.map((o) => (
+            <Button
+              key={o.value}
+              type="button"
+              size="sm"
+              variant={cart.orderType === o.value ? 'default' : 'outline'}
+              onClick={() => dispatch({ type: 'setOrderType', orderType: o.value })}
+            >
+              {o.label}
             </Button>
-          ) : null}
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={onKosongkan}
-            disabled={empty}
-            className="text-muted-foreground"
-          >
-            <Trans>Kosongkan</Trans>
-          </Button>
+          ))}
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-3">
