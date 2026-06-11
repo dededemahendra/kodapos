@@ -36,6 +36,7 @@ function ShiftHistoryPage() {
     { initialNumItems: 20 }
   );
   const [selected, setSelected] = useState<Id<'shifts'> | null>(null);
+  const sessions = useQuery(api.cashierSessions.listForShift, selected ? { shiftId: selected } : 'skip');
 
   if (selected) {
     return (
@@ -43,6 +44,19 @@ function ShiftHistoryPage() {
         <Button variant="outline" size="sm" onClick={() => setSelected(null)}>
           <Trans>← Kembali ke daftar shift</Trans>
         </Button>
+        {sessions && sessions.length > 0 ? (
+          <div className="rounded-md border border-border p-3">
+            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2"><Trans>Riwayat kasir</Trans></div>
+            <ul className="text-sm space-y-1">
+              {sessions.map((s) => (
+                <li key={s._id} className="flex justify-between">
+                  <span>{s.cashierName} · {s.type === 'login' ? <Trans>Masuk</Trans> : s.type === 'switch' ? <Trans>Ganti</Trans> : <Trans>Keluar</Trans>}</span>
+                  <span className="text-muted-foreground tabular-nums">{new Date(s.at).toLocaleTimeString('id-ID')}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <ShiftOrderList shiftId={selected} />
       </main>
     );
