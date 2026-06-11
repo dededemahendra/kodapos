@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { useConvex, useQuery } from 'convex/react';
+import { useConvex, useMutation, useQuery } from 'convex/react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { useState } from 'react';
@@ -18,7 +18,8 @@ function PinPickerPage() {
   const { t } = useLingui();
   const staff = useQuery(api.staff.list, {});
   const convex = useConvex();
-  const { setCashier } = useActiveCashier();
+  const record = useMutation(api.cashierSessions.record);
+  const { cashierId, setCashier } = useActiveCashier();
   const navigate = useNavigate();
   const [picking, setPicking] = useState<{
     id: Id<'cafeStaff'>;
@@ -31,9 +32,16 @@ function PinPickerPage() {
     return <p className="text-muted-foreground p-6"><Trans>Memuat…</Trans></p>;
   }
 
-  async function selectWithoutPin(id: Id<'cafeStaff'>): Promise<void> {
+  async function activate(id: Id<'cafeStaff'>): Promise<void> {
+    const wasActive = cashierId !== null;
+    await record({ cashierId: id, type: wasActive ? 'switch' : 'login' });
     setCashier(id);
-    navigate({ to: '/shift/open' });
+    const open = await convex.query(api.shifts.current, {});
+    navigate({ to: open ? '/sale' : '/shift/open' });
+  }
+
+  async function selectWithoutPin(id: Id<'cafeStaff'>): Promise<void> {
+    await activate(id);
   }
 
   async function selectWithPin(pin: string): Promise<void> {
@@ -43,9 +51,9 @@ function PinPickerPage() {
       setError(t`PIN salah.`);
       return;
     }
-    setCashier(picking.id);
+    const id = picking.id;
     setPicking(null);
-    navigate({ to: '/shift/open' });
+    await activate(id);
   }
 
   return (
