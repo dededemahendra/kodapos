@@ -1,5 +1,6 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { usePaginatedQuery, useQuery } from 'convex/react';
@@ -13,12 +14,18 @@ import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 
 export const Route = createFileRoute('/_pos/shifts')({
-  component: () => (
-    <PinGate>
-      <ShiftHistoryPage />
-    </PinGate>
-  ),
+  component: ShiftsPage,
 });
+
+function ShiftsPage() {
+  return (
+    <RequirePermission perm="canViewReports">
+      <PinGate>
+        <ShiftHistoryPage />
+      </PinGate>
+    </RequirePermission>
+  );
+}
 
 function formatDuration(ms: number): string {
   const mins = Math.max(0, Math.round(ms / 60000));

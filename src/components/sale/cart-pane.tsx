@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { formatIDR } from '~/lib/money';
+import { usePermissions } from '~/lib/permissions';
 import { formatPromoValue } from '~/lib/promo';
 import type { CartAction, CartPromo, CartState } from './cart-reducer';
 import { CartLineRow } from './cart-line-row';
@@ -51,6 +52,7 @@ export function CartPane({
   onSwitch?: boolean;
 }) {
   const { t } = useLingui();
+  const { can } = usePermissions();
   const empty = cart.lines.length === 0;
 
   return (
@@ -118,7 +120,7 @@ export function CartPane({
             </span>
             <span className="tabular-nums">−{formatIDR(discountIDR)}</span>
           </div>
-        ) : !empty ? (
+        ) : !empty && can('canDiscount') ? (
           <button
             type="button"
             onClick={onAddPromo}

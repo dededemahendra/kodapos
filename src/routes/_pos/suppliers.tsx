@@ -1,5 +1,6 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
@@ -19,10 +20,18 @@ import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/suppliers')({ component: SuppliersPage });
 
+function SuppliersPage() {
+  return (
+    <RequirePermission perm="canEditMenu">
+      <SuppliersInner />
+    </RequirePermission>
+  );
+}
+
 type Supplier = Doc<'suppliers'>;
 type Filter = 'active' | 'archived';
 
-function SuppliersPage() {
+function SuppliersInner() {
   const { t } = useLingui();
   const [filter, setFilter] = useState<Filter>('active');
   const [formOpen, setFormOpen] = useState(false);
