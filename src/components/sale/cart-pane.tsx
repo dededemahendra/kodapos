@@ -31,6 +31,9 @@ export function CartPane({
   onKosongkan,
   onKas,
   onSwitch,
+  onHold,
+  onShowHeld,
+  heldCount,
 }: {
   cart: CartState;
   dispatch: (a: CartAction) => void;
@@ -51,6 +54,9 @@ export function CartPane({
   onKosongkan: () => void;
   onKas?: () => void;
   onSwitch?: boolean;
+  onHold?: () => void;
+  onShowHeld?: () => void;
+  heldCount?: number;
 }) {
   const { t } = useLingui();
   const { can } = usePermissions();
@@ -72,6 +78,16 @@ export function CartPane({
             {onKas ? (
               <Button type="button" size="sm" variant="outline" onClick={onKas}>
                 <Trans>Kas</Trans>
+              </Button>
+            ) : null}
+            {onShowHeld ? (
+              <Button type="button" size="sm" variant="outline" onClick={onShowHeld}>
+                <Trans>Ditahan ({heldCount ?? 0})</Trans>
+              </Button>
+            ) : null}
+            {onHold ? (
+              <Button type="button" size="sm" variant="outline" onClick={onHold} disabled={empty}>
+                <Trans>Tahan</Trans>
               </Button>
             ) : null}
             <Button
