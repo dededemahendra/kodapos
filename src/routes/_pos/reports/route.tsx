@@ -21,6 +21,7 @@ const TABS = [
   { to: '/reports/orders', label: <Trans>Pesanan</Trans> },
   { to: '/reports/expenses', label: <Trans>Pengeluaran</Trans> },
   { to: '/reports/other-income', label: <Trans>Pendapatan Lain</Trans> },
+  { to: '/reports/export', label: <Trans>Ekspor Akuntansi</Trans> },
 ] as const;
 
 function ReportsLayout() {
