@@ -428,6 +428,7 @@ msgid "Aktivitas terbaru di kafe Anda."
 msgstr "Aktivitas terbaru di kafe Anda."
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/reports/export.tsx
 msgid "Akun"
 msgstr "Akun"
 
@@ -549,6 +550,14 @@ msgstr "Arsipkan pemasok?"
 #: src/routes/_pos/promos.tsx
 msgid "Arsipkan promo?"
 msgstr "Arsipkan promo?"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Arus Keluar"
+msgstr "Arus Keluar"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Arus Masuk"
+msgstr "Arus Masuk"
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Atur cara pelanggan memperoleh dan menukar poin."
@@ -927,6 +936,7 @@ msgid "Belum ada transaksi poin."
 msgstr "Belum ada transaksi poin."
 
 #: src/components/dashboard-invoices.tsx
+#: src/routes/_pos/reports/export.tsx
 msgid "Belum ada transaksi."
 msgstr "Belum ada transaksi."
 
@@ -957,6 +967,10 @@ msgstr "Berhasil clock out."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Beri diskon"
 msgstr "Beri diskon"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Bersih"
+msgstr "Bersih"
 
 #: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/settings/receipt.tsx
@@ -1269,6 +1283,7 @@ msgid "Coba ubah kata pencarian atau tambah kasir baru."
 msgstr "Coba ubah kata pencarian atau tambah kasir baru."
 
 #: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
@@ -1453,6 +1468,10 @@ msgstr "Edit grup modifier"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Edit menu"
 msgstr "Edit menu"
+
+#: src/routes/_pos/reports/route.tsx
+msgid "Ekspor Akuntansi"
+msgstr "Ekspor Akuntansi"
 
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -2403,6 +2422,7 @@ msgstr "Kerugian 30 hari · {0}"
 msgid "Kesehatan stok"
 msgstr "Kesehatan stok"
 
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 msgid "Keterangan"
 msgstr "Keterangan"
@@ -2841,6 +2861,7 @@ msgstr "Menyimpan…"
 
 #: src/components/sale/refund-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/payments.tsx
 msgid "Metode"
 msgstr "Metode"
@@ -3240,6 +3261,10 @@ msgstr "Pemasok diperbarui."
 msgid "Pemasok ditambahkan."
 msgstr "Pemasok ditambahkan."
 
+#: src/routes/_pos/reports/export.tsx
+#~ msgid "Pemasukan"
+#~ msgstr "Pemasukan"
+
 #: src/components/latest-change.tsx
 msgid "PEMBARUAN"
 msgstr "PEMBARUAN"
@@ -3279,6 +3304,7 @@ msgstr "Pembayaran Tunai"
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/purchases.tsx
+#: src/routes/_pos/reports/export.tsx
 msgid "Pembelian"
 msgstr "Pembelian"
 
@@ -3341,6 +3367,7 @@ msgstr "Pendapatan harian, 7 hari terakhir."
 msgid "Pendapatan lain"
 msgstr "Pendapatan lain"
 
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Pendapatan Lain"
 msgstr "Pendapatan Lain"
@@ -3366,6 +3393,7 @@ msgstr "Pengaturan loyalitas disimpan."
 #~ msgid "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 #~ msgstr "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Pengeluaran"
@@ -3379,6 +3407,7 @@ msgstr "Pengeluaran dicatat."
 msgid "Pengeluaran dihapus."
 msgstr "Pengeluaran dihapus."
 
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 msgid "Pengembalian"
 msgstr "Pengembalian"
@@ -3390,6 +3419,7 @@ msgstr "Pengiriman masuk"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Penjualan"
 msgstr "Penjualan"
@@ -4607,6 +4637,7 @@ msgstr "Tampilkan rincian pajak"
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Tanggal"
@@ -4837,6 +4868,7 @@ msgstr "Tinjau inventaris"
 #: src/components/promo/promo-form-dialog.tsx
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/promos.tsx
+#: src/routes/_pos/reports/export.tsx
 msgid "Tipe"
 msgstr "Tipe"
 
@@ -4938,6 +4970,14 @@ msgstr "Tutup Shift"
 msgid "Uang diterima"
 msgstr "Uang diterima"
 
+#: src/routes/_pos/reports/export.tsx
+msgid "Uang Keluar"
+msgstr "Uang Keluar"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Uang Masuk"
+msgstr "Uang Masuk"
+
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Uang seharusnya"
 msgstr "Uang seharusnya"
@@ -5023,6 +5063,10 @@ msgstr "Ukuran label"
 #: src/routes/_pos/settings/general.tsx
 msgid "Umum"
 msgstr "Umum"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Unduh Buku Besar (CSV)"
+msgstr "Unduh Buku Besar (CSV)"
 
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/expenses.tsx
