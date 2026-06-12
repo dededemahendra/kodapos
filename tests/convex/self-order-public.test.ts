@@ -327,7 +327,7 @@ describe('public.submitSelfOrder', () => {
       })
     ).rejects.toThrow(/harga/i);
 
-    const count = await tt.run(async (ctx) => {
+    const count = await t.run(async (ctx) => {
       const rows = await ctx.db
         .query('selfOrders')
         .withIndex('by_cafe_clientId', (q) =>
