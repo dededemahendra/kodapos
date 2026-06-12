@@ -601,6 +601,7 @@ msgstr "Spoiled/Expired"
 #: src/components/promo/promo-form-dialog.tsx
 #: src/components/sale/customer-section.tsx
 #: src/components/sale/hold-order-dialog.tsx
+#: src/components/sale/manual-discount-dialog.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
@@ -1120,9 +1121,24 @@ msgid "Dipakai ulang di banyak item, ubah di satu tempat."
 msgstr "Reused across many items, change in one place."
 
 #: src/components/sale/cart-pane.tsx
+#: src/components/sale/manual-discount-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 msgid "Diskon"
 msgstr "Discount"
+
+#: src/components/sale/cart-pane.tsx
+#: src/components/sale/manual-discount-dialog.tsx
+#: src/components/sale/receipt-preview.tsx
+msgid "Diskon manual"
+msgstr "Manual discount"
+
+#: src/components/sale/manual-discount-dialog.tsx
+msgid "Diskon persen maksimal 100."
+msgstr "Percent discount max 100."
+
+#: src/components/sale/manual-discount-dialog.tsx
+msgid "Diskon tidak valid."
+msgstr "Invalid discount."
 
 #. placeholder {0}: heldCount ?? 0
 #: src/components/sale/cart-pane.tsx
@@ -1498,6 +1514,11 @@ msgstr "Remove"
 #: src/components/sale/cart-line-row.tsx
 msgid "Hapus baris"
 msgstr "Remove row"
+
+#: src/components/sale/cart-pane.tsx
+#: src/components/sale/manual-discount-dialog.tsx
+msgid "Hapus diskon"
+msgstr "Remove discount"
 
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/settings/tax.tsx
@@ -2484,6 +2505,10 @@ msgstr "Value (%)"
 msgid "Nilai (Rp)"
 msgstr "Value (Rp)"
 
+#: src/components/sale/manual-discount-dialog.tsx
+msgid "Nilai diskon"
+msgstr "Discount value"
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Nilai rupiah"
 msgstr "Rupiah value"
@@ -2830,6 +2855,7 @@ msgid "Perolehan poin"
 msgstr "Point earning"
 
 #: src/components/promo/promo-form-dialog.tsx
+#: src/components/sale/manual-discount-dialog.tsx
 #: src/routes/_pos/promos.tsx
 msgid "Persen"
 msgstr "Percent"
@@ -3248,6 +3274,10 @@ msgstr "Nearest Rp100"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Rp500 terdekat"
 msgstr "Nearest Rp500"
+
+#: src/components/sale/manual-discount-dialog.tsx
+msgid "Rupiah"
+msgstr "Rupiah"
 
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/inventory/waste-reason.tsx
@@ -3815,9 +3845,9 @@ msgstr "Phone"
 msgid "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
 msgstr "Paste the keys from your Xendit dashboard. Keys are stored securely on the server."
 
-#: src/components/reports/range-picker.tsx
-#~ msgid "Terapkan"
-#~ msgstr "Apply"
+#: src/components/sale/manual-discount-dialog.tsx
+msgid "Terapkan"
+msgstr "Apply"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Terhubung"
