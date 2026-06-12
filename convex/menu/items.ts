@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
-import { mutation, query, type QueryCtx } from '../_generated/server';
+import { mutation, type MutationCtx, query, type QueryCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from '../lib/auth';
 import { itemRecipeStatus } from './itemStock';
 
@@ -105,18 +105,52 @@ function assertItem(name: string, priceIDR: number): string {
 // Mirror of a duplicate-name guard: query the by-cafe barcode index, collect
 // the matches, and reject if any non-archived item (other than the one being
 // edited) already owns the barcode.
+async function isBarcodeFree(
+  ctx: QueryCtx,
+  cafeId: Id<'cafes'>,
+  barcode: string,
+  currentId?: Id<'menuItems'>
+): Promise<boolean> {
+  const matches = await ctx.db
+    .query('menuItems')
+    .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', barcode))
+    .collect();
+  return !matches.some((m) => !m.archived && m._id !== currentId);
+}
+
 async function assertBarcodeUnique(
   ctx: QueryCtx,
   cafeId: Id<'cafes'>,
   barcode: string,
   currentId?: Id<'menuItems'>
 ): Promise<void> {
-  const matches = await ctx.db
-    .query('menuItems')
-    .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', barcode))
-    .collect();
-  const clash = matches.some((m) => !m.archived && m._id !== currentId);
-  if (clash) throw new Error('Barcode sudah dipakai item lain.');
+  if (!(await isBarcodeFree(ctx, cafeId, barcode, currentId)))
+    throw new Error('Barcode sudah dipakai item lain.');
+}
+
+// 12 random digits using the Convex-available Web Crypto. Digits-only so the
+// resulting Code128 symbology and handheld scanners handle it cleanly.
+function genBarcode(): string {
+  const a = new Uint8Array(12);
+  globalThis.crypto.getRandomValues(a);
+  return Array.from(a, (b) => String(b % 10)).join('');
+}
+
+// Generate a fresh unique digits-only barcode for an item that has none and
+// patch it in. Retries on the (vanishingly rare) collision. Returns the code.
+async function assignOneBarcode(
+  ctx: MutationCtx,
+  cafeId: Id<'cafes'>,
+  itemId: Id<'menuItems'>
+): Promise<string> {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const bc = genBarcode();
+    if (await isBarcodeFree(ctx, cafeId, bc)) {
+      await ctx.db.patch(itemId, { barcode: bc });
+      return bc;
+    }
+  }
+  throw new Error('Gagal membuat barcode unik.');
 }
 
 async function resolveAttachedGroups(
@@ -288,6 +322,35 @@ export const archive = mutation({
     await requireOwned(ctx, cafeId, id, 'Item');
     await ctx.db.patch(id, { archived: true });
     return null;
+  },
+});
+
+export const assignBarcode = mutation({
+  args: { id: v.id('menuItems') },
+  returns: v.string(),
+  handler: async (ctx, { id }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const item = await requireOwned(ctx, cafeId, id, 'Item');
+    if (item.barcode) throw new Error('Item sudah punya barcode.');
+    return await assignOneBarcode(ctx, cafeId, item._id);
+  },
+});
+
+export const assignMissingBarcodes = mutation({
+  args: {},
+  returns: v.object({ assigned: v.number() }),
+  handler: async (ctx) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    // Sellable items mirror listForSale: active + not archived.
+    const items = await ctx.db
+      .query('menuItems')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
+      .collect();
+    const missing = items.filter((i) => i.isActive && !i.barcode);
+    for (const item of missing) {
+      await assignOneBarcode(ctx, cafeId, item._id);
+    }
+    return { assigned: missing.length };
   },
 });
 
