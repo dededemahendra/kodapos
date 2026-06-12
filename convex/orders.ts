@@ -4,6 +4,8 @@ import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
 import { manualDiscountValidator } from './lib/discount';
 import { orderTypeValidator } from './lib/orderType';
+import { methodTotals } from './lib/payment';
+import { unitRefundIDR } from './lib/refund';
 import { buildOrder, reverseSettledSale, saleArgs, saleResult, settleSale } from './lib/sale';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
@@ -175,6 +177,7 @@ const orderSummary = v.object({
   voidedAt: v.optional(v.number()),
   voidReason: v.optional(v.string()),
   voidedByCashierId: v.optional(v.id('cafeStaff')),
+  refundedIDR: v.optional(v.number()),
   createdAtClient: v.number(),
   syncedAt: v.optional(v.number()),
 });
@@ -300,6 +303,75 @@ export const getById = query({
       ...order,
       cashierName: cashier?.name ?? '—',
       payments,
+    };
+  },
+});
+
+// Drives the refund dialog: the cumulative refunded total, the order's tenders
+// (the methods you can refund to), and per-line remaining-refundable qty + the
+// proportional per-unit refund value.
+export const refundInfo = query({
+  args: { orderId: v.id('orders') },
+  returns: v.object({
+    refundedIDR: v.number(),
+    fullyRefunded: v.boolean(),
+    methods: v.array(
+      v.union(
+        v.literal('cash'),
+        v.literal('qris_static'),
+        v.literal('qris_dynamic'),
+        v.literal('giftcard')
+      )
+    ),
+    lines: v.array(
+      v.object({
+        lineIndex: v.number(),
+        nameSnapshot: v.string(),
+        qty: v.number(),
+        refundedQty: v.number(),
+        remainingQty: v.number(),
+        unitRefundIDR: v.number(),
+      })
+    ),
+  }),
+  handler: async (ctx, { orderId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const order = await requireOwned(ctx, cafeId, orderId, 'Pesanan');
+
+    // Cumulative refunded qty per line, derived from the refunds ledger.
+    const prior = await ctx.db
+      .query('refunds')
+      .withIndex('by_order', (q) => q.eq('orderId', orderId))
+      .collect();
+    const refundedByIndex: Record<number, number> = {};
+    for (const r of prior) {
+      for (const l of r.lines) {
+        refundedByIndex[l.lineIndex] = (refundedByIndex[l.lineIndex] ?? 0) + l.qty;
+      }
+    }
+
+    const subtotalIDR = order.lines.reduce((s, l) => s + l.unitPriceIDR * l.qty, 0);
+    const refundedIDR = order.refundedIDR ?? 0;
+    const lines = order.lines.map((l, lineIndex) => {
+      const refundedQty = refundedByIndex[lineIndex] ?? 0;
+      return {
+        lineIndex,
+        nameSnapshot: l.nameSnapshot,
+        qty: l.qty,
+        refundedQty,
+        remainingQty: l.qty - refundedQty,
+        unitRefundIDR: unitRefundIDR(l.unitPriceIDR, order.totalIDR, subtotalIDR),
+      };
+    });
+
+    // Distinct order tenders (refund destinations).
+    const methods = [...new Set(methodTotals(order).map((t) => t.method))];
+
+    return {
+      refundedIDR,
+      fullyRefunded: lines.every((l) => l.remainingQty === 0),
+      methods,
+      lines,
     };
   },
 });

@@ -410,6 +410,11 @@ export default defineSchema({
     voidedAt: v.optional(v.number()),
     voidReason: v.optional(v.string()),
     voidedByCashierId: v.optional(v.id('cafeStaff')),
+    // Materialized cumulative refunded total (refunds slice). Optional for
+    // back-compat with orders created before refunds existed; the per-line
+    // refunded qty is derived by scanning refunds.by_order. paymentStatus stays
+    // 'paid' on a refunded order — refunds live in their own ledger.
+    refundedIDR: v.optional(v.number()),
     createdAtClient: v.number(),
     // Set by server at insert time today; optional reserved for Phase 2 offline-first when the client may persist an order before the backend confirms sync.
     syncedAt: v.optional(v.number()),
@@ -535,6 +540,38 @@ export default defineSchema({
     orderId: v.optional(v.id('orders')),
     at: v.number(),
   }).index('by_card_at', ['giftCardId', 'at']),
+
+  // Full + partial refunds against a paid order — a dated ledger event that
+  // restocks returned items, pro-rates loyalty, reverses gift-card/cash, and
+  // nets out of the money-truth reports. paymentStatus on the order is unchanged.
+  refunds: defineTable({
+    cafeId: v.id('cafes'),
+    orderId: v.id('orders'),
+    shiftId: v.id('shifts'), // the shift the refund is processed in
+    cashierId: v.id('cafeStaff'), // who processed it
+    clientId: v.string(), // idempotency key
+    method: v.union(
+      v.literal('cash'),
+      v.literal('qris_static'),
+      v.literal('qris_dynamic'),
+      v.literal('giftcard')
+    ), // tender refunded to
+    amountIDR: v.number(), // total refunded this transaction
+    lines: v.array(
+      v.object({
+        lineIndex: v.number(), // index into order.lines
+        nameSnapshot: v.string(),
+        qty: v.number(), // qty refunded in this transaction
+        lineRefundIDR: v.number(),
+      })
+    ),
+    reason: v.optional(v.string()),
+    at: v.number(),
+  })
+    .index('by_cafe_clientId', ['cafeId', 'clientId'])
+    .index('by_order', ['orderId'])
+    .index('by_cafe_at', ['cafeId', 'at'])
+    .index('by_shift', ['shiftId']),
 
   purchases: defineTable({
     cafeId: v.id('cafes'),
