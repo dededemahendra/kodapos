@@ -6,7 +6,7 @@ import { Button } from '~/components/ui/button';
 import { formatIDR } from '~/lib/money';
 import { usePermissions } from '~/lib/permissions';
 import { formatPromoValue } from '~/lib/promo';
-import type { CartAction, CartPromo, CartState } from './cart-reducer';
+import type { CartAction, CartPromo, CartState, ManualDiscount } from './cart-reducer';
 import { CartLineRow } from './cart-line-row';
 import { ORDER_TYPE_OPTIONS } from './order-types';
 import { methodLabel, type PaymentMethod } from './payment-methods';
@@ -26,6 +26,9 @@ export function CartPane({
   discountIDR,
   onAddPromo,
   onRemovePromo,
+  manualDiscount,
+  onAddManualDiscount,
+  onRemoveManualDiscount,
   payMethods,
   onPay,
   onKosongkan,
@@ -49,6 +52,9 @@ export function CartPane({
   discountIDR: number;
   onAddPromo: () => void;
   onRemovePromo: () => void;
+  manualDiscount?: ManualDiscount | null;
+  onAddManualDiscount?: () => void;
+  onRemoveManualDiscount?: () => void;
   payMethods: PaymentMethod[];
   onPay: (method: PaymentMethod) => void;
   onKosongkan: () => void;
@@ -159,6 +165,30 @@ export function CartPane({
             className="text-left text-primary hover:underline"
           >
             + <Trans>Tambah promo</Trans>
+          </button>
+        ) : null}
+        {manualDiscount && !empty ? (
+          <div className="flex items-center justify-between text-emerald-700">
+            <span className="flex items-center gap-1">
+              <Trans>Diskon manual</Trans>{' '}
+              ({formatPromoValue(manualDiscount.type, manualDiscount.value)})
+              <button
+                type="button"
+                onClick={onRemoveManualDiscount}
+                aria-label={t`Hapus diskon`}
+                className="ml-0.5 rounded p-0.5 hover:bg-muted"
+              >
+                <X className="size-3.5" />
+              </button>
+            </span>
+          </div>
+        ) : !empty && can('canDiscount') ? (
+          <button
+            type="button"
+            onClick={onAddManualDiscount}
+            className="block text-left text-primary hover:underline"
+          >
+            + <Trans>Diskon manual</Trans>
           </button>
         ) : null}
         {serviceChargeIDR > 0 ? (

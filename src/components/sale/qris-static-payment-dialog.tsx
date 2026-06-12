@@ -67,7 +67,7 @@ export function QrisStaticPaymentDialog({
 
   const { afterPromoIDR, redeemIDR, totalIDR } = usePaymentTotals({
     subtotalIDR,
-    promoDiscountIDR,
+    discountIDR: promoDiscountIDR,
     redeemPoints: customer.redeemPoints,
     loyaltyCfg,
     serviceChargeEnabled,
@@ -92,6 +92,7 @@ export function QrisStaticPaymentDialog({
           modifierOptionIds: l.modifierOptionIds,
         })),
         ...(promoId ? { promoId } : {}),
+        ...(cart.manualDiscount ? { manualDiscount: cart.manualDiscount } : {}),
         ...(customer.customerId ? { customerId: customer.customerId } : {}),
         ...(customer.redeemPoints > 0 ? { redeemPoints: customer.redeemPoints } : {}),
         createdAtClient: Date.now(),

@@ -67,7 +67,9 @@ export function ReceiptPreview({
   // redeem into one discount). Split them back out so the receipt shows the promo
   // discount and the points redeemed on separate lines.
   const pointsRedeemedIDR = order?.pointsRedeemedIDR ?? 0;
-  const promoDiscountIDR = (order?.discountIDR ?? 0) - pointsRedeemedIDR;
+  const manualDiscountIDR = order?.manualDiscountIDR ?? 0;
+  const promoDiscountIDR =
+    (order?.discountIDR ?? 0) - pointsRedeemedIDR - manualDiscountIDR;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -137,6 +139,14 @@ export function ReceiptPreview({
                     : ''}
                 </span>
                 <span className="tabular-nums">−{formatIDR(promoDiscountIDR)}</span>
+              </div>
+            ) : null}
+            {manualDiscountIDR > 0 ? (
+              <div className="flex justify-between">
+                <span>
+                  <Trans>Diskon manual</Trans>
+                </span>
+                <span className="tabular-nums">−{formatIDR(manualDiscountIDR)}</span>
               </div>
             ) : null}
             {pointsRedeemedIDR > 0 ? (

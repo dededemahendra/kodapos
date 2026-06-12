@@ -22,6 +22,7 @@ import type * as http from "../http.js";
 import type * as ingredients from "../ingredients.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_demand from "../lib/demand.js";
+import type * as lib_discount from "../lib/discount.js";
 import type * as lib_expense from "../lib/expense.js";
 import type * as lib_forecast from "../lib/forecast.js";
 import type * as lib_heldOrder from "../lib/heldOrder.js";
@@ -83,6 +84,7 @@ declare const fullApi: ApiFromModules<{
   ingredients: typeof ingredients;
   "lib/auth": typeof lib_auth;
   "lib/demand": typeof lib_demand;
+  "lib/discount": typeof lib_discount;
   "lib/expense": typeof lib_expense;
   "lib/forecast": typeof lib_forecast;
   "lib/heldOrder": typeof lib_heldOrder;

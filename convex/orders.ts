@@ -2,6 +2,7 @@ import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { manualDiscountValidator } from './lib/discount';
 import { orderTypeValidator } from './lib/orderType';
 import { buildOrder, reverseSettledSale, saleArgs, saleResult, settleSale } from './lib/sale';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
@@ -95,6 +96,8 @@ const orderSummary = v.object({
   serviceChargeIDR: v.optional(v.number()),
   serviceChargePct: v.optional(v.number()),
   serviceChargeName: v.optional(v.string()),
+  manualDiscountIDR: v.optional(v.number()),
+  manualDiscount: v.optional(manualDiscountValidator),
   customerId: v.optional(v.id('customers')),
   pointsRedeemed: v.optional(v.number()),
   pointsRedeemedIDR: v.optional(v.number()),

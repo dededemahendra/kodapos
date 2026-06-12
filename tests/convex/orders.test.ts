@@ -1510,3 +1510,94 @@ describe('voidSale', () => {
     ).rejects.toThrow(/tidak ditemukan/i);
   });
 });
+
+describe('manual discount', () => {
+  // Seeded item priceIDR is 18000 (see setup), tax off → subtotal 18000.
+  it('applies a fixed manual discount', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'md-fixed',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      manualDiscount: { type: 'fixed', value: 5000 },
+      cashTenderedIDR: 100000,
+      createdAtClient: 1700000000000,
+    });
+    expect(result.totalIDR).toBe(13000);
+
+    const o = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(o?.manualDiscountIDR).toBe(5000);
+    expect(o?.manualDiscount).toEqual({ type: 'fixed', value: 5000 });
+    expect(o?.discountIDR).toBe(5000);
+    expect(o?.totalIDR).toBe(13000);
+  });
+
+  it('applies a percent manual discount on the post-promo base', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    // 10% of 18000 = 1800 → total 16200.
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'md-percent',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      manualDiscount: { type: 'percent', value: 10 },
+      cashTenderedIDR: 100000,
+      createdAtClient: 1700000000000,
+    });
+    expect(result.totalIDR).toBe(16200);
+
+    const o = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(o?.manualDiscountIDR).toBe(1800);
+    expect(o?.manualDiscount).toEqual({ type: 'percent', value: 10 });
+    expect(o?.discountIDR).toBe(1800);
+    expect(o?.totalIDR).toBe(16200);
+  });
+
+  it('rejects an invalid discount (percent > 100 and negative value)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'md-bad-percent',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        manualDiscount: { type: 'percent', value: 150 },
+        cashTenderedIDR: 100000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow();
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'md-negative',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        manualDiscount: { type: 'fixed', value: -5000 },
+        cashTenderedIDR: 100000,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow();
+  });
+
+  it('omits manualDiscountIDR when no manual discount is given', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const result = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'md-none',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 100000,
+      createdAtClient: 1700000000000,
+    });
+    const o = await t.run(async (ctx) => await ctx.db.get(result.orderId));
+    expect(o?.manualDiscountIDR).toBeUndefined();
+    expect(o?.manualDiscount).toBeUndefined();
+    expect(o?.discountIDR).toBe(0);
+    expect(o?.totalIDR).toBe(18000);
+  });
+});

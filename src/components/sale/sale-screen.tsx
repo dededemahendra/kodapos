@@ -28,6 +28,7 @@ import { HeldOrdersDialog } from './held-orders-dialog';
 import { MenuPane, type ItemForSale } from './menu-pane';
 import { ModifierPickerDialog } from './modifier-picker-dialog';
 import { PromoPickerDialog } from './promo-picker-dialog';
+import { ManualDiscountDialog } from './manual-discount-dialog';
 import { PAYMENT_METHODS, type PaymentMethod } from './payment-methods';
 
 function genLineKey(): string {
@@ -48,6 +49,7 @@ export function SaleScreen() {
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
   const [openMethod, setOpenMethod] = useState<PaymentMethod | null>(null);
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
+  const [manualDiscountOpen, setManualDiscountOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
   const [kasOpen, setKasOpen] = useState(false);
   const [holdOpen, setHoldOpen] = useState(false);
@@ -76,9 +78,13 @@ export function SaleScreen() {
   }
 
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
-  const discount = cart.promo
+  const promoDisc = cart.promo
     ? promoDiscountIDR(cart.promo.type, cart.promo.value, subtotal)
     : 0;
+  const manualDisc = cart.manualDiscount
+    ? promoDiscountIDR(cart.manualDiscount.type, cart.manualDiscount.value, subtotal - promoDisc)
+    : 0;
+  const discount = promoDisc + manualDisc;
   const taxEnabled = cafe?.taxEnabled === true;
   const taxRatePct = taxEnabled ? cafe?.taxRatePct ?? 0 : 0;
   const scEnabled = settings?.payment.serviceChargeEnabled === true;
@@ -143,6 +149,9 @@ export function SaleScreen() {
         discountIDR={discount}
         onAddPromo={() => setPromoPickerOpen(true)}
         onRemovePromo={() => dispatch({ type: 'setPromo', promo: null })}
+        manualDiscount={cart.manualDiscount}
+        onAddManualDiscount={() => setManualDiscountOpen(true)}
+        onRemoveManualDiscount={() => dispatch({ type: 'setManualDiscount', manualDiscount: null })}
         payMethods={payMethods}
         onPay={(method) => {
           if (cart.lines.length > 0) setOpenMethod(method);
@@ -337,6 +346,13 @@ export function SaleScreen() {
         open={promoPickerOpen}
         onOpenChange={setPromoPickerOpen}
         onSelect={(promo) => dispatch({ type: 'setPromo', promo })}
+      />
+      <ManualDiscountDialog
+        open={manualDiscountOpen}
+        current={cart.manualDiscount}
+        onOpenChange={setManualDiscountOpen}
+        onApply={(d) => dispatch({ type: 'setManualDiscount', manualDiscount: d })}
+        onRemove={() => dispatch({ type: 'setManualDiscount', manualDiscount: null })}
       />
     </div>
   );
