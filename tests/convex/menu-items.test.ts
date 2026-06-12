@@ -193,6 +193,82 @@ describe('menu item barcode', () => {
   });
 });
 
+describe('menu item soldOut flag', () => {
+  it('setSoldOut(true) is carried by getById + listForSale; setSoldOut(false) clears it', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setup(t);
+    const id = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+
+    // Fresh item has no soldOut flag.
+    const fresh = await asOwner.query(api.menu.items.getById, { id });
+    expect(fresh?.item.soldOut).toBeUndefined();
+
+    await asOwner.mutation(api.menu.items.setSoldOut, { id, soldOut: true });
+
+    const detail = await asOwner.query(api.menu.items.getById, { id });
+    expect(detail?.item.soldOut).toBe(true);
+
+    const rows = await asOwner.query(api.menu.items.listForSale, {});
+    const row = rows.find((r) => r.item._id === id);
+    // listForSale STILL returns the sold-out item (not filtered) with the flag.
+    expect(row).toBeTruthy();
+    expect(row?.item.soldOut).toBe(true);
+
+    await asOwner.mutation(api.menu.items.setSoldOut, { id, soldOut: false });
+    const after = await asOwner.query(api.menu.items.getById, { id });
+    expect(after?.item.soldOut).toBe(false);
+  });
+
+  it('setSoldOut on a foreign item throws (owner-scope)', async () => {
+    const t = convexTest(schema, modules);
+    const a = await setup(t, 'owner-a@test.com');
+    const aItem = await a.asOwner.mutation(api.menu.items.create, {
+      categoryId: a.categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+    const b = await setup(t, 'owner-b@test.com');
+    await expect(
+      b.asOwner.mutation(api.menu.items.setSoldOut, { id: aItem, soldOut: true })
+    ).rejects.toThrow();
+  });
+
+  it('ordering a sold-out item via createCashSale is rejected and inserts nothing', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setup(t);
+    const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
+    const shiftId = await asOwner.mutation(api.shifts.open, {
+      cashierId,
+      openingFloatIDR: 100000,
+    });
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Espresso',
+      priceIDR: 18000,
+    });
+    await asOwner.mutation(api.menu.items.setSoldOut, { id: itemId, soldOut: true });
+
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'soldout-1',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 20000,
+      })
+    ).rejects.toThrow(/tidak tersedia/i);
+
+    const orders = await t.run((ctx) => ctx.db.query('orders').collect());
+    expect(orders).toHaveLength(0);
+    const payments = await t.run((ctx) => ctx.db.query('payments').collect());
+    expect(payments).toHaveLength(0);
+  });
+});
+
 describe('menu item assign barcode', () => {
   it('assignBarcode generates a unique 12-digit code carried by getById/listForSale', async () => {
     const t = convexTest(schema, modules);

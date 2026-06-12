@@ -211,6 +211,10 @@ export function SaleScreen({
   }
 
   function onItemTap(row: ItemForSale) {
+    if (row.item.soldOut) {
+      toast.error(t`Item sedang habis.`);
+      return;
+    }
     if (row.variants.length > 0 || row.attachedGroups.length > 0) {
       setPickerRow(row);
       return;

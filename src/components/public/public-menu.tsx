@@ -1,5 +1,6 @@
 import { Trans } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
+import { StatusBadge } from '~/components/ui/status-badge';
 import { formatIDR } from '~/lib/money';
 import type { CartLine, MenuItem, PublicMenu } from './types';
 
@@ -68,7 +69,10 @@ export function PublicMenuView({
                   <button
                     type="button"
                     onClick={() => onItemTap(item)}
-                    className="flex w-full items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-ring"
+                    disabled={item.soldOut}
+                    className={`flex w-full items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-ring ${
+                      item.soldOut ? 'opacity-60 pointer-events-none' : ''
+                    }`}
                   >
                     {item.imageUrl ? (
                       <img
@@ -78,7 +82,14 @@ export function PublicMenuView({
                       />
                     ) : null}
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium">{item.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{item.name}</span>
+                        {item.soldOut ? (
+                          <StatusBadge variant="danger">
+                            <Trans>Habis</Trans>
+                          </StatusBadge>
+                        ) : null}
+                      </div>
                       <div className="text-sm tabular-nums text-muted-foreground">
                         {formatIDR(item.priceIDR)}
                       </div>

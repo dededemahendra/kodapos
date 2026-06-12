@@ -110,6 +110,7 @@ export function MenuPane({
                 imageUrl={row.imageUrl}
                 hasModifiers={row.attachedGroups.length > 0}
                 lowStockIngredientNames={row.lowStockIngredientNames}
+                soldOut={row.item.soldOut}
                 onTap={() => onItemTap(row)}
               />
             ))}

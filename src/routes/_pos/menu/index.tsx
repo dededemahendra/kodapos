@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, Plus, Power, UtensilsCrossed } from 'lucide-react';
+import { Archive, Ban, CircleCheck, Plus, Power, UtensilsCrossed } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
@@ -52,6 +52,7 @@ function ItemsListPage() {
     includeInactive: true,
   }) as ItemRow[] | undefined;
   const setActive = useMutation(api.menu.items.setActive);
+  const setSoldOut = useMutation(api.menu.items.setSoldOut);
   const archive = useMutation(api.menu.items.archive);
 
   const categoryName = useMemo(() => {
@@ -175,6 +176,37 @@ function ItemsListPage() {
         },
       },
       {
+        id: 'availability',
+        enableSorting: false,
+        header: () => <Trans>Ketersediaan</Trans>,
+        cell: ({ row }) => {
+          const r = row.original;
+          if (r.archived)
+            return (
+              <StatusBadge variant="muted">
+                <Trans>Arsip</Trans>
+              </StatusBadge>
+            );
+          if (r.soldOut)
+            return (
+              <StatusBadge variant="danger">
+                <Trans>Habis</Trans>
+              </StatusBadge>
+            );
+          if (r.isActive)
+            return (
+              <StatusBadge variant="success">
+                <Trans>Tersedia</Trans>
+              </StatusBadge>
+            );
+          return (
+            <StatusBadge variant="muted">
+              <Trans>Nonaktif</Trans>
+            </StatusBadge>
+          );
+        },
+      },
+      {
         id: 'actions',
         enableSorting: false,
         header: () => null,
@@ -202,6 +234,26 @@ function ItemsListPage() {
                     },
                   },
                   {
+                    label: r.soldOut ? (
+                      <Trans>Tandai tersedia</Trans>
+                    ) : (
+                      <Trans>Tandai habis</Trans>
+                    ),
+                    icon: r.soldOut ? <CircleCheck /> : <Ban />,
+                    onSelect: async () => {
+                      try {
+                        await setSoldOut({ id: r._id, soldOut: !r.soldOut });
+                        toast.success(
+                          r.soldOut ? t`Item ditandai tersedia.` : t`Item ditandai habis.`
+                        );
+                      } catch (err) {
+                        toast.error(
+                          err instanceof Error ? err.message : t`Gagal memperbarui item.`
+                        );
+                      }
+                    },
+                  },
+                  {
                     label: <Trans>Arsipkan</Trans>,
                     icon: <Archive />,
                     destructive: true,
@@ -215,7 +267,7 @@ function ItemsListPage() {
         },
       },
     ],
-    [t, categoryName, setActive]
+    [t, categoryName, setActive, setSoldOut]
   );
 
   const emptyState = (

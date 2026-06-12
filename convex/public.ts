@@ -39,6 +39,7 @@ const menuForTableResult = v.union(
         categoryId: v.id('categories'),
         name: v.string(),
         priceIDR: v.number(),
+        soldOut: v.boolean(),
         imageUrl: v.union(v.string(), v.null()),
         variants: v.array(
           v.object({ id: v.id('menuItemVariants'), name: v.string(), priceIDR: v.number() })
@@ -145,6 +146,7 @@ export const menuForTable = query({
         categoryId: item.categoryId,
         name: item.name,
         priceIDR: item.priceIDR,
+        soldOut: item.soldOut ?? false,
         imageUrl: item.imageStorageId ? await ctx.storage.getUrl(item.imageStorageId) : null,
         variants,
         modifierGroups,
@@ -231,7 +233,7 @@ async function buildSelfOrderLine(
   }
 
   const item = await ctx.db.get(line.menuItemId);
-  if (!item || item.cafeId !== cafeId || item.archived || !item.isActive) {
+  if (!item || item.cafeId !== cafeId || item.archived || !item.isActive || item.soldOut) {
     throw new Error('Item tidak tersedia.');
   }
 

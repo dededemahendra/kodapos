@@ -111,7 +111,7 @@ export async function buildOrder(
       throw new Error('Jumlah item tidak valid.');
     }
     const item = await ctx.db.get(line.menuItemId);
-    if (!item || item.cafeId !== cafeId || item.archived || !item.isActive) {
+    if (!item || item.cafeId !== cafeId || item.archived || !item.isActive || item.soldOut) {
       const name = item?.name ? ` ${item.name}` : '';
       throw new Error(`Item${name} tidak tersedia.`);
     }

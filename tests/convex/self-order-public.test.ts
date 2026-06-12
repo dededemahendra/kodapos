@@ -191,6 +191,37 @@ describe('public.menuForTable', () => {
   });
 });
 
+describe('public.menuForTable + submitSelfOrder soldOut', () => {
+  it('menuForTable returns a sold-out item (not excluded) with soldOut:true', async () => {
+    const t = convexTest(schema, modules);
+    const { itemId } = await setup(t);
+    await t.run(async (ctx) => {
+      await ctx.db.patch(itemId, { soldOut: true });
+    });
+
+    const menu = await t.query(api.public.menuForTable, { qrToken: QR_TOKEN });
+    const item = menu!.items.find((i) => i.id === itemId);
+    expect(item).toBeTruthy();
+    expect(item!.soldOut).toBe(true);
+  });
+
+  it('submitSelfOrder with a sold-out menuItemId is rejected', async () => {
+    const t = convexTest(schema, modules);
+    const { itemId, regularId } = await setup(t);
+    await t.run(async (ctx) => {
+      await ctx.db.patch(itemId, { soldOut: true });
+    });
+
+    await expect(
+      t.mutation(api.public.submitSelfOrder, {
+        qrToken: QR_TOKEN,
+        clientId: cid('client-soldout'),
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
+      })
+    ).rejects.toThrow(/tidak tersedia/i);
+  });
+});
+
 describe('public.submitSelfOrder', () => {
   it('inserts status:new with SERVER-computed unitPriceIDR + subtotalIDR', async () => {
     const t = convexTest(schema, modules);
