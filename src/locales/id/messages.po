@@ -1095,6 +1095,11 @@ msgstr "Daftar belanja akan muncul setelah perkiraan aktif."
 msgid "DANA"
 msgstr "DANA"
 
+#: src/components/app-shared.tsx
+#: src/routes/_pos/kitchen.tsx
+msgid "Dapur"
+msgstr "Dapur"
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Dasar"
 msgstr "Dasar"
@@ -3429,6 +3434,7 @@ msgid "Selengkapnya"
 msgstr "Selengkapnya"
 
 #: src/components/sale/receipt-preview.tsx
+#: src/routes/_pos/kitchen.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "Selesai"
 msgstr "Selesai"
@@ -3532,6 +3538,10 @@ msgstr "Shift ditutup"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "ShopeeFood"
 msgstr "ShopeeFood"
+
+#: src/routes/_pos/kitchen.tsx
+msgid "Siap"
+msgstr "Siap"
 
 #: src/routes/_pos/pin.tsx
 msgid "Siapa yang bertugas?"
@@ -4044,6 +4054,10 @@ msgstr "Tidak ada pelanggan diarsipkan."
 #: src/routes/_pos/suppliers.tsx
 msgid "Tidak ada pemasok diarsipkan."
 msgstr "Tidak ada pemasok diarsipkan."
+
+#: src/routes/_pos/kitchen.tsx
+msgid "Tidak ada pesanan di dapur."
+msgstr "Tidak ada pesanan di dapur."
 
 #: src/components/sale/held-orders-dialog.tsx
 msgid "Tidak ada pesanan ditahan."

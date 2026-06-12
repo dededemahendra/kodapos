@@ -38,6 +38,7 @@ export function CashPaymentDialog({
   shiftId,
   cashierId,
   promoId,
+  tableId,
   onPaid,
 }: {
   open: boolean;
@@ -54,6 +55,7 @@ export function CashPaymentDialog({
   shiftId: Id<'shifts'>;
   cashierId: Id<'cafeStaff'>;
   promoId?: Id<'promotions'>;
+  tableId?: Id<'tables'>;
   onPaid: (orderId: Id<'orders'>) => void;
 }) {
   const { t } = useLingui();
@@ -117,6 +119,7 @@ export function CashPaymentDialog({
         })),
         cashTenderedIDR: tenderedNum,
         ...(promoId ? { promoId } : {}),
+        ...(tableId ? { tableId } : {}),
         ...(cart.manualDiscount ? { manualDiscount: cart.manualDiscount } : {}),
         ...(customer.customerId ? { customerId: customer.customerId } : {}),
         ...(customer.redeemPoints > 0 ? { redeemPoints: customer.redeemPoints } : {}),

@@ -129,6 +129,10 @@ const orderSummary = v.object({
   pointsEarned: v.optional(v.number()),
   totalIDR: v.number(),
   orderType: v.optional(orderTypeValidator),
+  tableId: v.optional(v.id('tables')),
+  kitchenStatus: v.optional(
+    v.union(v.literal('new'), v.literal('ready'), v.literal('done'))
+  ),
   paymentMethod: v.union(
     v.literal('cash'),
     v.literal('qris_static'),

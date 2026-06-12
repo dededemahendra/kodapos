@@ -23,6 +23,7 @@ import { Route as PosRecipesRouteImport } from './routes/_pos/recipes'
 import { Route as PosPromosRouteImport } from './routes/_pos/promos'
 import { Route as PosPinRouteImport } from './routes/_pos/pin'
 import { Route as PosLoyaltyRouteImport } from './routes/_pos/loyalty'
+import { Route as PosKitchenRouteImport } from './routes/_pos/kitchen'
 import { Route as PosHistoryRouteImport } from './routes/_pos/history'
 import { Route as PosHelpRouteImport } from './routes/_pos/help'
 import { Route as PosForecastRouteImport } from './routes/_pos/forecast'
@@ -132,6 +133,11 @@ const PosPinRoute = PosPinRouteImport.update({
 const PosLoyaltyRoute = PosLoyaltyRouteImport.update({
   id: '/loyalty',
   path: '/loyalty',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosKitchenRoute = PosKitchenRouteImport.update({
+  id: '/kitchen',
+  path: '/kitchen',
   getParentRoute: () => PosRoute,
 } as any)
 const PosHistoryRoute = PosHistoryRouteImport.update({
@@ -360,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/forecast': typeof PosForecastRoute
   '/help': typeof PosHelpRoute
   '/history': typeof PosHistoryRoute
+  '/kitchen': typeof PosKitchenRoute
   '/loyalty': typeof PosLoyaltyRoute
   '/pin': typeof PosPinRoute
   '/promos': typeof PosPromosRoute
@@ -412,6 +419,7 @@ export interface FileRoutesByTo {
   '/forecast': typeof PosForecastRoute
   '/help': typeof PosHelpRoute
   '/history': typeof PosHistoryRoute
+  '/kitchen': typeof PosKitchenRoute
   '/loyalty': typeof PosLoyaltyRoute
   '/pin': typeof PosPinRoute
   '/promos': typeof PosPromosRoute
@@ -470,6 +478,7 @@ export interface FileRoutesById {
   '/_pos/forecast': typeof PosForecastRoute
   '/_pos/help': typeof PosHelpRoute
   '/_pos/history': typeof PosHistoryRoute
+  '/_pos/kitchen': typeof PosKitchenRoute
   '/_pos/loyalty': typeof PosLoyaltyRoute
   '/_pos/pin': typeof PosPinRoute
   '/_pos/promos': typeof PosPromosRoute
@@ -529,6 +538,7 @@ export interface FileRouteTypes {
     | '/forecast'
     | '/help'
     | '/history'
+    | '/kitchen'
     | '/loyalty'
     | '/pin'
     | '/promos'
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/forecast'
     | '/help'
     | '/history'
+    | '/kitchen'
     | '/loyalty'
     | '/pin'
     | '/promos'
@@ -638,6 +649,7 @@ export interface FileRouteTypes {
     | '/_pos/forecast'
     | '/_pos/help'
     | '/_pos/history'
+    | '/_pos/kitchen'
     | '/_pos/loyalty'
     | '/_pos/pin'
     | '/_pos/promos'
@@ -784,6 +796,13 @@ declare module '@tanstack/react-router' {
       path: '/loyalty'
       fullPath: '/loyalty'
       preLoaderRoute: typeof PosLoyaltyRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/kitchen': {
+      id: '/_pos/kitchen'
+      path: '/kitchen'
+      fullPath: '/kitchen'
+      preLoaderRoute: typeof PosKitchenRouteImport
       parentRoute: typeof PosRoute
     }
     '/_pos/history': {
@@ -1231,6 +1250,7 @@ interface PosRouteChildren {
   PosForecastRoute: typeof PosForecastRoute
   PosHelpRoute: typeof PosHelpRoute
   PosHistoryRoute: typeof PosHistoryRoute
+  PosKitchenRoute: typeof PosKitchenRoute
   PosLoyaltyRoute: typeof PosLoyaltyRoute
   PosPinRoute: typeof PosPinRoute
   PosPromosRoute: typeof PosPromosRoute
@@ -1254,6 +1274,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosForecastRoute: PosForecastRoute,
   PosHelpRoute: PosHelpRoute,
   PosHistoryRoute: PosHistoryRoute,
+  PosKitchenRoute: PosKitchenRoute,
   PosLoyaltyRoute: PosLoyaltyRoute,
   PosPinRoute: PosPinRoute,
   PosPromosRoute: PosPromosRoute,

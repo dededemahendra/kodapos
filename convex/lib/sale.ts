@@ -25,6 +25,7 @@ export const saleArgs = {
   redeemPoints: v.optional(v.number()),
   createdAtClient: v.optional(v.number()),
   orderType: v.optional(orderTypeValidator),
+  tableId: v.optional(v.id('tables')),
 };
 
 export const saleResult = v.object({
@@ -95,6 +96,10 @@ export async function buildOrder(
   if (shift.status !== 'open') throw new Error('Shift sudah ditutup.');
 
   await requireActiveCashier(ctx, cafeId, args.cashierId);
+
+  // Tag the sold order with its table (dine-in). Validate ownership up-front so a
+  // foreign/unknown tableId is rejected before any side effects.
+  if (args.tableId) await requireOwned(ctx, cafeId, args.tableId, 'Meja');
 
   const builtLines: Doc<'orders'>['lines'] = [];
   for (const line of args.lines) {
@@ -371,6 +376,7 @@ export async function buildOrder(
     ...(pointsRedeemed > 0 ? { pointsRedeemed, pointsRedeemedIDR } : {}),
     totalIDR,
     orderType: args.orderType ?? 'dine_in',
+    ...(args.tableId ? { tableId: args.tableId } : {}),
     paymentMethod: orderMethod,
     paymentBreakdown,
     paymentStatus: 'pending',
@@ -473,7 +479,7 @@ export async function settleSale(ctx: MutationCtx, orderId: Id<'orders'>): Promi
     }
   }
 
-  await ctx.db.patch(orderId, { paymentStatus: 'paid' });
+  await ctx.db.patch(orderId, { paymentStatus: 'paid', kitchenStatus: 'new' });
   // A split order has N payment rows; confirm each one (collect, not unique).
   const payments = await ctx.db
     .query('payments')
