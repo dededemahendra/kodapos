@@ -44,6 +44,7 @@ import { Route as PosSaleIndexRouteImport } from './routes/_pos/sale/index'
 import { Route as PosReportsIndexRouteImport } from './routes/_pos/reports/index'
 import { Route as PosMenuIndexRouteImport } from './routes/_pos/menu/index'
 import { Route as PosInventoryIndexRouteImport } from './routes/_pos/inventory/index'
+import { Route as PublicOrderTokenRouteImport } from './routes/_public/order.$token'
 import { Route as PosShiftOpenRouteImport } from './routes/_pos/shift/open'
 import { Route as PosShiftCloseRouteImport } from './routes/_pos/shift/close'
 import { Route as PosSettingsTaxRouteImport } from './routes/_pos/settings/tax'
@@ -247,6 +248,11 @@ const PosInventoryIndexRoute = PosInventoryIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PosInventoryRouteRoute,
+} as any)
+const PublicOrderTokenRoute = PublicOrderTokenRouteImport.update({
+  id: '/order/$token',
+  path: '/order/$token',
+  getParentRoute: () => PublicRoute,
 } as any)
 const PosShiftOpenRoute = PosShiftOpenRouteImport.update({
   id: '/open',
@@ -458,6 +464,7 @@ export interface FileRoutesByFullPath {
   '/settings/tax': typeof PosSettingsTaxRoute
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
+  '/order/$token': typeof PublicOrderTokenRoute
   '/inventory/': typeof PosInventoryIndexRoute
   '/menu/': typeof PosMenuIndexRoute
   '/reports/': typeof PosReportsIndexRoute
@@ -519,6 +526,7 @@ export interface FileRoutesByTo {
   '/settings/tax': typeof PosSettingsTaxRoute
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
+  '/order/$token': typeof PublicOrderTokenRoute
   '/inventory': typeof PosInventoryIndexRoute
   '/menu': typeof PosMenuIndexRoute
   '/reports': typeof PosReportsIndexRoute
@@ -587,6 +595,7 @@ export interface FileRoutesById {
   '/_pos/settings/tax': typeof PosSettingsTaxRoute
   '/_pos/shift/close': typeof PosShiftCloseRoute
   '/_pos/shift/open': typeof PosShiftOpenRoute
+  '/_public/order/$token': typeof PublicOrderTokenRoute
   '/_pos/inventory/': typeof PosInventoryIndexRoute
   '/_pos/menu/': typeof PosMenuIndexRoute
   '/_pos/reports/': typeof PosReportsIndexRoute
@@ -654,6 +663,7 @@ export interface FileRouteTypes {
     | '/settings/tax'
     | '/shift/close'
     | '/shift/open'
+    | '/order/$token'
     | '/inventory/'
     | '/menu/'
     | '/reports/'
@@ -715,6 +725,7 @@ export interface FileRouteTypes {
     | '/settings/tax'
     | '/shift/close'
     | '/shift/open'
+    | '/order/$token'
     | '/inventory'
     | '/menu'
     | '/reports'
@@ -782,6 +793,7 @@ export interface FileRouteTypes {
     | '/_pos/settings/tax'
     | '/_pos/shift/close'
     | '/_pos/shift/open'
+    | '/_public/order/$token'
     | '/_pos/inventory/'
     | '/_pos/menu/'
     | '/_pos/reports/'
@@ -1041,6 +1053,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/inventory/'
       preLoaderRoute: typeof PosInventoryIndexRouteImport
       parentRoute: typeof PosInventoryRouteRoute
+    }
+    '/_public/order/$token': {
+      id: '/_public/order/$token'
+      path: '/order/$token'
+      fullPath: '/order/$token'
+      preLoaderRoute: typeof PublicOrderTokenRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/_pos/shift/open': {
       id: '/_pos/shift/open'
@@ -1461,6 +1480,7 @@ interface PublicRouteChildren {
   PublicSignupRoute: typeof PublicSignupRoute
   PublicTermsRoute: typeof PublicTermsRoute
   PublicIndexRoute: typeof PublicIndexRoute
+  PublicOrderTokenRoute: typeof PublicOrderTokenRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
@@ -1469,6 +1489,7 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicSignupRoute: PublicSignupRoute,
   PublicTermsRoute: PublicTermsRoute,
   PublicIndexRoute: PublicIndexRoute,
+  PublicOrderTokenRoute: PublicOrderTokenRoute,
 }
 
 const PublicRouteWithChildren =
