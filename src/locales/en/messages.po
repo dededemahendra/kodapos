@@ -177,6 +177,10 @@ msgstr "{0} active promos"
 msgid "{0}% — biasanya sepi di hari {day}"
 msgstr "{0}% — usually quiet on {day}"
 
+#: src/routes/_pos/menu/labels.tsx
+msgid "{assigned} barcode dibuat."
+msgstr "{assigned} barcodes generated."
+
 #: src/components/inventory/stock-take-dialog.tsx
 msgid "{changedCount} bahan akan disesuaikan"
 msgstr "{changedCount} items will be adjusted"
@@ -682,6 +686,10 @@ msgstr "Goods already received stay in stock. The order cannot receive any more 
 msgid "Barcode"
 msgstr "Barcode"
 
+#: src/routes/_pos/menu/labels.tsx
+msgid "Barcode dibuat."
+msgstr "Barcode generated."
+
 #: src/components/sale/sale-screen.tsx
 msgid "Barcode tidak ditemukan."
 msgstr "Barcode not found."
@@ -807,6 +815,7 @@ msgstr "No groups attached."
 
 #: src/components/sale/cart-pane.tsx
 #: src/routes/_pos/menu/index.tsx
+#: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Belum ada item."
 msgstr "No items yet."
@@ -949,6 +958,7 @@ msgstr "Clocked out successfully."
 msgid "Beri diskon"
 msgstr "Give discount"
 
+#: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Besar"
 msgstr "Large"
@@ -1015,6 +1025,14 @@ msgstr "Create 2-3 categories (Coffee, Non-Coffee, Food)."
 msgid "Buat bahan baru:"
 msgstr "Create new ingredient:"
 
+#: src/routes/_pos/menu/labels.tsx
+msgid "Buat barcode"
+msgstr "Generate barcode"
+
+#: src/routes/_pos/menu/labels.tsx
+msgid "Buat barcode dulu untuk item terpilih yang belum punya barcode."
+msgstr "Generate a barcode first for selected items that don't have one yet."
+
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Buat grup modifier (mis. Ukuran) dan pasang ke item."
 msgstr "Create modifier groups (e.g. Size) and attach them to items."
@@ -1047,6 +1065,10 @@ msgstr "Generate QRIS"
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Buat satu grup untuk dipakai ulang di banyak item."
 msgstr "Create a group to reuse across many items."
+
+#: src/routes/_pos/menu/labels.tsx
+msgid "Buat semua"
+msgstr "Generate all"
 
 #: src/routes/_pos/tables.tsx
 msgid "Buka \"Kelola meja\" untuk menambah meja."
@@ -1197,6 +1219,10 @@ msgstr "Note (optional)"
 #: src/components/sale/receipt-preview.tsx
 msgid "Cetak"
 msgstr "Print"
+
+#: src/routes/_pos/menu/labels.tsx
+msgid "Cetak label"
+msgstr "Print labels"
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Cetak logo kafe di bagian atas struk."
@@ -1476,6 +1502,10 @@ msgstr "Failed to cancel the purchase order."
 #: src/components/sale/receipt-preview.tsx
 msgid "Gagal membatalkan pesanan."
 msgstr "Could not void the order."
+
+#: src/routes/_pos/menu/labels.tsx
+msgid "Gagal membuat barcode."
+msgstr "Failed to generate barcode."
 
 #: src/components/menu/category-table.tsx
 #~ msgid "Gagal membuat kategori."
@@ -2080,6 +2110,7 @@ msgstr "Friday"
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/refund-dialog.tsx
 #: src/routes/_pos/inventory/waste.tsx
+#: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 msgid "Jumlah"
@@ -2284,6 +2315,7 @@ msgstr "Security"
 msgid "Kebijakan Privasi"
 msgstr "Privacy Policy"
 
+#: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Kecil"
 msgstr "Small"
@@ -2471,6 +2503,11 @@ msgstr "Gross profit"
 #: src/routes/_pos/reports/route.tsx
 msgid "Laba/Rugi"
 msgstr "Profit/Loss"
+
+#: src/routes/_pos/menu/labels.tsx
+#: src/routes/_pos/menu/route.tsx
+msgid "Label Barcode"
+msgstr "Barcode labels"
 
 #: src/components/expenses/expense-categories.tsx
 #: src/components/inventory/waste-dialog.tsx
@@ -3511,6 +3548,11 @@ msgstr "Orders you create will appear here."
 msgid "Pesanan yang diselesaikan selama shift ini akan muncul di sini."
 msgstr "Orders completed during this shift will appear here."
 
+#. placeholder {0}: item.name
+#: src/routes/_pos/menu/labels.tsx
+msgid "Pilih {0}"
+msgstr "Select {0}"
+
 #: src/components/inventory/waste-dialog.tsx
 msgid "Pilih bahan"
 msgstr "Select ingredient"
@@ -4014,6 +4056,7 @@ msgstr "Secret API Key"
 
 #: src/lib/auth-validation.ts
 #: src/routes/_pos/forecast.tsx
+#: src/routes/_pos/menu/labels.tsx
 msgid "Sedang"
 msgstr "Medium"
 
@@ -4395,6 +4438,10 @@ msgstr "Add Item"
 #: src/routes/_pos/recipes.tsx
 msgid "Tambah item menu dulu untuk mulai menyusun resep."
 msgstr "Add menu items first to start building recipes."
+
+#: src/routes/_pos/menu/labels.tsx
+msgid "Tambah item menu untuk mencetak label barcode."
+msgstr "Add menu items to print barcode labels."
 
 #: src/routes/_pos/menu/index.tsx
 msgid "Tambah item pertama untuk mulai berjualan."
@@ -4963,6 +5010,10 @@ msgstr "Font size"
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Ukuran kertas"
 msgstr "Paper size"
+
+#: src/routes/_pos/menu/labels.tsx
+msgid "Ukuran label"
+msgstr "Label size"
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Ukuran teks"

@@ -192,3 +192,123 @@ describe('menu item barcode', () => {
     expect(detail?.item.barcode).toBeUndefined();
   });
 });
+
+describe('menu item assign barcode', () => {
+  it('assignBarcode generates a unique 12-digit code carried by getById/listForSale', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setup(t);
+    const idA = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+    const idB = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Americano',
+      priceIDR: 20000,
+    });
+    const codeA = await asOwner.mutation(api.menu.items.assignBarcode, { id: idA });
+    const codeB = await asOwner.mutation(api.menu.items.assignBarcode, { id: idB });
+    expect(codeA).toMatch(/^\d{12}$/);
+    expect(codeB).toMatch(/^\d{12}$/);
+    expect(codeA).not.toBe(codeB);
+
+    const detail = await asOwner.query(api.menu.items.getById, { id: idA });
+    expect(detail?.item.barcode).toBe(codeA);
+
+    const rows = await asOwner.query(api.menu.items.listForSale, {});
+    const row = rows.find((r) => r.item._id === idA);
+    expect(row?.item.barcode).toBe(codeA);
+  });
+
+  it('assignBarcode throws when the item already has a barcode', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setup(t);
+    const id = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+      barcode: '8991234567890',
+    });
+    await expect(
+      asOwner.mutation(api.menu.items.assignBarcode, { id })
+    ).rejects.toThrow(/sudah punya/i);
+  });
+
+  it('assignMissingBarcodes assigns only to sellable items lacking one', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setup(t);
+    // One already has a barcode.
+    const withCode = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+      barcode: '8991234567890',
+    });
+    // Two are missing a barcode.
+    const missing1 = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Americano',
+      priceIDR: 20000,
+    });
+    const missing2 = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Cappuccino',
+      priceIDR: 28000,
+    });
+
+    // Count the sellable items missing a barcode up front.
+    const before = await asOwner.query(api.menu.items.listForSale, {});
+    const missingCount = before.filter((r) => !r.item.barcode).length;
+    expect(missingCount).toBe(2);
+
+    const res = await asOwner.mutation(api.menu.items.assignMissingBarcodes, {});
+    expect(res.assigned).toBe(missingCount);
+
+    // The pre-barcoded item is untouched.
+    const keep = await asOwner.query(api.menu.items.getById, { id: withCode });
+    expect(keep?.item.barcode).toBe('8991234567890');
+
+    // The previously-missing items now carry a fresh 12-digit code.
+    const d1 = await asOwner.query(api.menu.items.getById, { id: missing1 });
+    const d2 = await asOwner.query(api.menu.items.getById, { id: missing2 });
+    expect(d1?.item.barcode).toMatch(/^\d{12}$/);
+    expect(d2?.item.barcode).toMatch(/^\d{12}$/);
+    expect(d1?.item.barcode).not.toBe(d2?.item.barcode);
+
+    // Nothing is left missing; a second pass assigns zero.
+    const after = await asOwner.query(api.menu.items.listForSale, {});
+    expect(after.filter((r) => !r.item.barcode).length).toBe(0);
+    const second = await asOwner.mutation(api.menu.items.assignMissingBarcodes, {});
+    expect(second.assigned).toBe(0);
+  });
+
+  it('assignMissingBarcodes is cafe-scoped and does not touch another cafe', async () => {
+    const t = convexTest(schema, modules);
+    const a = await setup(t, 'owner-a@test.com');
+    const aItem = await a.asOwner.mutation(api.menu.items.create, {
+      categoryId: a.categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+    const b = await setup(t, 'owner-b@test.com');
+    const bItem = await b.asOwner.mutation(api.menu.items.create, {
+      categoryId: b.categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+
+    // Cafe A assigns; cafe B's item must remain untouched.
+    const res = await a.asOwner.mutation(api.menu.items.assignMissingBarcodes, {});
+    expect(res.assigned).toBe(1);
+    const bDetail = await b.asOwner.query(api.menu.items.getById, { id: bItem });
+    expect(bDetail?.item.barcode).toBeUndefined();
+
+    // Both cafes can hold their own (independent) codes; assign B too.
+    await b.asOwner.mutation(api.menu.items.assignMissingBarcodes, {});
+    const aDetail = await a.asOwner.query(api.menu.items.getById, { id: aItem });
+    const bDetail2 = await b.asOwner.query(api.menu.items.getById, { id: bItem });
+    expect(aDetail?.item.barcode).toMatch(/^\d{12}$/);
+    expect(bDetail2?.item.barcode).toMatch(/^\d{12}$/);
+  });
+});

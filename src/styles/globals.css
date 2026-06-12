@@ -224,16 +224,19 @@ html[data-density="comfortable"] {
   --kodapos-touch: 40px;
 }
 
-/* Receipt printing. Hides everything except the [data-print-receipt] root. */
+/* Receipt + label printing. Hides everything except the print-area root. */
 @media print {
   body * {
     visibility: hidden;
   }
   [data-print-receipt],
-  [data-print-receipt] * {
+  [data-print-receipt] *,
+  [data-print-labels],
+  [data-print-labels] * {
     visibility: visible;
   }
-  [data-print-receipt] {
+  [data-print-receipt],
+  [data-print-labels] {
     position: absolute;
     top: 0;
     left: 0;
