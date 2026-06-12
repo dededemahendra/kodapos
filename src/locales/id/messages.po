@@ -269,6 +269,10 @@ msgstr "− HPP"
 msgid "− Pengeluaran"
 msgstr "− Pengeluaran"
 
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "− Pengembalian"
+msgstr "− Pengembalian"
+
 #: src/routes/_pos/menu/index.tsx
 #~ msgid "○ Off"
 #~ msgstr "○ Off"
@@ -443,6 +447,7 @@ msgid "Alasan"
 msgstr "Alasan"
 
 #: src/components/sale/receipt-preview.tsx
+#: src/components/sale/refund-dialog.tsx
 msgid "Alasan (opsional)"
 msgstr "Alasan (opsional)"
 
@@ -1367,6 +1372,11 @@ msgstr "Dipakai ulang di banyak item, ubah di satu tempat."
 msgid "Dipesan"
 msgstr "Dipesan"
 
+#. placeholder {0}: formatIDR(order.refundedIDR ?? 0)
+#: src/components/sale/receipt-preview.tsx
+msgid "Direfund {0}"
+msgstr "Direfund {0}"
+
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/manual-discount-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
@@ -1698,6 +1708,10 @@ msgstr "Gagal menyimpan varian."
 #: src/routes/_pos/settings/tax.tsx
 msgid "Gagal menyimpan."
 msgstr "Gagal menyimpan."
+
+#: src/components/sale/refund-dialog.tsx
+msgid "Gagal refund."
+msgstr "Gagal refund."
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx
@@ -2064,6 +2078,7 @@ msgstr "Jumat"
 
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
+#: src/components/sale/refund-dialog.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
@@ -2106,6 +2121,10 @@ msgstr "Jumlah pengisian harus lebih dari 0."
 msgid "Jumlah poin"
 msgstr "Jumlah poin"
 
+#: src/components/sale/refund-dialog.tsx
+msgid "Jumlah refund"
+msgstr "Jumlah refund"
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Jumlah salinan"
 msgstr "Jumlah salinan"
@@ -2142,6 +2161,7 @@ msgstr "Kartu debit/kredit"
 
 #: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/cart-pane.tsx
+#: src/components/sale/refund-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
 msgid "Kartu hadiah"
 msgstr "Kartu hadiah"
@@ -2782,6 +2802,7 @@ msgstr "Menutup…"
 msgid "Menyimpan…"
 msgstr "Menyimpan…"
 
+#: src/components/sale/refund-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_pos/reports/payments.tsx
 msgid "Metode"
@@ -3321,6 +3342,10 @@ msgstr "Pengeluaran dicatat."
 msgid "Pengeluaran dihapus."
 msgstr "Pengeluaran dihapus."
 
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "Pengembalian"
+msgstr "Pengembalian"
+
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Pengiriman masuk"
@@ -3453,6 +3478,10 @@ msgstr "Pesanan beli tidak ditemukan."
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan dibatalkan."
 msgstr "Pesanan dibatalkan."
+
+#: src/components/sale/refund-dialog.tsx
+msgid "Pesanan direfund."
+msgstr "Pesanan direfund."
 
 #: src/components/sale/held-orders-dialog.tsx
 msgid "Pesanan ditahan"
@@ -3734,10 +3763,12 @@ msgstr "QRIS"
 msgid "QRIS (Midtrans/Xendit)"
 msgstr "QRIS (Midtrans/Xendit)"
 
+#: src/components/sale/refund-dialog.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "QRIS dinamis"
 msgstr "QRIS dinamis"
 
+#: src/components/sale/refund-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "QRIS statis"
@@ -3777,6 +3808,23 @@ msgstr "Rata-rata/transaksi"
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Recent invoices with customer, amount, and status."
 #~ msgstr "Recent invoices with customer, amount, and status."
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Refund"
+msgstr "Refund"
+
+#. placeholder {0}: formatIDR(total)
+#: src/components/sale/refund-dialog.tsx
+msgid "Refund {0}"
+msgstr "Refund {0}"
+
+#: src/components/sale/refund-dialog.tsx
+msgid "Refund ke"
+msgstr "Refund ke"
+
+#: src/components/sale/refund-dialog.tsx
+msgid "Refund pesanan"
+msgstr "Refund pesanan"
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Regional"
@@ -4009,6 +4057,10 @@ msgstr "Selisih"
 msgid "Selisih harga"
 msgstr "Selisih harga"
 
+#: src/components/sale/refund-dialog.tsx
+msgid "Seluruh sisa"
+msgstr "Seluruh sisa"
+
 #: src/routes/_public/signin.tsx
 #: src/routes/_public/signup.tsx
 msgid "Sembunyikan password"
@@ -4166,6 +4218,11 @@ msgstr "Sinkronkan penjualan ke Mekari Jurnal."
 msgid "Sisa"
 msgstr "Sisa"
 
+#. placeholder {0}: l.remainingQty
+#: src/components/sale/refund-dialog.tsx
+msgid "sisa {0}"
+msgstr "sisa {0}"
+
 #: src/components/inventory/stock-take-dialog.tsx
 msgid "Sistem"
 msgstr "Sistem"
@@ -4279,6 +4336,10 @@ msgstr "Sudah ada shift terbuka"
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Sudah dibayar"
 msgstr "Sudah dibayar"
+
+#: src/components/sale/refund-dialog.tsx
+msgid "Sudah direfund"
+msgstr "Sudah direfund"
 
 #: src/routes/_public/signup.tsx
 msgid "Sudah punya akun?"
@@ -4806,6 +4867,7 @@ msgstr "Tumpah"
 #: src/components/channel-sales-chart.tsx
 #: src/components/sale/payment-methods.tsx
 #: src/components/sale/receipt-preview.tsx
+#: src/components/sale/refund-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
 #: src/components/shift/shift-order-list.tsx
 #: src/routes/_pos/reports/orders.tsx
