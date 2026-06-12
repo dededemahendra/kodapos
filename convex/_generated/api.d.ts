@@ -17,6 +17,7 @@ import type * as customers from "../customers.js";
 import type * as dashboard from "../dashboard.js";
 import type * as expenses from "../expenses.js";
 import type * as forecast from "../forecast.js";
+import type * as giftCards from "../giftCards.js";
 import type * as heldOrders from "../heldOrders.js";
 import type * as http from "../http.js";
 import type * as ingredients from "../ingredients.js";
@@ -83,6 +84,7 @@ declare const fullApi: ApiFromModules<{
   dashboard: typeof dashboard;
   expenses: typeof expenses;
   forecast: typeof forecast;
+  giftCards: typeof giftCards;
   heldOrders: typeof heldOrders;
   http: typeof http;
   ingredients: typeof ingredients;
