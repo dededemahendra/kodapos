@@ -42,6 +42,7 @@ function ItemEditPage() {
           categoryId: detail?.item.categoryId ?? '',
           priceIDR: detail?.item.priceIDR ?? 0,
           isActive: detail?.item.isActive ?? true,
+          barcode: detail?.item.barcode ?? '',
           ...(detail?.item.imageStorageId ? { imageStorageId: detail.item.imageStorageId } : {}),
           imageUrl: detail?.imageUrl ?? null,
         }}

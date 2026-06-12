@@ -651,6 +651,14 @@ msgstr "Bakery"
 msgid "Bar"
 msgstr "Bar"
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Barcode"
+msgstr "Barcode"
+
+#: src/components/sale/sale-screen.tsx
+msgid "Barcode tidak ditemukan."
+msgstr "Barcode not found."
+
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Baru"
 msgstr "New"
@@ -3418,6 +3426,10 @@ msgstr "Incorrect PIN."
 msgid "PIN untuk {0}"
 msgstr "PIN for {0}"
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Pindai atau ketik barcode produk."
+msgstr "Scan or type the product barcode."
+
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/loyalty.tsx
@@ -3784,6 +3796,10 @@ msgstr "Unit"
 #: src/routes/_public/signup.tsx
 msgid "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 msgstr "I agree to the <0>Terms of Service</0> and <1>Privacy Policy</1>."
+
+#: src/components/sale/menu-pane.tsx
+msgid "Scan / ketik barcode…"
+msgstr "Scan / type barcode…"
 
 #. placeholder {0}: me.name
 #: src/routes/_pos/shift/open.tsx
