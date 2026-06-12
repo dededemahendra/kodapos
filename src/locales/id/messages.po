@@ -384,6 +384,7 @@ msgstr "Akses ditolak"
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/promos.tsx
+#: src/routes/_pos/reservations.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Aksi baris"
 msgstr "Aksi baris"
@@ -726,6 +727,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/confirm-archive.tsx
 #: src/components/promo/promo-form-dialog.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/customer-section.tsx
 #: src/components/sale/hold-order-dialog.tsx
 #: src/components/sale/manual-discount-dialog.tsx
@@ -748,6 +750,11 @@ msgid "Batal"
 msgstr "Batal"
 
 #: src/components/sale/receipt-preview.tsx
+msgid "Batalkan"
+msgstr "Batalkan"
+
+#: src/routes/_pos/reservations.tsx
+msgctxt "reservation action"
 msgid "Batalkan"
 msgstr "Batalkan"
 
@@ -923,6 +930,10 @@ msgstr "Belum ada promo."
 msgid "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
 msgstr "Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis."
 
+#: src/routes/_pos/reservations.tsx
+msgid "Belum ada reservasi."
+msgstr "Belum ada reservasi."
+
 #: src/routes/_pos/shifts.tsx
 msgid "Belum ada shift yang ditutup."
 msgstr "Belum ada shift yang ditutup."
@@ -1076,6 +1087,15 @@ msgstr "Buat promo untuk memberi diskon di kasir."
 msgid "Buat QRIS"
 msgstr "Buat QRIS"
 
+#: src/components/reservations/reservation-form-dialog.tsx
+#: src/routes/_pos/reservations.tsx
+msgid "Buat reservasi"
+msgstr "Buat reservasi"
+
+#: src/routes/_pos/reservations.tsx
+msgid "Buat reservasi untuk tanggal ini agar muncul di sini."
+msgstr "Buat reservasi untuk tanggal ini agar muncul di sini."
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Buat satu grup untuk dipakai ulang di banyak item."
 msgstr "Buat satu grup untuk dipakai ulang di banyak item."
@@ -1210,6 +1230,7 @@ msgstr "Catat stok:"
 
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/expenses.tsx
@@ -1384,6 +1405,7 @@ msgstr "Detail pesanan beli dan penerimaan barang."
 
 #: src/components/inventory/purchase-order-detail.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
+#: src/routes/_pos/reservations.tsx
 msgid "Dibatalkan"
 msgstr "Dibatalkan"
 
@@ -1410,6 +1432,11 @@ msgstr "Dipakai ulang di banyak item, ubah di satu tempat."
 
 #: src/components/inventory/purchase-order-detail.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Dipesan"
+msgstr "Dipesan"
+
+#: src/routes/_pos/reservations.tsx
+msgctxt "reservation status"
 msgid "Dipesan"
 msgstr "Dipesan"
 
@@ -1443,6 +1470,10 @@ msgstr "Diskon tidak valid."
 msgid "Ditahan ({0})"
 msgstr "Ditahan ({0})"
 
+#: src/routes/_pos/reservations.tsx
+msgid "Ditandai tidak datang."
+msgstr "Ditandai tidak datang."
+
 #: src/components/inventory/purchase-order-detail.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
 msgid "Diterima"
@@ -1456,6 +1487,14 @@ msgstr "Ditutup pada"
 #: src/routes/_pos/docs.tsx
 msgid "Dokumentasi"
 msgstr "Dokumentasi"
+
+#: src/routes/_pos/reservations.tsx
+msgid "Duduk"
+msgstr "Duduk"
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Durasi (menit)"
+msgstr "Durasi (menit)"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "E-wallet"
@@ -1549,6 +1588,10 @@ msgstr "Gagal memperbarui item."
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gagal memperbarui lokasi cuaca."
 msgstr "Gagal memperbarui lokasi cuaca."
+
+#: src/routes/_pos/reservations.tsx
+msgid "Gagal memperbarui status."
+msgstr "Gagal memperbarui status."
 
 #: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/cash-payment-dialog.tsx
@@ -1661,6 +1704,10 @@ msgstr "Gagal mengganti PIN."
 msgid "Gagal menghapus logo."
 msgstr "Gagal menghapus logo."
 
+#: src/routes/_pos/reservations.tsx
+msgid "Gagal menghapus reservasi."
+msgstr "Gagal menghapus reservasi."
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Gagal menghapus varian."
 msgstr "Gagal menghapus varian."
@@ -1737,6 +1784,10 @@ msgstr "Gagal menyimpan promo."
 #: src/components/inventory/recipe-editor.tsx
 msgid "Gagal menyimpan resep."
 msgstr "Gagal menyimpan resep."
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Gagal menyimpan reservasi."
+msgstr "Gagal menyimpan reservasi."
 
 #: src/components/inventory/stock-take-dialog.tsx
 msgid "Gagal menyimpan stok opname."
@@ -1882,6 +1933,7 @@ msgstr "Halaman tidak ditemukan"
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/other-income.tsx
+#: src/routes/_pos/reservations.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Hapus"
 msgstr "Hapus"
@@ -1918,6 +1970,10 @@ msgstr "Hapus pengeluaran?"
 #: src/components/sale/cart-pane.tsx
 msgid "Hapus promo"
 msgstr "Hapus promo"
+
+#: src/routes/_pos/reservations.tsx
+msgid "Hapus reservasi?"
+msgstr "Hapus reservasi?"
 
 #: src/components/sale/split-payment-dialog.tsx
 msgid "Hapus tender"
@@ -2132,6 +2188,7 @@ msgstr "Jumat"
 #: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reservations.tsx
 msgid "Jumlah"
 msgstr "Jumlah"
 
@@ -2178,6 +2235,14 @@ msgstr "Jumlah refund"
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Jumlah salinan"
 msgstr "Jumlah salinan"
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Jumlah tamu"
+msgstr "Jumlah tamu"
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Jumlah tamu minimal 1."
+msgstr "Jumlah tamu minimal 1."
 
 #: src/components/channel-sales-chart.tsx
 msgid "Jumlah transaksi per metode, 7 hari terakhir."
@@ -2720,8 +2785,10 @@ msgid "Max"
 msgstr "Max"
 
 #: src/components/app-shared.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/hold-order-dialog.tsx
 #: src/components/sale/register-top-bar.tsx
+#: src/routes/_pos/reservations.tsx
 #: src/routes/_pos/tables.tsx
 msgid "Meja"
 msgstr "Meja"
@@ -2855,6 +2922,7 @@ msgstr "Menutup…"
 #: src/components/menu/item-edit-form.tsx
 #: src/components/menu/modifier-group-form.tsx
 #: src/components/promo/promo-form-dialog.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 msgid "Menyimpan…"
 msgstr "Menyimpan…"
@@ -3045,6 +3113,14 @@ msgstr "Nama pemasok"
 msgid "Nama promo"
 msgstr "Nama promo"
 
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Nama tamu"
+msgstr "Nama tamu"
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Nama tamu wajib diisi."
+msgstr "Nama tamu wajib diisi."
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Nama tier"
 msgstr "Nama tier"
@@ -3205,6 +3281,7 @@ msgstr "Password wajib diisi."
 
 #: src/components/app-shared.tsx
 #: src/components/customer/customer-detail-sheet.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/routes/_pos/customers.tsx
 msgid "Pelanggan"
 msgstr "Pelanggan"
@@ -3629,6 +3706,7 @@ msgid "Pilih promo"
 msgstr "Pilih promo"
 
 #: src/components/reports/range-picker.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 msgid "Pilih tanggal"
 msgstr "Pilih tanggal"
 
@@ -3914,6 +3992,42 @@ msgstr "Rendah"
 msgid "Resep"
 msgstr "Resep"
 
+#: src/components/app-shared.tsx
+#: src/routes/_pos/reservations.tsx
+msgid "Reservasi"
+msgstr "Reservasi"
+
+#. placeholder {0}: removeTarget.customerName
+#: src/routes/_pos/reservations.tsx
+msgid "Reservasi \"{0}\" akan dihapus permanen."
+msgstr "Reservasi \"{0}\" akan dihapus permanen."
+
+#. placeholder {0}: new Date(reservation.at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', })
+#. placeholder {1}: reservation.partySize
+#: src/routes/_pos/tables.tsx
+msgid "Reservasi {0} · {1}"
+msgstr "Reservasi {0} · {1}"
+
+#: src/routes/_pos/reservations.tsx
+msgid "Reservasi dibatalkan."
+msgstr "Reservasi dibatalkan."
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Reservasi dibuat."
+msgstr "Reservasi dibuat."
+
+#: src/routes/_pos/reservations.tsx
+msgid "Reservasi dihapus."
+msgstr "Reservasi dihapus."
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Reservasi diperbarui."
+msgstr "Reservasi diperbarui."
+
+#: src/routes/_pos/reservations.tsx
+msgid "Reservasi selesai."
+msgstr "Reservasi selesai."
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Restoran"
 msgstr "Restoran"
@@ -4113,6 +4227,7 @@ msgstr "Selengkapnya"
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/kitchen.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
+#: src/routes/_pos/reservations.tsx
 msgid "Selesai"
 msgstr "Selesai"
 
@@ -4142,6 +4257,7 @@ msgstr "Sembunyikan password"
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/recipes.tsx
+#: src/routes/_pos/reservations.tsx
 msgid "Semua"
 msgstr "Semua"
 
@@ -4255,6 +4371,7 @@ msgstr "Siapa yang bertugas?"
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/components/promo/promo-form-dialog.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/customer-section.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/components/tables/table-manage-dialog.tsx
@@ -4318,6 +4435,7 @@ msgstr "Staf"
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/recipes.tsx
+#: src/routes/_pos/reservations.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Status"
 msgstr "Status"
@@ -4630,8 +4748,17 @@ msgstr "Tampilkan rincian pajak"
 #~ msgid "Tampilkan tombol nominal saat pembayaran tunai."
 #~ msgstr "Tampilkan tombol nominal saat pembayaran tunai."
 
+#: src/routes/_pos/reservations.tsx
+msgid "Tamu"
+msgstr "Tamu"
+
+#: src/routes/_pos/reservations.tsx
+msgid "Tamu duduk."
+msgstr "Tamu duduk."
+
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -4643,6 +4770,11 @@ msgstr "Tampilkan rincian pajak"
 msgid "Tanggal"
 msgstr "Tanggal"
 
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Tanggal dan waktu wajib diisi."
+msgstr "Tanggal dan waktu wajib diisi."
+
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/hold-order-dialog.tsx
 msgid "Tanpa meja"
 msgstr "Tanpa meja"
@@ -4650,6 +4782,10 @@ msgstr "Tanpa meja"
 #: src/components/sale/held-orders-dialog.tsx
 msgid "Tanpa nama"
 msgstr "Tanpa nama"
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Tanpa pelanggan"
+msgstr "Tanpa pelanggan"
 
 #: src/components/inventory/purchase-order-detail.tsx
 #: src/components/inventory/purchase-order-form-dialog.tsx
@@ -4674,6 +4810,7 @@ msgstr "Teks header"
 #~ msgstr "Teks yang dicetak di bagian bawah struk."
 
 #: src/components/customer/customer-form-dialog.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/suppliers.tsx
@@ -4851,6 +4988,10 @@ msgstr "Tidak ada shift terbuka."
 msgid "Tidak ada staf yang ditemukan."
 msgstr "Tidak ada staf yang ditemukan."
 
+#: src/routes/_pos/reservations.tsx
+msgid "Tidak datang"
+msgstr "Tidak datang"
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Tier"
 msgstr "Tier"
@@ -4994,6 +5135,7 @@ msgstr "Uang terhitung (Rp)"
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/promos.tsx
+#: src/routes/_pos/reservations.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Ubah"
 msgstr "Ubah"
@@ -5034,6 +5176,10 @@ msgstr "Ubah pemasok"
 #: src/components/promo/promo-form-dialog.tsx
 msgid "Ubah promo"
 msgstr "Ubah promo"
+
+#: src/components/reservations/reservation-form-dialog.tsx
+msgid "Ubah reservasi"
+msgstr "Ubah reservasi"
 
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Ukuran"
@@ -5175,6 +5321,8 @@ msgid "Wajib?"
 msgstr "Wajib?"
 
 #: src/components/dashboard-invoices.tsx
+#: src/components/reservations/reservation-form-dialog.tsx
+#: src/routes/_pos/reservations.tsx
 msgid "Waktu"
 msgstr "Waktu"
 

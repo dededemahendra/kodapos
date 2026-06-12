@@ -43,7 +43,7 @@ const STATUS_META: Record<
   ReservationStatus,
   { variant: StatusBadgeVariant; label: React.ReactNode }
 > = {
-  booked: { variant: 'muted', label: <Trans>Dipesan</Trans> },
+  booked: { variant: 'muted', label: <Trans context="reservation status">Dipesan</Trans> },
   // No 'info' StatusBadge variant exists; 'warn' reads as an in-progress state.
   seated: { variant: 'warn', label: <Trans>Duduk</Trans> },
   completed: { variant: 'success', label: <Trans>Selesai</Trans> },
@@ -166,7 +166,7 @@ function ReservationsPage() {
               onSelect: () => advanceStatus(r.id, 'seated', t`Tamu duduk.`),
             });
             items.push({
-              label: <Trans>Batalkan</Trans>,
+              label: <Trans context="reservation action">Batalkan</Trans>,
               icon: <XCircle />,
               onSelect: () => advanceStatus(r.id, 'cancelled', t`Reservasi dibatalkan.`),
             });
@@ -260,7 +260,9 @@ function ReservationsPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t`Semua`}</SelectItem>
-            <SelectItem value="booked">{t`Dipesan`}</SelectItem>
+            <SelectItem value="booked">
+              {t({ message: 'Dipesan', context: 'reservation status' })}
+            </SelectItem>
             <SelectItem value="seated">{t`Duduk`}</SelectItem>
             <SelectItem value="completed">{t`Selesai`}</SelectItem>
             <SelectItem value="cancelled">{t`Dibatalkan`}</SelectItem>
