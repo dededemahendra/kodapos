@@ -6,6 +6,7 @@ import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { ClipboardList } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { PurchaseOrderDetail } from '~/components/inventory/purchase-order-detail';
 import { PurchaseOrderFormDialog } from '~/components/inventory/purchase-order-form-dialog';
 import { RequirePermission } from '~/components/permission/require-permission';
 import { Button } from '~/components/ui/button';
@@ -65,12 +66,9 @@ function StatusCell({ status }: { status: PoStatus }) {
 
 function PurchaseOrdersPage() {
   const [formOpen, setFormOpen] = useState(false);
-  // Holds the row a user clicked; Task 3 wires this into the detail component.
+  // Holds the row a user clicked; opens the detail sheet.
   const [selectedId, setSelectedId] = useState<Id<'purchaseOrders'> | null>(null);
   const rows = useQuery(api.purchaseOrders.list, {}) as PoRow[] | undefined;
-
-  // selectedId is intentionally unused for now (Task 3 renders the detail).
-  void selectedId;
 
   const columns = useMemo<ColumnDef<PoRow, unknown>[]>(
     () => [
@@ -159,6 +157,13 @@ function PurchaseOrdersPage() {
         />
 
         <PurchaseOrderFormDialog open={formOpen} onOpenChange={setFormOpen} />
+
+        <PurchaseOrderDetail
+          id={selectedId}
+          onOpenChange={(o) => {
+            if (!o) setSelectedId(null);
+          }}
+        />
       </main>
     </RequirePermission>
   );
