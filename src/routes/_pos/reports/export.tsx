@@ -117,7 +117,7 @@ function AccountingExport() {
         accessorKey: 'inflowIDR',
         header: () => (
           <div className="text-right">
-            <Trans>Masuk</Trans>
+            <Trans>Uang Masuk</Trans>
           </div>
         ),
         cell: ({ row }) => (
@@ -130,7 +130,7 @@ function AccountingExport() {
         accessorKey: 'outflowIDR',
         header: () => (
           <div className="text-right">
-            <Trans>Keluar</Trans>
+            <Trans>Uang Keluar</Trans>
           </div>
         ),
         cell: ({ row }) => (
@@ -162,8 +162,8 @@ function AccountingExport() {
       { key: 'Keterangan', header: t`Keterangan` },
       { key: 'Akun', header: t`Akun` },
       { key: 'Metode', header: t`Metode` },
-      { key: 'Masuk', header: t`Masuk` },
-      { key: 'Keluar', header: t`Keluar` },
+      { key: 'Masuk', header: t`Uang Masuk` },
+      { key: 'Keluar', header: t`Uang Keluar` },
     ]);
     downloadCSV(`buku-besar-${data.fromKey}-${data.toKey}.csv`, csv);
   }
@@ -192,7 +192,7 @@ function AccountingExport() {
           <dl className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
             <div className="flex items-baseline justify-between gap-4">
               <dt>
-                <Trans>Pemasukan</Trans>
+                <Trans>Arus Masuk</Trans>
               </dt>
               <dd className="tabular-nums">
                 {formatIDR(data.summary.inflowIDR)}
@@ -200,7 +200,7 @@ function AccountingExport() {
             </div>
             <div className="flex items-baseline justify-between gap-4">
               <dt>
-                <Trans>Pengeluaran</Trans>
+                <Trans>Arus Keluar</Trans>
               </dt>
               <dd className="tabular-nums">
                 {formatIDR(data.summary.outflowIDR)}

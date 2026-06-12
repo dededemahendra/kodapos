@@ -551,6 +551,14 @@ msgstr "Archive supplier?"
 msgid "Arsipkan promo?"
 msgstr "Archive promo?"
 
+#: src/routes/_pos/reports/export.tsx
+msgid "Arus Keluar"
+msgstr "Outflow"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Arus Masuk"
+msgstr "Inflow"
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Atur cara pelanggan memperoleh dan menukar poin."
 msgstr "Set how customers earn and redeem points."
@@ -2350,7 +2358,6 @@ msgstr "Manage tables"
 
 #: src/components/nav-user.tsx
 #: src/components/shift/cash-movement-dialog.tsx
-#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Keluar"
 msgstr "Log out"
@@ -2684,7 +2691,6 @@ msgid "Margin muncul setelah ada item terjual pada rentang ini."
 msgstr "Margin appears once items are sold in this range."
 
 #: src/components/shift/cash-movement-dialog.tsx
-#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/shifts.tsx
 #: src/routes/_public/index.tsx
 #: src/routes/_public/signin.tsx
@@ -3256,8 +3262,8 @@ msgid "Pemasok ditambahkan."
 msgstr "Supplier added."
 
 #: src/routes/_pos/reports/export.tsx
-msgid "Pemasukan"
-msgstr "Inflow"
+#~ msgid "Pemasukan"
+#~ msgstr "Inflow"
 
 #: src/components/latest-change.tsx
 msgid "PEMBARUAN"
@@ -4963,6 +4969,14 @@ msgstr "Close Shift"
 #: src/components/sale/split-payment-dialog.tsx
 msgid "Uang diterima"
 msgstr "Cash received"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Uang Keluar"
+msgstr "Money out"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Uang Masuk"
+msgstr "Money in"
 
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Uang seharusnya"
