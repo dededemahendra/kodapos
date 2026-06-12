@@ -49,6 +49,7 @@ function ItemEditPage() {
           group: a.group,
           position: a.position,
         }))}
+        variants={detail?.variants ?? []}
         onSaved={() => navigate({ to: '/menu' })}
       />
       {!isNew ? <RecipeEditor menuItemId={itemId as Id<'menuItems'>} /> : null}
