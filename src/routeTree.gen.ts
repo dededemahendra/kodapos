@@ -20,6 +20,7 @@ import { Route as PosTimeClockRouteImport } from './routes/_pos/time-clock'
 import { Route as PosTablesRouteImport } from './routes/_pos/tables'
 import { Route as PosSuppliersRouteImport } from './routes/_pos/suppliers'
 import { Route as PosShiftsRouteImport } from './routes/_pos/shifts'
+import { Route as PosSelfOrdersRouteImport } from './routes/_pos/self-orders'
 import { Route as PosReservationsRouteImport } from './routes/_pos/reservations'
 import { Route as PosRecipesRouteImport } from './routes/_pos/recipes'
 import { Route as PosPromosRouteImport } from './routes/_pos/promos'
@@ -127,6 +128,11 @@ const PosSuppliersRoute = PosSuppliersRouteImport.update({
 const PosShiftsRoute = PosShiftsRouteImport.update({
   id: '/shifts',
   path: '/shifts',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosSelfOrdersRoute = PosSelfOrdersRouteImport.update({
+  id: '/self-orders',
+  path: '/self-orders',
   getParentRoute: () => PosRoute,
 } as any)
 const PosReservationsRoute = PosReservationsRouteImport.update({
@@ -428,6 +434,7 @@ export interface FileRoutesByFullPath {
   '/promos': typeof PosPromosRoute
   '/recipes': typeof PosRecipesRoute
   '/reservations': typeof PosReservationsRoute
+  '/self-orders': typeof PosSelfOrdersRoute
   '/shifts': typeof PosShiftsRoute
   '/suppliers': typeof PosSuppliersRoute
   '/tables': typeof PosTablesRoute
@@ -490,6 +497,7 @@ export interface FileRoutesByTo {
   '/promos': typeof PosPromosRoute
   '/recipes': typeof PosRecipesRoute
   '/reservations': typeof PosReservationsRoute
+  '/self-orders': typeof PosSelfOrdersRoute
   '/shifts': typeof PosShiftsRoute
   '/suppliers': typeof PosSuppliersRoute
   '/tables': typeof PosTablesRoute
@@ -558,6 +566,7 @@ export interface FileRoutesById {
   '/_pos/promos': typeof PosPromosRoute
   '/_pos/recipes': typeof PosRecipesRoute
   '/_pos/reservations': typeof PosReservationsRoute
+  '/_pos/self-orders': typeof PosSelfOrdersRoute
   '/_pos/shifts': typeof PosShiftsRoute
   '/_pos/suppliers': typeof PosSuppliersRoute
   '/_pos/tables': typeof PosTablesRoute
@@ -627,6 +636,7 @@ export interface FileRouteTypes {
     | '/promos'
     | '/recipes'
     | '/reservations'
+    | '/self-orders'
     | '/shifts'
     | '/suppliers'
     | '/tables'
@@ -689,6 +699,7 @@ export interface FileRouteTypes {
     | '/promos'
     | '/recipes'
     | '/reservations'
+    | '/self-orders'
     | '/shifts'
     | '/suppliers'
     | '/tables'
@@ -756,6 +767,7 @@ export interface FileRouteTypes {
     | '/_pos/promos'
     | '/_pos/recipes'
     | '/_pos/reservations'
+    | '/_pos/self-orders'
     | '/_pos/shifts'
     | '/_pos/suppliers'
     | '/_pos/tables'
@@ -884,6 +896,13 @@ declare module '@tanstack/react-router' {
       path: '/shifts'
       fullPath: '/shifts'
       preLoaderRoute: typeof PosShiftsRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/self-orders': {
+      id: '/_pos/self-orders'
+      path: '/self-orders'
+      fullPath: '/self-orders'
+      preLoaderRoute: typeof PosSelfOrdersRouteImport
       parentRoute: typeof PosRoute
     }
     '/_pos/reservations': {
@@ -1439,6 +1458,7 @@ interface PosRouteChildren {
   PosPromosRoute: typeof PosPromosRoute
   PosRecipesRoute: typeof PosRecipesRoute
   PosReservationsRoute: typeof PosReservationsRoute
+  PosSelfOrdersRoute: typeof PosSelfOrdersRoute
   PosShiftsRoute: typeof PosShiftsRoute
   PosSuppliersRoute: typeof PosSuppliersRoute
   PosTablesRoute: typeof PosTablesRoute
@@ -1466,6 +1486,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosPromosRoute: PosPromosRoute,
   PosRecipesRoute: PosRecipesRoute,
   PosReservationsRoute: PosReservationsRoute,
+  PosSelfOrdersRoute: PosSelfOrdersRoute,
   PosShiftsRoute: PosShiftsRoute,
   PosSuppliersRoute: PosSuppliersRoute,
   PosTablesRoute: PosTablesRoute,

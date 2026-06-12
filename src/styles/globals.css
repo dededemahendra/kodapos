@@ -232,11 +232,14 @@ html[data-density="comfortable"] {
   [data-print-receipt],
   [data-print-receipt] *,
   [data-print-labels],
-  [data-print-labels] * {
+  [data-print-labels] *,
+  [data-print-qr],
+  [data-print-qr] * {
     visibility: visible;
   }
   [data-print-receipt],
-  [data-print-labels] {
+  [data-print-labels],
+  [data-print-qr] {
     position: absolute;
     top: 0;
     left: 0;

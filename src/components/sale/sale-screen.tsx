@@ -44,14 +44,17 @@ function genLineKey(): string {
 
 export function SaleScreen({
   recall,
+  selfOrder,
   table,
 }: {
   recall?: string | undefined;
+  selfOrder?: string | undefined;
   table?: string | undefined;
 } = {}) {
   const { t } = useLingui();
   const navigate = useNavigate();
   const removeHeld = useMutation(api.heldOrders.remove);
+  const acceptSelfOrder = useMutation(api.selfOrders.accept);
   const categories = useQuery(api.menu.categories.list, {});
   const items = useQuery(api.menu.items.listForSale, {});
   const cafe = useQuery(api.cafes.myCafe, {});
@@ -79,6 +82,12 @@ export function SaleScreen({
   const held = useQuery(
     api.heldOrders.listForShift,
     shift ? { shiftId: shift._id } : 'skip'
+  );
+  // Accept a QR self-order into the register: /sale?selfOrder=<selfOrderId>.
+  // The payload is the SAME held-order recall shape, so it loads identically.
+  const selfOrderCart = useQuery(
+    api.selfOrders.getForCart,
+    selfOrder ? { id: selfOrder as Id<'selfOrders'> } : 'skip'
   );
 
   // Resume a table's parked order from the floor: /sale?recall=<heldOrderId>.
@@ -114,6 +123,28 @@ export function SaleScreen({
       await navigate({ to: '/sale', search: {}, replace: true });
     })();
   }, [recall, held, navigate, removeHeld]);
+
+  // Accept a self-order from the "Pesanan Masuk" queue. Mirrors the recall flow:
+  // load the same recall-shaped lines into the cart, re-tag the table, mark the
+  // self-order accepted, then strip the param. The ref guards a single run per id.
+  const acceptedSelfOrderRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!selfOrder || selfOrderCart === undefined) return;
+    if (acceptedSelfOrderRef.current === selfOrder) return;
+    acceptedSelfOrderRef.current = selfOrder;
+    void (async () => {
+      const state: CartState = {
+        orderType: 'dine_in',
+        promo: null,
+        lines: selfOrderCart.lines.map((l) => ({ ...l, lineKey: genLineKey() })),
+        manualDiscount: null,
+      };
+      dispatch({ type: 'load', state });
+      if (selfOrderCart.tableId) setCurrentTable(selfOrderCart.tableId);
+      await acceptSelfOrder({ id: selfOrder as Id<'selfOrders'> });
+      await navigate({ to: '/sale', search: {}, replace: true });
+    })();
+  }, [selfOrder, selfOrderCart, navigate, acceptSelfOrder]);
 
   if (
     categories === undefined ||

@@ -21,7 +21,7 @@ const matchesPrefix = (path: string, prefixes: string[]) =>
 const WIZARD_PREFIXES = ['/onboarding', '/pin', '/shift'];
 // Operational cashier screens: chrome-free, but share the register top bar
 // (cafe + Meja/Dapur/Riwayat/Shift/Admin) so they stay one tap apart.
-const OPERATIONAL_PREFIXES = ['/sale', '/tables', '/kitchen'];
+const OPERATIONAL_PREFIXES = ['/sale', '/tables', '/kitchen', '/self-orders'];
 
 function PosLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
