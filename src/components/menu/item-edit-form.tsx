@@ -31,6 +31,7 @@ export interface ItemEditFormProps {
     categoryId: Id<'categories'> | '';
     priceIDR: number;
     isActive: boolean;
+    barcode: string;
     imageStorageId?: Id<'_storage'>;
     imageUrl?: string | null;
   };
@@ -59,6 +60,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
   const [categoryId, setCategoryId] = useState<Id<'categories'> | ''>(props.initial.categoryId);
   const [priceIDR, setPriceIDR] = useState<number>(props.initial.priceIDR);
   const [isActive, setIsActive] = useState(props.initial.isActive);
+  const [barcode, setBarcode] = useState(props.initial.barcode);
   const [imageStorageId, setImageStorageId] = useState<Id<'_storage'> | undefined>(props.initial.imageStorageId);
   const [imageUrl, setImageUrl] = useState<string | null>(props.initial.imageUrl ?? null);
   const [uploading, setUploading] = useState(false);
@@ -112,9 +114,22 @@ export function ItemEditForm(props: ItemEditFormProps) {
     try {
       let id: Id<'menuItems'>;
       if (props.itemId === 'new') {
-        id = await createItem({ categoryId, name, priceIDR, ...(imageStorageId ? { imageStorageId } : {}) });
+        id = await createItem({
+          categoryId,
+          name,
+          priceIDR,
+          ...(imageStorageId ? { imageStorageId } : {}),
+          ...(barcode.trim() ? { barcode: barcode.trim() } : {}),
+        });
       } else {
-        await updateItem({ id: props.itemId, categoryId, name, priceIDR, ...(imageStorageId ? { imageStorageId } : {}) });
+        await updateItem({
+          id: props.itemId,
+          categoryId,
+          name,
+          priceIDR,
+          ...(imageStorageId ? { imageStorageId } : {}),
+          barcode: barcode.trim(),
+        });
         id = props.itemId;
       }
       if (props.itemId !== 'new' && isActive !== props.initial.isActive) {
@@ -171,6 +186,19 @@ export function ItemEditForm(props: ItemEditFormProps) {
               onChange={(e) => setPriceIDR(Number(e.target.value))}
               required
             />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="barcode"><Trans>Barcode</Trans></FieldLabel>
+            <Input
+              id="barcode"
+              value={barcode}
+              onChange={(e) => setBarcode(e.target.value)}
+              inputMode="numeric"
+              maxLength={64}
+            />
+            <p className="text-xs text-muted-foreground">
+              <Trans>Pindai atau ketik barcode produk.</Trans>
+            </p>
           </Field>
           <Field>
             <FieldLabel><Trans>Gambar item</Trans></FieldLabel>

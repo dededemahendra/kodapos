@@ -1,8 +1,8 @@
 import { useLingui } from '@lingui/react/macro';
 import { Trans } from '@lingui/react/macro';
 import type { Doc, Id } from 'convex/_generated/dataModel';
-import { UtensilsCrossed } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { ScanLine, UtensilsCrossed } from 'lucide-react';
+import { type FormEvent, useMemo, useRef, useState } from 'react';
 import {
   Empty,
   EmptyDescription,
@@ -10,6 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
+import { Input } from '~/components/ui/input';
 import { ItemCard } from './item-card';
 
 export type ItemForSale = {
@@ -28,13 +29,25 @@ export function MenuPane({
   categories,
   items,
   onItemTap,
+  onScan,
 }: {
   categories: Doc<'categories'>[];
   items: ItemForSale[];
   onItemTap: (item: ItemForSale) => void;
+  onScan?: (code: string) => void;
 }) {
   const { t } = useLingui();
   const [activeCategoryId, setActiveCategoryId] = useState<Id<'categories'> | 'all'>('all');
+  const [scanValue, setScanValue] = useState('');
+  const scanRef = useRef<HTMLInputElement>(null);
+
+  function handleScan(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const code = scanValue.trim();
+    if (code) onScan?.(code);
+    setScanValue('');
+    scanRef.current?.focus();
+  }
   const visible = useMemo(() => {
     if (activeCategoryId === 'all') return items;
     return items.filter((row) => row.item.categoryId === activeCategoryId);
@@ -42,6 +55,18 @@ export function MenuPane({
 
   return (
     <div className="flex flex-col h-full">
+      <form onSubmit={handleScan} className="flex items-center gap-2 px-3 py-2 border-b border-border">
+        <ScanLine className="size-4 shrink-0 text-muted-foreground" />
+        <Input
+          ref={scanRef}
+          value={scanValue}
+          onChange={(e) => setScanValue(e.target.value)}
+          placeholder={t`Scan / ketik barcode…`}
+          inputMode="numeric"
+          autoFocus
+          className="h-9"
+        />
+      </form>
       <div className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-border">
         <CategoryTab
           label={t`Semua (${items.length})`}

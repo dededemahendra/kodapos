@@ -5,6 +5,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals, promoDiscountIDR } from 'convex/lib/pricing';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
+import { toast } from '~/lib/toast';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { GiftCardPaymentDialog } from '~/components/giftcard/gift-card-payment-dialog';
 import { CashPaymentDialog } from './cash-payment-dialog';
@@ -47,6 +49,7 @@ export function SaleScreen({
   recall?: string | undefined;
   table?: string | undefined;
 } = {}) {
+  const { t } = useLingui();
   const navigate = useNavigate();
   const removeHeld = useMutation(api.heldOrders.remove);
   const categories = useQuery(api.menu.categories.list, {});
@@ -170,6 +173,12 @@ export function SaleScreen({
     (a, b) => Number(b === defaultMethod) - Number(a === defaultMethod)
   );
 
+  function onScan(code: string) {
+    const row = items?.find((r) => r.item.barcode === code);
+    if (row) onItemTap(row);
+    else toast.error(t`Barcode tidak ditemukan.`);
+  }
+
   function onItemTap(row: ItemForSale) {
     if (row.variants.length > 0 || row.attachedGroups.length > 0) {
       setPickerRow(row);
@@ -191,7 +200,7 @@ export function SaleScreen({
 
   return (
     <div className="grid grid-cols-[1fr_minmax(320px,30%)] h-full">
-      <MenuPane categories={categories} items={items} onItemTap={onItemTap} />
+      <MenuPane categories={categories} items={items} onItemTap={onItemTap} onScan={onScan} />
       <CartPane
         cart={cart}
         dispatch={dispatch}
