@@ -10,8 +10,9 @@ import { computeOrderTotals } from 'convex/lib/pricing';
  */
 export function usePaymentTotals(params: {
   subtotalIDR: number;
-  /** Promo discount already applied to the cart (0 when no promo). */
-  promoDiscountIDR: number;
+  /** Combined pre-loyalty discount already applied to the cart — promo + manual
+   *  order discount (0 when none). Points redemption is added on top below. */
+  discountIDR: number;
   redeemPoints: number;
   loyaltyCfg: LoyaltyConfig;
   serviceChargeEnabled: boolean;
@@ -19,12 +20,12 @@ export function usePaymentTotals(params: {
   taxEnabled: boolean;
   taxRatePct: number;
 }): { afterPromoIDR: number; redeemIDR: number; totalIDR: number } {
-  const afterPromoIDR = params.subtotalIDR - params.promoDiscountIDR;
+  const afterPromoIDR = params.subtotalIDR - params.discountIDR;
   const redeemIDR = redemptionIDR(params.redeemPoints, params.loyaltyCfg);
-  const discountIDR = params.promoDiscountIDR + redeemIDR;
+  const totalDiscountIDR = params.discountIDR + redeemIDR;
   const { totalIDR } = computeOrderTotals({
     subtotalIDR: params.subtotalIDR,
-    discountIDR,
+    discountIDR: totalDiscountIDR,
     serviceChargeEnabled: params.serviceChargeEnabled,
     serviceChargePct: params.serviceChargePct,
     taxEnabled: params.taxEnabled,

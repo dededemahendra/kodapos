@@ -57,7 +57,7 @@ export function QrisDynamicPaymentDialog({
 
   const { afterPromoIDR, redeemIDR, totalIDR } = usePaymentTotals({
     subtotalIDR,
-    promoDiscountIDR,
+    discountIDR: promoDiscountIDR,
     redeemPoints: customer.redeemPoints,
     loyaltyCfg,
     serviceChargeEnabled,
