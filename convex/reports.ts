@@ -197,6 +197,7 @@ export const profitLoss = query({
         amountIDR: v.number(),
       })
     ),
+    otherIncomeIDR: v.number(),
     netProfitIDR: v.number(),
     grossMarginPct: v.number(), // 0..100, 0 when revenue is 0
     netMarginPct: v.number(), // can be negative
@@ -237,8 +238,19 @@ export const profitLoss = query({
       expensesIDR += e.amountIDR;
       byCat.set(e.category, (byCat.get(e.category) ?? 0) + e.amountIDR);
     }
+    // Non-sales income in the same range (the otherIncome ledger).
+    const incomes = await ctx.db
+      .query('otherIncome')
+      .withIndex('by_cafe_at', (q) =>
+        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
+      )
+      .collect();
+    let otherIncomeIDR = 0;
+    for (const i of incomes) {
+      otherIncomeIDR += i.amountIDR;
+    }
     const grossProfitIDR = revenueIDR - cogsIDR;
-    const netProfitIDR = grossProfitIDR - expensesIDR;
+    const netProfitIDR = grossProfitIDR - expensesIDR + otherIncomeIDR;
     return {
       revenueIDR,
       cogsIDR,
@@ -248,6 +260,7 @@ export const profitLoss = query({
         category: category as 'rent' | 'utilities' | 'supplies' | 'salary' | 'other',
         amountIDR,
       })),
+      otherIncomeIDR,
       netProfitIDR,
       grossMarginPct: revenueIDR === 0 ? 0 : Math.round((grossProfitIDR / revenueIDR) * 100),
       netMarginPct: revenueIDR === 0 ? 0 : Math.round((netProfitIDR / revenueIDR) * 100),

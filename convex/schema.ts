@@ -631,6 +631,14 @@ export default defineSchema({
     at: v.number(),
   }).index('by_cafe_at', ['cafeId', 'at']),
 
+  otherIncome: defineTable({
+    cafeId: v.id('cafes'),
+    source: v.string(),
+    amountIDR: v.number(),
+    note: v.optional(v.string()),
+    at: v.number(),
+  }).index('by_cafe_at', ['cafeId', 'at']),
+
   inventoryMovements: defineTable({
     cafeId: v.id('cafes'),
     ingredientId: v.id('ingredients'),
