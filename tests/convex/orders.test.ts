@@ -810,7 +810,7 @@ describe('orders read queries', () => {
     expect(await ownerA.query(api.orders.getById, { id: created.orderId })).toBeNull();
     const own = await ownerB.query(api.orders.getById, { id: created.orderId });
     expect(own?._id).toBe(created.orderId);
-    expect(own?.payment?.method).toBe('cash');
+    expect(own?.payments[0]?.method).toBe('cash');
     expect(own?.cashierName).toBe('Andi');
   });
 });

@@ -158,15 +158,14 @@ const orderSummary = v.object({
 const orderDetail = v.object({
   ...orderSummary.fields,
   cashierName: v.string(),
-  payment: v.union(
+  payments: v.array(
     v.object({
       method: v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic')),
       amountIDR: v.number(),
       cashTenderedIDR: v.optional(v.number()),
       changeIDR: v.optional(v.number()),
       confirmedAt: v.optional(v.number()),
-    }),
-    v.null()
+    })
   ),
 });
 
@@ -254,25 +253,23 @@ export const getById = query({
     const order = await ctx.db.get(id);
     if (!order || order.cafeId !== cafeId) return null;
     const cashier = await ctx.db.get(order.cashierId);
-    const payment = await ctx.db
+    const paymentRows = await ctx.db
       .query('payments')
       .withIndex('by_order', (q) => q.eq('orderId', order._id))
-      .unique();
-    const paymentObj = payment
-      ? {
-          method: payment.method,
-          amountIDR: payment.amountIDR,
-          ...(payment.cashTenderedIDR !== undefined && {
-            cashTenderedIDR: payment.cashTenderedIDR,
-          }),
-          ...(payment.changeIDR !== undefined && { changeIDR: payment.changeIDR }),
-          ...(payment.confirmedAt !== undefined && { confirmedAt: payment.confirmedAt }),
-        }
-      : null;
+      .collect();
+    const payments = paymentRows
+      .sort((a, b) => a._creationTime - b._creationTime)
+      .map((p) => ({
+        method: p.method,
+        amountIDR: p.amountIDR,
+        ...(p.cashTenderedIDR !== undefined ? { cashTenderedIDR: p.cashTenderedIDR } : {}),
+        ...(p.changeIDR !== undefined ? { changeIDR: p.changeIDR } : {}),
+        ...(p.confirmedAt !== undefined ? { confirmedAt: p.confirmedAt } : {}),
+      }));
     return {
       ...order,
       cashierName: cashier?.name ?? '—',
-      payment: paymentObj,
+      payments,
     };
   },
 });
