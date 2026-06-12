@@ -32,6 +32,7 @@ export function CartPane({
   payMethods,
   onPay,
   onSplit,
+  onGiftCard,
   onKosongkan,
   onKas,
   onSwitch,
@@ -60,6 +61,8 @@ export function CartPane({
   onPay: (method: PaymentMethod) => void;
   /** Opens the split-payment dialog. Omitted when a split isn't possible. */
   onSplit?: () => void;
+  /** Opens the gift-card payment dialog. Omitted when unavailable. */
+  onGiftCard?: () => void;
   onKosongkan: () => void;
   onKas?: () => void;
   onSwitch?: boolean;
@@ -235,6 +238,18 @@ export function CartPane({
             size="lg"
           >
             <Trans>Bagi pembayaran</Trans>
+          </Button>
+        ) : null}
+        {onGiftCard ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onGiftCard}
+            disabled={empty}
+            className="w-full mt-2"
+            size="lg"
+          >
+            <Trans>Kartu hadiah</Trans>
           </Button>
         ) : null}
       </div>

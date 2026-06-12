@@ -23,8 +23,8 @@ import type { CartState } from './cart-reducer';
 import { CustomerSection, type CustomerSelection } from './customer-section';
 import { usePaymentTotals } from './use-payment-totals';
 
-type SyncMethod = 'cash' | 'qris_static';
-type TenderRow = { method: SyncMethod; amount: string; tendered: string };
+type SyncMethod = 'cash' | 'qris_static' | 'giftcard';
+type TenderRow = { method: SyncMethod; amount: string; tendered: string; code: string };
 
 function parseAmount(s: string): number {
   if (!s) return 0;
@@ -82,13 +82,20 @@ export function SplitPaymentDialog({
     const out: SyncMethod[] = [];
     if (cashEnabled) out.push('cash');
     if (qrisStaticEnabled) out.push('qris_static');
+    // Gift cards are always combinable in a split — they redeem against a
+    // server-validated balance, independent of the cash/QRIS rails.
+    out.push('giftcard');
     return out;
   }, [cashEnabled, qrisStaticEnabled]);
 
   const firstMethod: SyncMethod = availableMethods[0] ?? 'cash';
   const [rows, setRows] = useState<TenderRow[]>([
-    { method: firstMethod, amount: '', tendered: '' },
+    { method: firstMethod, amount: '', tendered: '', code: '' },
   ]);
+  // Live balances for the gift-card codes currently typed, keyed by trimmed
+  // code. `undefined` = still loading, `null` = not found / inactive. Reported
+  // up by each gift-card row's own getByCode query.
+  const [giftBalances, setGiftBalances] = useState<Record<string, number | null | undefined>>({});
 
   // Generate clientId once when the dialog opens; reset state on close.
   useEffect(() => {
@@ -96,7 +103,8 @@ export function SplitPaymentDialog({
       clientIdRef.current = genUUID();
       setError(null);
       setCustomer({ redeemPoints: 0 });
-      setRows([{ method: availableMethods[0] ?? 'cash', amount: '', tendered: '' }]);
+      setGiftBalances({});
+      setRows([{ method: availableMethods[0] ?? 'cash', amount: '', tendered: '', code: '' }]);
     }
   }, [open, availableMethods]);
 
@@ -119,13 +127,27 @@ export function SplitPaymentDialog({
     const tendered = r.tendered ? Number.parseInt(r.tendered, 10) : amt;
     return Number.isFinite(tendered) && tendered >= amt;
   });
-  const canSubmit = remaining === 0 && cashTendersOk && rows.length >= 2 && !submitting;
+  // Every gift-card row needs a non-empty code that resolves to an active card
+  // whose balance covers that row's amount.
+  const giftTendersOk = rows.every((r) => {
+    if (r.method !== 'giftcard') return true;
+    const code = r.code.trim();
+    if (!code) return false;
+    const bal = giftBalances[code];
+    if (bal === undefined || bal === null) return false;
+    return bal >= parseAmount(r.amount);
+  });
+  const canSubmit =
+    remaining === 0 && cashTendersOk && giftTendersOk && rows.length >= 2 && !submitting;
 
   function updateRow(i: number, patch: Partial<TenderRow>) {
     setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   }
   function addRow() {
-    setRows((rs) => [...rs, { method: availableMethods[0] ?? 'cash', amount: '', tendered: '' }]);
+    setRows((rs) => [
+      ...rs,
+      { method: availableMethods[0] ?? 'cash', amount: '', tendered: '', code: '' },
+    ]);
   }
   function removeRow(i: number) {
     setRows((rs) => (rs.length <= 1 ? rs : rs.filter((_, idx) => idx !== i)));
@@ -141,6 +163,9 @@ export function SplitPaymentDialog({
         if (r.method === 'cash') {
           const tenderedIDR = r.tendered ? Number.parseInt(r.tendered, 10) : amountIDR;
           return { method: 'cash' as const, amountIDR, tenderedIDR };
+        }
+        if (r.method === 'giftcard') {
+          return { method: 'giftcard' as const, giftCardCode: r.code.trim(), amountIDR };
         }
         return { method: 'qris_static' as const, amountIDR };
       });
@@ -237,6 +262,11 @@ export function SplitPaymentDialog({
                             <Trans>QRIS statis</Trans>
                           </SelectItem>
                         ) : null}
+                        {availableMethods.includes('giftcard') ? (
+                          <SelectItem value="giftcard">
+                            <Trans>Kartu hadiah</Trans>
+                          </SelectItem>
+                        ) : null}
                       </SelectContent>
                     </Select>
                     <Input
@@ -279,6 +309,16 @@ export function SplitPaymentDialog({
                       </span>
                     </div>
                   ) : null}
+                  {row.method === 'giftcard' ? (
+                    <GiftCardTenderRow
+                      code={row.code}
+                      amountIDR={amt}
+                      onCodeChange={(code) => updateRow(i, { code })}
+                      onBalance={(code, balance) =>
+                        setGiftBalances((b) => (b[code] === balance ? b : { ...b, [code]: balance }))
+                      }
+                    />
+                  ) : null}
                 </div>
               );
             })}
@@ -318,5 +358,72 @@ export function SplitPaymentDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * A gift-card leg of a split: a code input plus a live balance preview. Owns its
+ * own getByCode query and reports the resolved balance up to the parent (keyed
+ * by trimmed code) so the parent can gate submit on balance ≥ this row's amount.
+ */
+function GiftCardTenderRow({
+  code,
+  amountIDR,
+  onCodeChange,
+  onBalance,
+}: {
+  code: string;
+  amountIDR: number;
+  onCodeChange: (code: string) => void;
+  onBalance: (code: string, balance: number | null) => void;
+}) {
+  const { t } = useLingui();
+  const trimmed = code.trim();
+  const card = useQuery(api.giftCards.getByCode, trimmed ? { code: trimmed } : 'skip');
+
+  useEffect(() => {
+    if (!trimmed || card === undefined) return;
+    // Inactive cards are unusable — surface them as "not found" for gating.
+    const balance = card && card.status === 'active' ? card.balanceIDR : null;
+    onBalance(trimmed, balance);
+  }, [trimmed, card, onBalance]);
+
+  const balanceIDR = card && card.status === 'active' ? card.balanceIDR : null;
+  const insufficient = balanceIDR !== null && amountIDR > 0 && amountIDR > balanceIDR;
+
+  return (
+    <div className="space-y-1">
+      <Input
+        placeholder={t`Kode kartu`}
+        value={code}
+        onChange={(e) => onCodeChange(e.target.value)}
+        className="h-9 uppercase tabular-nums"
+      />
+      {trimmed && card === undefined ? (
+        <p className="text-xs text-muted-foreground">
+          <Trans>Memeriksa kartu…</Trans>
+        </p>
+      ) : trimmed && card === null ? (
+        <p className="text-xs text-red-600">
+          <Trans>Kartu hadiah tidak ditemukan.</Trans>
+        </p>
+      ) : card && card.status !== 'active' ? (
+        <p className="text-xs text-red-600">
+          <Trans>Kartu hadiah tidak aktif.</Trans>
+        </p>
+      ) : balanceIDR !== null ? (
+        <div className="flex justify-between text-xs">
+          <span className="text-muted-foreground">
+            <Trans>Saldo</Trans>
+          </span>
+          <span className="font-semibold tabular-nums">{formatIDR(balanceIDR)}</span>
+        </div>
+      ) : null}
+      {insufficient ? (
+        <p className="text-xs text-amber-700">
+          <Trans>Saldo kurang.</Trans>
+        </p>
+      ) : null}
+    </div>
   );
 }
