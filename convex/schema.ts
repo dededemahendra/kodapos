@@ -551,6 +551,30 @@ export default defineSchema({
     createdAt: v.number(),
   }).index('by_cafe_at', ['cafeId', 'at']),
 
+  purchaseOrders: defineTable({
+    cafeId: v.id('cafes'),
+    supplierId: v.optional(v.id('suppliers')),
+    supplierName: v.optional(v.string()), // snapshot for display
+    status: v.union(
+      v.literal('open'),
+      v.literal('partial'),
+      v.literal('received'),
+      v.literal('cancelled')
+    ),
+    lines: v.array(
+      v.object({
+        ingredientId: v.id('ingredients'),
+        orderedQty: v.number(),
+        receivedQty: v.number(), // accumulates on receive (starts 0)
+        unitCostIDR: v.number(),
+      })
+    ),
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_cafe_status', ['cafeId', 'status'])
+    .index('by_cafe_created', ['cafeId', 'createdAt']),
+
   forecasts: defineTable({
     cafeId: v.id('cafes'),
     generatedAt: v.number(),

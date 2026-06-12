@@ -156,6 +156,11 @@ msgstr "{0} penyesuaian · 30 hari"
 msgid "{0} pesanan"
 msgstr "{0} pesanan"
 
+#. placeholder {0}: rows.length
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "{0} pesanan beli"
+msgstr "{0} pesanan beli"
+
 #. placeholder {0}: formatCount(draft.redeemBlockPoints)
 #. placeholder {1}: formatIDR(draft.redeemBlockIDR)
 #: src/routes/_pos/loyalty.tsx
@@ -225,6 +230,10 @@ msgstr "+ Tambah bahan"
 #: src/routes/_pos/inventory/index.tsx
 #~ msgid "+ Tambah Bahan"
 #~ msgstr "+ Tambah Bahan"
+
+#: src/components/inventory/purchase-order-form-dialog.tsx
+msgid "+ Tambah baris"
+msgstr "+ Tambah baris"
 
 #: src/routes/_pos/loyalty.tsx
 msgid "+ Tambah tier"
@@ -586,6 +595,7 @@ msgstr "Bagi pembayaran"
 msgid "bahan"
 msgstr "bahan"
 
+#: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
@@ -651,6 +661,14 @@ msgstr "Bakery"
 msgid "Bar"
 msgstr "Bar"
 
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Barang diterima."
+msgstr "Barang diterima."
+
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Barang yang sudah diterima tetap berada di stok. Pesanan tidak bisa menerima barang lagi setelah dibatalkan."
+msgstr "Barang yang sudah diterima tetap berada di stok. Pesanan tidak bisa menerima barang lagi setelah dibatalkan."
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Barcode"
 msgstr "Barcode"
@@ -674,6 +692,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
@@ -712,6 +731,14 @@ msgstr "Batalkan pesanan"
 #: src/components/sale/receipt-preview.tsx
 msgid "Batalkan pesanan ini?"
 msgstr "Batalkan pesanan ini?"
+
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Batalkan PO"
+msgstr "Batalkan PO"
+
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Batalkan PO?"
+msgstr "Batalkan PO?"
 
 #: src/components/sale/order-types.tsx
 msgid "Bawa pulang"
@@ -836,6 +863,10 @@ msgstr "Belum ada penyesuaian."
 msgid "Belum ada pergerakan stok."
 msgstr "Belum ada pergerakan stok."
 
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Belum ada pesanan beli."
+msgstr "Belum ada pesanan beli."
+
 #: src/components/shift/shift-order-list.tsx
 msgid "Belum ada pesanan di shift ini."
 msgstr "Belum ada pesanan di shift ini."
@@ -933,6 +964,7 @@ msgid "Biaya per satuan (Rp)"
 msgstr "Biaya per satuan (Rp)"
 
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 msgid "Biaya/satuan"
 msgstr "Biaya/satuan"
@@ -976,6 +1008,15 @@ msgstr "Buat grup modifier (mis. Ukuran) dan pasang ke item."
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
 msgstr "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
+
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Buat pesanan beli ke pemasok, lalu terima barang untuk menambah stok."
+msgstr "Buat pesanan beli ke pemasok, lalu terima barang untuk menambah stok."
+
+#: src/components/inventory/purchase-order-form-dialog.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Buat PO"
+msgstr "Buat PO"
 
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "Buat promo di halaman Promo & Diskon."
@@ -1271,6 +1312,15 @@ msgstr "Data cuaca tidak tersedia."
 msgid "Detail kontak"
 msgstr "Detail kontak"
 
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Detail pesanan beli dan penerimaan barang."
+msgstr "Detail pesanan beli dan penerimaan barang."
+
+#: src/components/inventory/purchase-order-detail.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Dibatalkan"
+msgstr "Dibatalkan"
+
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Dibuka oleh"
 msgstr "Dibuka oleh"
@@ -1291,6 +1341,11 @@ msgstr "Digit {0}"
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Dipakai ulang di banyak item, ubah di satu tempat."
 msgstr "Dipakai ulang di banyak item, ubah di satu tempat."
+
+#: src/components/inventory/purchase-order-detail.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Dipesan"
+msgstr "Dipesan"
 
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/manual-discount-dialog.tsx
@@ -1316,6 +1371,11 @@ msgstr "Diskon tidak valid."
 #: src/components/sale/cart-pane.tsx
 msgid "Ditahan ({0})"
 msgstr "Ditahan ({0})"
+
+#: src/components/inventory/purchase-order-detail.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Diterima"
+msgstr "Diterima"
 
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Ditutup pada"
@@ -1379,6 +1439,10 @@ msgstr "Gagal clock in."
 msgid "Gagal clock out."
 msgstr "Gagal clock out."
 
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Gagal membatalkan pesanan beli."
+msgstr "Gagal membatalkan pesanan beli."
+
 #: src/components/sale/receipt-preview.tsx
 msgid "Gagal membatalkan pesanan."
 msgstr "Gagal membatalkan pesanan."
@@ -1386,6 +1450,10 @@ msgstr "Gagal membatalkan pesanan."
 #: src/components/menu/category-table.tsx
 #~ msgid "Gagal membuat kategori."
 #~ msgstr "Gagal membuat kategori."
+
+#: src/components/inventory/purchase-order-form-dialog.tsx
+msgid "Gagal membuat pesanan beli."
+msgstr "Gagal membuat pesanan beli."
 
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 msgid "Gagal membuat tagihan QRIS."
@@ -1461,6 +1529,10 @@ msgstr "Gagal mendaftar."
 #: src/components/giftcard/gift-card-form-dialog.tsx
 msgid "Gagal menerbitkan kartu hadiah."
 msgstr "Gagal menerbitkan kartu hadiah."
+
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Gagal menerima barang."
+msgstr "Gagal menerima barang."
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Gagal mengarsipkan bahan."
@@ -1726,6 +1798,7 @@ msgid "Hapus"
 msgstr "Hapus"
 
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/sale/cart-line-row.tsx
 msgid "Hapus baris"
@@ -2662,6 +2735,7 @@ msgstr "Menutup…"
 #: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/stock-take-dialog.tsx
@@ -3052,12 +3126,14 @@ msgid "Pelanggan tidak ditemukan."
 msgstr "Pelanggan tidak ditemukan."
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Pemasok"
 msgstr "Pemasok"
 
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 msgid "Pemasok (opsional)"
 msgstr "Pemasok (opsional)"
 
@@ -3308,6 +3384,23 @@ msgstr "Pesanan ({0})"
 msgid "Pesanan baru akan muncul di sini saat dibayar."
 msgstr "Pesanan baru akan muncul di sini saat dibayar."
 
+#: src/components/app-shared.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Pesanan Beli"
+msgstr "Pesanan Beli"
+
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Pesanan beli dibatalkan."
+msgstr "Pesanan beli dibatalkan."
+
+#: src/components/inventory/purchase-order-form-dialog.tsx
+msgid "Pesanan beli dibuat."
+msgstr "Pesanan beli dibuat."
+
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Pesanan beli tidak ditemukan."
+msgstr "Pesanan beli tidak ditemukan."
+
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan dibatalkan."
 msgstr "Pesanan dibatalkan."
@@ -3349,6 +3442,7 @@ msgid "Pilih bahan untuk disesuaikan"
 msgstr "Pilih bahan untuk disesuaikan"
 
 #: src/components/inventory/ingredient-picker.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 msgid "Pilih bahan…"
 msgstr "Pilih bahan…"
 
@@ -3605,11 +3699,13 @@ msgid "QRIS Statis"
 msgstr "QRIS Statis"
 
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 msgid "Qty"
 msgstr "Qty"
 
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 msgid "Qty ({unit})"
 msgstr "Qty ({unit})"
 
@@ -3806,6 +3902,11 @@ msgstr "Scan / ketik barcode…"
 msgid "Sebagai: {0}"
 msgstr "Sebagai: {0}"
 
+#: src/components/inventory/purchase-order-detail.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Sebagian"
+msgstr "Sebagian"
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 #~ msgstr "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
@@ -3972,6 +4073,7 @@ msgstr "Siapa yang bertugas?"
 #: src/components/expenses/expense-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
@@ -4009,6 +4111,7 @@ msgstr "Sinkronkan penjualan ke Accurate."
 msgid "Sinkronkan penjualan ke Mekari Jurnal."
 msgstr "Sinkronkan penjualan ke Mekari Jurnal."
 
+#: src/components/inventory/purchase-order-detail.tsx
 #: src/components/sale/split-payment-dialog.tsx
 msgid "Sisa"
 msgstr "Sisa"
@@ -4030,6 +4133,7 @@ msgstr "Staf"
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/promos.tsx
@@ -4267,6 +4371,7 @@ msgid "Tambahkan meja untuk mulai mengelola lantai."
 msgstr "Tambahkan meja untuk mulai mengelola lantai."
 
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 msgid "Tambahkan minimal satu bahan dengan jumlah dan biaya."
 msgstr "Tambahkan minimal satu bahan dengan jumlah dan biaya."
 
@@ -4335,6 +4440,7 @@ msgstr "Tampilkan rincian pajak"
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/expenses.tsx
@@ -4349,6 +4455,12 @@ msgstr "Tanpa meja"
 #: src/components/sale/held-orders-dialog.tsx
 msgid "Tanpa nama"
 msgstr "Tanpa nama"
+
+#: src/components/inventory/purchase-order-detail.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Tanpa pemasok"
+msgstr "Tanpa pemasok"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tanpa pembulatan"
@@ -4398,6 +4510,11 @@ msgstr "Terbitkan kartu"
 msgid "Terbitkan kartu untuk mulai menjual voucher prabayar."
 msgstr "Terbitkan kartu untuk mulai menjual voucher prabayar."
 
+#: src/components/inventory/purchase-order-detail.tsx
+#: src/routes/_pos/inventory/purchase-orders.tsx
+msgid "Terbuka"
+msgstr "Terbuka"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Terhubung"
 msgstr "Terhubung"
@@ -4405,6 +4522,15 @@ msgstr "Terhubung"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Terhubung lewat integrasi penyedia."
 msgstr "Terhubung lewat integrasi penyedia."
+
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Terima"
+msgstr "Terima"
+
+#. placeholder {0}: line.ingredientName
+#: src/components/inventory/purchase-order-detail.tsx
+msgid "Terima {0}"
+msgstr "Terima {0}"
 
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Terima kasih 🙏"
@@ -4560,6 +4686,7 @@ msgstr "Tombol uang cepat"
 
 #: src/components/dashboard-invoices.tsx
 #: src/components/inventory/purchase-form.tsx
+#: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/customers.tsx
