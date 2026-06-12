@@ -56,6 +56,7 @@ export const kpis = query({
   args: {},
   returns: v.object({
     revenueIDR: v.number(),
+    refundsIDR: v.number(),
     revenueDeltaPct: v.number(),
     orders: v.number(),
     ordersDeltaPct: v.number(),
@@ -86,8 +87,23 @@ export const kpis = query({
     const sum = (a: Doc<'orders'>[]) => a.reduce((s, o) => s + o.totalIDR, 0);
     const items = (a: Doc<'orders'>[]) => a.reduce((s, o) => s + lineItemQty(o), 0);
 
-    const tRev = sum(today);
-    const yRev = sum(yest);
+    // Net out refunds dated (by `refund.at`) in each day's window so revenue is
+    // a true money figure and the delta stays apples-to-apples.
+    const refunds = await ctx.db
+      .query('refunds')
+      .withIndex('by_cafe_at', (q) =>
+        q.eq('cafeId', cafeId).gte('at', yesterdayStart)
+      )
+      .collect();
+    const tRefunds = refunds
+      .filter((r) => r.at >= todayStart)
+      .reduce((s, r) => s + r.amountIDR, 0);
+    const yRefunds = refunds
+      .filter((r) => r.at >= yesterdayStart && r.at < todayStart)
+      .reduce((s, r) => s + r.amountIDR, 0);
+
+    const tRev = sum(today) - tRefunds;
+    const yRev = sum(yest) - yRefunds;
     const tOrders = today.length;
     const yOrders = yest.length;
     const tAvg = tOrders ? tRev / tOrders : 0;
@@ -97,6 +113,7 @@ export const kpis = query({
 
     return {
       revenueIDR: tRev,
+      refundsIDR: tRefunds,
       revenueDeltaPct: pctDelta(tRev, yRev),
       orders: tOrders,
       ordersDeltaPct: pctDelta(tOrders, yOrders),
@@ -130,6 +147,16 @@ export const revenueDaily = query({
       if (o.paymentStatus !== 'paid') continue;
       const b = bucketFor(o.createdAtClient);
       if (b) b.revenueIDR += o.totalIDR;
+    }
+    // Net out refunds dated (by `refund.at`) into their own day's bucket so the
+    // chart matches the net KPI revenue rather than overstating gross.
+    const refunds = await ctx.db
+      .query('refunds')
+      .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', windowStart))
+      .collect();
+    for (const r of refunds) {
+      const b = bucketFor(r.at);
+      if (b) b.revenueIDR -= r.amountIDR;
     }
     return buckets;
   },
