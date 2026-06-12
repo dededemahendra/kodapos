@@ -257,6 +257,15 @@ export default defineSchema({
     at: v.number(),
   }).index('by_shift', ['shiftId']),
 
+  timeClock: defineTable({
+    cafeId: v.id('cafes'),
+    cashierId: v.id('cafeStaff'),
+    clockInAt: v.number(),
+    clockOutAt: v.optional(v.number()), // unset == currently clocked in
+  })
+    .index('by_cafe_clockin', ['cafeId', 'clockInAt'])
+    .index('by_cafe_cashier', ['cafeId', 'cashierId']),
+
   cashMovements: defineTable({
     cafeId: v.id('cafes'),
     shiftId: v.id('shifts'),

@@ -16,6 +16,7 @@ import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PosTimeClockRouteImport } from './routes/_pos/time-clock'
 import { Route as PosTablesRouteImport } from './routes/_pos/tables'
 import { Route as PosSuppliersRouteImport } from './routes/_pos/suppliers'
 import { Route as PosShiftsRouteImport } from './routes/_pos/shifts'
@@ -101,6 +102,11 @@ const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
   getParentRoute: () => PublicRoute,
+} as any)
+const PosTimeClockRoute = PosTimeClockRouteImport.update({
+  id: '/time-clock',
+  path: '/time-clock',
+  getParentRoute: () => PosRoute,
 } as any)
 const PosTablesRoute = PosTablesRouteImport.update({
   id: '/tables',
@@ -387,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/shifts': typeof PosShiftsRoute
   '/suppliers': typeof PosSuppliersRoute
   '/tables': typeof PosTablesRoute
+  '/time-clock': typeof PosTimeClockRoute
   '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
@@ -442,6 +449,7 @@ export interface FileRoutesByTo {
   '/shifts': typeof PosShiftsRoute
   '/suppliers': typeof PosSuppliersRoute
   '/tables': typeof PosTablesRoute
+  '/time-clock': typeof PosTimeClockRoute
   '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
@@ -503,6 +511,7 @@ export interface FileRoutesById {
   '/_pos/shifts': typeof PosShiftsRoute
   '/_pos/suppliers': typeof PosSuppliersRoute
   '/_pos/tables': typeof PosTablesRoute
+  '/_pos/time-clock': typeof PosTimeClockRoute
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
@@ -565,6 +574,7 @@ export interface FileRouteTypes {
     | '/shifts'
     | '/suppliers'
     | '/tables'
+    | '/time-clock'
     | '/privacy'
     | '/signin'
     | '/signup'
@@ -620,6 +630,7 @@ export interface FileRouteTypes {
     | '/shifts'
     | '/suppliers'
     | '/tables'
+    | '/time-clock'
     | '/privacy'
     | '/signin'
     | '/signup'
@@ -680,6 +691,7 @@ export interface FileRouteTypes {
     | '/_pos/shifts'
     | '/_pos/suppliers'
     | '/_pos/tables'
+    | '/_pos/time-clock'
     | '/_public/privacy'
     | '/_public/signin'
     | '/_public/signup'
@@ -772,6 +784,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/privacy'
       preLoaderRoute: typeof PublicPrivacyRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/_pos/time-clock': {
+      id: '/_pos/time-clock'
+      path: '/time-clock'
+      fullPath: '/time-clock'
+      preLoaderRoute: typeof PosTimeClockRouteImport
+      parentRoute: typeof PosRoute
     }
     '/_pos/tables': {
       id: '/_pos/tables'
@@ -1299,6 +1318,7 @@ interface PosRouteChildren {
   PosShiftsRoute: typeof PosShiftsRoute
   PosSuppliersRoute: typeof PosSuppliersRoute
   PosTablesRoute: typeof PosTablesRoute
+  PosTimeClockRoute: typeof PosTimeClockRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
@@ -1324,6 +1344,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosShiftsRoute: PosShiftsRoute,
   PosSuppliersRoute: PosSuppliersRoute,
   PosTablesRoute: PosTablesRoute,
+  PosTimeClockRoute: PosTimeClockRoute,
 }
 
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)

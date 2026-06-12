@@ -66,6 +66,7 @@ import type * as shifts from "../shifts.js";
 import type * as staff from "../staff.js";
 import type * as suppliers from "../suppliers.js";
 import type * as tables from "../tables.js";
+import type * as timeClock from "../timeClock.js";
 import type * as users from "../users.js";
 import type * as waste from "../waste.js";
 
@@ -134,6 +135,7 @@ declare const fullApi: ApiFromModules<{
   staff: typeof staff;
   suppliers: typeof suppliers;
   tables: typeof tables;
+  timeClock: typeof timeClock;
   users: typeof users;
   waste: typeof waste;
 }>;
