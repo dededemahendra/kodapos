@@ -17,6 +17,7 @@ const TABS = [
   { to: '/reports/payments', label: <Trans>Pembayaran</Trans> },
   { to: '/reports/cashiers', label: <Trans>Kasir</Trans> },
   { to: '/reports/orders', label: <Trans>Pesanan</Trans> },
+  { to: '/reports/expenses', label: <Trans>Pengeluaran</Trans> },
 ] as const;
 
 function ReportsLayout() {
