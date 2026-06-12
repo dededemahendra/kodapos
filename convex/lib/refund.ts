@@ -76,7 +76,7 @@ export function validateRefundLines(
     if (!Number.isInteger(req.lineIndex) || req.lineIndex < 0 || req.lineIndex >= orderLines.length) {
       throw new Error('Pilih item untuk direfund.');
     }
-    if (!Number.isInteger(req.qty) || req.qty < 0) {
+    if (!Number.isInteger(req.qty) || req.qty <= 0) {
       throw new Error('Pilih item untuk direfund.');
     }
     requestedQtyByIndex.set(

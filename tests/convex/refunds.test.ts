@@ -699,3 +699,338 @@ describe('reports — refunds net out revenue + COGS by refund date', () => {
     expect(pl.cogsIDR).toBe(15000); // full COGS, not reduced
   });
 });
+
+// ── Finding 1: sequential partial-refund loyalty over-clawback ──────────────
+describe('refunds.create — cumulative loyalty clawback (Finding 1)', () => {
+  it('N partial refunds claw back EXACTLY pointsEarned, never more (no over-clawback)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, categoryId, susuId } = await setup(t);
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111111',
+    });
+    // A SECOND order for the same customer earns points that must NOT be touched
+    // by refunds against the first order (the over-clawback would silently eat
+    // these via the max(0, …) floor only after draining the order's own points,
+    // but the invariant is that cross-order points are never the source).
+    const otherItem = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Other',
+      priceIDR: 50000,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: otherItem,
+      lines: [{ ingredientId: susuId, qty: 10, wastageFactor: 1.0 }],
+    });
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'other-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: otherItem, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 50000,
+      customerId,
+      createdAtClient: 1700000000000,
+    });
+    // 50000 earns 50 points at 1pt/1000IDR.
+    const otherEarned = 50;
+
+    // Target order: priced 1000 ⇒ totalIDR 10000 for qty 10, earning 10 points…
+    // but the spec example is "earns 7 pts on totalIDR 10000". Force pointsEarned
+    // to 7 by patching the order so the rounding stress is exactly as described.
+    const targetItem = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Target',
+      priceIDR: 1000,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: targetItem,
+      lines: [{ ingredientId: susuId, qty: 1, wastageFactor: 1.0 }],
+    });
+    const sale = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'target-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: targetItem, qty: 10, modifierOptionIds: [] }],
+      cashTenderedIDR: 10000,
+      customerId,
+      createdAtClient: 1700000000000,
+    });
+    expect(sale.totalIDR).toBe(10000);
+    // Patch pointsEarned to 7 (and the customer balance to match: 7 + 50 = 57).
+    await t.run(async (ctx) => {
+      await ctx.db.patch(sale.orderId, { pointsEarned: 7 });
+      await ctx.db.patch(customerId, { pointsBalance: 7 + otherEarned });
+    });
+
+    const balanceOf = () =>
+      asOwner.query(api.customers.getDetail, { id: customerId }).then((d) => d!.pointsBalance);
+    expect(await balanceOf()).toBe(57);
+
+    // Refund all 10 units in 10 × 1-unit (1000 IDR) increments.
+    for (let i = 0; i < 10; i++) {
+      await asOwner.mutation(api.refunds.create, {
+        orderId: sale.orderId,
+        clientId: `target-refund-${i}`,
+        cashierId,
+        method: 'cash',
+        lines: [{ lineIndex: 0, qty: 1 }],
+      });
+    }
+
+    // After fully refunding the target order: EXACTLY 7 points clawed back (not
+    // 8+ from naive per-refund rounding), and the other order's 50 are intact.
+    expect(await balanceOf()).toBe(57 - 7); // 50
+    // Sum of all adjust txns for THIS order === −7 exactly.
+    const adjSum = await t.run(async (ctx) => {
+      const rows = await ctx.db
+        .query('loyaltyTransactions')
+        .withIndex('by_customer_at', (q) => q.eq('customerId', customerId))
+        .collect();
+      return rows
+        .filter((r) => r.orderId === sale.orderId && r.type === 'adjust')
+        .reduce((s, r) => s + r.points, 0);
+    });
+    expect(adjSum).toBe(-7);
+  });
+
+  it('3 uneven partials then a full refund land cumulative clawback EXACTLY on pointsEarned', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, categoryId, susuId } = await setup(t);
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Sari',
+      phone: '08122222222',
+    });
+    const item = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Uneven',
+      priceIDR: 1000,
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: item,
+      lines: [{ ingredientId: susuId, qty: 1, wastageFactor: 1.0 }],
+    });
+    const sale = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'uneven-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: item, qty: 10, modifierOptionIds: [] }],
+      cashTenderedIDR: 10000,
+      customerId,
+      createdAtClient: 1700000000000,
+    });
+    await t.run(async (ctx) => {
+      await ctx.db.patch(sale.orderId, { pointsEarned: 7 });
+      await ctx.db.patch(customerId, { pointsBalance: 7 });
+    });
+
+    // Uneven: 2, then 3, then 5 (full) units.
+    for (const [i, qty] of [2, 3, 5].entries()) {
+      await asOwner.mutation(api.refunds.create, {
+        orderId: sale.orderId,
+        clientId: `uneven-refund-${i}`,
+        cashierId,
+        method: 'cash',
+        lines: [{ lineIndex: 0, qty }],
+      });
+    }
+
+    const detail = await asOwner.query(api.customers.getDetail, { id: customerId });
+    expect(detail?.pointsBalance).toBe(0); // 7 − 7 exactly
+  });
+});
+
+// ── Finding 4: gift-card / tender over-credit on split orders ────────────────
+describe('refunds.create — per-tender cap on split orders (Finding 4)', () => {
+  async function splitSale(t: ReturnType<typeof convexTest>, s: Setup) {
+    const gid = await s.asOwner.mutation(api.giftCards.issue, {
+      code: 'SPLITGC',
+      balanceIDR: 100000,
+    });
+    // 50000-priced item × 2 = 100000; split cash 70000 + giftcard 30000.
+    const item = await s.asOwner.mutation(api.menu.items.create, {
+      categoryId: s.categoryId,
+      name: 'Fifty',
+      priceIDR: 50000,
+    });
+    await s.asOwner.mutation(api.recipes.upsert, {
+      menuItemId: item,
+      lines: [{ ingredientId: s.susuId, qty: 10, wastageFactor: 1.0 }],
+    });
+    const sale = await s.asOwner.mutation(api.orders.createSplitSale, {
+      clientId: 'split-sale',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [{ menuItemId: item, qty: 2, modifierOptionIds: [] }],
+      tenders: [
+        { method: 'cash', amountIDR: 70000, tenderedIDR: 70000 },
+        { method: 'giftcard', giftCardCode: 'SPLITGC', amountIDR: 30000 },
+      ],
+      createdAtClient: 1700000000000,
+    });
+    expect(sale.totalIDR).toBe(100000);
+    return { sale };
+  }
+
+  it('refunding the full 100000 to giftcard THROWS and applies nothing', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const { sale } = await splitSale(t, s);
+    // Card was 100000, 30000 redeemed at sale ⇒ 70000.
+    const before = await s.asOwner.query(api.giftCards.getByCode, { code: 'SPLITGC' });
+    expect(before?.balanceIDR).toBe(70000);
+
+    await expect(
+      s.asOwner.mutation(api.refunds.create, {
+        orderId: sale.orderId,
+        clientId: 'split-refund-over',
+        cashierId: s.cashierId,
+        method: 'giftcard',
+        lines: [
+          { lineIndex: 0, qty: 2 }, // full order = 100000, but only 30000 on the card
+        ],
+      })
+    ).rejects.toThrow(/tender/i);
+
+    // Card balance unchanged, no refund row, refundedIDR untouched.
+    const after = await s.asOwner.query(api.giftCards.getByCode, { code: 'SPLITGC' });
+    expect(after?.balanceIDR).toBe(70000);
+    const refundRows = await t.run((ctx) =>
+      ctx.db.query('refunds').withIndex('by_order', (q) => q.eq('orderId', sale.orderId)).collect()
+    );
+    expect(refundRows).toHaveLength(0);
+    const order = await t.run((ctx) => ctx.db.get(sale.orderId));
+    expect(order?.refundedIDR).toBeUndefined();
+  });
+
+  it('cash leg: refunding within the 70000 cash leg succeeds, exceeding it throws', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const { sale } = await splitSale(t, s);
+    // First 50000 ≤ 70000 cash leg → OK.
+    await s.asOwner.mutation(api.refunds.create, {
+      orderId: sale.orderId,
+      clientId: 'split-refund-cash-ok',
+      cashierId: s.cashierId,
+      method: 'cash',
+      lines: [{ lineIndex: 0, qty: 1 }], // 50000 ≤ 70000 cash leg
+    });
+    const order = await t.run((ctx) => ctx.db.get(sale.orderId));
+    expect(order?.refundedIDR).toBe(50000);
+    // Now a SECOND 50000 to cash would exceed the 70000 cash leg (50000 already
+    // refunded ⇒ only 20000 left) and must throw.
+    await expect(
+      s.asOwner.mutation(api.refunds.create, {
+        orderId: sale.orderId,
+        clientId: 'split-refund-cash-over',
+        cashierId: s.cashierId,
+        method: 'cash',
+        lines: [{ lineIndex: 0, qty: 1 }],
+      })
+    ).rejects.toThrow(/tender/i);
+  });
+
+  it('giftcard leg: refunding within the 30000 gc leg succeeds and credits exactly that', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    // A cleaner split where a single line equals the giftcard leg: 30000 item ×1
+    // (giftcard) + 70000 item ×1 (cash). Refund the 30000 line to giftcard.
+    const gid = await s.asOwner.mutation(api.giftCards.issue, {
+      code: 'GCLEG',
+      balanceIDR: 100000,
+    });
+    const cheap = await s.asOwner.mutation(api.menu.items.create, {
+      categoryId: s.categoryId,
+      name: 'Cheap30',
+      priceIDR: 30000,
+    });
+    const pricey = await s.asOwner.mutation(api.menu.items.create, {
+      categoryId: s.categoryId,
+      name: 'Pricey70',
+      priceIDR: 70000,
+    });
+    const sale = await s.asOwner.mutation(api.orders.createSplitSale, {
+      clientId: 'gcleg-sale',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        { menuItemId: cheap, qty: 1, modifierOptionIds: [] },
+        { menuItemId: pricey, qty: 1, modifierOptionIds: [] },
+      ],
+      tenders: [
+        { method: 'cash', amountIDR: 70000, tenderedIDR: 70000 },
+        { method: 'giftcard', giftCardCode: 'GCLEG', amountIDR: 30000 },
+      ],
+      createdAtClient: 1700000000000,
+    });
+    expect(sale.totalIDR).toBe(100000);
+    const before = await s.asOwner.query(api.giftCards.getByCode, { code: 'GCLEG' });
+    expect(before?.balanceIDR).toBe(70000); // 100000 − 30000 redeemed
+
+    // Refund the 30000 line (lineIndex 0) to giftcard — equals the gc leg exactly.
+    await s.asOwner.mutation(api.refunds.create, {
+      orderId: sale.orderId,
+      clientId: 'gcleg-refund',
+      cashierId: s.cashierId,
+      method: 'giftcard',
+      lines: [{ lineIndex: 0, qty: 1 }],
+    });
+    const after = await s.asOwner.query(api.giftCards.getByCode, { code: 'GCLEG' });
+    expect(after?.balanceIDR).toBe(70000 + 30000); // credited exactly the leg
+    const txns = await s.asOwner.query(api.giftCards.transactions, { id: gid });
+    const refundTxn = txns.find((x) => x.type === 'refund');
+    expect(refundTxn?.amountIDR).toBe(30000);
+  });
+});
+
+// ── Finding 2: daily charts subtract refunds ────────────────────────────────
+describe('reports.salesDaily + dashboard.revenueDaily net out refunds (Finding 2)', () => {
+  it('salesDaily subtracts a refund from its day bucket', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, itemId } = await setup(t);
+    const now = Date.now();
+    const sale = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'daily-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 60000,
+      createdAtClient: now,
+    });
+    await asOwner.mutation(api.refunds.create, {
+      orderId: sale.orderId,
+      clientId: 'daily-refund',
+      cashierId,
+      method: 'cash',
+      lines: [{ lineIndex: 0, qty: 1 }],
+    });
+    const range = { from: jakartaKey(now), to: jakartaKey(now) } as const;
+    const daily = await asOwner.query(api.reports.salesDaily, { range });
+    const today = daily.days.find((d) => d.day === jakartaKey(now));
+    expect(today?.revenueIDR).toBe(54000 - 18000); // net of the refund
+    expect(today?.orders).toBe(1);
+  });
+
+  it('dashboard.revenueDaily subtracts a refund from its day bucket', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, itemId } = await setup(t);
+    const now = Date.now();
+    const sale = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'rd-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 60000,
+      createdAtClient: now,
+    });
+    await asOwner.mutation(api.refunds.create, {
+      orderId: sale.orderId,
+      clientId: 'rd-refund',
+      cashierId,
+      method: 'cash',
+      lines: [{ lineIndex: 0, qty: 1 }],
+    });
+    const rd = await asOwner.query(api.dashboard.revenueDaily, {});
+    const today = rd.find((d) => d.day === jakartaKey(now));
+    expect(today?.revenueIDR).toBe(54000 - 18000); // net of the refund
+  });
+});

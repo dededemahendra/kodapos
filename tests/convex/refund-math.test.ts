@@ -103,4 +103,19 @@ describe('validateRefundLines', () => {
     const ol = lines([{ nameSnapshot: 'Espresso', qty: 3, unitPriceIDR: 18000 }]);
     expect(() => validateRefundLines(ol, {}, [{ lineIndex: 0, qty: -1 }])).toThrow(/pilih item/i);
   });
+
+  // Finding 3: a per-line qty of 0 is invalid input, not a silently-skipped row.
+  // A 0-qty row mixed with a valid one must still reject the whole request.
+  it('throws on a zero-qty row even when another valid row is present', () => {
+    const ol = lines([
+      { nameSnapshot: 'Espresso', qty: 3, unitPriceIDR: 18000 },
+      { nameSnapshot: 'Latte', qty: 1, unitPriceIDR: 24000 },
+    ]);
+    expect(() =>
+      validateRefundLines(ol, {}, [
+        { lineIndex: 0, qty: 1 },
+        { lineIndex: 1, qty: 0 },
+      ])
+    ).toThrow(/pilih item/i);
+  });
 });

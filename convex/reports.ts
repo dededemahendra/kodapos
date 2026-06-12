@@ -76,7 +76,7 @@ export const salesDaily = query({
     toKey: v.string(),
   }),
   handler: async (ctx, { range }) => {
-    const { tz, fromKey, toKey, paid } = await paidInRange(ctx, range);
+    const { cafeId, tz, fromKey, toKey, paid } = await paidInRange(ctx, range);
     const keyOf = dayKeyFn(tz);
     const dayKeys = eachDayKey(fromKey, toKey);
     const byDay = new Map<string, { revenueIDR: number; orders: number }>();
@@ -87,6 +87,17 @@ export const salesDaily = query({
         b.revenueIDR += o.totalIDR;
         b.orders += 1;
       }
+    }
+    // Net out refunds dated (by `refund.at`) into their own day's bucket, so the
+    // chart reconciles with the net KPI rather than overstating gross revenue.
+    const { startMs, endMs } = resolveRange(tz, range, Date.now());
+    const refunds = await ctx.db
+      .query('refunds')
+      .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs))
+      .collect();
+    for (const r of refunds) {
+      const b = byDay.get(keyOf(r.at));
+      if (b) b.revenueIDR -= r.amountIDR;
     }
     const days = dayKeys.map((day) => ({ day, ...byDay.get(day)! }));
     return { days, fromKey, toKey };
@@ -305,8 +316,10 @@ export const profitLoss = query({
       })),
       otherIncomeIDR,
       netProfitIDR,
-      grossMarginPct: netRevenueIDR === 0 ? 0 : Math.round((grossProfitIDR / netRevenueIDR) * 100),
-      netMarginPct: netRevenueIDR === 0 ? 0 : Math.round((netProfitIDR / netRevenueIDR) * 100),
+      // Guard a non-positive denominator: a negative netRevenue (refunds > sales)
+      // would otherwise invert the sign / blow past the documented 0..100 range.
+      grossMarginPct: netRevenueIDR <= 0 ? 0 : Math.round((grossProfitIDR / netRevenueIDR) * 100),
+      netMarginPct: netRevenueIDR <= 0 ? 0 : Math.round((netProfitIDR / netRevenueIDR) * 100),
       fromKey,
       toKey,
     };

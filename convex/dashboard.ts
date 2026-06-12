@@ -148,6 +148,16 @@ export const revenueDaily = query({
       const b = bucketFor(o.createdAtClient);
       if (b) b.revenueIDR += o.totalIDR;
     }
+    // Net out refunds dated (by `refund.at`) into their own day's bucket so the
+    // chart matches the net KPI revenue rather than overstating gross.
+    const refunds = await ctx.db
+      .query('refunds')
+      .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', windowStart))
+      .collect();
+    for (const r of refunds) {
+      const b = bucketFor(r.at);
+      if (b) b.revenueIDR -= r.amountIDR;
+    }
     return buckets;
   },
 });

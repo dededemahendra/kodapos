@@ -74,7 +74,8 @@ export const create = mutation({
     }
 
     // method must be one of the order's tenders.
-    const tenderMethods = new Set(methodTotals(order).map((t) => t.method));
+    const tenders = methodTotals(order);
+    const tenderMethods = new Set(tenders.map((t) => t.method));
     if (!tenderMethods.has(args.method)) {
       throw new Error('Metode refund tidak cocok.');
     }
@@ -115,6 +116,24 @@ export const create = mutation({
       throw new Error('Melebihi jumlah yang bisa direfund.');
     }
 
+    // Per-tender cap: never refund more to a method than was actually tendered
+    // to it. Without this, a split (e.g. cash 70k + giftcard 30k) could refund
+    // the whole 100k to `giftcard`, minting 70k of phantom stored value.
+    const methodTenderedIDR = tenders
+      .filter((t) => t.method === args.method)
+      .reduce((s, t) => s + t.amountIDR, 0);
+    const alreadyRefundedToMethodIDR = (
+      await ctx.db
+        .query('refunds')
+        .withIndex('by_order', (q) => q.eq('orderId', args.orderId))
+        .collect()
+    )
+      .filter((r) => r.method === args.method)
+      .reduce((s, r) => s + r.amountIDR, 0);
+    if (amountIDR > methodTenderedIDR - alreadyRefundedToMethodIDR) {
+      throw new Error('Melebihi jumlah tender metode ini.');
+    }
+
     // ── Side effects (validate-before-apply: everything above already threw) ──
     const now = Date.now();
 
@@ -135,13 +154,26 @@ export const create = mutation({
       }
     }
 
-    // 2) Loyalty (pro-rated) — claw back earned, re-credit redeemed, floor at 0.
+    // 2) Loyalty (pro-rated, cumulative-target) — claw back earned, re-credit
+    // redeemed, floor at 0. Computing each refund's clawback independently from
+    // its OWN fraction lets N partial refunds claw back MORE than was ever earned
+    // (rounding compounds, and the floor silently eats the customer's other
+    // points). Instead, target the cumulative clawback for the order's lifetime
+    // refunded-so-far and apply only the delta vs. what prior refunds already
+    // took. On a full refund cumRefundedIDR === totalIDR, so the target lands
+    // EXACTLY on pointsEarned / pointsRedeemed.
     if (order.customerId) {
       const customer = await ctx.db.get(order.customerId);
       if (customer) {
-        const fraction = amountIDR / order.totalIDR;
-        const clawback = Math.round((order.pointsEarned ?? 0) * fraction);
-        const recredit = Math.round((order.pointsRedeemed ?? 0) * fraction);
+        const cumRefundedIDR = priorRefundedIDR + amountIDR;
+        const pointsEarned = order.pointsEarned ?? 0;
+        const pointsRedeemed = order.pointsRedeemed ?? 0;
+        const targetCumClawback = Math.round((pointsEarned * cumRefundedIDR) / order.totalIDR);
+        const targetCumRecredit = Math.round((pointsRedeemed * cumRefundedIDR) / order.totalIDR);
+        const alreadyClawed = Math.round((pointsEarned * priorRefundedIDR) / order.totalIDR);
+        const alreadyRecredited = Math.round((pointsRedeemed * priorRefundedIDR) / order.totalIDR);
+        const clawback = targetCumClawback - alreadyClawed;
+        const recredit = targetCumRecredit - alreadyRecredited;
         const newBalance = Math.max(0, customer.pointsBalance - clawback + recredit);
         const appliedPoints = newBalance - customer.pointsBalance;
         if (appliedPoints !== 0) {

@@ -52,6 +52,17 @@ export function RefundDialog({
   const [method, setMethod] = useState<RefundMethod>('cash');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // Idempotency key for THIS dialog session. Fixed once per open so a retry after
+  // a network failure that already persisted reuses the same clientId (the server
+  // returns the existing refund) instead of creating a second refund.
+  const [clientId, setClientId] = useState<string>('');
+
+  // Mint a fresh idempotency key once per open (depends only on open/orderId, not
+  // on `info`, so a live `refundInfo` re-resolve mid-retry can't rotate it).
+  useEffect(() => {
+    if (!open) return;
+    setClientId(genUUID());
+  }, [open, orderId]);
 
   // Re-seed whenever the dialog opens or the order changes.
   useEffect(() => {
@@ -94,7 +105,7 @@ export function RefundDialog({
     : false;
 
   async function submit() {
-    if (!orderId || !cashierId || !info || !hasSelection || submitting) return;
+    if (!orderId || !cashierId || !info || !hasSelection || submitting || !clientId) return;
     setSubmitting(true);
     try {
       const lines: { lineIndex: number; qty: number }[] = [];
@@ -106,7 +117,7 @@ export function RefundDialog({
       }
       await createRefund({
         orderId,
-        clientId: genUUID(),
+        clientId,
         cashierId,
         method,
         lines,
