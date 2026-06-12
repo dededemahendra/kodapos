@@ -378,6 +378,10 @@ msgstr "Alamat (opsional)"
 msgid "Alasan"
 msgstr "Alasan"
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Alasan (opsional)"
+msgstr "Alasan (opsional)"
+
 #: src/routes/_pos/inventory/index.tsx
 msgid "Ambang"
 msgstr "Ambang"
@@ -598,6 +602,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/sale/hold-order-dialog.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
+#: src/components/sale/receipt-preview.tsx
 #: src/components/sale/sale-screen.tsx
 #: src/components/settings/save-bar.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
@@ -611,6 +616,18 @@ msgstr "Batal"
 msgctxt "order status"
 msgid "Batal"
 msgstr "Batal"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Batalkan"
+msgstr "Batalkan"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Batalkan pesanan"
+msgstr "Batalkan pesanan"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Batalkan pesanan ini?"
+msgstr "Batalkan pesanan ini?"
 
 #: src/components/sale/order-types.tsx
 msgid "Bawa pulang"
@@ -1144,6 +1161,10 @@ msgstr "Format Tanggal"
 #: src/routes/_pos/settings/general.tsx
 msgid "Format Waktu"
 msgstr "Format Waktu"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Gagal membatalkan pesanan."
+msgstr "Gagal membatalkan pesanan."
 
 #: src/components/menu/category-table.tsx
 #~ msgid "Gagal membuat kategori."
@@ -2768,6 +2789,10 @@ msgstr "Pesanan"
 msgid "Pesanan ({0})"
 msgstr "Pesanan ({0})"
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Pesanan dibatalkan."
+msgstr "Pesanan dibatalkan."
+
 #: src/components/sale/held-orders-dialog.tsx
 msgid "Pesanan ditahan"
 msgstr "Pesanan ditahan"
@@ -3397,6 +3422,10 @@ msgstr "Status"
 #: src/routes/_pos/inventory/index.tsx
 msgid "Stok"
 msgstr "Stok"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Stok akan dikembalikan dan poin loyalitas dibatalkan. Tindakan ini tidak bisa diurungkan."
+msgstr "Stok akan dikembalikan dan poin loyalitas dibatalkan. Tindakan ini tidak bisa diurungkan."
 
 #: src/components/billing-health.tsx
 msgid "Stok aman."
