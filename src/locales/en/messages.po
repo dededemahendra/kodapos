@@ -240,6 +240,22 @@ msgstr "+{0} more"
 msgid "+{0}% — biasanya ramai di hari {day}"
 msgstr "+{0}% — usually busy on {day}"
 
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "= Laba bersih"
+msgstr "= Net profit"
+
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "= Laba kotor"
+msgstr "= Gross profit"
+
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "− HPP"
+msgstr "− COGS"
+
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "− Pengeluaran"
+msgstr "− Expenses"
+
 #: src/routes/_pos/menu/index.tsx
 #~ msgid "○ Off"
 #~ msgstr "○ Off"
@@ -726,6 +742,7 @@ msgstr "No ingredients yet."
 #~ msgstr "No ingredients yet. Add your first ingredient to start tracking stock."
 
 #: src/routes/_pos/reports/index.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 msgid "Belum ada data pada rentang ini."
 msgstr "No data in this range yet."
 
@@ -1124,6 +1141,7 @@ msgstr "Try a different search or add a new cashier."
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Coba ubah rentang tanggal di atas."
 msgstr "Try changing the date range above."
@@ -1540,6 +1558,7 @@ msgstr "Failed to save."
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 msgid "Gaji"
 msgstr "Salary"
 
@@ -1739,6 +1758,14 @@ msgstr "Counted"
 msgid "Hitung fisik {0}"
 msgstr "Counted {0}"
 
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "HPP"
+msgstr "COGS"
+
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "HPP memakai biaya bahan terkini; pengeluaran di luar inventaris."
+msgstr "COGS uses current ingredient cost; expenses exclude inventory."
+
 #: src/routes/_pos/recipes.tsx
 msgid "HPP/cup"
 msgstr "Cost/cup"
@@ -1889,6 +1916,7 @@ msgstr "Quantity"
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/payments.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 msgid "Jumlah (Rp)"
 msgstr "Amount (Rp)"
 
@@ -2162,6 +2190,10 @@ msgstr "30-day loss · {0}"
 msgid "Kesehatan stok"
 msgstr "Stock health"
 
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "Keterangan"
+msgstr "Description"
+
 #: src/routes/_pos/forecast.tsx
 msgid "Kirim ke WhatsApp"
 msgstr "Send to WhatsApp"
@@ -2247,10 +2279,23 @@ msgstr "Visits"
 msgid "Kurangi jumlah"
 msgstr "Decrease quantity"
 
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "Laba bersih"
+msgstr "Net profit"
+
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "Laba kotor"
+msgstr "Gross profit"
+
+#: src/routes/_pos/reports/route.tsx
+msgid "Laba/Rugi"
+msgstr "Profit/Loss"
+
 #: src/components/expenses/expense-categories.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/inventory/waste-reason.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Lainnya"
 msgstr "Other"
@@ -3036,6 +3081,7 @@ msgstr "Owner has all permissions."
 #: src/routes/_pos/reports/index.tsx
 #: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Pendapatan"
 msgstr "Revenue"
@@ -3076,6 +3122,7 @@ msgstr "Loyalty settings saved."
 #~ msgid "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 #~ msgstr "Receipt & payment settings are now on the Receipt & Printer and Tax & Payment pages."
 
+#: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Pengeluaran"
 msgstr "Expenses"
@@ -3139,6 +3186,7 @@ msgstr "Estimated loss:"
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 msgid "Perlengkapan"
 msgstr "Supplies"
 
@@ -3812,6 +3860,7 @@ msgstr "Set PIN"
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 msgid "Sewa"
 msgstr "Rent"
 
@@ -4608,6 +4657,7 @@ msgstr "General"
 #: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Unduh CSV"
 msgstr "Download CSV"
@@ -4639,6 +4689,7 @@ msgstr "USB"
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
 msgid "Utilitas"
 msgstr "Utilities"
 
