@@ -516,6 +516,7 @@ msgstr "Awalan nomor pesanan"
 
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/split-payment-dialog.tsx
+#: src/routes/_pos/reports/orders.tsx
 msgid "Bagi pembayaran"
 msgstr "Bagi pembayaran"
 

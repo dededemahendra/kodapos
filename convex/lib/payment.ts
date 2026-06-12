@@ -7,7 +7,14 @@ export function methodTotals(order: Doc<'orders'>): { method: PayMethod; amountI
   if (order.paymentBreakdown && order.paymentBreakdown.length > 0) return order.paymentBreakdown;
   // legacy / pre-breakdown order: derive from the single headline method.
   const m = order.paymentMethod;
-  if (m === 'split') return []; // a split must always have a breakdown; defensive
+  if (m === 'split') {
+    // buildOrder always writes a breakdown for splits, so this is unreachable in
+    // normal flow. If it ever happens, the order's amount would silently drop out
+    // of cash reconciliation + reports — log loudly so the data gap is detectable
+    // rather than producing a phantom drawer shortfall with no signal.
+    console.error(`methodTotals: split order ${order._id} has no paymentBreakdown`);
+    return [];
+  }
   return [{ method: m, amountIDR: order.totalIDR }];
 }
 

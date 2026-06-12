@@ -205,7 +205,7 @@ export const search = query({
   args: {
     range: rangeArg,
     cashierId: v.optional(v.id('cafeStaff')),
-    paymentMethod: v.optional(v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic'))),
+    paymentMethod: v.optional(v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic'), v.literal('split'))),
     orderType: v.optional(orderTypeValidator),
     status: v.optional(v.union(v.literal('paid'), v.literal('pending'), v.literal('void'))),
     paginationOpts: paginationOptsValidator,
