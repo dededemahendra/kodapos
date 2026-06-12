@@ -66,6 +66,7 @@ import { Route as PosMenuModifiersRouteImport } from './routes/_pos/menu/modifie
 import { Route as PosMenuCategoriesRouteImport } from './routes/_pos/menu/categories'
 import { Route as PosInventoryWasteRouteImport } from './routes/_pos/inventory/waste'
 import { Route as PosInventoryPurchasesRouteImport } from './routes/_pos/inventory/purchases'
+import { Route as PosInventoryPurchaseOrdersRouteImport } from './routes/_pos/inventory/purchase-orders'
 import { Route as PosInventoryAdjustmentsRouteImport } from './routes/_pos/inventory/adjustments'
 import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
 import { Route as PosMenuItemsItemIdRouteImport } from './routes/_pos/menu/items.$itemId'
@@ -353,6 +354,12 @@ const PosInventoryPurchasesRoute = PosInventoryPurchasesRouteImport.update({
   path: '/purchases',
   getParentRoute: () => PosInventoryRouteRoute,
 } as any)
+const PosInventoryPurchaseOrdersRoute =
+  PosInventoryPurchaseOrdersRouteImport.update({
+    id: '/purchase-orders',
+    path: '/purchase-orders',
+    getParentRoute: () => PosInventoryRouteRoute,
+  } as any)
 const PosInventoryAdjustmentsRoute = PosInventoryAdjustmentsRouteImport.update({
   id: '/adjustments',
   path: '/adjustments',
@@ -399,6 +406,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
   '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
+  '/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
   '/inventory/waste': typeof PosInventoryWasteRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
@@ -455,6 +463,7 @@ export interface FileRoutesByTo {
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
   '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
+  '/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
   '/inventory/waste': typeof PosInventoryWasteRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
@@ -518,6 +527,7 @@ export interface FileRoutesById {
   '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
   '/_pos/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
+  '/_pos/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/_pos/inventory/purchases': typeof PosInventoryPurchasesRoute
   '/_pos/inventory/waste': typeof PosInventoryWasteRoute
   '/_pos/menu/categories': typeof PosMenuCategoriesRoute
@@ -580,6 +590,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/inventory/adjustments'
+    | '/inventory/purchase-orders'
     | '/inventory/purchases'
     | '/inventory/waste'
     | '/menu/categories'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/inventory/adjustments'
+    | '/inventory/purchase-orders'
     | '/inventory/purchases'
     | '/inventory/waste'
     | '/menu/categories'
@@ -698,6 +710,7 @@ export interface FileRouteTypes {
     | '/_public/terms'
     | '/_public/'
     | '/_pos/inventory/adjustments'
+    | '/_pos/inventory/purchase-orders'
     | '/_pos/inventory/purchases'
     | '/_pos/inventory/waste'
     | '/_pos/menu/categories'
@@ -1135,6 +1148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosInventoryPurchasesRouteImport
       parentRoute: typeof PosInventoryRouteRoute
     }
+    '/_pos/inventory/purchase-orders': {
+      id: '/_pos/inventory/purchase-orders'
+      path: '/purchase-orders'
+      fullPath: '/inventory/purchase-orders'
+      preLoaderRoute: typeof PosInventoryPurchaseOrdersRouteImport
+      parentRoute: typeof PosInventoryRouteRoute
+    }
     '/_pos/inventory/adjustments': {
       id: '/_pos/inventory/adjustments'
       path: '/adjustments'
@@ -1161,6 +1181,7 @@ declare module '@tanstack/react-router' {
 
 interface PosInventoryRouteRouteChildren {
   PosInventoryAdjustmentsRoute: typeof PosInventoryAdjustmentsRoute
+  PosInventoryPurchaseOrdersRoute: typeof PosInventoryPurchaseOrdersRoute
   PosInventoryPurchasesRoute: typeof PosInventoryPurchasesRoute
   PosInventoryWasteRoute: typeof PosInventoryWasteRoute
   PosInventoryIndexRoute: typeof PosInventoryIndexRoute
@@ -1168,6 +1189,7 @@ interface PosInventoryRouteRouteChildren {
 
 const PosInventoryRouteRouteChildren: PosInventoryRouteRouteChildren = {
   PosInventoryAdjustmentsRoute: PosInventoryAdjustmentsRoute,
+  PosInventoryPurchaseOrdersRoute: PosInventoryPurchaseOrdersRoute,
   PosInventoryPurchasesRoute: PosInventoryPurchasesRoute,
   PosInventoryWasteRoute: PosInventoryWasteRoute,
   PosInventoryIndexRoute: PosInventoryIndexRoute,
