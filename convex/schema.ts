@@ -243,10 +243,19 @@ export default defineSchema({
     at: v.number(),
   }).index('by_shift', ['shiftId']),
 
+  tables: defineTable({
+    cafeId: v.id('cafes'),
+    name: v.string(),
+    sortOrder: v.number(),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  }).index('by_cafe', ['cafeId']),
+
   heldOrders: defineTable({
     cafeId: v.id('cafes'),
     shiftId: v.id('shifts'),
     cashierId: v.id('cafeStaff'),
+    tableId: v.optional(v.id('tables')),
     label: v.string(),
     orderType: orderTypeValidator,
     lines: v.array(heldLineValidator),
@@ -254,7 +263,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index('by_shift', ['shiftId'])
-    .index('by_cafe', ['cafeId']),
+    .index('by_cafe', ['cafeId'])
+    .index('by_table', ['tableId']),
 
   orders: defineTable({
     cafeId: v.id('cafes'),

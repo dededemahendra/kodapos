@@ -11,9 +11,10 @@ export const hold = mutation({
     orderType: orderTypeValidator,
     lines: v.array(heldLineValidator),
     promo: v.optional(heldPromoValidator),
+    tableId: v.optional(v.id('tables')),
   },
   returns: v.id('heldOrders'),
-  handler: async (ctx, { cashierId, label, orderType, lines, promo }) => {
+  handler: async (ctx, { cashierId, label, orderType, lines, promo, tableId }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     if (lines.length === 0) throw new Error('Keranjang kosong.');
     await requireOwned(ctx, cafeId, cashierId, 'Kasir');
@@ -22,6 +23,15 @@ export const hold = mutation({
       .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'open'))
       .first();
     if (!shift) throw new Error('Tidak ada shift terbuka.');
+    if (tableId) {
+      await requireOwned(ctx, cafeId, tableId, 'Meja');
+      const existing = await ctx.db
+        .query('heldOrders')
+        .withIndex('by_table', (q) => q.eq('tableId', tableId))
+        .filter((q) => q.eq(q.field('shiftId'), shift._id))
+        .first();
+      if (existing) throw new Error('Meja sudah terisi.');
+    }
     return await ctx.db.insert('heldOrders', {
       cafeId,
       shiftId: shift._id,
@@ -30,6 +40,7 @@ export const hold = mutation({
       orderType,
       lines,
       ...(promo ? { promo } : {}),
+      ...(tableId ? { tableId } : {}),
       createdAt: Date.now(),
     });
   },
@@ -41,6 +52,7 @@ const heldRow = v.object({
   orderType: orderTypeValidator,
   lines: v.array(heldLineValidator),
   promo: v.optional(heldPromoValidator),
+  tableId: v.optional(v.id('tables')),
   createdAt: v.number(),
 });
 
@@ -62,6 +74,7 @@ export const listForShift = query({
         orderType: r.orderType,
         lines: r.lines,
         ...(r.promo ? { promo: r.promo } : {}),
+        ...(r.tableId ? { tableId: r.tableId } : {}),
         createdAt: r.createdAt,
       }));
   },
