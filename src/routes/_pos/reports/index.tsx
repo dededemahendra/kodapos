@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { BarChart3 } from 'lucide-react';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 import { useReportRange } from '~/components/reports/use-report-range';
@@ -32,6 +32,9 @@ function OverviewReport() {
           <EmptyTitle>
             <Trans>Belum ada data pada rentang ini.</Trans>
           </EmptyTitle>
+          <EmptyDescription>
+            <Trans>Data akan muncul setelah ada penjualan pada rentang ini.</Trans>
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     );

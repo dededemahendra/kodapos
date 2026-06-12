@@ -18,6 +18,7 @@ import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -191,6 +192,9 @@ function ExpensesReport() {
             <EmptyTitle>
               <Trans>Belum ada pengeluaran pada rentang ini.</Trans>
             </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Catat pengeluaran atau ubah rentang tanggal di atas.</Trans>
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (

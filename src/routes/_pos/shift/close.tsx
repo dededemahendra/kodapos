@@ -9,6 +9,7 @@ import { type ShiftSummary, ShiftSummaryPanel } from '~/components/shift/shift-s
 import { Button } from '~/components/ui/button';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -63,6 +64,7 @@ function ShiftClosePage() {
               <Clock />
             </EmptyMedia>
             <EmptyTitle><Trans>Tidak ada shift terbuka.</Trans></EmptyTitle>
+            <EmptyDescription><Trans>Buka shift baru sebelum menerima penjualan.</Trans></EmptyDescription>
           </EmptyHeader>
           <Button asChild>
             <Link to="/shift/open"><Trans>Buka Shift Baru</Trans></Link>

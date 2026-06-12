@@ -9,6 +9,7 @@ import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -103,6 +104,9 @@ function PaymentsReport() {
           <EmptyTitle>
             <Trans>Belum ada pembayaran pada rentang ini.</Trans>
           </EmptyTitle>
+          <EmptyDescription>
+            <Trans>Coba ubah rentang tanggal di atas.</Trans>
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     );

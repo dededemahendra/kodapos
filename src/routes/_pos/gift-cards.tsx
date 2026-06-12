@@ -14,7 +14,7 @@ import { RequirePermission } from '~/components/permission/require-permission';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
 import { RowActions } from '~/components/ui/row-actions';
 import { StatusBadge } from '~/components/ui/status-badge';
@@ -111,6 +111,7 @@ function GiftCardsInner() {
       <EmptyHeader>
         <EmptyMedia variant="icon"><Gift /></EmptyMedia>
         <EmptyTitle>{filter === 'archived' ? <Trans>Tidak ada kartu hadiah diarsipkan.</Trans> : <Trans>Belum ada kartu hadiah.</Trans>}</EmptyTitle>
+        <EmptyDescription>{filter === 'archived' ? <Trans>Kartu yang diarsipkan akan muncul di sini.</Trans> : <Trans>Terbitkan kartu untuk mulai menjual voucher prabayar.</Trans>}</EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

@@ -4,12 +4,12 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, Plus, Power } from 'lucide-react';
+import { Archive, Plus, Power, UtensilsCrossed } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '~/components/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
 import { RowActions } from '~/components/ui/row-actions';
 import {
@@ -221,6 +221,9 @@ function ItemsListPage() {
   const emptyState = (
     <Empty>
       <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <UtensilsCrossed />
+        </EmptyMedia>
         <EmptyTitle>
           {filter === 'archived' ? (
             <Trans>Tidak ada item diarsipkan.</Trans>
@@ -228,11 +231,13 @@ function ItemsListPage() {
             <Trans>Belum ada item.</Trans>
           )}
         </EmptyTitle>
-        {filter === 'active' ? (
-          <EmptyDescription>
+        <EmptyDescription>
+          {filter === 'archived' ? (
+            <Trans>Item yang diarsipkan akan muncul di sini.</Trans>
+          ) : (
             <Trans>Tambah item pertama untuk mulai berjualan.</Trans>
-          </EmptyDescription>
-        ) : null}
+          )}
+        </EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

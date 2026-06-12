@@ -11,6 +11,7 @@ import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } f
 import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -77,6 +78,9 @@ function SalesReport() {
           <EmptyTitle>
             <Trans>Belum ada penjualan pada rentang ini.</Trans>
           </EmptyTitle>
+          <EmptyDescription>
+            <Trans>Coba ubah rentang tanggal di atas.</Trans>
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
