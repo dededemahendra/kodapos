@@ -1661,17 +1661,17 @@ msgstr "When off, customers don't earn points."
 msgid "Jumat"
 msgstr "Friday"
 
-#: src/components/expenses/expense-dialog.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/routes/_pos/inventory/waste.tsx
-#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 msgid "Jumlah"
 msgstr "Quantity"
 
+#: src/components/expenses/expense-dialog.tsx
 #: src/components/shift/cash-movement-dialog.tsx
+#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/payments.tsx
 msgid "Jumlah (Rp)"
 msgstr "Amount (Rp)"

@@ -1661,17 +1661,17 @@ msgstr "Jika nonaktif, pelanggan tidak memperoleh poin."
 msgid "Jumat"
 msgstr "Jumat"
 
-#: src/components/expenses/expense-dialog.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/routes/_pos/inventory/waste.tsx
-#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 msgid "Jumlah"
 msgstr "Jumlah"
 
+#: src/components/expenses/expense-dialog.tsx
 #: src/components/shift/cash-movement-dialog.tsx
+#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/payments.tsx
 msgid "Jumlah (Rp)"
 msgstr "Jumlah (Rp)"

@@ -81,7 +81,7 @@ function ExpensesReport() {
       },
       {
         accessorKey: 'amountIDR',
-        header: () => <Trans>Jumlah</Trans>,
+        header: () => <Trans>Jumlah (Rp)</Trans>,
         cell: ({ row }) => (
           <span className="tabular-nums">
             {formatIDR(row.original.amountIDR)}
@@ -131,7 +131,7 @@ function ExpensesReport() {
       [
         { key: 'at', header: t`Tanggal` },
         { key: 'category', header: t`Kategori` },
-        { key: 'amountIDR', header: t`Jumlah` },
+        { key: 'amountIDR', header: t`Jumlah (Rp)` },
         { key: 'note', header: t`Catatan` },
       ]
     );

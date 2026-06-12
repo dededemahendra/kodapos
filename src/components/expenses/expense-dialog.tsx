@@ -108,7 +108,7 @@ export function ExpenseDialog({
             </Field>
             <Field>
               <FieldLabel htmlFor="exp-amount">
-                <Trans>Jumlah</Trans>
+                <Trans>Jumlah (Rp)</Trans>
               </FieldLabel>
               <Input
                 id="exp-amount"
