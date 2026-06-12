@@ -284,7 +284,44 @@ export default defineSchema({
     sortOrder: v.number(),
     archived: v.boolean(),
     createdAt: v.number(),
-  }).index('by_cafe', ['cafeId']),
+    // Unguessable per-table capability token for the public QR self-order URL
+    // (`/order/{qrToken}`). Assigned lazily on first QR view (tables.ensureQrToken).
+    qrToken: v.optional(v.string()),
+  })
+    .index('by_cafe', ['cafeId'])
+    .index('by_qr_token', ['qrToken']),
+
+  // Public QR self-order intake. A customer scans a table QR → submits a cart on
+  // the unauthenticated `/order/{qrToken}` page → a row lands here `status:'new'`
+  // for staff to Accept (into the register) or Reject. All money/stock/kitchen
+  // stay on the authenticated path; this table only holds the request + its
+  // server-computed price snapshot (the client never sends amounts).
+  selfOrders: defineTable({
+    cafeId: v.id('cafes'),
+    tableId: v.optional(v.id('tables')),
+    tableName: v.optional(v.string()), // snapshot for the staff queue
+    status: v.union(v.literal('new'), v.literal('accepted'), v.literal('rejected')),
+    clientId: v.string(), // idempotency (browser UUID)
+    customerNote: v.optional(v.string()),
+    lines: v.array(
+      v.object({
+        menuItemId: v.id('menuItems'),
+        nameSnapshot: v.string(),
+        qty: v.number(),
+        unitPriceIDR: v.number(), // base + modifier adjustments, SERVER-computed
+        variantId: v.optional(v.id('menuItemVariants')),
+        variantName: v.optional(v.string()),
+        modifierOptionIds: v.array(v.id('modifierOptions')),
+        modifierLabels: v.array(v.string()),
+      })
+    ),
+    subtotalIDR: v.number(), // server-computed snapshot
+    createdAt: v.number(),
+    acceptedAt: v.optional(v.number()),
+  })
+    .index('by_cafe_clientId', ['cafeId', 'clientId'])
+    .index('by_cafe_status', ['cafeId', 'status'])
+    .index('by_cafe_created', ['cafeId', 'createdAt']),
 
   heldOrders: defineTable({
     cafeId: v.id('cafes'),

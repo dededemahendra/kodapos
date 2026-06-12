@@ -35,11 +35,11 @@ async function makeCustomer(
   return await asOwner.mutation(api.customers.create, { name, phone });
 }
 
-// A datetime today around noon (well within the cafe-local day for any reasonable tz).
+// The live instant — provably within the cafe-tz "today" window the queries
+// compute (both use the same Date.now()), so it's tz-/midnight-boundary safe.
+// (A machine-local noon can land on a different calendar day than the cafe tz.)
 function todayNoon(): number {
-  const d = new Date();
-  d.setHours(12, 0, 0, 0);
-  return d.getTime();
+  return Date.now();
 }
 
 describe('reservations create + list', () => {
@@ -263,7 +263,7 @@ describe('reservations list window + todayByTable', () => {
     const r2 = await asOwner.mutation(api.reservations.create, {
       customerName: 'Seated',
       partySize: 3,
-      at: today + 60_000,
+      at: today,
       tableId,
     });
     await asOwner.mutation(api.reservations.setStatus, { id: r2, status: 'seated' });

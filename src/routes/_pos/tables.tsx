@@ -3,8 +3,9 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
-import { Grid3x3, Settings2 } from 'lucide-react';
+import { Grid3x3, QrCode, Settings2 } from 'lucide-react';
 import { useState } from 'react';
+import { QrPrintDialog } from '~/components/sale/qr-print-dialog';
 import { TableManageDialog } from '~/components/tables/table-manage-dialog';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
@@ -22,6 +23,7 @@ function TablesPage() {
   const { isOwner } = usePermissions();
   const { t } = useLingui();
   const [manageOpen, setManageOpen] = useState(false);
+  const [qrTarget, setQrTarget] = useState<{ id: Id<'tables'>; name: string } | null>(null);
 
   const reservationByTable = new Map<
     Id<'tables'>,
@@ -87,48 +89,73 @@ function TablesPage() {
               </Badge>
             ) : null;
 
+            const qrButton = (
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label={t`Cetak QR ${table.name}`}
+                className="absolute right-1.5 top-1.5 size-7"
+                onClick={() => setQrTarget({ id: table._id, name: table.name })}
+              >
+                <QrCode className="size-4" />
+              </Button>
+            );
+
             return table.heldOrderId ? (
-              <Link
-                key={table._id}
-                to="/sale"
-                search={{ recall: table.heldOrderId }}
-                className={`flex flex-col gap-1 rounded-lg border bg-card p-4 text-card-foreground shadow-sm transition-colors hover:border-primary${
-                  reservation ? ' ring-1 ring-primary/30' : ''
-                }`}
-              >
-                <div className="flex items-center gap-1.5 font-medium">
-                  <span className="text-primary" aria-hidden="true">
-                    ●
+              <div key={table._id} className="relative">
+                <Link
+                  to="/sale"
+                  search={{ recall: table.heldOrderId }}
+                  className={`flex flex-col gap-1 rounded-lg border bg-card p-4 pr-9 text-card-foreground shadow-sm transition-colors hover:border-primary${
+                    reservation ? ' ring-1 ring-primary/30' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-medium">
+                    <span className="text-primary" aria-hidden="true">
+                      ●
+                    </span>
+                    <span className="truncate">{table.name}</span>
+                  </div>
+                  {reservationChip}
+                  <span className="text-sm tabular-nums">{formatIDR(table.totalIDR)}</span>
+                  <span className="text-xs text-muted-foreground">
+                    <Trans>{table.itemCount} item</Trans>
                   </span>
-                  <span className="truncate">{table.name}</span>
-                </div>
-                {reservationChip}
-                <span className="text-sm tabular-nums">{formatIDR(table.totalIDR)}</span>
-                <span className="text-xs text-muted-foreground">
-                  <Trans>{table.itemCount} item</Trans>
-                </span>
-              </Link>
+                </Link>
+                {qrButton}
+              </div>
             ) : (
-              <Link
-                key={table._id}
-                to="/sale"
-                search={{ table: table._id }}
-                className={`flex flex-col gap-1 rounded-lg border border-dashed bg-card p-4 text-card-foreground transition-colors hover:border-primary${
-                  reservation ? ' ring-1 ring-primary/30' : ''
-                }`}
-              >
-                <span className="truncate font-medium">{table.name}</span>
-                {reservationChip}
-                <span className="text-xs text-muted-foreground">
-                  <Trans>kosong</Trans>
-                </span>
-              </Link>
+              <div key={table._id} className="relative">
+                <Link
+                  to="/sale"
+                  search={{ table: table._id }}
+                  className={`flex flex-col gap-1 rounded-lg border border-dashed bg-card p-4 pr-9 text-card-foreground transition-colors hover:border-primary${
+                    reservation ? ' ring-1 ring-primary/30' : ''
+                  }`}
+                >
+                  <span className="truncate font-medium">{table.name}</span>
+                  {reservationChip}
+                  <span className="text-xs text-muted-foreground">
+                    <Trans>kosong</Trans>
+                  </span>
+                </Link>
+                {qrButton}
+              </div>
             );
           })}
         </div>
       )}
 
       <TableManageDialog open={manageOpen} onOpenChange={setManageOpen} />
+      <QrPrintDialog
+        open={qrTarget !== null}
+        onOpenChange={(o) => {
+          if (!o) setQrTarget(null);
+        }}
+        tableId={qrTarget?.id ?? null}
+        tableName={qrTarget?.name ?? ''}
+      />
     </main>
   );
 }

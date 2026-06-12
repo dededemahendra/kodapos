@@ -2,6 +2,7 @@ import { Trans } from '@lingui/react/macro';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
+import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { NavUser } from '~/components/nav-user';
 import { usePermissions } from '~/lib/permissions';
@@ -10,6 +11,8 @@ export function RegisterTopBar() {
   const cafe = useQuery(api.cafes.myCafe, {});
   const { isOwner } = usePermissions();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const selfOrders = useQuery(api.selfOrders.queue);
+  const pendingCount = selfOrders?.length ?? 0;
 
   const isActive = (to: string) => path === to || path.startsWith(`${to}/`);
 
@@ -25,6 +28,20 @@ export function RegisterTopBar() {
           variant={isActive('/tables') ? 'secondary' : 'ghost'}
         >
           <Link to="/tables"><Trans>Meja</Trans></Link>
+        </Button>
+        <Button
+          asChild
+          size="sm"
+          variant={isActive('/self-orders') ? 'secondary' : 'ghost'}
+        >
+          <Link to="/self-orders">
+            <Trans>Pesanan Masuk</Trans>
+            {pendingCount > 0 ? (
+              <Badge variant="destructive" className="ml-1.5">
+                {pendingCount}
+              </Badge>
+            ) : null}
+          </Link>
         </Button>
         <Button
           asChild
