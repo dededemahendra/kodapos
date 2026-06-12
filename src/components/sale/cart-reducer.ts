@@ -58,12 +58,16 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'addLine': {
       const incoming = action.line;
-      // De-dup only when the line has NO modifiers and an existing line of the
-      // same item also has no modifiers. With modifiers, always push a new line
-      // because the cashier might intend different selections.
+      // De-dup only when the line has NO modifiers, the SAME variant, and an
+      // existing line of the same item/variant also has no modifiers. With
+      // modifiers, or a different variant (e.g. Latte S vs Latte L), always push
+      // a new line — merging would charge the first variant's price for both.
       if (incoming.modifierOptionIds.length === 0) {
         const idx = state.lines.findIndex(
-          (l) => l.menuItemId === incoming.menuItemId && l.modifierOptionIds.length === 0
+          (l) =>
+            l.menuItemId === incoming.menuItemId &&
+            l.modifierOptionIds.length === 0 &&
+            l.variantId === incoming.variantId
         );
         if (idx !== -1) {
           const existing = state.lines[idx];
