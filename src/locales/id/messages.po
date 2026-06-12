@@ -478,8 +478,8 @@ msgstr "Ambil di tempat"
 #~ msgstr "Anda tidak punya akses ke halaman ini."
 
 #: src/components/permission/require-permission.tsx
-msgid "Anda tidak punya akses ke halaman ini. Hubungi pemilik untuk meminta akses."
-msgstr "Anda tidak punya akses ke halaman ini. Hubungi pemilik untuk meminta akses."
+#~ msgid "Anda tidak punya akses ke halaman ini. Hubungi pemilik untuk meminta akses."
+#~ msgstr "Anda tidak punya akses ke halaman ini. Hubungi pemilik untuk meminta akses."
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Anggota"
@@ -1946,6 +1946,10 @@ msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkai
 msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait syarat dan ketentuan, hubungi tim kodapos."
 msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait syarat dan ketentuan, hubungi tim kodapos."
 
+#: src/components/permission/require-permission.tsx
+msgid "Halaman ini perlu akses pemilik. Anda login sebagai pemilik, tetapi kasir aktif di kasir ini bukan pemilik — masuk sebagai pemilik untuk membukanya."
+msgstr "Halaman ini perlu akses pemilik. Anda login sebagai pemilik, tetapi kasir aktif di kasir ini bukan pemilik — masuk sebagai pemilik untuk membukanya."
+
 #: src/components/coming-soon.tsx
 msgid "Halaman ini sedang dalam pengembangan."
 msgstr "Halaman ini sedang dalam pengembangan."
@@ -2813,6 +2817,10 @@ msgstr "Margin muncul setelah ada item terjual pada rentang ini."
 #: src/routes/_public/signup.tsx
 msgid "Masuk"
 msgstr "Masuk"
+
+#: src/components/permission/switch-to-owner.tsx
+msgid "Masuk sebagai pemilik"
+msgstr "Masuk sebagai pemilik"
 
 #. placeholder {0}: new Date(open.clockInAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', })
 #: src/routes/_pos/time-clock.tsx
@@ -3833,6 +3841,10 @@ msgstr "PIN"
 msgid "PIN 4 digit"
 msgstr "PIN 4 digit"
 
+#: src/components/permission/switch-to-owner.tsx
+msgid "PIN pemilik"
+msgstr "PIN pemilik"
+
 #: src/routes/_pos/onboarding/cashier.tsx
 msgid "PIN Pemilik"
 msgstr "PIN Pemilik"
@@ -3841,6 +3853,7 @@ msgstr "PIN Pemilik"
 msgid "PIN Pemilik & Kasir"
 msgstr "PIN Pemilik & Kasir"
 
+#: src/components/permission/switch-to-owner.tsx
 #: src/routes/_pos/pin.tsx
 msgid "PIN salah."
 msgstr "PIN salah."
