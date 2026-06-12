@@ -169,7 +169,7 @@ export function SaleScreen({
   );
 
   function onItemTap(row: ItemForSale) {
-    if (row.attachedGroups.length > 0) {
+    if (row.variants.length > 0 || row.attachedGroups.length > 0) {
       setPickerRow(row);
       return;
     }
@@ -244,6 +244,9 @@ export function SaleScreen({
             line: {
               menuItemId: pickerRow.item._id,
               nameSnapshot: pickerRow.item.name,
+              ...(pick.variantId
+                ? { variantId: pick.variantId, variantName: pick.variantName }
+                : {}),
               qty: pick.qty,
               unitPriceIDR: pick.unitPriceIDR,
               modifierOptionIds: pick.modifierOptionIds,

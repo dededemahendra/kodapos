@@ -12,6 +12,8 @@ export type CartLine = {
   lineKey: string;
   menuItemId: Id<'menuItems'>;
   nameSnapshot: string;
+  variantId?: Id<'menuItemVariants'>;
+  variantName?: string;
   qty: number;
   unitPriceIDR: number;
   modifierOptionIds: Array<Id<'modifierOptions'>>;

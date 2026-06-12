@@ -1,16 +1,18 @@
 import { useLingui } from '@lingui/react/macro';
 import { Trans } from '@lingui/react/macro';
-import type { Doc } from 'convex/_generated/dataModel';
+import type { Doc, Id } from 'convex/_generated/dataModel';
 import { formatIDR } from '~/lib/money';
 
 export function ItemCard({
   item,
+  variants,
   imageUrl,
   hasModifiers,
   lowStockIngredientNames,
   onTap,
 }: {
   item: Doc<'menuItems'>;
+  variants: { _id: Id<'menuItemVariants'>; name: string; priceIDR: number }[];
   imageUrl: string | null;
   hasModifiers: boolean;
   lowStockIngredientNames: string[];
@@ -36,7 +38,13 @@ export function ItemCard({
         <div className="font-medium leading-tight">{item.name}</div>
         {isLow ? <span aria-label={t`Stok rendah`}>⚠</span> : null}
       </div>
-      <div className="text-sm text-muted-foreground mt-1">{formatIDR(item.priceIDR)}</div>
+      <div className="text-sm text-muted-foreground mt-1">
+        {variants.length > 0 ? (
+          <Trans>dari {formatIDR(Math.min(...variants.map((v) => v.priceIDR)))}</Trans>
+        ) : (
+          formatIDR(item.priceIDR)
+        )}
+      </div>
       {hasModifiers ? (
         <div className="mt-2 inline-block text-[10px] uppercase tracking-wide text-primary bg-accent rounded px-1.5 py-0.5">
           <Trans>Pilihan</Trans>
