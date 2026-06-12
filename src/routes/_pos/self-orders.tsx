@@ -100,7 +100,7 @@ function SelfOrdersPage() {
                       navigate({ to: '/sale', search: { selfOrder: order.id } })
                     }
                   >
-                    <Trans>Terima</Trans>
+                    <Trans context="self-order action">Terima</Trans>
                   </Button>
                   <Button
                     type="button"

@@ -910,6 +910,10 @@ msgstr "No purchase orders yet."
 msgid "Belum ada pesanan di shift ini."
 msgstr "No orders in this shift."
 
+#: src/routes/_pos/self-orders.tsx
+msgid "Belum ada pesanan masuk."
+msgstr "No incoming orders yet."
+
 #: src/routes/_pos/reports/orders.tsx
 msgid "Belum ada pesanan pada rentang ini."
 msgstr "No orders in this range."
@@ -1243,6 +1247,7 @@ msgstr "Notes"
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
+#: src/components/public/cart-review-sheet.tsx
 #: src/components/shift/cash-movement-dialog.tsx
 msgid "Catatan (opsional)"
 msgstr "Note (optional)"
@@ -1255,6 +1260,10 @@ msgstr "Note (optional)"
 msgid "Cetak"
 msgstr "Print"
 
+#: src/components/sale/qr-print-dialog.tsx
+msgid "Cetak dan tempel di meja. Tamu pindai untuk memesan sendiri."
+msgstr "Print and stick it on the table. Guests scan to order themselves."
+
 #: src/routes/_pos/menu/labels.tsx
 msgid "Cetak label"
 msgstr "Print labels"
@@ -1266,6 +1275,15 @@ msgstr "Print labels"
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Cetak otomatis"
 msgstr "Auto print"
+
+#: src/components/sale/qr-print-dialog.tsx
+msgid "Cetak QR"
+msgstr "Print QR"
+
+#. placeholder {0}: table.name
+#: src/routes/_pos/tables.tsx
+msgid "Cetak QR {0}"
+msgstr "Print QR {0}"
 
 #: src/routes/_pos/shift/close.tsx
 msgid "Cetak ringkasan"
@@ -1573,6 +1591,10 @@ msgstr "Failed to generate barcode."
 msgid "Gagal membuat pesanan beli."
 msgstr "Failed to create the purchase order."
 
+#: src/components/sale/qr-print-dialog.tsx
+msgid "Gagal membuat QR."
+msgstr "Failed to generate the QR."
+
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 msgid "Gagal membuat tagihan QRIS."
 msgstr "Failed to create the QRIS charge."
@@ -1736,6 +1758,10 @@ msgstr "Failed to upload logo."
 #: src/routes/_pos/settings/tax.tsx
 msgid "Gagal mengunggah QRIS."
 msgstr "Failed to upload QRIS."
+
+#: src/routes/_pos/self-orders.tsx
+msgid "Gagal menolak pesanan."
+msgstr "Failed to reject the order."
 
 #: src/routes/_pos/shift/close.tsx
 msgid "Gagal menutup shift."
@@ -1929,6 +1955,7 @@ msgid "Halaman tidak ditemukan"
 msgstr "Page not found"
 
 #: src/components/menu/modifier-group-form.tsx
+#: src/components/public/cart-review-sheet.tsx
 #: src/components/sale/customer-section.tsx
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/reports/expenses.tsx
@@ -1997,6 +2024,8 @@ msgid "Harga (Rp)"
 msgstr "Price (Rp)"
 
 #. placeholder {0}: formatIDR(item.item.priceIDR)
+#. placeholder {0}: formatIDR(menuItem.priceIDR)
+#: src/components/public/item-picker-sheet.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Harga dasar {0}"
 msgstr "Base price {0}"
@@ -2182,6 +2211,7 @@ msgid "Jumat"
 msgstr "Friday"
 
 #: src/components/inventory/recipe-editor.tsx
+#: src/components/public/item-picker-sheet.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/refund-dialog.tsx
 #: src/routes/_pos/inventory/waste.tsx
@@ -2466,6 +2496,10 @@ msgstr "Change"
 msgid "Kepadatan tampilan"
 msgstr "Display density"
 
+#: src/components/public/cart-review-sheet.tsx
+msgid "Keranjang"
+msgstr "Cart"
+
 #: src/components/sale/sale-screen.tsx
 msgid "Keranjang berisi item. Memuat pesanan ditahan akan menggantinya."
 msgstr "The cart has items. Loading a held order will replace it."
@@ -2496,6 +2530,10 @@ msgstr "Description"
 msgid "Kirim ke WhatsApp"
 msgstr "Send to WhatsApp"
 
+#: src/components/public/cart-review-sheet.tsx
+msgid "Kirim pesanan"
+msgstr "Send order"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Kirim struk & notifikasi via WhatsApp."
 msgstr "Send receipts & notifications via WhatsApp."
@@ -2510,6 +2548,10 @@ msgstr "Card code"
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kode pos"
 msgstr "Postal code"
+
+#: src/routes/_public/order.$token.tsx
+msgid "Kode QR ini tidak dikenali. Mohon pindai ulang QR di meja Anda."
+msgstr "This QR code is not recognized. Please rescan the QR at your table."
 
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Kode QRIS"
@@ -2572,6 +2614,11 @@ msgstr "Auto-lock when idle"
 #: src/routes/_pos/customers.tsx
 msgid "Kunjungan"
 msgstr "Visits"
+
+#: src/components/public/cart-review-sheet.tsx
+#: src/components/public/item-picker-sheet.tsx
+msgid "Kurangi"
+msgstr "Decrease"
 
 #: src/components/sale/cart-line-row.tsx
 msgid "Kurangi jumlah"
@@ -2672,6 +2719,10 @@ msgstr "{label} holiday — expected up {pct}%"
 #: src/components/forecast/render-driver.tsx
 msgid "Libur {label} — perkiraan turun {0}%"
 msgstr "{label} holiday — expected down {0}%"
+
+#: src/components/public/public-menu.tsx
+msgid "Lihat keranjang ({cartCount})"
+msgstr "View cart ({cartCount})"
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Lihat laporan"
@@ -2793,6 +2844,11 @@ msgstr "Max"
 msgid "Meja"
 msgstr "Table"
 
+#. placeholder {0}: menu.table.name
+#: src/components/public/public-menu.tsx
+msgid "Meja {0}"
+msgstr "Table {0}"
+
 #: src/components/tables/table-manage-dialog.tsx
 msgid "Meja disimpan."
 msgstr "Table saved."
@@ -2897,6 +2953,10 @@ msgstr "Menu"
 msgid "Menunggu"
 msgstr "Pending"
 
+#: src/routes/_public/order.$token.tsx
+msgid "Menunggu konfirmasi…"
+msgstr "Awaiting confirmation…"
+
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 msgid "Menunggu pembayaran…"
 msgstr "Waiting for payment…"
@@ -2987,6 +3047,10 @@ msgstr "e.g. PB1 or VAT."
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "mis. Terima kasih telah berbelanja"
 #~ msgstr "e.g. Thank you for shopping with us"
+
+#: src/components/public/cart-review-sheet.tsx
+msgid "mis. tidak pedas"
+msgstr "e.g. not spicy"
 
 #: src/routes/_public/signup.tsx
 msgid "mis. Warren"
@@ -3250,6 +3314,8 @@ msgid "Opsional"
 msgstr "Optional"
 
 #. placeholder {0}: ag.group.maxSelect
+#. placeholder {0}: group.maxSelect
+#: src/components/public/item-picker-sheet.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Opsional (maks {0})"
 msgstr "Optional (max {0})"
@@ -3258,6 +3324,7 @@ msgstr "Optional (max {0})"
 msgid "OVO"
 msgstr "OVO"
 
+#: src/components/public/cart-review-sheet.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Pajak"
 msgstr "Tax"
@@ -3539,6 +3606,10 @@ msgstr "Low-stock alerts"
 msgid "Perkiraan kerugian:"
 msgstr "Estimated loss:"
 
+#: src/components/public/cart-review-sheet.tsx
+msgid "Perkiraan total"
+msgstr "Estimated total"
+
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
@@ -3583,6 +3654,10 @@ msgstr "Stock changes for this ingredient will be recorded here."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pesan"
 msgstr "Message"
+
+#: src/routes/_public/order.$token.tsx
+msgid "Pesan lagi"
+msgstr "Order again"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pesan-antar"
@@ -3635,9 +3710,35 @@ msgstr "Held orders"
 msgid "Pesanan ditahan."
 msgstr "Order held."
 
+#: src/routes/_public/order.$token.tsx
+msgid "Pesanan diterima ✓"
+msgstr "Order accepted ✓"
+
+#: src/routes/_public/order.$token.tsx
+msgid "Pesanan ditolak"
+msgstr "Order rejected"
+
+#: src/routes/_pos/self-orders.tsx
+msgid "Pesanan ditolak."
+msgstr "Order rejected."
+
+#: src/routes/_pos/self-orders.tsx
+msgid "Pesanan ini akan dihapus dari daftar pesanan masuk."
+msgstr "This order will be removed from the incoming orders list."
+
+#: src/components/app-shared.tsx
+#: src/components/sale/register-top-bar.tsx
+#: src/routes/_pos/self-orders.tsx
+msgid "Pesanan Masuk"
+msgstr "Incoming orders"
+
 #: src/components/dashboard-invoices.tsx
 msgid "Pesanan terakhir dan statusnya."
 msgstr "Latest orders and their status."
+
+#: src/routes/_public/order.$token.tsx
+msgid "Pesanan terkirim"
+msgstr "Order sent"
 
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan tidak ditemukan."
@@ -3714,6 +3815,7 @@ msgstr "Pick dates"
 msgid "Pilih ulang"
 msgstr "Reselect"
 
+#: src/components/public/item-picker-sheet.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Pilih varian"
 msgstr "Choose a variant"
@@ -3903,6 +4005,14 @@ msgstr "Play a confirmation sound after a successful sale."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Putuskan"
 msgstr "Disconnect"
+
+#: src/components/sale/qr-print-dialog.tsx
+msgid "QR pesan mandiri"
+msgstr "Self-order QR"
+
+#: src/routes/_public/order.$token.tsx
+msgid "QR tidak valid"
+msgstr "Invalid QR"
 
 #: src/components/channel-sales-chart.tsx
 #: src/components/sale/payment-methods.tsx
@@ -4514,6 +4624,7 @@ msgstr "Receipt & Printer"
 msgid "Suara saat transaksi berhasil"
 msgstr "Sound on successful sale"
 
+#: src/components/public/cart-review-sheet.tsx
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -4562,6 +4673,8 @@ msgstr "Hold"
 msgid "Tahan pesanan"
 msgstr "Hold order"
 
+#: src/components/public/cart-review-sheet.tsx
+#: src/components/public/item-picker-sheet.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tambah"
 msgstr "Add"
@@ -4610,6 +4723,10 @@ msgstr "Add category"
 #: src/components/menu/category-table.tsx
 msgid "Tambah Kategori"
 msgstr "Add Category"
+
+#: src/components/public/item-picker-sheet.tsx
+msgid "Tambah ke keranjang"
+msgstr "Add to cart"
 
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Tambah ke pesanan"
@@ -4776,6 +4893,7 @@ msgstr "Date and time are required."
 
 #: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/hold-order-dialog.tsx
+#: src/routes/_pos/self-orders.tsx
 msgid "Tanpa meja"
 msgstr "No table"
 
@@ -4858,6 +4976,11 @@ msgstr "Connected via the provider integration."
 #: src/components/inventory/purchase-order-detail.tsx
 msgid "Terima"
 msgstr "Receive"
+
+#: src/routes/_pos/self-orders.tsx
+msgctxt "self-order action"
+msgid "Terima"
+msgstr "Accept"
 
 #. placeholder {0}: line.ingredientName
 #: src/components/inventory/purchase-order-detail.tsx
@@ -5013,6 +5136,14 @@ msgstr "Review inventory"
 msgid "Tipe"
 msgstr "Type"
 
+#: src/routes/_pos/self-orders.tsx
+msgid "Tolak"
+msgstr "Reject"
+
+#: src/routes/_pos/self-orders.tsx
+msgid "Tolak pesanan?"
+msgstr "Reject order?"
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Tombol nominal cepat"
 #~ msgstr "Quick cash buttons"
@@ -5035,6 +5166,7 @@ msgid "Total"
 msgstr "Total"
 
 #. placeholder {0}: formatIDR(qty * unitPriceIDR)
+#: src/components/public/item-picker-sheet.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Total <0>{0}</0>"
 msgstr "Total <0>{0}</0>"
@@ -5181,6 +5313,7 @@ msgstr "Edit promo"
 msgid "Ubah reservasi"
 msgstr "Edit reservation"
 
+#: src/components/public/item-picker-sheet.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Ukuran"
 msgstr "Size"
@@ -5307,7 +5440,10 @@ msgid "Wajib"
 msgstr "Required"
 
 #. placeholder {0}: ag.group.minSelect
+#. placeholder {0}: group.minSelect
 #. placeholder {1}: ag.group.maxSelect > ag.group.minSelect ? `-${ag.group.maxSelect}` : ''
+#. placeholder {1}: group.maxSelect > group.minSelect ? `-${group.maxSelect}` : ''
+#: src/components/public/item-picker-sheet.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Wajib (pilih {0}{1})"
 msgstr "Required (select {0}{1})"
