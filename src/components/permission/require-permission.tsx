@@ -2,6 +2,7 @@ import { Trans } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
 import { Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { SwitchToOwner } from '~/components/permission/switch-to-owner';
 import { Button } from '~/components/ui/button';
 import {
   Empty,
@@ -29,9 +30,10 @@ export function RequirePermission({
           <EmptyHeader>
             <EmptyMedia variant="icon"><Lock /></EmptyMedia>
             <EmptyTitle><Trans>Akses ditolak</Trans></EmptyTitle>
-            <EmptyDescription><Trans>Anda tidak punya akses ke halaman ini. Hubungi pemilik untuk meminta akses.</Trans></EmptyDescription>
+            <EmptyDescription><Trans>Halaman ini perlu akses pemilik. Anda login sebagai pemilik, tetapi kasir aktif di kasir ini bukan pemilik — masuk sebagai pemilik untuk membukanya.</Trans></EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
+            <SwitchToOwner />
             <Button asChild variant="outline" size="sm"><Link to="/sale"><Trans>Kembali ke kasir</Trans></Link></Button>
           </EmptyContent>
         </Empty>
