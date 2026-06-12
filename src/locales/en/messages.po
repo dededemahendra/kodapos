@@ -49,6 +49,11 @@ msgstr "\"{0}\" will be hidden from the active list. It can be restored from the
 msgid "\"{0}\" akan disembunyikan dari menu dan layar kasir."
 msgstr "\"{0}\" will be hidden from the menu and cashier screen."
 
+#. placeholder {0}: archiveTarget.code
+#: src/routes/_pos/gift-cards.tsx
+msgid "\"{0}\" tidak akan bisa digunakan lagi."
+msgstr "\"{0}\" can no longer be used."
+
 #. placeholder {0}: archiveTarget.name
 #: src/routes/_pos/promos.tsx
 msgid "\"{0}\" tidak akan bisa dipakai di kasir."
@@ -120,6 +125,11 @@ msgstr "{0} items · {1} low stock"
 #: src/routes/_pos/recipes.tsx
 msgid "{0} item · {1} tanpa resep"
 msgstr "{0} items · {1} without recipe"
+
+#. placeholder {0}: counts.active
+#: src/routes/_pos/gift-cards.tsx
+msgid "{0} kartu aktif"
+msgstr "{0} active cards"
 
 #. placeholder {0}: detail.visitCount
 #: src/components/customer/customer-detail-sheet.tsx
@@ -326,6 +336,7 @@ msgstr "Access denied"
 
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/customers.tsx
+#: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -336,6 +347,7 @@ msgstr "Row actions"
 
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/customers.tsx
+#: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -425,6 +437,7 @@ msgstr "Members"
 
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/customers.tsx
+#: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -439,6 +452,7 @@ msgstr "Archive"
 #: src/components/menu/confirm-archive.tsx
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/customers.tsx
+#: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -467,6 +481,10 @@ msgstr "Archive item"
 #: src/routes/_pos/menu/index.tsx
 msgid "Arsipkan item?"
 msgstr "Archive item?"
+
+#: src/routes/_pos/gift-cards.tsx
+msgid "Arsipkan kartu hadiah?"
+msgstr "Archive gift card?"
 
 #: src/components/menu/category-table.tsx
 msgid "Arsipkan kategori?"
@@ -615,6 +633,7 @@ msgstr "Spoiled/Expired"
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
 #: src/components/expenses/expense-dialog.tsx
+#: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
@@ -660,6 +679,7 @@ msgstr "Void this order?"
 msgid "Bawa pulang"
 msgstr "Takeaway"
 
+#: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
 msgid "Bayar"
 msgstr "Pay"
@@ -714,6 +734,10 @@ msgstr "No groups attached."
 #: src/routes/_pos/recipes.tsx
 msgid "Belum ada item."
 msgstr "No items yet."
+
+#: src/routes/_pos/gift-cards.tsx
+msgid "Belum ada kartu hadiah."
+msgstr "No gift cards yet."
 
 #: src/components/menu/category-table.tsx
 msgid "Belum ada kategori."
@@ -1275,6 +1299,7 @@ msgstr "Failed to update item."
 msgid "Gagal memperbarui lokasi cuaca."
 msgstr "Failed to update weather location."
 
+#: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
@@ -1329,6 +1354,10 @@ msgstr "Failed to record stock."
 msgid "Gagal mendaftar."
 msgstr "Sign up failed."
 
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Gagal menerbitkan kartu hadiah."
+msgstr "Failed to issue gift card."
+
 #: src/routes/_pos/inventory/index.tsx
 msgid "Gagal mengarsipkan bahan."
 msgstr "Failed to archive ingredient."
@@ -1340,6 +1369,10 @@ msgstr "Failed to archive group."
 #: src/routes/_pos/menu/index.tsx
 msgid "Gagal mengarsipkan item."
 msgstr "Failed to archive item."
+
+#: src/routes/_pos/gift-cards.tsx
+msgid "Gagal mengarsipkan kartu hadiah."
+msgstr "Failed to archive gift card."
 
 #: src/components/menu/category-table.tsx
 msgid "Gagal mengarsipkan kategori."
@@ -1380,6 +1413,10 @@ msgstr "Could not delete."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Gagal menghubungkan integrasi."
 msgstr "Failed to connect integration."
+
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Gagal mengisi saldo kartu."
+msgstr "Failed to top up card balance."
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Gagal mengunggah gambar."
@@ -1708,6 +1745,11 @@ msgstr "Inventory"
 #~ msgid "Invoice #1045 marked paid"
 #~ msgstr "Invoice #1045 marked paid"
 
+#: src/components/giftcard/gift-card-form-dialog.tsx
+#: src/routes/_pos/gift-cards.tsx
+msgid "Isi saldo"
+msgstr "Top up"
+
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/recipes.tsx
@@ -1815,6 +1857,14 @@ msgstr "Quantity wasted"
 msgid "Jumlah harus lebih dari nol."
 msgstr "Amount must be greater than zero."
 
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Jumlah pengisian"
+msgstr "Top-up amount"
+
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Jumlah pengisian harus lebih dari 0."
+msgstr "Top-up amount must be greater than 0."
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Jumlah poin"
 msgstr "Points amount"
@@ -1844,6 +1894,7 @@ msgstr "We're still learning"
 msgid "Kamis"
 msgstr "Thursday"
 
+#: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Kartu"
 msgstr "Card"
@@ -1851,6 +1902,35 @@ msgstr "Card"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Kartu debit/kredit"
 msgstr "Debit/credit card"
+
+#: src/components/giftcard/gift-card-payment-dialog.tsx
+#: src/components/sale/cart-pane.tsx
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Kartu hadiah"
+msgstr "Gift card"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/gift-cards.tsx
+msgid "Kartu Hadiah"
+msgstr "Gift cards"
+
+#: src/routes/_pos/gift-cards.tsx
+msgid "Kartu hadiah diarsipkan."
+msgstr "Gift card archived."
+
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Kartu hadiah diterbitkan."
+msgstr "Gift card issued."
+
+#: src/components/giftcard/gift-card-payment-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Kartu hadiah tidak aktif."
+msgstr "Gift card is inactive."
+
+#: src/components/giftcard/gift-card-payment-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Kartu hadiah tidak ditemukan."
+msgstr "Gift card not found."
 
 #: src/components/sale/cart-pane.tsx
 msgid "Kas"
@@ -2033,6 +2113,13 @@ msgstr "Send to WhatsApp"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Kirim struk & notifikasi via WhatsApp."
 msgstr "Send receipts & notifications via WhatsApp."
+
+#: src/components/giftcard/gift-card-form-dialog.tsx
+#: src/components/giftcard/gift-card-payment-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
+#: src/routes/_pos/gift-cards.tsx
+msgid "Kode kartu"
+msgstr "Card code"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kode pos"
@@ -2306,6 +2393,11 @@ msgstr "Creating charge…"
 msgid "Membuka…"
 msgstr "Opening…"
 
+#: src/components/giftcard/gift-card-payment-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Memeriksa kartu…"
+msgstr "Checking card…"
+
 #. placeholder {0}: data.daysNeeded
 #. placeholder {1}: data.daysCollected
 #. placeholder {2}: data.etaDateKey
@@ -2313,6 +2405,7 @@ msgstr "Opening…"
 msgid "Memerlukan minimal {0} hari data (terkumpul {1}). Perkiraan akan aktif sekitar {2}."
 msgstr "Needs at least {0} days of data (collected {1}). Forecasts go live around {2}."
 
+#: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
@@ -2399,6 +2492,7 @@ msgstr "Closing…"
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
 #: src/components/expenses/expense-dialog.tsx
+#: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/recipe-editor.tsx
@@ -3160,6 +3254,7 @@ msgstr "Points outstanding"
 msgid "Poin disesuaikan."
 msgstr "Points adjusted."
 
+#: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
@@ -3446,9 +3541,32 @@ msgstr "Saturday"
 msgid "Salah masak"
 msgstr "Mis-cooked"
 
+#: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/components/sale/split-payment-dialog.tsx
+#: src/routes/_pos/gift-cards.tsx
 msgid "Saldo"
 msgstr "Balance"
+
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Saldo awal"
+msgstr "Initial balance"
+
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Saldo kartu ditambahkan."
+msgstr "Card balance added."
+
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Saldo kartu harus lebih dari 0."
+msgstr "Card balance must be greater than 0."
+
+#: src/components/giftcard/gift-card-payment-dialog.tsx
+msgid "Saldo kurang — gunakan Bagi pembayaran."
+msgstr "Balance too low — use Split payment."
+
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Saldo kurang."
+msgstr "Balance too low."
 
 #. placeholder {0}: detail.pointsBalance
 #: src/components/customer/customer-detail-sheet.tsx
@@ -3688,6 +3806,7 @@ msgstr "Staff"
 #~ msgstr "Staff"
 
 #: src/components/menu/category-table.tsx
+#: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
@@ -4032,6 +4151,15 @@ msgstr "Paste the keys from your Xendit dashboard. Keys are stored securely on t
 msgid "Terapkan"
 msgstr "Apply"
 
+#: src/components/giftcard/gift-card-form-dialog.tsx
+msgid "Terbitkan"
+msgstr "Issue"
+
+#: src/components/giftcard/gift-card-form-dialog.tsx
+#: src/routes/_pos/gift-cards.tsx
+msgid "Terbitkan kartu"
+msgstr "Issue card"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Terhubung"
 msgstr "Connected"
@@ -4124,6 +4252,10 @@ msgstr "No archived items."
 #~ msgid "Tidak ada item."
 #~ msgstr "No items."
 
+#: src/routes/_pos/gift-cards.tsx
+msgid "Tidak ada kartu hadiah diarsipkan."
+msgstr "No archived gift cards."
+
 #: src/components/menu/category-table.tsx
 msgid "Tidak ada kategori diarsipkan."
 msgstr "No archived categories."
@@ -4203,6 +4335,7 @@ msgstr "Total"
 msgid "Total <0>{0}</0>"
 msgstr "Total <0>{0}</0>"
 
+#: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
