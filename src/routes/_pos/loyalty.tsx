@@ -1,9 +1,11 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
+import type { LoyaltyTier } from 'convex/lib/loyalty';
 import { useMutation, useQuery } from 'convex/react';
-import { Award } from 'lucide-react';
+import { Award, X } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '~/components/ui/button';
 import { RowSep, SettingRow, SettingsSection } from '~/components/settings/primitives';
 import { SaveBar } from '~/components/settings/save-bar';
 import { useEditableState } from '~/components/settings/use-editable-state';
@@ -37,6 +39,7 @@ interface ConfigDraft {
   earnRatePerIDR: number;
   redeemBlockPoints: number;
   redeemBlockIDR: number;
+  tiers: LoyaltyTier[];
 }
 
 /** Parse an integer input, clamping to a non-negative number (NaN → 0). */
@@ -45,13 +48,21 @@ function toInt(value: string): number {
   return Number.isNaN(n) ? 0 : n;
 }
 
+/** Parse a float input (NaN → 1, the neutral multiplier). */
+function toFloat(value: string): number {
+  const n = Number.parseFloat(value);
+  return Number.isNaN(n) ? 1 : n;
+}
+
 function LoyaltyPage() {
   const { t } = useLingui();
   const config = useQuery(api.loyalty.getConfig);
   const stats = useQuery(api.loyalty.stats);
   const updateConfig = useMutation(api.loyalty.updateConfig);
 
-  const { draft, setDraft, dirty, reset } = useEditableState<ConfigDraft>(config);
+  // Seed the draft with `tiers` always an array so the editor binds cleanly.
+  const seed: ConfigDraft | undefined = config && { ...config, tiers: config.tiers ?? [] };
+  const { draft, setDraft, dirty, reset } = useEditableState<ConfigDraft>(seed);
   const [error, setError] = useState<string | null>(null);
 
   function patch(p: Partial<ConfigDraft>) {
@@ -59,15 +70,49 @@ function LoyaltyPage() {
     setDraft({ ...draft, ...p });
   }
 
+  function patchTier(index: number, p: Partial<LoyaltyTier>) {
+    if (!draft) return;
+    patch({ tiers: draft.tiers.map((tier, i) => (i === index ? { ...tier, ...p } : tier)) });
+  }
+
+  function addTier() {
+    if (!draft) return;
+    patch({ tiers: [...draft.tiers, { name: '', minSpendIDR: 0, earnMultiplier: 1 }] });
+  }
+
+  function removeTier(index: number) {
+    if (!draft) return;
+    patch({ tiers: draft.tiers.filter((_, i) => i !== index) });
+  }
+
   async function handleSave() {
     if (!draft) return;
     setError(null);
+
+    // Drop rows with an empty name; normalize the rest.
+    const tiers: LoyaltyTier[] = draft.tiers
+      .filter((tier) => tier.name.trim().length > 0)
+      .map((tier) => ({
+        name: tier.name.trim(),
+        minSpendIDR: Number.isNaN(tier.minSpendIDR) ? 0 : tier.minSpendIDR,
+        earnMultiplier: Number.isNaN(tier.earnMultiplier) ? 1 : tier.earnMultiplier,
+      }));
+
+    // Client-side guard: every multiplier must be ≥ 1.
+    if (tiers.some((tier) => tier.earnMultiplier < 1)) {
+      const msg = t`Pengali poin minimal 1.`;
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
     try {
       await updateConfig({
         enabled: draft.enabled,
         earnRatePerIDR: draft.earnRatePerIDR,
         redeemBlockPoints: draft.redeemBlockPoints,
         redeemBlockIDR: draft.redeemBlockIDR,
+        tiers,
       });
       toast.success(t`Pengaturan loyalitas disimpan.`);
     } catch (e) {
@@ -168,6 +213,71 @@ function LoyaltyPage() {
                   }
                 />
               </FieldGroup>
+
+              {/* ------------------------------------------------------------ */}
+              {/* Tiers                                                         */}
+              {/* ------------------------------------------------------------ */}
+              <div className="mt-6 border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium">
+                      <Trans>Tier</Trans>
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      <Trans>Pelanggan dengan belanja lebih tinggi memperoleh pengali poin.</Trans>
+                    </p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={addTier}>
+                    <Trans>+ Tambah tier</Trans>
+                  </Button>
+                </div>
+
+                {draft.tiers.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {draft.tiers.map((tier, index) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: tier rows are positional draft state with no stable id
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          value={tier.name}
+                          onChange={(e) => patchTier(index, { name: e.target.value })}
+                          placeholder={t`Nama tier`}
+                          aria-label={t`Nama tier`}
+                          className="flex-1"
+                        />
+                        <Input
+                          type="number"
+                          min={0}
+                          step={1}
+                          value={tier.minSpendIDR}
+                          onChange={(e) => patchTier(index, { minSpendIDR: toInt(e.target.value) })}
+                          aria-label={t`Belanja minimum`}
+                          className="w-32"
+                        />
+                        <Input
+                          type="number"
+                          min={1}
+                          step="0.1"
+                          value={tier.earnMultiplier}
+                          onChange={(e) =>
+                            patchTier(index, { earnMultiplier: toFloat(e.target.value) })
+                          }
+                          aria-label={t`Pengali poin`}
+                          className="w-20"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeTier(index)}
+                          aria-label={t`Hapus tier`}
+                        >
+                          <X />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {error && <FieldError className="mt-4">{error}</FieldError>}
             </SettingsSection>

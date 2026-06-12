@@ -1,6 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
+import { nextTierFor, tierFor } from 'convex/lib/loyalty';
 import { useMutation, useQuery } from 'convex/react';
 import { Pencil, Receipt } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
@@ -21,7 +22,7 @@ import { Skeleton } from '~/components/ui/skeleton';
 import { Spinner } from '~/components/ui/spinner';
 import { StatusBadge } from '~/components/ui/status-badge';
 import type { StatusBadgeVariant } from '~/components/ui/status-badge-variant';
-import { formatDate, formatIDR } from '~/lib/formater';
+import { formatCount, formatDate, formatIDR } from '~/lib/formater';
 import { toast } from '~/lib/toast';
 
 type TxnType = 'earn' | 'redeem' | 'adjust';
@@ -43,6 +44,7 @@ export function CustomerDetailSheet({
 }) {
   const { t } = useLingui();
   const detail = useQuery(api.customers.getDetail, customerId ? { id: customerId } : 'skip');
+  const loyaltyCfg = useQuery(api.loyalty.getConfig, {});
   const adjustPoints = useMutation(api.customers.adjustPoints);
 
   const [editOpen, setEditOpen] = useState(false);
@@ -107,6 +109,30 @@ export function CustomerDetailSheet({
           </p>
         ) : (
           <div className="mt-4 text-sm">
+            {(() => {
+              const tier = tierFor(detail.totalSpentIDR, loyaltyCfg?.tiers);
+              const next = nextTierFor(detail.totalSpentIDR, loyaltyCfg?.tiers);
+              if (!tier && !next) return null;
+              return (
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  {tier ? (
+                    <Badge variant="secondary">
+                      <Trans>
+                        {tier.name} · {tier.earnMultiplier}× poin
+                      </Trans>
+                    </Badge>
+                  ) : null}
+                  {next ? (
+                    <span className="text-xs text-muted-foreground">
+                      <Trans>
+                        Rp {formatCount(next.minSpendIDR - detail.totalSpentIDR)} lagi ke{' '}
+                        {next.name}
+                      </Trans>
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })()}
             <div className="flex flex-wrap items-center gap-3">
               <Badge>
                 <Trans>Saldo poin: {detail.pointsBalance}</Trans>
