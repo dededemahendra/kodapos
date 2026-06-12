@@ -45,7 +45,7 @@ function OrderPage() {
   const submit = useMutation(api.public.submitSelfOrder);
   const status = useQuery(
     api.public.selfOrderStatus,
-    selfOrderId ? { selfOrderId } : 'skip'
+    selfOrderId ? { selfOrderId, qrToken: token } : 'skip'
   );
 
   // --- cart mutators ---------------------------------------------------------

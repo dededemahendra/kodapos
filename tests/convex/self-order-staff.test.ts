@@ -85,9 +85,13 @@ async function seedOrder(
   s: Setup,
   opts: { clientId?: string; note?: string } = {}
 ): Promise<Id<'selfOrders'>> {
+  // submitSelfOrder requires a 16–64 char clientId; pad the short, readable ids
+  // these tests pass so they clear that bound while staying distinct.
+  const rawClientId = opts.clientId ?? 'client-1';
+  const clientId = rawClientId.padEnd(16, '0');
   const { selfOrderId } = await s.t.mutation(api.public.submitSelfOrder, {
     qrToken: s.qrToken,
-    clientId: opts.clientId ?? 'client-1',
+    clientId,
     ...(opts.note ? { customerNote: opts.note } : {}),
     lines: [
       // variant L (25000) + Oat (+5000) → 30000, qty 2 → 60000

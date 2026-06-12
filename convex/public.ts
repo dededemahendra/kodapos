@@ -261,7 +261,7 @@ async function buildSelfOrderLine(
       throw new Error('Modifier tidak tersedia.');
     }
     const group = await ctx.db.get(option.groupId);
-    if (!group || !attachedGroupIds.has(group._id)) {
+    if (!group || group.cafeId !== cafeId || !attachedGroupIds.has(group._id)) {
       throw new Error('Modifier tidak tersedia.');
     }
     countByGroup.set(group._id, (countByGroup.get(group._id) ?? 0) + 1);
@@ -283,6 +283,9 @@ async function buildSelfOrderLine(
 
   const basePrice = variant ? variant.priceIDR : item.priceIDR;
   const unitPriceIDR = basePrice + modifierAdjustments;
+  if (unitPriceIDR < 0) {
+    throw new Error('Harga item tidak valid.');
+  }
 
   return {
     menuItemId: item._id,
@@ -304,6 +307,16 @@ export const submitSelfOrder = mutation({
   },
   returns: v.object({ selfOrderId: v.id('selfOrders') }),
   handler: async (ctx, args) => {
+    // 0. Bound attacker-controlled inputs before any DB work. `clientId` is a
+    // browser-minted UUID (36 chars); reject trivial/oversized values that could
+    // force collisions or bloat the idempotency index.
+    if (args.clientId.length < 16 || args.clientId.length > 64) {
+      throw new Error('clientId tidak valid.');
+    }
+    if (args.customerNote && args.customerNote.length > 500) {
+      throw new Error('Catatan terlalu panjang.');
+    }
+
     // 1. Resolve the table+cafe ONLY from the capability token.
     const table = await ctx.db
       .query('tables')
@@ -326,13 +339,21 @@ export const submitSelfOrder = mutation({
     const pending = await ctx.db
       .query('selfOrders')
       .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'new'))
-      .collect();
+      .take(MAX_PENDING_SELF_ORDERS);
     if (pending.length >= MAX_PENDING_SELF_ORDERS) {
       throw new Error('Terlalu banyak pesanan menunggu. Hubungi staf.');
     }
 
     // 4. Server-side line validation + pricing (never trust client amounts).
     if (args.lines.length < 1) throw new Error('Keranjang kosong.');
+    if (args.lines.length > 20) {
+      throw new Error('Terlalu banyak item dalam satu pesanan.');
+    }
+    for (const line of args.lines) {
+      if (line.modifierOptionIds.length > 20) {
+        throw new Error('Terlalu banyak modifier.');
+      }
+    }
     const builtLines: BuiltLine[] = [];
     for (const line of args.lines) {
       builtLines.push(await buildSelfOrderLine(ctx, cafeId, line));
@@ -361,18 +382,25 @@ export const submitSelfOrder = mutation({
 // ---------------------------------------------------------------------------
 
 export const selfOrderStatus = query({
-  args: { selfOrderId: v.id('selfOrders') },
+  args: { selfOrderId: v.id('selfOrders'), qrToken: v.string() },
   returns: v.union(
     v.null(),
     v.object({
       status: v.union(v.literal('new'), v.literal('accepted'), v.literal('rejected')),
     })
   ),
-  handler: async (ctx: QueryCtx, { selfOrderId }) => {
-    // The id is known only to the submitter (returned by submitSelfOrder). We
-    // return ONLY the status — no lines/prices/cafe/table data leaks.
+  handler: async (ctx: QueryCtx, { selfOrderId, qrToken }) => {
+    // Bind the read to the table's capability token so a guessed/enumerated
+    // selfOrderId alone can't poll an arbitrary order's status. Only someone
+    // holding the order's own table qrToken sees it. We return ONLY the status —
+    // no lines/prices/cafe/table data leaks.
     const row = await ctx.db.get(selfOrderId);
-    if (!row) return null;
+    if (!row || !row.tableId) return null;
+    const table = await ctx.db
+      .query('tables')
+      .withIndex('by_qr_token', (q) => q.eq('qrToken', qrToken))
+      .unique();
+    if (!table || table._id !== row.tableId) return null;
     return { status: row.status };
   },
 });

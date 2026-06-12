@@ -22,6 +22,12 @@ type Setup = {
 
 const QR_TOKEN = 'a'.repeat(32);
 
+/** submitSelfOrder requires a 16–64 char clientId (a real UUID is 36). Pad the
+ * short, human-readable ids the tests use so they clear that bound. */
+function cid(base: string): string {
+  return `${base}-${'0'.repeat(Math.max(0, 16 - base.length - 1))}`;
+}
+
 /** Owner + cafe + a table (with a qrToken patched in) + a sellable item with a
  * variant + a min/max modifier group. The PUBLIC functions are then called on
  * the bare `t` (no identity). */
@@ -192,7 +198,7 @@ describe('public.submitSelfOrder', () => {
 
     const { selfOrderId } = await t.mutation(api.public.submitSelfOrder, {
       qrToken: QR_TOKEN,
-      clientId: 'client-1',
+      clientId: cid('client-1'),
       lines: [
         // variant L (25000) + Oat (+5000) → 30000, qty 2 → 60000
         { menuItemId: itemId, qty: 2, variantId: variantLId, modifierOptionIds: [oatId] },
@@ -219,6 +225,120 @@ describe('public.submitSelfOrder', () => {
     expect(row!.subtotalIDR).toBe(78000);
   });
 
+  it('rejects a customerNote over 500 chars (storage abuse), allows a normal note', async () => {
+    const t = convexTest(schema, modules);
+    const { itemId, regularId } = await setup(t);
+    await expect(
+      t.mutation(api.public.submitSelfOrder, {
+        qrToken: QR_TOKEN,
+        clientId: cid('client-longnote'),
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
+        customerNote: 'x'.repeat(501),
+      })
+    ).rejects.toThrow(/panjang/i);
+
+    const { selfOrderId } = await t.mutation(api.public.submitSelfOrder, {
+      qrToken: QR_TOKEN,
+      clientId: cid('client-okaynote'),
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
+      customerNote: 'Tanpa gula, terima kasih',
+    });
+    const row = await t.run(async (ctx) => await ctx.db.get(selfOrderId));
+    expect(row!.customerNote).toBe('Tanpa gula, terima kasih');
+  });
+
+  it('rejects more than 20 lines (DoS), and a line with more than 20 modifierOptionIds', async () => {
+    const t = convexTest(schema, modules);
+    const { itemId, regularId } = await setup(t);
+    await expect(
+      t.mutation(api.public.submitSelfOrder, {
+        qrToken: QR_TOKEN,
+        clientId: cid('client-manylines'),
+        lines: Array.from({ length: 21 }, () => ({
+          menuItemId: itemId,
+          qty: 1,
+          modifierOptionIds: [regularId],
+        })),
+      })
+    ).rejects.toThrow(/terlalu banyak item/i);
+
+    await expect(
+      t.mutation(api.public.submitSelfOrder, {
+        qrToken: QR_TOKEN,
+        clientId: cid('client-manymods'),
+        lines: [
+          { menuItemId: itemId, qty: 1, modifierOptionIds: Array.from({ length: 21 }, () => regularId) },
+        ],
+      })
+    ).rejects.toThrow(/terlalu banyak modifier/i);
+  });
+
+  it('rejects a clientId that is too short or too long, accepts a 36-char UUID', async () => {
+    const t = convexTest(schema, modules);
+    const { itemId, regularId } = await setup(t);
+    await expect(
+      t.mutation(api.public.submitSelfOrder, {
+        qrToken: QR_TOKEN,
+        clientId: 'a',
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
+      })
+    ).rejects.toThrow(/clientId tidak valid/i);
+
+    await expect(
+      t.mutation(api.public.submitSelfOrder, {
+        qrToken: QR_TOKEN,
+        clientId: 'z'.repeat(65),
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
+      })
+    ).rejects.toThrow(/clientId tidak valid/i);
+
+    const { selfOrderId } = await t.mutation(api.public.submitSelfOrder, {
+      qrToken: QR_TOKEN,
+      clientId: '123e4567-e89b-12d3-a456-426614174000', // 36-char UUID
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
+    });
+    const row = await t.run(async (ctx) => await ctx.db.get(selfOrderId));
+    expect(row).toBeTruthy();
+  });
+
+  it('rejects a line whose computed unitPriceIDR is negative, inserts nothing', async () => {
+    const t = convexTest(schema, modules);
+    const { t: tt, itemId, cafeId, groupId } = await setup(t);
+
+    // Seed a modifier option with a huge negative adjustment directly (the public
+    // flow can't create one), attached to the item's existing group.
+    const evilOptId = await tt.run(async (ctx) =>
+      ctx.db.insert('modifierOptions', {
+        cafeId,
+        groupId,
+        name: 'Diskon Jahat',
+        priceAdjustmentIDR: -1_000_000,
+        position: 99,
+        archived: false,
+        createdAt: Date.now(),
+      })
+    );
+
+    await expect(
+      t.mutation(api.public.submitSelfOrder, {
+        qrToken: QR_TOKEN,
+        clientId: cid('client-negprice'),
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [evilOptId] }],
+      })
+    ).rejects.toThrow(/harga/i);
+
+    const count = await tt.run(async (ctx) => {
+      const rows = await ctx.db
+        .query('selfOrders')
+        .withIndex('by_cafe_clientId', (q) =>
+          q.eq('cafeId', cafeId).eq('clientId', cid('client-negprice'))
+        )
+        .collect();
+      return rows.length;
+    });
+    expect(count).toBe(0);
+  });
+
   it('the line arg validator forbids a client-sent price field', async () => {
     const t = convexTest(schema, modules);
     const { itemId, regularId } = await setup(t);
@@ -229,7 +349,7 @@ describe('public.submitSelfOrder', () => {
     await expect(
       t.mutation(api.public.submitSelfOrder, {
         qrToken: QR_TOKEN,
-        clientId: 'client-price',
+        clientId: cid('client-price'),
         // @ts-expect-error — unitPriceIDR is NOT part of the line arg validator.
         lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId], unitPriceIDR: 1 }],
       })
@@ -242,7 +362,7 @@ describe('public.submitSelfOrder', () => {
     await expect(
       t.mutation(api.public.submitSelfOrder, {
         qrToken: 'z'.repeat(32),
-        clientId: 'client-bad',
+        clientId: cid('client-bad'),
         lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
       })
     ).rejects.toThrow(/QR/i);
@@ -254,7 +374,7 @@ describe('public.submitSelfOrder', () => {
     await expect(
       t.mutation(api.public.submitSelfOrder, {
         qrToken: QR_TOKEN,
-        clientId: 'client-empty',
+        clientId: cid('client-empty'),
         lines: [],
       })
     ).rejects.toThrow();
@@ -267,7 +387,7 @@ describe('public.submitSelfOrder', () => {
       await expect(
         t.mutation(api.public.submitSelfOrder, {
           qrToken: QR_TOKEN,
-          clientId: `client-qty-${qty}`,
+          clientId: cid(`client-qty-${qty}`),
           lines: [{ menuItemId: itemId, qty, modifierOptionIds: [regularId] }],
         })
       ).rejects.toThrow();
@@ -294,7 +414,7 @@ describe('public.submitSelfOrder', () => {
     await expect(
       t.mutation(api.public.submitSelfOrder, {
         qrToken: QR_TOKEN,
-        clientId: 'client-badvariant',
+        clientId: cid('client-badvariant'),
         lines: [
           { menuItemId: itemId, qty: 1, variantId: otherVariantId, modifierOptionIds: [regularId] },
         ],
@@ -323,7 +443,7 @@ describe('public.submitSelfOrder', () => {
     await expect(
       t.mutation(api.public.submitSelfOrder, {
         qrToken: QR_TOKEN,
-        clientId: 'client-badmod',
+        clientId: cid('client-badmod'),
         lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [looseOptId] }],
       })
     ).rejects.toThrow();
@@ -337,7 +457,7 @@ describe('public.submitSelfOrder', () => {
     await expect(
       t.mutation(api.public.submitSelfOrder, {
         qrToken: QR_TOKEN, // cafe #1's token
-        clientId: 'client-crosscafe',
+        clientId: cid('client-crosscafe'),
         lines: [{ menuItemId: other.itemId, qty: 1, modifierOptionIds: [] }],
       })
     ).rejects.toThrow();
@@ -348,7 +468,7 @@ describe('public.submitSelfOrder', () => {
     const { itemId, regularId, cafeId } = await setup(t);
     const args = {
       qrToken: QR_TOKEN,
-      clientId: 'client-idem',
+      clientId: cid('client-idem'),
       lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
     };
     const first = await t.mutation(api.public.submitSelfOrder, args);
@@ -359,7 +479,7 @@ describe('public.submitSelfOrder', () => {
       const rows = await ctx.db
         .query('selfOrders')
         .withIndex('by_cafe_clientId', (q) =>
-          q.eq('cafeId', cafeId).eq('clientId', 'client-idem')
+          q.eq('cafeId', cafeId).eq('clientId', cid('client-idem'))
         )
         .collect();
       return rows.length;
@@ -373,14 +493,14 @@ describe('public.submitSelfOrder', () => {
     for (let i = 0; i < 8; i++) {
       await t.mutation(api.public.submitSelfOrder, {
         qrToken: QR_TOKEN,
-        clientId: `cap-${i}`,
+        clientId: cid(`cap-${i}`),
         lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
       });
     }
     await expect(
       t.mutation(api.public.submitSelfOrder, {
         qrToken: QR_TOKEN,
-        clientId: 'cap-9',
+        clientId: cid('cap-9'),
         lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
       })
     ).rejects.toThrow(/terlalu banyak/i);
@@ -388,15 +508,51 @@ describe('public.submitSelfOrder', () => {
 });
 
 describe('public.selfOrderStatus', () => {
-  it('returns only { status }', async () => {
+  it('returns only { status } when the qrToken matches the order table', async () => {
     const t = convexTest(schema, modules);
     const { itemId, regularId } = await setup(t);
     const { selfOrderId } = await t.mutation(api.public.submitSelfOrder, {
       qrToken: QR_TOKEN,
-      clientId: 'client-status',
+      clientId: cid('client-status'),
       lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
     });
-    const status = await t.query(api.public.selfOrderStatus, { selfOrderId });
+    const status = await t.query(api.public.selfOrderStatus, {
+      selfOrderId,
+      qrToken: QR_TOKEN,
+    });
     expect(status).toEqual({ status: 'new' });
+  });
+
+  it('returns null for a wrong/unknown qrToken (no enumeration oracle)', async () => {
+    const t = convexTest(schema, modules);
+    const { itemId, regularId } = await setup(t);
+    const { selfOrderId } = await t.mutation(api.public.submitSelfOrder, {
+      qrToken: QR_TOKEN,
+      clientId: cid('client-status-wrong'),
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
+    });
+    const status = await t.query(api.public.selfOrderStatus, {
+      selfOrderId,
+      qrToken: 'z'.repeat(32),
+    });
+    expect(status).toBeNull();
+  });
+
+  it('returns null when the qrToken belongs to a DIFFERENT table than the order', async () => {
+    const t = convexTest(schema, modules);
+    const { itemId, regularId } = await setup(t);
+    // A foreign cafe+table with its own valid token.
+    const other = await setup(t, { email: 'o2@x.com', qrToken: 'c'.repeat(32) });
+    const { selfOrderId } = await t.mutation(api.public.submitSelfOrder, {
+      qrToken: QR_TOKEN,
+      clientId: cid('client-status-foreign'),
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [regularId] }],
+    });
+    // Polling with the foreign table's token must not reveal this order's status.
+    const status = await t.query(api.public.selfOrderStatus, {
+      selfOrderId,
+      qrToken: other.qrToken,
+    });
+    expect(status).toBeNull();
   });
 });
