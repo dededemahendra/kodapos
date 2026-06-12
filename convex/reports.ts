@@ -38,6 +38,7 @@ export const overview = query({
   args: { range: rangeArg },
   returns: v.object({
     revenueIDR: v.number(),
+    refundsIDR: v.number(),
     orders: v.number(),
     aovIDR: v.number(),
     itemsSold: v.number(),
@@ -45,12 +46,23 @@ export const overview = query({
     toKey: v.string(),
   }),
   handler: async (ctx, { range }) => {
-    const { fromKey, toKey, paid } = await paidInRange(ctx, range);
-    const revenueIDR = paid.reduce((s, o) => s + o.totalIDR, 0);
+    const { cafeId, tz, fromKey, toKey, paid } = await paidInRange(ctx, range);
+    const grossRevenueIDR = paid.reduce((s, o) => s + o.totalIDR, 0);
+    // Net out refunds dated (by `refund.at`) in this window.
+    const { startMs, endMs } = resolveRange(tz, range, Date.now());
+    const refunds = await ctx.db
+      .query('refunds')
+      .withIndex('by_cafe_at', (q) =>
+        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
+      )
+      .collect();
+    const refundsIDR = refunds.reduce((s, r) => s + r.amountIDR, 0);
+    const revenueIDR = grossRevenueIDR - refundsIDR;
     const orders = paid.length;
     const itemsSold = paid.reduce((s, o) => s + o.lines.reduce((n, l) => n + l.qty, 0), 0);
+    // AOV off net revenue to stay consistent with the headline revenue figure.
     const aovIDR = orders === 0 ? 0 : Math.round(revenueIDR / orders);
-    return { revenueIDR, orders, aovIDR, itemsSold, fromKey, toKey };
+    return { revenueIDR, refundsIDR, orders, aovIDR, itemsSold, fromKey, toKey };
   },
 });
 
@@ -182,6 +194,8 @@ export const profitLoss = query({
   args: { range: rangeArg },
   returns: v.object({
     revenueIDR: v.number(),
+    refundsIDR: v.number(),
+    netRevenueIDR: v.number(),
     cogsIDR: v.number(),
     grossProfitIDR: v.number(),
     expensesIDR: v.number(),
@@ -213,7 +227,7 @@ export const profitLoss = query({
       .collect();
     const cost = new Map(ingredients.map((i) => [i._id, i.lastCostPerUnitIDR]));
     let revenueIDR = 0;
-    let cogsIDR = 0;
+    let grossCogsIDR = 0;
     for (const o of paid) {
       revenueIDR += o.totalIDR;
       for (const l of o.lines) {
@@ -221,11 +235,38 @@ export const profitLoss = query({
           (s, rl) => s + rl.qty * rl.wastageFactor * (cost.get(rl.ingredientId) ?? 0),
           0
         );
-        cogsIDR += l.qty * unitCogs;
+        grossCogsIDR += l.qty * unitCogs;
       }
     }
     // Operating expenses in the same range (the non-inventory expenses table).
     const { startMs, endMs } = resolveRange(tz, range, Date.now());
+    // Refunds are dated by `refund.at` — net them (and their COGS) out of the
+    // refund's period, not the original sale's. COGS uses the order's own
+    // recipeSnapshot so it matches what the sale deducted.
+    const refunds = await ctx.db
+      .query('refunds')
+      .withIndex('by_cafe_at', (q) =>
+        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
+      )
+      .collect();
+    let refundsIDR = 0;
+    let refundCogsIDR = 0;
+    for (const r of refunds) {
+      refundsIDR += r.amountIDR;
+      const order = await ctx.db.get(r.orderId);
+      if (!order) continue;
+      for (const line of r.lines) {
+        const orderLine = order.lines[line.lineIndex];
+        if (!orderLine) continue;
+        const unitCogs = (orderLine.recipeSnapshot ?? []).reduce(
+          (s, rl) => s + rl.qty * rl.wastageFactor * (cost.get(rl.ingredientId) ?? 0),
+          0
+        );
+        refundCogsIDR += line.qty * unitCogs;
+      }
+    }
+    const netRevenueIDR = revenueIDR - refundsIDR;
+    const cogsIDR = grossCogsIDR - refundCogsIDR;
     const expenses = await ctx.db
       .query('expenses')
       .withIndex('by_cafe_at', (q) =>
@@ -249,10 +290,12 @@ export const profitLoss = query({
     for (const i of incomes) {
       otherIncomeIDR += i.amountIDR;
     }
-    const grossProfitIDR = revenueIDR - cogsIDR;
+    const grossProfitIDR = netRevenueIDR - cogsIDR;
     const netProfitIDR = grossProfitIDR - expensesIDR + otherIncomeIDR;
     return {
       revenueIDR,
+      refundsIDR,
+      netRevenueIDR,
       cogsIDR,
       grossProfitIDR,
       expensesIDR,
@@ -262,8 +305,8 @@ export const profitLoss = query({
       })),
       otherIncomeIDR,
       netProfitIDR,
-      grossMarginPct: revenueIDR === 0 ? 0 : Math.round((grossProfitIDR / revenueIDR) * 100),
-      netMarginPct: revenueIDR === 0 ? 0 : Math.round((netProfitIDR / revenueIDR) * 100),
+      grossMarginPct: netRevenueIDR === 0 ? 0 : Math.round((grossProfitIDR / netRevenueIDR) * 100),
+      netMarginPct: netRevenueIDR === 0 ? 0 : Math.round((netProfitIDR / netRevenueIDR) * 100),
       fromKey,
       toKey,
     };

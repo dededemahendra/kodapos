@@ -566,3 +566,136 @@ describe('refunds.create — qris record-only', () => {
     expect(moves.filter((m) => m.direction === 'out')).toHaveLength(0);
   });
 });
+
+// A calendar day key (YYYY-MM-DD) in Asia/Jakarta for a given instant.
+function jakartaKey(ms: number): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(ms));
+}
+
+describe('reports — refunds net out revenue + COGS by refund date', () => {
+  it('profitLoss: refundsIDR, netRevenue, reduced COGS, gross/net profit', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, itemId } = await setup(t);
+    const now = Date.now();
+    // 3 Espresso @ 18000 = 54000; recipe 200ml Susu @ 25/ml ⇒ unit COGS 5000.
+    const sale = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'rep-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 60000,
+      createdAtClient: now,
+    });
+    expect(sale.totalIDR).toBe(54000);
+    // Refund 1 of the 3 ⇒ amount 18000, refund COGS 5000.
+    await asOwner.mutation(api.refunds.create, {
+      orderId: sale.orderId,
+      clientId: 'rep-refund',
+      cashierId,
+      method: 'cash',
+      lines: [{ lineIndex: 0, qty: 1 }],
+    });
+
+    const range = { from: jakartaKey(now), to: jakartaKey(now) } as const;
+    const pl = await asOwner.query(api.reports.profitLoss, { range });
+
+    expect(pl.revenueIDR).toBe(54000); // GROSS, unchanged
+    expect(pl.refundsIDR).toBe(18000);
+    expect(pl.netRevenueIDR).toBe(54000 - 18000); // 36000
+    expect(pl.cogsIDR).toBe(15000 - 5000); // 10000 (net of refund COGS)
+    expect(pl.grossProfitIDR).toBe(36000 - 10000); // 26000 = netRevenue − net COGS
+    expect(pl.netProfitIDR).toBe(26000); // no expenses / other income
+    expect(pl.grossMarginPct).toBe(Math.round((26000 / 36000) * 100));
+  });
+
+  it('overview.revenueIDR is net of in-range refunds and exposes refundsIDR', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, itemId } = await setup(t);
+    const now = Date.now();
+    const sale = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'ov-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 60000,
+      createdAtClient: now,
+    });
+    await asOwner.mutation(api.refunds.create, {
+      orderId: sale.orderId,
+      clientId: 'ov-refund',
+      cashierId,
+      method: 'cash',
+      lines: [{ lineIndex: 0, qty: 1 }],
+    });
+    const range = { from: jakartaKey(now), to: jakartaKey(now) } as const;
+    const ov = await asOwner.query(api.reports.overview, { range });
+    expect(ov.refundsIDR).toBe(18000);
+    expect(ov.revenueIDR).toBe(54000 - 18000); // net
+    expect(ov.orders).toBe(1);
+  });
+
+  it('dashboard kpis revenue is net of in-range refunds', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, itemId } = await setup(t);
+    const now = Date.now();
+    const sale = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'kpi-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 60000,
+      createdAtClient: now,
+    });
+    await asOwner.mutation(api.refunds.create, {
+      orderId: sale.orderId,
+      clientId: 'kpi-refund',
+      cashierId,
+      method: 'cash',
+      lines: [{ lineIndex: 0, qty: 1 }],
+    });
+    const kpis = await asOwner.query(api.dashboard.kpis, {});
+    expect(kpis.refundsIDR).toBe(18000);
+    expect(kpis.revenueIDR).toBe(54000 - 18000); // net
+  });
+
+  it('a refund dated OUTSIDE the range does not affect an in-range report', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId, cashierId, shiftId, itemId } = await setup(t);
+    const now = Date.now();
+    const sale = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'out-sale',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 60000,
+      createdAtClient: now,
+    });
+    await asOwner.mutation(api.refunds.create, {
+      orderId: sale.orderId,
+      clientId: 'out-refund',
+      cashierId,
+      method: 'cash',
+      lines: [{ lineIndex: 0, qty: 1 }],
+    });
+    // Backdate the refund 60 days so it falls before the report window.
+    const past = now - 60 * 24 * 60 * 60 * 1000;
+    await t.run(async (ctx) => {
+      const rows = await ctx.db
+        .query('refunds')
+        .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId))
+        .collect();
+      for (const r of rows) await ctx.db.patch(r._id, { at: past });
+    });
+
+    const range = { from: jakartaKey(now), to: jakartaKey(now) } as const;
+    const pl = await asOwner.query(api.reports.profitLoss, { range });
+    expect(pl.refundsIDR).toBe(0); // refund is out of range
+    expect(pl.netRevenueIDR).toBe(54000); // full gross revenue, no net-out
+    expect(pl.cogsIDR).toBe(15000); // full COGS, not reduced
+  });
+});
