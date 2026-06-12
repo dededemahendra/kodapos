@@ -13,6 +13,7 @@ const menuItemDoc = v.object({
   priceIDR: v.number(),
   isActive: v.boolean(),
   archived: v.boolean(),
+  soldOut: v.optional(v.boolean()),
   position: v.number(),
   createdAt: v.number(),
   imageStorageId: v.optional(v.id('_storage')),
@@ -288,6 +289,17 @@ export const setActive = mutation({
     const { cafeId } = await requireOwnerCafe(ctx);
     await requireOwned(ctx, cafeId, id, 'Item');
     await ctx.db.patch(id, { isActive });
+    return null;
+  },
+});
+
+export const setSoldOut = mutation({
+  args: { id: v.id('menuItems'), soldOut: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, { id, soldOut }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await requireOwned(ctx, cafeId, id, 'Item');
+    await ctx.db.patch(id, { soldOut });
     return null;
   },
 });
