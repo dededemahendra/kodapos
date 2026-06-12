@@ -325,7 +325,24 @@ export default defineSchema({
     paymentMethod: v.union(
       v.literal('cash'),
       v.literal('qris_static'),
-      v.literal('qris_dynamic')
+      v.literal('qris_dynamic'),
+      v.literal('split')
+    ),
+    // Per-method amounts collected for the order (split + accounting source of
+    // truth). buildOrder writes it for every new order: single-method = one entry
+    // [{ method, totalIDR }]; split = N entries. Optional for back-compat with
+    // pre-breakdown orders (helper falls back to the headline paymentMethod).
+    paymentBreakdown: v.optional(
+      v.array(
+        v.object({
+          method: v.union(
+            v.literal('cash'),
+            v.literal('qris_static'),
+            v.literal('qris_dynamic')
+          ),
+          amountIDR: v.number(),
+        })
+      )
     ),
     orderType: v.optional(orderTypeValidator),
     // 'pending' + 'void' reserved for Slice 5 (QRIS + voids); cash always inserts 'paid'.

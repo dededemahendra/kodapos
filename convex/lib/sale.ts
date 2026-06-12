@@ -39,7 +39,14 @@ export type SaleArgs = Infer<typeof saleArgsValidator>;
 export type PaymentInput =
   | { method: 'cash'; tenderedIDR: number }
   | { method: 'qris_static' }
-  | { method: 'qris_dynamic' };
+  | { method: 'qris_dynamic' }
+  | {
+      method: 'split';
+      tenders: Array<
+        | { method: 'cash'; amountIDR: number; tenderedIDR: number }
+        | { method: 'qris_static'; amountIDR: number }
+      >;
+    };
 
 function assertIDR(n: number, label: string): number {
   if (!Number.isInteger(n)) throw new Error(`${label} harus berupa angka bulat (rupiah).`);
@@ -69,14 +76,16 @@ export async function buildOrder(
     .withIndex('by_cafe_clientId', (q) => q.eq('cafeId', cafeId).eq('clientId', args.clientId))
     .unique();
   if (existing) {
-    const existingPayment = await ctx.db
+    // A split order has N payment rows; sum each row's change (cash legs only
+    // carry it). Collect (not unique) so a split replay doesn't throw.
+    const existingPayments = await ctx.db
       .query('payments')
       .withIndex('by_order', (q) => q.eq('orderId', existing._id))
-      .unique();
+      .collect();
     return {
       orderId: existing._id,
       totalIDR: existing.totalIDR,
-      changeIDR: existingPayment?.changeIDR ?? 0,
+      changeIDR: existingPayments.reduce((s, p) => s + (p.changeIDR ?? 0), 0),
     };
   }
 
@@ -218,11 +227,18 @@ export async function buildOrder(
 
   // method-availability guards (cash/qris_static keep the settings.methods gate;
   // qris_dynamic is gated by the connected integration in the action, not here).
+  // A split is gated by the methods its tenders actually use.
   const methods = settings?.payment?.methods;
-  if (payment.method === 'cash' && methods?.cash === false) {
+  const usesCash =
+    payment.method === 'cash' ||
+    (payment.method === 'split' && payment.tenders.some((t) => t.method === 'cash'));
+  const usesQrisStatic =
+    payment.method === 'qris_static' ||
+    (payment.method === 'split' && payment.tenders.some((t) => t.method === 'qris_static'));
+  if (usesCash && methods?.cash === false) {
     throw new Error('Metode tunai tidak aktif.');
   }
-  if (payment.method === 'qris_static') {
+  if (usesQrisStatic) {
     if (methods?.qrisStatic === false) {
       throw new Error('Metode QRIS statis tidak aktif.');
     }
@@ -280,14 +296,55 @@ export async function buildOrder(
     taxRatePct,
   });
 
-  // method-specific: funds check + change only for cash.
+  // Resolve the per-method breakdown + total change for the order. Single-method
+  // orders produce one breakdown entry [{ method, totalIDR }]; a split validates
+  // its tenders and produces N entries summing to totalIDR. `orderMethod` is the
+  // headline paymentMethod stored on the order ('split' for a multi-tender order).
+  type Tender =
+    | { method: 'cash'; amountIDR: number; tenderedIDR: number }
+    | { method: 'qris_static'; amountIDR: number };
+  type BreakdownEntry = { method: 'cash' | 'qris_static' | 'qris_dynamic'; amountIDR: number };
+
   let changeIDR = 0;
-  if (payment.method === 'cash') {
-    const tendered = assertIDR(payment.tenderedIDR, 'Uang yang diterima');
-    if (tendered < totalIDR) {
-      throw new Error('Uang yang diterima kurang dari total.');
+  let orderMethod: 'cash' | 'qris_static' | 'qris_dynamic' | 'split';
+  let paymentBreakdown: BreakdownEntry[];
+  let splitTenders: Tender[] | null = null;
+
+  if (payment.method === 'split') {
+    const tenders = payment.tenders;
+    if (tenders.length < 2) throw new Error('Pembayaran terbagi memerlukan minimal dua tender.');
+    let sum = 0;
+    for (const tender of tenders) {
+      // Validator already restricts method to cash/qris_static; re-check defensively.
+      if (tender.method !== 'cash' && tender.method !== 'qris_static') {
+        throw new Error('Metode tender tidak didukung pada pembayaran terbagi.');
+      }
+      assertIDR(tender.amountIDR, 'Jumlah tender');
+      if (tender.amountIDR <= 0) throw new Error('Jumlah tender harus lebih dari nol.');
+      if (tender.method === 'cash') {
+        const tendered = assertIDR(tender.tenderedIDR, 'Uang yang diterima');
+        if (tendered < tender.amountIDR) {
+          throw new Error('Uang yang diterima kurang dari jumlah tender.');
+        }
+        changeIDR += tendered - tender.amountIDR;
+      }
+      sum += tender.amountIDR;
     }
-    changeIDR = tendered - totalIDR;
+    if (sum !== totalIDR) throw new Error('Total tender tidak sama dengan total pesanan.');
+    orderMethod = 'split';
+    paymentBreakdown = tenders.map((tender) => ({ method: tender.method, amountIDR: tender.amountIDR }));
+    splitTenders = tenders;
+  } else {
+    // method-specific: funds check + change only for cash.
+    if (payment.method === 'cash') {
+      const tendered = assertIDR(payment.tenderedIDR, 'Uang yang diterima');
+      if (tendered < totalIDR) {
+        throw new Error('Uang yang diterima kurang dari total.');
+      }
+      changeIDR = tendered - totalIDR;
+    }
+    orderMethod = payment.method;
+    paymentBreakdown = [{ method: payment.method, amountIDR: totalIDR }];
   }
 
   const earnBase = subtotalIDR - discountIDR;
@@ -314,24 +371,40 @@ export async function buildOrder(
     ...(pointsRedeemed > 0 ? { pointsRedeemed, pointsRedeemedIDR } : {}),
     totalIDR,
     orderType: args.orderType ?? 'dine_in',
-    paymentMethod: payment.method,
+    paymentMethod: orderMethod,
+    paymentBreakdown,
     paymentStatus: 'pending',
     createdAtClient: args.createdAtClient ?? now,
     syncedAt: now,
   });
 
-  // method-specific: cash records tendered/change; qris_dynamic records only the
-  // pending marker here (providerRef/expiresAt are patched later by patchCharge,
-  // once the provider charge exists); qris_static records neither. No confirmedAt
+  // Payment rows (order-first so they reference orderId). A split inserts one row
+  // per tender; a single-method order inserts one row. cash records tendered/change;
+  // qris_dynamic records only the pending marker here (providerRef/expiresAt are
+  // patched later by patchCharge); qris_static records neither. No confirmedAt
   // until settleSale runs.
-  await ctx.db.insert('payments', {
-    cafeId,
-    orderId,
-    method: payment.method,
-    amountIDR: totalIDR,
-    ...(payment.method === 'cash' ? { cashTenderedIDR: payment.tenderedIDR, changeIDR } : {}),
-    ...(payment.method === 'qris_dynamic' ? { providerStatus: 'pending' } : {}),
-  });
+  if (splitTenders) {
+    for (const tender of splitTenders) {
+      await ctx.db.insert('payments', {
+        cafeId,
+        orderId,
+        method: tender.method,
+        amountIDR: tender.amountIDR,
+        ...(tender.method === 'cash'
+          ? { cashTenderedIDR: tender.tenderedIDR, changeIDR: tender.tenderedIDR - tender.amountIDR }
+          : {}),
+      });
+    }
+  } else {
+    await ctx.db.insert('payments', {
+      cafeId,
+      orderId,
+      method: payment.method as 'cash' | 'qris_static' | 'qris_dynamic',
+      amountIDR: totalIDR,
+      ...(payment.method === 'cash' ? { cashTenderedIDR: payment.tenderedIDR, changeIDR } : {}),
+      ...(payment.method === 'qris_dynamic' ? { providerStatus: 'pending' } : {}),
+    });
+  }
 
   return { orderId, totalIDR, changeIDR };
 }
@@ -401,11 +474,12 @@ export async function settleSale(ctx: MutationCtx, orderId: Id<'orders'>): Promi
   }
 
   await ctx.db.patch(orderId, { paymentStatus: 'paid' });
-  const payment = await ctx.db
+  // A split order has N payment rows; confirm each one (collect, not unique).
+  const payments = await ctx.db
     .query('payments')
     .withIndex('by_order', (q) => q.eq('orderId', orderId))
-    .unique();
-  if (payment) {
+    .collect();
+  for (const payment of payments) {
     await ctx.db.patch(payment._id, {
       confirmedAt: now,
       ...(payment.method === 'qris_dynamic' ? { providerStatus: 'paid' } : {}),
@@ -490,10 +564,11 @@ export async function voidPendingOrder(
   const order = await ctx.db.get(orderId);
   if (order?.paymentStatus !== 'pending') return false;
   await ctx.db.patch(orderId, { paymentStatus: 'void' });
-  const payment = await ctx.db
+  // Loop-patch every row (a split has N; collect, not unique).
+  const payments = await ctx.db
     .query('payments')
     .withIndex('by_order', (q) => q.eq('orderId', orderId))
-    .unique();
-  if (payment) await ctx.db.patch(payment._id, { providerStatus });
+    .collect();
+  for (const payment of payments) await ctx.db.patch(payment._id, { providerStatus });
   return true;
 }

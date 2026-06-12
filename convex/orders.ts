@@ -27,6 +27,31 @@ export const createQrisStaticSale = mutation({
   },
 });
 
+export const createSplitSale = mutation({
+  args: {
+    ...saleArgs,
+    tenders: v.array(
+      v.union(
+        v.object({
+          method: v.literal('cash'),
+          amountIDR: v.number(),
+          tenderedIDR: v.number(),
+        }),
+        v.object({
+          method: v.literal('qris_static'),
+          amountIDR: v.number(),
+        })
+      )
+    ),
+  },
+  returns: saleResult,
+  handler: async (ctx, args) => {
+    const res = await buildOrder(ctx, args, { method: 'split', tenders: args.tenders });
+    await settleSale(ctx, res.orderId);
+    return res;
+  },
+});
+
 export const voidSale = mutation({
   args: {
     orderId: v.id('orders'),
@@ -104,7 +129,24 @@ const orderSummary = v.object({
   pointsEarned: v.optional(v.number()),
   totalIDR: v.number(),
   orderType: v.optional(orderTypeValidator),
-  paymentMethod: v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic')),
+  paymentMethod: v.union(
+    v.literal('cash'),
+    v.literal('qris_static'),
+    v.literal('qris_dynamic'),
+    v.literal('split')
+  ),
+  paymentBreakdown: v.optional(
+    v.array(
+      v.object({
+        method: v.union(
+          v.literal('cash'),
+          v.literal('qris_static'),
+          v.literal('qris_dynamic')
+        ),
+        amountIDR: v.number(),
+      })
+    )
+  ),
   paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
   voidedAt: v.optional(v.number()),
   voidReason: v.optional(v.string()),
@@ -149,7 +191,12 @@ const orderRow = v.object({
   createdAtClient: v.number(),
   totalIDR: v.number(),
   orderType: v.optional(orderTypeValidator),
-  paymentMethod: v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic')),
+  paymentMethod: v.union(
+    v.literal('cash'),
+    v.literal('qris_static'),
+    v.literal('qris_dynamic'),
+    v.literal('split')
+  ),
   paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
   cashierName: v.string(),
   lineCount: v.number(),
