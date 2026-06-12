@@ -190,7 +190,7 @@ export function SaleScreen({
   }
 
   return (
-    <div className="grid grid-cols-[1fr_minmax(320px,30%)] h-[calc(100vh-3rem)]">
+    <div className="grid grid-cols-[1fr_minmax(320px,30%)] h-full">
       <MenuPane categories={categories} items={items} onItemTap={onItemTap} />
       <CartPane
         cart={cart}

@@ -12,5 +12,7 @@ export const Route = createFileRoute('/_pos/sale/')({
 
 function SaleIndex() {
   const { recall, table } = Route.useSearch();
+  // The full-screen shell + top bar is provided by the _pos layout for all
+  // operational screens (sale/tables/kitchen); this route just renders the screen.
   return <SaleScreen recall={recall} table={table} />;
 }
