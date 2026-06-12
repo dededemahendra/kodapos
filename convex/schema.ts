@@ -62,9 +62,11 @@ export default defineSchema({
     position: v.number(),
     createdAt: v.number(),
     imageStorageId: v.optional(v.id('_storage')),
+    barcode: v.optional(v.string()),
   })
     .index('by_cafe_category', ['cafeId', 'categoryId', 'archived', 'position'])
-    .index('by_cafe_active', ['cafeId', 'archived', 'isActive']),
+    .index('by_cafe_active', ['cafeId', 'archived', 'isActive'])
+    .index('by_cafe_barcode', ['cafeId', 'barcode']),
 
   modifierGroups: defineTable({
     cafeId: v.id('cafes'),

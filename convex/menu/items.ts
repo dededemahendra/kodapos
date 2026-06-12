@@ -16,6 +16,7 @@ const menuItemDoc = v.object({
   position: v.number(),
   createdAt: v.number(),
   imageStorageId: v.optional(v.id('_storage')),
+  barcode: v.optional(v.string()),
 });
 
 const menuItemWithStatus = v.object({
@@ -101,6 +102,23 @@ function assertItem(name: string, priceIDR: number): string {
   return trimmed;
 }
 
+// Mirror of a duplicate-name guard: query the by-cafe barcode index, collect
+// the matches, and reject if any non-archived item (other than the one being
+// edited) already owns the barcode.
+async function assertBarcodeUnique(
+  ctx: QueryCtx,
+  cafeId: Id<'cafes'>,
+  barcode: string,
+  currentId?: Id<'menuItems'>
+): Promise<void> {
+  const matches = await ctx.db
+    .query('menuItems')
+    .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', barcode))
+    .collect();
+  const clash = matches.some((m) => !m.archived && m._id !== currentId);
+  if (clash) throw new Error('Barcode sudah dipakai item lain.');
+}
+
 async function resolveAttachedGroups(
   ctx: QueryCtx,
   menuItemId: Id<'menuItems'>
@@ -154,12 +172,15 @@ export const create = mutation({
     name: v.string(),
     priceIDR: v.number(),
     imageStorageId: v.optional(v.id('_storage')),
+    barcode: v.optional(v.string()),
   },
   returns: v.id('menuItems'),
   handler: async (ctx, args) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const cleanName = assertItem(args.name, args.priceIDR);
     await requireOwned(ctx, cafeId, args.categoryId, 'Kategori');
+    const bc = args.barcode?.trim();
+    if (bc) await assertBarcodeUnique(ctx, cafeId, bc);
     const siblings = await ctx.db
       .query('menuItems')
       .withIndex('by_cafe_category', (q) =>
@@ -178,6 +199,7 @@ export const create = mutation({
       position: nextPos,
       createdAt: Date.now(),
       ...(args.imageStorageId ? { imageStorageId: args.imageStorageId } : {}),
+      ...(bc ? { barcode: bc } : {}),
     });
   },
 });
@@ -189,6 +211,7 @@ export const update = mutation({
     name: v.string(),
     priceIDR: v.number(),
     imageStorageId: v.optional(v.id('_storage')),
+    barcode: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -196,6 +219,8 @@ export const update = mutation({
     const item = await requireOwned(ctx, cafeId, args.id, 'Item');
     await requireOwned(ctx, cafeId, args.categoryId, 'Kategori');
     const cleanName = assertItem(args.name, args.priceIDR);
+    const bc = args.barcode?.trim();
+    if (bc) await assertBarcodeUnique(ctx, cafeId, bc, args.id);
     // If the item is moving to a different category, give it a fresh
     // position at the bottom of the destination so it doesn't collide
     // with an existing sibling that already has the same position number.
@@ -216,6 +241,7 @@ export const update = mutation({
       priceIDR: args.priceIDR,
       position: nextPosition,
       imageStorageId: args.imageStorageId,
+      barcode: bc || undefined,
     });
     return null;
   },
