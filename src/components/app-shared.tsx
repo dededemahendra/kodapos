@@ -46,6 +46,7 @@ export const navGroups: SidebarNavGroup[] = [
 			{ title: msg`Kasir`, path: "/sale", icon: <Calculator /> },
 			{ title: msg`Meja`, path: "/tables", icon: <Grid3x3 /> },
 			{ title: msg`Dapur`, path: "/kitchen", icon: <ChefHat /> },
+			{ title: msg`Jam Kerja`, path: "/time-clock", icon: <Clock /> },
 			{ title: msg`Riwayat`, path: "/history", icon: <History /> },
 			{ title: msg`Shift`, path: "/shifts", icon: <Clock />, requires: 'canViewReports' },
 		],
