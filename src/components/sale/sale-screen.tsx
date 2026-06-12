@@ -66,6 +66,11 @@ export function SaleScreen({
   const [holdOpen, setHoldOpen] = useState(false);
   const [heldOpen, setHeldOpen] = useState(false);
   const [recallTarget, setRecallTarget] = useState<CartState | null>(null);
+  // The table this sale is tagged to (from /sale?table=<id> on the floor, or
+  // re-derived when resuming a parked table order). Cleared once a sale settles.
+  const [currentTable, setCurrentTable] = useState<Id<'tables'> | null>(
+    table ? (table as Id<'tables'>) : null
+  );
   const held = useQuery(
     api.heldOrders.listForShift,
     shift ? { shiftId: shift._id } : 'skip'
@@ -96,6 +101,8 @@ export function SaleScreen({
           manualDiscount: null,
         };
         dispatch({ type: 'load', state });
+        // Re-tag the resumed order to its table so the next sale carries it.
+        if (row.tableId) setCurrentTable(row.tableId);
         await removeHeld({ id: recall as Id<'heldOrders'> });
       }
       // Clear the param whether the row was found or already gone.
@@ -338,12 +345,14 @@ export function SaleScreen({
             taxRatePct={taxRatePct}
             quickCashButtons={settings.payment.quickCashButtons}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            {...(currentTable ? { tableId: currentTable } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
             onPaid={(orderId) => {
               setReceiptOrderId(orderId);
               dispatch({ type: 'clearCart' });
+              setCurrentTable(null);
             }}
           />
           <QrisStaticPaymentDialog
@@ -361,12 +370,14 @@ export function SaleScreen({
             {...('qrisMerchantName' in settings.payment && settings.payment.qrisMerchantName ? { qrisMerchantName: settings.payment.qrisMerchantName } : {})}
             {...('qrisNmid' in settings.payment && settings.payment.qrisNmid ? { qrisNmid: settings.payment.qrisNmid } : {})}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            {...(currentTable ? { tableId: currentTable } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
             onPaid={(orderId) => {
               setReceiptOrderId(orderId);
               dispatch({ type: 'clearCart' });
+              setCurrentTable(null);
             }}
           />
           <SplitPaymentDialog
@@ -381,12 +392,14 @@ export function SaleScreen({
             cashEnabled={splitCashEnabled}
             qrisStaticEnabled={splitQrisStaticEnabled}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            {...(currentTable ? { tableId: currentTable } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
             onPaid={(orderId) => {
               setReceiptOrderId(orderId);
               dispatch({ type: 'clearCart' });
+              setCurrentTable(null);
             }}
           />
           <QrisDynamicPaymentDialog
@@ -401,12 +414,14 @@ export function SaleScreen({
             taxEnabled={taxEnabled}
             taxRatePct={taxRatePct}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            {...(currentTable ? { tableId: currentTable } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
             onPaid={(orderId) => {
               setReceiptOrderId(orderId);
               dispatch({ type: 'clearCart' });
+              setCurrentTable(null);
             }}
           />
         </>
