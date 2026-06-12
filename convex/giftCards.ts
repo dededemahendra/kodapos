@@ -51,8 +51,9 @@ export const list = query({
       .withIndex('by_cafe_code', (q) => q.eq('cafeId', cafeId))
       .collect();
     const visible = includeArchived ? rows : rows.filter((r) => r.status === 'active');
-    // newest-first
-    return visible.sort((a, b) => b.createdAt - a.createdAt);
+    // Newest-first. Tie-break on `_creationTime` (monotonic + unique) so cards
+    // issued in the same millisecond still get a stable order.
+    return visible.sort((a, b) => b.createdAt - a.createdAt || b._creationTime - a._creationTime);
   },
 });
 
