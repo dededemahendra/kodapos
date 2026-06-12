@@ -76,13 +76,14 @@ export function CartPane({
 
   return (
     <aside className="border-l border-border flex flex-col h-full">
-      <div className="px-3 py-2 border-b border-border">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">
+      <div className="px-3 py-2 border-b border-border space-y-2">
+        {/* Wrap so the action buttons never clip in a narrow cart — they flow
+            onto the next line instead of overflowing the panel width. */}
+        <div className="flex flex-wrap items-center gap-1">
+          <h2 className="mr-auto text-sm font-semibold">
             <Trans>Pesanan ({cart.lines.length})</Trans>
           </h2>
-          <div className="flex items-center gap-1">
-            {onSwitch ? (
+          {onSwitch ? (
               <Button type="button" size="sm" variant="outline" asChild>
                 <Link to="/pin"><Trans>Ganti kasir</Trans></Link>
               </Button>
@@ -112,9 +113,8 @@ export function CartPane({
             >
               <Trans>Kosongkan</Trans>
             </Button>
-          </div>
         </div>
-        <div className="mt-2 flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {ORDER_TYPE_OPTIONS.map((o) => (
             <Button
               key={o.value}
