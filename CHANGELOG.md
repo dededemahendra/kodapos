@@ -4,7 +4,164 @@ All notable changes to kodapos. Format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
-Pending: QRIS / non-cash payments (Slice 5). Deferred observability: Sentry (16), PostHog (17). Deferred feature backlog: per-category weather sensitivity (C2c), restock suggestion history/dismiss + nightly persistence with draft/sent status, PDF purchase orders & PDF report export, item/category-scoped + coded promotions. Inventory + Recipes, Reports, CI, and Cloudflare Workers deploy are now shipped (see below); production Convex cutover is still pending (deploy currently targets the DEV deployment).
+QRIS payments (static, dynamic, Xendit BYO + reconciliation), loyalty + tiers, gift cards, the Pro-POS suite (stock-take, order types, held orders, void, expenses, margin + P&L reports, manual discount, split tender, tables, KDS, product variants), the full-screen register shell, employee time clock, barcode scan-to-cart, and purchase orders are now shipped (see Phase 2 below). Deferred observability: Sentry (16), PostHog (17). Deferred feature backlog: per-category weather sensitivity (C2c), restock suggestion history/dismiss + nightly persistence with draft/sent status, PDF purchase orders & PDF report export, item/category-scoped + coded promotions, and the bigger infra bets pending product direction (offline mode, multi-outlet, delivery, customer display). Production Convex cutover is still pending (deploy currently targets the DEV deployment).
+
+---
+
+## Phase 2 · Operations — Time Clock, Barcode & Purchase Orders · 2026-06-12
+
+Three independent owner-side operations tools. Employee **time clock** lets owners clock cashiers in and out and read an hours report off a new `timeClock` table — `clockOutAt` is left unset while a cashier is on the clock, so `currentlyIn` derives the live roster and `report` sums worked minutes per cashier over a range. **Barcode** adds a per-item `barcode` field with a unique-per-cafe guard, surfaces a scan input at the top of the cashier menu pane, and resolves a scan to a cart add client-side against the loaded sale items. **Purchase orders** introduce a create → receive → cancel lifecycle: a PO snapshots supplier + per-ingredient ordered quantities and unit costs, receiving applies an `inventoryMovements` stock entry (`reason: 'purchase'`) plus an ingredient `lastCostPerUnitIDR` update per received line and re-derives `open`/`partial`/`received` status, and cancel only stops future receipts (already-received goods stay — movements are never reversed).
+
+### Added
+- `timeClock` table (`convex/schema.ts`: `cafeId`, `cashierId`, `clockInAt`, optional `clockOutAt`; `by_cafe_clockin` + `by_cafe_cashier` indexes) and `convex/timeClock.ts` — `clockIn` / `clockOut` mutations, `currentlyIn` query (live roster), and `report` query (per-cashier worked-minutes over a range), all `requireOwnerCafe` + `requireOwned`-gated.
+- `/time-clock` owner page (`src/routes/_pos/time-clock.tsx`) — clock in/out controls and an hours report; "Absensi" nav entry (`src/components/app-shared.tsx`). Tests in `tests/convex/time-clock.test.ts`.
+- `menuItems.barcode` field + `by_cafe_barcode` index (`convex/schema.ts`); barcode threaded through `menu/items.ts` `create`/`update` with a duplicate-barcode guard mirroring the duplicate-name check, plus a barcode field on the item edit form (`src/components/menu/item-edit-form.tsx`).
+- Scan-to-cart: a `ScanLine` scan input at the top of `MenuPane` (`src/components/sale/menu-pane.tsx`) with an `onScan` callback wired in `sale-screen.tsx` to match a scanned code against the loaded sale items and add to cart. Tests extended in `tests/convex/menu-items.test.ts`.
+- `purchaseOrders` table (`convex/schema.ts`: `supplierId`/`supplierName` snapshot, `status` open/partial/received/cancelled, `lines[]` of `{ ingredientId, orderedQty, receivedQty, unitCostIDR }`, `note`; `by_cafe_status` + `by_cafe_created` indexes) and `convex/purchaseOrders.ts` — `create`, `receive` (stock movement + cost update per line, `deriveStatus`), `cancel`, `list`, `get`.
+- `/inventory/purchase-orders` page (`src/routes/_pos/inventory/purchase-orders.tsx`) with `PurchaseOrderFormDialog` and `PurchaseOrderDetail` (`src/components/inventory/`) for create + receive; "Pesanan Beli" nav entry. Tests in `tests/convex/purchase-orders.test.ts`.
+
+### Fixed
+- Purchase orders reject duplicate-ingredient lines on both create and receipt, and the `list` query is bounded rather than collecting unboundedly.
+
+### Docs
+- `docs/superpowers/specs/2026-06-11-time-clock-design.md`, `docs/superpowers/plans/2026-06-11-time-clock.md`
+- `docs/superpowers/specs/2026-06-11-barcode-design.md`, `docs/superpowers/plans/2026-06-11-barcode.md`
+- `docs/superpowers/specs/2026-06-11-purchase-orders-design.md`, `docs/superpowers/plans/2026-06-11-purchase-orders.md`
+
+---
+
+## Phase 2 · Profit & Loss Report · 2026-06-12
+
+Adds a Profit & Loss tab to the reports module that nets recorded expenses against gross profit. The reactive `reports.profitLoss` query computes revenue (paid orders), COGS (per-line recipe cost, reusing the margin report's COGS basis), gross profit, operating expenses (from the expenses table), net profit, and gross/net margin percentages over the shared report range.
+
+### Added
+- `reports.profitLoss` query (`convex/reports.ts`) returning `revenueIDR`, `cogsIDR`, `grossProfitIDR`, `expensesIDR`, `netProfitIDR`, `grossMarginPct`, `netMarginPct`.
+- `/reports/profit-loss` page (`src/routes/_pos/reports/profit-loss.tsx`) added to the reports sub-nav (`reports/route.tsx`).
+
+### Docs
+- `docs/superpowers/plans/2026-06-11-profit-loss.md`
+
+---
+
+## Phase 2 · UX — Rounded, Empty States & Register Shell · 2026-06-12
+
+Three presentation passes. The theme switches from square to rounded corners (`--radius` `0rem → 0.5rem` in `src/styles/globals.css`). Every data/page empty state is migrated to the shadcn `Empty` primitive with an icon + description (not plain text) across routes and components. The cashier-facing register gets a full-screen shell: a shared `RegisterTopBar` wraps `/sale`, `/tables`, and `/kitchen` outside the admin sidebar chrome, and owners now land on the dashboard while cashiers land on the register.
+
+### Changed
+- Base `--radius` set to `0.5rem` so all components round (`src/styles/globals.css`).
+- Data/page empty states across the app use shadcn `Empty` (icon + description) — customer detail, dashboard activity/invoices, inventory movement history + stock-take, menu category table, permission guard, held-orders, menu pane, shift order list, table-manage dialog, gift cards, inventory, kitchen, and more.
+- Full-screen register: `RegisterTopBar` (`src/components/sale/register-top-bar.tsx`) shared across `/sale`, `/tables`, `/kitchen`; `_pos.tsx` routes those screens outside the sidebar shell; post-login landing is role-aware (owner → dashboard, cashier → register).
+
+### Fixed
+- Cart-header actions wrapped so they don't clip in a narrow cart (`src/components/sale/cart-pane.tsx`).
+
+### Docs
+- `docs/superpowers/specs/2026-06-11-register-shell-design.md`
+
+---
+
+## Phase 2 · Pro-POS Expansion · 2026-06-11 → 2026-06-12
+
+A wide professional-POS slice landed back-to-back: inventory stock-take, order types, held orders, void, expense tracking, a margin report, manual discounts, split/multi-tender, table management, a kitchen display, loyalty tiers, product variants, and gift cards. Most of these thread through the shared sale core (`convex/lib/sale.ts`) — `buildOrder` / `settleSale` — so receipts, history, shift cash reconciliation, and dashboard/report aggregations stay consistent across every payment path. Each feature ships with its own admin page or sale-screen entry point, Convex tests, and i18n.
+
+### Added
+- **Stock-take** (#43): `ingredients.performStockTake` batched-recount mutation and a `StockTakeDialog` (`src/components/inventory/stock-take-dialog.tsx`) launched from the stock page (`/inventory`).
+- **Order types** (#44): `orderTypeValidator` (`dine_in` / `takeaway` / `pickup`, `convex/lib/orderType.ts`) on the order + cart, an order-type toggle in `cart-pane.tsx`, the type on the receipt, and an order-type filter/label in `/reports/orders`.
+- **Held orders** (#45): `heldOrders` table (`by_shift` / `by_cafe`) holding label + order type + cart lines + promo snapshot off the money path; `convex/heldOrders.ts` hold/list/remove; `HoldOrderDialog` + `HeldOrdersDialog` and a cart `load` action to recall.
+- **Void** (#46): `orders.void` reverses inventory + loyalty and flips status; canVoid-gated void action with a "voided" banner in the receipt preview.
+- **Expenses** (#47): `expenses` table + `convex/expenses.ts` (range-aware record/list/remove/total) and a `Pengeluaran` tab (`/reports/expenses`) with categories, an expense dialog, and CSV.
+- **Margin report** (#48): `reports.margin` query (per-item revenue vs recipe COGS) and the `/reports/margin` tab with CSV.
+- **Manual discount** (#49): ad-hoc post-promo order discount (`convex/lib/discount.ts`), cart state + `ManualDiscountDialog`, applied at checkout across all methods and shown on the receipt.
+- **Split / multi-tender** (#50): N-payment split create + settle/void with a stored tender breakdown (`convex/lib/payment.ts`); `getById` returns the tender array, the receipt renders splits, and shift cash reconciliation + reports + dashboard account for split orders (`SplitPaymentDialog`).
+- **Table management** (#51): `tables` table + `convex/tables.ts` CRUD, a floor view (`/tables`), hold-to-table (one held order per table via `heldOrders.tableId`) and resume-from-floor.
+- **Kitchen display (KDS)** (#52): order `kitchenStatus` + `tableId` (`by_cafe_kitchen` index), `convex/kitchen.ts` tickets/advance (`'ready' → 'done'`), and a kitchen board (`/kitchen`).
+- **Loyalty tiers** (#53): spend-based `tiers` config (`cafeSettings.loyalty.tiers`) with an earn multiplier (`convex/lib/loyalty.ts`), a tier editor on `/loyalty`, and a tier badge on the customer detail sheet.
+- **Product variants** (#54): `menuItemVariants` table (absolute price that replaces the item base price; recipe shared with the parent), variant CRUD (`convex/menu/variants.ts`), a variants editor on the item form, variant pick in the item picker, and `variantId`/`variantName` threaded through the cart, checkout, receipt, and held orders.
+- **Gift cards** (#55): `giftCards` (unique uppercased `code` per cafe, mutable `balanceIDR`) + `giftCardTransactions` audit ledger (issue/topup/redeem/refund), `convex/giftCards.ts` management, a management page (`/gift-cards`), and gift-card redemption as a tender (full + split) with void refund.
+
+### Changed
+- Sale core split into `buildOrder` + `settleSale` (`convex/lib/sale.ts`) and generalized to N tenders so split payments, gift-card tenders, manual discounts, order types, KDS status, and variants all flow through one path; `usePaymentTotals` documented as taking the combined promo + manual discount.
+- Shift cash reconciliation, `reports`, and `dashboard` updated to recognize split orders and to exclude gift-card tenders from the shift QRIS-sales figure.
+- Stock health summary added above the stock table; the colliding `bahan` unit dropped and a bare low-stock count shown (#42 polish carried in).
+
+### Fixed
+- Void keeps the loyalty ledger reconciled with a floored points balance.
+- Variant cart lines with different variants stay separate; gift-card list is stable newest-first (tie-break on `_creationTime`).
+- Split / expense / gift-card amount fields use the `Jumlah (Rp)` label to avoid the Quantity/Fixed copy collision.
+
+### Docs
+- Design specs + plans under `docs/superpowers/` (all 2026-06-11) for inventory-stock-take, order-types, held-orders, void-sale, expense-tracking, margin-report, manager-discount, split-tender, table-management, kds, loyalty-tiers, product-variants, and gift-cards.
+
+---
+
+## Phase 2 · Permissions & Menu Media · 2026-06-11
+
+Role-aware access control plus item imagery. Permissions resolve from a cashier's role + per-flag grants (`staff.permissionsFor`) into a client `usePermissions` hook and a `RequirePermission` route guard, gating reports, menu editing, shift management, void, and checkout discount — and hiding the nav entries a cashier can't reach. Menu items gain an uploadable image (`imageStorageId` → resolved `imageUrl`) surfaced as thumbnails in the admin list and the cashier grid. A stock health summary sits above the stock table.
+
+### Added
+- `staff.permissionsFor` query (resolved role + flags) and `src/lib/permissions.ts` `usePermissions` hook (`Permission` = `canVoid` / `canDiscount` / `canManageShift` / `canViewReports` / `canEditMenu`); `RequirePermission` guard (`src/components/permission/require-permission.tsx`) on dashboard, forecast, inventory, menu, promos, recipes, reports, settings, shift, and shifts routes; nav entries hidden by permission (`app-shared.tsx`, `app-sidebar.tsx`).
+- Menu item `imageStorageId` field with resolved `imageUrl` in list/sale/detail (`convex/menu/items.ts`); upload/replace/remove in the item edit form; thumbnails in the admin list (`menu/index.tsx`) and cashier `item-card.tsx`.
+- Stock health summary tiles (`src/components/inventory/stock-summary.tsx`) above the stock table (`/inventory`).
+
+### Docs
+- Design specs + plans under `docs/superpowers/` for permission-gates, menu-item-images, and stock-health-overview (2026-06-11).
+
+---
+
+## Phase 2 · Shifts, Handoff & Order History · 2026-06-10 → 2026-06-11
+
+Closes the loop on shift accounting and cashier accountability. Shift history lists closed shifts with read-time totals and cash variance and drills into per-shift orders. Close-out gains a `cashMovements` ledger (cash in/out, recorded from the sale screen), a full breakdown with a live variance preview, and stores expected/variance on close. Order history moves to a searchable `/reports/orders` browse (date range + cashier/method/status filters, pagination, reprint). A `cashierSessions` ledger records login/switch/logout, drives a cashier-switch button, and renders a cashier timeline in the shift-history detail.
+
+### Added
+- `shifts.listClosed` (read-time totals + variance) and a shift-history list (`/shifts`) with drill-in; shared `ShiftOrderList` (`src/components/shift/shift-order-list.tsx`) reused by `/history`.
+- `cashMovements` table (`by_shift`; direction in/out, amount, note) + `convex/cashMovements.ts` (record + listForShift); `CashMovementDialog` launched from the sale screen; close-out breakdown with live variance preview and stored expected/variance + `closeoutSummary` (`/shift/close`).
+- `orders.search` query (date range + cashier/method/status filters, pagination) and the `/reports/orders` browse page with badges and receipt reprint.
+- `cashierSessions` table (`by_shift`; login/switch/logout) + `convex/cashierSessions.ts` (record + listForShift); cashier-switch button, logout recorded on close/sign-out, `/pin` records a session and routes to `/sale` when a shift is open, and a cashier timeline in the shift-history detail.
+
+### Docs
+- Design specs + plans under `docs/superpowers/` for shift-history (2026-06-10), shift-closeout, order-history, and cashier-handoff (2026-06-11).
+
+---
+
+## Phase 2 · Payments — QRIS (static, dynamic, Xendit BYO, reconciliation) · 2026-06-09 → 2026-06-10
+
+QRIS lands in four slices. **Static** (#32): owners upload a fixed QRIS image in settings, the cashier shows it in a `QrisStaticPaymentDialog`, and `createQrisStaticSale` settles through the shared sale core; method-aware pay buttons disable unconfigured/unsupported methods server- and client-side. **Dynamic** (#33): a `PaymentProvider` interface with a `MockProvider`, a `qrisDynamic` action that creates a per-order charge, a `/webhooks/qris` HTTP route that confirms payment, a reactive dialog that auto-advances on confirm, and a sweep cron — the sale core is refactored into `buildOrder` + `settleSale` and pay buttons are driven from a method registry. **Xendit BYO** (#34): owners connect their own Xendit account (Secret API Key + Callback Token, masked), `XenditProvider` issues real QR Codes and verifies the callback token, and `/webhooks/qris/xendit` is multi-tenant (lookup-then-verify). **Reconciliation** (#35): a `reconcilePending` cron polling Xendit (`PaymentProvider.fetchStatus`) replaces the blind sweep, treating the provider as the authority.
+
+### Added
+- Static QRIS: `createQrisStaticSale` (`convex/orders.ts`), `qrisImageUrl` resolution in `settings.get`, image upload in settings tax/profile, `QrisStaticPaymentDialog` + `use-payment-totals.ts` + `src/lib/upload.ts` / `uuid.ts`, a `qris_static` receipt line, and live quick-cash buttons.
+- Dynamic QRIS: `PaymentProvider` interface + `MockProvider` + `resolveProvider` (`convex/payments/providers/`), `convex/payments/qrisDynamic.ts` action (create charge, confirm, cancel, sweep), `/webhooks/qris` route (`convex/http.ts`) + sweep cron, `payments.expiresAt` + `by_provider_ref` index, `QrisDynamicPaymentDialog` with reactive auto-advance, and a `payment-methods.tsx` method registry.
+- Xendit BYO: `XenditProvider` (QR Codes API + callback-token verify, `convex/payments/providers/xendit.ts`), `connectQrisProvider` with masked-secret reads (`convex/settings.ts`), a Xendit connect form (`/settings/integrations`), multi-tenant `/webhooks/qris/xendit`, and a scannable QR render in the dynamic dialog.
+- Reconciliation: `PaymentProvider.fetchStatus` (Xendit poll + mock no-op) and a `reconcilePending` cron replacing the sweep.
+
+### Changed
+- `convex/orders.ts` split into `buildOrder` + `settleSale` in the shared sale core (`convex/lib/sale.ts`); `SaleArgs` derived from the validator; pay buttons + dialogs driven from a method registry; charges created after the order with `patchCharge` setting the provider ref.
+- History filtered to paid orders; a dynamic-QRIS order supersedes a pending static one; provider interface uses `referenceId` + headers.
+
+### Fixed
+- Guard disabled/unconfigured methods server-side; prevent checkout lockout when no method is usable; `simulateWebhook` made internal (dev-only); QRIS disconnect blocked while a dynamic order is pending; finite `expiresAt` fallback + shared `timingSafeEqual`; pending orders excluded from sales aggregations.
+
+### Docs
+- Design specs + plans under `docs/superpowers/` for qris-static (2026-06-08), qris-dynamic (2026-06-09), qris-xendit-byo, and qris-reconciliation (2026-06-10).
+
+---
+
+## Phase 2 · Loyalty & Customers · 2026-06-07
+
+A cafe-scoped customer directory plus a points-based loyalty program. Customers carry a points balance, visit count, and total spend; cash sales earn points and track visit/spend, and points can be redeemed at checkout (stacking on a promo). A `loyaltyTransactions` ledger records earn/redeem/adjust, the owner configures earn rate + redemption value on `/loyalty` with a stats view, and the checkout path reads `cafeSettings` once.
+
+### Added
+- `customers` table (`by_cafe_phone` / `by_cafe_active`; `pointsBalance`, `visitCount`, `totalSpentIDR`, `lastVisitAt`) and `loyaltyTransactions` ledger (`by_customer_at`; earn/redeem/adjust); loyalty config on `cafeSettings` (`earnRatePerIDR`, redemption block value). Pure points math in `convex/lib/loyalty.ts`.
+- `convex/customers.ts` directory CRUD + phone lookup + manual point adjust; `convex/loyalty.ts` program config get/update + stats.
+- `/customers` directory page with create/edit dialog and a detail sheet (history + manual point adjust); `/loyalty` program config + stats page; a customer section + redeem flow in the sale screen and on the receipt.
+
+### Changed
+- `createCashSale` earns points + tracks visit/spend and redeems points (stacking on promo) with a single `cafeSettings` read on the checkout path.
+
+### Fixed
+- Reject point redemption without an attached customer; guard `redemptionIDR` against a non-positive block value; CI runs `convex deploy` only on production builds; top-customers shows a loading state instead of an empty table.
+
+### Docs
+- `docs/superpowers/specs/2026-06-03-loyalty-customers-design.md`, `docs/superpowers/plans/2026-06-03-loyalty-customers.md`
 
 ---
 
