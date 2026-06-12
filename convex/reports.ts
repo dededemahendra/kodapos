@@ -178,6 +178,85 @@ export const margin = query({
   },
 });
 
+export const profitLoss = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    revenueIDR: v.number(),
+    cogsIDR: v.number(),
+    grossProfitIDR: v.number(),
+    expensesIDR: v.number(),
+    expensesByCategory: v.array(
+      v.object({
+        category: v.union(
+          v.literal('rent'),
+          v.literal('utilities'),
+          v.literal('supplies'),
+          v.literal('salary'),
+          v.literal('other')
+        ),
+        amountIDR: v.number(),
+      })
+    ),
+    netProfitIDR: v.number(),
+    grossMarginPct: v.number(), // 0..100, 0 when revenue is 0
+    netMarginPct: v.number(), // can be negative
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const { cafeId, tz, fromKey, toKey, paid } = await paidInRange(ctx, range);
+    // Revenue + recipe COGS (mirror the margin computation).
+    const ingredients = await ctx.db
+      .query('ingredients')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
+      .collect();
+    const cost = new Map(ingredients.map((i) => [i._id, i.lastCostPerUnitIDR]));
+    let revenueIDR = 0;
+    let cogsIDR = 0;
+    for (const o of paid) {
+      revenueIDR += o.totalIDR;
+      for (const l of o.lines) {
+        const unitCogs = (l.recipeSnapshot ?? []).reduce(
+          (s, rl) => s + rl.qty * rl.wastageFactor * (cost.get(rl.ingredientId) ?? 0),
+          0
+        );
+        cogsIDR += l.qty * unitCogs;
+      }
+    }
+    // Operating expenses in the same range (the non-inventory expenses table).
+    const { startMs, endMs } = resolveRange(tz, range, Date.now());
+    const expenses = await ctx.db
+      .query('expenses')
+      .withIndex('by_cafe_at', (q) =>
+        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
+      )
+      .collect();
+    const byCat = new Map<string, number>();
+    let expensesIDR = 0;
+    for (const e of expenses) {
+      expensesIDR += e.amountIDR;
+      byCat.set(e.category, (byCat.get(e.category) ?? 0) + e.amountIDR);
+    }
+    const grossProfitIDR = revenueIDR - cogsIDR;
+    const netProfitIDR = grossProfitIDR - expensesIDR;
+    return {
+      revenueIDR,
+      cogsIDR,
+      grossProfitIDR,
+      expensesIDR,
+      expensesByCategory: [...byCat.entries()].map(([category, amountIDR]) => ({
+        category: category as 'rent' | 'utilities' | 'supplies' | 'salary' | 'other',
+        amountIDR,
+      })),
+      netProfitIDR,
+      grossMarginPct: revenueIDR === 0 ? 0 : Math.round((grossProfitIDR / revenueIDR) * 100),
+      netMarginPct: revenueIDR === 0 ? 0 : Math.round((netProfitIDR / revenueIDR) * 100),
+      fromKey,
+      toKey,
+    };
+  },
+});
+
 export const payments = query({
   args: { range: rangeArg },
   returns: v.object({
