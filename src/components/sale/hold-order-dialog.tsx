@@ -82,6 +82,7 @@ export function HoldOrderDialog({
           unitPriceIDR: l.unitPriceIDR,
           modifierOptionIds: l.modifierOptionIds,
           modifierLabels: l.modifierLabels,
+          ...(l.variantId ? { variantId: l.variantId, variantName: l.variantName } : {}),
         })),
         ...(cart.promo
           ? {

@@ -35,6 +35,8 @@ export function HeldOrdersDialog({
             optionName: string;
             priceAdjustmentIDR: number;
           }>;
+          variantId?: Id<'menuItemVariants'>;
+          variantName?: string;
         }>;
         promo?: { promoId: Id<'promotions'>; name: string; type: 'percent' | 'fixed'; value: number };
         createdAt: number;

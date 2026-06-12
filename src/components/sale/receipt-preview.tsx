@@ -108,6 +108,7 @@ export function ReceiptPreview({
                 <div className="flex justify-between">
                   <span>
                     {line.qty}× {line.nameSnapshot}
+                    {line.variantName ? ` (${line.variantName})` : ''}
                   </span>
                   <span className="tabular-nums">{formatIDR(line.lineTotalIDR)}</span>
                 </div>
