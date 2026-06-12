@@ -53,6 +53,13 @@ export const create = mutation({
         throw new Error('Bahan tidak ditemukan.');
       }
     }
+    const seen = new Set<string>();
+    for (const line of args.lines) {
+      if (seen.has(line.ingredientId)) {
+        throw new Error('Bahan duplikat dalam pesanan.');
+      }
+      seen.add(line.ingredientId);
+    }
 
     let supplierName: string | undefined;
     if (args.supplierId) {
@@ -95,6 +102,13 @@ export const receive = mutation({
     const po = await requireOwned(ctx, cafeId, args.id, 'Pesanan beli');
     if (po.status === 'received' || po.status === 'cancelled') {
       throw new Error('PO sudah selesai atau dibatalkan.');
+    }
+    const receiptIds = new Set<string>();
+    for (const r of args.lines) {
+      if (receiptIds.has(r.ingredientId)) {
+        throw new Error('Bahan duplikat dalam penerimaan.');
+      }
+      receiptIds.add(r.ingredientId);
     }
 
     // Work on a copy; validate every receipt before applying any side effect.
@@ -168,17 +182,19 @@ export const list = query({
   handler: async (ctx, { status }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const rows = status
-      ? await ctx.db
+      ? // bounded; PO volume per cafe is modest
+        await ctx.db
           .query('purchaseOrders')
           .withIndex('by_cafe_status', (q) =>
             q.eq('cafeId', cafeId).eq('status', status)
           )
-          .collect()
-      : await ctx.db
+          .take(200)
+      : // bounded; PO volume per cafe is modest
+        await ctx.db
           .query('purchaseOrders')
           .withIndex('by_cafe_created', (q) => q.eq('cafeId', cafeId))
           .order('desc')
-          .collect();
+          .take(200);
     // The status index is not ordered by createdAt; sort newest-first for both.
     const sorted = [...rows].sort((a, b) => b.createdAt - a.createdAt);
     return sorted.map((po) => ({

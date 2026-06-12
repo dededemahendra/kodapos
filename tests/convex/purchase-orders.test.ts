@@ -101,6 +101,19 @@ describe('purchaseOrders.create', () => {
       })
     ).rejects.toThrow(/tidak ditemukan/i);
   });
+
+  it('rejects duplicate ingredient across lines', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, biji } = await setup(t);
+    await expect(
+      asOwner.mutation(api.purchaseOrders.create, {
+        lines: [
+          { ingredientId: biji, orderedQty: 100, unitCostIDR: 40 },
+          { ingredientId: biji, orderedQty: 50, unitCostIDR: 45 },
+        ],
+      })
+    ).rejects.toThrow(/duplikat/i);
+  });
 });
 
 describe('purchaseOrders.receive', () => {
@@ -238,6 +251,31 @@ describe('purchaseOrders.receive', () => {
         lines: [{ ingredientId: susu, qty: 10 }],
       })
     ).rejects.toThrow(/tidak ditemukan/i);
+  });
+
+  it('rejects duplicate ingredient in one receive call and applies nothing', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, biji, supplier } = await setup(t);
+    const id = await asOwner.mutation(api.purchaseOrders.create, {
+      supplierId: supplier,
+      lines: [{ ingredientId: biji, orderedQty: 5000, unitCostIDR: 50 }],
+    });
+    await expect(
+      asOwner.mutation(api.purchaseOrders.receive, {
+        id,
+        lines: [
+          { ingredientId: biji, qty: 1 },
+          { ingredientId: biji, qty: 1 },
+        ],
+      })
+    ).rejects.toThrow(/duplikat/i);
+
+    // Nothing applied: stock still 0, line receivedQty still 0, status open.
+    const bijiRow = await asOwner.query(api.ingredients.get, { id: biji });
+    expect(bijiRow?.currentStockQty).toBe(0);
+    const detail = await asOwner.query(api.purchaseOrders.get, { id });
+    expect(detail?.status).toBe('open');
+    expect(detail?.lines[0]?.receivedQty).toBe(0);
   });
 });
 
