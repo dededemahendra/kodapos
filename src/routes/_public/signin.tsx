@@ -81,7 +81,7 @@ function SigninPage() {
         email: email.value.trim(),
         password: password.value,
       });
-      navigate({ to: '/menu' });
+      navigate({ to: '/dashboard' });
     } catch {
       // @convex-dev/auth throws InvalidAccountId (wrong email/password) and other
       // auth errors as uncaught errors; Convex masks them to a generic "Server

@@ -326,6 +326,10 @@ msgstr "Accurate"
 msgid "Ada"
 msgstr "Ada"
 
+#: src/components/sale/register-top-bar.tsx
+msgid "Admin"
+msgstr "Admin"
+
 #: src/routes/_public/index.tsx
 msgid "AI-native POS untuk kafe & QSR Indonesia."
 msgstr "AI-native POS untuk kafe & QSR Indonesia."
@@ -1169,6 +1173,7 @@ msgid "DANA"
 msgstr "DANA"
 
 #: src/components/app-shared.tsx
+#: src/components/sale/register-top-bar.tsx
 #: src/routes/_pos/kitchen.tsx
 msgid "Dapur"
 msgstr "Dapur"
@@ -2428,6 +2433,7 @@ msgstr "Max"
 
 #: src/components/app-shared.tsx
 #: src/components/sale/hold-order-dialog.tsx
+#: src/components/sale/register-top-bar.tsx
 #: src/routes/_pos/tables.tsx
 msgid "Meja"
 msgstr "Meja"
@@ -3565,6 +3571,7 @@ msgstr "Ringkasan"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/components/sale/register-top-bar.tsx
 msgid "Riwayat"
 msgstr "Riwayat"
 
@@ -3809,6 +3816,7 @@ msgid "Sewa"
 msgstr "Sewa"
 
 #: src/components/app-shared.tsx
+#: src/components/sale/register-top-bar.tsx
 msgid "Shift"
 msgstr "Shift"
 

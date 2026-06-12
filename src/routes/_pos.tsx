@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_pos')({
 });
 
 // Routes where the sidebar would get in the way (full-screen flows).
-const NAV_HIDDEN_PREFIXES = ['/onboarding', '/pin', '/shift'];
+const NAV_HIDDEN_PREFIXES = ['/onboarding', '/pin', '/shift', '/sale'];
 
 function PosLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
