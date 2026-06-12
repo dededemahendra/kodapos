@@ -27,6 +27,7 @@ import type * as lib_demand from "../lib/demand.js";
 import type * as lib_discount from "../lib/discount.js";
 import type * as lib_expense from "../lib/expense.js";
 import type * as lib_forecast from "../lib/forecast.js";
+import type * as lib_giftcard from "../lib/giftcard.js";
 import type * as lib_heldOrder from "../lib/heldOrder.js";
 import type * as lib_inventory from "../lib/inventory.js";
 import type * as lib_loyalty from "../lib/loyalty.js";
@@ -94,6 +95,7 @@ declare const fullApi: ApiFromModules<{
   "lib/discount": typeof lib_discount;
   "lib/expense": typeof lib_expense;
   "lib/forecast": typeof lib_forecast;
+  "lib/giftcard": typeof lib_giftcard;
   "lib/heldOrder": typeof lib_heldOrder;
   "lib/inventory": typeof lib_inventory;
   "lib/loyalty": typeof lib_loyalty;

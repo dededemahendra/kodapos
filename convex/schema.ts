@@ -364,6 +364,7 @@ export default defineSchema({
       v.literal('cash'),
       v.literal('qris_static'),
       v.literal('qris_dynamic'),
+      v.literal('giftcard'),
       v.literal('split')
     ),
     // Per-method amounts collected for the order (split + accounting source of
@@ -376,7 +377,8 @@ export default defineSchema({
           method: v.union(
             v.literal('cash'),
             v.literal('qris_static'),
-            v.literal('qris_dynamic')
+            v.literal('qris_dynamic'),
+            v.literal('giftcard')
           ),
           amountIDR: v.number(),
         })
@@ -412,9 +414,12 @@ export default defineSchema({
     method: v.union(
       v.literal('cash'),
       v.literal('qris_static'),
-      v.literal('qris_dynamic')
+      v.literal('qris_dynamic'),
+      v.literal('giftcard')
     ),
     amountIDR: v.number(),
+    // Set on a giftcard payment row so a void can refund the right card.
+    giftCardId: v.optional(v.id('giftCards')),
     cashTenderedIDR: v.optional(v.number()),
     changeIDR: v.optional(v.number()),
     providerRef: v.optional(v.string()),

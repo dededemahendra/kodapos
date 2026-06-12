@@ -3,6 +3,7 @@ import type { Doc, Id } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from './auth';
 import { manualDiscountValidator } from './discount';
+import { redeemGiftCard } from './giftcard';
 import { DEFAULT_LOYALTY, earnMultiplierFor, pointsEarned, redemptionIDR } from './loyalty';
 import { orderTypeValidator } from './orderType';
 import { computeOrderTotals, DEFAULT_SERVICE_CHARGE_NAME, promoDiscountIDR } from './pricing';
@@ -42,11 +43,13 @@ export type PaymentInput =
   | { method: 'cash'; tenderedIDR: number }
   | { method: 'qris_static' }
   | { method: 'qris_dynamic' }
+  | { method: 'giftcard'; giftCardCode: string }
   | {
       method: 'split';
       tenders: Array<
         | { method: 'cash'; amountIDR: number; tenderedIDR: number }
         | { method: 'qris_static'; amountIDR: number }
+        | { method: 'giftcard'; giftCardCode: string; amountIDR: number }
       >;
     };
 
@@ -324,11 +327,15 @@ export async function buildOrder(
   // headline paymentMethod stored on the order ('split' for a multi-tender order).
   type Tender =
     | { method: 'cash'; amountIDR: number; tenderedIDR: number }
-    | { method: 'qris_static'; amountIDR: number };
-  type BreakdownEntry = { method: 'cash' | 'qris_static' | 'qris_dynamic'; amountIDR: number };
+    | { method: 'qris_static'; amountIDR: number }
+    | { method: 'giftcard'; giftCardCode: string; amountIDR: number };
+  type BreakdownEntry = {
+    method: 'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard';
+    amountIDR: number;
+  };
 
   let changeIDR = 0;
-  let orderMethod: 'cash' | 'qris_static' | 'qris_dynamic' | 'split';
+  let orderMethod: 'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard' | 'split';
   let paymentBreakdown: BreakdownEntry[];
   let splitTenders: Tender[] | null = null;
 
@@ -337,8 +344,12 @@ export async function buildOrder(
     if (tenders.length < 2) throw new Error('Pembayaran terbagi memerlukan minimal dua tender.');
     let sum = 0;
     for (const tender of tenders) {
-      // Validator already restricts method to cash/qris_static; re-check defensively.
-      if (tender.method !== 'cash' && tender.method !== 'qris_static') {
+      // Validator already restricts method to cash/qris_static/giftcard; re-check defensively.
+      if (
+        tender.method !== 'cash' &&
+        tender.method !== 'qris_static' &&
+        tender.method !== 'giftcard'
+      ) {
         throw new Error('Metode tender tidak didukung pada pembayaran terbagi.');
       }
       assertIDR(tender.amountIDR, 'Jumlah tender');
@@ -350,6 +361,8 @@ export async function buildOrder(
         }
         changeIDR += tendered - tender.amountIDR;
       }
+      // A giftcard tender has no tenderedIDR/change; its amount is redeemed
+      // (and balance-validated) after the order insert.
       sum += tender.amountIDR;
     }
     if (sum !== totalIDR) throw new Error('Total tender tidak sama dengan total pesanan.');
@@ -357,7 +370,8 @@ export async function buildOrder(
     paymentBreakdown = tenders.map((tender) => ({ method: tender.method, amountIDR: tender.amountIDR }));
     splitTenders = tenders;
   } else {
-    // method-specific: funds check + change only for cash.
+    // method-specific: funds check + change only for cash. A standalone giftcard
+    // payment redeems the full totalIDR after the order insert (no change).
     if (payment.method === 'cash') {
       const tendered = assertIDR(payment.tenderedIDR, 'Uang yang diterima');
       if (tendered < totalIDR) {
@@ -410,6 +424,12 @@ export async function buildOrder(
   // until settleSale runs.
   if (splitTenders) {
     for (const tender of splitTenders) {
+      // A giftcard leg redeems its amount now (order exists), validating the
+      // balance server-side and stamping giftCardId so a void can refund it.
+      const giftCardId =
+        tender.method === 'giftcard'
+          ? await redeemGiftCard(ctx, cafeId, tender.giftCardCode, tender.amountIDR, orderId)
+          : undefined;
       await ctx.db.insert('payments', {
         cafeId,
         orderId,
@@ -418,8 +438,19 @@ export async function buildOrder(
         ...(tender.method === 'cash'
           ? { cashTenderedIDR: tender.tenderedIDR, changeIDR: tender.tenderedIDR - tender.amountIDR }
           : {}),
+        ...(giftCardId ? { giftCardId } : {}),
       });
     }
+  } else if (payment.method === 'giftcard') {
+    // Standalone gift-card payment: redeem the full computed total.
+    const giftCardId = await redeemGiftCard(ctx, cafeId, payment.giftCardCode, totalIDR, orderId);
+    await ctx.db.insert('payments', {
+      cafeId,
+      orderId,
+      method: 'giftcard',
+      amountIDR: totalIDR,
+      giftCardId,
+    });
   } else {
     await ctx.db.insert('payments', {
       cafeId,
@@ -570,6 +601,29 @@ export async function reverseSettledSale(
         visitCount: Math.max(0, customer.visitCount - 1),
         totalSpentIDR: Math.max(0, customer.totalSpentIDR - order.totalIDR),
       });
+    }
+  }
+  // Refund any gift-card tenders back onto their cards. The paymentStatus !==
+  // 'paid' guard above prevents a double void, so each card is credited exactly
+  // once. Reads the stored giftCardId so the right card is restored.
+  const pays = await ctx.db
+    .query('payments')
+    .withIndex('by_order', (q) => q.eq('orderId', orderId))
+    .collect();
+  for (const p of pays) {
+    if (p.method === 'giftcard' && p.giftCardId) {
+      const card = await ctx.db.get(p.giftCardId);
+      if (card) {
+        await ctx.db.patch(card._id, { balanceIDR: card.balanceIDR + p.amountIDR });
+        await ctx.db.insert('giftCardTransactions', {
+          cafeId: order.cafeId,
+          giftCardId: card._id,
+          type: 'refund',
+          amountIDR: p.amountIDR,
+          orderId,
+          at: now,
+        });
+      }
     }
   }
   await ctx.db.patch(orderId, {
