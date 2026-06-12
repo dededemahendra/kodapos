@@ -60,6 +60,11 @@ msgid "\"{0}\" tidak akan muncul di daftar pelanggan."
 msgstr "\"{0}\" will no longer appear in the customer list."
 
 #. placeholder {0}: archiveTarget.name
+#: src/components/tables/table-manage-dialog.tsx
+msgid "\"{0}\" tidak akan muncul di lantai meja."
+msgstr "\"{0}\" will no longer appear on the table floor."
+
+#. placeholder {0}: archiveTarget.name
 #: src/routes/_pos/suppliers.tsx
 msgid "\"{0}\" tidak akan muncul di pilihan pemasok."
 msgstr "\"{0}\" will no longer appear in the supplier picker."
@@ -91,8 +96,10 @@ msgstr "{0} ingredients · {1} low stock"
 
 #. placeholder {0}: o.lineCount
 #. placeholder {0}: o.lines.length
+#. placeholder {0}: table.itemCount
 #: src/components/shift/shift-order-list.tsx
 #: src/routes/_pos/reports/orders.tsx
+#: src/routes/_pos/tables.tsx
 msgid "{0} item"
 msgstr "{0} item"
 
@@ -420,6 +427,7 @@ msgstr "Archive"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/confirm-archive.tsx
+#: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
@@ -614,6 +622,7 @@ msgstr "Spoiled/Expired"
 #: src/components/sale/sale-screen.tsx
 #: src/components/settings/save-bar.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
+#: src/components/tables/table-manage-dialog.tsx
 #: src/components/ui/confirm-dialog.tsx
 #: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/settings/integrations.tsx
@@ -703,6 +712,11 @@ msgstr "No waste yet"
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Belum ada limbah tercatat dalam 30 hari terakhir."
 msgstr "No waste recorded in the last 30 days."
+
+#: src/components/tables/table-manage-dialog.tsx
+#: src/routes/_pos/tables.tsx
+msgid "Belum ada meja."
+msgstr "No tables yet."
 
 #: src/components/menu/modifier-group-form.tsx
 msgid "Belum ada opsi. Tambahkan minimal satu."
@@ -881,6 +895,10 @@ msgstr "Generate QRIS"
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Buat satu grup untuk dipakai ulang di banyak item."
 msgstr "Create a group to reuse across many items."
+
+#: src/routes/_pos/tables.tsx
+msgid "Buka \"Kelola meja\" untuk menambah meja."
+msgstr "Open \"Manage tables\" to add a table."
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Buka detail"
@@ -1363,6 +1381,10 @@ msgstr "Failed to save item."
 msgid "Gagal menyimpan kategori."
 msgstr "Failed to save category."
 
+#: src/components/tables/table-manage-dialog.tsx
+msgid "Gagal menyimpan meja."
+msgstr "Could not save the table."
+
 #: src/components/customer/customer-form-dialog.tsx
 msgid "Gagal menyimpan pelanggan."
 msgstr "Failed to save customer."
@@ -1511,6 +1533,7 @@ msgstr "Page not found"
 
 #: src/components/menu/modifier-group-form.tsx
 #: src/components/sale/customer-section.tsx
+#: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Hapus"
@@ -1531,6 +1554,10 @@ msgstr "Remove discount"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Hapus gambar"
 msgstr "Remove image"
+
+#: src/components/tables/table-manage-dialog.tsx
+msgid "Hapus meja?"
+msgstr "Delete table?"
 
 #: src/routes/_pos/reports/expenses.tsx
 msgid "Hapus pengeluaran?"
@@ -1872,6 +1899,11 @@ msgstr "Manage your cafe's identity, contact info, and operating hours."
 msgid "Kelola kasir, kontak, izin akses, dan PIN."
 msgstr "Manage cashiers, contact info, access permissions, and PINs."
 
+#: src/components/tables/table-manage-dialog.tsx
+#: src/routes/_pos/tables.tsx
+msgid "Kelola meja"
+msgstr "Manage tables"
+
 #: src/components/nav-user.tsx
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
@@ -1974,6 +2006,10 @@ msgstr "Receipt content"
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Koreksi"
 msgstr "Correction"
+
+#: src/routes/_pos/tables.tsx
+msgid "kosong"
+msgstr "empty"
 
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/sale-screen.tsx
@@ -2191,6 +2227,16 @@ msgstr "Off"
 #: src/components/menu/modifier-group-form.tsx
 msgid "Max"
 msgstr "Max"
+
+#: src/components/app-shared.tsx
+#: src/components/sale/hold-order-dialog.tsx
+#: src/routes/_pos/tables.tsx
+msgid "Meja"
+msgstr "Table"
+
+#: src/components/tables/table-manage-dialog.tsx
+msgid "Meja disimpan."
+msgstr "Table saved."
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Mekari Jurnal"
@@ -2467,6 +2513,10 @@ msgstr "Category name"
 #: src/components/menu/category-table.tsx
 #~ msgid "Nama kategori baru"
 #~ msgstr "New category name"
+
+#: src/components/tables/table-manage-dialog.tsx
+msgid "Nama meja"
+msgstr "Table name"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Nama merchant"
@@ -3500,6 +3550,7 @@ msgstr "Who's on duty?"
 #: src/components/promo/promo-form-dialog.tsx
 #: src/components/sale/customer-section.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
+#: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Simpan"
 msgstr "Save"
@@ -3717,6 +3768,10 @@ msgstr "Add Category"
 msgid "Tambah ke pesanan"
 msgstr "Add to order"
 
+#: src/components/tables/table-manage-dialog.tsx
+msgid "Tambah meja"
+msgstr "Add table"
+
 #: src/components/customer/customer-form-dialog.tsx
 #: src/routes/_pos/customers.tsx
 msgid "Tambah pelanggan"
@@ -3754,6 +3809,10 @@ msgstr "Add Promo"
 #: src/components/sale/split-payment-dialog.tsx
 msgid "Tambah tender"
 msgstr "Add tender"
+
+#: src/components/tables/table-manage-dialog.tsx
+msgid "Tambah, ubah nama, atau arsipkan meja."
+msgstr "Add, rename, or archive tables."
 
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Tambahkan beberapa item beserta harganya."
@@ -3834,6 +3893,10 @@ msgstr "Show tax breakdown"
 #: src/routes/_pos/reports/sales.tsx
 msgid "Tanggal"
 msgstr "Date"
+
+#: src/components/sale/hold-order-dialog.tsx
+msgid "Tanpa meja"
+msgstr "No table"
 
 #: src/components/sale/held-orders-dialog.tsx
 msgid "Tanpa nama"
@@ -4116,6 +4179,7 @@ msgid "Uang terhitung (Rp)"
 msgstr "Counted cash (Rp)"
 
 #: src/components/customer/customer-detail-sheet.tsx
+#: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/suppliers.tsx

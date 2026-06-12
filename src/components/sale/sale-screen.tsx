@@ -1,8 +1,9 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
+import { useNavigate } from '@tanstack/react-router';
 import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals, promoDiscountIDR } from 'convex/lib/pricing';
-import { useReducer, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { CashPaymentDialog } from './cash-payment-dialog';
@@ -38,7 +39,15 @@ function genLineKey(): string {
     : `k-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function SaleScreen() {
+export function SaleScreen({
+  recall,
+  table,
+}: {
+  recall?: string | undefined;
+  table?: string | undefined;
+} = {}) {
+  const navigate = useNavigate();
+  const removeHeld = useMutation(api.heldOrders.remove);
   const categories = useQuery(api.menu.categories.list, {});
   const items = useQuery(api.menu.items.listForSale, {});
   const cafe = useQuery(api.cafes.myCafe, {});
@@ -61,6 +70,38 @@ export function SaleScreen() {
     api.heldOrders.listForShift,
     shift ? { shiftId: shift._id } : 'skip'
   );
+
+  // Resume a table's parked order from the floor: /sale?recall=<heldOrderId>.
+  // The ref guards the effect so it fires once per recall id (not on every
+  // re-render while we await the remove + navigate).
+  const recalledRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!recall || held === undefined) return;
+    if (recalledRef.current === recall) return;
+    recalledRef.current = recall;
+    const row = held.find((h) => h._id === recall);
+    void (async () => {
+      if (row) {
+        const state: CartState = {
+          orderType: row.orderType,
+          promo: row.promo
+            ? {
+                _id: row.promo.promoId,
+                name: row.promo.name,
+                type: row.promo.type,
+                value: row.promo.value,
+              }
+            : null,
+          lines: row.lines.map((l) => ({ ...l, lineKey: genLineKey() })),
+          manualDiscount: null,
+        };
+        dispatch({ type: 'load', state });
+        await removeHeld({ id: recall as Id<'heldOrders'> });
+      }
+      // Clear the param whether the row was found or already gone.
+      await navigate({ to: '/sale', search: {}, replace: true });
+    })();
+  }, [recall, held, navigate, removeHeld]);
 
   if (
     categories === undefined ||
@@ -267,6 +308,7 @@ export function SaleScreen() {
             open={holdOpen}
             cart={cart}
             cashierId={cashierId}
+            {...(table ? { defaultTableId: table as Id<'tables'> } : {})}
             onOpenChange={setHoldOpen}
             onHeld={() => {
               dispatch({ type: 'clearCart' });
