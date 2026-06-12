@@ -4,9 +4,15 @@ import { Trans } from "@lingui/react/macro";
 import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Link } from "@tanstack/react-router";
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, Receipt } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
+import {
+	Empty,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "~/components/ui/empty";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
 	CardContent,
@@ -99,11 +105,17 @@ export function DashboardInvoices() {
 							))
 						) : data.length === 0 ? (
 							<TableRow>
-								<TableCell
-									colSpan={3}
-									className="py-8 text-center text-muted-foreground"
-								>
-									<Trans>Belum ada transaksi.</Trans>
+								<TableCell colSpan={3} className="py-8">
+									<Empty>
+										<EmptyHeader>
+											<EmptyMedia variant="icon">
+												<Receipt />
+											</EmptyMedia>
+											<EmptyTitle>
+												<Trans>Belum ada transaksi.</Trans>
+											</EmptyTitle>
+										</EmptyHeader>
+									</Empty>
 								</TableCell>
 							</TableRow>
 						) : (
