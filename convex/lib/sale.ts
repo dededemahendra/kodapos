@@ -2,6 +2,7 @@ import { type Infer, v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from './auth';
+import { manualDiscountValidator } from './discount';
 import { DEFAULT_LOYALTY, pointsEarned, redemptionIDR } from './loyalty';
 import { orderTypeValidator } from './orderType';
 import { computeOrderTotals, DEFAULT_SERVICE_CHARGE_NAME, promoDiscountIDR } from './pricing';
@@ -19,6 +20,7 @@ export const saleArgs = {
   cashierId: v.id('cafeStaff'),
   lines: v.array(lineInput),
   promoId: v.optional(v.id('promotions')),
+  manualDiscount: v.optional(manualDiscountValidator),
   customerId: v.optional(v.id('customers')),
   redeemPoints: v.optional(v.number()),
   createdAtClient: v.optional(v.number()),
@@ -188,6 +190,22 @@ export async function buildOrder(
     };
   }
 
+  // Ad-hoc manager discount: applied to the post-promo remainder and folded into
+  // discountIDR (with manualDiscountIDR stored separately for receipt attribution).
+  // Sits AFTER the promo block and BEFORE loyalty redemption, so redemption applies
+  // to the post-manual remainder. Reuses promoDiscountIDR's [0, base] clamp.
+  let manualDiscountIDR = 0;
+  let manualDiscount: { type: 'percent' | 'fixed'; value: number } | undefined;
+  if (args.manualDiscount) {
+    const { type, value } = args.manualDiscount;
+    if (!Number.isInteger(value) || value < 0) throw new Error('Diskon tidak valid.');
+    if (type === 'percent' && value > 100) throw new Error('Diskon persen maksimal 100.');
+    const base = subtotalIDR - discountIDR; // post-promo remainder
+    manualDiscountIDR = promoDiscountIDR(type, value, base);
+    discountIDR += manualDiscountIDR;
+    manualDiscount = { type, value };
+  }
+
   if ((args.redeemPoints ?? 0) > 0 && !args.customerId) {
     throw new Error('Penukaran poin memerlukan pelanggan.');
   }
@@ -287,6 +305,8 @@ export async function buildOrder(
     taxIDR,
     discountIDR,
     ...(appliedPromo ? { appliedPromo } : {}),
+    ...(manualDiscountIDR > 0 ? { manualDiscountIDR } : {}),
+    ...(manualDiscount ? { manualDiscount } : {}),
     serviceChargeIDR,
     serviceChargePct: scPct,
     serviceChargeName: scName,

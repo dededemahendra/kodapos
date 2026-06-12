@@ -1,6 +1,7 @@
 import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { manualDiscountValidator } from './lib/discount';
 import { expenseCategoryValidator } from './lib/expense';
 import { heldLineValidator, heldPromoValidator } from './lib/heldOrder';
 import { orderTypeValidator } from './lib/orderType';
@@ -310,6 +311,12 @@ export default defineSchema({
     serviceChargeIDR: v.optional(v.number()),
     serviceChargePct: v.optional(v.number()),
     serviceChargeName: v.optional(v.string()),
+    // Ad-hoc manager order-level discount (manual-discount slice). Applied to the
+    // post-promo base and folded into discountIDR; manualDiscountIDR stored
+    // separately so the receipt can attribute each source. Both optional for
+    // back-compat with orders created before this slice.
+    manualDiscountIDR: v.optional(v.number()),
+    manualDiscount: v.optional(manualDiscountValidator),
     customerId: v.optional(v.id('customers')),
     pointsRedeemed: v.optional(v.number()),
     pointsRedeemedIDR: v.optional(v.number()),
