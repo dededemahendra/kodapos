@@ -198,6 +198,15 @@ export default defineSchema({
         earnRatePerIDR: v.number(),
         redeemBlockPoints: v.number(),
         redeemBlockIDR: v.number(),
+        tiers: v.optional(
+          v.array(
+            v.object({
+              name: v.string(),
+              minSpendIDR: v.number(),
+              earnMultiplier: v.number(),
+            })
+          )
+        ),
       })
     ),
 

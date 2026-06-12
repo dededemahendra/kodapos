@@ -3,7 +3,7 @@ import type { Doc, Id } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
 import { requireOwned, requireOwnerCafe } from './auth';
 import { manualDiscountValidator } from './discount';
-import { DEFAULT_LOYALTY, pointsEarned, redemptionIDR } from './loyalty';
+import { DEFAULT_LOYALTY, earnMultiplierFor, pointsEarned, redemptionIDR } from './loyalty';
 import { orderTypeValidator } from './orderType';
 import { computeOrderTotals, DEFAULT_SERVICE_CHARGE_NAME, promoDiscountIDR } from './pricing';
 import { requireActiveCashier } from './staff';
@@ -353,7 +353,9 @@ export async function buildOrder(
   }
 
   const earnBase = subtotalIDR - discountIDR;
-  const earned = customer ? pointsEarned(earnBase, loyaltyCfg) : 0;
+  const earned = customer
+    ? Math.floor(pointsEarned(earnBase, loyaltyCfg) * earnMultiplierFor(customer.totalSpentIDR, loyaltyCfg.tiers))
+    : 0;
 
   const now = Date.now();
   const orderId = await ctx.db.insert('orders', {
