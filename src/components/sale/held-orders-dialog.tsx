@@ -56,6 +56,7 @@ export function HeldOrdersDialog({
           ? { _id: h.promo.promoId, name: h.promo.name, type: h.promo.type, value: h.promo.value }
           : null,
         lines: h.lines.map((l) => ({ ...l, lineKey: genLineKey() })),
+        manualDiscount: null,
       };
       onRecall(state);
       await remove({ id: h._id });

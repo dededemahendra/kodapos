@@ -25,7 +25,14 @@ export type CartPromo = {
   value: number;
 };
 
-export type CartState = { lines: CartLine[]; promo: CartPromo | null; orderType: OrderType };
+export type ManualDiscount = { type: 'percent' | 'fixed'; value: number };
+
+export type CartState = {
+  lines: CartLine[];
+  promo: CartPromo | null;
+  orderType: OrderType;
+  manualDiscount: ManualDiscount | null;
+};
 
 export type CartAction =
   | { type: 'addLine'; line: Omit<CartLine, 'lineKey'>; lineKey: string }
@@ -35,9 +42,15 @@ export type CartAction =
   | { type: 'clearCart' }
   | { type: 'setPromo'; promo: CartPromo | null }
   | { type: 'setOrderType'; orderType: OrderType }
+  | { type: 'setManualDiscount'; manualDiscount: ManualDiscount | null }
   | { type: 'load'; state: CartState };
 
-export const initialCart: CartState = { lines: [], promo: null, orderType: 'dine_in' };
+export const initialCart: CartState = {
+  lines: [],
+  promo: null,
+  orderType: 'dine_in',
+  manualDiscount: null,
+};
 
 export function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -94,8 +107,11 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     case 'load': {
       return action.state;
     }
+    case 'setManualDiscount': {
+      return { ...state, manualDiscount: action.manualDiscount };
+    }
     case 'clearCart': {
-      return { lines: [], promo: null, orderType: 'dine_in' };
+      return { lines: [], promo: null, orderType: 'dine_in', manualDiscount: null };
     }
   }
 }
