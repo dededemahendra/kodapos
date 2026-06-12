@@ -1,12 +1,28 @@
-import { Trans } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_SERVICE_CHARGE_NAME } from 'convex/lib/pricing';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '~/components/ui/alert-dialog';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent } from '~/components/ui/dialog';
+import { Input } from '~/components/ui/input';
+import { Spinner } from '~/components/ui/spinner';
+import { useActiveCashier } from '~/lib/active-cashier';
 import { formatIDR } from '~/lib/money';
+import { usePermissions } from '~/lib/permissions';
 import { formatPromoValue } from '~/lib/promo';
+import { toast } from '~/lib/toast';
 
 // Printed receipt is always English, kept out of the i18n catalog. Maps a stored
 // payment method to its human label (cash is rendered separately above).
@@ -37,6 +53,13 @@ export function ReceiptPreview({
 }) {
   const cafe = useQuery(api.cafes.myCafe, {});
   const order = useQuery(api.orders.getById, orderId ? { id: orderId } : 'skip');
+  const { t } = useLingui();
+  const { can } = usePermissions();
+  const { cashierId } = useActiveCashier();
+  const voidSale = useMutation(api.orders.voidSale);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [reason, setReason] = useState('');
+  const [voiding, setVoiding] = useState(false);
 
   if (!orderId) return null;
 
@@ -73,6 +96,10 @@ export function ReceiptPreview({
                 </div>
               ) : null}
             </div>
+            {/* Printed receipt is always English, kept out of the i18n catalog. */}
+            {order.paymentStatus === 'void' ? (
+              <div className="text-center font-bold text-destructive my-2">** VOID **</div>
+            ) : null}
             <hr className="border-dashed border-border my-2" />
             {order.lines.map((line, i) => (
               <div key={`${order._id}-line-${i}`} className="mb-1.5">
@@ -176,15 +203,88 @@ export function ReceiptPreview({
             ) : null}
           </div>
         )}
-        <div className="flex gap-2 justify-end mt-4">
-          <Button type="button" variant="outline" onClick={() => window.print()}>
-            <Trans>Cetak</Trans>
-          </Button>
-          <Button type="button" onClick={onDone}>
-            <Trans>Selesai</Trans>
-          </Button>
+        <div className="flex gap-2 justify-between mt-4">
+          <div>
+            {order?.paymentStatus === 'paid' && can('canVoid') ? (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => {
+                  setReason('');
+                  setConfirmOpen(true);
+                }}
+              >
+                <Trans>Batalkan pesanan</Trans>
+              </Button>
+            ) : null}
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => window.print()}>
+              <Trans>Cetak</Trans>
+            </Button>
+            <Button type="button" onClick={onDone}>
+              <Trans>Selesai</Trans>
+            </Button>
+          </div>
         </div>
       </DialogContent>
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(o) => {
+          if (!voiding) setConfirmOpen(o);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <Trans>Batalkan pesanan ini?</Trans>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <Trans>
+                Stok akan dikembalikan dan poin loyalitas dibatalkan. Tindakan ini tidak bisa
+                diurungkan.
+              </Trans>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            maxLength={120}
+            placeholder={t`Alasan (opsional)`}
+            aria-label="reason"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={voiding}>
+              <Trans>Batal</Trans>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={voiding}
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!orderId) return;
+                setVoiding(true);
+                try {
+                  await voidSale({
+                    orderId,
+                    ...(reason.trim() ? { reason: reason.trim() } : {}),
+                    ...(cashierId ? { cashierId } : {}),
+                  });
+                  toast.success(t`Pesanan dibatalkan.`);
+                  setConfirmOpen(false);
+                  onDone();
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : t`Gagal membatalkan pesanan.`);
+                } finally {
+                  setVoiding(false);
+                }
+              }}
+            >
+              {voiding && <Spinner data-icon="inline-start" />}
+              <Trans>Batalkan</Trans>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
