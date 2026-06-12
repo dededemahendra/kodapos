@@ -428,20 +428,26 @@ export async function reverseSettledSale(
     if (customer) {
       const redeemed = order.pointsRedeemed ?? 0;
       const earned = order.pointsEarned ?? 0;
-      const net = redeemed - earned;
-      if (net !== 0) {
+      // Inverse of settleSale's `pointsBalance += earned - redeemed`. Floor at 0 so
+      // a void never drives the balance negative (would break redemption/display
+      // assumptions) — e.g. if points earned by this sale were already spent on a
+      // later order. Record the ACTUALLY-applied delta (post-floor) so the loyalty
+      // ledger always reconciles with pointsBalance instead of silently diverging.
+      const newBalance = Math.max(0, customer.pointsBalance - earned + redeemed);
+      const appliedPoints = newBalance - customer.pointsBalance;
+      if (appliedPoints !== 0) {
         await ctx.db.insert('loyaltyTransactions', {
           cafeId: order.cafeId,
           customerId: customer._id,
           orderId,
           type: 'adjust',
-          points: net,
+          points: appliedPoints,
           note: 'Pembatalan pesanan',
           at: now,
         });
       }
       await ctx.db.patch(customer._id, {
-        pointsBalance: Math.max(0, customer.pointsBalance - earned + redeemed),
+        pointsBalance: newBalance,
         visitCount: Math.max(0, customer.visitCount - 1),
         totalSpentIDR: Math.max(0, customer.totalSpentIDR - order.totalIDR),
       });
