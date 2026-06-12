@@ -174,8 +174,11 @@ async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
   for (const o of paid) {
     salesTotalIDR += o.totalIDR;
     cashSalesIDR += cashCollectedIDR(o);
+    // QRIS only — NOT "everything non-cash". Gift-card tenders are a separate
+    // method and must not be mislabeled as QRIS in the shift summary (they stay
+    // in salesTotalIDR but neither the cash nor the QRIS bucket).
     qrisSalesIDR += methodTotals(o)
-      .filter((t) => t.method !== 'cash')
+      .filter((t) => t.method === 'qris_static' || t.method === 'qris_dynamic')
       .reduce((s, t) => s + t.amountIDR, 0);
   }
   const cashier = await ctx.db.get(shift.cashierId);

@@ -125,6 +125,15 @@ describe('gift card redemption (tender)', () => {
     expect(summary.cashSalesIDR).toBe(50_000);
     expect(summary.expectedCashIDR).toBe(100_000 + 50_000); // opening 100k + cash leg
 
+    // The shift-history summary must NOT lump the gift-card leg into QRIS sales.
+    await asOwner.mutation(api.shifts.close, { id: shiftId, countedCashIDR: 150_000 });
+    const history = await asOwner.query(api.shifts.listClosed, {
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+    const closed = history.page.find((s) => s._id === shiftId);
+    expect(closed?.cashSalesIDR).toBe(50_000);
+    expect(closed?.qrisSalesIDR).toBe(0); // gift-card leg excluded from QRIS
+
     const pays = await t.run((ctx) =>
       ctx.db
         .query('payments')
