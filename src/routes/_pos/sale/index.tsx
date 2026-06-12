@@ -11,5 +11,6 @@ export const Route = createFileRoute('/_pos/sale/')({
 });
 
 function SaleIndex() {
-  return <SaleScreen />;
+  const { recall, table } = Route.useSearch();
+  return <SaleScreen recall={recall} table={table} />;
 }
