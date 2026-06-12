@@ -3,13 +3,13 @@ import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { SettingsPageHeader } from '~/components/settings/primitives';
 import { PinEntry } from '~/components/staff/pin-entry';
 import { Badge } from '~/components/ui/badge';
-import { Empty, EmptyHeader, EmptyTitle } from '~/components/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
@@ -190,7 +190,9 @@ function StaffSettingsPage() {
                 <td colSpan={3} className="p-0">
                   <Empty>
                     <EmptyHeader>
+                      <EmptyMedia variant="icon"><Users /></EmptyMedia>
                       <EmptyTitle><Trans>Tidak ada staf yang ditemukan.</Trans></EmptyTitle>
+                      <EmptyDescription><Trans>Coba ubah kata pencarian atau tambah kasir baru.</Trans></EmptyDescription>
                     </EmptyHeader>
                   </Empty>
                 </td>

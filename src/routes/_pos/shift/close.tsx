@@ -3,9 +3,17 @@ import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
+import { Clock } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { type ShiftSummary, ShiftSummaryPanel } from '~/components/shift/shift-summary-panel';
 import { Button } from '~/components/ui/button';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
@@ -50,10 +58,18 @@ function ShiftClosePage() {
   if (current === null) {
     return (
       <main className="max-w-xl mx-auto p-6">
-        <p className="text-muted-foreground"><Trans>Tidak ada shift terbuka.</Trans></p>
-        <Button asChild className="mt-3">
-          <Link to="/shift/open"><Trans>Buka Shift Baru</Trans></Link>
-        </Button>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Clock />
+            </EmptyMedia>
+            <EmptyTitle><Trans>Tidak ada shift terbuka.</Trans></EmptyTitle>
+            <EmptyDescription><Trans>Buka shift baru sebelum menerima penjualan.</Trans></EmptyDescription>
+          </EmptyHeader>
+          <Button asChild>
+            <Link to="/shift/open"><Trans>Buka Shift Baru</Trans></Link>
+          </Button>
+        </Empty>
       </main>
     );
   }

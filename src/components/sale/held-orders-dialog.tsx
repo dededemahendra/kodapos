@@ -2,12 +2,19 @@ import { Trans } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
+import { PauseCircle } from 'lucide-react';
 import { useState } from 'react';
 import type { CartState } from './cart-reducer';
 import { ORDER_TYPE_OPTIONS } from './order-types';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
-import { Empty, EmptyHeader, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 
@@ -92,9 +99,15 @@ export function HeldOrdersDialog({
         ) : held.length === 0 ? (
           <Empty>
             <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <PauseCircle />
+              </EmptyMedia>
               <EmptyTitle>
                 <Trans>Tidak ada pesanan ditahan.</Trans>
               </EmptyTitle>
+              <EmptyDescription>
+                <Trans>Pesanan yang Anda tahan akan muncul di sini untuk dilanjutkan nanti.</Trans>
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (

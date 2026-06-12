@@ -4,12 +4,12 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, Pencil, Plus } from 'lucide-react';
+import { Archive, Pencil, Plus, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '~/components/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
 import { RowActions } from '~/components/ui/row-actions';
 import { StatusBadge } from '~/components/ui/status-badge';
@@ -153,6 +153,9 @@ function ModifierGroupsPage() {
   const emptyState = (
     <Empty>
       <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <SlidersHorizontal />
+        </EmptyMedia>
         <EmptyTitle>
           {filter === 'archived' ? (
             <Trans>Tidak ada grup diarsipkan.</Trans>
@@ -160,11 +163,13 @@ function ModifierGroupsPage() {
             <Trans>Belum ada grup modifier.</Trans>
           )}
         </EmptyTitle>
-        {filter === 'active' ? (
-          <EmptyDescription>
+        <EmptyDescription>
+          {filter === 'archived' ? (
+            <Trans>Grup modifier yang diarsipkan akan muncul di sini.</Trans>
+          ) : (
             <Trans>Buat satu grup untuk dipakai ulang di banyak item.</Trans>
-          </EmptyDescription>
-        ) : null}
+          )}
+        </EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

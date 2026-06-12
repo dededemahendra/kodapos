@@ -1,13 +1,20 @@
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
-import { CreditCard, DoorOpen, DoorClosed } from "lucide-react";
+import { Activity, CreditCard, DoorOpen, DoorClosed } from "lucide-react";
 import {
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
+import {
+	Empty,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "~/components/ui/empty";
 import { DashboardCard } from "~/components/dashboard-card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatRelative, formatIDRCompact } from "~/lib/formater";
@@ -71,9 +78,19 @@ export function DashboardActivity() {
 						))}
 					</ul>
 				) : data.length === 0 ? (
-					<p className="px-6 py-4 text-muted-foreground text-sm">
-						<Trans>Belum ada aktivitas.</Trans>
-					</p>
+					<Empty>
+						<EmptyHeader>
+							<EmptyMedia variant="icon">
+								<Activity />
+							</EmptyMedia>
+							<EmptyTitle>
+								<Trans>Belum ada aktivitas.</Trans>
+							</EmptyTitle>
+							<EmptyDescription>
+								<Trans>Transaksi dan shift terbaru akan muncul di sini.</Trans>
+							</EmptyDescription>
+						</EmptyHeader>
+					</Empty>
 				) : (
 					<ul className="flex flex-col divide-y divide-border">
 						{data.map((item) => (

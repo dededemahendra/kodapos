@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, ClipboardList, History, PackagePlus, Pencil, Plus } from 'lucide-react';
+import { Archive, ClipboardList, History, Package, PackagePlus, Pencil, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { IngredientForm } from '~/components/inventory/ingredient-form';
 import { MovementHistorySheet } from '~/components/inventory/movement-history-sheet';
@@ -18,6 +18,7 @@ import {
   Empty,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
@@ -202,6 +203,9 @@ function InventoryIndex() {
   const emptyState = (
     <Empty>
       <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Package />
+        </EmptyMedia>
         <EmptyTitle>
           {filter === 'low' ? (
             <Trans>Tidak ada bahan dengan stok rendah.</Trans>
@@ -211,11 +215,15 @@ function InventoryIndex() {
             <Trans>Belum ada bahan.</Trans>
           )}
         </EmptyTitle>
-        {filter === 'all' ? (
-          <EmptyDescription>
+        <EmptyDescription>
+          {filter === 'low' ? (
+            <Trans>Semua bahan masih di atas ambang pemesanan ulang.</Trans>
+          ) : filter === 'archived' ? (
+            <Trans>Bahan yang diarsipkan akan muncul di sini.</Trans>
+          ) : (
             <Trans>Tambah bahan pertama untuk mulai melacak stok.</Trans>
-          </EmptyDescription>
-        ) : null}
+          )}
+        </EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

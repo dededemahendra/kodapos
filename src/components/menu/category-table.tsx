@@ -2,12 +2,18 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, Pencil, Plus } from 'lucide-react';
+import { Archive, Folder, FolderTree, Pencil, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CategoryFormDialog } from '~/components/menu/category-form-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
-import { Empty, EmptyHeader, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
 import {
   ReorderableTable,
@@ -120,6 +126,9 @@ export function CategoryTable() {
   const emptyState = (
     <Empty>
       <EmptyHeader>
+        <EmptyMedia variant="icon">
+          {filter === 'archived' ? <Folder /> : <FolderTree />}
+        </EmptyMedia>
         <EmptyTitle>
           {filter === 'archived' ? (
             <Trans>Tidak ada kategori diarsipkan.</Trans>
@@ -127,6 +136,13 @@ export function CategoryTable() {
             <Trans>Belum ada kategori.</Trans>
           )}
         </EmptyTitle>
+        <EmptyDescription>
+          {filter === 'archived' ? (
+            <Trans>Kategori yang diarsipkan akan muncul di sini.</Trans>
+          ) : (
+            <Trans>Tambahkan kategori untuk mengelompokkan item menu Anda.</Trans>
+          )}
+        </EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

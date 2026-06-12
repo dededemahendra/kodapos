@@ -6,7 +6,7 @@ import { ChefHat } from 'lucide-react';
 import { ORDER_TYPE_OPTIONS } from '~/components/sale/order-types';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
 import { Spinner } from '~/components/ui/spinner';
 import { cn } from '~/lib/utils';
@@ -38,6 +38,9 @@ function KitchenPage() {
             <EmptyTitle>
               <Trans>Tidak ada pesanan di dapur.</Trans>
             </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Pesanan baru akan muncul di sini saat dibayar.</Trans>
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (

@@ -2,7 +2,7 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, Check, Pencil, Plus, X } from 'lucide-react';
+import { Archive, Check, Grid3x3, Pencil, Plus, X } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
@@ -13,6 +13,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 import { toast } from '~/lib/toast';
@@ -116,9 +123,19 @@ export function TableManageDialog({
               <Spinner />
             </div>
           ) : tables.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              <Trans>Belum ada meja.</Trans>
-            </p>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Grid3x3 />
+                </EmptyMedia>
+                <EmptyTitle>
+                  <Trans>Belum ada meja.</Trans>
+                </EmptyTitle>
+                <EmptyDescription>
+                  <Trans>Tambahkan meja untuk mulai mengelola lantai.</Trans>
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <ul className="divide-y">
               {tables.map((table) => (

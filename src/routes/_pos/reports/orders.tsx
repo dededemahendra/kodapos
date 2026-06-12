@@ -12,6 +12,7 @@ import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -134,6 +135,9 @@ function OrdersReport() {
             <EmptyTitle>
               <Trans>Belum ada pesanan pada rentang ini.</Trans>
             </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Coba ubah filter atau rentang tanggal di atas.</Trans>
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (

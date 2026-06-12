@@ -1,7 +1,15 @@
 import { useLingui } from '@lingui/react/macro';
 import { Trans } from '@lingui/react/macro';
 import type { Doc, Id } from 'convex/_generated/dataModel';
+import { UtensilsCrossed } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { ItemCard } from './item-card';
 
 export type ItemForSale = {
@@ -52,11 +60,21 @@ export function MenuPane({
           );
         })}
       </div>
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="flex flex-1 flex-col overflow-y-auto p-3">
         {visible.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            <Trans>Tidak ada item di kategori ini.</Trans>
-          </p>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <UtensilsCrossed />
+              </EmptyMedia>
+              <EmptyTitle>
+                <Trans>Tidak ada item di kategori ini.</Trans>
+              </EmptyTitle>
+              <EmptyDescription>
+                <Trans>Pilih kategori lain atau tambah item di menu.</Trans>
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
             {visible.map((row) => (

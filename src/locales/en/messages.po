@@ -428,8 +428,12 @@ msgstr "Pickup"
 #~ msgstr "Amount"
 
 #: src/components/permission/require-permission.tsx
-msgid "Anda tidak punya akses ke halaman ini."
-msgstr "You do not have access to this page."
+#~ msgid "Anda tidak punya akses ke halaman ini."
+#~ msgstr "You do not have access to this page."
+
+#: src/components/permission/require-permission.tsx
+msgid "Anda tidak punya akses ke halaman ini. Hubungi pemilik untuk meminta akses."
+msgstr "You don't have access to this page. Contact the owner to request access."
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Anggota"
@@ -584,6 +588,10 @@ msgstr "Ingredient updated."
 #: src/components/inventory/ingredient-form.tsx
 msgid "Bahan ditambahkan."
 msgstr "Ingredient added."
+
+#: src/routes/_pos/inventory/index.tsx
+msgid "Bahan yang diarsipkan akan muncul di sini."
+msgstr "Archived ingredients will appear here."
 
 #: src/components/billing-health.tsx
 msgid "Bahan yang perlu diisi ulang."
@@ -958,6 +966,10 @@ msgstr "Open Shift"
 msgid "Buka Shift Baru"
 msgstr "Open New Shift"
 
+#: src/routes/_pos/shift/close.tsx
+msgid "Buka shift baru sebelum menerima penjualan."
+msgstr "Open a new shift before taking sales."
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Buka/tutup shift"
 msgstr "Open/close shift"
@@ -1024,6 +1036,10 @@ msgstr "Record purchases to add stock and update ingredient costs."
 #: src/routes/_pos/reports/expenses.tsx
 msgid "Catat pengeluaran"
 msgstr "Record expense"
+
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Catat pengeluaran atau ubah rentang tanggal di atas."
+msgstr "Record an expense or change the date range above."
 
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Catat Penyesuaian"
@@ -1092,6 +1108,21 @@ msgstr "Automatically print receipt after payment."
 #: src/components/channel-sales-chart.tsx
 #~ msgid "Channel sales"
 #~ msgstr "Channel sales"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Coba ubah filter atau rentang tanggal di atas."
+msgstr "Try changing the filter or date range above."
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Coba ubah kata pencarian atau tambah kasir baru."
+msgstr "Try a different search or add a new cashier."
+
+#: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/payments.tsx
+#: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/sales.tsx
+msgid "Coba ubah rentang tanggal di atas."
+msgstr "Try changing the date range above."
 
 #: src/components/stats.tsx
 #~ msgid "Conversion Rate"
@@ -1162,6 +1193,10 @@ msgstr "New dashboard"
 #: src/components/dashboard-activity.tsx
 #~ msgid "Dashboard v2 shipped to prod"
 #~ msgstr "Dashboard v2 shipped to prod"
+
+#: src/routes/_pos/reports/index.tsx
+msgid "Data akan muncul setelah ada penjualan pada rentang ini."
+msgstr "Data will appear once there are sales in this range."
 
 #: src/components/dashboard.tsx
 #~ msgid "Data contoh: dasbor belum terhubung ke data kafe."
@@ -1584,6 +1619,10 @@ msgstr "Modifier groups ({0})"
 msgid "Grup modifier baru"
 msgstr "New modifier group"
 
+#: src/routes/_pos/menu/modifiers.tsx
+msgid "Grup modifier yang diarsipkan akan muncul di sini."
+msgstr "Archived modifier groups will appear here."
+
 #: src/routes/_pos/menu/modifiers.$groupId.tsx
 msgid "Grup tidak ditemukan."
 msgstr "Group not found."
@@ -1787,6 +1826,10 @@ msgstr "Items sold"
 msgid "Item tidak ditemukan."
 msgstr "Item not found."
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Item yang diarsipkan akan muncul di sini."
+msgstr "Archived items will appear here."
+
 #: src/routes/_pos/menu/items.$itemId.tsx
 #: src/routes/_pos/menu/route.tsx
 msgid "Items"
@@ -1932,6 +1975,10 @@ msgstr "Gift card is inactive."
 msgid "Kartu hadiah tidak ditemukan."
 msgstr "Gift card not found."
 
+#: src/routes/_pos/gift-cards.tsx
+msgid "Kartu yang diarsipkan akan muncul di sini."
+msgstr "Archived cards will appear here."
+
 #: src/components/sale/cart-pane.tsx
 msgid "Kas"
 msgstr "Cash"
@@ -2010,6 +2057,10 @@ msgstr "Category added."
 #: src/components/menu/category-table.tsx
 msgid "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
 msgstr "Categories appear as filters in the Items list and on the cashier screen."
+
+#: src/components/menu/category-table.tsx
+msgid "Kategori yang diarsipkan akan muncul di sini."
+msgstr "Archived categories will appear here."
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Keamanan"
@@ -2346,6 +2397,10 @@ msgstr "Margin %"
 #: src/routes/_pos/reports/margin.tsx
 msgid "Margin memakai biaya bahan terkini."
 msgstr "Margin uses current ingredient cost."
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Margin muncul setelah ada item terjual pada rentang ini."
+msgstr "Margin appears once items are sold in this range."
 
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
@@ -3112,6 +3167,10 @@ msgstr "VAT percentage"
 msgid "Perubahan"
 msgstr "Change"
 
+#: src/components/inventory/movement-history-sheet.tsx
+msgid "Perubahan stok bahan ini akan tercatat di sini."
+msgstr "Stock changes for this ingredient will be recorded here."
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pesan"
 msgstr "Message"
@@ -3129,6 +3188,10 @@ msgstr "Orders"
 #: src/components/sale/cart-pane.tsx
 msgid "Pesanan ({0})"
 msgstr "Order ({0})"
+
+#: src/routes/_pos/kitchen.tsx
+msgid "Pesanan baru akan muncul di sini saat dibayar."
+msgstr "New orders will appear here once paid."
 
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan dibatalkan."
@@ -3149,6 +3212,18 @@ msgstr "Latest orders and their status."
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan tidak ditemukan."
 msgstr "Order not found."
+
+#: src/components/sale/held-orders-dialog.tsx
+msgid "Pesanan yang Anda tahan akan muncul di sini untuk dilanjutkan nanti."
+msgstr "Orders you hold will appear here to resume later."
+
+#: src/components/dashboard-invoices.tsx
+msgid "Pesanan yang dibuat akan muncul di sini."
+msgstr "Orders you create will appear here."
+
+#: src/components/shift/shift-order-list.tsx
+msgid "Pesanan yang diselesaikan selama shift ini akan muncul di sini."
+msgstr "Orders completed during this shift will appear here."
 
 #: src/components/inventory/waste-dialog.tsx
 msgid "Pilih bahan"
@@ -3173,6 +3248,10 @@ msgstr "Select business type"
 #: src/components/menu/item-edit-form.tsx
 msgid "Pilih kategori"
 msgstr "Select category"
+
+#: src/components/sale/menu-pane.tsx
+msgid "Pilih kategori lain atau tambah item di menu."
+msgstr "Pick another category or add items in the menu."
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Pilih kategori terlebih dahulu."
@@ -3270,6 +3349,10 @@ msgstr "Points redeemed ({0})"
 #: src/components/customer/customer-detail-sheet.tsx
 msgid "Poin tidak valid."
 msgstr "Invalid points."
+
+#: src/components/customer/customer-detail-sheet.tsx
+msgid "Poin yang diperoleh atau ditukar akan tercatat di sini."
+msgstr "Points earned or redeemed will be recorded here."
 
 #: src/components/inventory/recipe-editor.tsx
 msgid "porsi"
@@ -3668,6 +3751,10 @@ msgstr "All"
 msgid "Semua ({0})"
 msgstr "All ({0})"
 
+#: src/routes/_pos/inventory/index.tsx
+msgid "Semua bahan masih di atas ambang pemesanan ulang."
+msgstr "All ingredients are above their reorder threshold."
+
 #: src/components/sale/sale-screen.tsx
 msgid "Semua item akan dihapus dari pesanan ini."
 msgstr "All items will be removed from this order."
@@ -3724,6 +3811,10 @@ msgstr "Rent"
 #: src/components/app-shared.tsx
 msgid "Shift"
 msgstr "Shift"
+
+#: src/routes/_pos/shifts.tsx
+msgid "Shift akan muncul di sini setelah ditutup."
+msgstr "Shifts will appear here after they're closed."
 
 #: src/components/dashboard-activity.tsx
 msgid "Shift dibuka"
@@ -4028,9 +4119,21 @@ msgstr "Add variant"
 msgid "Tambah, ubah nama, atau arsipkan meja."
 msgstr "Add, rename, or archive tables."
 
+#: src/components/inventory/stock-take-dialog.tsx
+msgid "Tambahkan bahan di inventaris untuk mulai stok opname."
+msgstr "Add ingredients in inventory to start a stock take."
+
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Tambahkan beberapa item beserta harganya."
 msgstr "Add some items along with their prices."
+
+#: src/components/menu/category-table.tsx
+msgid "Tambahkan kategori untuk mengelompokkan item menu Anda."
+msgstr "Add a category to group your menu items."
+
+#: src/components/tables/table-manage-dialog.tsx
+msgid "Tambahkan meja untuk mulai mengelola lantai."
+msgstr "Add a table to start managing the floor."
 
 #: src/components/inventory/purchase-form.tsx
 msgid "Tambahkan minimal satu bahan dengan jumlah dan biaya."
@@ -4159,6 +4262,10 @@ msgstr "Issue"
 #: src/routes/_pos/gift-cards.tsx
 msgid "Terbitkan kartu"
 msgstr "Issue card"
+
+#: src/routes/_pos/gift-cards.tsx
+msgid "Terbitkan kartu untuk mulai menjual voucher prabayar."
+msgstr "Issue a card to start selling prepaid vouchers."
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Terhubung"
@@ -4350,6 +4457,10 @@ msgstr "Total bill"
 #: src/routes/_pos/reports/sales.tsx
 msgid "Transaksi"
 msgstr "Transactions"
+
+#: src/components/dashboard-activity.tsx
+msgid "Transaksi dan shift terbaru akan muncul di sini."
+msgstr "Recent transactions and shifts will appear here."
 
 #: src/components/dashboard-invoices.tsx
 msgid "Transaksi terbaru"

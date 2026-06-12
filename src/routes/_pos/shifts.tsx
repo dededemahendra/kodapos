@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { PinGate } from '~/components/staff/pin-gate';
 import { ShiftOrderList } from '~/components/shift/shift-order-list';
 import { Button } from '~/components/ui/button';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 
@@ -93,6 +93,7 @@ function ShiftHistoryPage() {
           <EmptyHeader>
             <EmptyMedia variant="icon"><History /></EmptyMedia>
             <EmptyTitle><Trans>Belum ada shift yang ditutup.</Trans></EmptyTitle>
+            <EmptyDescription><Trans>Shift akan muncul di sini setelah ditutup.</Trans></EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (

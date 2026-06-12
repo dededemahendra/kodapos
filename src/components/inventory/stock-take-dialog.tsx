@@ -2,6 +2,7 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
+import { ClipboardList } from 'lucide-react';
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import {
@@ -11,6 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Field, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
@@ -92,9 +100,19 @@ export function StockTakeDialog({
         </DialogHeader>
 
         {empty ? (
-          <p className="text-muted-foreground text-sm">
-            <Trans>Belum ada bahan untuk dihitung.</Trans>
-          </p>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ClipboardList />
+              </EmptyMedia>
+              <EmptyTitle>
+                <Trans>Belum ada bahan untuk dihitung.</Trans>
+              </EmptyTitle>
+              <EmptyDescription>
+                <Trans>Tambahkan bahan di inventaris untuk mulai stok opname.</Trans>
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <form onSubmit={onSubmit}>
             <div className="max-h-[55vh] space-y-2 overflow-y-auto pr-1">

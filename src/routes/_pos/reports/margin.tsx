@@ -11,6 +11,7 @@ import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -159,6 +160,9 @@ function MarginReport() {
             <EmptyTitle>
               <Trans>Belum ada penjualan pada rentang ini.</Trans>
             </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Margin muncul setelah ada item terjual pada rentang ini.</Trans>
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (
