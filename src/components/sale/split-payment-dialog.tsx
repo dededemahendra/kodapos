@@ -237,7 +237,7 @@ export function SplitPaymentDialog({
                     </Select>
                     <Input
                       inputMode="numeric"
-                      placeholder={t`Jumlah`}
+                      placeholder={t`Jumlah (Rp)`}
                       value={row.amount}
                       onChange={(e) =>
                         updateRow(i, { amount: e.target.value.replace(/\D/g, '') })
