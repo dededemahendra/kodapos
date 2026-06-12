@@ -1,6 +1,7 @@
 import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { expenseCategoryValidator } from './lib/expense';
 import { heldLineValidator, heldPromoValidator } from './lib/heldOrder';
 import { orderTypeValidator } from './lib/orderType';
 import { weatherConditionV, weatherSignalV } from './lib/weather';
@@ -484,6 +485,14 @@ export default defineSchema({
     sentLines: v.optional(v.array(v.object({ name: v.string(), qty: v.number(), unit: v.string() }))),
     exportedAt: v.optional(v.number()),
   }).index('by_cafe_generated', ['cafeId', 'generatedAt']),
+
+  expenses: defineTable({
+    cafeId: v.id('cafes'),
+    category: expenseCategoryValidator,
+    amountIDR: v.number(),
+    note: v.optional(v.string()),
+    at: v.number(),
+  }).index('by_cafe_at', ['cafeId', 'at']),
 
   inventoryMovements: defineTable({
     cafeId: v.id('cafes'),
