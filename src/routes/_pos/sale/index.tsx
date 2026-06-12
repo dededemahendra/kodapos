@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { RegisterTopBar } from '~/components/sale/register-top-bar';
 import { SaleScreen } from '~/components/sale/sale-screen';
 
 export const Route = createFileRoute('/_pos/sale/')({
@@ -13,12 +12,7 @@ export const Route = createFileRoute('/_pos/sale/')({
 
 function SaleIndex() {
   const { recall, table } = Route.useSearch();
-  return (
-    <div className="flex h-screen flex-col">
-      <RegisterTopBar />
-      <div className="min-h-0 flex-1 overflow-hidden">
-        <SaleScreen recall={recall} table={table} />
-      </div>
-    </div>
-  );
+  // The full-screen shell + top bar is provided by the _pos layout for all
+  // operational screens (sale/tables/kitchen); this route just renders the screen.
+  return <SaleScreen recall={recall} table={table} />;
 }
