@@ -355,6 +355,15 @@ export default defineSchema({
       )
     ),
     orderType: v.optional(orderTypeValidator),
+    // The table this order was rung for (dine-in). Optional: only set when paying
+    // a table order (threaded via saleArgs/buildOrder); legacy/non-table orders omit it.
+    tableId: v.optional(v.id('tables')),
+    // Kitchen ticket lifecycle. Set to 'new' when the order settles to paid (in
+    // settleSale); the kitchen advances it 'ready' → 'done'. Optional: legacy/
+    // already-paid orders have no kitchenStatus and never appear on the board.
+    kitchenStatus: v.optional(
+      v.union(v.literal('new'), v.literal('ready'), v.literal('done'))
+    ),
     // 'pending' + 'void' reserved for Slice 5 (QRIS + voids); cash always inserts 'paid'.
     paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
     voidedAt: v.optional(v.number()),
@@ -366,7 +375,8 @@ export default defineSchema({
   })
     .index('by_cafe_clientId', ['cafeId', 'clientId'])
     .index('by_shift', ['shiftId'])
-    .index('by_cafe_created', ['cafeId', 'createdAtClient']),
+    .index('by_cafe_created', ['cafeId', 'createdAtClient'])
+    .index('by_cafe_kitchen', ['cafeId', 'kitchenStatus']),
 
   payments: defineTable({
     cafeId: v.id('cafes'),
