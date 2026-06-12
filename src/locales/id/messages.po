@@ -590,6 +590,7 @@ msgstr "Basi/Kedaluwarsa"
 
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
+#: src/components/expenses/expense-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
@@ -715,6 +716,10 @@ msgstr "Belum ada pembayaran pada rentang ini."
 #: src/routes/_pos/inventory/purchases.tsx
 msgid "Belum ada pembelian."
 msgstr "Belum ada pembelian."
+
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Belum ada pengeluaran pada rentang ini."
+msgstr "Belum ada pengeluaran pada rentang ini."
 
 #: src/routes/_pos/reports/sales.tsx
 msgid "Belum ada penjualan pada rentang ini."
@@ -939,6 +944,11 @@ msgstr "Catat Pembelian"
 msgid "Catat pembelian untuk menambah stok dan memperbarui biaya bahan."
 msgstr "Catat pembelian untuk menambah stok dan memperbarui biaya bahan."
 
+#: src/components/expenses/expense-dialog.tsx
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Catat pengeluaran"
+msgstr "Catat pengeluaran"
+
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Catat Penyesuaian"
 msgstr "Catat Penyesuaian"
@@ -963,9 +973,11 @@ msgstr "Catat stok:"
 #: src/components/customer/customer-form-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/waste.tsx
+#: src/routes/_pos/reports/expenses.tsx
 msgid "Catatan"
 msgstr "Catatan"
 
+#: src/components/expenses/expense-dialog.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
@@ -1223,6 +1235,10 @@ msgstr "Gagal mencatat limbah."
 msgid "Gagal mencatat pembelian."
 msgstr "Gagal mencatat pembelian."
 
+#: src/components/expenses/expense-dialog.tsx
+msgid "Gagal mencatat pengeluaran."
+msgstr "Gagal mencatat pengeluaran."
+
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Gagal mencatat stok."
 msgstr "Gagal mencatat stok."
@@ -1270,6 +1286,10 @@ msgstr "Gagal mengganti PIN."
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gagal menghapus logo."
 msgstr "Gagal menghapus logo."
+
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Gagal menghapus."
+msgstr "Gagal menghapus."
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Gagal menghubungkan integrasi."
@@ -1346,6 +1366,11 @@ msgstr "Gagal menyimpan urutan."
 #: src/routes/_pos/settings/tax.tsx
 msgid "Gagal menyimpan."
 msgstr "Gagal menyimpan."
+
+#: src/components/expenses/expense-categories.tsx
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Gaji"
+msgstr "Gaji"
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Gambar item"
@@ -1454,6 +1479,7 @@ msgstr "Halaman tidak ditemukan"
 
 #: src/components/menu/modifier-group-form.tsx
 #: src/components/sale/customer-section.tsx
+#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Hapus"
 msgstr "Hapus"
@@ -1468,6 +1494,10 @@ msgstr "Hapus baris"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Hapus gambar"
 msgstr "Hapus gambar"
+
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Hapus pengeluaran?"
+msgstr "Hapus pengeluaran?"
 
 #: src/components/sale/cart-pane.tsx
 msgid "Hapus promo"
@@ -1639,7 +1669,9 @@ msgstr "Jumat"
 msgid "Jumlah"
 msgstr "Jumlah"
 
+#: src/components/expenses/expense-dialog.tsx
 #: src/components/shift/cash-movement-dialog.tsx
+#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/payments.tsx
 msgid "Jumlah (Rp)"
 msgstr "Jumlah (Rp)"
@@ -1748,10 +1780,12 @@ msgid "Katalog"
 msgstr "Katalog"
 
 #: src/components/app-shared.tsx
+#: src/components/expenses/expense-dialog.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/route.tsx
+#: src/routes/_pos/reports/expenses.tsx
 msgid "Kategori"
 msgstr "Kategori"
 
@@ -1934,8 +1968,10 @@ msgstr "Kunjungan"
 msgid "Kurangi jumlah"
 msgstr "Kurangi jumlah"
 
+#: src/components/expenses/expense-categories.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/inventory/waste-reason.tsx
+#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Lainnya"
 msgstr "Lainnya"
@@ -2201,6 +2237,7 @@ msgstr "Menutup…"
 
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
+#: src/components/expenses/expense-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/recipe-editor.tsx
@@ -2692,6 +2729,18 @@ msgstr "Pengaturan loyalitas disimpan."
 #~ msgid "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 #~ msgstr "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 
+#: src/routes/_pos/reports/route.tsx
+msgid "Pengeluaran"
+msgstr "Pengeluaran"
+
+#: src/components/expenses/expense-dialog.tsx
+msgid "Pengeluaran dicatat."
+msgstr "Pengeluaran dicatat."
+
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Pengeluaran dihapus."
+msgstr "Pengeluaran dihapus."
+
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Pengiriman masuk"
@@ -2740,6 +2789,11 @@ msgstr "Peringatan stok rendah"
 #: src/components/inventory/waste-dialog.tsx
 msgid "Perkiraan kerugian:"
 msgstr "Perkiraan kerugian:"
+
+#: src/components/expenses/expense-categories.tsx
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Perlengkapan"
+msgstr "Perlengkapan"
 
 #: src/components/customer/customer-detail-sheet.tsx
 msgid "Perolehan"
@@ -3334,6 +3388,11 @@ msgstr "Sesuaikan poin"
 msgid "Set PIN"
 msgstr "Set PIN"
 
+#: src/components/expenses/expense-categories.tsx
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Sewa"
+msgstr "Sewa"
+
 #: src/components/app-shared.tsx
 msgid "Shift"
 msgstr "Shift"
@@ -3357,6 +3416,7 @@ msgstr "Siapa yang bertugas?"
 
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
+#: src/components/expenses/expense-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
@@ -3689,6 +3749,7 @@ msgstr "Tampilkan rincian pajak"
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/inventory/waste.tsx
+#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Tanggal"
 msgstr "Tanggal"
@@ -3882,6 +3943,7 @@ msgstr "Tombol uang cepat"
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/purchases.tsx
+#: src/routes/_pos/reports/expenses.tsx
 msgid "Total"
 msgstr "Total"
 
@@ -4028,6 +4090,7 @@ msgid "Umum"
 msgstr "Umum"
 
 #: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/sales.tsx
@@ -4058,6 +4121,11 @@ msgstr "URL yang kamu buka tidak ada di kodapos."
 #: src/routes/_pos/settings/receipt.tsx
 msgid "USB"
 msgstr "USB"
+
+#: src/components/expenses/expense-categories.tsx
+#: src/routes/_pos/reports/expenses.tsx
+msgid "Utilitas"
+msgstr "Utilitas"
 
 #: src/components/dashboard-invoices.tsx
 #~ msgid "View All"
