@@ -298,6 +298,7 @@ msgid "24 jam"
 msgstr "24 jam"
 
 #: src/components/reports/range-picker.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "30 hari"
 msgstr "30 hari"
 
@@ -315,6 +316,7 @@ msgstr "58 mm"
 
 #: src/components/reports/range-picker.tsx
 #: src/routes/_pos/forecast.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "7 hari"
 msgstr "7 hari"
 
@@ -764,6 +766,10 @@ msgstr "Belum ada grup terpasang."
 msgid "Belum ada item."
 msgstr "Belum ada item."
 
+#: src/routes/_pos/time-clock.tsx
+msgid "Belum ada jam kerja pada rentang ini."
+msgstr "Belum ada jam kerja pada rentang ini."
+
 #: src/routes/_pos/gift-cards.tsx
 msgid "Belum ada kartu hadiah."
 msgstr "Belum ada kartu hadiah."
@@ -866,6 +872,10 @@ msgstr "Belum ada transaksi."
 msgid "Belum ada varian. Tambahkan untuk menawarkan pilihan ukuran/harga."
 msgstr "Belum ada varian. Tambahkan untuk menawarkan pilihan ukuran/harga."
 
+#: src/routes/_pos/time-clock.tsx
+msgid "Belum masuk"
+msgstr "Belum masuk"
+
 #: src/routes/_public/signin.tsx
 msgid "Belum punya akun?"
 msgstr "Belum punya akun?"
@@ -873,6 +883,14 @@ msgstr "Belum punya akun?"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Belum terhubung"
 msgstr "Belum terhubung"
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Berhasil clock in."
+msgstr "Berhasil clock in."
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Berhasil clock out."
+msgstr "Berhasil clock out."
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Beri diskon"
@@ -1130,6 +1148,18 @@ msgstr "Cetak struk otomatis setelah pembayaran."
 #~ msgid "Channel sales"
 #~ msgstr "Channel sales"
 
+#: src/routes/_pos/time-clock.tsx
+msgid "Clock in"
+msgstr "Clock in"
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Clock out"
+msgstr "Clock out"
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Coba pilih rentang lain."
+msgstr "Coba pilih rentang lain."
+
 #: src/routes/_pos/reports/orders.tsx
 msgid "Coba ubah filter atau rentang tanggal di atas."
 msgstr "Coba ubah filter atau rentang tanggal di atas."
@@ -1332,6 +1362,14 @@ msgstr "Format Tanggal"
 #: src/routes/_pos/settings/general.tsx
 msgid "Format Waktu"
 msgstr "Format Waktu"
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Gagal clock in."
+msgstr "Gagal clock in."
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Gagal clock out."
+msgstr "Gagal clock out."
 
 #: src/components/sale/receipt-preview.tsx
 msgid "Gagal membatalkan pesanan."
@@ -1746,6 +1784,7 @@ msgid "Harga varian menggantikan harga dasar item saat dipilih di kasir."
 msgstr "Harga varian menggantikan harga dasar item saat dipilih di kasir."
 
 #: src/components/reports/range-picker.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "Hari ini"
 msgstr "Hari ini"
 
@@ -1870,6 +1909,15 @@ msgstr "Items"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Izin akses"
 msgstr "Izin akses"
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Jam"
+msgstr "Jam"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/time-clock.tsx
+msgid "Jam Kerja"
+msgstr "Jam Kerja"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Jam operasional"
@@ -2459,6 +2507,11 @@ msgstr "Margin muncul setelah ada item terjual pada rentang ini."
 #: src/routes/_public/signup.tsx
 msgid "Masuk"
 msgstr "Masuk"
+
+#. placeholder {0}: new Date(open.clockInAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', })
+#: src/routes/_pos/time-clock.tsx
+msgid "Masuk sejak {0}"
+msgstr "Masuk sejak {0}"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Masukkan kunci API (opsional)"
@@ -3846,6 +3899,10 @@ msgstr "Senin"
 msgid "Seret untuk menata ulang"
 msgstr "Seret untuk menata ulang"
 
+#: src/routes/_pos/time-clock.tsx
+msgid "Sesi"
+msgstr "Sesi"
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Sesuaikan dengan lebar gulungan printer Anda."
 #~ msgstr "Sesuaikan dengan lebar gulungan printer Anda."
@@ -3946,6 +4003,7 @@ msgstr "Sistem"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/settings/staff.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "Staf"
 msgstr "Staf"
 
@@ -4491,6 +4549,7 @@ msgstr "Tombol uang cepat"
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "Total"
 msgstr "Total"
 
@@ -4659,6 +4718,7 @@ msgstr "Umum"
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/sales.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "Unduh CSV"
 msgstr "Unduh CSV"
 
