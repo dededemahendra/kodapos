@@ -1,11 +1,12 @@
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { type FormEvent, useRef, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { uploadToStorage } from '~/lib/upload';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
+import { toast } from '~/lib/toast';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -13,6 +14,13 @@ import { Spinner } from '~/components/ui/spinner';
 
 export interface AttachedGroupRow {
   group: Doc<'modifierGroups'>;
+  position: number;
+}
+
+export interface VariantRow {
+  _id: Id<'menuItemVariants'>;
+  name: string;
+  priceIDR: number;
   position: number;
 }
 
@@ -27,6 +35,7 @@ export interface ItemEditFormProps {
     imageUrl?: string | null;
   };
   attached: AttachedGroupRow[];
+  variants: VariantRow[];
   onSaved: (id: Id<'menuItems'>) => void;
 }
 
@@ -42,6 +51,9 @@ export function ItemEditForm(props: ItemEditFormProps) {
   const attachGroup = useMutation(api.menu.itemGroups.attach);
   const detachGroup = useMutation(api.menu.itemGroups.detach);
   const reorderGroup = useMutation(api.menu.itemGroups.reorder);
+  const createVariant = useMutation(api.menu.variants.create);
+  const updateVariant = useMutation(api.menu.variants.update);
+  const archiveVariant = useMutation(api.menu.variants.archive);
 
   const [name, setName] = useState(props.initial.name);
   const [categoryId, setCategoryId] = useState<Id<'categories'> | ''>(props.initial.categoryId);
@@ -74,6 +86,16 @@ export function ItemEditForm(props: ItemEditFormProps) {
   function removeImage() {
     setImageStorageId(undefined);
     setImageUrl(null);
+  }
+
+  async function addVariant() {
+    if (props.itemId === 'new') return;
+    try {
+      await createVariant({ menuItemId: props.itemId, name: t`Varian baru`, priceIDR });
+      toast.success(t`Varian ditambahkan.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t`Gagal menambah varian.`);
+    }
   }
 
   const attachedIds = new Set(props.attached.map((a) => a.group._id));
@@ -283,6 +305,42 @@ export function ItemEditForm(props: ItemEditFormProps) {
         )}
       </div>
 
+      {props.itemId !== 'new' && (
+        <div className="col-span-2 mt-4 pt-4 border-t border-border">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xs uppercase tracking-wide text-muted-foreground">
+              <Trans>Varian ({props.variants.length})</Trans>
+            </h2>
+            <Button type="button" variant="outline" size="sm" onClick={() => void addVariant()}>
+              + <Trans>Tambah varian</Trans>
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            <Trans>Harga varian menggantikan harga dasar item saat dipilih di kasir.</Trans>
+          </p>
+          {props.variants.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              <Trans>Belum ada varian. Tambahkan untuk menawarkan pilihan ukuran/harga.</Trans>
+            </p>
+          ) : (
+            <ul className="space-y-2 max-w-xl">
+              {props.variants.map((variant) => (
+                <VariantEditRow
+                  key={variant._id}
+                  variant={variant}
+                  onSave={async (name, priceIDR) => {
+                    await updateVariant({ id: variant._id, name, priceIDR });
+                  }}
+                  onRemove={async () => {
+                    await archiveVariant({ id: variant._id });
+                  }}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       <div className="col-span-2 flex justify-between items-center mt-4 pt-4 border-t border-border">
         <div>
           {props.itemId !== 'new' && (
@@ -311,5 +369,83 @@ export function ItemEditForm(props: ItemEditFormProps) {
         </div>
       </div>
     </form>
+  );
+}
+
+function VariantEditRow(props: {
+  variant: VariantRow;
+  onSave: (name: string, priceIDR: number) => Promise<void>;
+  onRemove: () => Promise<void>;
+}) {
+  const { t } = useLingui();
+  const [name, setName] = useState(props.variant.name);
+  const [price, setPrice] = useState<number>(props.variant.priceIDR);
+
+  // Keep local drafts in sync when the reactive query delivers fresh values.
+  useEffect(() => {
+    setName(props.variant.name);
+  }, [props.variant.name]);
+  useEffect(() => {
+    setPrice(props.variant.priceIDR);
+  }, [props.variant.priceIDR]);
+
+  async function commit() {
+    const trimmed = name.trim();
+    if (trimmed === props.variant.name && price === props.variant.priceIDR) return;
+    try {
+      await props.onSave(trimmed, price);
+      toast.success(t`Varian diperbarui.`);
+    } catch (err) {
+      // Revert to the server value and surface the validation error.
+      setName(props.variant.name);
+      setPrice(props.variant.priceIDR);
+      toast.error(err instanceof Error ? err.message : t`Gagal menyimpan varian.`);
+    }
+  }
+
+  async function remove() {
+    try {
+      await props.onRemove();
+      toast.success(t`Varian dihapus.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t`Gagal menghapus varian.`);
+    }
+  }
+
+  return (
+    <li className="flex items-center gap-2">
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onBlur={() => void commit()}
+        maxLength={24}
+        aria-label={t`Nama varian`}
+        className="flex-1"
+      />
+      <Input
+        type="number"
+        min="0"
+        step="500"
+        value={price}
+        onChange={(e) => setPrice(Number(e.target.value))}
+        onBlur={() => void commit()}
+        aria-label={t`Harga varian (Rp)`}
+        className="w-32"
+      />
+      <ConfirmArchive
+        noun={t`varian`}
+        name={props.variant.name}
+        onConfirm={() => void remove()}
+        trigger={
+          <button
+            type="button"
+            aria-label={t`Hapus varian`}
+            className="px-2 text-destructive hover:underline"
+          >
+            ✕
+          </button>
+        }
+      />
+    </li>
   );
 }

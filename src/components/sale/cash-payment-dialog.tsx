@@ -116,6 +116,7 @@ export function CashPaymentDialog({
           menuItemId: l.menuItemId,
           qty: l.qty,
           modifierOptionIds: l.modifierOptionIds,
+          ...(l.variantId ? { variantId: l.variantId } : {}),
         })),
         cashTenderedIDR: tenderedNum,
         ...(promoId ? { promoId } : {}),

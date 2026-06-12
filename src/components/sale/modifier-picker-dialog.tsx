@@ -17,6 +17,8 @@ import type { ItemForSale } from './menu-pane';
 
 export type ModifierPickResult = {
   qty: number;
+  variantId?: Id<'menuItemVariants'>;
+  variantName?: string;
   modifierOptionIds: Id<'modifierOptions'>[];
   modifierLabels: CartLineModifier[];
   unitPriceIDR: number;
@@ -35,12 +37,15 @@ export function ModifierPickerDialog({
 }) {
   const { t } = useLingui();
   const [selected, setSelected] = useState<Record<string, Set<string>>>({});
+  const [variantId, setVariantId] = useState<Id<'menuItemVariants'> | null>(null);
   const [qty, setQty] = useState(1);
 
-  // Reset state when the dialog opens for a new item.
+  // Reset state when the dialog opens for a new item. Default the variant to the
+  // first one when the item has variants (a required selection).
   useEffect(() => {
     if (open) {
       setSelected({});
+      setVariantId(row?.variants[0]?._id ?? null);
       setQty(1);
     }
   }, [open, row?.item._id]);
@@ -89,8 +94,14 @@ export function ModifierPickerDialog({
       }
     }
   }
+  const hasVariants = item.variants.length > 0;
+  const selectedVariant = hasVariants
+    ? item.variants.find((v) => v._id === variantId) ?? null
+    : null;
+  const basePrice = selectedVariant ? selectedVariant.priceIDR : item.item.priceIDR;
   const unitPriceIDR =
-    item.item.priceIDR + adjustments.reduce((s, m) => s + m.priceAdjustmentIDR, 0);
+    basePrice + adjustments.reduce((s, m) => s + m.priceAdjustmentIDR, 0);
+  const variantSatisfied = !hasVariants || selectedVariant !== null;
 
   function submit() {
     const ids: Id<'modifierOptions'>[] = [];
@@ -100,7 +111,15 @@ export function ModifierPickerDialog({
         if (set.has(opt._id)) ids.push(opt._id);
       }
     }
-    onConfirm({ qty, modifierOptionIds: ids, modifierLabels: adjustments, unitPriceIDR });
+    onConfirm({
+      qty,
+      ...(selectedVariant
+        ? { variantId: selectedVariant._id, variantName: selectedVariant.name }
+        : {}),
+      modifierOptionIds: ids,
+      modifierLabels: adjustments,
+      unitPriceIDR,
+    });
     onOpenChange(false);
   }
 
@@ -114,6 +133,37 @@ export function ModifierPickerDialog({
           </p>
         </DialogHeader>
         <div className="space-y-4 max-h-[50vh] overflow-y-auto">
+          {hasVariants ? (
+            <div>
+              <div className="flex items-baseline justify-between">
+                <h3 className="text-sm font-medium">
+                  <Trans>Ukuran</Trans>
+                </h3>
+                <span className="text-xs text-muted-foreground">
+                  <Trans>Pilih varian</Trans>
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {item.variants.map((v) => {
+                  const checked = v._id === variantId;
+                  return (
+                    <button
+                      type="button"
+                      key={v._id}
+                      onClick={() => setVariantId(v._id)}
+                      className={`text-sm px-3 py-1.5 rounded-full border ${
+                        checked
+                          ? 'bg-primary text-primary-foreground border-ring'
+                          : 'bg-background text-foreground border-border hover:border-ring'
+                      }`}
+                    >
+                      {v.name} ({formatIDR(v.priceIDR)})
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
           {item.attachedGroups.map((ag) => {
             const isRequired = ag.group.required || ag.group.minSelect >= 1;
             return (
@@ -192,7 +242,11 @@ export function ModifierPickerDialog({
                 <Trans>Batal</Trans>
               </Button>
             </DialogClose>
-            <Button type="button" onClick={submit} disabled={!allRequiredSatisfied}>
+            <Button
+              type="button"
+              onClick={submit}
+              disabled={!allRequiredSatisfied || !variantSatisfied}
+            >
               <Trans>Tambah ke pesanan</Trans>
             </Button>
           </div>

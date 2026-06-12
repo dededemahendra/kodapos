@@ -809,6 +809,10 @@ msgstr "Belum ada transaksi poin."
 msgid "Belum ada transaksi."
 msgstr "Belum ada transaksi."
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Belum ada varian. Tambahkan untuk menawarkan pilihan ukuran/harga."
+msgstr "Belum ada varian. Tambahkan untuk menawarkan pilihan ukuran/harga."
+
 #: src/routes/_public/signin.tsx
 msgid "Belum punya akun?"
 msgstr "Belum punya akun?"
@@ -1114,6 +1118,11 @@ msgstr "DANA"
 msgid "Dapur"
 msgstr "Dapur"
 
+#. placeholder {0}: formatIDR(Math.min(...variants.map((v) => v.priceIDR)))
+#: src/components/sale/item-card.tsx
+msgid "dari {0}"
+msgstr "dari {0}"
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Dasar"
 msgstr "Dasar"
@@ -1292,6 +1301,10 @@ msgstr "Gagal menambah pelanggan."
 msgid "Gagal menambah staf."
 msgstr "Gagal menambah staf."
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Gagal menambah varian."
+msgstr "Gagal menambah varian."
+
 #: src/components/shift/cash-movement-dialog.tsx
 msgid "Gagal mencatat kas."
 msgstr "Gagal mencatat kas."
@@ -1355,6 +1368,10 @@ msgstr "Gagal mengganti PIN."
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gagal menghapus logo."
 msgstr "Gagal menghapus logo."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Gagal menghapus varian."
+msgstr "Gagal menghapus varian."
 
 #: src/routes/_pos/reports/expenses.tsx
 msgid "Gagal menghapus."
@@ -1431,6 +1448,10 @@ msgstr "Gagal menyimpan stok opname."
 #: src/components/menu/category-table.tsx
 msgid "Gagal menyimpan urutan."
 msgstr "Gagal menyimpan urutan."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Gagal menyimpan varian."
+msgstr "Gagal menyimpan varian."
 
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/settings/profile.tsx
@@ -1594,6 +1615,10 @@ msgstr "Hapus tender"
 msgid "Hapus tier"
 msgstr "Hapus tier"
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Hapus varian"
+msgstr "Hapus varian"
+
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Harga"
@@ -1611,6 +1636,14 @@ msgstr "Harga dasar {0}"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Harga sudah termasuk pajak"
 msgstr "Harga sudah termasuk pajak"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Harga varian (Rp)"
+msgstr "Harga varian (Rp)"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Harga varian menggantikan harga dasar item saat dipilih di kasir."
+msgstr "Harga varian menggantikan harga dasar item saat dipilih di kasir."
 
 #: src/components/reports/range-picker.tsx
 msgid "Hari ini"
@@ -2569,6 +2602,10 @@ msgstr "Nama promo"
 msgid "Nama tier"
 msgstr "Nama tier"
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Nama varian"
+msgstr "Nama varian"
+
 #: src/lib/auth-validation.ts
 msgid "Nama wajib diisi."
 msgstr "Nama wajib diisi."
@@ -3066,6 +3103,10 @@ msgstr "Pilih tanggal"
 #: src/routes/_pos/shift/open.tsx
 msgid "Pilih ulang"
 msgstr "Pilih ulang"
+
+#: src/components/sale/modifier-picker-dialog.tsx
+msgid "Pilih varian"
+msgstr "Pilih varian"
 
 #: src/components/sale/item-card.tsx
 msgid "Pilihan"
@@ -3860,6 +3901,10 @@ msgstr "Tambah Promo"
 msgid "Tambah tender"
 msgstr "Tambah tender"
 
+#: src/components/menu/item-edit-form.tsx
+msgid "Tambah varian"
+msgstr "Tambah varian"
+
 #: src/components/tables/table-manage-dialog.tsx
 msgid "Tambah, ubah nama, atau arsipkan meja."
 msgstr "Tambah, ubah nama, atau arsipkan meja."
@@ -4281,6 +4326,10 @@ msgstr "Ubah pemasok"
 msgid "Ubah promo"
 msgstr "Ubah promo"
 
+#: src/components/sale/modifier-picker-dialog.tsx
+msgid "Ukuran"
+msgstr "Ukuran"
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Ukuran font"
 msgstr "Ukuran font"
@@ -4340,6 +4389,31 @@ msgstr "USB"
 #: src/routes/_pos/reports/expenses.tsx
 msgid "Utilitas"
 msgstr "Utilitas"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "varian"
+msgstr "varian"
+
+#. placeholder {0}: props.variants.length
+#: src/components/menu/item-edit-form.tsx
+msgid "Varian ({0})"
+msgstr "Varian ({0})"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Varian baru"
+msgstr "Varian baru"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Varian dihapus."
+msgstr "Varian dihapus."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Varian diperbarui."
+msgstr "Varian diperbarui."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Varian ditambahkan."
+msgstr "Varian ditambahkan."
 
 #: src/components/dashboard-invoices.tsx
 #~ msgid "View All"

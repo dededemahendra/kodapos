@@ -12,6 +12,7 @@ export const lineInput = v.object({
   menuItemId: v.id('menuItems'),
   qty: v.number(),
   modifierOptionIds: v.array(v.id('modifierOptions')),
+  variantId: v.optional(v.id('menuItemVariants')),
 });
 
 export const saleArgs = {
@@ -112,6 +113,20 @@ export async function buildOrder(
       throw new Error(`Item${name} tidak tersedia.`);
     }
 
+    // Resolve the variant (server-authoritative price). A variant-less line keeps
+    // today's behavior exactly (item.priceIDR). The variant must belong to this
+    // item + cafe and not be archived.
+    const variant = line.variantId ? await ctx.db.get(line.variantId) : null;
+    if (
+      line.variantId &&
+      (!variant ||
+        variant.menuItemId !== item._id ||
+        variant.cafeId !== cafeId ||
+        variant.archived)
+    ) {
+      throw new Error('Varian tidak tersedia.');
+    }
+
     const modifiersSnapshot: Doc<'orders'>['lines'][number]['modifiersSnapshot'] = [];
     let modifierAdjustments = 0;
 
@@ -152,7 +167,8 @@ export async function buildOrder(
       }
     }
 
-    const unitPriceIDR = item.priceIDR + modifierAdjustments;
+    const basePrice = variant ? variant.priceIDR : item.priceIDR;
+    const unitPriceIDR = basePrice + modifierAdjustments;
     const lineTotalIDR = line.qty * unitPriceIDR;
 
     const recipe = await ctx.db
@@ -183,6 +199,7 @@ export async function buildOrder(
       unitPriceIDR,
       modifiersSnapshot,
       lineTotalIDR,
+      ...(variant ? { variantId: variant._id, variantName: variant.name } : {}),
       recipeSnapshot,
     });
   }

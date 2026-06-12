@@ -6,6 +6,8 @@ export const heldLineValidator = v.object({
   nameSnapshot: v.string(),
   qty: v.number(),
   unitPriceIDR: v.number(),
+  variantId: v.optional(v.id('menuItemVariants')),
+  variantName: v.optional(v.string()),
   modifierOptionIds: v.array(v.id('modifierOptions')),
   modifierLabels: v.array(
     v.object({

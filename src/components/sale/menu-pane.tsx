@@ -11,6 +11,7 @@ export type ItemForSale = {
     options: Doc<'modifierOptions'>[];
     position: number;
   }>;
+  variants: { _id: Id<'menuItemVariants'>; name: string; priceIDR: number }[];
   lowStockIngredientNames: string[];
   imageUrl: string | null;
 };
@@ -62,6 +63,7 @@ export function MenuPane({
               <ItemCard
                 key={row.item._id}
                 item={row.item}
+                variants={row.variants}
                 imageUrl={row.imageUrl}
                 hasModifiers={row.attachedGroups.length > 0}
                 lowStockIngredientNames={row.lowStockIngredientNames}

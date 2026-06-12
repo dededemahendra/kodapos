@@ -19,7 +19,10 @@ export function CartLineRow({
   return (
     <li className="border-b border-border py-2">
       <div className="flex items-baseline justify-between gap-2">
-        <div className="text-sm font-medium leading-tight">{line.nameSnapshot}</div>
+        <div className="text-sm font-medium leading-tight">
+          {line.nameSnapshot}
+          {line.variantName ? ` (${line.variantName})` : ''}
+        </div>
         <div className="text-sm tabular-nums">{formatIDR(line.qty * line.unitPriceIDR)}</div>
       </div>
       {line.modifierLabels.length > 0 ? (

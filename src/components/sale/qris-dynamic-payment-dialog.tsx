@@ -101,6 +101,7 @@ export function QrisDynamicPaymentDialog({
           menuItemId: l.menuItemId,
           qty: l.qty,
           modifierOptionIds: l.modifierOptionIds,
+          ...(l.variantId ? { variantId: l.variantId } : {}),
         })),
         ...(promoId ? { promoId } : {}),
         ...(tableId ? { tableId } : {}),
