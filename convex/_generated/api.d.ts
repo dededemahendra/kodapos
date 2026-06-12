@@ -57,6 +57,7 @@ import type * as payments_providers_util from "../payments/providers/util.js";
 import type * as payments_providers_xendit from "../payments/providers/xendit.js";
 import type * as payments_qrisDynamic from "../payments/qrisDynamic.js";
 import type * as promotions from "../promotions.js";
+import type * as purchaseOrders from "../purchaseOrders.js";
 import type * as purchases from "../purchases.js";
 import type * as recipes from "../recipes.js";
 import type * as reports from "../reports.js";
@@ -126,6 +127,7 @@ declare const fullApi: ApiFromModules<{
   "payments/providers/xendit": typeof payments_providers_xendit;
   "payments/qrisDynamic": typeof payments_qrisDynamic;
   promotions: typeof promotions;
+  purchaseOrders: typeof purchaseOrders;
   purchases: typeof purchases;
   recipes: typeof recipes;
   reports: typeof reports;
