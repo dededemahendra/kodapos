@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog';
+import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
@@ -23,6 +24,7 @@ import { formatIDR } from '~/lib/money';
 import { usePermissions } from '~/lib/permissions';
 import { formatPromoValue } from '~/lib/promo';
 import { toast } from '~/lib/toast';
+import { RefundDialog } from './refund-dialog';
 
 // Printed receipt is always English, kept out of the i18n catalog. Maps a stored
 // payment method to its human label (cash is rendered separately above).
@@ -61,6 +63,7 @@ export function ReceiptPreview({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [voiding, setVoiding] = useState(false);
+  const [refundOpen, setRefundOpen] = useState(false);
 
   if (!orderId) return null;
 
@@ -102,6 +105,13 @@ export function ReceiptPreview({
             {/* Printed receipt is always English, kept out of the i18n catalog. */}
             {order.paymentStatus === 'void' ? (
               <div className="text-center font-bold text-destructive my-2">** VOID **</div>
+            ) : null}
+            {(order.refundedIDR ?? 0) > 0 ? (
+              <div className="text-center my-2">
+                <Badge variant="secondary">
+                  <Trans>Direfund {formatIDR(order.refundedIDR ?? 0)}</Trans>
+                </Badge>
+              </div>
             ) : null}
             <hr className="border-dashed border-border my-2" />
             {order.lines.map((line, i) => (
@@ -219,7 +229,7 @@ export function ReceiptPreview({
           </div>
         )}
         <div className="flex gap-2 justify-between mt-4">
-          <div>
+          <div className="flex gap-2">
             {order?.paymentStatus === 'paid' && can('canVoid') ? (
               <Button
                 type="button"
@@ -230,6 +240,17 @@ export function ReceiptPreview({
                 }}
               >
                 <Trans>Batalkan pesanan</Trans>
+              </Button>
+            ) : null}
+            {order?.paymentStatus === 'paid' &&
+            can('canVoid') &&
+            (order.refundedIDR ?? 0) < order.totalIDR ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setRefundOpen(true)}
+              >
+                <Trans>Refund</Trans>
               </Button>
             ) : null}
           </div>
@@ -300,6 +321,12 @@ export function ReceiptPreview({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <RefundDialog
+        orderId={orderId}
+        open={refundOpen}
+        onOpenChange={setRefundOpen}
+        onDone={onDone}
+      />
     </Dialog>
   );
 }

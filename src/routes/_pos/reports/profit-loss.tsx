@@ -49,6 +49,7 @@ function ProfitLossReport() {
     if (!data) return;
     const rows: { label: string; amountIDR: number }[] = [
       { label: t`Pendapatan`, amountIDR: data.revenueIDR },
+      { label: t`Pengembalian`, amountIDR: -data.refundsIDR },
       { label: t`HPP`, amountIDR: -data.cogsIDR },
       { label: t`Laba kotor`, amountIDR: data.grossProfitIDR },
       { label: t`Pengeluaran`, amountIDR: -data.expensesIDR },
@@ -85,6 +86,7 @@ function ProfitLossReport() {
           <Spinner />
         </div>
       ) : data.revenueIDR === 0 &&
+        data.refundsIDR === 0 &&
         data.expensesIDR === 0 &&
         data.otherIncomeIDR === 0 ? (
         <Empty>
@@ -108,6 +110,12 @@ function ProfitLossReport() {
                 <Trans>Pendapatan</Trans>
               </dt>
               <dd className="tabular-nums">{formatIDR(data.revenueIDR)}</dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-4 text-muted-foreground">
+              <dt>
+                <Trans>− Pengembalian</Trans>
+              </dt>
+              <dd className="tabular-nums">−{formatIDR(data.refundsIDR)}</dd>
             </div>
             <div className="flex items-baseline justify-between gap-4 text-muted-foreground">
               <dt>
