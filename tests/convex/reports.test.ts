@@ -161,6 +161,75 @@ describe('reports.products', () => {
   });
 });
 
+describe('reports.margin', () => {
+  it('computes per-item revenue, COGS, and margin for an item with a recipe', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner, shiftId, cashierId } = refs;
+    const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Teh' });
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Teh Susu',
+      priceIDR: 10000,
+    });
+    const ingredientId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 1000,
+    });
+    // Stock so the sale's inventory deduction does not fail.
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId,
+      newQty: 1000,
+      reasonLabel: 'Stok awal',
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId, qty: 2, wastageFactor: 1.0 }],
+    });
+    // unit COGS = 2 * 1.0 * 1000 = 2000; sell qty 3 → revenue 30000, cogs 6000.
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'margin-recipe-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 30000,
+      createdAtClient: wib(2026, 5, 10),
+    });
+    const data = await asOwner.query(api.reports.margin, { range: { from: '2026-05-10', to: '2026-05-10' } });
+    const row = data.items.find((i) => i.name === 'Teh Susu');
+    expect(row?.qty).toBe(3);
+    expect(row?.revenueIDR).toBe(30000);
+    expect(row?.cogsIDR).toBe(6000);
+    expect(row?.marginIDR).toBe(24000);
+    expect(row?.marginPct).toBe(80);
+    expect(data.totalMarginIDR).toBe(24000);
+  });
+
+  it('treats an item with no recipe as full margin (0 COGS)', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner, shiftId, cashierId, itemId } = refs;
+    // The default item (Espresso, priceIDR 18000) has no recipe.
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'margin-norecipe-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 18000,
+      createdAtClient: wib(2026, 5, 10),
+    });
+    const data = await asOwner.query(api.reports.margin, { range: { from: '2026-05-10', to: '2026-05-10' } });
+    const row = data.items.find((i) => i.name === 'Espresso');
+    expect(row?.qty).toBe(1);
+    expect(row?.revenueIDR).toBe(18000);
+    expect(row?.cogsIDR).toBe(0);
+    expect(row?.marginIDR).toBe(18000);
+    expect(row?.marginPct).toBe(100);
+  });
+});
+
 describe('reports.payments + cashiers', () => {
   it('payments splits by method with a total', async () => {
     const t = convexTest(schema, modules);

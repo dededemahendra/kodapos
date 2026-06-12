@@ -107,6 +107,76 @@ export const products = query({
   },
 });
 
+export const margin = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    items: v.array(
+      v.object({
+        name: v.string(),
+        qty: v.number(),
+        revenueIDR: v.number(),
+        cogsIDR: v.number(),
+        marginIDR: v.number(),
+        marginPct: v.number(), // 0..100, 0 when revenue is 0
+      })
+    ),
+    totalRevenueIDR: v.number(),
+    totalCogsIDR: v.number(),
+    totalMarginIDR: v.number(),
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const { cafeId, fromKey, toKey, paid } = await paidInRange(ctx, range);
+    // current ingredient cost map
+    const ingredients = await ctx.db
+      .query('ingredients')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
+      .collect();
+    const cost = new Map(ingredients.map((i) => [i._id, i.lastCostPerUnitIDR]));
+    const byName = new Map<string, { qty: number; revenueIDR: number; cogsIDR: number }>();
+    for (const o of paid) {
+      for (const l of o.lines) {
+        const unitCogs = (l.recipeSnapshot ?? []).reduce(
+          (s, rl) => s + rl.qty * rl.wastageFactor * (cost.get(rl.ingredientId) ?? 0),
+          0
+        );
+        const cur = byName.get(l.nameSnapshot) ?? { qty: 0, revenueIDR: 0, cogsIDR: 0 };
+        cur.qty += l.qty;
+        cur.revenueIDR += l.lineTotalIDR;
+        cur.cogsIDR += l.qty * unitCogs;
+        byName.set(l.nameSnapshot, cur);
+      }
+    }
+    const items = Array.from(byName, ([name, a]) => {
+      const marginIDR = a.revenueIDR - a.cogsIDR;
+      return {
+        name,
+        qty: a.qty,
+        revenueIDR: a.revenueIDR,
+        cogsIDR: a.cogsIDR,
+        marginIDR,
+        marginPct: a.revenueIDR === 0 ? 0 : Math.round((marginIDR / a.revenueIDR) * 100),
+      };
+    }).sort(
+      (x, y) =>
+        y.marginIDR - x.marginIDR ||
+        y.revenueIDR - x.revenueIDR ||
+        x.name.localeCompare(y.name, 'id-ID')
+    );
+    const totalRevenueIDR = items.reduce((s, i) => s + i.revenueIDR, 0);
+    const totalCogsIDR = items.reduce((s, i) => s + i.cogsIDR, 0);
+    return {
+      items,
+      totalRevenueIDR,
+      totalCogsIDR,
+      totalMarginIDR: totalRevenueIDR - totalCogsIDR,
+      fromKey,
+      toKey,
+    };
+  },
+});
+
 export const payments = query({
   args: { range: rangeArg },
   returns: v.object({
