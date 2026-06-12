@@ -1938,6 +1938,12 @@ msgstr "Grup tidak ditemukan."
 msgid "Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan."
 msgstr "Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan."
 
+#: src/components/public/public-menu.tsx
+#: src/components/sale/item-card.tsx
+#: src/routes/_pos/menu/index.tsx
+msgid "Habis"
+msgstr "Habis"
+
 #: src/routes/_public/privacy.tsx
 msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
 msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
@@ -2146,10 +2152,22 @@ msgstr "Item diarsipkan."
 msgid "Item dinonaktifkan."
 msgstr "Item dinonaktifkan."
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Item ditandai habis."
+msgstr "Item ditandai habis."
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Item ditandai tersedia."
+msgstr "Item ditandai tersedia."
+
 #: src/components/app-shared.tsx
 #: src/routes/_pos/menu/index.tsx
 msgid "Item Menu"
 msgstr "Item Menu"
+
+#: src/components/sale/sale-screen.tsx
+msgid "Item sedang habis."
+msgstr "Item sedang habis."
 
 #: src/components/stats.tsx
 #: src/routes/_pos/reports/index.tsx
@@ -2529,6 +2547,10 @@ msgstr "Kesehatan stok"
 #: src/routes/_pos/reports/profit-loss.tsx
 msgid "Keterangan"
 msgstr "Keterangan"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Ketersediaan"
+msgstr "Ketersediaan"
 
 #: src/routes/_pos/forecast.tsx
 msgid "Kirim ke WhatsApp"
@@ -4886,6 +4908,14 @@ msgstr "Tamu"
 msgid "Tamu duduk."
 msgstr "Tamu duduk."
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Tandai habis"
+msgstr "Tandai habis"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Tandai tersedia"
+msgstr "Tandai tersedia"
+
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
@@ -5027,6 +5057,10 @@ msgstr "Terjual"
 #: src/routes/_pos/forecast.tsx
 msgid "Terkirim"
 msgstr "Terkirim"
+
+#: src/routes/_pos/menu/index.tsx
+msgid "Tersedia"
+msgstr "Tersedia"
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Tersimpan"
