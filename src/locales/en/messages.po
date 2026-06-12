@@ -428,6 +428,7 @@ msgid "Aktivitas terbaru di kafe Anda."
 msgstr "Recent activity at your cafe."
 
 #: src/components/app-shared.tsx
+#: src/routes/_pos/reports/export.tsx
 msgid "Akun"
 msgstr "Account"
 
@@ -927,6 +928,7 @@ msgid "Belum ada transaksi poin."
 msgstr "No point transactions yet."
 
 #: src/components/dashboard-invoices.tsx
+#: src/routes/_pos/reports/export.tsx
 msgid "Belum ada transaksi."
 msgstr "No transactions yet."
 
@@ -957,6 +959,10 @@ msgstr "Clocked out successfully."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Beri diskon"
 msgstr "Give discount"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Bersih"
+msgstr "Net"
 
 #: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/settings/receipt.tsx
@@ -1269,6 +1275,7 @@ msgid "Coba ubah kata pencarian atau tambah kasir baru."
 msgstr "Try a different search or add a new cashier."
 
 #: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
@@ -1453,6 +1460,10 @@ msgstr "Edit modifier group"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Edit menu"
 msgstr "Edit menu"
+
+#: src/routes/_pos/reports/route.tsx
+msgid "Ekspor Akuntansi"
+msgstr "Accounting export"
 
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -2339,6 +2350,7 @@ msgstr "Manage tables"
 
 #: src/components/nav-user.tsx
 #: src/components/shift/cash-movement-dialog.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Keluar"
 msgstr "Log out"
@@ -2403,6 +2415,7 @@ msgstr "30-day loss · {0}"
 msgid "Kesehatan stok"
 msgstr "Stock health"
 
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 msgid "Keterangan"
 msgstr "Description"
@@ -2671,6 +2684,7 @@ msgid "Margin muncul setelah ada item terjual pada rentang ini."
 msgstr "Margin appears once items are sold in this range."
 
 #: src/components/shift/cash-movement-dialog.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/shifts.tsx
 #: src/routes/_public/index.tsx
 #: src/routes/_public/signin.tsx
@@ -2841,6 +2855,7 @@ msgstr "Saving…"
 
 #: src/components/sale/refund-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/payments.tsx
 msgid "Metode"
 msgstr "Method"
@@ -3240,6 +3255,10 @@ msgstr "Supplier updated."
 msgid "Pemasok ditambahkan."
 msgstr "Supplier added."
 
+#: src/routes/_pos/reports/export.tsx
+msgid "Pemasukan"
+msgstr "Inflow"
+
 #: src/components/latest-change.tsx
 msgid "PEMBARUAN"
 msgstr "UPDATE"
@@ -3279,6 +3298,7 @@ msgstr "Cash Payment"
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/purchases.tsx
+#: src/routes/_pos/reports/export.tsx
 msgid "Pembelian"
 msgstr "Purchases"
 
@@ -3341,6 +3361,7 @@ msgstr "Daily revenue, last 7 days."
 msgid "Pendapatan lain"
 msgstr "Other income"
 
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Pendapatan Lain"
 msgstr "Other income"
@@ -3366,6 +3387,7 @@ msgstr "Loyalty settings saved."
 #~ msgid "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 #~ msgstr "Receipt & payment settings are now on the Receipt & Printer and Tax & Payment pages."
 
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Pengeluaran"
@@ -3379,6 +3401,7 @@ msgstr "Expense recorded."
 msgid "Pengeluaran dihapus."
 msgstr "Expense deleted."
 
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 msgid "Pengembalian"
 msgstr "Refunds"
@@ -3390,6 +3413,7 @@ msgstr "Incoming delivery"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Penjualan"
 msgstr "Sales"
@@ -4607,6 +4631,7 @@ msgstr "Show tax breakdown"
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Tanggal"
@@ -4837,6 +4862,7 @@ msgstr "Review inventory"
 #: src/components/promo/promo-form-dialog.tsx
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/promos.tsx
+#: src/routes/_pos/reports/export.tsx
 msgid "Tipe"
 msgstr "Type"
 
@@ -5023,6 +5049,10 @@ msgstr "Label size"
 #: src/routes/_pos/settings/general.tsx
 msgid "Umum"
 msgstr "General"
+
+#: src/routes/_pos/reports/export.tsx
+msgid "Unduh Buku Besar (CSV)"
+msgstr "Download ledger (CSV)"
 
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/expenses.tsx
