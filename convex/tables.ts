@@ -83,6 +83,23 @@ export const archive = mutation({
   },
 });
 
+export const ensureQrToken = mutation({
+  args: { id: v.id('tables') },
+  returns: v.string(),
+  handler: async (ctx, { id }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const table = await requireOwned(ctx, cafeId, id, 'Meja');
+    // Idempotent: never regenerate an existing token — already-printed QR codes
+    // must keep resolving. Only mint one the first time.
+    if (table.qrToken) return table.qrToken;
+    const b = new Uint8Array(16);
+    globalThis.crypto.getRandomValues(b);
+    const token = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+    await ctx.db.patch(id, { qrToken: token });
+    return token;
+  },
+});
+
 export const floor = query({
   args: {},
   returns: v.array(
