@@ -65,6 +65,7 @@ import type * as purchases from "../purchases.js";
 import type * as recipes from "../recipes.js";
 import type * as refunds from "../refunds.js";
 import type * as reports from "../reports.js";
+import type * as reservations from "../reservations.js";
 import type * as restock from "../restock.js";
 import type * as settings from "../settings.js";
 import type * as shifts from "../shifts.js";
@@ -139,6 +140,7 @@ declare const fullApi: ApiFromModules<{
   recipes: typeof recipes;
   refunds: typeof refunds;
   reports: typeof reports;
+  reservations: typeof reservations;
   restock: typeof restock;
   settings: typeof settings;
   shifts: typeof shifts;

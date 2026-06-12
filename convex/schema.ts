@@ -506,6 +506,28 @@ export default defineSchema({
     .index('by_cafe_phone', ['cafeId', 'phone'])
     .index('by_cafe_active', ['cafeId', 'archived']),
 
+  reservations: defineTable({
+    cafeId: v.id('cafes'),
+    tableId: v.optional(v.id('tables')), // optional — book without assigning a table
+    customerId: v.optional(v.id('customers')), // optional link to the customer book
+    customerName: v.string(), // snapshot / freeform name
+    phone: v.optional(v.string()),
+    partySize: v.number(),
+    at: v.number(), // reservation datetime (ms, in the café tz)
+    durationMin: v.number(), // default 90
+    status: v.union(
+      v.literal('booked'),
+      v.literal('seated'),
+      v.literal('completed'),
+      v.literal('cancelled'),
+      v.literal('no_show')
+    ),
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_cafe_at', ['cafeId', 'at'])
+    .index('by_cafe_status', ['cafeId', 'status']),
+
   loyaltyTransactions: defineTable({
     cafeId: v.id('cafes'),
     customerId: v.id('customers'),
