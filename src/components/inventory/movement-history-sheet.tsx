@@ -4,7 +4,13 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { WASTE_REASON_LABELS } from '~/components/inventory/waste-reason';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import {
   Sheet,
   SheetContent,
@@ -62,6 +68,9 @@ export function MovementHistorySheet({
                 <EmptyTitle>
                   <Trans>Belum ada pergerakan stok.</Trans>
                 </EmptyTitle>
+                <EmptyDescription>
+                  <Trans>Perubahan stok bahan ini akan tercatat di sini.</Trans>
+                </EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : (

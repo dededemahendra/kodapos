@@ -9,6 +9,7 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import {
 	Empty,
+	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
@@ -114,6 +115,9 @@ export function DashboardInvoices() {
 											<EmptyTitle>
 												<Trans>Belum ada transaksi.</Trans>
 											</EmptyTitle>
+											<EmptyDescription>
+												<Trans>Pesanan yang dibuat akan muncul di sini.</Trans>
+											</EmptyDescription>
 										</EmptyHeader>
 									</Empty>
 								</TableCell>

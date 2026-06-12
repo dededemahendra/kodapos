@@ -14,6 +14,7 @@ import {
 } from '~/components/ui/dialog';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -107,6 +108,9 @@ export function StockTakeDialog({
               <EmptyTitle>
                 <Trans>Belum ada bahan untuk dihitung.</Trans>
               </EmptyTitle>
+              <EmptyDescription>
+                <Trans>Tambahkan bahan di inventaris untuk mulai stok opname.</Trans>
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (

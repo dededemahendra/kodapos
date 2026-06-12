@@ -5,7 +5,13 @@ import { useQuery } from 'convex/react';
 import { Receipt } from 'lucide-react';
 import { useState } from 'react';
 import { ReceiptPreview } from '~/components/sale/receipt-preview';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 
@@ -28,6 +34,7 @@ export function ShiftOrderList({ shiftId }: { shiftId: Id<'shifts'> }) {
         <EmptyHeader>
           <EmptyMedia variant="icon"><Receipt /></EmptyMedia>
           <EmptyTitle><Trans>Belum ada pesanan di shift ini.</Trans></EmptyTitle>
+          <EmptyDescription><Trans>Pesanan yang diselesaikan selama shift ini akan muncul di sini.</Trans></EmptyDescription>
         </EmptyHeader>
       </Empty>
     );

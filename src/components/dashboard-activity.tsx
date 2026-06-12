@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/card";
 import {
 	Empty,
+	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
@@ -85,6 +86,9 @@ export function DashboardActivity() {
 							<EmptyTitle>
 								<Trans>Belum ada aktivitas.</Trans>
 							</EmptyTitle>
+							<EmptyDescription>
+								<Trans>Transaksi dan shift terbaru akan muncul di sini.</Trans>
+							</EmptyDescription>
 						</EmptyHeader>
 					</Empty>
 				) : (

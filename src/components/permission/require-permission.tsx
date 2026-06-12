@@ -3,7 +3,14 @@ import { Link } from '@tanstack/react-router';
 import { Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '~/components/ui/button';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { type Permission, usePermissions } from '~/lib/permissions';
 
@@ -22,9 +29,11 @@ export function RequirePermission({
           <EmptyHeader>
             <EmptyMedia variant="icon"><Lock /></EmptyMedia>
             <EmptyTitle><Trans>Akses ditolak</Trans></EmptyTitle>
+            <EmptyDescription><Trans>Anda tidak punya akses ke halaman ini. Hubungi pemilik untuk meminta akses.</Trans></EmptyDescription>
           </EmptyHeader>
-          <p className="text-sm text-muted-foreground mb-3"><Trans>Anda tidak punya akses ke halaman ini.</Trans></p>
-          <Button asChild variant="outline" size="sm"><Link to="/sale"><Trans>Kembali ke kasir</Trans></Link></Button>
+          <EmptyContent>
+            <Button asChild variant="outline" size="sm"><Link to="/sale"><Trans>Kembali ke kasir</Trans></Link></Button>
+          </EmptyContent>
         </Empty>
       </div>
     );

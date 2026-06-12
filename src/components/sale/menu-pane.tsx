@@ -5,6 +5,7 @@ import { UtensilsCrossed } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -69,6 +70,9 @@ export function MenuPane({
               <EmptyTitle>
                 <Trans>Tidak ada item di kategori ini.</Trans>
               </EmptyTitle>
+              <EmptyDescription>
+                <Trans>Pilih kategori lain atau tambah item di menu.</Trans>
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (

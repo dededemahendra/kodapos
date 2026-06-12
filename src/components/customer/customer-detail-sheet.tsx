@@ -8,7 +8,13 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { CustomerFormDialog } from '~/components/customer/customer-form-dialog';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Field, FieldError, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import {
@@ -212,6 +218,9 @@ export function CustomerDetailSheet({
                   <EmptyTitle>
                     <Trans>Belum ada transaksi poin.</Trans>
                   </EmptyTitle>
+                  <EmptyDescription>
+                    <Trans>Poin yang diperoleh atau ditukar akan tercatat di sini.</Trans>
+                  </EmptyDescription>
                 </EmptyHeader>
               </Empty>
             ) : (

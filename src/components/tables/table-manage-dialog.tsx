@@ -15,6 +15,7 @@ import {
 } from '~/components/ui/dialog';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -130,6 +131,9 @@ export function TableManageDialog({
                 <EmptyTitle>
                   <Trans>Belum ada meja.</Trans>
                 </EmptyTitle>
+                <EmptyDescription>
+                  <Trans>Tambahkan meja untuk mulai mengelola lantai.</Trans>
+                </EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : (
