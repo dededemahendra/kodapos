@@ -59,6 +59,19 @@ const modifierOptionDoc = v.object({
   createdAt: v.number(),
 });
 
+const variantForSale = v.object({
+  _id: v.id('menuItemVariants'),
+  name: v.string(),
+  priceIDR: v.number(),
+});
+
+const variantDetail = v.object({
+  _id: v.id('menuItemVariants'),
+  name: v.string(),
+  priceIDR: v.number(),
+  position: v.number(),
+});
+
 const itemDetail = v.object({
   item: menuItemDoc,
   attachedGroups: v.array(
@@ -68,6 +81,7 @@ const itemDetail = v.object({
       position: v.number(),
     })
   ),
+  variants: v.array(variantDetail),
   imageUrl: v.union(v.string(), v.null()),
 });
 
@@ -121,6 +135,17 @@ async function resolveAttachedGroups(
     });
   }
   return attachedGroups;
+}
+
+async function resolveActiveVariants(
+  ctx: QueryCtx,
+  menuItemId: Id<'menuItems'>
+): Promise<Doc<'menuItemVariants'>[]> {
+  const variants = await ctx.db
+    .query('menuItemVariants')
+    .withIndex('by_item_active', (q) => q.eq('menuItemId', menuItemId).eq('archived', false))
+    .collect();
+  return variants.sort((a, b) => a.position - b.position);
 }
 
 export const create = mutation({
@@ -287,6 +312,7 @@ const groupWithOptionsForSale = v.object({
 const itemForSale = v.object({
   item: menuItemDoc,
   attachedGroups: v.array(groupWithOptionsForSale),
+  variants: v.array(variantForSale),
   lowStockIngredientNames: v.array(v.string()),
   imageUrl: v.union(v.string(), v.null()),
 });
@@ -304,8 +330,13 @@ export const listForSale = query({
     const result = [];
     for (const item of active) {
       const attachedGroups = await resolveAttachedGroups(ctx, item._id);
+      const variants = (await resolveActiveVariants(ctx, item._id)).map((vr) => ({
+        _id: vr._id,
+        name: vr.name,
+        priceIDR: vr.priceIDR,
+      }));
       const { lowStockIngredientNames } = await itemRecipeStatus(ctx, cafeId, item._id);
-      result.push({ item, attachedGroups, lowStockIngredientNames, imageUrl: await imageUrlFor(ctx, item.imageStorageId) });
+      result.push({ item, attachedGroups, variants, lowStockIngredientNames, imageUrl: await imageUrlFor(ctx, item.imageStorageId) });
     }
     return result;
   },
@@ -319,6 +350,12 @@ export const getById = query({
     const item = await ctx.db.get(id);
     if (!item || item.cafeId !== cafeId) return null;
     const attachedGroups = await resolveAttachedGroups(ctx, id);
-    return { item, attachedGroups, imageUrl: await imageUrlFor(ctx, item.imageStorageId) };
+    const variants = (await resolveActiveVariants(ctx, id)).map((vr) => ({
+      _id: vr._id,
+      name: vr.name,
+      priceIDR: vr.priceIDR,
+      position: vr.position,
+    }));
+    return { item, attachedGroups, variants, imageUrl: await imageUrlFor(ctx, item.imageStorageId) };
   },
 });

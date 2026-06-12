@@ -46,6 +46,7 @@ import type * as menu_itemGroups from "../menu/itemGroups.js";
 import type * as menu_itemStock from "../menu/itemStock.js";
 import type * as menu_items from "../menu/items.js";
 import type * as menu_modifierGroups from "../menu/modifierGroups.js";
+import type * as menu_variants from "../menu/variants.js";
 import type * as orders from "../orders.js";
 import type * as payments_providers_index from "../payments/providers/index.js";
 import type * as payments_providers_mock from "../payments/providers/mock.js";
@@ -111,6 +112,7 @@ declare const fullApi: ApiFromModules<{
   "menu/itemStock": typeof menu_itemStock;
   "menu/items": typeof menu_items;
   "menu/modifierGroups": typeof menu_modifierGroups;
+  "menu/variants": typeof menu_variants;
   orders: typeof orders;
   "payments/providers/index": typeof payments_providers_index;
   "payments/providers/mock": typeof payments_providers_mock;

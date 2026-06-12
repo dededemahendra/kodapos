@@ -95,6 +95,21 @@ export default defineSchema({
     .index('by_item', ['menuItemId', 'position'])
     .index('by_group', ['modifierGroupId']),
 
+  // Item variants (e.g. Size S/M/L) — each carries an absolute price that
+  // REPLACES the item's base price for the line (modifiers still stack on top).
+  // Variants share the item's recipe. Mirrors the modifier-option child pattern.
+  menuItemVariants: defineTable({
+    cafeId: v.id('cafes'),
+    menuItemId: v.id('menuItems'),
+    name: v.string(), // "S" / "M" / "L"
+    priceIDR: v.number(), // absolute price for this variant
+    position: v.number(),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index('by_item_active', ['menuItemId', 'archived', 'position'])
+    .index('by_cafe_item', ['cafeId', 'menuItemId']),
+
   cafeStaff: defineTable({
     cafeId: v.id('cafes'),
     name: v.string(),
@@ -294,6 +309,10 @@ export default defineSchema({
           })
         ),
         lineTotalIDR: v.number(),
+        // Variant snapshot frozen at sale time. Optional: omitted for variant-less
+        // lines (back-compat with orders rung before variants existed).
+        variantId: v.optional(v.id('menuItemVariants')),
+        variantName: v.optional(v.string()),
         // Recipe frozen at sale time so retroactive recipe edits don't rewrite
         // history. Optional for backward compat with Slice 3 orders inserted
         // before this field existed. Going forward, every createCashSale writes
