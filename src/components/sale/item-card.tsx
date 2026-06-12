@@ -1,6 +1,7 @@
 import { useLingui } from '@lingui/react/macro';
 import { Trans } from '@lingui/react/macro';
 import type { Doc, Id } from 'convex/_generated/dataModel';
+import { StatusBadge } from '~/components/ui/status-badge';
 import { formatIDR } from '~/lib/money';
 
 export function ItemCard({
@@ -9,6 +10,7 @@ export function ItemCard({
   imageUrl,
   hasModifiers,
   lowStockIngredientNames,
+  soldOut,
   onTap,
 }: {
   item: Doc<'menuItems'>;
@@ -16,6 +18,7 @@ export function ItemCard({
   imageUrl: string | null;
   hasModifiers: boolean;
   lowStockIngredientNames: string[];
+  soldOut?: boolean | undefined;
   onTap: () => void;
 }) {
   const { t } = useLingui();
@@ -26,8 +29,8 @@ export function ItemCard({
       onClick={onTap}
       title={isLow ? t`Stok rendah: ${lowStockIngredientNames.join(', ')}` : undefined}
       className={`text-left rounded-md border p-3 hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring ${
-        isLow ? 'border-destructive bg-destructive/10' : 'border-border bg-background'
-      }`}
+        soldOut ? 'opacity-60 ' : ''
+      }${isLow ? 'border-destructive bg-destructive/10' : 'border-border bg-background'}`}
     >
       {imageUrl ? (
         <img src={imageUrl} alt="" className="w-full h-16 rounded object-cover mb-1" />
@@ -45,11 +48,18 @@ export function ItemCard({
           formatIDR(item.priceIDR)
         )}
       </div>
-      {hasModifiers ? (
-        <div className="mt-2 inline-block text-[10px] uppercase tracking-wide text-primary bg-accent rounded px-1.5 py-0.5">
-          <Trans>Pilihan</Trans>
-        </div>
-      ) : null}
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {hasModifiers ? (
+          <span className="inline-block text-[10px] uppercase tracking-wide text-primary bg-accent rounded px-1.5 py-0.5">
+            <Trans>Pilihan</Trans>
+          </span>
+        ) : null}
+        {soldOut ? (
+          <StatusBadge variant="danger">
+            <Trans>Habis</Trans>
+          </StatusBadge>
+        ) : null}
+      </div>
     </button>
   );
 }
