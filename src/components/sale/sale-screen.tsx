@@ -8,6 +8,7 @@ import { useActiveCashier } from '~/lib/active-cashier';
 import { CashPaymentDialog } from './cash-payment-dialog';
 import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
 import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
+import { SplitPaymentDialog } from './split-payment-dialog';
 import { ReceiptPreview } from './receipt-preview';
 import { CashMovementDialog } from '~/components/shift/cash-movement-dialog';
 import {
@@ -48,6 +49,7 @@ export function SaleScreen() {
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
   const [openMethod, setOpenMethod] = useState<PaymentMethod | null>(null);
+  const [splitOpen, setSplitOpen] = useState(false);
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [manualDiscountOpen, setManualDiscountOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
@@ -101,6 +103,12 @@ export function SaleScreen() {
 
   const defaultMethod = settings.payment.defaultMethod;
   const ready = PAYMENT_METHODS.filter((m) => m.isReady(settings)).map((m) => m.method);
+  // Sync tender methods a split can combine. Mirror the same gating the cash /
+  // qris_static dialogs use: cash if enabled, qris_static if enabled + QR set.
+  const splitCashEnabled = ready.includes('cash');
+  const splitQrisStaticEnabled = ready.includes('qris_static');
+  // A split needs at least two usable sync methods to be meaningful.
+  const canSplit = splitCashEnabled && splitQrisStaticEnabled;
   // Dynamic QRIS supersedes static on the same rail: it auto-confirms via webhook
   // and is strictly preferable, so never show two identical "QRIS" buttons.
   const supported = ready.includes('qris_dynamic')
@@ -156,6 +164,13 @@ export function SaleScreen() {
         onPay={(method) => {
           if (cart.lines.length > 0) setOpenMethod(method);
         }}
+        {...(shift && cashierId && canSplit
+          ? {
+              onSplit: () => {
+                if (cart.lines.length > 0) setSplitOpen(true);
+              },
+            }
+          : {})}
         onKosongkan={() => setClearOpen(true)}
         {...(shift && cashierId
           ? {
@@ -303,6 +318,26 @@ export function SaleScreen() {
             {...(settings.qrisImageUrl ? { qrisImageUrl: settings.qrisImageUrl } : {})}
             {...('qrisMerchantName' in settings.payment && settings.payment.qrisMerchantName ? { qrisMerchantName: settings.payment.qrisMerchantName } : {})}
             {...('qrisNmid' in settings.payment && settings.payment.qrisNmid ? { qrisNmid: settings.payment.qrisNmid } : {})}
+            {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            cart={cart}
+            shiftId={shift._id}
+            cashierId={cashierId}
+            onPaid={(orderId) => {
+              setReceiptOrderId(orderId);
+              dispatch({ type: 'clearCart' });
+            }}
+          />
+          <SplitPaymentDialog
+            open={splitOpen}
+            onOpenChange={setSplitOpen}
+            subtotalIDR={subtotal}
+            promoDiscountIDR={discount}
+            serviceChargeEnabled={scEnabled}
+            serviceChargePct={scPct}
+            taxEnabled={taxEnabled}
+            taxRatePct={taxRatePct}
+            cashEnabled={splitCashEnabled}
+            qrisStaticEnabled={splitQrisStaticEnabled}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             cart={cart}
             shiftId={shift._id}

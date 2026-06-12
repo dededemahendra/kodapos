@@ -31,6 +31,7 @@ export function CartPane({
   onRemoveManualDiscount,
   payMethods,
   onPay,
+  onSplit,
   onKosongkan,
   onKas,
   onSwitch,
@@ -57,6 +58,8 @@ export function CartPane({
   onRemoveManualDiscount?: () => void;
   payMethods: PaymentMethod[];
   onPay: (method: PaymentMethod) => void;
+  /** Opens the split-payment dialog. Omitted when a split isn't possible. */
+  onSplit?: () => void;
   onKosongkan: () => void;
   onKas?: () => void;
   onSwitch?: boolean;
@@ -222,6 +225,18 @@ export function CartPane({
             ))}
           </div>
         )}
+        {onSplit ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSplit}
+            disabled={empty}
+            className="w-full mt-2"
+            size="lg"
+          >
+            <Trans>Bagi pembayaran</Trans>
+          </Button>
+        ) : null}
       </div>
     </aside>
   );
