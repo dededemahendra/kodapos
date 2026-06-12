@@ -77,6 +77,7 @@ export const navGroups: SidebarNavGroup[] = [
 				],
 			},
 			{ title: msg`Promo`, path: "/promos", icon: <BadgePercent />, requires: 'canEditMenu' },
+			{ title: msg`Kartu Hadiah`, path: "/gift-cards", icon: <Gift />, requires: 'canEditMenu' },
 		],
 	},
 	{
