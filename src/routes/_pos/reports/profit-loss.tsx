@@ -56,6 +56,7 @@ function ProfitLossReport() {
         label: catText[c.category],
         amountIDR: -c.amountIDR,
       })),
+      { label: t`Pendapatan lain`, amountIDR: data.otherIncomeIDR },
       { label: t`Laba bersih`, amountIDR: data.netProfitIDR },
     ];
     const csv = toCSV(rows, [
@@ -83,7 +84,9 @@ function ProfitLossReport() {
         <div className="flex justify-center py-12">
           <Spinner />
         </div>
-      ) : data.revenueIDR === 0 && data.expensesIDR === 0 ? (
+      ) : data.revenueIDR === 0 &&
+        data.expensesIDR === 0 &&
+        data.otherIncomeIDR === 0 ? (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -140,6 +143,15 @@ function ProfitLossReport() {
                 ))}
               </div>
             ) : null}
+
+            <div className="flex items-baseline justify-between gap-4 text-muted-foreground pt-2">
+              <dt>
+                <Trans>+ Pendapatan lain</Trans>
+              </dt>
+              <dd className="tabular-nums">
+                +{formatIDR(data.otherIncomeIDR)}
+              </dd>
+            </div>
 
             <div className="flex items-baseline justify-between gap-4 border-t border-border pt-2 text-lg font-bold">
               <dt className="flex items-center gap-2">

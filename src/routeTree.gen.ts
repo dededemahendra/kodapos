@@ -55,6 +55,7 @@ import { Route as PosReportsSalesRouteImport } from './routes/_pos/reports/sales
 import { Route as PosReportsProfitLossRouteImport } from './routes/_pos/reports/profit-loss'
 import { Route as PosReportsProductsRouteImport } from './routes/_pos/reports/products'
 import { Route as PosReportsPaymentsRouteImport } from './routes/_pos/reports/payments'
+import { Route as PosReportsOtherIncomeRouteImport } from './routes/_pos/reports/other-income'
 import { Route as PosReportsOrdersRouteImport } from './routes/_pos/reports/orders'
 import { Route as PosReportsMarginRouteImport } from './routes/_pos/reports/margin'
 import { Route as PosReportsExpensesRouteImport } from './routes/_pos/reports/expenses'
@@ -299,6 +300,11 @@ const PosReportsPaymentsRoute = PosReportsPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => PosReportsRouteRoute,
 } as any)
+const PosReportsOtherIncomeRoute = PosReportsOtherIncomeRouteImport.update({
+  id: '/other-income',
+  path: '/other-income',
+  getParentRoute: () => PosReportsRouteRoute,
+} as any)
 const PosReportsOrdersRoute = PosReportsOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -418,6 +424,7 @@ export interface FileRoutesByFullPath {
   '/reports/expenses': typeof PosReportsExpensesRoute
   '/reports/margin': typeof PosReportsMarginRoute
   '/reports/orders': typeof PosReportsOrdersRoute
+  '/reports/other-income': typeof PosReportsOtherIncomeRoute
   '/reports/payments': typeof PosReportsPaymentsRoute
   '/reports/products': typeof PosReportsProductsRoute
   '/reports/profit-loss': typeof PosReportsProfitLossRoute
@@ -475,6 +482,7 @@ export interface FileRoutesByTo {
   '/reports/expenses': typeof PosReportsExpensesRoute
   '/reports/margin': typeof PosReportsMarginRoute
   '/reports/orders': typeof PosReportsOrdersRoute
+  '/reports/other-income': typeof PosReportsOtherIncomeRoute
   '/reports/payments': typeof PosReportsPaymentsRoute
   '/reports/products': typeof PosReportsProductsRoute
   '/reports/profit-loss': typeof PosReportsProfitLossRoute
@@ -539,6 +547,7 @@ export interface FileRoutesById {
   '/_pos/reports/expenses': typeof PosReportsExpensesRoute
   '/_pos/reports/margin': typeof PosReportsMarginRoute
   '/_pos/reports/orders': typeof PosReportsOrdersRoute
+  '/_pos/reports/other-income': typeof PosReportsOtherIncomeRoute
   '/_pos/reports/payments': typeof PosReportsPaymentsRoute
   '/_pos/reports/products': typeof PosReportsProductsRoute
   '/_pos/reports/profit-loss': typeof PosReportsProfitLossRoute
@@ -602,6 +611,7 @@ export interface FileRouteTypes {
     | '/reports/expenses'
     | '/reports/margin'
     | '/reports/orders'
+    | '/reports/other-income'
     | '/reports/payments'
     | '/reports/products'
     | '/reports/profit-loss'
@@ -659,6 +669,7 @@ export interface FileRouteTypes {
     | '/reports/expenses'
     | '/reports/margin'
     | '/reports/orders'
+    | '/reports/other-income'
     | '/reports/payments'
     | '/reports/products'
     | '/reports/profit-loss'
@@ -722,6 +733,7 @@ export interface FileRouteTypes {
     | '/_pos/reports/expenses'
     | '/_pos/reports/margin'
     | '/_pos/reports/orders'
+    | '/_pos/reports/other-income'
     | '/_pos/reports/payments'
     | '/_pos/reports/products'
     | '/_pos/reports/profit-loss'
@@ -1071,6 +1083,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosReportsPaymentsRouteImport
       parentRoute: typeof PosReportsRouteRoute
     }
+    '/_pos/reports/other-income': {
+      id: '/_pos/reports/other-income'
+      path: '/other-income'
+      fullPath: '/reports/other-income'
+      preLoaderRoute: typeof PosReportsOtherIncomeRouteImport
+      parentRoute: typeof PosReportsRouteRoute
+    }
     '/_pos/reports/orders': {
       id: '/_pos/reports/orders'
       path: '/orders'
@@ -1247,6 +1266,7 @@ interface PosReportsRouteRouteChildren {
   PosReportsExpensesRoute: typeof PosReportsExpensesRoute
   PosReportsMarginRoute: typeof PosReportsMarginRoute
   PosReportsOrdersRoute: typeof PosReportsOrdersRoute
+  PosReportsOtherIncomeRoute: typeof PosReportsOtherIncomeRoute
   PosReportsPaymentsRoute: typeof PosReportsPaymentsRoute
   PosReportsProductsRoute: typeof PosReportsProductsRoute
   PosReportsProfitLossRoute: typeof PosReportsProfitLossRoute
@@ -1259,6 +1279,7 @@ const PosReportsRouteRouteChildren: PosReportsRouteRouteChildren = {
   PosReportsExpensesRoute: PosReportsExpensesRoute,
   PosReportsMarginRoute: PosReportsMarginRoute,
   PosReportsOrdersRoute: PosReportsOrdersRoute,
+  PosReportsOtherIncomeRoute: PosReportsOtherIncomeRoute,
   PosReportsPaymentsRoute: PosReportsPaymentsRoute,
   PosReportsProductsRoute: PosReportsProductsRoute,
   PosReportsProfitLossRoute: PosReportsProfitLossRoute,
