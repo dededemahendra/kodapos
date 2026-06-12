@@ -514,6 +514,11 @@ msgstr "Order number prefix"
 msgid "Awalan nomor pesanan"
 msgstr "Order number prefix"
 
+#: src/components/sale/cart-pane.tsx
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Bagi pembayaran"
+msgstr "Split payment"
+
 #: src/components/inventory/ingredient-form.tsx
 msgid "bahan"
 msgstr "ingredient"
@@ -635,9 +640,9 @@ msgstr "Void this order?"
 msgid "Bawa pulang"
 msgstr "Takeaway"
 
-#: src/components/sale/cart-pane.tsx
-#~ msgid "Bayar"
-#~ msgstr "Pay"
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Bayar"
+msgstr "Pay"
 
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/recipes.tsx
@@ -1225,6 +1230,7 @@ msgstr "Failed to update weather location."
 
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
 msgid "Gagal memproses pembayaran."
 msgstr "Failed to process payment."
 
@@ -1533,6 +1539,10 @@ msgstr "Delete expense?"
 msgid "Hapus promo"
 msgstr "Remove promo"
 
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Hapus tender"
+msgstr "Remove tender"
+
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Harga"
@@ -1694,6 +1704,7 @@ msgstr "Friday"
 
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
@@ -1897,6 +1908,7 @@ msgstr "Back to menu"
 
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
+#: src/components/sale/split-payment-dialog.tsx
 msgid "Kembalian"
 msgstr "Change"
 
@@ -2200,6 +2212,7 @@ msgstr "Needs at least {0} days of data (collected {1}). Forecasts go live aroun
 
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_public/signin.tsx
 #: src/routes/_public/signup.tsx
 msgid "Memproses…"
@@ -2298,6 +2311,7 @@ msgstr "Closing…"
 msgid "Menyimpan…"
 msgstr "Saving…"
 
+#: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_pos/reports/payments.tsx
 msgid "Metode"
 msgstr "Method"
@@ -3018,6 +3032,7 @@ msgstr "Points adjusted."
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
 msgid "Poin ditukar"
 msgstr "Points redeemed"
 
@@ -3152,6 +3167,7 @@ msgstr "QRIS (Midtrans/Xendit)"
 msgid "QRIS dinamis"
 msgstr "Dynamic QRIS"
 
+#: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "QRIS statis"
 msgstr "Static QRIS"
@@ -3511,6 +3527,10 @@ msgstr "Sync sales to Accurate."
 msgid "Sinkronkan penjualan ke Mekari Jurnal."
 msgstr "Sync sales to Mekari Jurnal."
 
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Sisa"
+msgstr "Remaining"
+
 #: src/components/inventory/stock-take-dialog.tsx
 msgid "Sistem"
 msgstr "System"
@@ -3729,6 +3749,10 @@ msgstr "Add promo"
 #: src/routes/_pos/promos.tsx
 msgid "Tambah Promo"
 msgstr "Add Promo"
+
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Tambah tender"
+msgstr "Add tender"
 
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Tambahkan beberapa item beserta harganya."
@@ -4015,6 +4039,7 @@ msgstr "Total <0>{0}</0>"
 #: src/components/sale/cash-payment-dialog.tsx
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/qris-static-payment-dialog.tsx
+#: src/components/sale/split-payment-dialog.tsx
 msgid "Total tagihan"
 msgstr "Total bill"
 
@@ -4054,6 +4079,7 @@ msgstr "Spilled"
 #: src/components/channel-sales-chart.tsx
 #: src/components/sale/payment-methods.tsx
 #: src/components/sale/receipt-preview.tsx
+#: src/components/sale/split-payment-dialog.tsx
 #: src/components/shift/shift-order-list.tsx
 #: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/settings/tax.tsx
@@ -4071,6 +4097,10 @@ msgstr "Close details"
 #: src/routes/_pos/shift/close.tsx
 msgid "Tutup Shift"
 msgstr "Close Shift"
+
+#: src/components/sale/split-payment-dialog.tsx
+msgid "Uang diterima"
+msgstr "Cash received"
 
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Uang seharusnya"
