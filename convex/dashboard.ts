@@ -3,6 +3,7 @@ import type { Doc } from './_generated/dataModel';
 import { query } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
+import { methodTotals } from './lib/payment';
 import { DAY_MS, dayKeyFn, startOfLocalDay, tzFor } from './lib/time';
 
 const paymentStatus = v.union(
@@ -158,8 +159,10 @@ export const paymentMethods = query({
       if (o.paymentStatus !== 'paid') continue;
       const b = bucketFor(o.createdAtClient);
       if (!b) continue;
-      if (o.paymentMethod === 'cash') b.cash += 1;
-      else b.qris += 1;
+      // A split touches both channels: count each method the order used.
+      const methods = new Set(methodTotals(o).map((t) => t.method));
+      if (methods.has('cash')) b.cash += 1;
+      if (methods.has('qris_static') || methods.has('qris_dynamic')) b.qris += 1;
     }
     return buckets;
   },

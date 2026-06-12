@@ -4,6 +4,7 @@ import { mutation, query } from './_generated/server';
 import type { Doc } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { cashCollectedIDR, methodTotals } from './lib/payment';
 import { requireActiveCashier } from './lib/staff';
 
 const shiftWithCashier = v.object({
@@ -33,8 +34,8 @@ async function shiftCashBreakdown(ctx: QueryCtx | MutationCtx, shift: Doc<'shift
     .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
     .collect();
   const cashSalesIDR = orders
-    .filter((o) => o.paymentStatus === 'paid' && o.paymentMethod === 'cash')
-    .reduce((s, o) => s + o.totalIDR, 0);
+    .filter((o) => o.paymentStatus === 'paid')
+    .reduce((s, o) => s + cashCollectedIDR(o), 0);
   const movements = await ctx.db
     .query('cashMovements')
     .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
@@ -172,9 +173,10 @@ async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
   let qrisSalesIDR = 0;
   for (const o of paid) {
     salesTotalIDR += o.totalIDR;
-    if (o.paymentMethod === 'cash') cashSalesIDR += o.totalIDR;
-    else if (o.paymentMethod === 'qris_static' || o.paymentMethod === 'qris_dynamic')
-      qrisSalesIDR += o.totalIDR;
+    cashSalesIDR += cashCollectedIDR(o);
+    qrisSalesIDR += methodTotals(o)
+      .filter((t) => t.method !== 'cash')
+      .reduce((s, t) => s + t.amountIDR, 0);
   }
   const cashier = await ctx.db.get(shift.cashierId);
   const countedCashIDR = shift.countedCashIDR ?? null;

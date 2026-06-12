@@ -52,7 +52,7 @@ function OrdersReport() {
       range,
       ...(cashier !== ALL ? { cashierId: cashier as Id<'cafeStaff'> } : {}),
       ...(method !== ALL
-        ? { paymentMethod: method as 'cash' | 'qris_static' | 'qris_dynamic' }
+        ? { paymentMethod: method as 'cash' | 'qris_static' | 'qris_dynamic' | 'split' }
         : {}),
       ...(orderType !== ALL
         ? { orderType: orderType as 'dine_in' | 'takeaway' | 'pickup' }
@@ -90,6 +90,7 @@ function OrdersReport() {
             <SelectItem value="cash">{t`Tunai`}</SelectItem>
             <SelectItem value="qris_static">QRIS statis</SelectItem>
             <SelectItem value="qris_dynamic">QRIS dinamis</SelectItem>
+            <SelectItem value="split">{t`Bagi pembayaran`}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -156,7 +157,11 @@ function OrdersReport() {
                   <span>{o.cashierName}</span>
                   <span>
                     ·{' '}
-                    {o.paymentMethod === 'cash' ? t`Tunai` : 'QRIS'}
+                    {o.paymentMethod === 'cash'
+                      ? t`Tunai`
+                      : o.paymentMethod === 'split'
+                        ? t`Bagi pembayaran`
+                        : 'QRIS'}
                   </span>
                   <span>· {t`${o.lineCount} item`}</span>
                   {o.orderType ? (

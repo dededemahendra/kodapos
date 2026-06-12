@@ -69,6 +69,7 @@ export const patchCharge = internalMutation({
     const payment = await ctx.db
       .query('payments')
       .withIndex('by_order', (q) => q.eq('orderId', orderId))
+      .filter((q) => q.eq(q.field('method'), 'qris_dynamic'))
       .unique();
     if (payment) await ctx.db.patch(payment._id, { providerRef, expiresAt, providerStatus: 'pending' });
     return null;
