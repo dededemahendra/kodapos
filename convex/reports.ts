@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { query } from './_generated/server';
 import type { QueryCtx } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
+import { methodTotals } from './lib/payment';
 import { type RangeArgs, dayKeyFn, eachDayKey, resolveRange, tzFor } from './lib/time';
 
 const rangeArg = v.union(
@@ -200,10 +201,14 @@ export const payments = query({
     const order: Array<'cash' | 'qris_static' | 'qris_dynamic'> = ['cash', 'qris_static', 'qris_dynamic'];
     const byMethod = new Map<string, { count: number; amountIDR: number }>();
     for (const o of paid) {
-      const cur = byMethod.get(o.paymentMethod) ?? { count: 0, amountIDR: 0 };
-      cur.count += 1;
-      cur.amountIDR += o.totalIDR;
-      byMethod.set(o.paymentMethod, cur);
+      // Each order contributes to every method it used (a split touches 2+).
+      // count = number of orders that used the method (once per order/method).
+      for (const entry of methodTotals(o)) {
+        const cur = byMethod.get(entry.method) ?? { count: 0, amountIDR: 0 };
+        cur.count += 1;
+        cur.amountIDR += entry.amountIDR;
+        byMethod.set(entry.method, cur);
+      }
     }
     const methods = order
       .filter((m) => byMethod.has(m))

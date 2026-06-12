@@ -190,3 +190,120 @@ describe('orders.createSplitSale', () => {
     ).rejects.toThrow();
   });
 });
+
+// Split legs over the 18000 Espresso: cash A=10000 + qris_static B=8000.
+// Pure-cash order C=18000. Cash reconciliation must count A + C (28000),
+// NOT A+B+C (36000) and NOT just C (18000). QRIS must count B (8000).
+const A = 10000; // cash leg of the split
+const B = 8000; // qris_static leg of the split
+const C = TOTAL; // pure-cash order (18000)
+const OPENING = 100000; // setup opens the shift with openingFloatIDR 100000
+
+describe('reconciliation + reports + dashboard for splits', () => {
+  it('shift cash expectation counts only the cash leg of a split (A + C, not A+B+C)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+
+    // Split: cash A + qris_static B over the 18000 order.
+    await asOwner.mutation(api.orders.createSplitSale, {
+      clientId: 'recon-split',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      tenders: [
+        { method: 'cash', amountIDR: A, tenderedIDR: A },
+        { method: 'qris_static', amountIDR: B },
+      ],
+      createdAtClient: 1700000000000,
+    });
+    // Pure-cash order C.
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'recon-cash',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: C,
+      createdAtClient: 1700000000000,
+    });
+
+    // closeoutSummary reads shiftCashBreakdown over the open shift.
+    const summary = await asOwner.query(api.shifts.closeoutSummary, { shiftId });
+    expect(summary.cashSalesIDR).toBe(A + C); // 28000, NOT 36000, NOT 18000
+    expect(summary.expectedCashIDR).toBe(OPENING + A + C); // 128000
+  });
+
+  it('summarizeShift (listClosed) splits cash vs qris by tender, not by headline method', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+
+    await asOwner.mutation(api.orders.createSplitSale, {
+      clientId: 'sum-split',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      tenders: [
+        { method: 'cash', amountIDR: A, tenderedIDR: A },
+        { method: 'qris_static', amountIDR: B },
+      ],
+      createdAtClient: 1700000000000,
+    });
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'sum-cash',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: C,
+      createdAtClient: 1700000000000,
+    });
+
+    await asOwner.mutation(api.shifts.close, {
+      id: shiftId,
+      countedCashIDR: OPENING + A + C,
+    });
+    const res = await asOwner.query(api.shifts.listClosed, {
+      paginationOpts: { numItems: 20, cursor: null },
+    });
+    const s = res.page[0]!;
+    expect(s.ordersCount).toBe(2);
+    expect(s.salesTotalIDR).toBe(C + TOTAL); // each order's total once: 18000 + 18000
+    expect(s.cashSalesIDR).toBe(A + C); // 28000
+    expect(s.qrisSalesIDR).toBe(B); // 8000
+    expect(s.varianceIDR).toBe(0);
+  });
+
+  it('reports.payments attributes each tender method its amount; total counts each order once', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t);
+    const now = Date.now();
+
+    await asOwner.mutation(api.orders.createSplitSale, {
+      clientId: 'rep-split',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      tenders: [
+        { method: 'cash', amountIDR: A, tenderedIDR: A },
+        { method: 'qris_static', amountIDR: B },
+      ],
+      createdAtClient: now,
+    });
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'rep-cash',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: C,
+      createdAtClient: now,
+    });
+
+    const r = await asOwner.query(api.reports.payments, { range: { preset: 'today' } });
+    const cash = r.methods.find((m) => m.method === 'cash');
+    const qris = r.methods.find((m) => m.method === 'qris_static');
+    expect(cash?.amountIDR).toBe(A + C); // 28000
+    expect(qris?.amountIDR).toBe(B); // 8000
+    // cash bucket counts both orders (split + pure-cash); qris only the split.
+    expect(cash?.count).toBe(2);
+    expect(qris?.count).toBe(1);
+    expect(r.totalIDR).toBe(TOTAL + C); // each order total once: 36000
+  });
+});
