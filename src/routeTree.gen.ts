@@ -64,6 +64,7 @@ import { Route as PosOnboardingProfileRouteImport } from './routes/_pos/onboardi
 import { Route as PosOnboardingMenuRouteImport } from './routes/_pos/onboarding/menu'
 import { Route as PosOnboardingCashierRouteImport } from './routes/_pos/onboarding/cashier'
 import { Route as PosMenuModifiersRouteImport } from './routes/_pos/menu/modifiers'
+import { Route as PosMenuLabelsRouteImport } from './routes/_pos/menu/labels'
 import { Route as PosMenuCategoriesRouteImport } from './routes/_pos/menu/categories'
 import { Route as PosInventoryWasteRouteImport } from './routes/_pos/inventory/waste'
 import { Route as PosInventoryPurchasesRouteImport } from './routes/_pos/inventory/purchases'
@@ -345,6 +346,11 @@ const PosMenuModifiersRoute = PosMenuModifiersRouteImport.update({
   path: '/modifiers',
   getParentRoute: () => PosMenuRouteRoute,
 } as any)
+const PosMenuLabelsRoute = PosMenuLabelsRouteImport.update({
+  id: '/labels',
+  path: '/labels',
+  getParentRoute: () => PosMenuRouteRoute,
+} as any)
 const PosMenuCategoriesRoute = PosMenuCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
@@ -416,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
   '/inventory/waste': typeof PosInventoryWasteRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
+  '/menu/labels': typeof PosMenuLabelsRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
@@ -474,6 +481,7 @@ export interface FileRoutesByTo {
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
   '/inventory/waste': typeof PosInventoryWasteRoute
   '/menu/categories': typeof PosMenuCategoriesRoute
+  '/menu/labels': typeof PosMenuLabelsRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
@@ -539,6 +547,7 @@ export interface FileRoutesById {
   '/_pos/inventory/purchases': typeof PosInventoryPurchasesRoute
   '/_pos/inventory/waste': typeof PosInventoryWasteRoute
   '/_pos/menu/categories': typeof PosMenuCategoriesRoute
+  '/_pos/menu/labels': typeof PosMenuLabelsRoute
   '/_pos/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
   '/_pos/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/_pos/onboarding/menu': typeof PosOnboardingMenuRoute
@@ -603,6 +612,7 @@ export interface FileRouteTypes {
     | '/inventory/purchases'
     | '/inventory/waste'
     | '/menu/categories'
+    | '/menu/labels'
     | '/menu/modifiers'
     | '/onboarding/cashier'
     | '/onboarding/menu'
@@ -661,6 +671,7 @@ export interface FileRouteTypes {
     | '/inventory/purchases'
     | '/inventory/waste'
     | '/menu/categories'
+    | '/menu/labels'
     | '/menu/modifiers'
     | '/onboarding/cashier'
     | '/onboarding/menu'
@@ -725,6 +736,7 @@ export interface FileRouteTypes {
     | '/_pos/inventory/purchases'
     | '/_pos/inventory/waste'
     | '/_pos/menu/categories'
+    | '/_pos/menu/labels'
     | '/_pos/menu/modifiers'
     | '/_pos/onboarding/cashier'
     | '/_pos/onboarding/menu'
@@ -1146,6 +1158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosMenuModifiersRouteImport
       parentRoute: typeof PosMenuRouteRoute
     }
+    '/_pos/menu/labels': {
+      id: '/_pos/menu/labels'
+      path: '/labels'
+      fullPath: '/menu/labels'
+      preLoaderRoute: typeof PosMenuLabelsRouteImport
+      parentRoute: typeof PosMenuRouteRoute
+    }
     '/_pos/menu/categories': {
       id: '/_pos/menu/categories'
       path: '/categories'
@@ -1230,6 +1249,7 @@ const PosMenuModifiersRouteWithChildren =
 
 interface PosMenuRouteRouteChildren {
   PosMenuCategoriesRoute: typeof PosMenuCategoriesRoute
+  PosMenuLabelsRoute: typeof PosMenuLabelsRoute
   PosMenuModifiersRoute: typeof PosMenuModifiersRouteWithChildren
   PosMenuIndexRoute: typeof PosMenuIndexRoute
   PosMenuItemsItemIdRoute: typeof PosMenuItemsItemIdRoute
@@ -1237,6 +1257,7 @@ interface PosMenuRouteRouteChildren {
 
 const PosMenuRouteRouteChildren: PosMenuRouteRouteChildren = {
   PosMenuCategoriesRoute: PosMenuCategoriesRoute,
+  PosMenuLabelsRoute: PosMenuLabelsRoute,
   PosMenuModifiersRoute: PosMenuModifiersRouteWithChildren,
   PosMenuIndexRoute: PosMenuIndexRoute,
   PosMenuItemsItemIdRoute: PosMenuItemsItemIdRoute,
