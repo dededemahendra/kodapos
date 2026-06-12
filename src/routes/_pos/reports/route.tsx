@@ -14,6 +14,7 @@ const TABS = [
   { to: '/reports', label: <Trans>Ringkasan</Trans> },
   { to: '/reports/sales', label: <Trans>Penjualan</Trans> },
   { to: '/reports/products', label: <Trans>Produk</Trans> },
+  { to: '/reports/margin', label: <Trans>Margin</Trans> },
   { to: '/reports/payments', label: <Trans>Pembayaran</Trans> },
   { to: '/reports/cashiers', label: <Trans>Kasir</Trans> },
   { to: '/reports/orders', label: <Trans>Pesanan</Trans> },
