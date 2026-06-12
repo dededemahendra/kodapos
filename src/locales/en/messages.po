@@ -378,6 +378,10 @@ msgstr "Address (optional)"
 msgid "Alasan"
 msgstr "Reason"
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Alasan (opsional)"
+msgstr "Reason (optional)"
+
 #: src/routes/_pos/inventory/index.tsx
 msgid "Ambang"
 msgstr "Threshold"
@@ -598,6 +602,7 @@ msgstr "Spoiled/Expired"
 #: src/components/sale/hold-order-dialog.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
+#: src/components/sale/receipt-preview.tsx
 #: src/components/sale/sale-screen.tsx
 #: src/components/settings/save-bar.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
@@ -611,6 +616,18 @@ msgstr "Cancel"
 msgctxt "order status"
 msgid "Batal"
 msgstr "Void"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Batalkan"
+msgstr "Void"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Batalkan pesanan"
+msgstr "Void order"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Batalkan pesanan ini?"
+msgstr "Void this order?"
 
 #: src/components/sale/order-types.tsx
 msgid "Bawa pulang"
@@ -1144,6 +1161,10 @@ msgstr "Date format"
 #: src/routes/_pos/settings/general.tsx
 msgid "Format Waktu"
 msgstr "Time format"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Gagal membatalkan pesanan."
+msgstr "Could not void the order."
 
 #: src/components/menu/category-table.tsx
 #~ msgid "Gagal membuat kategori."
@@ -2768,6 +2789,10 @@ msgstr "Orders"
 msgid "Pesanan ({0})"
 msgstr "Order ({0})"
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Pesanan dibatalkan."
+msgstr "Order voided."
+
 #: src/components/sale/held-orders-dialog.tsx
 msgid "Pesanan ditahan"
 msgstr "Held orders"
@@ -3397,6 +3422,10 @@ msgstr "Status"
 #: src/routes/_pos/inventory/index.tsx
 msgid "Stok"
 msgstr "Stock"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Stok akan dikembalikan dan poin loyalitas dibatalkan. Tindakan ini tidak bisa diurungkan."
+msgstr "Stock will be restored and loyalty points reversed. This cannot be undone."
 
 #: src/components/billing-health.tsx
 msgid "Stok aman."
