@@ -218,6 +218,10 @@ msgstr "+ Option"
 msgid "+ Pasang grup…"
 msgstr "+ Attach group…"
 
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "+ Pendapatan lain"
+msgstr "+ Other income"
+
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "+ Tambah"
@@ -690,6 +694,7 @@ msgstr "Spoiled/Expired"
 #: src/components/customer/customer-form-dialog.tsx
 #: src/components/expenses/expense-dialog.tsx
 #: src/components/giftcard/gift-card-form-dialog.tsx
+#: src/components/income/income-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/purchase-order-form-dialog.tsx
@@ -845,6 +850,10 @@ msgstr "No payments in this range yet."
 #: src/routes/_pos/inventory/purchases.tsx
 msgid "Belum ada pembelian."
 msgstr "No purchases yet."
+
+#: src/routes/_pos/reports/other-income.tsx
+msgid "Belum ada pendapatan lain."
+msgstr "No other income yet."
 
 #: src/routes/_pos/reports/expenses.tsx
 msgid "Belum ada pengeluaran pada rentang ini."
@@ -1120,6 +1129,15 @@ msgstr "Record Purchase"
 msgid "Catat pembelian untuk menambah stok dan memperbarui biaya bahan."
 msgstr "Record purchases to add stock and update ingredient costs."
 
+#: src/components/income/income-dialog.tsx
+#: src/routes/_pos/reports/other-income.tsx
+msgid "Catat pendapatan"
+msgstr "Record income"
+
+#: src/routes/_pos/reports/other-income.tsx
+msgid "Catat pendapatan atau ubah rentang tanggal di atas."
+msgstr "Record income or change the date range above."
+
 #: src/components/expenses/expense-dialog.tsx
 #: src/routes/_pos/reports/expenses.tsx
 msgid "Catat pengeluaran"
@@ -1154,10 +1172,12 @@ msgstr "Record stock:"
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/other-income.tsx
 msgid "Catatan"
 msgstr "Notes"
 
 #: src/components/expenses/expense-dialog.tsx
+#: src/components/income/income-dialog.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/components/inventory/stock-take-dialog.tsx
 #: src/components/inventory/waste-dialog.tsx
@@ -1514,6 +1534,10 @@ msgstr "Failed to record waste."
 msgid "Gagal mencatat pembelian."
 msgstr "Failed to record purchase."
 
+#: src/components/income/income-dialog.tsx
+msgid "Gagal mencatat pendapatan."
+msgstr "Could not record the income."
+
 #: src/components/expenses/expense-dialog.tsx
 msgid "Gagal mencatat pengeluaran."
 msgstr "Could not record the expense."
@@ -1583,6 +1607,7 @@ msgid "Gagal menghapus varian."
 msgstr "Failed to delete variant."
 
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/other-income.tsx
 msgid "Gagal menghapus."
 msgstr "Could not delete."
 
@@ -1793,6 +1818,7 @@ msgstr "Page not found"
 #: src/components/sale/customer-section.tsx
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Hapus"
 msgstr "Remove"
@@ -1817,6 +1843,10 @@ msgstr "Remove image"
 #: src/components/tables/table-manage-dialog.tsx
 msgid "Hapus meja?"
 msgstr "Delete table?"
+
+#: src/routes/_pos/reports/other-income.tsx
+msgid "Hapus pendapatan?"
+msgstr "Delete income?"
 
 #: src/routes/_pos/reports/expenses.tsx
 msgid "Hapus pengeluaran?"
@@ -2041,9 +2071,11 @@ msgid "Jumlah"
 msgstr "Quantity"
 
 #: src/components/expenses/expense-dialog.tsx
+#: src/components/income/income-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 msgid "Jumlah (Rp)"
@@ -2733,6 +2765,7 @@ msgstr "Closing…"
 #: src/components/customer/customer-form-dialog.tsx
 #: src/components/expenses/expense-dialog.tsx
 #: src/components/giftcard/gift-card-form-dialog.tsx
+#: src/components/income/income-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/purchase-order-form-dialog.tsx
@@ -3230,6 +3263,14 @@ msgstr "Revenue"
 msgid "Pendapatan (Rp)"
 msgstr "Revenue (Rp)"
 
+#: src/components/income/income-dialog.tsx
+msgid "Pendapatan dicatat."
+msgstr "Income recorded."
+
+#: src/routes/_pos/reports/other-income.tsx
+msgid "Pendapatan dihapus."
+msgstr "Income deleted."
+
 #: src/components/stats.tsx
 msgid "Pendapatan hari ini"
 msgstr "Revenue today"
@@ -3237,6 +3278,14 @@ msgstr "Revenue today"
 #: src/components/net-revenue-chart.tsx
 msgid "Pendapatan harian, 7 hari terakhir."
 msgstr "Daily revenue, last 7 days."
+
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "Pendapatan lain"
+msgstr "Other income"
+
+#: src/routes/_pos/reports/route.tsx
+msgid "Pendapatan Lain"
+msgstr "Other income"
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Pengali poin"
@@ -4071,6 +4120,7 @@ msgstr "Who's on duty?"
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
 #: src/components/expenses/expense-dialog.tsx
+#: src/components/income/income-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/purchase-order-form-dialog.tsx
@@ -4233,6 +4283,11 @@ msgstr "Paid"
 #: src/routes/_public/signup.tsx
 msgid "Sudah punya akun?"
 msgstr "Already have an account?"
+
+#: src/components/income/income-dialog.tsx
+#: src/routes/_pos/reports/other-income.tsx
+msgid "Sumber"
+msgstr "Source"
 
 #: src/routes/_pos/recipes.tsx
 msgid "Sunting bahan dan jumlah untuk resep item ini."
@@ -4444,6 +4499,7 @@ msgstr "Show tax breakdown"
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Tanggal"
 msgstr "Date"
@@ -4692,6 +4748,7 @@ msgstr "Quick cash buttons"
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/time-clock.tsx
 msgid "Total"
 msgstr "Total"
@@ -4857,6 +4914,7 @@ msgstr "General"
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/margin.tsx
+#: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
