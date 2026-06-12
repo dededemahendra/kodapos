@@ -230,6 +230,101 @@ describe('reports.margin', () => {
   });
 });
 
+describe('reports.profitLoss', () => {
+  // Seeds an item with a recipe (unit COGS = qty 2 * wastage 1 * cost 1000 = 2000).
+  async function seedRecipeItem(t: ReturnType<typeof convexTest>, refs: Refs) {
+    const { asOwner } = refs;
+    const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Teh' });
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Teh Susu',
+      priceIDR: 10000,
+    });
+    const ingredientId = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 500,
+      lastCostPerUnitIDR: 1000,
+    });
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId,
+      newQty: 1000,
+      reasonLabel: 'Stok awal',
+    });
+    await asOwner.mutation(api.recipes.upsert, {
+      menuItemId: itemId,
+      lines: [{ ingredientId, qty: 2, wastageFactor: 1.0 }],
+    });
+    return itemId;
+  }
+
+  it('composes revenue − COGS − expenses into a P&L statement', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner, shiftId, cashierId } = refs;
+    const itemId = await seedRecipeItem(t, refs);
+    // sell qty 3 → revenue 30000, cogs 6000 (unit COGS 2000)
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'pl-recipe-1',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 30000,
+      createdAtClient: Date.now(),
+    });
+    await asOwner.mutation(api.expenses.record, { category: 'rent', amountIDR: 10000 });
+    const data = await asOwner.query(api.reports.profitLoss, { range: { preset: 'today' } });
+    expect(data.revenueIDR).toBe(30000);
+    expect(data.cogsIDR).toBe(6000);
+    expect(data.grossProfitIDR).toBe(24000);
+    expect(data.expensesIDR).toBe(10000);
+    expect(data.netProfitIDR).toBe(14000);
+    expect(data.grossMarginPct).toBe(80);
+    expect(data.netMarginPct).toBe(47); // Math.round(14000/30000*100)
+    expect(data.expensesByCategory).toContainEqual({ category: 'rent', amountIDR: 10000 });
+  });
+
+  it('net profit goes negative when expenses exceed gross profit', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner, shiftId, cashierId } = refs;
+    const itemId = await seedRecipeItem(t, refs);
+    await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'pl-recipe-neg',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 30000,
+      createdAtClient: Date.now(),
+    });
+    // gross profit 24000; expense 30000 → net −6000
+    await asOwner.mutation(api.expenses.record, { category: 'salary', amountIDR: 30000 });
+    const data = await asOwner.query(api.reports.profitLoss, { range: { preset: 'today' } });
+    expect(data.grossProfitIDR).toBe(24000);
+    expect(data.netProfitIDR).toBeLessThan(0);
+    expect(data.netMarginPct).toBeLessThan(0);
+  });
+
+  it('excludes a voided order from revenue and COGS', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    const { asOwner, shiftId, cashierId } = refs;
+    const itemId = await seedRecipeItem(t, refs);
+    const { orderId } = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'pl-recipe-void',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }],
+      cashTenderedIDR: 30000,
+      createdAtClient: Date.now(),
+    });
+    await asOwner.mutation(api.orders.voidSale, { orderId });
+    const data = await asOwner.query(api.reports.profitLoss, { range: { preset: 'today' } });
+    expect(data.revenueIDR).toBe(0);
+    expect(data.cogsIDR).toBe(0);
+  });
+});
+
 describe('reports.payments + cashiers', () => {
   it('payments splits by method with a total', async () => {
     const t = convexTest(schema, modules);
