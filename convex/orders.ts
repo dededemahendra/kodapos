@@ -27,6 +27,19 @@ export const createQrisStaticSale = mutation({
   },
 });
 
+export const createGiftCardSale = mutation({
+  args: { ...saleArgs, giftCardCode: v.string() },
+  returns: saleResult,
+  handler: async (ctx, args) => {
+    const res = await buildOrder(ctx, args, {
+      method: 'giftcard',
+      giftCardCode: args.giftCardCode,
+    });
+    await settleSale(ctx, res.orderId);
+    return res;
+  },
+});
+
 export const createSplitSale = mutation({
   args: {
     ...saleArgs,
@@ -39,6 +52,11 @@ export const createSplitSale = mutation({
         }),
         v.object({
           method: v.literal('qris_static'),
+          amountIDR: v.number(),
+        }),
+        v.object({
+          method: v.literal('giftcard'),
+          giftCardCode: v.string(),
           amountIDR: v.number(),
         })
       )
@@ -137,6 +155,7 @@ const orderSummary = v.object({
     v.literal('cash'),
     v.literal('qris_static'),
     v.literal('qris_dynamic'),
+    v.literal('giftcard'),
     v.literal('split')
   ),
   paymentBreakdown: v.optional(
@@ -145,7 +164,8 @@ const orderSummary = v.object({
         method: v.union(
           v.literal('cash'),
           v.literal('qris_static'),
-          v.literal('qris_dynamic')
+          v.literal('qris_dynamic'),
+          v.literal('giftcard')
         ),
         amountIDR: v.number(),
       })
@@ -164,7 +184,12 @@ const orderDetail = v.object({
   cashierName: v.string(),
   payments: v.array(
     v.object({
-      method: v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic')),
+      method: v.union(
+        v.literal('cash'),
+        v.literal('qris_static'),
+        v.literal('qris_dynamic'),
+        v.literal('giftcard')
+      ),
       amountIDR: v.number(),
       cashTenderedIDR: v.optional(v.number()),
       changeIDR: v.optional(v.number()),
@@ -198,6 +223,7 @@ const orderRow = v.object({
     v.literal('cash'),
     v.literal('qris_static'),
     v.literal('qris_dynamic'),
+    v.literal('giftcard'),
     v.literal('split')
   ),
   paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
@@ -209,7 +235,7 @@ export const search = query({
   args: {
     range: rangeArg,
     cashierId: v.optional(v.id('cafeStaff')),
-    paymentMethod: v.optional(v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic'), v.literal('split'))),
+    paymentMethod: v.optional(v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic'), v.literal('giftcard'), v.literal('split'))),
     orderType: v.optional(orderTypeValidator),
     status: v.optional(v.union(v.literal('paid'), v.literal('pending'), v.literal('void'))),
     paginationOpts: paginationOptsValidator,

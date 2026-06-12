@@ -186,7 +186,8 @@ export const payments = query({
         method: v.union(
           v.literal('cash'),
           v.literal('qris_static'),
-          v.literal('qris_dynamic')
+          v.literal('qris_dynamic'),
+          v.literal('giftcard')
         ),
         count: v.number(),
         amountIDR: v.number(),
@@ -198,7 +199,7 @@ export const payments = query({
   }),
   handler: async (ctx, { range }) => {
     const { fromKey, toKey, paid } = await paidInRange(ctx, range);
-    const order: Array<'cash' | 'qris_static' | 'qris_dynamic'> = ['cash', 'qris_static', 'qris_dynamic'];
+    const order: Array<'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard'> = ['cash', 'qris_static', 'qris_dynamic', 'giftcard'];
     const byMethod = new Map<string, { count: number; amountIDR: number }>();
     for (const o of paid) {
       // Each order contributes to every method it used (a split touches 2+).

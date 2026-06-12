@@ -29,6 +29,7 @@ import { toast } from '~/lib/toast';
 const PAYMENT_LABELS: Record<string, string> = {
   qris_static: 'QRIS',
   qris_dynamic: 'QRIS',
+  giftcard: 'Gift card',
   card: 'Card',
   ewallet: 'E-Wallet',
   transfer: 'Bank Transfer',

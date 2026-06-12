@@ -1,6 +1,6 @@
 import type { Doc } from '../_generated/dataModel';
 
-export type PayMethod = 'cash' | 'qris_static' | 'qris_dynamic';
+export type PayMethod = 'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard';
 
 /** Per-method collected amounts for an order, uniform across single/split/legacy. */
 export function methodTotals(order: Doc<'orders'>): { method: PayMethod; amountIDR: number }[] {

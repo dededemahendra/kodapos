@@ -6,6 +6,7 @@ import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals, promoDiscountIDR } fro
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useActiveCashier } from '~/lib/active-cashier';
+import { GiftCardPaymentDialog } from '~/components/giftcard/gift-card-payment-dialog';
 import { CashPaymentDialog } from './cash-payment-dialog';
 import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
 import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
@@ -59,6 +60,7 @@ export function SaleScreen({
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
   const [openMethod, setOpenMethod] = useState<PaymentMethod | null>(null);
   const [splitOpen, setSplitOpen] = useState(false);
+  const [giftCardOpen, setGiftCardOpen] = useState(false);
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [manualDiscountOpen, setManualDiscountOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
@@ -216,6 +218,13 @@ export function SaleScreen({
           ? {
               onSplit: () => {
                 if (cart.lines.length > 0) setSplitOpen(true);
+              },
+            }
+          : {})}
+        {...(shift && cashierId
+          ? {
+              onGiftCard: () => {
+                if (cart.lines.length > 0) setGiftCardOpen(true);
               },
             }
           : {})}
@@ -394,6 +403,26 @@ export function SaleScreen({
             taxRatePct={taxRatePct}
             cashEnabled={splitCashEnabled}
             qrisStaticEnabled={splitQrisStaticEnabled}
+            {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
+            {...(currentTable ? { tableId: currentTable } : {})}
+            cart={cart}
+            shiftId={shift._id}
+            cashierId={cashierId}
+            onPaid={(orderId) => {
+              setReceiptOrderId(orderId);
+              dispatch({ type: 'clearCart' });
+              setCurrentTable(null);
+            }}
+          />
+          <GiftCardPaymentDialog
+            open={giftCardOpen}
+            onOpenChange={setGiftCardOpen}
+            subtotalIDR={subtotal}
+            promoDiscountIDR={discount}
+            serviceChargeEnabled={scEnabled}
+            serviceChargePct={scPct}
+            taxEnabled={taxEnabled}
+            taxRatePct={taxRatePct}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
             cart={cart}

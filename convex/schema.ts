@@ -364,6 +364,7 @@ export default defineSchema({
       v.literal('cash'),
       v.literal('qris_static'),
       v.literal('qris_dynamic'),
+      v.literal('giftcard'),
       v.literal('split')
     ),
     // Per-method amounts collected for the order (split + accounting source of
@@ -376,7 +377,8 @@ export default defineSchema({
           method: v.union(
             v.literal('cash'),
             v.literal('qris_static'),
-            v.literal('qris_dynamic')
+            v.literal('qris_dynamic'),
+            v.literal('giftcard')
           ),
           amountIDR: v.number(),
         })
@@ -412,9 +414,12 @@ export default defineSchema({
     method: v.union(
       v.literal('cash'),
       v.literal('qris_static'),
-      v.literal('qris_dynamic')
+      v.literal('qris_dynamic'),
+      v.literal('giftcard')
     ),
     amountIDR: v.number(),
+    // Set on a giftcard payment row so a void can refund the right card.
+    giftCardId: v.optional(v.id('giftCards')),
     cashTenderedIDR: v.optional(v.number()),
     changeIDR: v.optional(v.number()),
     providerRef: v.optional(v.string()),
@@ -494,6 +499,31 @@ export default defineSchema({
     note: v.optional(v.string()),
     at: v.number(),
   }).index('by_customer_at', ['customerId', 'at']),
+
+  giftCards: defineTable({
+    cafeId: v.id('cafes'),
+    code: v.string(), // unique per cafe, stored UPPERCASED
+    balanceIDR: v.number(), // current redeemable balance (mutable, like customer.pointsBalance)
+    status: v.union(v.literal('active'), v.literal('archived')),
+    createdAt: v.number(),
+  })
+    .index('by_cafe_code', ['cafeId', 'code'])
+    .index('by_cafe_status', ['cafeId', 'status']),
+
+  giftCardTransactions: defineTable({
+    // audit ledger; the stored balanceIDR is the source of truth, this is the audit trail
+    cafeId: v.id('cafes'),
+    giftCardId: v.id('giftCards'),
+    type: v.union(
+      v.literal('issue'),
+      v.literal('topup'),
+      v.literal('redeem'),
+      v.literal('refund')
+    ),
+    amountIDR: v.number(), // signed delta (+issue/+topup/+refund, −redeem)
+    orderId: v.optional(v.id('orders')),
+    at: v.number(),
+  }).index('by_card_at', ['giftCardId', 'at']),
 
   purchases: defineTable({
     cafeId: v.id('cafes'),
