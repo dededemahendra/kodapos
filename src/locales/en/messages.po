@@ -721,6 +721,7 @@ msgstr "No purchases yet."
 msgid "Belum ada pengeluaran pada rentang ini."
 msgstr "No expenses in this range."
 
+#: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Belum ada penjualan pada rentang ini."
 msgstr "No sales in this range yet."
@@ -792,6 +793,14 @@ msgstr "Large"
 #: src/routes/_pos/forecast.tsx
 msgid "Besok"
 msgstr "Tomorrow"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Biaya"
+msgstr "Cost"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Biaya (Rp)"
+msgstr "Cost (Rp)"
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Biaya / satuan"
@@ -1587,6 +1596,7 @@ msgstr "Inventory"
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/recipes.tsx
+#: src/routes/_pos/reports/margin.tsx
 msgid "Item"
 msgstr "Items"
 
@@ -2107,8 +2117,22 @@ msgid "Maks ({maxPoints})"
 msgstr "Max ({maxPoints})"
 
 #: src/routes/_pos/recipes.tsx
+#: src/routes/_pos/reports/margin.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Margin"
 msgstr "Margin"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Margin (Rp)"
+msgstr "Margin (Rp)"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Margin %"
+msgstr "Margin %"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Margin memakai biaya bahan terkini."
+msgstr "Margin uses current ingredient cost."
 
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
@@ -2697,12 +2721,14 @@ msgstr "Owner has all permissions."
 #: src/components/net-revenue-chart.tsx
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/index.tsx
+#: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Pendapatan"
 msgstr "Revenue"
 
 #: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Pendapatan (Rp)"
@@ -3821,6 +3847,10 @@ msgstr "Receive orders from GrabFood."
 msgid "Terima pesanan dari ShopeeFood."
 msgstr "Receive orders from ShopeeFood."
 
+#: src/routes/_pos/reports/margin.tsx
+msgid "Terjual"
+msgstr "Sold"
+
 #: src/routes/_pos/forecast.tsx
 msgid "Terkirim"
 msgstr "Sent"
@@ -4091,6 +4121,7 @@ msgstr "General"
 
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/sales.tsx

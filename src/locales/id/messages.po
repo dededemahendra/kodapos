@@ -721,6 +721,7 @@ msgstr "Belum ada pembelian."
 msgid "Belum ada pengeluaran pada rentang ini."
 msgstr "Belum ada pengeluaran pada rentang ini."
 
+#: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Belum ada penjualan pada rentang ini."
 msgstr "Belum ada penjualan pada rentang ini."
@@ -792,6 +793,14 @@ msgstr "Besar"
 #: src/routes/_pos/forecast.tsx
 msgid "Besok"
 msgstr "Besok"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Biaya"
+msgstr "Biaya"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Biaya (Rp)"
+msgstr "Biaya (Rp)"
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Biaya / satuan"
@@ -1587,6 +1596,7 @@ msgstr "Inventaris"
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/recipes.tsx
+#: src/routes/_pos/reports/margin.tsx
 msgid "Item"
 msgstr "Item"
 
@@ -2107,8 +2117,22 @@ msgid "Maks ({maxPoints})"
 msgstr "Maks ({maxPoints})"
 
 #: src/routes/_pos/recipes.tsx
+#: src/routes/_pos/reports/margin.tsx
+#: src/routes/_pos/reports/route.tsx
 msgid "Margin"
 msgstr "Margin"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Margin (Rp)"
+msgstr "Margin (Rp)"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Margin %"
+msgstr "Margin %"
+
+#: src/routes/_pos/reports/margin.tsx
+msgid "Margin memakai biaya bahan terkini."
+msgstr "Margin memakai biaya bahan terkini."
 
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
@@ -2697,12 +2721,14 @@ msgstr "Pemilik memiliki semua izin."
 #: src/components/net-revenue-chart.tsx
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/index.tsx
+#: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Pendapatan"
 msgstr "Pendapatan"
 
 #: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Pendapatan (Rp)"
@@ -3821,6 +3847,10 @@ msgstr "Terima pesanan dari GrabFood."
 msgid "Terima pesanan dari ShopeeFood."
 msgstr "Terima pesanan dari ShopeeFood."
 
+#: src/routes/_pos/reports/margin.tsx
+msgid "Terjual"
+msgstr "Terjual"
+
 #: src/routes/_pos/forecast.tsx
 msgid "Terkirim"
 msgstr "Terkirim"
@@ -4091,6 +4121,7 @@ msgstr "Umum"
 
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/payments.tsx
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/sales.tsx
