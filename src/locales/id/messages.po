@@ -2321,8 +2321,12 @@ msgid "Impor item menu"
 msgstr "Impor item menu"
 
 #: src/routes/_public/signin.tsx
-msgid "Ingat saya"
-msgstr "Ingat saya"
+#~ msgid "Ingat saya"
+#~ msgstr "Ingat saya"
+
+#: src/routes/_public/signin.tsx
+msgid "Ingat saya di perangkat ini"
+msgstr "Ingat saya di perangkat ini"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Instagram"
@@ -3224,8 +3228,12 @@ msgid "Masukkan kode"
 msgstr "Masukkan kode"
 
 #: src/routes/_public/signin.tsx
-msgid "Masukkan kode 6 digit."
-msgstr "Masukkan kode 6 digit."
+#~ msgid "Masukkan kode 6 digit."
+#~ msgstr "Masukkan kode 6 digit."
+
+#: src/routes/_public/signin.tsx
+msgid "Masukkan kode 8 digit."
+msgstr "Masukkan kode 8 digit."
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Masukkan kunci API (opsional)"

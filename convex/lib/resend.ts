@@ -26,7 +26,10 @@ export async function sendEmail({
     body: JSON.stringify({ from, to, subject, html, text }),
   });
   if (!res.ok) {
+    // Log the raw Resend response server-side for debugging, but never surface
+    // the provider body to the client (it can leak request/recipient detail).
     const detail = await res.text().catch(() => '');
-    throw new Error(`Gagal mengirim email (${res.status}). ${detail}`.trim());
+    console.error(`Resend send failed (${res.status}): ${detail}`);
+    throw new Error('Gagal mengirim email.');
   }
 }

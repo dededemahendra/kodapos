@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 export interface OtpInputProps {
-  /** Number of code cells. */
+  /** Number of code cells. Defaults to 8 (the OTP / reset code length). */
   digits?: number;
   /** Called when the user fills all digits. Caller decides what to do with the value. */
   onComplete: (code: string) => void;
@@ -23,7 +23,7 @@ export interface OtpInputProps {
  * Used by signin (passwordless code) and password-reset.
  */
 export function OtpInput({
-  digits = 6,
+  digits = 8,
   onComplete,
   errorMessage,
   disabled,

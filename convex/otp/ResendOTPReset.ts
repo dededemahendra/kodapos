@@ -1,10 +1,12 @@
 import type { EmailConfig } from '@convex-dev/auth/server';
+import { internal } from '../_generated/api';
+import type { ActionCtx } from '../_generated/server';
 import { sendEmail } from '../lib/resend';
 
 /**
  * Build the password-reset email body. Pure (no I/O) so it is unit testable.
  * English content, off the i18n catalog. A reset only needs the code (no magic
- * link), so this just presents the 6-digit code prominently. No em-dash.
+ * link), so this just presents the 8-digit code prominently. No em-dash.
  */
 export function buildResetEmail(code: string): { html: string; text: string } {
   const text = [
@@ -31,34 +33,53 @@ export function buildResetEmail(code: string): { html: string; text: string } {
   return { html, text };
 }
 
-/** Derive a zero-padded 6-digit numeric code from a cryptographically secure source. */
+/**
+ * Derive a zero-padded 8-digit numeric code from a cryptographically secure
+ * source. The 10^8 space (vs 10^6) widens the brute-force surface against the
+ * verify endpoint; platform throttling + single-use-after-success bound the rest.
+ */
 function generateCode(): string {
   const b = new Uint8Array(4);
   globalThis.crypto.getRandomValues(b);
   const n = new DataView(b.buffer).getUint32(0);
-  return String(n % 1000000).padStart(6, '0').slice(0, 6);
+  return String(n % 100000000).padStart(8, '0').slice(0, 8);
 }
 
 /**
  * Password-reset verification provider passed to `Password({ reset })`. The
- * 6-digit code is server-generated via `crypto.getRandomValues`, short-lived,
+ * 8-digit code is server-generated via `crypto.getRandomValues`, short-lived,
  * and emailed (never logged, never returned). A reset cannot complete without
  * the emailed code, so an attacker who knows only the email cannot take over.
+ *
+ * `sendVerificationRequest` runs server-side in a Convex action ctx
+ * (`@convex-dev/auth` passes ctx as the 2nd arg; the upstream EmailConfig type
+ * omits it, hence the cast), so issuance is rate-limited via runMutation here.
  */
 export const ResendOTPReset: EmailConfig = {
   id: 'resend-otp-password-reset',
   type: 'email',
+  // `from` is display-only and not used by `sendEmail` (RESEND_FROM owns the
+  // sender); kept because the upstream type wants an EmailConfig shape.
   name: 'Password reset code',
-  from: 'kodapos <onboarding@resend.dev>',
   maxAge: 60 * 15,
   async generateVerificationToken() {
     return generateCode();
   },
-  async sendVerificationRequest({ identifier: email, token }) {
+  // The upstream EmailConfig types sendVerificationRequest with a single param,
+  // but `@convex-dev/auth` passes the action ctx as a 2nd arg (see signIn.js's
+  // `@ts-expect-error`). We declare ctx here and cast the object below.
+  async sendVerificationRequest(
+    { identifier: email, token }: { identifier: string; token: string },
+    ctx: ActionCtx,
+  ) {
+    // Server-side issuance rate limit (the client cooldown is bypassable).
+    // Distinct bucket from the otp flow.
+    await ctx.runMutation(internal.auth_rate.checkAndBump, { identifier: `reset:${email}` });
+
     await sendEmail({
       to: email,
       subject: 'Reset your kodapos password',
       ...buildResetEmail(token),
     });
   },
-};
+} as unknown as EmailConfig;

@@ -10,6 +10,16 @@ import { weatherConditionV, weatherSignalV } from './lib/weather';
 export default defineSchema({
   ...authTables,
 
+  // Server-side issuance rate limit for emailed OTP / password-reset codes.
+  // Keyed by a per-provider identifier (e.g. `otp:email` / `reset:email`) so the
+  // two flows don't share a bucket. A fixed 10-minute window caps issuance and
+  // blunts the client-cooldown bypass (the client gate is trivially evaded).
+  otpRateLimit: defineTable({
+    identifier: v.string(),
+    windowStart: v.number(),
+    count: v.number(),
+  }).index('by_identifier', ['identifier']),
+
   cafes: defineTable({
     name: v.string(),
     ownerUserId: v.id('users'),

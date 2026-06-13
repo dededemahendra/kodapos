@@ -12,10 +12,11 @@ export function setRememberMe(remember: boolean): void {
   window.localStorage.setItem(REMEMBER_ME_KEY, remember ? '1' : '0');
 }
 
-// Defaults to TRUE when the flag is absent, so a fresh visitor is remembered.
+// Opt-in: defaults to FALSE when the flag is absent, so a fresh visitor on a
+// shared register is NOT remembered unless they explicitly tick the box.
 function remembering(): boolean {
-  if (typeof window === 'undefined') return true;
-  return window.localStorage.getItem(REMEMBER_ME_KEY) !== '0';
+  if (typeof window === 'undefined') return false;
+  return window.localStorage.getItem(REMEMBER_ME_KEY) === '1';
 }
 
 /**

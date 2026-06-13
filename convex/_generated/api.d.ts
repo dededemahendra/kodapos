@@ -11,6 +11,7 @@
 import type * as accounting from "../accounting.js";
 import type * as alerts from "../alerts.js";
 import type * as auth from "../auth.js";
+import type * as auth_rate from "../auth_rate.js";
 import type * as cafes from "../cafes.js";
 import type * as cashMovements from "../cashMovements.js";
 import type * as cashierSessions from "../cashierSessions.js";
@@ -98,6 +99,7 @@ declare const fullApi: ApiFromModules<{
   accounting: typeof accounting;
   alerts: typeof alerts;
   auth: typeof auth;
+  auth_rate: typeof auth_rate;
   cafes: typeof cafes;
   cashMovements: typeof cashMovements;
   cashierSessions: typeof cashierSessions;

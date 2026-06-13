@@ -27,16 +27,32 @@ import {
   validatePasswordSignup,
 } from '~/lib/auth-validation';
 
-type SigninSearch = { email?: string; code?: string; reset?: string };
+// `email`/`code` no longer live in the query string: the magic link now carries
+// them in the URL FRAGMENT (#) so they never reach a server log / Referer. Only
+// `reset` remains a search param (it routes the card into reset mode).
+type SigninSearch = { reset?: string };
 
 export const Route = createFileRoute('/_public/signin')({
   validateSearch: (s: Record<string, unknown>): SigninSearch => ({
-    ...(typeof s.email === 'string' ? { email: s.email } : {}),
-    ...(typeof s.code === 'string' ? { code: s.code } : {}),
     ...(typeof s.reset === 'string' ? { reset: s.reset } : {}),
   }),
   component: SigninPage,
 });
+
+/**
+ * Parse a magic-link fragment of the form `#email=<enc>&code=<token>`.
+ * Returns null when either part is missing. A fragment is never sent to the
+ * server (Finding 3), so the code does not leak via logs / Referer.
+ */
+function parseMagicLinkHash(hash: string): { email: string; code: string } | null {
+  const raw = hash.startsWith('#') ? hash.slice(1) : hash;
+  if (!raw) return null;
+  const params = new URLSearchParams(raw);
+  const email = params.get('email');
+  const code = params.get('code');
+  if (!email || !code) return null;
+  return { email, code };
+}
 
 type FieldState = { value: string; touched: boolean; error: MessageDescriptor | null };
 const initialField: FieldState = { value: '', touched: false, error: null };
@@ -46,10 +62,11 @@ const RESEND_COOLDOWN_SECONDS = 30;
 
 function SigninPage() {
   const search = Route.useSearch();
-  // Magic link: both email + code present means an email link was tapped.
-  const isMagicLink = Boolean(search.email && search.code);
-  if (isMagicLink) {
-    return <MagicLinkHandler email={search.email as string} code={search.code as string} />;
+  // Magic link: email + code arrive in the URL fragment (never the query).
+  const magic =
+    typeof window !== 'undefined' ? parseMagicLinkHash(window.location.hash) : null;
+  if (magic) {
+    return <MagicLinkHandler email={magic.email} code={magic.code} />;
   }
   return <SigninCard initialMode={search.reset !== undefined ? 'reset' : 'password'} />;
 }
@@ -115,7 +132,9 @@ function SigninCard({
   const { t, i18n } = useLingui();
 
   const [mode, setMode] = useState<Mode>(initialMode);
-  const [remember, setRemember] = useState(true);
+  // Opt-in (Finding 6): default OFF so a shared register isn't remembered
+  // unless the operator explicitly ticks the box.
+  const [remember, setRemember] = useState(false);
   const [email, setEmail] = useState<FieldState>(
     prefillEmail ? { value: prefillEmail, touched: false, error: null } : initialField,
   );
@@ -300,8 +319,8 @@ function SigninCard({
     const newPwErr = validatePasswordSignup(newPassword.value);
     setNewPassword((prev) => ({ ...prev, touched: true, error: newPwErr }));
     if (newPwErr !== null) return;
-    if (resetCode.length !== 6) {
-      setAuthError(t`Masukkan kode 6 digit.`);
+    if (resetCode.length !== 8) {
+      setAuthError(t`Masukkan kode 8 digit.`);
       return;
     }
     setSubmitting(true);
@@ -415,7 +434,7 @@ function SigninCard({
                     checked={remember}
                     onCheckedChange={(c) => setRemember(c === true)}
                   />
-                  <Trans>Ingat saya</Trans>
+                  <Trans>Ingat saya di perangkat ini</Trans>
                 </label>
                 <Button
                   type="button"
@@ -458,7 +477,7 @@ function SigninCard({
                 {emailField(true)}
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox checked={remember} onCheckedChange={(c) => setRemember(c === true)} />
-                  <Trans>Ingat saya</Trans>
+                  <Trans>Ingat saya di perangkat ini</Trans>
                 </label>
                 {authError && <FieldError>{authError}</FieldError>}
                 <Button
@@ -477,6 +496,7 @@ function SigninCard({
                 <Trans>Masukkan kode</Trans>
               </p>
               <OtpInput
+                digits={8}
                 onComplete={(code) => void onOtpComplete(code)}
                 errorMessage={authError ?? undefined}
                 disabled={submitting}
@@ -537,7 +557,7 @@ function SigninCard({
                   <p className="text-center text-sm text-muted-foreground">
                     <Trans>Masukkan kode</Trans>
                   </p>
-                  <OtpInput digits={6} onComplete={setResetCode} disabled={submitting} />
+                  <OtpInput digits={8} onComplete={setResetCode} disabled={submitting} />
                 </div>
                 <Field>
                   <FieldLabel htmlFor="new-password">
