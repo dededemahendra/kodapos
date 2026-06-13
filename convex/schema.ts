@@ -228,6 +228,13 @@ export default defineSchema({
       })
     ),
 
+    notifications: v.optional(
+      v.object({
+        summaryEmail: v.optional(v.string()),
+        emailSummaryOnClose: v.boolean(),
+      })
+    ),
+
     taxName: v.optional(v.string()),
     taxInclusive: v.optional(v.boolean()),
     npwp: v.optional(v.string()),

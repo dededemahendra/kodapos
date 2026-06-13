@@ -1,6 +1,7 @@
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { internal } from './_generated/api';
+import { internalQuery, mutation, query } from './_generated/server';
 import type { Doc } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
@@ -109,6 +110,22 @@ export const close = mutation({
       expectedCashIDR,
       varianceIDR: counted - expectedCashIDR,
     });
+
+    // Auto-send the shift-summary email when the owner has enabled it. Run via
+    // the scheduler so a Resend failure (or missing key) never rolls back the
+    // close. The scheduled action is system-side, so it reads `summaryData`
+    // (no owner gate).
+    const settingsRow = await ctx.db
+      .query('cafeSettings')
+      .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+      .first();
+    const notifications = settingsRow?.notifications;
+    if (notifications?.emailSummaryOnClose && notifications.summaryEmail) {
+      await ctx.scheduler.runAfter(0, internal.email.sendShiftSummaryScheduled, {
+        shiftId: id,
+        to: notifications.summaryEmail,
+      });
+    }
     return null;
   },
 });
@@ -200,6 +217,63 @@ async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
       shift.varianceIDR ?? (countedCashIDR !== null ? countedCashIDR - expectedCashIDR : null),
   };
 }
+
+const shiftSummaryData = v.object({
+  cafeName: v.string(),
+  openedAt: v.number(),
+  closedAt: v.number(),
+  salesTotalIDR: v.number(),
+  cashSalesIDR: v.number(),
+  qrisSalesIDR: v.number(),
+  openingFloatIDR: v.number(),
+  expectedCashIDR: v.number(),
+  countedCashIDR: v.union(v.number(), v.null()),
+  varianceIDR: v.union(v.number(), v.null()),
+});
+
+/** Resolve the ShiftSummaryData shape (cafe name + the shift numbers) for a shift. */
+async function buildSummaryData(ctx: QueryCtx, shift: Doc<'shifts'>) {
+  const cafe = await ctx.db.get(shift.cafeId);
+  const s = await summarizeShift(ctx, shift);
+  return {
+    cafeName: cafe?.name ?? 'kodapos',
+    openedAt: s.openedAt,
+    closedAt: s.closedAt,
+    salesTotalIDR: s.salesTotalIDR,
+    cashSalesIDR: s.cashSalesIDR,
+    qrisSalesIDR: s.qrisSalesIDR,
+    openingFloatIDR: s.openingFloatIDR,
+    expectedCashIDR: s.expectedCashIDR,
+    countedCashIDR: s.countedCashIDR,
+    varianceIDR: s.varianceIDR,
+  };
+}
+
+/**
+ * System-side summary numbers for a shift. No owner gate: invoked by the
+ * scheduled auto-send action (`email.sendShiftSummaryScheduled`) which runs
+ * with no user identity.
+ */
+export const summaryData = internalQuery({
+  args: { shiftId: v.id('shifts') },
+  returns: shiftSummaryData,
+  handler: async (ctx, { shiftId }) => {
+    const shift = await ctx.db.get(shiftId);
+    if (!shift) throw new Error('Shift tidak ditemukan.');
+    return await buildSummaryData(ctx, shift);
+  },
+});
+
+/** Owner-gated summary numbers, for the manual "Email ringkasan" send. */
+export const summaryDataOwned = query({
+  args: { shiftId: v.id('shifts') },
+  returns: shiftSummaryData,
+  handler: async (ctx, { shiftId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const shift = await requireOwned(ctx, cafeId, shiftId, 'Shift');
+    return await buildSummaryData(ctx, shift);
+  },
+});
 
 export const listClosed = query({
   args: { paginationOpts: paginationOptsValidator },

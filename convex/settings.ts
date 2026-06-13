@@ -102,6 +102,11 @@ const receiptValidator = v.object({
   openDrawer: v.boolean(),
 });
 
+const notificationsValidator = v.object({
+  summaryEmail: v.optional(v.string()),
+  emailSummaryOnClose: v.boolean(),
+});
+
 const integrationsValidator = v.array(
   v.object({
     key: v.string(),
@@ -115,6 +120,7 @@ const settingsValidator = v.object({
   payment: paymentValidator,
   receipt: receiptValidator,
   integrations: integrationsValidator,
+  notifications: notificationsValidator,
   taxName: v.string(),
   taxInclusive: v.boolean(),
   npwp: v.optional(v.string()),
@@ -161,6 +167,7 @@ export const get = query({
       payment,
       receipt: row?.receipt ?? DEFAULT_SETTINGS.receipt,
       integrations,
+      notifications: row?.notifications ?? { emailSummaryOnClose: false },
       taxName: row?.taxName ?? DEFAULT_SETTINGS.taxName,
       taxInclusive: row?.taxInclusive ?? DEFAULT_SETTINGS.taxInclusive,
       ...(row?.npwp !== undefined ? { npwp: row.npwp } : {}),
@@ -198,6 +205,17 @@ export const updatePayment = mutation({
     const { cafeId } = await requireOwnerCafe(ctx);
     const id = await getOrCreateSettingsId(ctx, cafeId);
     await ctx.db.patch(id, { payment, updatedAt: Date.now() });
+    return null;
+  },
+});
+
+export const updateNotifications = mutation({
+  args: { notifications: notificationsValidator },
+  returns: v.null(),
+  handler: async (ctx, { notifications }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    await ctx.db.patch(id, { notifications, updatedAt: Date.now() });
     return null;
   },
 });
