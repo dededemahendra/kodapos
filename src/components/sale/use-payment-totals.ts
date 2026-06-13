@@ -14,6 +14,9 @@ export function usePaymentTotals(params: {
    *  order discount (0 when none). Points redemption is added on top below. */
   discountIDR: number;
   redeemPoints: number;
+  /** When a catalog reward is selected, its fixed discount overrides the
+   *  free-form points redemption (the two are mutually exclusive). */
+  redeemRewardIDR?: number | undefined;
   loyaltyCfg: LoyaltyConfig;
   serviceChargeEnabled: boolean;
   serviceChargePct: number;
@@ -21,7 +24,10 @@ export function usePaymentTotals(params: {
   taxRatePct: number;
 }): { afterPromoIDR: number; redeemIDR: number; totalIDR: number } {
   const afterPromoIDR = params.subtotalIDR - params.discountIDR;
-  const redeemIDR = redemptionIDR(params.redeemPoints, params.loyaltyCfg);
+  const redeemIDR =
+    params.redeemRewardIDR && params.redeemRewardIDR > 0
+      ? params.redeemRewardIDR
+      : redemptionIDR(params.redeemPoints, params.loyaltyCfg);
   const totalDiscountIDR = params.discountIDR + redeemIDR;
   const { totalIDR } = computeOrderTotals({
     subtotalIDR: params.subtotalIDR,

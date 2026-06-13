@@ -7,6 +7,13 @@ import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 import { toast } from '~/lib/toast';
@@ -16,6 +23,8 @@ export type CustomerSelection = {
   customerName?: string;
   pointsBalance?: number;
   redeemPoints: number;
+  redeemRewardId?: Id<'loyaltyRewards'>;
+  redeemRewardIDR?: number;
 };
 
 /** Count of phone digits required before we run a lookup query. */
@@ -74,6 +83,13 @@ export function CustomerSection({
 
   const selected = value.customerId !== undefined;
   const notFound = phoneReady && !selected && lookup === null;
+
+  // Affordable active rewards for the selected customer (the checkout picker).
+  const rewards = useQuery(
+    api.loyaltyRewards.listForCustomer,
+    value.customerId ? { customerId: value.customerId } : 'skip'
+  );
+  const NO_REWARD = '__none__';
 
   function clearCustomer() {
     setPhone('');
@@ -207,7 +223,58 @@ export function CustomerSection({
             </Button>
           </div>
 
-          {canRedeem ? (
+          {rewards && rewards.length > 0 ? (
+            <div className="space-y-1.5 border-t border-border pt-2">
+              <div className="text-xs font-medium text-muted-foreground">
+                <Trans>Tukar reward</Trans>
+              </div>
+              <Select
+                value={value.redeemRewardId ?? NO_REWARD}
+                onValueChange={(v) => {
+                  if (v === NO_REWARD) {
+                    const { redeemRewardId: _id, redeemRewardIDR: _idr, ...rest } = value;
+                    onChange(rest);
+                    return;
+                  }
+                  const reward = rewards.find((r) => r._id === v);
+                  if (!reward) return;
+                  onChange({
+                    ...value,
+                    redeemRewardId: reward._id,
+                    redeemRewardIDR: reward.discountIDR,
+                    redeemPoints: 0,
+                  });
+                }}
+              >
+                <SelectTrigger className="h-9 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_REWARD}>
+                    <Trans>Tanpa reward</Trans>
+                  </SelectItem>
+                  {rewards.map((r) => {
+                    const points = r.pointsCost;
+                    return (
+                      <SelectItem key={r._id} value={r._id}>
+                        {r.name} · {t`${points} poin`} · {formatIDR(r.discountIDR)}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              {value.redeemRewardId && value.redeemRewardIDR ? (
+                <div className="flex justify-between text-emerald-700">
+                  <span>
+                    <Trans>Diskon reward</Trans>
+                  </span>
+                  <span className="tabular-nums">−{formatIDR(value.redeemRewardIDR)}</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {canRedeem && !value.redeemRewardId ? (
             <div className="space-y-1.5 border-t border-border pt-2">
               <div className="text-xs font-medium text-muted-foreground">
                 <Trans>Tukar poin</Trans>
