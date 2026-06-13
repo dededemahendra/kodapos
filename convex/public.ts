@@ -1,7 +1,17 @@
 import { v } from 'convex/values';
+import { internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
-import { mutation, type MutationCtx, query, type QueryCtx } from './_generated/server';
-import { DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
+import {
+  action,
+  internalMutation,
+  internalQuery,
+  mutation,
+  type MutationCtx,
+  query,
+  type QueryCtx,
+} from './_generated/server';
+import { computeOrderTotals, DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
+import { resolveProvider } from './payments/providers';
 
 /**
  * Public (UNAUTHENTICATED) QR self-order intake. These functions are kodapos's
@@ -69,6 +79,7 @@ const menuForTableResult = v.union(
       serviceChargePct: v.number(),
       serviceChargeName: v.string(),
     }),
+    payNowAvailable: v.boolean(),
   })
 );
 
@@ -171,6 +182,12 @@ export const menuForTable = query({
     const taxEnabled = cafe.taxEnabled === true;
     const scEnabled = pay?.serviceChargeEnabled === true;
 
+    // Pay-now is offered only when a QRIS-dynamic integration is connected. This is
+    // a non-throwing presence check (mirrors getQrisConfig) — no creds exposed.
+    const payNowAvailable = (settings?.integrations ?? []).some(
+      (i) => i.key === 'qris' && i.connected
+    );
+
     return {
       cafe: {
         name: cafe.name,
@@ -186,6 +203,7 @@ export const menuForTable = query({
         serviceChargePct: scEnabled ? (pay?.serviceChargePct ?? 0) : 0,
         serviceChargeName: pay?.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME,
       },
+      payNowAvailable,
     };
   },
 });
@@ -389,13 +407,18 @@ export const selfOrderStatus = query({
     v.null(),
     v.object({
       status: v.union(v.literal('new'), v.literal('accepted'), v.literal('rejected')),
+      paymentStatus: v.union(v.literal('unpaid'), v.literal('awaiting'), v.literal('paid')),
+      // Charge details only while awaiting payment (so the customer can show the QR).
+      qrString: v.optional(v.string()),
+      expiresAt: v.optional(v.number()),
+      totalIDR: v.optional(v.number()),
     })
   ),
   handler: async (ctx: QueryCtx, { selfOrderId, qrToken }) => {
     // Bind the read to the table's capability token so a guessed/enumerated
     // selfOrderId alone can't poll an arbitrary order's status. Only someone
-    // holding the order's own table qrToken sees it. We return ONLY the status —
-    // no lines/prices/cafe/table data leaks.
+    // holding the order's own table qrToken sees it. We return ONLY the status +
+    // (while awaiting) the QR/amount needed to pay — no lines/cafe/table data leaks.
     const row = await ctx.db.get(selfOrderId);
     if (!row || !row.tableId) return null;
     const table = await ctx.db
@@ -403,6 +426,171 @@ export const selfOrderStatus = query({
       .withIndex('by_qr_token', (q) => q.eq('qrToken', qrToken))
       .unique();
     if (!table || table._id !== row.tableId) return null;
-    return { status: row.status };
+    const paymentStatus = row.paymentStatus ?? 'unpaid';
+    return {
+      status: row.status,
+      paymentStatus,
+      ...(paymentStatus === 'awaiting'
+        ? { qrString: row.qrString, expiresAt: row.expiresAt, totalIDR: row.totalIDR }
+        : {}),
+    };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// createSelfOrderCharge — public pay-now QRIS charge (server-authoritative)
+// ---------------------------------------------------------------------------
+
+/**
+ * Internal: load the self-order + its cafe's tax/SC config for a public charge,
+ * binding the read to the table's capability token. Returns the data the action
+ * needs to recompute the TRUE total + decide idempotency. Throws on a token/order
+ * mismatch (the action runs unauthenticated, so this is the only guard).
+ */
+export const getSelfOrderForCharge = internalQuery({
+  args: { selfOrderId: v.id('selfOrders'), qrToken: v.string() },
+  returns: v.object({
+    cafeId: v.id('cafes'),
+    subtotalIDR: v.number(),
+    pricing: v.object({
+      serviceChargeEnabled: v.boolean(),
+      serviceChargePct: v.number(),
+      taxEnabled: v.boolean(),
+      taxRatePct: v.number(),
+    }),
+    // When already charged (awaiting/paid) the action short-circuits — no new charge.
+    existing: v.union(
+      v.null(),
+      v.object({ qrString: v.string(), expiresAt: v.number(), totalIDR: v.number() })
+    ),
+  }),
+  handler: async (ctx, { selfOrderId, qrToken }) => {
+    const row = await ctx.db.get(selfOrderId);
+    if (!row || !row.tableId) throw new Error('Pesanan tidak ditemukan.');
+    const table = await ctx.db
+      .query('tables')
+      .withIndex('by_qr_token', (q) => q.eq('qrToken', qrToken))
+      .unique();
+    if (!table || table._id !== row.tableId) throw new Error('QR tidak valid.');
+
+    const cafe = await ctx.db.get(row.cafeId);
+    if (!cafe) throw new Error('Pesanan tidak ditemukan.');
+    const settings = await ctx.db
+      .query('cafeSettings')
+      .withIndex('by_cafe', (q) => q.eq('cafeId', row.cafeId))
+      .first();
+    const pay = settings?.payment;
+    const taxEnabled = cafe.taxEnabled === true;
+    const scEnabled = pay?.serviceChargeEnabled === true;
+
+    const alreadyCharged =
+      (row.paymentStatus === 'awaiting' || row.paymentStatus === 'paid') &&
+      row.providerRef &&
+      row.qrString &&
+      row.expiresAt !== undefined &&
+      row.totalIDR !== undefined;
+
+    return {
+      cafeId: row.cafeId,
+      subtotalIDR: row.subtotalIDR,
+      pricing: {
+        serviceChargeEnabled: scEnabled,
+        serviceChargePct: scEnabled ? (pay?.serviceChargePct ?? 0) : 0,
+        taxEnabled,
+        taxRatePct: taxEnabled ? (cafe.taxRatePct ?? 0) : 0,
+      },
+      existing: alreadyCharged
+        ? { qrString: row.qrString!, expiresAt: row.expiresAt!, totalIDR: row.totalIDR! }
+        : null,
+    };
+  },
+});
+
+/** Internal: persist a freshly created pay-now charge onto the self-order. */
+export const markSelfOrderCharged = internalMutation({
+  args: {
+    selfOrderId: v.id('selfOrders'),
+    totalIDR: v.number(),
+    providerRef: v.string(),
+    qrString: v.string(),
+    expiresAt: v.number(),
+  },
+  returns: v.null(),
+  handler: async (ctx, { selfOrderId, totalIDR, providerRef, qrString, expiresAt }) => {
+    const row = await ctx.db.get(selfOrderId);
+    // Idempotency guard against a race: if another charge already landed, keep it.
+    if (row && (row.paymentStatus === 'awaiting' || row.paymentStatus === 'paid') && row.providerRef) {
+      return null;
+    }
+    await ctx.db.patch(selfOrderId, {
+      paymentMode: 'qris',
+      paymentStatus: 'awaiting',
+      totalIDR,
+      providerRef,
+      qrString,
+      expiresAt,
+    });
+    return null;
+  },
+});
+
+/**
+ * Public (UNAUTHENTICATED) pay-now charge. The customer holds only the table's
+ * `qrToken` + the `selfOrderId` they just created. This NEVER calls
+ * `requireOwnerCafe`. Security spine:
+ *
+ *  - The amount is RECOMPUTED server-side (`computeOrderTotals` over the stored
+ *    snapshot lines + the cafe's tax/SC config) — the client can never set it,
+ *    and it is the TRUE total incl tax/SC, not the bare subtotal.
+ *  - Idempotent: once a charge exists (awaiting/paid) the same QR/amount is
+ *    returned with NO second provider charge (one charge per self-order).
+ *  - The QRIS provider config (creds) stays server-only; only `{ qrString,
+ *    expiresAt, totalIDR }` is returned to the public.
+ */
+export const createSelfOrderCharge = action({
+  args: { qrToken: v.string(), selfOrderId: v.id('selfOrders') },
+  returns: v.object({ qrString: v.string(), expiresAt: v.number(), totalIDR: v.number() }),
+  handler: async (
+    ctx,
+    { qrToken, selfOrderId }
+  ): Promise<{ qrString: string; expiresAt: number; totalIDR: number }> => {
+    const info = await ctx.runQuery(internal.public.getSelfOrderForCharge, { selfOrderId, qrToken });
+
+    // Idempotent short-circuit: a charge already exists → return it, no new charge.
+    if (info.existing) {
+      return {
+        qrString: info.existing.qrString,
+        expiresAt: info.existing.expiresAt,
+        totalIDR: info.existing.totalIDR,
+      };
+    }
+
+    // Server-authoritative TRUE total (subtotal + SC + tax). discount 0 (no promo
+    // engine on the public surface yet).
+    const { totalIDR } = computeOrderTotals({
+      subtotalIDR: info.subtotalIDR,
+      discountIDR: 0,
+      ...info.pricing,
+    });
+
+    const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, {
+      cafeId: info.cafeId,
+    });
+    if (!config) throw new Error('Pembayaran QRIS tidak tersedia.');
+
+    const { providerRef, qrString, expiresAt } = await resolveProvider(config).createCharge({
+      amountIDR: totalIDR,
+      referenceId: `so_${selfOrderId}`,
+    });
+
+    await ctx.runMutation(internal.public.markSelfOrderCharged, {
+      selfOrderId,
+      totalIDR,
+      providerRef,
+      qrString,
+      expiresAt,
+    });
+
+    return { qrString, expiresAt, totalIDR };
   },
 });

@@ -40,6 +40,83 @@ export const getPaymentCafeByRef = internalQuery({
   },
 });
 
+/** Internal: resolve the cafe owning a SELF-ORDER by its provider ref (webhook fallback). */
+export const getSelfOrderCafeByRef = internalQuery({
+  args: { providerRef: v.string() },
+  returns: v.union(v.object({ cafeId: v.id('cafes') }), v.null()),
+  handler: async (ctx, { providerRef }) => {
+    const so = await ctx.db
+      .query('selfOrders')
+      .withIndex('by_provider_ref', (q) => q.eq('providerRef', providerRef))
+      .unique();
+    return so ? { cafeId: so.cafeId } : null;
+  },
+});
+
+/**
+ * Internal: confirm a pay-now self-order by provider ref (webhook/reconcile).
+ * Only flips `awaiting → paid` (idempotent: paid stays paid, others ignored).
+ * Records `paidAmountIDR` from the SERVER-stored `totalIDR` — never a client/webhook amount.
+ */
+export const confirmSelfOrderFromWebhook = internalMutation({
+  args: { providerRef: v.string() },
+  returns: v.union(v.literal('paid'), v.literal('unknown')),
+  handler: async (ctx, { providerRef }) => {
+    const so = await ctx.db
+      .query('selfOrders')
+      .withIndex('by_provider_ref', (q) => q.eq('providerRef', providerRef))
+      .unique();
+    if (!so) return 'unknown';
+    if (so.paymentStatus === 'awaiting') {
+      await ctx.db.patch(so._id, { paymentStatus: 'paid', paidAmountIDR: so.totalIDR });
+    }
+    return 'paid';
+  },
+});
+
+/**
+ * Internal: void a pay-now self-order charge by provider ref (expired/failed).
+ * Returns it to `unpaid` and clears the charge fields so the customer can retry.
+ * Only acts on an `awaiting` order (a paid one is left untouched).
+ */
+export const voidSelfOrderCharge = internalMutation({
+  args: { providerRef: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { providerRef }) => {
+    const so = await ctx.db
+      .query('selfOrders')
+      .withIndex('by_provider_ref', (q) => q.eq('providerRef', providerRef))
+      .unique();
+    if (!so || so.paymentStatus !== 'awaiting') return null;
+    await ctx.db.patch(so._id, {
+      paymentStatus: 'unpaid',
+      providerRef: undefined,
+      qrString: undefined,
+      expiresAt: undefined,
+    });
+    return null;
+  },
+});
+
+/** Internal: list up to 50 awaiting pay-now self-order charges (reconcile candidates). */
+export const listPendingSelfOrders = internalQuery({
+  args: {},
+  returns: v.array(
+    v.object({ cafeId: v.id('cafes'), providerRef: v.string(), expiresAt: v.number() })
+  ),
+  handler: async (ctx) => {
+    // No dedicated awaiting index; scan recent self-orders and filter (small table).
+    const rows = await ctx.db.query('selfOrders').order('desc').take(200);
+    const out: Array<{ cafeId: Id<'cafes'>; providerRef: string; expiresAt: number }> = [];
+    for (const so of rows) {
+      if (so.paymentStatus === 'awaiting' && so.providerRef && so.expiresAt !== undefined) {
+        out.push({ cafeId: so.cafeId, providerRef: so.providerRef, expiresAt: so.expiresAt });
+      }
+    }
+    return out;
+  },
+});
+
 /** Internal: a cafe's connected qris integration config (creds — server-only). */
 export const getQrisConfig = internalQuery({
   args: { cafeId: v.id('cafes') },
@@ -217,6 +294,34 @@ export const reconcilePending = internalAction({
         } else {
           if (now > c.expiresAt + FAILSAFE_GRACE_MS) {
             await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, { providerRef: c.providerRef });
+            voided++;
+          } else {
+            left++;
+          }
+        }
+      } catch {
+        left++;
+      }
+    }
+
+    // Pay-now self-order charges (public surface) — same provider-as-source-of-truth
+    // logic, idempotent + pending-guarded, with a failsafe-void past expiry.
+    const selfOrders = await ctx.runQuery(internal.payments.qrisDynamic.listPendingSelfOrders, {});
+    for (const c of selfOrders) {
+      try {
+        const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, { cafeId: c.cafeId });
+        const status = config ? await resolveProvider(config).fetchStatus(c.providerRef) : 'unknown';
+        if (status === 'paid') {
+          await ctx.runMutation(internal.payments.qrisDynamic.confirmSelfOrderFromWebhook, { providerRef: c.providerRef });
+          settled++;
+        } else if (status === 'expired' || status === 'failed') {
+          await ctx.runMutation(internal.payments.qrisDynamic.voidSelfOrderCharge, { providerRef: c.providerRef });
+          voided++;
+        } else if (status === 'pending') {
+          left++;
+        } else {
+          if (now > c.expiresAt + FAILSAFE_GRACE_MS) {
+            await ctx.runMutation(internal.payments.qrisDynamic.voidSelfOrderCharge, { providerRef: c.providerRef });
             voided++;
           } else {
             left++;

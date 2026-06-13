@@ -338,10 +338,24 @@ export default defineSchema({
     subtotalIDR: v.number(), // server-computed snapshot
     createdAt: v.number(),
     acceptedAt: v.optional(v.number()),
+    // Pay-now (QRIS-dynamic on the public surface). All optional so pay-at-counter
+    // self-orders carry none of these. The charge amount + status are SERVER-owned;
+    // the client never sends a price. providerRef round-trips through the webhook.
+    paymentMode: v.optional(v.union(v.literal('counter'), v.literal('qris'))),
+    paymentStatus: v.optional(
+      v.union(v.literal('unpaid'), v.literal('awaiting'), v.literal('paid'))
+    ),
+    totalIDR: v.optional(v.number()), // true total (subtotal + SC + tax), server-computed
+    providerRef: v.optional(v.string()),
+    qrString: v.optional(v.string()),
+    expiresAt: v.optional(v.number()),
+    paidAmountIDR: v.optional(v.number()),
+    acceptedOrderId: v.optional(v.id('orders')),
   })
     .index('by_cafe_clientId', ['cafeId', 'clientId'])
     .index('by_cafe_status', ['cafeId', 'status'])
-    .index('by_cafe_created', ['cafeId', 'createdAt']),
+    .index('by_cafe_created', ['cafeId', 'createdAt'])
+    .index('by_provider_ref', ['providerRef']),
 
   heldOrders: defineTable({
     cafeId: v.id('cafes'),
