@@ -232,6 +232,7 @@ export default defineSchema({
       v.object({
         summaryEmail: v.optional(v.string()),
         emailSummaryOnClose: v.boolean(),
+        emailLowStockDaily: v.optional(v.boolean()),
       })
     ),
 

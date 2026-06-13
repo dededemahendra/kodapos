@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
-import { mutation, query } from './_generated/server';
+import { internalQuery, mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 import { DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
@@ -105,6 +105,7 @@ const receiptValidator = v.object({
 const notificationsValidator = v.object({
   summaryEmail: v.optional(v.string()),
   emailSummaryOnClose: v.boolean(),
+  emailLowStockDaily: v.optional(v.boolean()),
 });
 
 const integrationsValidator = v.array(
@@ -217,6 +218,23 @@ export const updateNotifications = mutation({
     const id = await getOrCreateSettingsId(ctx, cafeId);
     await ctx.db.patch(id, { notifications, updatedAt: Date.now() });
     return null;
+  },
+});
+
+/**
+ * One cafe's notification preferences, for system-side cron jobs (no owner
+ * gate). Returns null when the cafe has no `cafeSettings` row or no
+ * `notifications` group yet.
+ */
+export const notificationsForCafe = internalQuery({
+  args: { cafeId: v.id('cafes') },
+  returns: v.union(notificationsValidator, v.null()),
+  handler: async (ctx, { cafeId }) => {
+    const row = await ctx.db
+      .query('cafeSettings')
+      .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+      .first();
+    return row?.notifications ?? null;
   },
 });
 

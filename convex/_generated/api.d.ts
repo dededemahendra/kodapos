@@ -9,6 +9,7 @@
  */
 
 import type * as accounting from "../accounting.js";
+import type * as alerts from "../alerts.js";
 import type * as auth from "../auth.js";
 import type * as cafes from "../cafes.js";
 import type * as cashMovements from "../cashMovements.js";
@@ -32,6 +33,7 @@ import type * as lib_forecast from "../lib/forecast.js";
 import type * as lib_giftcard from "../lib/giftcard.js";
 import type * as lib_heldOrder from "../lib/heldOrder.js";
 import type * as lib_inventory from "../lib/inventory.js";
+import type * as lib_lowStockEmail from "../lib/lowStockEmail.js";
 import type * as lib_loyalty from "../lib/loyalty.js";
 import type * as lib_orderType from "../lib/orderType.js";
 import type * as lib_payment from "../lib/payment.js";
@@ -89,6 +91,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounting: typeof accounting;
+  alerts: typeof alerts;
   auth: typeof auth;
   cafes: typeof cafes;
   cashMovements: typeof cashMovements;
@@ -112,6 +115,7 @@ declare const fullApi: ApiFromModules<{
   "lib/giftcard": typeof lib_giftcard;
   "lib/heldOrder": typeof lib_heldOrder;
   "lib/inventory": typeof lib_inventory;
+  "lib/lowStockEmail": typeof lib_lowStockEmail;
   "lib/loyalty": typeof lib_loyalty;
   "lib/orderType": typeof lib_orderType;
   "lib/payment": typeof lib_payment;
