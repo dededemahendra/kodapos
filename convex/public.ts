@@ -458,11 +458,6 @@ export const getSelfOrderForCharge = internalQuery({
       taxEnabled: v.boolean(),
       taxRatePct: v.number(),
     }),
-    // When already charged (awaiting/paid) the action short-circuits — no new charge.
-    existing: v.union(
-      v.null(),
-      v.object({ qrString: v.string(), expiresAt: v.number(), totalIDR: v.number() })
-    ),
   }),
   handler: async (ctx, { selfOrderId, qrToken }) => {
     const row = await ctx.db.get(selfOrderId);
@@ -472,6 +467,13 @@ export const getSelfOrderForCharge = internalQuery({
       .withIndex('by_qr_token', (q) => q.eq('qrToken', qrToken))
       .unique();
     if (!table || table._id !== row.tableId) throw new Error('QR tidak valid.');
+
+    // Only a still-pending ('new') order may be charged. A rejected order must
+    // never collect money; an accepted one is already being processed at the
+    // register. (The awaiting/paid idempotent early-return below still applies
+    // for a 'new' order that was already charged.)
+    if (row.status === 'rejected') throw new Error('Pesanan sudah ditolak.');
+    if (row.status === 'accepted') throw new Error('Pesanan sudah diproses.');
 
     const cafe = await ctx.db.get(row.cafeId);
     if (!cafe) throw new Error('Pesanan tidak ditemukan.');
@@ -483,13 +485,9 @@ export const getSelfOrderForCharge = internalQuery({
     const taxEnabled = cafe.taxEnabled === true;
     const scEnabled = pay?.serviceChargeEnabled === true;
 
-    const alreadyCharged =
-      (row.paymentStatus === 'awaiting' || row.paymentStatus === 'paid') &&
-      row.providerRef &&
-      row.qrString &&
-      row.expiresAt !== undefined &&
-      row.totalIDR !== undefined;
-
+    // Idempotency (an already-charged order returning its existing QR) is owned by
+    // `claimSelfOrderChargeSlot`, which the action calls next — this query only
+    // validates + supplies the data to recompute the true total.
     return {
       cafeId: row.cafeId,
       subtotalIDR: row.subtotalIDR,
@@ -499,10 +497,77 @@ export const getSelfOrderForCharge = internalQuery({
         taxEnabled,
         taxRatePct: taxEnabled ? (cafe.taxRatePct ?? 0) : 0,
       },
-      existing: alreadyCharged
-        ? { qrString: row.qrString!, expiresAt: row.expiresAt!, totalIDR: row.totalIDR! }
-        : null,
     };
+  },
+});
+
+/**
+ * Internal: atomically claim the single charge slot for a self-order (TOCTOU
+ * guard against two concurrent `createSelfOrderCharge` calls each creating a
+ * Xendit charge). In one transaction:
+ *  - If already charged (awaiting w/ providerRef, or paid) → return the existing
+ *    `{ qrString, expiresAt, totalIDR }` (loser reuses the winner's charge).
+ *  - If rejected/accepted → throw (mirrors getSelfOrderForCharge / Finding 2).
+ *  - Else mark `paymentStatus:'awaiting'` (the CLAIM — no providerRef yet) and
+ *    return `null` so the caller knows it won the slot and must create the charge.
+ */
+export const claimSelfOrderChargeSlot = internalMutation({
+  args: { selfOrderId: v.id('selfOrders') },
+  returns: v.union(
+    v.null(),
+    v.object({ qrString: v.string(), expiresAt: v.number(), totalIDR: v.number() })
+  ),
+  handler: async (ctx, { selfOrderId }) => {
+    const row = await ctx.db.get(selfOrderId);
+    if (!row) throw new Error('Pesanan tidak ditemukan.');
+    if (row.status === 'rejected') throw new Error('Pesanan sudah ditolak.');
+    if (row.status === 'accepted') throw new Error('Pesanan sudah diproses.');
+
+    // Already charged → hand back the existing charge (no second provider charge).
+    if (
+      (row.paymentStatus === 'awaiting' || row.paymentStatus === 'paid') &&
+      row.providerRef &&
+      row.qrString &&
+      row.expiresAt !== undefined &&
+      row.totalIDR !== undefined
+    ) {
+      return { qrString: row.qrString, expiresAt: row.expiresAt, totalIDR: row.totalIDR };
+    }
+
+    // A concurrent loser may see awaiting w/o a providerRef yet (claimed, charge
+    // in flight). Return its (possibly-undefined) charge fields — the winning call
+    // returns the real QR to its own client; the UI calls the action once per tap.
+    if (row.paymentStatus === 'awaiting') {
+      if (
+        row.qrString &&
+        row.expiresAt !== undefined &&
+        row.totalIDR !== undefined
+      ) {
+        return { qrString: row.qrString, expiresAt: row.expiresAt, totalIDR: row.totalIDR };
+      }
+      // Charge in flight, QR not stored yet — treat as already-claimed (no-op for
+      // this caller; it returns the bare row fields, acceptable per spec).
+      return null;
+    }
+
+    // Win the slot: claim awaiting (no providerRef yet).
+    await ctx.db.patch(selfOrderId, { paymentStatus: 'awaiting' });
+    return null;
+  },
+});
+
+/** Internal: reset a claimed-but-failed charge back to unpaid (Xendit threw). */
+export const resetSelfOrderChargeSlot = internalMutation({
+  args: { selfOrderId: v.id('selfOrders') },
+  returns: v.null(),
+  handler: async (ctx, { selfOrderId }) => {
+    const row = await ctx.db.get(selfOrderId);
+    // Only release a slot that's still awaiting WITHOUT a real charge attached, so
+    // we never clobber a charge that actually landed.
+    if (row && row.paymentStatus === 'awaiting' && !row.providerRef) {
+      await ctx.db.patch(selfOrderId, { paymentStatus: 'unpaid' });
+    }
+    return null;
   },
 });
 
@@ -554,16 +619,18 @@ export const createSelfOrderCharge = action({
     ctx,
     { qrToken, selfOrderId }
   ): Promise<{ qrString: string; expiresAt: number; totalIDR: number }> => {
+    // The query validates the qrToken↔table binding + the order status (throws on
+    // rejected/accepted / token mismatch) and returns the data to recompute the
+    // true total. It does NOT mutate.
     const info = await ctx.runQuery(internal.public.getSelfOrderForCharge, { selfOrderId, qrToken });
 
-    // Idempotent short-circuit: a charge already exists → return it, no new charge.
-    if (info.existing) {
-      return {
-        qrString: info.existing.qrString,
-        expiresAt: info.existing.expiresAt,
-        totalIDR: info.existing.totalIDR,
-      };
-    }
+    // Atomically claim the single charge slot. A concurrent loser gets the
+    // existing charge back here (and never creates a second Xendit charge); the
+    // claim also re-checks status (rejected/accepted → throw).
+    const claimed = await ctx.runMutation(internal.public.claimSelfOrderChargeSlot, {
+      selfOrderId,
+    });
+    if (claimed) return claimed;
 
     // Server-authoritative TRUE total (subtotal + SC + tax). discount 0 (no promo
     // engine on the public surface yet).
@@ -576,21 +643,34 @@ export const createSelfOrderCharge = action({
     const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, {
       cafeId: info.cafeId,
     });
-    if (!config) throw new Error('Pembayaran QRIS tidak tersedia.');
+    if (!config) {
+      // We claimed the slot but can't charge — release it so the order isn't stuck
+      // in `awaiting` with no QR.
+      await ctx.runMutation(internal.public.resetSelfOrderChargeSlot, { selfOrderId });
+      throw new Error('Pembayaran QRIS tidak tersedia.');
+    }
 
-    const { providerRef, qrString, expiresAt } = await resolveProvider(config).createCharge({
-      amountIDR: totalIDR,
-      referenceId: `so_${selfOrderId}`,
-    });
+    let charge: { providerRef: string; qrString: string; expiresAt: number };
+    try {
+      charge = await resolveProvider(config).createCharge({
+        amountIDR: totalIDR,
+        referenceId: `so_${selfOrderId}`,
+      });
+    } catch (err) {
+      // Xendit threw — release the claimed slot back to `unpaid` so it isn't stuck
+      // in `awaiting` with no QR, then rethrow.
+      await ctx.runMutation(internal.public.resetSelfOrderChargeSlot, { selfOrderId });
+      throw err;
+    }
 
     await ctx.runMutation(internal.public.markSelfOrderCharged, {
       selfOrderId,
       totalIDR,
-      providerRef,
-      qrString,
-      expiresAt,
+      providerRef: charge.providerRef,
+      qrString: charge.qrString,
+      expiresAt: charge.expiresAt,
     });
 
-    return { qrString, expiresAt, totalIDR };
+    return { qrString: charge.qrString, expiresAt: charge.expiresAt, totalIDR };
   },
 });

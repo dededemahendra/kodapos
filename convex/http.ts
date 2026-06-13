@@ -9,6 +9,9 @@ import { qrisWebhookSecret, resolveProvider } from './payments/providers';
 const http = httpRouter();
 auth.addHttpRoutes(http);
 
+// `/webhooks/qris` is the MOCK/dev + `simulateWebhook` route ONLY: it hardwires
+// MockProvider on purpose (real Xendit traffic uses `/webhooks/qris/xendit`
+// below, which resolves the per-cafe provider from config).
 http.route({
   path: '/webhooks/qris',
   method: 'POST',

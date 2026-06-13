@@ -152,10 +152,12 @@ export const reject = mutation({
   handler: async (ctx, { id }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const row = await requireOwned(ctx, cafeId, id, 'Pesanan');
-    // A pre-paid (QRIS) self-order can't be rejected: the money is already
-    // collected, so it must be accepted (or refunded out of band), never dropped.
-    if (row.paymentStatus === 'paid') {
-      throw new Error('Pesanan sudah dibayar, tidak bisa ditolak.');
+    // A pay-now (QRIS) self-order with a charge in-flight (awaiting) or already
+    // paid can't be rejected: the customer may pay (or has paid) a live QR, so
+    // rejecting would collect money on a never-fired order. It must be accepted
+    // (or refunded out of band), never dropped.
+    if (row.paymentStatus === 'awaiting' || row.paymentStatus === 'paid') {
+      throw new Error('Tidak bisa menolak pesanan yang sedang atau sudah dibayar.');
     }
     await ctx.db.patch(id, { status: 'rejected' });
     return null;
@@ -177,6 +179,13 @@ export const acceptPaid = mutation({
 
     // Idempotent fast-path: already accepted → return the existing order.
     if (so.acceptedOrderId) return { orderId: so.acceptedOrderId };
+
+    // A rejected self-order must never be turned into a real order, even if a
+    // payment somehow landed on it ('new' is the normal path; 'accepted' covers
+    // the idempotent retry before acceptedOrderId is stamped).
+    if (so.status !== 'new' && so.status !== 'accepted') {
+      throw new Error('Pesanan sudah ditolak.');
+    }
 
     if (so.paymentStatus !== 'paid') throw new Error('Pesanan belum dibayar.');
     if (so.paidAmountIDR === undefined) throw new Error('Pesanan belum dibayar.');

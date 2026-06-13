@@ -67,8 +67,16 @@ export const confirmSelfOrderFromWebhook = internalMutation({
       .withIndex('by_provider_ref', (q) => q.eq('providerRef', providerRef))
       .unique();
     if (!so) return 'unknown';
-    if (so.paymentStatus === 'awaiting') {
+    // Only confirm a NON-rejected order. A payment that lands on a rejected order
+    // does NOT silently flip to paid (no stuck "paid + rejected" order). The money
+    // for a paid-but-rejected order is handled out-of-band; the key fix is not
+    // creating a confusing paid+rejected self-order.
+    if (so.paymentStatus === 'awaiting' && so.status !== 'rejected') {
       await ctx.db.patch(so._id, { paymentStatus: 'paid', paidAmountIDR: so.totalIDR });
+    } else if (so.paymentStatus === 'awaiting' && so.status === 'rejected') {
+      console.warn(
+        `confirmSelfOrderFromWebhook: webhook hit a REJECTED self-order ${so._id} (ref ${providerRef}); payment handled out-of-band, not confirmed.`
+      );
     }
     return 'paid';
   },

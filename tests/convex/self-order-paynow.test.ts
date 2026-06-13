@@ -422,4 +422,104 @@ describe('selfOrders.reject (pay-now guard)', () => {
       s.asOwner.mutation(api.selfOrders.reject, { id: selfOrderId })
     ).rejects.toThrow(/sudah dibayar/i);
   });
+
+  // Finding 1: a LIVE QR (awaiting, charge in-flight) must NOT be rejectable —
+  // otherwise the customer can pay a rejected, never-fired order.
+  it('throws when rejecting an AWAITING (live QR) self-order', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const selfOrderId = await submit(t, s, 'c-reject-await');
+    await t.action(api.public.createSelfOrderCharge, { qrToken: s.qrToken, selfOrderId });
+    await expect(
+      s.asOwner.mutation(api.selfOrders.reject, { id: selfOrderId })
+    ).rejects.toThrow(/sedang atau sudah dibayar|dibayar/i);
+  });
+});
+
+// Finding 1 (defense in depth): a webhook landing on a REJECTED self-order must
+// NOT silently flip it to paid (no stuck "paid + rejected" order).
+describe('payments.qrisDynamic.confirmSelfOrderFromWebhook (rejected guard)', () => {
+  it('does NOT flip a rejected self-order to paid', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const selfOrderId = await submit(t, s, 'c-confirm-rej');
+    await t.action(api.public.createSelfOrderCharge, { qrToken: s.qrToken, selfOrderId });
+    const providerRef = await t.run(async (ctx) => (await ctx.db.get(selfOrderId))!.providerRef!);
+
+    // Force the order to rejected behind the webhook's back.
+    await t.run(async (ctx) => ctx.db.patch(selfOrderId, { status: 'rejected' }));
+
+    await t.mutation(internal.payments.qrisDynamic.confirmSelfOrderFromWebhook, { providerRef });
+    const row = await t.run(async (ctx) => ctx.db.get(selfOrderId));
+    expect(row!.paymentStatus).not.toBe('paid');
+    expect(row!.paymentStatus).toBe('awaiting');
+  });
+});
+
+// Finding 2: createSelfOrderCharge must not charge a rejected/accepted order.
+describe('public.createSelfOrderCharge (status guard)', () => {
+  it('throws ditolak when charging a REJECTED self-order', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const selfOrderId = await submit(t, s, 'c-charge-rej');
+    await t.run(async (ctx) => ctx.db.patch(selfOrderId, { status: 'rejected' }));
+    await expect(
+      t.action(api.public.createSelfOrderCharge, { qrToken: s.qrToken, selfOrderId })
+    ).rejects.toThrow(/ditolak/i);
+  });
+
+  it('throws diproses when charging an ACCEPTED self-order', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const selfOrderId = await submit(t, s, 'c-charge-acc');
+    await t.run(async (ctx) => ctx.db.patch(selfOrderId, { status: 'accepted' }));
+    await expect(
+      t.action(api.public.createSelfOrderCharge, { qrToken: s.qrToken, selfOrderId })
+    ).rejects.toThrow(/diproses/i);
+  });
+
+  it('still charges a new self-order fine', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const selfOrderId = await submit(t, s, 'c-charge-new');
+    const res = await t.action(api.public.createSelfOrderCharge, {
+      qrToken: s.qrToken,
+      selfOrderId,
+    });
+    expect(res.totalIDR).toBe(22000);
+  });
+});
+
+// Finding 3: claim-slot against duplicate Xendit charges.
+describe('public.createSelfOrderCharge (claim-slot)', () => {
+  it('a 2nd charge after a claim does not change the providerRef', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const selfOrderId = await submit(t, s, 'c-claim');
+
+    await t.action(api.public.createSelfOrderCharge, { qrToken: s.qrToken, selfOrderId });
+    const firstRef = await t.run(async (ctx) => (await ctx.db.get(selfOrderId))!.providerRef!);
+
+    await t.action(api.public.createSelfOrderCharge, { qrToken: s.qrToken, selfOrderId });
+    const secondRef = await t.run(async (ctx) => (await ctx.db.get(selfOrderId))!.providerRef!);
+    expect(secondRef).toBe(firstRef);
+  });
+
+  it('acceptPaid rejects an order whose self-order status was forced to rejected', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const { cashierId } = await openShift(s.asOwner);
+    const selfOrderId = await seedPaid(t, s, 'c-acceptpaid-rej');
+    await t.run(async (ctx) => ctx.db.patch(selfOrderId, { status: 'rejected' }));
+    await expect(
+      s.asOwner.mutation(api.selfOrders.acceptPaid, { id: selfOrderId, cashierId })
+    ).rejects.toThrow(/ditolak/i);
+  });
 });
