@@ -34,15 +34,15 @@ export function LatestChange() {
 		<div
 			className={cn(
 				"group/latest-change size-full min-h-27 justify-center border-t",
-				"relative flex size-full flex-col gap-1 overflow-hidden px-4 pt-3 pb-1 *:text-nowrap",
+				"relative flex size-full flex-col gap-1 overflow-hidden px-4 pt-3 pb-1",
 				"transition-opacity group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0"
 			)}
 		>
-			<span className="font-light font-mono text-[10px] text-muted-foreground">
+			<span className="font-light font-mono text-[10px] text-nowrap text-muted-foreground">
 				<Trans>PEMBARUAN</Trans>
 			</span>
-			<p className="truncate font-medium text-xs">{localized(latest.title, locale)}</p>
-			<span className="truncate text-[10px] text-muted-foreground">
+			<p className="pr-6 font-medium text-xs">{localized(latest.title, locale)}</p>
+			<span className="text-[10px] text-muted-foreground">
 				{localized(latest.summary, locale)}
 			</span>
 			<Button
