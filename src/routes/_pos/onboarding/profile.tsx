@@ -3,6 +3,7 @@ import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
+import { useEffect, useRef } from 'react';
 import { CafeProfileForm, type CafeProfileFormValues } from '~/components/menu/cafe-profile-form';
 
 export const Route = createFileRoute('/_pos/onboarding/profile')({
@@ -14,13 +15,23 @@ function OnboardingProfile() {
   const cafe = useQuery(api.cafes.myCafe);
   const updateProfile = useMutation(api.cafes.updateProfile);
   const markComplete = useMutation(api.cafes.markSetupComplete);
+  const createForOwner = useMutation(api.cafes.createForOwner);
   const navigate = useNavigate();
 
-  if (cafe === undefined) {
+  // A Google sign-up lands here authenticated but cafe-less (the inline
+  // cafe-creation step only runs on the password signup form). Create a
+  // default cafe so onboarding can proceed; createForOwner is idempotent.
+  const creating = useRef(false);
+  useEffect(() => {
+    if (cafe !== null || creating.current) return;
+    creating.current = true;
+    void createForOwner({ name: 'Kafe Saya' }).catch(() => {
+      creating.current = false;
+    });
+  }, [cafe, createForOwner]);
+
+  if (cafe === undefined || cafe === null) {
     return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
-  }
-  if (cafe === null) {
-    return <p className="text-muted-foreground"><Trans>Kafe tidak ditemukan.</Trans></p>;
   }
 
   const initial: CafeProfileFormValues = {

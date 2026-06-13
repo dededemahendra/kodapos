@@ -4,6 +4,7 @@ import { Trans } from '@lingui/react/macro';
 import { createRootRoute, HeadContent, Link, Outlet, Scripts } from '@tanstack/react-router';
 import { useEffect, type ReactNode } from 'react';
 import { LocaleProvider } from '~/components/locale-provider';
+import { authStorage } from '~/lib/auth-storage';
 import { convex } from '~/lib/convex';
 import { i18n } from '~/lib/i18n';
 import { applyDensity, getDensity } from '~/lib/preferences';
@@ -55,7 +56,7 @@ function RootComponent() {
     <RootDocument>
       <I18nProvider i18n={i18n}>
         <LocaleProvider>
-          <ConvexAuthProvider client={convex}>
+          <ConvexAuthProvider client={convex} storage={authStorage}>
             <Outlet />
           </ConvexAuthProvider>
         </LocaleProvider>

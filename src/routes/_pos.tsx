@@ -1,7 +1,7 @@
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import { Authenticated, AuthLoading, Unauthenticated, useConvex, useQuery } from 'convex/react';
+import { Authenticated, AuthLoading, Unauthenticated, useQuery } from 'convex/react';
 import { type ReactNode, useEffect } from 'react';
 import { AppHeader } from '~/components/app-header';
 import { AppSidebar } from '~/components/app-sidebar';
@@ -80,22 +80,36 @@ function SignedOutRedirect() {
 }
 
 function OnboardingGate({ children }: { children: ReactNode }) {
-  const convex = useConvex();
+  // Use the cached reactive query so the gate resolves synchronously on
+  // re-render rather than after an awaited fetch. `undefined` = still loading;
+  // we MUST NOT render `_pos` content until we know the cafe state, otherwise a
+  // cafe-less user briefly sees the app before the onboarding redirect fires.
+  const cafe = useQuery(api.cafes.myCafe, {});
   const path = useRouterState({ select: (s) => s.location.pathname });
+  // A cafe-less authenticated user (e.g. a Google sign-up that skipped the
+  // inline cafe-creation step) needs to land in onboarding to create one;
+  // an owner mid-onboarding (cafe exists but no setupCompletedAt) too. The
+  // onboarding routes are exempt to avoid a redirect loop.
+  const alreadyOnOnboarding = path.startsWith('/onboarding');
+  const needsOnboarding = cafe !== undefined && (cafe === null || !cafe.setupCompletedAt);
+
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const cafe = await convex.query(api.cafes.myCafe);
-      if (cancelled) return;
-      const needsOnboarding = cafe !== null && !cafe.setupCompletedAt;
-      const alreadyOnOnboarding = path.startsWith('/onboarding');
-      if (needsOnboarding && !alreadyOnOnboarding && typeof window !== 'undefined') {
-        window.location.replace('/onboarding/profile');
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [convex, path]);
+    if (needsOnboarding && !alreadyOnOnboarding && typeof window !== 'undefined') {
+      window.location.replace('/onboarding/profile');
+    }
+  }, [needsOnboarding, alreadyOnOnboarding]);
+
+  // Loading: don't flash app content.
+  if (cafe === undefined) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+  // Redirecting a cafe-less user (and not already on onboarding): render nothing.
+  if (needsOnboarding && !alreadyOnOnboarding) {
+    return null;
+  }
   return <>{children}</>;
 }
