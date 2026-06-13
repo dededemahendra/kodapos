@@ -1,4 +1,3 @@
-import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from 'convex/react';
@@ -7,7 +6,7 @@ import { AppHeader } from '~/components/app-header';
 import { AppSidebar } from '~/components/app-sidebar';
 import { RegisterTopBar } from '~/components/sale/register-top-bar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
-import { Spinner } from '~/components/ui/spinner';
+import { LoadingCounter } from '~/components/ui/loading-counter';
 import { Toaster } from '~/components/ui/sonner';
 
 export const Route = createFileRoute('/_pos')({
@@ -37,10 +36,7 @@ function PosLayout() {
   return (
     <div className="min-h-screen bg-muted">
       <AuthLoading>
-        <div className="flex min-h-screen items-center justify-center gap-2 text-muted-foreground">
-          <Spinner />
-          <span><Trans>Memuat sesi…</Trans></span>
-        </div>
+        <LoadingCounter />
       </AuthLoading>
       <Unauthenticated>
         <SignedOutRedirect />
@@ -101,11 +97,7 @@ function OnboardingGate({ children }: { children: ReactNode }) {
 
   // Loading: don't flash app content.
   if (cafe === undefined) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <LoadingCounter />;
   }
   // Redirecting a cafe-less user (and not already on onboarding): render nothing.
   if (needsOnboarding && !alreadyOnOnboarding) {
