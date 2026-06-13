@@ -1,11 +1,17 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
+import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
+import type { Doc } from 'convex/_generated/dataModel';
 import type { LoyaltyTier } from 'convex/lib/loyalty';
 import { useMutation, useQuery } from 'convex/react';
-import { Award, X } from 'lucide-react';
-import { useState } from 'react';
+import { Archive, Award, Gift, Pencil, Plus, X } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import { RewardFormDialog } from '~/components/loyalty/reward-form-dialog';
 import { Button } from '~/components/ui/button';
+import { ConfirmDialog } from '~/components/ui/confirm-dialog';
+import { DataTable } from '~/components/ui/data-table';
+import { RowActions } from '~/components/ui/row-actions';
 import { RowSep, SettingRow, SettingsSection } from '~/components/settings/primitives';
 import { SaveBar } from '~/components/settings/save-bar';
 import { useEditableState } from '~/components/settings/use-editable-state';
@@ -52,6 +58,163 @@ function toInt(value: string): number {
 function toFloat(value: string): number {
   const n = Number.parseFloat(value);
   return Number.isNaN(n) ? 1 : n;
+}
+
+type Reward = Doc<'loyaltyRewards'>;
+
+/** Admin section: a catalog of redeemable rewards (points cost → a fixed
+ *  discount). Owner-gated by the backend mutations. */
+function RewardsSection() {
+  const { t } = useLingui();
+  const rewards = useQuery(api.loyaltyRewards.list, {});
+  const archive = useMutation(api.loyaltyRewards.archive);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Reward | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Reward | null>(null);
+
+  function openCreate() {
+    setEditing(null);
+    setFormOpen(true);
+  }
+  // Stable so the `columns` memo (dep [t]) doesn't capture a changing ref.
+  const openEdit = useCallback((r: Reward) => {
+    setEditing(r);
+    setFormOpen(true);
+  }, []);
+
+  const columns = useMemo<ColumnDef<Reward, unknown>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: () => <Trans>Nama</Trans>,
+        cell: ({ row }) => (
+          <button
+            type="button"
+            className="text-left font-medium hover:underline"
+            onClick={() => openEdit(row.original)}
+          >
+            {row.original.name}
+          </button>
+        ),
+      },
+      {
+        accessorKey: 'pointsCost',
+        header: () => <Trans>Poin</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">
+            <Trans>{formatCount(row.original.pointsCost)} poin</Trans>
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'discountIDR',
+        header: () => <Trans>Diskon</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">{formatIDR(row.original.discountIDR)}</span>
+        ),
+      },
+      {
+        id: 'actions',
+        enableSorting: false,
+        header: () => null,
+        cell: ({ row }) => (
+          <div className="text-right">
+            <RowActions
+              label={t`Aksi baris`}
+              items={[
+                {
+                  label: <Trans>Ubah</Trans>,
+                  icon: <Pencil />,
+                  onSelect: () => openEdit(row.original),
+                },
+                {
+                  label: <Trans>Arsipkan</Trans>,
+                  icon: <Archive />,
+                  destructive: true,
+                  separatorBefore: true,
+                  onSelect: () => setArchiveTarget(row.original),
+                },
+              ]}
+            />
+          </div>
+        ),
+      },
+    ],
+    [t, openEdit]
+  );
+
+  const emptyState = (
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Gift />
+        </EmptyMedia>
+        <EmptyTitle>
+          <Trans>Belum ada reward.</Trans>
+        </EmptyTitle>
+        <EmptyDescription>
+          <Trans>Buat reward untuk ditukar pelanggan dengan poin.</Trans>
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  );
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-center justify-between pb-3">
+        <CardTitle className="text-base">
+          <Trans>Reward</Trans>
+        </CardTitle>
+        <Button type="button" size="sm" onClick={openCreate}>
+          <Plus />
+          <Trans>Tambah reward</Trans>
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <DataTable
+          columns={columns}
+          data={rewards}
+          emptyState={emptyState}
+          initialSort={[{ id: 'pointsCost', desc: false }]}
+        />
+      </CardContent>
+
+      <RewardFormDialog
+        open={formOpen}
+        editing={editing}
+        onOpenChange={(o) => {
+          setFormOpen(o);
+          if (!o) setEditing(null);
+        }}
+      />
+      <ConfirmDialog
+        open={archiveTarget !== null}
+        onOpenChange={(o) => {
+          if (!o) setArchiveTarget(null);
+        }}
+        title={<Trans>Arsipkan reward?</Trans>}
+        description={
+          archiveTarget ? (
+            <Trans>"{archiveTarget.name}" tidak akan bisa ditukar lagi.</Trans>
+          ) : undefined
+        }
+        confirmLabel={<Trans>Arsipkan</Trans>}
+        destructive
+        onConfirm={async () => {
+          if (!archiveTarget) return;
+          try {
+            await archive({ id: archiveTarget._id });
+            toast.success(t`Reward diarsipkan.`);
+          } catch (err) {
+            const message = err instanceof Error ? err.message : t`Gagal mengarsipkan reward.`;
+            toast.error(message);
+            throw err;
+          }
+        }}
+      />
+    </Card>
+  );
 }
 
 function LoyaltyPage() {
@@ -285,6 +448,11 @@ function LoyaltyPage() {
             <SaveBar dirty={dirty} onReset={reset} onSave={handleSave} />
           </>
         )}
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Rewards                                                           */}
+        {/* ---------------------------------------------------------------- */}
+        <RewardsSection />
 
         {/* ---------------------------------------------------------------- */}
         {/* Stats                                                             */}

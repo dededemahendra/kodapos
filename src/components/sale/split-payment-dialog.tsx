@@ -112,6 +112,7 @@ export function SplitPaymentDialog({
     subtotalIDR,
     discountIDR: promoDiscountIDR,
     redeemPoints: customer.redeemPoints,
+    redeemRewardIDR: customer.redeemRewardIDR,
     loyaltyCfg,
     serviceChargeEnabled,
     serviceChargePct,
@@ -186,6 +187,7 @@ export function SplitPaymentDialog({
         ...(cart.manualDiscount ? { manualDiscount: cart.manualDiscount } : {}),
         ...(customer.customerId ? { customerId: customer.customerId } : {}),
         ...(customer.redeemPoints > 0 ? { redeemPoints: customer.redeemPoints } : {}),
+        ...(customer.redeemRewardId ? { redeemRewardId: customer.redeemRewardId } : {}),
         createdAtClient: Date.now(),
       });
       onPaid(result.orderId);

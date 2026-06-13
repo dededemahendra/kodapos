@@ -30,6 +30,7 @@ export const saleArgs = {
   manualDiscount: v.optional(manualDiscountValidator),
   customerId: v.optional(v.id('customers')),
   redeemPoints: v.optional(v.number()),
+  redeemRewardId: v.optional(v.id('loyaltyRewards')),
   createdAtClient: v.optional(v.number()),
   orderType: v.optional(orderTypeValidator),
   tableId: v.optional(v.id('tables')),
@@ -265,6 +266,12 @@ export async function buildOrder(
   if ((args.redeemPoints ?? 0) > 0 && !args.customerId) {
     throw new Error('Penukaran poin memerlukan pelanggan.');
   }
+  if (args.redeemRewardId) {
+    if ((args.redeemPoints ?? 0) > 0) {
+      throw new Error('Pilih reward atau tukar poin, tidak keduanya.');
+    }
+    if (!args.customerId) throw new Error('Pilih pelanggan untuk menukar reward.');
+  }
 
   // Single cafeSettings read for the whole checkout path.
   const settings = await ctx.db
@@ -309,19 +316,33 @@ export async function buildOrder(
     customer = c;
     loyaltyCfg = { ...DEFAULT_LOYALTY, ...(settings?.loyalty ?? {}) };
 
-    const redeem = args.redeemPoints ?? 0;
-    if (redeem > 0) {
+    const afterPromo = subtotalIDR - discountIDR;
+    if (args.redeemRewardId) {
+      // A reward is server-authoritative: resolve by id, read its pointsCost +
+      // discountIDR off the doc (never a client amount). Mutually exclusive with
+      // free-form redeemPoints (guarded above).
       if (!loyaltyCfg.enabled) throw new Error('Program loyalitas tidak aktif.');
-      if (!Number.isInteger(redeem) || redeem % loyaltyCfg.redeemBlockPoints !== 0) {
-        throw new Error('Poin harus kelipatan blok penukaran.');
+      const reward = await requireOwned(ctx, cafeId, args.redeemRewardId, 'Reward');
+      if (reward.archived) throw new Error('Reward tidak tersedia.');
+      if (reward.pointsCost > customer.pointsBalance) throw new Error('Poin tidak mencukupi.');
+      if (reward.discountIDR > afterPromo) throw new Error('Reward melebihi total.');
+      pointsRedeemed = reward.pointsCost;
+      pointsRedeemedIDR = reward.discountIDR;
+      discountIDR += reward.discountIDR;
+    } else {
+      const redeem = args.redeemPoints ?? 0;
+      if (redeem > 0) {
+        if (!loyaltyCfg.enabled) throw new Error('Program loyalitas tidak aktif.');
+        if (!Number.isInteger(redeem) || redeem % loyaltyCfg.redeemBlockPoints !== 0) {
+          throw new Error('Poin harus kelipatan blok penukaran.');
+        }
+        if (redeem > customer.pointsBalance) throw new Error('Poin tidak mencukupi.');
+        const redeemIDR = redemptionIDR(redeem, loyaltyCfg);
+        if (redeemIDR > afterPromo) throw new Error('Penukaran poin melebihi total.');
+        pointsRedeemed = redeem;
+        pointsRedeemedIDR = redeemIDR;
+        discountIDR += redeemIDR;
       }
-      if (redeem > customer.pointsBalance) throw new Error('Poin tidak mencukupi.');
-      const afterPromo = subtotalIDR - discountIDR;
-      const redeemIDR = redemptionIDR(redeem, loyaltyCfg);
-      if (redeemIDR > afterPromo) throw new Error('Penukaran poin melebihi total.');
-      pointsRedeemed = redeem;
-      pointsRedeemedIDR = redeemIDR;
-      discountIDR += redeemIDR;
     }
   }
 
@@ -543,7 +564,9 @@ export async function settleSale(ctx: MutationCtx, orderId: Id<'orders'>): Promi
         });
       }
       await ctx.db.patch(customer._id, {
-        pointsBalance: customer.pointsBalance + earned - pointsRedeemed,
+        // Floor at 0 so a reward costing more points than the order earns (or a
+        // concurrent redemption) can never drive the balance negative.
+        pointsBalance: Math.max(0, customer.pointsBalance + earned - pointsRedeemed),
         visitCount: customer.visitCount + 1,
         totalSpentIDR: customer.totalSpentIDR + order.totalIDR,
         lastVisitAt: now,
