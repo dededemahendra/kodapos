@@ -1149,6 +1149,10 @@ msgstr "Create 2-3 categories (Coffee, Non-Coffee, Food)."
 #~ msgid "Buat 2–3 kategori (Kopi, Non-Kopi, Makanan)."
 #~ msgstr "Create 2–3 categories (Coffee, Non-Coffee, Food)."
 
+#: src/routes/_public/signup.tsx
+msgid "Buat akun"
+msgstr "Create account"
+
 #: src/components/inventory/ingredient-picker.tsx
 msgid "Buat bahan baru:"
 msgstr "Create new ingredient:"
@@ -2554,7 +2558,6 @@ msgstr "Transaction count by method, last 7 days."
 msgid "Kafe"
 msgstr "Cafe"
 
-#: src/routes/_pos/onboarding/profile.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kafe tidak ditemukan."
 msgstr "Cafe not found."

@@ -87,7 +87,10 @@ function OnboardingGate({ children }: { children: ReactNode }) {
     void (async () => {
       const cafe = await convex.query(api.cafes.myCafe);
       if (cancelled) return;
-      const needsOnboarding = cafe !== null && !cafe.setupCompletedAt;
+      // A cafe-less authenticated user (e.g. a Google sign-up that skipped the
+      // inline cafe-creation step) needs to land in onboarding to create one;
+      // an owner mid-onboarding (cafe exists but no setupCompletedAt) too.
+      const needsOnboarding = cafe === null || !cafe.setupCompletedAt;
       const alreadyOnOnboarding = path.startsWith('/onboarding');
       if (needsOnboarding && !alreadyOnOnboarding && typeof window !== 'undefined') {
         window.location.replace('/onboarding/profile');

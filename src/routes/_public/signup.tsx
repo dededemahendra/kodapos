@@ -12,11 +12,15 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { AuthCard } from '~/components/auth/auth-card';
+import { OrDivider } from '~/components/auth/or-divider';
+import { GoogleButton } from '~/components/auth/social-buttons';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { setRememberMe } from '~/lib/auth-storage';
 import {
   passwordStrength,
   validateCafeName,
@@ -100,6 +104,13 @@ function SignupPage() {
     password.value.length === 0 ||
     !agreed;
 
+  function onGoogle(): void {
+    // Google signups can't run the cafe-creation step inline; the post-auth
+    // OnboardingGate routes a cafe-less authenticated user into onboarding.
+    setRememberMe(true);
+    void signIn('google');
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
     const nameErr = validateName(name.value);
@@ -114,6 +125,7 @@ function SignupPage() {
     setSubmitting(true);
     setAuthError(null);
     try {
+      setRememberMe(true);
       await signIn('password', {
         flow: 'signUp',
         email: email.value.trim(),
@@ -133,12 +145,11 @@ function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
-      <form
-        onSubmit={onSubmit}
-        className="w-full max-w-sm p-6 rounded-lg border border-border bg-background"
-      >
-        <h1 className="mb-6 text-2xl font-bold"><Trans>Daftar</Trans></h1>
+    <AuthCard title={<Trans>Buat akun</Trans>}>
+      <GoogleButton onClick={onGoogle} disabled={submitting} />
+      <OrDivider />
+
+      <form onSubmit={onSubmit}>
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="name"><Trans>Nama Anda</Trans></FieldLabel>
@@ -285,14 +296,14 @@ function SignupPage() {
             {submitting ? <Trans>Memproses…</Trans> : <Trans>Daftar</Trans>}
           </Button>
         </FieldGroup>
-
-        <div className="mt-6 pt-6 border-t border-border text-center text-sm text-muted-foreground">
-          <Trans>Sudah punya akun?</Trans>{' '}
-          <Link to="/signin" className="text-primary underline">
-            <Trans>Masuk</Trans>
-          </Link>
-        </div>
       </form>
-    </main>
+
+      <div className="mt-6 border-t border-border pt-6 text-center text-sm text-muted-foreground">
+        <Trans>Sudah punya akun?</Trans>{' '}
+        <Link to="/signin" className="text-primary underline">
+          <Trans>Masuk</Trans>
+        </Link>
+      </div>
+    </AuthCard>
   );
 }
