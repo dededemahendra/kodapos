@@ -1544,6 +1544,10 @@ msgstr "Incorrect email or password."
 msgid "Email penerima ringkasan"
 msgstr "Summary recipient email"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Email peringatan stok menipis harian"
+msgstr "Daily low-stock email alert"
+
 #: src/routes/_pos/shifts.tsx
 msgid "Email ringkasan"
 msgstr "Email summary"
@@ -2924,6 +2928,10 @@ msgstr "Table saved."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Mekari Jurnal"
 msgstr "Mekari Jurnal"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Memakai email penerima yang sama."
+msgstr "Uses the same recipient email."
 
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 msgid "Membuat tagihan…"
