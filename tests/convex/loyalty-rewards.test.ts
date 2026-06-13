@@ -2,6 +2,7 @@ import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
+import { settleSale } from '../../convex/lib/sale';
 import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
@@ -125,6 +126,23 @@ describe('loyaltyRewards.listForCustomer', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]?.name).toBe('Cheap');
     expect(rows[0]?.pointsCost).toBe(100);
+  });
+
+  it('drops rewards whose discountIDR exceeds afterPromoIDR', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    // Both affordable by points; only the 10000 one fits a 20000 cart remainder.
+    await asOwner.mutation(api.loyaltyRewards.create, { name: 'Small', pointsCost: 100, discountIDR: 10000 });
+    await asOwner.mutation(api.loyaltyRewards.create, { name: 'Big', pointsCost: 100, discountIDR: 50000 });
+    const customerId = await asOwner.mutation(api.customers.create, { name: 'C', phone: '08120000002' });
+    await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 500 });
+    const rows = await asOwner.query(api.loyaltyRewards.listForCustomer, {
+      customerId,
+      afterPromoIDR: 20000,
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.name).toBe('Small');
+    expect(rows[0]?.discountIDR).toBe(10000);
   });
 });
 
@@ -276,5 +294,115 @@ describe('reward redemption at checkout', () => {
         createdAtClient: 1700000000000,
       })
     ).rejects.toThrow(/pelanggan/i);
+  });
+
+  it('rejects a reward sale when the loyalty program is disabled', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, itemId } = await setupSale(t, 'rw-off@x.com');
+    const rewardId = await asOwner.mutation(api.loyaltyRewards.create, {
+      name: 'Free Latte',
+      pointsCost: 120,
+      discountIDR: 25000,
+    });
+    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111115' });
+    await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 300 });
+    // Disable the program (keep the other config fields valid).
+    await asOwner.mutation(api.loyalty.updateConfig, {
+      enabled: false,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 10000,
+    });
+    await expect(
+      asOwner.mutation(api.orders.createCashSale, {
+        clientId: 'reward-off',
+        shiftId,
+        cashierId,
+        lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+        cashTenderedIDR: 200000,
+        customerId,
+        redeemRewardId: rewardId,
+        createdAtClient: 1700000000000,
+      })
+    ).rejects.toThrow(/tidak aktif/i);
+  });
+
+  it('settle never drives the points balance below 0 (reward costs more than earned)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId, itemId } = await setupSale(t, 'rw-floor@x.com');
+    // A reward that discounts the WHOLE 100000 order: earnBase = 0 → earns 0 points.
+    const rewardId = await asOwner.mutation(api.loyaltyRewards.create, {
+      name: 'Full off',
+      pointsCost: 120,
+      discountIDR: 100000,
+    });
+    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111116' });
+    // Exactly enough points to redeem; the sale earns 0, so balance lands at 0.
+    await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 120 });
+    const res = await asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'reward-floor',
+      shiftId,
+      cashierId,
+      lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 200000,
+      customerId,
+      redeemRewardId: rewardId,
+      createdAtClient: 1700000000000,
+    });
+    const order = await t.run((ctx) => ctx.db.get(res.orderId));
+    expect(order?.pointsRedeemed).toBe(120);
+    expect(order?.pointsEarned).toBe(0); // earnBase 100000 - 100000 = 0
+    const detail = await asOwner.query(api.customers.getDetail, { id: customerId });
+    // max(0, 120 + 0 - 120) = 0, never negative.
+    expect(detail?.pointsBalance).toBeGreaterThanOrEqual(0);
+    expect(detail?.pointsBalance).toBe(0);
+  });
+
+  it('settleSale floors at 0 when the balance was drained below pointsRedeemed', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupSale(t, 'rw-drain@x.com');
+    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111117' });
+    await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 120 });
+
+    // Build a pending order directly that redeems 120 points and earns 0, then
+    // simulate a concurrent redemption draining the balance to 50 before settle.
+    const orderId = await t.run(async (ctx) => {
+      const customer = await ctx.db.get(customerId as Id<'customers'>);
+      const id = await ctx.db.insert('orders', {
+        cafeId: customer!.cafeId,
+        // biome-ignore lint: minimal pending order for the settle floor test
+        shiftId: (await ctx.db.query('shifts').first())!._id,
+        cashierId: (await ctx.db.query('cafeStaff').first())!._id,
+        clientId: 'drain-pending',
+        lines: [],
+        subtotalIDR: 0,
+        taxRatePct: 0,
+        taxIDR: 0,
+        discountIDR: 0,
+        serviceChargeIDR: 0,
+        serviceChargePct: 0,
+        serviceChargeName: 'Service',
+        customerId: customerId as Id<'customers'>,
+        pointsEarned: 0,
+        pointsRedeemed: 120,
+        pointsRedeemedIDR: 0,
+        totalIDR: 0,
+        orderType: 'dine_in',
+        paymentMethod: 'cash',
+        paymentBreakdown: [{ method: 'cash', amountIDR: 0 }],
+        paymentStatus: 'pending',
+        createdAtClient: 1700000000000,
+        syncedAt: 1700000000000,
+      });
+      // Concurrent drain: balance now below the 120 this order will redeem.
+      await ctx.db.patch(customerId as Id<'customers'>, { pointsBalance: 50 });
+      return id;
+    });
+
+    // settleSale subtracts 120 from a balance of 50 → would be -70 without the floor.
+    await t.run((ctx) => settleSale(ctx, orderId));
+    const detail = await asOwner.query(api.customers.getDetail, { id: customerId });
+    expect(detail?.pointsBalance).toBeGreaterThanOrEqual(0);
+    expect(detail?.pointsBalance).toBe(0);
   });
 });

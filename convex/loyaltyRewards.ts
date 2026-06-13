@@ -83,11 +83,14 @@ export const archive = mutation({
 });
 
 /** Active rewards the customer can afford (pointsCost <= pointsBalance), for the
- *  checkout picker. Sorted by pointsCost asc. */
+ *  checkout picker. When afterPromoIDR is provided, also drops rewards whose
+ *  discountIDR exceeds the post-promo cart remainder, so the picker never offers
+ *  a reward checkout would reject with "Reward melebihi total.". Sorted by
+ *  pointsCost asc. */
 export const listForCustomer = query({
-  args: { customerId: v.id('customers') },
+  args: { customerId: v.id('customers'), afterPromoIDR: v.optional(v.number()) },
   returns: v.array(rewardDoc),
-  handler: async (ctx, { customerId }) => {
+  handler: async (ctx, { customerId, afterPromoIDR }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
     const customer = await requireOwned(ctx, cafeId, customerId, 'Pelanggan');
     const rows = await ctx.db
@@ -95,7 +98,11 @@ export const listForCustomer = query({
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
       .collect();
     return rows
-      .filter((r) => r.pointsCost <= customer.pointsBalance)
+      .filter(
+        (r) =>
+          r.pointsCost <= customer.pointsBalance &&
+          (afterPromoIDR === undefined || r.discountIDR <= afterPromoIDR)
+      )
       .sort((a, b) => a.pointsCost - b.pointsCost);
   },
 });

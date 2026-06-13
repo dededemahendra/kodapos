@@ -87,7 +87,7 @@ export function CustomerSection({
   // Affordable active rewards for the selected customer (the checkout picker).
   const rewards = useQuery(
     api.loyaltyRewards.listForCustomer,
-    value.customerId ? { customerId: value.customerId } : 'skip'
+    value.customerId ? { customerId: value.customerId, afterPromoIDR } : 'skip'
   );
   const NO_REWARD = '__none__';
 

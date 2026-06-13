@@ -321,6 +321,7 @@ export async function buildOrder(
       // A reward is server-authoritative: resolve by id, read its pointsCost +
       // discountIDR off the doc (never a client amount). Mutually exclusive with
       // free-form redeemPoints (guarded above).
+      if (!loyaltyCfg.enabled) throw new Error('Program loyalitas tidak aktif.');
       const reward = await requireOwned(ctx, cafeId, args.redeemRewardId, 'Reward');
       if (reward.archived) throw new Error('Reward tidak tersedia.');
       if (reward.pointsCost > customer.pointsBalance) throw new Error('Poin tidak mencukupi.');
@@ -563,7 +564,9 @@ export async function settleSale(ctx: MutationCtx, orderId: Id<'orders'>): Promi
         });
       }
       await ctx.db.patch(customer._id, {
-        pointsBalance: customer.pointsBalance + earned - pointsRedeemed,
+        // Floor at 0 so a reward costing more points than the order earns (or a
+        // concurrent redemption) can never drive the balance negative.
+        pointsBalance: Math.max(0, customer.pointsBalance + earned - pointsRedeemed),
         visitCount: customer.visitCount + 1,
         totalSpentIDR: customer.totalSpentIDR + order.totalIDR,
         lastVisitAt: now,
