@@ -126,3 +126,69 @@ export const report = query({
     return { rows: reportRows, totalMinutes, fromKey, toKey };
   },
 });
+
+export const payroll = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    rows: v.array(
+      v.object({
+        staffId: v.id('cafeStaff'),
+        name: v.string(),
+        totalMinutes: v.number(),
+        hours: v.number(),
+        hourlyRateIDR: v.number(),
+        payIDR: v.number(),
+      })
+    ),
+    totalPayIDR: v.number(),
+    totalMinutes: v.number(),
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const tz = await tzFor(ctx, cafeId);
+    const now = Date.now();
+    const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, now);
+    const rows = await ctx.db
+      .query('timeClock')
+      .withIndex('by_cafe_clockin', (q) =>
+        q.eq('cafeId', cafeId).gte('clockInAt', startMs).lte('clockInAt', endMs)
+      )
+      .collect();
+    const staff = await ctx.db
+      .query('cafeStaff')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
+      .collect();
+    const nameById = new Map(staff.map((s) => [s._id, s.name] as const));
+    const rateById = new Map(staff.map((s) => [s._id, s.hourlyRateIDR ?? 0] as const));
+
+    const byStaff = new Map<string, number>();
+    for (const r of rows) {
+      const minutes = Math.round(((r.clockOutAt ?? now) - r.clockInAt) / 60000);
+      const key = r.cashierId;
+      byStaff.set(key, (byStaff.get(key) ?? 0) + minutes);
+    }
+
+    const payrollRows = [...byStaff.entries()]
+      .map(([staffId, mins]) => {
+        const id = staffId as (typeof rows)[number]['cashierId'];
+        const hourlyRateIDR = rateById.get(id) ?? 0;
+        const hours = Math.round((mins / 60) * 100) / 100;
+        const payIDR = Math.round((mins / 60) * hourlyRateIDR);
+        return {
+          staffId: id,
+          name: nameById.get(id) ?? '?',
+          totalMinutes: mins,
+          hours,
+          hourlyRateIDR,
+          payIDR,
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const totalMinutes = payrollRows.reduce((s, r) => s + r.totalMinutes, 0);
+    const totalPayIDR = payrollRows.reduce((s, r) => s + r.payIDR, 0);
+    return { rows: payrollRows, totalPayIDR, totalMinutes, fromKey, toKey };
+  },
+});

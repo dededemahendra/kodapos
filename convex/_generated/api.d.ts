@@ -74,6 +74,7 @@ import type * as refunds from "../refunds.js";
 import type * as reports from "../reports.js";
 import type * as reservations from "../reservations.js";
 import type * as restock from "../restock.js";
+import type * as schedule from "../schedule.js";
 import type * as selfOrders from "../selfOrders.js";
 import type * as settings from "../settings.js";
 import type * as shifts from "../shifts.js";
@@ -157,6 +158,7 @@ declare const fullApi: ApiFromModules<{
   reports: typeof reports;
   reservations: typeof reservations;
   restock: typeof restock;
+  schedule: typeof schedule;
   selfOrders: typeof selfOrders;
   settings: typeof settings;
   shifts: typeof shifts;

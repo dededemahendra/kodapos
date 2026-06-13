@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/u
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 import { Switch } from '~/components/ui/switch';
+import { toast } from '~/lib/toast';
 import { cn } from '~/lib/utils';
 
 export const Route = createFileRoute('/_pos/settings/staff')({
@@ -44,6 +45,7 @@ type StaffRow = {
   createdAt: number;
   phone?: string;
   email?: string;
+  hourlyRateIDR?: number;
   permissions?: StaffPermissions;
 };
 
@@ -366,8 +368,30 @@ function StaffDetail({
   // Permissions state (optimistic local copy)
   const [perms, setPerms] = useState<StaffPermissions>(() => effectivePermissions(row));
 
+  // Hourly-rate state (raw IDR number; saved on the rate save button)
+  const [rate, setRate] = useState(String(row.hourlyRateIDR ?? 0));
+  const [rateSaveState, setRateSaveState] = useState<SaveState>('idle');
+
   const updateDetails = useMutation(api.staff.updateDetails);
   const setPermissions = useMutation(api.staff.setPermissions);
+  const setHourlyRate = useMutation(api.staff.setHourlyRate);
+
+  async function handleSaveRate() {
+    const value = Number(rate);
+    if (!Number.isInteger(value) || value < 0) {
+      setRateSaveState('error');
+      return;
+    }
+    setRateSaveState('saving');
+    try {
+      await setHourlyRate({ id: row._id, hourlyRateIDR: value });
+      setRateSaveState('saved');
+      setTimeout(() => setRateSaveState('idle'), 2000);
+    } catch (err) {
+      setRateSaveState('error');
+      toast.error(err instanceof Error ? err.message : t`Gagal menyimpan.`);
+    }
+  }
 
   async function handleSaveDetails(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -463,6 +487,50 @@ function StaffDetail({
           )}
         </div>
       </form>
+
+      {/* ── Hourly rate ─────────────────────────────────────────────────── */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+          <Trans>Tarif per jam</Trans>
+        </p>
+        <div className="flex items-end gap-3">
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground" htmlFor={`rate-${row._id}`}>
+              <Trans>Tarif per jam (Rp)</Trans>
+            </label>
+            <Input
+              id={`rate-${row._id}`}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={1000}
+              value={rate}
+              onChange={(e) => setRate(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => void handleSaveRate()}
+            disabled={rateSaveState === 'saving'}
+          >
+            {rateSaveState === 'saving' && <Spinner data-icon="inline-start" />}
+            <Trans>Simpan</Trans>
+          </Button>
+          {rateSaveState === 'saved' && (
+            <span className="text-xs text-green-600 dark:text-green-400">
+              <Trans>Tersimpan</Trans>
+            </span>
+          )}
+          {rateSaveState === 'error' && (
+            <span className="text-xs text-destructive">
+              <Trans>Masukkan angka yang valid.</Trans>
+            </span>
+          )}
+        </div>
+      </div>
 
       {/* ── Permissions ─────────────────────────────────────────────────── */}
       <div className="space-y-3">
