@@ -23,8 +23,8 @@ export function LoadingCounter() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="font-bold tabular-nums tracking-tight text-foreground">
-        <span className="text-7xl">{n}</span>
-        <span className="align-top text-3xl text-muted-foreground">%</span>
+        <span className="text-[9rem] leading-none sm:text-[12rem]">{n}</span>
+        <span className="align-top text-5xl text-muted-foreground">%</span>
       </div>
     </div>
   );
