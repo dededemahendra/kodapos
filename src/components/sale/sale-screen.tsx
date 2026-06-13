@@ -13,6 +13,7 @@ import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { toast } from '~/lib/toast';
 import { useActiveCashier } from '~/lib/active-cashier';
+import { publishDisplay } from '~/lib/customer-display';
 import { GiftCardPaymentDialog } from '~/components/giftcard/gift-card-payment-dialog';
 import { CashPaymentDialog } from './cash-payment-dialog';
 import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
@@ -156,30 +157,13 @@ export function SaleScreen({
     })();
   }, [selfOrder, selfOrderCart, navigate, acceptSelfOrder]);
 
-  if (
-    categories === undefined ||
-    items === undefined ||
-    cafe === undefined ||
-    shift === undefined ||
-    settings === undefined
-  ) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] gap-2 text-muted-foreground">
-        <Spinner />
-        <span>
-          <Trans>Memuat menu…</Trans>
-        </span>
-      </div>
-    );
-  }
-
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
   // Map each cart line to the scope-helper shape, resolving its category from the
   // loaded items so a scoped promo previews against only its matching lines. The
   // server recomputes the discount authoritatively from the promo doc at checkout.
   const scopeLines = cart.lines.map((l) => ({
     menuItemId: l.menuItemId as string,
-    categoryId: (items.find((r) => r.item._id === l.menuItemId)?.item.categoryId ?? '') as string,
+    categoryId: (items?.find((r) => r.item._id === l.menuItemId)?.item.categoryId ?? '') as string,
     lineTotalIDR: l.qty * l.unitPriceIDR,
   }));
   const promoDisc = cart.promo
@@ -211,6 +195,51 @@ export function SaleScreen({
     taxEnabled,
     taxRatePct,
   });
+
+  // Mirror the live cart to the customer-facing /display window via localStorage.
+  // Publish a snapshot whenever the lines or totals change; publish null when the
+  // cart is empty so the display falls back to its idle welcome state.
+  useEffect(() => {
+    if (cart.lines.length === 0) {
+      publishDisplay(null);
+      return;
+    }
+    publishDisplay({
+      lines: cart.lines.map((l) => ({
+        name: l.nameSnapshot,
+        ...(l.variantName ? { variantName: l.variantName } : {}),
+        qty: l.qty,
+        lineTotalIDR: l.qty * l.unitPriceIDR,
+      })),
+      subtotalIDR: subtotal,
+      discountIDR: discount,
+      serviceChargeIDR,
+      taxIDR: tax,
+      totalIDR: total,
+      ...(cart.promo ? { promoName: cart.promo.name } : {}),
+    });
+  }, [subtotal, discount, serviceChargeIDR, tax, total, cart.lines, cart.promo]);
+
+  // Clear the display when the register window closes so a stale cart does not
+  // linger on the second monitor.
+  useEffect(() => () => publishDisplay(null), []);
+
+  if (
+    categories === undefined ||
+    items === undefined ||
+    cafe === undefined ||
+    shift === undefined ||
+    settings === undefined
+  ) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh] gap-2 text-muted-foreground">
+        <Spinner />
+        <span>
+          <Trans>Memuat menu…</Trans>
+        </span>
+      </div>
+    );
+  }
 
   const defaultMethod = settings.payment.defaultMethod;
   const ready = PAYMENT_METHODS.filter((m) => m.isReady(settings)).map((m) => m.method);
