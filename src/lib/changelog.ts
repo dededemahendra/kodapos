@@ -42,20 +42,20 @@ export const CHANGELOG: ChangelogEntry[] = [
   },
   {
     version: '1.2',
+    date: '2026-06-12',
+    title: { id: 'Rangkaian Pro-POS', en: 'Pro-POS suite' },
+    summary: {
+      id: 'Meja, layar dapur, pesanan ditahan, void/refund, laporan laba rugi, varian produk, dan banyak lagi.',
+      en: 'Tables, kitchen display, held orders, void/refund, profit and loss reports, product variants, and more.',
+    },
+  },
+  {
+    version: '1.1',
     date: '2026-06-09',
     title: { id: 'Pembayaran QRIS', en: 'QRIS payments' },
     summary: {
       id: 'Terima pembayaran QRIS statis dan dinamis langsung di kasir.',
       en: 'Accept static and dynamic QRIS payments right at the register.',
-    },
-  },
-  {
-    version: '1.1',
-    date: '2026-06-08',
-    title: { id: 'Rangkaian Pro-POS', en: 'Pro-POS suite' },
-    summary: {
-      id: 'Meja, layar dapur, pesanan ditahan, void/refund, laporan laba rugi, varian produk, dan banyak lagi.',
-      en: 'Tables, kitchen display, held orders, void/refund, profit and loss reports, product variants, and more.',
     },
   },
   {
