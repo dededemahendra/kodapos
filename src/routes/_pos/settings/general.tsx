@@ -32,7 +32,6 @@ import {
   useBoolPreference,
   usePreference,
 } from '~/lib/preferences';
-import { Badge } from '~/components/ui/badge';
 import { SettingsPageHeader } from '~/components/settings/primitives';
 
 export const Route = createFileRoute('/_pos/settings/general')({
@@ -586,22 +585,6 @@ function EmailSummarySection() {
 // Main component
 // ---------------------------------------------------------------------------
 
-// Sections wrapped in <SoonSection> are not yet wired to any live behaviour —
-// they persist to localStorage but don't affect the app yet.
-function SoonSection({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative">
-      <Badge
-        variant="secondary"
-        className="absolute right-4 top-3.5 z-10 text-[10px]"
-      >
-        <Trans>Segera</Trans>
-      </Badge>
-      {children}
-    </div>
-  );
-}
-
 function GeneralSettings() {
   const { t } = useLingui();
   const { locale, setLocale } = useLocale();
@@ -674,35 +657,29 @@ function GeneralSettings() {
 
       <EmailSummarySection />
 
-      <SoonSection>
-        <OrdersSection
-          t={t}
-          confirmClearCart={confirmClearCart}
-          setConfirmClearCart={setConfirmClearCart}
-          orderPrefix={orderPrefix}
-          setOrderPrefix={setOrderPrefix}
-        />
-      </SoonSection>
+      <OrdersSection
+        t={t}
+        confirmClearCart={confirmClearCart}
+        setConfirmClearCart={setConfirmClearCart}
+        orderPrefix={orderPrefix}
+        setOrderPrefix={setOrderPrefix}
+      />
 
-      <SoonSection>
-        <NotificationsSection
-          t={t}
-          lowStockAlerts={lowStockAlerts}
-          setLowStockAlerts={setLowStockAlerts}
-          saleSound={saleSound}
-          setSaleSound={setSaleSound}
-        />
-      </SoonSection>
+      <NotificationsSection
+        t={t}
+        lowStockAlerts={lowStockAlerts}
+        setLowStockAlerts={setLowStockAlerts}
+        saleSound={saleSound}
+        setSaleSound={setSaleSound}
+      />
 
-      <SoonSection>
-        <SecuritySection
-          t={t}
-          pinForVoid={pinForVoid}
-          setPinForVoid={setPinForVoid}
-          autoLock={autoLock}
-          setAutoLock={setAutoLock}
-        />
-      </SoonSection>
+      <SecuritySection
+        t={t}
+        pinForVoid={pinForVoid}
+        setPinForVoid={setPinForVoid}
+        autoLock={autoLock}
+        setAutoLock={setAutoLock}
+      />
     </div>
   );
 }

@@ -13,6 +13,8 @@ import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { toast } from '~/lib/toast';
 import { useActiveCashier } from '~/lib/active-cashier';
+import { useBoolPreference } from '~/lib/preferences';
+import { playSaleChime } from '~/lib/sound';
 import { publishDisplay } from '~/lib/customer-display';
 import { GiftCardPaymentDialog } from '~/components/giftcard/gift-card-payment-dialog';
 import { CashPaymentDialog } from './cash-payment-dialog';
@@ -67,6 +69,8 @@ export function SaleScreen({
   const shift = useQuery(api.shifts.current, {});
   const settings = useQuery(api.settings.get, {});
   const { cashierId } = useActiveCashier();
+  const [confirmClearCart] = useBoolPreference('confirmClearCart', true);
+  const [saleSound] = useBoolPreference('saleSound', false);
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
@@ -89,6 +93,16 @@ export function SaleScreen({
     api.heldOrders.listForShift,
     shift ? { shiftId: shift._id } : 'skip'
   );
+
+  // Every payment dialog settles the same way: show the receipt, empty the cart,
+  // and untag the table. Centralised so the success chime (opt-in via Settings →
+  // Notifikasi → "Suara saat transaksi berhasil") plays once on any method.
+  function handlePaid(orderId: Id<'orders'>): void {
+    if (saleSound) playSaleChime();
+    setReceiptOrderId(orderId);
+    dispatch({ type: 'clearCart' });
+    setCurrentTable(null);
+  }
   // Accept a QR self-order into the register: /sale?selfOrder=<selfOrderId>.
   // The payload is the SAME held-order recall shape, so it loads identically.
   const selfOrderCart = useQuery(
@@ -328,7 +342,10 @@ export function SaleScreen({
               },
             }
           : {})}
-        onKosongkan={() => setClearOpen(true)}
+        onKosongkan={() => {
+          if (confirmClearCart) setClearOpen(true);
+          else dispatch({ type: 'clearCart' });
+        }}
         {...(shift && cashierId
           ? {
               onKas: () => setKasOpen(true),
@@ -461,11 +478,7 @@ export function SaleScreen({
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
-            onPaid={(orderId) => {
-              setReceiptOrderId(orderId);
-              dispatch({ type: 'clearCart' });
-              setCurrentTable(null);
-            }}
+            onPaid={handlePaid}
           />
           <QrisStaticPaymentDialog
             open={openMethod === 'qris_static'}
@@ -486,11 +499,7 @@ export function SaleScreen({
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
-            onPaid={(orderId) => {
-              setReceiptOrderId(orderId);
-              dispatch({ type: 'clearCart' });
-              setCurrentTable(null);
-            }}
+            onPaid={handlePaid}
           />
           <SplitPaymentDialog
             open={splitOpen}
@@ -508,11 +517,7 @@ export function SaleScreen({
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
-            onPaid={(orderId) => {
-              setReceiptOrderId(orderId);
-              dispatch({ type: 'clearCart' });
-              setCurrentTable(null);
-            }}
+            onPaid={handlePaid}
           />
           <GiftCardPaymentDialog
             open={giftCardOpen}
@@ -528,11 +533,7 @@ export function SaleScreen({
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
-            onPaid={(orderId) => {
-              setReceiptOrderId(orderId);
-              dispatch({ type: 'clearCart' });
-              setCurrentTable(null);
-            }}
+            onPaid={handlePaid}
           />
           <QrisDynamicPaymentDialog
             open={openMethod === 'qris_dynamic'}
@@ -550,11 +551,7 @@ export function SaleScreen({
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
-            onPaid={(orderId) => {
-              setReceiptOrderId(orderId);
-              dispatch({ type: 'clearCart' });
-              setCurrentTable(null);
-            }}
+            onPaid={handlePaid}
           />
         </>
       ) : null}

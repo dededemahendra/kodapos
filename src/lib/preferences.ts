@@ -121,6 +121,26 @@ export function getTimeFormat(): TimeFormatPref {
 }
 
 // ---------------------------------------------------------------------------
+// Auto-lock idle timeout (browser-only, SSR-safe)
+// ---------------------------------------------------------------------------
+
+/**
+ * Minutes of inactivity before the register auto-locks back to the PIN screen.
+ * `0` means disabled. Read fresh from localStorage so a change in settings
+ * takes effect on the next activity tick without a reload.
+ */
+export function getAutoLockMinutes(): number {
+  if (typeof window === 'undefined') return 0;
+  try {
+    const raw = window.localStorage.getItem('kodapos.autoLock');
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 /**
  * Small typed localStorage hook. Key is namespaced as `kodapos.<key>`.

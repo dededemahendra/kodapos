@@ -20,9 +20,11 @@ import { Dialog, DialogContent } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { Spinner } from '~/components/ui/spinner';
+import { PinConfirmDialog, useOwnerPin } from '~/components/permission/pin-confirm-dialog';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { formatIDR } from '~/lib/money';
 import { usePermissions } from '~/lib/permissions';
+import { usePreference, useBoolPreference } from '~/lib/preferences';
 import { formatPromoValue } from '~/lib/promo';
 import { toast } from '~/lib/toast';
 import { RefundDialog } from './refund-dialog';
@@ -69,6 +71,24 @@ export function ReceiptPreview({
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
 
+  // Optional printed order-number prefix (Settings → Pesanan → "Awalan nomor
+  // pesanan"). Receipt content stays English/off-catalog.
+  const [orderPrefix] = usePreference<string>('orderPrefix', '');
+  // Owner-PIN gate for void/refund (Settings → Keamanan). Only meaningful when a
+  // PIN is actually set; otherwise the action proceeds directly.
+  const [pinForVoid] = useBoolPreference('pinForVoid', true);
+  const { ownerId, hasPin, loaded: ownerLoaded } = useOwnerPin();
+  const needPin = pinForVoid && hasPin;
+  // Fail-closed: until the owner's PIN status is known, block void/refund so the
+  // gate can't be bypassed in the brief staff.list loading window.
+  const gateLoading = pinForVoid && !ownerLoaded;
+  const [pinGate, setPinGate] = useState<'void' | 'refund' | null>(null);
+
+  function openVoid(): void {
+    setReason('');
+    setConfirmOpen(true);
+  }
+
   if (!orderId) return null;
 
   // Persisted discountIDR includes any point redemption (server folds promo +
@@ -99,6 +119,11 @@ export function ReceiptPreview({
               </div>
               <div className="text-xs text-muted-foreground">
                 <Trans>Kasir: {order.cashierName}</Trans>
+              </div>
+              {/* Printed receipt is always English, kept out of the i18n catalog. */}
+              <div className="text-xs text-muted-foreground">
+                Order #{orderPrefix}
+                {order._id.slice(-4).toUpperCase()}
               </div>
               {order.orderType ? (
                 <div className="text-xs text-muted-foreground">
@@ -238,9 +263,10 @@ export function ReceiptPreview({
               <Button
                 type="button"
                 variant="destructive"
+                disabled={gateLoading}
                 onClick={() => {
-                  setReason('');
-                  setConfirmOpen(true);
+                  if (needPin) setPinGate('void');
+                  else openVoid();
                 }}
               >
                 <Trans>Batalkan pesanan</Trans>
@@ -252,7 +278,11 @@ export function ReceiptPreview({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setRefundOpen(true)}
+                disabled={gateLoading}
+                onClick={() => {
+                  if (needPin) setPinGate('refund');
+                  else setRefundOpen(true);
+                }}
               >
                 <Trans>Refund</Trans>
               </Button>
@@ -373,6 +403,20 @@ export function ReceiptPreview({
         open={refundOpen}
         onOpenChange={setRefundOpen}
         onDone={onDone}
+      />
+      <PinConfirmDialog
+        open={pinGate !== null}
+        ownerId={ownerId}
+        onOpenChange={(o) => {
+          if (!o) setPinGate(null);
+        }}
+        onConfirmed={() => {
+          const gate = pinGate;
+          setPinGate(null);
+          if (gate === 'void') openVoid();
+          else if (gate === 'refund') setRefundOpen(true);
+        }}
+        description={<Trans>Masukkan PIN pemilik untuk melanjutkan.</Trans>}
       />
     </Dialog>
   );

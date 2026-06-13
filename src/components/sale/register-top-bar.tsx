@@ -2,11 +2,12 @@ import { Trans } from '@lingui/react/macro';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
-import { Monitor } from 'lucide-react';
+import { AlertTriangle, Monitor } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { NavUser } from '~/components/nav-user';
 import { usePermissions } from '~/lib/permissions';
+import { useBoolPreference } from '~/lib/preferences';
 
 export function RegisterTopBar() {
   const cafe = useQuery(api.cafes.myCafe, {});
@@ -14,6 +15,10 @@ export function RegisterTopBar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const selfOrders = useQuery(api.selfOrders.queue);
   const pendingCount = selfOrders?.length ?? 0;
+  // Low-stock warning indicator, opt-out via Settings → Notifikasi.
+  const [lowStockAlerts] = useBoolPreference('lowStockAlerts', true);
+  const lowStock = useQuery(api.dashboard.lowStock, lowStockAlerts ? {} : 'skip');
+  const lowStockCount = lowStock?.count ?? 0;
 
   const isActive = (to: string) => path === to || path.startsWith(`${to}/`);
 
@@ -60,6 +65,22 @@ export function RegisterTopBar() {
         </Button>
       </div>
       <div className="flex items-center gap-2">
+        {lowStockAlerts && lowStockCount > 0 ? (
+          <Button
+            asChild
+            size="sm"
+            variant="ghost"
+            className="text-amber-600 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-500"
+          >
+            <Link to="/inventory">
+              <AlertTriangle />
+              <Trans>Stok rendah</Trans>
+              <Badge variant="destructive" className="ml-1.5">
+                {lowStockCount}
+              </Badge>
+            </Link>
+          </Button>
+        ) : null}
         <Button
           size="sm"
           variant="ghost"
