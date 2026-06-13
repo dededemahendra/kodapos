@@ -1,4 +1,3 @@
-import { Coffee } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Card, CardContent } from '~/components/ui/card';
 
@@ -16,12 +15,6 @@ export function AuthCard({ title, subtitle, children }: AuthCardProps) {
   return (
     <main className="min-h-screen grid place-items-center bg-muted/30 p-4 sm:p-6">
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <Coffee className="size-5" aria-hidden="true" />
-          </span>
-          <span className="text-xl font-bold tracking-tight">kodapos</span>
-        </div>
         <Card>
           <CardContent className="p-6">
             {(title || subtitle) && (
