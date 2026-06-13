@@ -1539,6 +1539,10 @@ msgstr "Email"
 msgid "Email atau password salah."
 msgstr "Incorrect email or password."
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Email struk"
+msgstr "Email receipt"
+
 #: src/lib/auth-validation.ts
 msgid "Email wajib diisi."
 msgstr "Email is required."
@@ -1742,6 +1746,10 @@ msgstr "Could not delete."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Gagal menghubungkan integrasi."
 msgstr "Failed to connect integration."
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Gagal mengirim email."
+msgstr "Could not send the email."
 
 #: src/components/giftcard/gift-card-form-dialog.tsx
 msgid "Gagal mengisi saldo kartu."
@@ -2551,6 +2559,10 @@ msgstr "Description"
 #: src/routes/_pos/menu/index.tsx
 msgid "Ketersediaan"
 msgstr "Availability"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Kirim email"
+msgstr "Send email"
 
 #: src/routes/_pos/forecast.tsx
 msgid "Kirim ke WhatsApp"
@@ -4654,6 +4666,10 @@ msgstr "Current stock:"
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Struk & Printer"
 msgstr "Receipt & Printer"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Struk dikirim ke email."
+msgstr "Receipt sent to email."
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Suara saat transaksi berhasil"

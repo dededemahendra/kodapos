@@ -2,7 +2,7 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_SERVICE_CHARGE_NAME } from 'convex/lib/pricing';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -18,6 +18,7 @@ import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { Spinner } from '~/components/ui/spinner';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { formatIDR } from '~/lib/money';
@@ -60,10 +61,13 @@ export function ReceiptPreview({
   const { can } = usePermissions();
   const { cashierId } = useActiveCashier();
   const voidSale = useMutation(api.orders.voidSale);
+  const sendReceipt = useAction(api.email.sendReceipt);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [voiding, setVoiding] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [sending, setSending] = useState(false);
 
   if (!orderId) return null;
 
@@ -255,6 +259,49 @@ export function ReceiptPreview({
             ) : null}
           </div>
           <div className="flex gap-2">
+            {order ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button type="button" variant="outline">
+                    <Trans>Email struk</Trans>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72">
+                  <form
+                    className="flex flex-col gap-2"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!orderId) return;
+                      const to = email.trim();
+                      if (!to) return;
+                      setSending(true);
+                      try {
+                        await sendReceipt({ orderId, to });
+                        toast.success(t`Struk dikirim ke email.`);
+                      } catch (err) {
+                        toast.error(
+                          err instanceof Error ? err.message : t`Gagal mengirim email.`
+                        );
+                      } finally {
+                        setSending(false);
+                      }
+                    }}
+                  >
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="email@contoh.com"
+                      aria-label={t`Email struk`}
+                    />
+                    <Button type="submit" disabled={sending || !email.trim()}>
+                      {sending && <Spinner data-icon="inline-start" />}
+                      <Trans>Kirim email</Trans>
+                    </Button>
+                  </form>
+                </PopoverContent>
+              </Popover>
+            ) : null}
             <Button type="button" variant="outline" onClick={() => window.print()}>
               <Trans>Cetak</Trans>
             </Button>
