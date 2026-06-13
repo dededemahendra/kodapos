@@ -407,6 +407,7 @@ function SigninCard({
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
+                    placeholder={t`Masukkan sandi`}
                     className={`pl-9 pr-9 ${password.error ? 'border-destructive' : ''}`}
                     value={password.value}
                     onBlur={handlePasswordBlur}
@@ -573,6 +574,7 @@ function SigninCard({
                       name="new-password"
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
+                      placeholder={t`Minimal 8 karakter`}
                       className={`pl-9 pr-9 ${newPassword.error ? 'border-destructive' : ''}`}
                       value={newPassword.value}
                       onBlur={handleNewPasswordBlur}

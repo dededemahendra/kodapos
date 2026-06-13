@@ -3239,6 +3239,10 @@ msgstr "Enter the 8-digit code."
 msgid "Masukkan kunci API (opsional)"
 msgstr "Enter API key (optional)"
 
+#: src/routes/_public/signin.tsx
+msgid "Masukkan sandi"
+msgstr "Enter your password"
+
 #: src/routes/_pos/settings/general.tsx
 msgid "Mata Uang"
 msgstr "Currency"
@@ -3458,6 +3462,7 @@ msgstr "This week"
 msgid "Minggu sebelumnya"
 msgstr "Previous week"
 
+#: src/routes/_public/signin.tsx
 #: src/routes/_public/signup.tsx
 msgid "Minimal 8 karakter"
 msgstr "Minimum 8 characters"
