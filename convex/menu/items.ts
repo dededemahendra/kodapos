@@ -366,6 +366,123 @@ export const assignMissingBarcodes = mutation({
   },
 });
 
+const importResult = v.object({
+  created: v.number(),
+  skipped: v.number(),
+  errors: v.array(
+    v.object({ row: v.number(), name: v.string(), reason: v.string() })
+  ),
+});
+
+export const bulkImport = mutation({
+  args: {
+    rows: v.array(
+      v.object({
+        name: v.string(),
+        category: v.string(),
+        priceIDR: v.number(),
+        barcode: v.optional(v.string()),
+      })
+    ),
+  },
+  returns: importResult,
+  handler: async (ctx, { rows }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    if (rows.length > 1000) throw new Error('Terlalu banyak baris.');
+
+    // Preload the cafe's active categories (lowercased name -> id), active
+    // item names (lowercased), and barcodes so the loop stays in-memory.
+    const categories = await ctx.db
+      .query('categories')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
+      .collect();
+    const categoryByName = new Map<string, Id<'categories'>>();
+    let maxCategoryPos = 0;
+    for (const c of categories) {
+      categoryByName.set(c.name.toLowerCase(), c._id);
+      if (c.position > maxCategoryPos) maxCategoryPos = c.position;
+    }
+
+    const existingItems = await ctx.db
+      .query('menuItems')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
+      .collect();
+    const itemNames = new Set<string>();
+    const barcodes = new Set<string>();
+    const categoryMaxItemPos = new Map<string, number>();
+    for (const it of existingItems) {
+      itemNames.add(it.name.toLowerCase());
+      if (it.barcode) barcodes.add(it.barcode);
+      const cur = categoryMaxItemPos.get(it.categoryId) ?? 0;
+      if (it.position > cur) categoryMaxItemPos.set(it.categoryId, it.position);
+    }
+
+    let created = 0;
+    let skipped = 0;
+    const errors: Array<{ row: number; name: string; reason: string }> = [];
+
+    for (const [i, raw] of rows.entries()) {
+      try {
+        const cleanName = assertItem(raw.name, raw.priceIDR);
+        if (!Number.isInteger(raw.priceIDR) || raw.priceIDR <= 0) {
+          throw new Error('Harga tidak valid.');
+        }
+        const bc = raw.barcode?.trim();
+        if (bc && barcodes.has(bc)) throw new Error('Barcode sudah dipakai.');
+
+        const lowerName = cleanName.toLowerCase();
+        if (itemNames.has(lowerName)) {
+          skipped++;
+          continue;
+        }
+
+        // Resolve (or create) the category, case-insensitive, at most once.
+        const catName = raw.category.trim();
+        if (catName.length < 1) throw new Error('Nama kategori tidak valid.');
+        if (catName.length > 60) throw new Error('Nama kategori tidak valid.');
+        const lowerCat = catName.toLowerCase();
+        let categoryId = categoryByName.get(lowerCat);
+        if (!categoryId) {
+          maxCategoryPos += 100;
+          categoryId = await ctx.db.insert('categories', {
+            cafeId,
+            name: catName,
+            position: maxCategoryPos,
+            archived: false,
+            createdAt: Date.now(),
+          });
+          categoryByName.set(lowerCat, categoryId);
+        }
+
+        const nextPos = (categoryMaxItemPos.get(categoryId) ?? 0) + 100;
+        await ctx.db.insert('menuItems', {
+          cafeId,
+          categoryId,
+          name: cleanName,
+          priceIDR: raw.priceIDR,
+          isActive: true,
+          archived: false,
+          position: nextPos,
+          createdAt: Date.now(),
+          ...(bc ? { barcode: bc } : {}),
+        });
+        categoryMaxItemPos.set(categoryId, nextPos);
+        itemNames.add(lowerName);
+        if (bc) barcodes.add(bc);
+        created++;
+      } catch (err) {
+        errors.push({
+          row: i,
+          name: raw.name,
+          reason: err instanceof Error ? err.message : 'Baris tidak valid.',
+        });
+      }
+    }
+
+    return { created, skipped, errors };
+  },
+});
+
 export const list = query({
   args: {
     categoryId: v.optional(v.id('categories')),
