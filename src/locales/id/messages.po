@@ -604,6 +604,10 @@ msgstr "Arus Keluar"
 msgid "Arus Masuk"
 msgstr "Arus Masuk"
 
+#: src/components/auth/or-divider.tsx
+msgid "atau"
+msgstr "atau"
+
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "atau pilih promo"
 msgstr "atau pilih promo"
@@ -647,6 +651,10 @@ msgstr "Atur program poin dan lihat ringkasannya."
 #: src/routes/_pos/time-clock.tsx
 msgid "Atur tarif per jam staf dan catat jam kerja."
 msgstr "Atur tarif per jam staf dan catat jam kerja."
+
+#: src/routes/_public/signin.tsx
+msgid "Atur ulang sandi"
+msgstr "Atur ulang sandi"
 
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Aturan"
@@ -1540,6 +1548,7 @@ msgid "Dibuka pada"
 msgstr "Dibuka pada"
 
 #. placeholder {0}: idx + 1
+#: src/components/auth/otp-input.tsx
 #: src/components/staff/pin-entry.tsx
 msgid "Digit {0}"
 msgstr "Digit {0}"
@@ -2307,6 +2316,10 @@ msgstr "Impor CSV"
 msgid "Impor item menu"
 msgstr "Impor item menu"
 
+#: src/routes/_public/signin.tsx
+msgid "Ingat saya"
+msgstr "Ingat saya"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Instagram"
 msgstr "Instagram"
@@ -2731,6 +2744,7 @@ msgid "Kemarin"
 msgstr "Kemarin"
 
 #: src/routes/_public/privacy.tsx
+#: src/routes/_public/signin.tsx
 #: src/routes/_public/terms.tsx
 msgid "Kembali"
 msgstr "Kembali"
@@ -2811,6 +2825,14 @@ msgstr "Kirim email"
 msgid "Kirim ke WhatsApp"
 msgstr "Kirim ke WhatsApp"
 
+#: src/routes/_public/signin.tsx
+msgid "Kirim kode"
+msgstr "Kirim kode"
+
+#: src/routes/_public/signin.tsx
+msgid "Kirim kode reset"
+msgstr "Kirim kode reset"
+
 #: src/components/public/cart-review-sheet.tsx
 msgid "Kirim pesanan"
 msgstr "Kirim pesanan"
@@ -2827,9 +2849,29 @@ msgstr "Kirim ringkasan saat tutup shift"
 msgid "Kirim struk & notifikasi via WhatsApp."
 msgstr "Kirim struk & notifikasi via WhatsApp."
 
+#: src/routes/_public/signin.tsx
+msgid "Kirim ulang kode"
+msgstr "Kirim ulang kode"
+
+#: src/routes/_public/signin.tsx
+msgid "Kirim ulang kode ({cooldown}s)"
+msgstr "Kirim ulang kode ({cooldown}s)"
+
+#: src/components/auth/otp-input.tsx
+msgid "Kode"
+msgstr "Kode"
+
 #: src/routes/_pos/promos.tsx
 msgid "Kode & cakupan"
 msgstr "Kode & cakupan"
+
+#: src/routes/_public/signin.tsx
+msgid "Kode dikirim ke email Anda."
+msgstr "Kode dikirim ke email Anda."
+
+#: src/routes/_public/signin.tsx
+msgid "Kode dikirim ulang."
+msgstr "Kode dikirim ulang."
 
 #: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/components/giftcard/gift-card-payment-dialog.tsx
@@ -2857,6 +2899,10 @@ msgstr "Kode QR pembayaran sudah tidak berlaku. Buat ulang untuk membayar."
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Kode QRIS"
 msgstr "Kode QRIS"
+
+#: src/routes/_public/signin.tsx
+msgid "Kode salah atau sudah kedaluwarsa."
+msgstr "Kode salah atau sudah kedaluwarsa."
 
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "Kode tidak valid."
@@ -2980,6 +3026,10 @@ msgstr "Lanjut ke Tutup Shift"
 msgid "Lanjut: PIN & Kasir →"
 msgstr "Lanjut: PIN & Kasir →"
 
+#: src/components/auth/social-buttons.tsx
+msgid "Lanjutkan dengan Google"
+msgstr "Lanjutkan dengan Google"
+
 #: src/components/app-shared.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Laporan"
@@ -3094,6 +3144,10 @@ msgstr "Lunas"
 msgid "Lunas (QRIS)"
 msgstr "Lunas (QRIS)"
 
+#: src/routes/_public/signin.tsx
+msgid "Lupa sandi?"
+msgstr "Lupa sandi?"
+
 #: src/components/sale/order-types.tsx
 msgid "Makan di tempat"
 msgstr "Makan di tempat"
@@ -3136,9 +3190,17 @@ msgstr "Margin muncul setelah ada item terjual pada rentang ini."
 msgid "Masuk"
 msgstr "Masuk"
 
+#: src/routes/_public/signin.tsx
+msgid "Masuk dengan kode"
+msgstr "Masuk dengan kode"
+
 #: src/routes/_pos/self-orders.tsx
 msgid "Masuk dengan PIN dulu untuk menerima pesanan."
 msgstr "Masuk dengan PIN dulu untuk menerima pesanan."
+
+#: src/routes/_public/signin.tsx
+msgid "Masuk ke akun"
+msgstr "Masuk ke akun"
 
 #: src/components/permission/switch-to-owner.tsx
 msgid "Masuk sebagai pemilik"
@@ -3154,8 +3216,13 @@ msgid "Masukkan angka yang valid."
 msgstr "Masukkan angka yang valid."
 
 #: src/components/sale/promo-picker-dialog.tsx
+#: src/routes/_public/signin.tsx
 msgid "Masukkan kode"
 msgstr "Masukkan kode"
+
+#: src/routes/_public/signin.tsx
+msgid "Masukkan kode 6 digit."
+msgstr "Masukkan kode 6 digit."
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Masukkan kunci API (opsional)"
@@ -3218,6 +3285,10 @@ msgstr "Memeriksa kartu…"
 #: src/routes/_pos/forecast.tsx
 msgid "Memerlukan minimal {0} hari data (terkumpul {1}). Perkiraan akan aktif sekitar {2}."
 msgstr "Memerlukan minimal {0} hari data (terkumpul {1}). Perkiraan akan aktif sekitar {2}."
+
+#: src/routes/_public/signin.tsx
+msgid "Memproses tautan masuk..."
+msgstr "Memproses tautan masuk..."
 
 #: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/cash-payment-dialog.tsx
@@ -3711,6 +3782,10 @@ msgstr "Pajak & Pembayaran"
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "Pakai"
 msgstr "Pakai"
+
+#: src/routes/_public/signin.tsx
+msgid "Pakai sandi"
+msgstr "Pakai sandi"
 
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Pas"
@@ -4736,6 +4811,10 @@ msgstr "Saldo: {balance} poin"
 #~ msgid "Sales"
 #~ msgstr "Sales"
 
+#: src/routes/_public/signin.tsx
+msgid "Sandi baru"
+msgstr "Sandi baru"
+
 #: src/routes/_pos/forecast.tsx
 msgid "Saran"
 msgstr "Saran"
@@ -5444,6 +5523,10 @@ msgstr "Tarif per jam (Rp)"
 msgid "Tarif/jam"
 msgstr "Tarif/jam"
 
+#: src/routes/_public/signin.tsx
+msgid "Tautan masuk tidak valid atau sudah kedaluwarsa. Silakan coba lagi."
+msgstr "Tautan masuk tidak valid atau sudah kedaluwarsa. Silakan coba lagi."
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Teks footer"
 msgstr "Teks footer"
@@ -5660,6 +5743,14 @@ msgstr "Tidak ada shift terbuka."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Tidak ada staf yang ditemukan."
 msgstr "Tidak ada staf yang ditemukan."
+
+#: src/routes/_public/signin.tsx
+msgid "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi."
+msgstr "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi."
+
+#: src/routes/_public/signin.tsx
+msgid "Tidak dapat mengirim ulang kode."
+msgstr "Tidak dapat mengirim ulang kode."
 
 #: src/routes/_pos/reservations.tsx
 msgid "Tidak datang"
