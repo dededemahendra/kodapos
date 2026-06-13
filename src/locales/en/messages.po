@@ -3771,6 +3771,10 @@ msgstr "Purchase order created."
 msgid "Pesanan beli tidak ditemukan."
 msgstr "Purchase order not found."
 
+#: src/routes/_pos/self-orders.tsx
+msgid "Pesanan dari QR meja akan muncul di sini untuk Anda terima."
+msgstr "Orders from the table QR will show up here for you to accept."
+
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan dibatalkan."
 msgstr "Order voided."

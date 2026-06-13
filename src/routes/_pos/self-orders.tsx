@@ -11,6 +11,7 @@ import { Card, CardContent } from '~/components/ui/card';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import {
   Empty,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -46,6 +47,9 @@ function SelfOrdersPage() {
             <EmptyTitle>
               <Trans>Belum ada pesanan masuk.</Trans>
             </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Pesanan dari QR meja akan muncul di sini untuk Anda terima.</Trans>
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (
