@@ -1,10 +1,10 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { api } from "convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { LogOut, Settings } from "lucide-react";
+import { Languages, LifeBuoy, LineChart, LogOut, RefreshCw, Settings, Users } from "lucide-react";
 import { Trans } from "@lingui/react/macro";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
@@ -13,15 +13,24 @@ import {
 	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { useLocale } from "~/components/locale-provider";
 import { useActiveCashier } from "~/lib/active-cashier";
+import { LOCALES, type Locale } from "~/lib/locale";
 
 export function NavUser() {
 	const { signOut } = useAuthActions();
+	const navigate = useNavigate();
 	const record = useMutation(api.cashierSessions.record);
 	const { cashierId, clearCashier } = useActiveCashier();
+	const { locale, setLocale } = useLocale();
 	const cafe = useQuery(api.cafes.myCafe, {});
 	const name = cafe?.name ?? "kodapos";
 	const initial = name.charAt(0).toUpperCase();
@@ -58,7 +67,51 @@ export function NavUser() {
 							<Trans>Pengaturan</Trans>
 						</Link>
 					</DropdownMenuItem>
+					<DropdownMenuItem asChild>
+						<Link to="/settings/staff">
+							<Users />
+							<Trans>Kelola staf</Trans>
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuItem asChild>
+						<Link to="/reports" search={{ preset: "today" }}>
+							<LineChart />
+							<Trans>Laporan</Trans>
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuItem asChild>
+						<Link to="/help">
+							<LifeBuoy />
+							<Trans>Bantuan</Trans>
+						</Link>
+					</DropdownMenuItem>
 				</DropdownMenuGroup>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					className="cursor-pointer"
+					onClick={() => void navigate({ to: "/pin" })}
+				>
+					<RefreshCw />
+					<Trans>Ganti kasir</Trans>
+				</DropdownMenuItem>
+				<DropdownMenuSub>
+					<DropdownMenuSubTrigger>
+						<Languages />
+						<Trans>Bahasa</Trans>
+					</DropdownMenuSubTrigger>
+					<DropdownMenuSubContent>
+						<DropdownMenuRadioGroup
+							value={locale}
+							onValueChange={(v) => setLocale(v as Locale)}
+						>
+							{LOCALES.map((l) => (
+								<DropdownMenuRadioItem key={l.value} value={l.value}>
+									{l.label}
+								</DropdownMenuRadioItem>
+							))}
+						</DropdownMenuRadioGroup>
+					</DropdownMenuSubContent>
+				</DropdownMenuSub>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					className="cursor-pointer"

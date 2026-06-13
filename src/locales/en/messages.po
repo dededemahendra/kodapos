@@ -214,6 +214,10 @@ msgstr "{changedCount} items will be adjusted"
 msgid "{itemCount} item"
 msgstr "{itemCount} items"
 
+#: src/components/notifications-menu.tsx
+msgid "{lowStockCount} bahan perlu diisi ulang"
+msgstr "{lowStockCount} ingredients need restocking"
+
 #: src/components/promo/promo-form-dialog.tsx
 msgid "{n} item dipilih"
 msgstr "{n} items selected"
@@ -225,6 +229,10 @@ msgstr "{n} categories selected"
 #: src/components/sale/customer-section.tsx
 msgid "{points} poin"
 msgstr "{points} points"
+
+#: src/components/notifications-menu.tsx
+msgid "{selfOrderCount} pesanan masuk menunggu"
+msgstr "{selfOrderCount} incoming orders waiting"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "@namakafe"
@@ -716,6 +724,7 @@ msgstr "Archived ingredients will appear here."
 msgid "Bahan yang perlu diisi ulang."
 msgstr "Ingredients to restock."
 
+#: src/components/nav-user.tsx
 #: src/routes/_pos/settings/general.tsx
 msgid "Bahasa"
 msgstr "Language"
@@ -743,6 +752,10 @@ msgstr "Bakery"
 #: src/components/billing-health.tsx
 #~ msgid "Balances and payouts look fine. nothing overdue in this snapshot."
 #~ msgstr "Balances and payouts look fine. nothing overdue in this snapshot."
+
+#: src/components/nav-user.tsx
+msgid "Bantuan"
+msgstr "Help"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Bar"
@@ -2065,6 +2078,7 @@ msgstr "Change"
 msgid "Ganti gambar"
 msgstr "Change image"
 
+#: src/components/nav-user.tsx
 #: src/components/sale/cart-pane.tsx
 msgid "Ganti kasir"
 msgstr "Switch cashier"
@@ -2753,6 +2767,10 @@ msgid "Kelola meja"
 msgstr "Manage tables"
 
 #: src/components/nav-user.tsx
+msgid "Kelola staf"
+msgstr "Manage staff"
+
+#: src/components/nav-user.tsx
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Keluar"
@@ -3050,6 +3068,7 @@ msgid "Lanjutkan dengan Google"
 msgstr "Continue with Google"
 
 #: src/components/app-shared.tsx
+#: src/components/nav-user.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Laporan"
 msgstr "Reports"
@@ -3738,7 +3757,7 @@ msgstr "Normal"
 #~ msgid "Nothing urgent needs your attention."
 #~ msgstr "Nothing urgent needs your attention."
 
-#: src/components/app-header.tsx
+#: src/components/notifications-menu.tsx
 #: src/routes/_pos/settings/general.tsx
 msgid "Notifikasi"
 msgstr "Notifications"
@@ -5759,6 +5778,10 @@ msgstr "No archived gift cards."
 #: src/components/menu/category-table.tsx
 msgid "Tidak ada kategori diarsipkan."
 msgstr "No archived categories."
+
+#: src/components/notifications-menu.tsx
+msgid "Tidak ada notifikasi baru"
+msgstr "No new notifications"
 
 #: src/routes/_pos/customers.tsx
 msgid "Tidak ada pelanggan cocok."
