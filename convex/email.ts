@@ -13,6 +13,7 @@ import {
   buildShiftSummaryText,
   type ShiftSummaryData,
 } from './lib/shiftSummary';
+import { sendEmail } from './lib/resend';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -38,37 +39,18 @@ export const sendReceipt = action({
     const html = buildReceiptHtml(order as ReceiptOrder, cafe as ReceiptCafe | null);
     const text = buildReceiptText(order as ReceiptOrder, cafe as ReceiptCafe | null);
 
-    const from = process.env.RESEND_FROM ?? 'kodapos <onboarding@resend.dev>';
     const subject = `Receipt ${cafe?.name ?? 'kodapos'}`;
-
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to, subject, html, text }),
-    });
-    if (!res.ok) {
-      const detail = await res.text().catch(() => '');
-      throw new Error(`Gagal mengirim email (${res.status}). ${detail}`.trim());
-    }
+    await sendEmail({ to, subject, html, text });
     return null;
   },
 });
 
 /** POST a built shift summary to Resend. Throws on a non-ok response. */
-async function postShiftSummary(key: string, to: string, data: ShiftSummaryData): Promise<void> {
+async function postShiftSummary(to: string, data: ShiftSummaryData): Promise<void> {
   const html = buildShiftSummaryHtml(data);
   const text = buildShiftSummaryText(data);
-  const from = process.env.RESEND_FROM ?? 'kodapos <onboarding@resend.dev>';
   const subject = `Shift summary ${data.cafeName}`;
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to, subject, html, text }),
-  });
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new Error(`Gagal mengirim email (${res.status}). ${detail}`.trim());
-  }
+  await sendEmail({ to, subject, html, text });
 }
 
 /**
@@ -86,7 +68,7 @@ export const sendShiftSummary = action({
     if (!key) throw new Error('Email belum dikonfigurasi.');
 
     const data = await ctx.runQuery(api.shifts.summaryDataOwned, { shiftId });
-    await postShiftSummary(key, to.trim(), data as ShiftSummaryData);
+    await postShiftSummary(to.trim(), data as ShiftSummaryData);
     return null;
   },
 });
@@ -110,7 +92,7 @@ export const sendShiftSummaryScheduled = internalAction({
     }
     try {
       const data = await ctx.runQuery(internal.shifts.summaryData, { shiftId });
-      await postShiftSummary(key, to, data as ShiftSummaryData);
+      await postShiftSummary(to, data as ShiftSummaryData);
     } catch (err) {
       console.error(`sendShiftSummaryScheduled failed for shift ${shiftId}:`, err);
     }
