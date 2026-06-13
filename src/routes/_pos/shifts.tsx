@@ -3,15 +3,19 @@ import { createFileRoute } from '@tanstack/react-router';
 import { RequirePermission } from '~/components/permission/require-permission';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { usePaginatedQuery, useQuery } from 'convex/react';
-import { History } from 'lucide-react';
+import { useAction, usePaginatedQuery, useQuery } from 'convex/react';
+import { History, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { PinGate } from '~/components/staff/pin-gate';
 import { ShiftOrderList } from '~/components/shift/shift-order-list';
 import { Button } from '~/components/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
+import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/shifts')({
   component: ShiftsPage,
@@ -34,9 +38,80 @@ function formatDuration(ms: number): string {
   return h > 0 ? `${h}j ${m}m` : `${m}m`;
 }
 
+/** Per-row "Email ringkasan" control: a popover with an email input + Kirim. */
+function EmailSummaryButton({
+  shiftId,
+  defaultEmail,
+}: {
+  shiftId: Id<'shifts'>;
+  defaultEmail: string;
+}) {
+  const { t } = useLingui();
+  const send = useAction(api.email.sendShiftSummary);
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState(defaultEmail);
+  const [sending, setSending] = useState(false);
+
+  async function handleSend() {
+    const to = email.trim();
+    if (!to) return;
+    setSending(true);
+    try {
+      await send({ shiftId, to });
+      toast.success(t`Ringkasan dikirim.`);
+      setOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t`Gagal mengirim ringkasan.`);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" size="sm" className="gap-1.5">
+          <Mail className="size-3.5" />
+          <Trans>Email ringkasan</Trans>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 space-y-2">
+        <Label htmlFor={`summary-email-${shiftId}`} className="text-xs">
+          <Trans>Email penerima ringkasan</Trans>
+        </Label>
+        <Input
+          id={`summary-email-${shiftId}`}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="email@contoh.com"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+        />
+        <Button
+          type="button"
+          size="sm"
+          className="w-full"
+          disabled={sending || email.trim().length === 0}
+          onClick={handleSend}
+        >
+          {sending && <Spinner data-icon="inline-start" />}
+          <Trans>Kirim</Trans>
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function ShiftHistoryPage() {
   const { t } = useLingui();
   const open = useQuery(api.shifts.current, {});
+  const settings = useQuery(api.settings.get);
+  const summaryEmail = settings?.notifications?.summaryEmail ?? '';
   const { results, status, loadMore } = usePaginatedQuery(
     api.shifts.listClosed,
     {},
@@ -99,8 +174,8 @@ function ShiftHistoryPage() {
       ) : (
         <ul className="divide-y divide-border border border-border rounded-md">
           {results.map((s) => (
-            <li key={s._id}>
-              <button type="button" onClick={() => setSelected(s._id)} className="w-full text-left p-3 hover:bg-muted">
+            <li key={s._id} className="flex items-start gap-2 p-3 hover:bg-muted">
+              <button type="button" onClick={() => setSelected(s._id)} className="flex-1 min-w-0 text-left">
                 <div className="flex justify-between">
                   <span className="text-sm font-medium">{s.cashierName}</span>
                   <span className="text-sm font-semibold tabular-nums">{formatIDR(s.salesTotalIDR)}</span>
@@ -120,6 +195,9 @@ function ShiftHistoryPage() {
                   ) : null}
                 </div>
               </button>
+              <div className="shrink-0">
+                <EmailSummaryButton key={summaryEmail} shiftId={s._id} defaultEmail={summaryEmail} />
+              </div>
             </li>
           ))}
         </ul>
