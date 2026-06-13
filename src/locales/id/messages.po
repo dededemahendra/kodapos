@@ -1508,6 +1508,7 @@ msgstr "Direfund {0}"
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/manual-discount-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
+#: src/routes/display.tsx
 msgid "Diskon"
 msgstr "Diskon"
 
@@ -2883,6 +2884,14 @@ msgstr "Laporan"
 #~ msgid "Latest updates in your workspace."
 #~ msgstr "Latest updates in your workspace."
 
+#: src/routes/display.tsx
+msgid "Layanan"
+msgstr "Layanan"
+
+#: src/components/sale/register-top-bar.tsx
+msgid "Layar pelanggan"
+msgstr "Layar pelanggan"
+
 #: src/lib/auth-validation.ts
 msgid "Lemah"
 msgstr "Lemah"
@@ -3533,6 +3542,7 @@ msgstr "OVO"
 
 #: src/components/public/cart-review-sheet.tsx
 #: src/routes/_pos/settings/tax.tsx
+#: src/routes/display.tsx
 msgid "Pajak"
 msgstr "Pajak"
 
@@ -3883,6 +3893,10 @@ msgstr "Pesanan"
 #: src/components/sale/cart-pane.tsx
 msgid "Pesanan ({0})"
 msgstr "Pesanan ({0})"
+
+#: src/routes/display.tsx
+msgid "Pesanan Anda akan tampil di sini."
+msgstr "Pesanan Anda akan tampil di sini."
 
 #: src/routes/_pos/kitchen.tsx
 msgid "Pesanan baru akan muncul di sini saat dibayar."
@@ -4568,6 +4582,10 @@ msgstr "Segera"
 msgid "Segera hadir."
 msgstr "Segera hadir."
 
+#: src/routes/display.tsx
+msgid "Selamat datang"
+msgstr "Selamat datang"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Selasa"
 msgstr "Selasa"
@@ -4879,6 +4897,7 @@ msgstr "Suara saat transaksi berhasil"
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/inventory/purchases.tsx
+#: src/routes/display.tsx
 msgid "Subtotal"
 msgstr "Subtotal"
 
@@ -5433,6 +5452,7 @@ msgstr "Tombol uang cepat"
 #: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/time-clock.tsx
+#: src/routes/display.tsx
 msgid "Total"
 msgstr "Total"
 

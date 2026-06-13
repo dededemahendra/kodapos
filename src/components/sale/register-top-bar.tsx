@@ -2,6 +2,7 @@ import { Trans } from '@lingui/react/macro';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
+import { Monitor } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { NavUser } from '~/components/nav-user';
@@ -59,6 +60,13 @@ export function RegisterTopBar() {
         </Button>
       </div>
       <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => window.open('/display', 'kodaposCustomerDisplay')}
+        >
+          <Monitor /><Trans>Layar pelanggan</Trans>
+        </Button>
         <Button
           asChild
           size="sm"
