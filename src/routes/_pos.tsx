@@ -8,6 +8,7 @@ import { RegisterTopBar } from '~/components/sale/register-top-bar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { LoadingCounter } from '~/components/ui/loading-counter';
 import { Toaster } from '~/components/ui/sonner';
+import { useAutoLock } from '~/lib/use-auto-lock';
 
 export const Route = createFileRoute('/_pos')({
   component: PosLayout,
@@ -42,6 +43,7 @@ function PosLayout() {
         <SignedOutRedirect />
       </Unauthenticated>
       <Authenticated>
+        <AutoLock />
         <OnboardingGate>
           {showNav ? (
             <SidebarProvider>
@@ -66,6 +68,12 @@ function PosLayout() {
       </Authenticated>
     </div>
   );
+}
+
+// Arms the idle auto-lock only while authenticated (renders nothing).
+function AutoLock() {
+  useAutoLock();
+  return null;
 }
 
 function SignedOutRedirect() {
