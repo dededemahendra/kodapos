@@ -18,6 +18,7 @@ import {
 } from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
 import { Spinner } from '~/components/ui/spinner';
+import { useActiveCashier } from '~/lib/active-cashier';
 import { formatIDR, formatRelative } from '~/lib/formater';
 import { toast } from '~/lib/toast';
 
@@ -26,9 +27,29 @@ export const Route = createFileRoute('/_pos/self-orders')({ component: SelfOrder
 function SelfOrdersPage() {
   const { t } = useLingui();
   const navigate = useNavigate();
+  const { cashierId } = useActiveCashier();
   const queue = useQuery(api.selfOrders.queue);
   const reject = useMutation(api.selfOrders.reject);
+  const acceptPaid = useMutation(api.selfOrders.acceptPaid);
   const [rejectTarget, setRejectTarget] = useState<Id<'selfOrders'> | null>(null);
+  const [acceptingId, setAcceptingId] = useState<Id<'selfOrders'> | null>(null);
+
+  async function handleAcceptPaid(id: Id<'selfOrders'>): Promise<void> {
+    if (!cashierId) {
+      toast.error(t`Masuk dengan PIN dulu untuk menerima pesanan.`);
+      return;
+    }
+    setAcceptingId(id);
+    try {
+      await acceptPaid({ id, cashierId });
+      toast.success(t`Pesanan diterima.`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t`Gagal menerima pesanan.`;
+      toast.error(message);
+    } finally {
+      setAcceptingId(null);
+    }
+  }
 
   return (
     <main className="p-6">
@@ -92,29 +113,54 @@ function SelfOrdersPage() {
                   </p>
                 ) : null}
 
-                <div className="text-sm font-medium tabular-nums">
-                  {formatIDR(order.subtotalIDR)}
-                </div>
+                {order.paymentStatus === 'paid' ? (
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="secondary" className="shrink-0 font-normal">
+                      <Trans>Lunas (QRIS)</Trans>
+                    </Badge>
+                    <span className="text-sm font-medium tabular-nums">
+                      {formatIDR(order.totalIDR ?? order.subtotalIDR)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="text-sm font-medium tabular-nums">
+                    {formatIDR(order.subtotalIDR)}
+                  </div>
+                )}
 
-                <div className="mt-1 flex items-center gap-2">
-                  <Button
-                    type="button"
-                    className="flex-1"
-                    onClick={() =>
-                      navigate({ to: '/sale', search: { selfOrder: order.id } })
-                    }
-                  >
-                    <Trans context="self-order action">Terima</Trans>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setRejectTarget(order.id)}
-                  >
-                    <Trans>Tolak</Trans>
-                  </Button>
-                </div>
+                {order.paymentStatus === 'paid' ? (
+                  <div className="mt-1 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      className="flex-1"
+                      disabled={acceptingId === order.id}
+                      onClick={() => handleAcceptPaid(order.id)}
+                    >
+                      {acceptingId === order.id ? <Spinner /> : null}
+                      <Trans context="self-order action">Terima (sudah dibayar)</Trans>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      className="flex-1"
+                      onClick={() =>
+                        navigate({ to: '/sale', search: { selfOrder: order.id } })
+                      }
+                    >
+                      <Trans context="self-order action">Terima</Trans>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setRejectTarget(order.id)}
+                    >
+                      <Trans>Tolak</Trans>
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
