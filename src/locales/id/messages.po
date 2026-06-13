@@ -847,6 +847,15 @@ msgstr "Bawa pulang"
 msgid "Bayar"
 msgstr "Bayar"
 
+#: src/components/public/cart-review-sheet.tsx
+#: src/components/public/qr-payment-view.tsx
+msgid "Bayar di kasir"
+msgstr "Bayar di kasir"
+
+#: src/components/public/cart-review-sheet.tsx
+msgid "Bayar sekarang (QRIS)"
+msgstr "Bayar sekarang (QRIS)"
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Belanja minimum"
 msgstr "Belanja minimum"
@@ -1059,6 +1068,11 @@ msgstr "Berhasil clock out."
 msgid "Beri diskon"
 msgstr "Beri diskon"
 
+#. placeholder {0}: formatCountdown(expiresAt - now)
+#: src/components/public/qr-payment-view.tsx
+msgid "Berlaku <0>{0}</0>"
+msgstr "Berlaku <0>{0}</0>"
+
 #: src/routes/_pos/reports/export.tsx
 msgid "Bersih"
 msgstr "Bersih"
@@ -1188,6 +1202,10 @@ msgstr "Buat satu grup untuk dipakai ulang di banyak item."
 #: src/routes/_pos/menu/labels.tsx
 msgid "Buat semua"
 msgstr "Buat semua"
+
+#: src/components/public/qr-payment-view.tsx
+msgid "Buat ulang QR"
+msgstr "Buat ulang QR"
 
 #: src/routes/_pos/tables.tsx
 msgid "Buka \"Kelola meja\" untuk menambah meja."
@@ -1803,6 +1821,10 @@ msgstr "Gagal menerbitkan kartu hadiah."
 #: src/components/inventory/purchase-order-detail.tsx
 msgid "Gagal menerima barang."
 msgstr "Gagal menerima barang."
+
+#: src/routes/_pos/self-orders.tsx
+msgid "Gagal menerima pesanan."
+msgstr "Gagal menerima pesanan."
 
 #: src/routes/_pos/inventory/index.tsx
 msgid "Gagal mengarsipkan bahan."
@@ -2828,6 +2850,10 @@ msgstr "Kode promo"
 msgid "Kode QR ini tidak dikenali. Mohon pindai ulang QR di meja Anda."
 msgstr "Kode QR ini tidak dikenali. Mohon pindai ulang QR di meja Anda."
 
+#: src/components/public/qr-payment-view.tsx
+msgid "Kode QR pembayaran sudah tidak berlaku. Buat ulang untuk membayar."
+msgstr "Kode QR pembayaran sudah tidak berlaku. Buat ulang untuk membayar."
+
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Kode QRIS"
 msgstr "Kode QRIS"
@@ -3064,6 +3090,10 @@ msgstr "Loyalitas"
 msgid "Lunas"
 msgstr "Lunas"
 
+#: src/routes/_pos/self-orders.tsx
+msgid "Lunas (QRIS)"
+msgstr "Lunas (QRIS)"
+
 #: src/components/sale/order-types.tsx
 msgid "Makan di tempat"
 msgstr "Makan di tempat"
@@ -3105,6 +3135,10 @@ msgstr "Margin muncul setelah ada item terjual pada rentang ini."
 #: src/routes/_public/signup.tsx
 msgid "Masuk"
 msgstr "Masuk"
+
+#: src/routes/_pos/self-orders.tsx
+msgid "Masuk dengan PIN dulu untuk menerima pesanan."
+msgstr "Masuk dengan PIN dulu untuk menerima pesanan."
 
 #: src/components/permission/switch-to-owner.tsx
 msgid "Masuk sebagai pemilik"
@@ -3769,6 +3803,7 @@ msgid "Pembayaran"
 msgstr "Pembayaran"
 
 #: src/components/dashboard-activity.tsx
+#: src/components/public/qr-payment-view.tsx
 msgid "Pembayaran diterima"
 msgstr "Pembayaran diterima"
 
@@ -4066,10 +4101,19 @@ msgstr "Pesanan ditahan"
 msgid "Pesanan ditahan."
 msgstr "Pesanan ditahan."
 
+#: src/components/public/qr-payment-view.tsx
+msgid "Pesanan diterima"
+msgstr "Pesanan diterima"
+
 #: src/routes/_public/order.$token.tsx
 msgid "Pesanan diterima ✓"
 msgstr "Pesanan diterima ✓"
 
+#: src/routes/_pos/self-orders.tsx
+msgid "Pesanan diterima."
+msgstr "Pesanan diterima."
+
+#: src/components/public/qr-payment-view.tsx
 #: src/routes/_public/order.$token.tsx
 msgid "Pesanan ditolak"
 msgstr "Pesanan ditolak"
@@ -4087,6 +4131,10 @@ msgstr "Pesanan ini akan dihapus dari daftar pesanan masuk."
 #: src/routes/_pos/self-orders.tsx
 msgid "Pesanan Masuk"
 msgstr "Pesanan Masuk"
+
+#: src/components/public/qr-payment-view.tsx
+msgid "Pesanan sedang diproses."
+msgstr "Pesanan sedang diproses."
 
 #: src/components/dashboard-invoices.tsx
 msgid "Pesanan terakhir dan statusnya."
@@ -4392,6 +4440,10 @@ msgstr "Putar suara konfirmasi setelah pembayaran selesai."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Putuskan"
 msgstr "Putuskan"
+
+#: src/components/public/qr-payment-view.tsx
+msgid "QR kedaluwarsa"
+msgstr "QR kedaluwarsa"
 
 #: src/components/sale/qr-print-dialog.tsx
 msgid "QR pesan mandiri"
@@ -5459,6 +5511,11 @@ msgctxt "self-order action"
 msgid "Terima"
 msgstr "Terima"
 
+#: src/routes/_pos/self-orders.tsx
+msgctxt "self-order action"
+msgid "Terima (sudah dibayar)"
+msgstr "Terima (sudah dibayar)"
+
 #. placeholder {0}: line.ingredientName
 #: src/components/inventory/purchase-order-detail.tsx
 msgid "Terima {0}"
@@ -5724,6 +5781,10 @@ msgstr "Tumpah"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tunai"
 msgstr "Tunai"
+
+#: src/components/public/qr-payment-view.tsx
+msgid "Tunjukkan QR ini untuk membayar"
+msgstr "Tunjukkan QR ini untuk membayar"
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Turunkan urutan"
