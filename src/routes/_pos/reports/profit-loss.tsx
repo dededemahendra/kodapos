@@ -21,6 +21,8 @@ import {
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
+import { exportTablePdf } from '~/lib/pdf';
+import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/reports/profit-loss')({
   component: ProfitLossReport,
@@ -67,6 +69,47 @@ function ProfitLossReport() {
     downloadCSV('laba-rugi.csv', csv);
   }
 
+  // English category labels for the off-catalog PDF document.
+  const catEnglish: Record<ExpenseCategory, string> = {
+    rent: 'Rent',
+    utilities: 'Utilities',
+    supplies: 'Supplies',
+    salary: 'Salary',
+    other: 'Other',
+  };
+
+  async function exportPDF() {
+    if (!data) return;
+    try {
+      const rows = [
+        { label: 'Revenue', amountIDR: formatIDR(data.revenueIDR) },
+        { label: 'Refunds', amountIDR: formatIDR(-data.refundsIDR) },
+        { label: 'COGS', amountIDR: formatIDR(-data.cogsIDR) },
+        { label: 'Gross profit', amountIDR: formatIDR(data.grossProfitIDR) },
+        { label: 'Expenses', amountIDR: formatIDR(-data.expensesIDR) },
+        ...data.expensesByCategory.map((c) => ({
+          label: catEnglish[c.category],
+          amountIDR: formatIDR(-c.amountIDR),
+        })),
+        { label: 'Other income', amountIDR: formatIDR(data.otherIncomeIDR) },
+      ];
+      await exportTablePdf({
+        filename: 'laba-rugi.pdf',
+        title: 'Profit and Loss',
+        subtitle: `${data.fromKey} to ${data.toKey}`,
+        columns: [
+          { key: 'label', header: 'Item' },
+          { key: 'amountIDR', header: 'Amount' },
+        ],
+        rows,
+        numericKeys: ['amountIDR'],
+        footRows: [['Net profit', formatIDR(data.netProfitIDR)]],
+      });
+    } catch {
+      toast.error(t`Gagal mengunduh PDF.`);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-end gap-2">
@@ -78,6 +121,15 @@ function ProfitLossReport() {
           disabled={!data}
         >
           <Trans>Unduh CSV</Trans>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={exportPDF}
+          disabled={!data}
+        >
+          <Trans>Unduh PDF</Trans>
         </Button>
       </div>
 

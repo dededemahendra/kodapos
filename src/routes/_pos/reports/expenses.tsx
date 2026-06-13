@@ -26,6 +26,7 @@ import {
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
+import { exportTablePdf } from '~/lib/pdf';
 import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/reports/expenses')({
@@ -139,6 +140,43 @@ function ExpensesReport() {
     downloadCSV('pengeluaran.csv', csv);
   }
 
+  // English category labels for the off-catalog PDF document.
+  const catEnglish: Record<ExpenseCategory, string> = {
+    rent: 'Rent',
+    utilities: 'Utilities',
+    supplies: 'Supplies',
+    salary: 'Salary',
+    other: 'Other',
+  };
+
+  async function exportPDF() {
+    if (!data) return;
+    try {
+      await exportTablePdf({
+        filename: 'pengeluaran.pdf',
+        title: 'Expenses',
+        subtitle:
+          'from' in range ? `${range.from} to ${range.to}` : range.preset,
+        columns: [
+          { key: 'at', header: 'Date' },
+          { key: 'category', header: 'Category' },
+          { key: 'amountIDR', header: 'Amount' },
+          { key: 'note', header: 'Note' },
+        ],
+        rows: data.rows.map((r) => ({
+          at: new Date(r.at).toLocaleDateString('en-GB'),
+          category: catEnglish[r.category],
+          amountIDR: formatIDR(r.amountIDR),
+          note: r.note ?? '',
+        })),
+        numericKeys: ['amountIDR'],
+        footRows: [['', 'Total', formatIDR(data.totalIDR), '']],
+      });
+    } catch {
+      toast.error(t`Gagal mengunduh PDF.`);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -157,6 +195,15 @@ function ExpensesReport() {
             disabled={!data || data.rows.length === 0}
           >
             <Trans>Unduh CSV</Trans>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={exportPDF}
+            disabled={!data || data.rows.length === 0}
+          >
+            <Trans>Unduh PDF</Trans>
           </Button>
           <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
             <Plus />

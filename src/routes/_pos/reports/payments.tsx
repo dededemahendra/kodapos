@@ -17,6 +17,7 @@ import {
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
+import { exportTablePdf } from '~/lib/pdf';
 import { useReportRange } from '~/components/reports/use-report-range';
 
 export const Route = createFileRoute('/_pos/reports/payments')({
@@ -27,6 +28,13 @@ const METHOD_LABEL: Record<string, string> = {
   cash: 'Tunai',
   qris_static: 'QRIS Statis',
   qris_dynamic: 'QRIS Dinamis',
+};
+
+// English method labels for the off-catalog PDF document.
+const METHOD_LABEL_EN: Record<string, string> = {
+  cash: 'Cash',
+  qris_static: 'QRIS Static',
+  qris_dynamic: 'QRIS Dynamic',
 };
 
 type MethodRow = {
@@ -130,11 +138,40 @@ function PaymentsReport() {
     downloadCSV(`pembayaran-${data!.fromKey}_${data!.toKey}.csv`, csv);
   }
 
+  async function onDownloadPDF() {
+    await exportTablePdf({
+      filename: `pembayaran-${data!.fromKey}_${data!.toKey}.pdf`,
+      title: 'Payments',
+      subtitle: `${data!.fromKey} to ${data!.toKey}`,
+      columns: [
+        { key: 'method', header: 'Method' },
+        { key: 'count', header: 'Orders' },
+        { key: 'amountIDR', header: 'Amount' },
+        { key: 'pct', header: 'Share' },
+      ],
+      rows: rows.map((r) => ({
+        method: METHOD_LABEL_EN[r.method] ?? r.method,
+        count: r.count,
+        amountIDR: formatIDR(r.amountIDR),
+        pct: `${r.pct}%`,
+      })),
+      numericKeys: ['count', 'amountIDR', 'pct'],
+    });
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" size="sm" onClick={onDownload}>
           <Trans>Unduh CSV</Trans>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onDownloadPDF}
+        >
+          <Trans>Unduh PDF</Trans>
         </Button>
       </div>
       <DataTable

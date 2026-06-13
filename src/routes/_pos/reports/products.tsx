@@ -17,6 +17,7 @@ import {
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
+import { exportTablePdf } from '~/lib/pdf';
 import { useReportRange } from '~/components/reports/use-report-range';
 
 export const Route = createFileRoute('/_pos/reports/products')({
@@ -88,11 +89,38 @@ function ProductsReport() {
     downloadCSV(`produk-${data!.fromKey}_${data!.toKey}.csv`, csv);
   }
 
+  async function onDownloadPDF() {
+    await exportTablePdf({
+      filename: `produk-${data!.fromKey}_${data!.toKey}.pdf`,
+      title: 'Products',
+      subtitle: `${data!.fromKey} to ${data!.toKey}`,
+      columns: [
+        { key: 'name', header: 'Product' },
+        { key: 'qty', header: 'Qty' },
+        { key: 'revenueIDR', header: 'Revenue' },
+      ],
+      rows: data!.items.map((i) => ({
+        name: i.name,
+        qty: i.qty,
+        revenueIDR: formatIDR(i.revenueIDR),
+      })),
+      numericKeys: ['qty', 'revenueIDR'],
+    });
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" size="sm" onClick={onDownload}>
           <Trans>Unduh CSV</Trans>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onDownloadPDF}
+        >
+          <Trans>Unduh PDF</Trans>
         </Button>
       </div>
       <DataTable

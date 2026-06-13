@@ -60,6 +60,8 @@
     "clsx": "^2.1.1",
     "convex": "^1.39.1",
     "date-fns": "^4.4.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.16.0",
     "motion": "^12.40.0",
     "qrcode.react": "^4.2.0",
