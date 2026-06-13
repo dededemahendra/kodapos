@@ -592,6 +592,15 @@ export default defineSchema({
     .index('by_cafe_at', ['cafeId', 'at'])
     .index('by_cafe_status', ['cafeId', 'status']),
 
+  loyaltyRewards: defineTable({
+    cafeId: v.id('cafes'),
+    name: v.string(),
+    pointsCost: v.number(),
+    discountIDR: v.number(),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  }).index('by_cafe_active', ['cafeId', 'archived']),
+
   loyaltyTransactions: defineTable({
     cafeId: v.id('cafes'),
     customerId: v.id('customers'),
