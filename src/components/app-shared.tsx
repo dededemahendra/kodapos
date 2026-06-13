@@ -8,6 +8,7 @@ import {
 	BookOpen,
 	Calculator,
 	CalendarClock,
+	CalendarDays,
 	ChefHat,
 	ClipboardList,
 	Clock,

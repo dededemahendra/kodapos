@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Clock } from 'lucide-react';
+import { Clock, Wallet } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
@@ -25,6 +25,8 @@ import {
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
+import { formatIDR } from '~/lib/money';
+import { exportTablePdf } from '~/lib/pdf';
 import { usePermissions } from '~/lib/permissions';
 import { toast } from '~/lib/toast';
 
@@ -45,6 +47,7 @@ function TimeClockPage() {
       <div className="space-y-8">
         <ClockSection />
         <ReportSection />
+        <PayrollSection />
       </div>
     </main>
   );
@@ -245,6 +248,191 @@ function ReportSection() {
             <Trans>Total</Trans>:{' '}
             <span className="font-semibold tabular-nums">
               {formatMinutes(report.totalMinutes)}
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+type PayrollRow = {
+  staffId: Id<'cafeStaff'>;
+  name: string;
+  totalMinutes: number;
+  hours: number;
+  hourlyRateIDR: number;
+  payIDR: number;
+};
+
+function PayrollSection() {
+  const { isOwner } = usePermissions();
+  const { t } = useLingui();
+  const [preset, setPreset] = useState<Preset>('last7');
+  const payroll = useQuery(api.timeClock.payroll, { range: { preset } });
+
+  const columns = useMemo<ColumnDef<PayrollRow, unknown>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: () => <Trans>Nama</Trans>,
+        cell: ({ row }) => <span>{row.original.name}</span>,
+      },
+      {
+        accessorKey: 'hours',
+        header: () => <Trans>Jam</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">{row.original.hours}</span>
+        ),
+      },
+      {
+        accessorKey: 'hourlyRateIDR',
+        header: () => <Trans>Tarif/jam</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">
+            {formatIDR(row.original.hourlyRateIDR)}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'payIDR',
+        header: () => <Trans>Bayar</Trans>,
+        cell: ({ row }) => (
+          <span className="tabular-nums">{formatIDR(row.original.payIDR)}</span>
+        ),
+      },
+    ],
+    []
+  );
+
+  if (!isOwner) return null;
+
+  function exportCSV() {
+    if (!payroll) return;
+    const csv = toCSV(
+      payroll.rows.map((r) => ({
+        name: r.name,
+        hours: r.hours,
+        rate: r.hourlyRateIDR,
+        pay: r.payIDR,
+      })),
+      [
+        { key: 'name', header: t`Nama` },
+        { key: 'hours', header: t`Jam` },
+        { key: 'rate', header: t`Tarif/jam` },
+        { key: 'pay', header: t`Bayar` },
+      ]
+    );
+    downloadCSV(`payroll-${payroll.fromKey}-${payroll.toKey}.csv`, csv);
+  }
+
+  async function exportPDF() {
+    if (!payroll) return;
+    // PDF document content is intentionally English (printable export).
+    await exportTablePdf({
+      // eslint-disable-next-line lingui/no-unlocalized-strings
+      filename: 'payroll.pdf',
+      // eslint-disable-next-line lingui/no-unlocalized-strings
+      title: 'Payroll',
+      subtitle: `${payroll.fromKey} to ${payroll.toKey}`,
+      columns: [
+        // eslint-disable-next-line lingui/no-unlocalized-strings
+        { key: 'name', header: 'Name' },
+        // eslint-disable-next-line lingui/no-unlocalized-strings
+        { key: 'hours', header: 'Hours' },
+        // eslint-disable-next-line lingui/no-unlocalized-strings
+        { key: 'rate', header: 'Rate' },
+        // eslint-disable-next-line lingui/no-unlocalized-strings
+        { key: 'pay', header: 'Pay' },
+      ],
+      rows: payroll.rows.map((r) => ({
+        name: r.name,
+        hours: r.hours,
+        rate: formatIDR(r.hourlyRateIDR),
+        pay: formatIDR(r.payIDR),
+      })),
+      numericKeys: ['rate', 'pay'],
+      // eslint-disable-next-line lingui/no-unlocalized-strings
+      footRows: [['', '', 'Total', formatIDR(payroll.totalPayIDR)]],
+    });
+  }
+
+  const isEmpty = payroll !== undefined && payroll.rows.length === 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold">
+            <Trans>Payroll</Trans>
+          </span>
+          <Select
+            value={preset}
+            onValueChange={(v) => setPreset(v as Preset)}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">
+                <Trans>Hari ini</Trans>
+              </SelectItem>
+              <SelectItem value="last7">
+                <Trans>7 hari</Trans>
+              </SelectItem>
+              <SelectItem value="last30">
+                <Trans>30 hari</Trans>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={exportCSV}
+            disabled={!payroll || payroll.rows.length === 0}
+          >
+            <Trans>Unduh CSV</Trans>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void exportPDF()}
+            disabled={!payroll || payroll.rows.length === 0}
+          >
+            <Trans>Unduh PDF</Trans>
+          </Button>
+        </div>
+      </div>
+
+      {payroll === undefined ? (
+        <div className="flex justify-center py-12">
+          <Spinner />
+        </div>
+      ) : isEmpty ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Wallet />
+            </EmptyMedia>
+            <EmptyTitle>
+              <Trans>Belum ada payroll pada rentang ini.</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Atur tarif per jam staf dan catat jam kerja.</Trans>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <>
+          <DataTable columns={columns} data={payroll.rows} emptyState={null} />
+          <div className="text-sm">
+            <Trans>Total</Trans>:{' '}
+            <span className="font-semibold tabular-nums">
+              {formatIDR(payroll.totalPayIDR)}
             </span>
           </div>
         </>
