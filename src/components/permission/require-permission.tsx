@@ -30,7 +30,7 @@ export function RequirePermission({
           <EmptyHeader>
             <EmptyMedia variant="icon"><Lock /></EmptyMedia>
             <EmptyTitle><Trans>Akses ditolak</Trans></EmptyTitle>
-            <EmptyDescription><Trans>Halaman ini perlu akses pemilik. Anda login sebagai pemilik, tetapi kasir aktif di kasir ini bukan pemilik — masuk sebagai pemilik untuk membukanya.</Trans></EmptyDescription>
+            <EmptyDescription><Trans>Anda tidak punya akses ke halaman ini. Masuk sebagai pemilik untuk membukanya.</Trans></EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <SwitchToOwner />
