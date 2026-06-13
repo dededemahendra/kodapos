@@ -106,6 +106,27 @@ describe('promotions: coupon codes', () => {
     ).rejects.toThrow(/kode/i);
   });
 
+  it('allows reusing the code of an ARCHIVED promo; a live duplicate still throws', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const id = await asOwner.mutation(api.promotions.create, {
+      name: 'First', type: 'percent', value: 20, code: 'SAVE10',
+    });
+    await asOwner.mutation(api.promotions.archive, { id });
+    // Archived holder of SAVE10 no longer blocks the code → reuse succeeds.
+    await asOwner.mutation(api.promotions.create, {
+      name: 'Reuse', type: 'percent', value: 10, code: 'save10',
+    });
+    const list = await asOwner.query(api.promotions.list, {});
+    expect(list.find((p) => p.code === 'SAVE10')?.name).toBe('Reuse');
+    // A non-archived duplicate of the now-live SAVE10 still throws.
+    await expect(
+      asOwner.mutation(api.promotions.create, {
+        name: 'Dup', type: 'percent', value: 5, code: 'SAVE10',
+      })
+    ).rejects.toThrow(/kode/i);
+  });
+
   it('allows the same code in a different cafe', async () => {
     const t = convexTest(schema, modules);
     const { asOwner: ownerA } = await setupOwner(t, 'a@x.com');

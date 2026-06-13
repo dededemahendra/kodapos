@@ -718,6 +718,8 @@ describe('orders.createCashSale', () => {
     // 10% of A's line (18000) = 1800; NOT 10% of subtotal 30000 (= 3000)
     expect(order?.discountIDR).toBe(1800);
     expect(order?.appliedPromo?.scope).toBe('item');
+    // Targets snapshotted so audit/refund can reconstruct the scoped subtotal.
+    expect(order?.appliedPromo?.targetItemIds).toEqual([s.itemA]);
     expect(result.totalIDR).toBe(28200); // 30000 - 1800
   });
 

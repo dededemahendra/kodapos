@@ -23,6 +23,12 @@ export const heldPromoValidator = v.object({
   name: v.string(),
   type: v.union(v.literal('percent'), v.literal('fixed')),
   value: v.number(),
+  // Carry the promo's scope + targets through hold/recall so the recalled cart
+  // previews the SCOPED subtotal (not the whole cart). Optional for back-compat
+  // with pre-scope held orders.
+  scope: v.optional(v.union(v.literal('order'), v.literal('item'), v.literal('category'))),
+  targetItemIds: v.optional(v.array(v.id('menuItems'))),
+  targetCategoryIds: v.optional(v.array(v.id('categories'))),
 });
 
 export { orderTypeValidator };

@@ -241,6 +241,8 @@ export async function buildOrder(
       type: promo.type,
       value: promo.value,
       scope: promo.scope ?? 'order',
+      ...(promo.targetItemIds ? { targetItemIds: promo.targetItemIds } : {}),
+      ...(promo.targetCategoryIds ? { targetCategoryIds: promo.targetCategoryIds } : {}),
     };
   }
 

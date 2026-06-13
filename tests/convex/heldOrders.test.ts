@@ -88,6 +88,36 @@ describe('heldOrders', () => {
     expect(list[0]?.lines[0]?.qty).toBe(2);
   });
 
+  it('round-trips a scoped promo (scope + targetItemIds survive hold/recall)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cashierId, shiftId } = await setup(t);
+    const itemId = await makeItem(asOwner);
+    await asOwner.mutation(api.heldOrders.hold, {
+      cashierId,
+      label: 'Meja 7',
+      orderType: 'dine_in',
+      lines: sampleLines(itemId),
+      promo: {
+        promoId: (await asOwner.mutation(api.promotions.create, {
+          name: 'Item 10%',
+          type: 'percent',
+          value: 10,
+          scope: 'item',
+          targetItemIds: [itemId],
+        })) as Id<'promotions'>,
+        name: 'Item 10%',
+        type: 'percent',
+        value: 10,
+        scope: 'item',
+        targetItemIds: [itemId],
+      },
+    });
+    const list = await asOwner.query(api.heldOrders.listForShift, { shiftId });
+    expect(list).toHaveLength(1);
+    expect(list[0]?.promo?.scope).toBe('item');
+    expect(list[0]?.promo?.targetItemIds).toEqual([itemId]);
+  });
+
   it('rejects an empty cart', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, cashierId } = await setup(t);

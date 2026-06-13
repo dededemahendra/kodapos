@@ -114,6 +114,11 @@ export function SaleScreen({
                 name: row.promo.name,
                 type: row.promo.type,
                 value: row.promo.value,
+                ...(row.promo.scope ? { scope: row.promo.scope } : {}),
+                ...(row.promo.targetItemIds ? { targetItemIds: row.promo.targetItemIds } : {}),
+                ...(row.promo.targetCategoryIds
+                  ? { targetCategoryIds: row.promo.targetCategoryIds }
+                  : {}),
               }
             : null,
           lines: row.lines.map((l) => ({ ...l, lineKey: genLineKey() })),

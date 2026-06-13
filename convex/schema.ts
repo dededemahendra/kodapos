@@ -403,6 +403,10 @@ export default defineSchema({
         scope: v.optional(
           v.union(v.literal('order'), v.literal('item'), v.literal('category'))
         ),
+        // Target snapshot so audit/refund can reconstruct the scoped subtotal.
+        // Optional: present only for item/category-scoped promos.
+        targetItemIds: v.optional(v.array(v.id('menuItems'))),
+        targetCategoryIds: v.optional(v.array(v.id('categories'))),
       })
     ),
     // Service charge (added in the service-charge slice). Optional for

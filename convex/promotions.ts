@@ -43,7 +43,8 @@ function assertPromoCode(code: string): string {
   return upper;
 }
 
-/** Ensure `code` is unique within the cafe (excluding `selfId` on update). */
+/** Ensure `code` is unique within the cafe (excluding `selfId` on update). Only
+ *  NON-archived promos block a code, so an archived promo's code can be reused. */
 async function assertCodeUnique(
   ctx: MutationCtx,
   cafeId: Id<'cafes'>,
@@ -54,7 +55,9 @@ async function assertCodeUnique(
     .query('promotions')
     .withIndex('by_cafe_code', (q) => q.eq('cafeId', cafeId).eq('code', code))
     .collect();
-  if (clash.some((p) => p._id !== selfId)) throw new Error('Kode promo sudah dipakai.');
+  if (clash.some((p) => !p.archived && p._id !== selfId)) {
+    throw new Error('Kode promo sudah dipakai.');
+  }
 }
 
 /**

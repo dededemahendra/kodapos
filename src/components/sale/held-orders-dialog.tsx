@@ -45,7 +45,15 @@ export function HeldOrdersDialog({
           variantId?: Id<'menuItemVariants'>;
           variantName?: string;
         }>;
-        promo?: { promoId: Id<'promotions'>; name: string; type: 'percent' | 'fixed'; value: number };
+        promo?: {
+          promoId: Id<'promotions'>;
+          name: string;
+          type: 'percent' | 'fixed';
+          value: number;
+          scope?: 'order' | 'item' | 'category';
+          targetItemIds?: Array<Id<'menuItems'>>;
+          targetCategoryIds?: Array<Id<'categories'>>;
+        };
         createdAt: number;
       }[]
     | undefined;
@@ -62,7 +70,15 @@ export function HeldOrdersDialog({
       const state: CartState = {
         orderType: h.orderType,
         promo: h.promo
-          ? { _id: h.promo.promoId, name: h.promo.name, type: h.promo.type, value: h.promo.value }
+          ? {
+              _id: h.promo.promoId,
+              name: h.promo.name,
+              type: h.promo.type,
+              value: h.promo.value,
+              ...(h.promo.scope ? { scope: h.promo.scope } : {}),
+              ...(h.promo.targetItemIds ? { targetItemIds: h.promo.targetItemIds } : {}),
+              ...(h.promo.targetCategoryIds ? { targetCategoryIds: h.promo.targetCategoryIds } : {}),
+            }
           : null,
         lines: h.lines.map((l) => ({ ...l, lineKey: genLineKey() })),
         manualDiscount: null,
