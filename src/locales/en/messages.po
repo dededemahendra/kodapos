@@ -716,6 +716,7 @@ msgstr "Archived ingredients will appear here."
 msgid "Bahan yang perlu diisi ulang."
 msgstr "Ingredients to restock."
 
+#: src/components/nav-user.tsx
 #: src/routes/_pos/settings/general.tsx
 msgid "Bahasa"
 msgstr "Language"
@@ -743,6 +744,10 @@ msgstr "Bakery"
 #: src/components/billing-health.tsx
 #~ msgid "Balances and payouts look fine. nothing overdue in this snapshot."
 #~ msgstr "Balances and payouts look fine. nothing overdue in this snapshot."
+
+#: src/components/nav-user.tsx
+msgid "Bantuan"
+msgstr "Help"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Bar"
@@ -2065,6 +2070,7 @@ msgstr "Change"
 msgid "Ganti gambar"
 msgstr "Change image"
 
+#: src/components/nav-user.tsx
 #: src/components/sale/cart-pane.tsx
 msgid "Ganti kasir"
 msgstr "Switch cashier"
@@ -2753,6 +2759,10 @@ msgid "Kelola meja"
 msgstr "Manage tables"
 
 #: src/components/nav-user.tsx
+msgid "Kelola staf"
+msgstr "Manage staff"
+
+#: src/components/nav-user.tsx
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Keluar"
@@ -3050,6 +3060,7 @@ msgid "Lanjutkan dengan Google"
 msgstr "Continue with Google"
 
 #: src/components/app-shared.tsx
+#: src/components/nav-user.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Laporan"
 msgstr "Reports"
