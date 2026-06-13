@@ -1539,6 +1539,15 @@ msgstr "Email"
 msgid "Email atau password salah."
 msgstr "Incorrect email or password."
 
+#: src/routes/_pos/settings/general.tsx
+#: src/routes/_pos/shifts.tsx
+msgid "Email penerima ringkasan"
+msgstr "Summary recipient email"
+
+#: src/routes/_pos/shifts.tsx
+msgid "Email ringkasan"
+msgstr "Email summary"
+
 #: src/components/sale/receipt-preview.tsx
 msgid "Email struk"
 msgstr "Email receipt"
@@ -1751,6 +1760,10 @@ msgstr "Failed to connect integration."
 msgid "Gagal mengirim email."
 msgstr "Could not send the email."
 
+#: src/routes/_pos/shifts.tsx
+msgid "Gagal mengirim ringkasan."
+msgstr "Could not send the summary."
+
 #: src/components/giftcard/gift-card-form-dialog.tsx
 msgid "Gagal mengisi saldo kartu."
 msgstr "Failed to top up card balance."
@@ -1836,6 +1849,7 @@ msgid "Gagal menyimpan varian."
 msgstr "Failed to save variant."
 
 #: src/routes/_pos/loyalty.tsx
+#: src/routes/_pos/settings/general.tsx
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/receipt.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -2560,6 +2574,10 @@ msgstr "Description"
 msgid "Ketersediaan"
 msgstr "Availability"
 
+#: src/routes/_pos/shifts.tsx
+msgid "Kirim"
+msgstr "Send"
+
 #: src/components/sale/receipt-preview.tsx
 msgid "Kirim email"
 msgstr "Send email"
@@ -2571,6 +2589,14 @@ msgstr "Send to WhatsApp"
 #: src/components/public/cart-review-sheet.tsx
 msgid "Kirim pesanan"
 msgstr "Send order"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Kirim rekap penjualan dan kas ke email saat shift ditutup."
+msgstr "Email a sales and cash recap when the shift closes."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Kirim ringkasan saat tutup shift"
+msgstr "Email the summary when a shift closes"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Kirim struk & notifikasi via WhatsApp."
@@ -2958,6 +2984,7 @@ msgstr "Loading receipt…"
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/onboarding/profile.tsx
 #: src/routes/_pos/pin.tsx
+#: src/routes/_pos/settings/general.tsx
 #: src/routes/_pos/settings/integrations.tsx
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/receipt.tsx
@@ -4213,6 +4240,14 @@ msgstr "Compact"
 #: src/routes/_pos/reports/route.tsx
 msgid "Ringkasan"
 msgstr "Summary"
+
+#: src/routes/_pos/shifts.tsx
+msgid "Ringkasan dikirim."
+msgstr "Summary sent."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Ringkasan email"
+msgstr "Email summary"
 
 #: src/routes/_pos/reports/index.tsx
 #~ msgid "Ringkasan Laporan"
