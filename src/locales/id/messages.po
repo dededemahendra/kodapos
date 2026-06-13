@@ -3771,6 +3771,10 @@ msgstr "Pesanan beli dibuat."
 msgid "Pesanan beli tidak ditemukan."
 msgstr "Pesanan beli tidak ditemukan."
 
+#: src/routes/_pos/self-orders.tsx
+msgid "Pesanan dari QR meja akan muncul di sini untuk Anda terima."
+msgstr "Pesanan dari QR meja akan muncul di sini untuk Anda terima."
+
 #: src/components/sale/receipt-preview.tsx
 msgid "Pesanan dibatalkan."
 msgstr "Pesanan dibatalkan."
