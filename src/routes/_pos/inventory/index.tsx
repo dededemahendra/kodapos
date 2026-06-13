@@ -4,8 +4,9 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, ClipboardList, History, Package, PackagePlus, Pencil, Plus } from 'lucide-react';
+import { Archive, ClipboardList, History, Package, PackagePlus, Pencil, Plus, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { CsvImportDialog } from '~/components/import/csv-import-dialog';
 import { IngredientForm } from '~/components/inventory/ingredient-form';
 import { MovementHistorySheet } from '~/components/inventory/movement-history-sheet';
 import { StockAdjustDialog } from '~/components/inventory/stock-adjust-dialog';
@@ -45,12 +46,14 @@ function InventoryIndex() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [takeOpen, setTakeOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editId, setEditId] = useState<Id<'ingredients'> | null>(null);
   const [adjustId, setAdjustId] = useState<Id<'ingredients'> | null>(null);
   const [archiveRow, setArchiveRow] = useState<Ingredient | null>(null);
   const [historyRow, setHistoryRow] = useState<Ingredient | null>(null);
 
   const archive = useMutation(api.ingredients.archive);
+  const bulkImportIngredients = useMutation(api.ingredients.bulkImport);
   const ingredients = useQuery(api.ingredients.list, { includeArchived: true });
 
   // Counts for the filter chips (computed off the unfiltered, non-archived set
@@ -244,6 +247,14 @@ function InventoryIndex() {
             <Button
               type="button"
               variant="outline"
+              onClick={() => setImportOpen(true)}
+            >
+              <Upload />
+              <Trans>Impor CSV</Trans>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setTakeOpen(true)}
             >
               <ClipboardList />
@@ -306,6 +317,21 @@ function InventoryIndex() {
         open={takeOpen}
         ingredients={activeIngredients}
         onOpenChange={setTakeOpen}
+      />
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        kind="ingredients"
+        onImport={(rows) =>
+          bulkImportIngredients({
+            rows: rows as Array<{
+              name: string;
+              unit: string;
+              reorderThreshold: number;
+              lastCostPerUnitIDR?: number;
+            }>,
+          })
+        }
       />
       <ConfirmDialog
         open={archiveRow !== null}
