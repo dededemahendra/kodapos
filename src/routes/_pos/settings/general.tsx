@@ -1,8 +1,12 @@
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { api } from 'convex/_generated/api';
+import { useMutation, useQuery } from 'convex/react';
+import { useMemo, useState } from 'react';
 import { useLocale } from '~/components/locale-provider';
+import { SaveBar } from '~/components/settings/save-bar';
+import { useEditableState } from '~/components/settings/use-editable-state';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldTitle } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -427,6 +431,117 @@ function SecuritySection({
 }
 
 // ---------------------------------------------------------------------------
+// Ringkasan email — persists to Convex via settings.updateNotifications
+// ---------------------------------------------------------------------------
+
+interface NotificationsDraft {
+  emailSummaryOnClose: boolean;
+  summaryEmail: string;
+}
+
+function EmailSummarySection() {
+  const { t } = useLingui();
+  const s = useQuery(api.settings.get);
+  const updateNotifications = useMutation(api.settings.updateNotifications);
+  const [error, setError] = useState<string | null>(null);
+
+  const initialDraft = useMemo<NotificationsDraft | undefined>(() => {
+    if (!s) return undefined;
+    const n = s.notifications ?? { emailSummaryOnClose: false };
+    return {
+      emailSummaryOnClose: n.emailSummaryOnClose,
+      summaryEmail: ('summaryEmail' in n ? n.summaryEmail : undefined) ?? '',
+    };
+  }, [s]);
+
+  const { draft, setDraft, dirty, reset } = useEditableState<NotificationsDraft>(initialDraft);
+
+  if (s === undefined) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">
+            <Trans>Ringkasan email</Trans>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            <Trans>Memuat…</Trans>
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (!draft) return null;
+
+  async function handleSave() {
+    const d = draft;
+    if (!d) return;
+    setError(null);
+    try {
+      const summaryEmail = d.summaryEmail.trim() || undefined;
+      await updateNotifications({
+        notifications: {
+          emailSummaryOnClose: d.emailSummaryOnClose,
+          ...(summaryEmail !== undefined ? { summaryEmail } : {}),
+        },
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t`Gagal menyimpan.`);
+      throw e;
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">
+          <Trans>Ringkasan email</Trans>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <FieldGroup>
+          <SettingRow
+            label={<Trans>Kirim ringkasan saat tutup shift</Trans>}
+            description={
+              <Trans>Kirim rekap penjualan dan kas ke email saat shift ditutup.</Trans>
+            }
+            control={
+              <Switch
+                checked={draft.emailSummaryOnClose}
+                onCheckedChange={(checked) =>
+                  setDraft({ ...draft, emailSummaryOnClose: checked })
+                }
+                aria-label={t`Kirim ringkasan saat tutup shift`}
+              />
+            }
+          />
+
+          <RowSep />
+
+          <Field orientation="vertical">
+            <FieldTitle>
+              <Trans>Email penerima ringkasan</Trans>
+            </FieldTitle>
+            <Input
+              type="email"
+              value={draft.summaryEmail}
+              onChange={(e) => setDraft({ ...draft, summaryEmail: e.target.value })}
+              placeholder="email@contoh.com"
+              className="mt-1.5 max-w-xs"
+            />
+          </Field>
+        </FieldGroup>
+
+        {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
+
+        <SaveBar dirty={dirty} onReset={reset} onSave={handleSave} />
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -501,6 +616,8 @@ function GeneralSettings() {
       />
 
       <AppearanceSection density={density} handleDensity={handleDensity} />
+
+      <EmailSummarySection />
 
       <SoonSection>
         <OrdersSection
