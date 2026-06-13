@@ -1788,6 +1788,14 @@ msgstr "Gagal mengirim ringkasan."
 msgid "Gagal mengisi saldo kartu."
 msgstr "Gagal mengisi saldo kartu."
 
+#: src/components/inventory/purchase-order-detail.tsx
+#: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/export.tsx
+#: src/routes/_pos/reports/other-income.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
+msgid "Gagal mengunduh PDF."
+msgstr "Gagal mengunduh PDF."
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Gagal mengunggah gambar."
 msgstr "Gagal mengunggah gambar."
@@ -5548,6 +5556,19 @@ msgstr "Unduh Buku Besar (CSV)"
 #: src/routes/_pos/time-clock.tsx
 msgid "Unduh CSV"
 msgstr "Unduh CSV"
+
+#: src/components/inventory/purchase-order-detail.tsx
+#: src/routes/_pos/reports/cashiers.tsx
+#: src/routes/_pos/reports/expenses.tsx
+#: src/routes/_pos/reports/export.tsx
+#: src/routes/_pos/reports/margin.tsx
+#: src/routes/_pos/reports/other-income.tsx
+#: src/routes/_pos/reports/payments.tsx
+#: src/routes/_pos/reports/products.tsx
+#: src/routes/_pos/reports/profit-loss.tsx
+#: src/routes/_pos/reports/sales.tsx
+msgid "Unduh PDF"
+msgstr "Unduh PDF"
 
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/settings/tax.tsx
