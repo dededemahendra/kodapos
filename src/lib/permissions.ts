@@ -11,9 +11,17 @@ export function usePermissions(): {
 } {
   const { cashierId } = useActiveCashier();
   const data = useQuery(api.staff.permissionsFor, cashierId ? { cashierId } : 'skip');
+  // The signed-in account is always the cafe owner (only owners have accounts;
+  // the server authorizes owner actions by the JWT, not the active cashier). So
+  // the owner gate is account-based: the owner can always reach owner-only pages
+  // (settings/staff), regardless of which cashier is PIN-active on the register.
+  // The active cashier's role/permissions still drive the operational register
+  // UI (canVoid/canEditMenu/...) so an operating cashier sees a restricted view.
+  const cafe = useQuery(api.cafes.myCafe, {});
+  const isAccountOwner = cafe != null;
   return {
-    can: (p) => (data ? data.role === 'owner' || data.permissions[p] : false),
-    isOwner: data?.role === 'owner',
-    isLoading: cashierId !== null && data === undefined,
+    can: (p) => (data ? data.role === 'owner' || data.permissions[p] : isAccountOwner),
+    isOwner: isAccountOwner || data?.role === 'owner',
+    isLoading: cafe === undefined || (cashierId !== null && data === undefined),
   };
 }

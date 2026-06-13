@@ -44,19 +44,27 @@ Pick staff + PIN (/pin)  ───►  Active cashier (localStorage)  → ALL cl
 ```ts
 const { cashierId } = useActiveCashier();                          // localStorage
 const data = useQuery(api.staff.permissionsFor, { cashierId });    // THAT cashier's role
-can(p)   = data ? (data.role === 'owner' || data.permissions[p]) : false
-isOwner  = data?.role === 'owner'
-isLoading = cashierId !== null && data === undefined
+const isAccountOwner = useQuery(api.cafes.myCafe) != null;         // the signed-in JWT owns a cafe
+can(p)   = data ? (data.role === 'owner' || data.permissions[p]) : isAccountOwner
+isOwner  = isAccountOwner || data?.role === 'owner'                // ACCOUNT-based
+isLoading = cafe === undefined || (cashierId !== null && data === undefined)
 ```
 
 `staff.permissionsFor` (`convex/staff.ts`): an `owner` role gets **all** permissions
 (`ALL_TRUE`); a `cashier` gets only the flags toggled on their staff row.
 
+**The owner gate is account-based.** Only owners have accounts, and the server authorizes
+owner actions by the JWT (`requireOwnerCafe`), never by the active cashier — so the client
+owner gate would be a false boundary if it blocked the signed-in owner. `isOwner` is therefore
+true whenever the signed-in account owns the cafe (`cafes.myCafe != null`), so the owner can
+always reach `/settings`. The active cashier's role/permissions still drive the operational
+register UI (`can(perm)` for void/discount/menu) so a PIN-active cashier sees a restricted view.
+
 ### The gate matrix
 
 | Gate | Passes when | Used by |
 |---|---|---|
-| `<RequirePermission owner>` | active cashier **role === 'owner'** | all of `/settings/*` (`settings/route.tsx`) |
+| `<RequirePermission owner>` | the signed-in **account owns the cafe** (`isAccountOwner`) | all of `/settings/*` (`settings/route.tsx`) |
 | `<RequirePermission perm="canEditMenu">` | `can('canEditMenu')` | menu, recipes, inventory, promos, gift cards, purchase orders, **barcode labels** |
 | `<RequirePermission perm="canViewReports">` | `can('canViewReports')` | dashboard, reports, forecast, shifts, **accounting export**, **other income** |
 | nav item `requires: 'owner' \| <perm>` | same as above (or shown while `isLoading`) | `src/components/app-sidebar.tsx` `allowed()` |
