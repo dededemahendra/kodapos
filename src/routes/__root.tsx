@@ -7,8 +7,13 @@ import { LocaleProvider } from '~/components/locale-provider';
 import { authStorage } from '~/lib/auth-storage';
 import { convex } from '~/lib/convex';
 import { i18n } from '~/lib/i18n';
-import { applyDensity, getDensity } from '~/lib/preferences';
+import { applyDensity, applyTheme, getDensity, getTheme } from '~/lib/preferences';
 import globalsCss from '~/styles/globals.css?url';
+
+// Runs in <head> before paint to set the `.dark` class from the stored theme
+// preference, avoiding a light/dark flash on first render. Self-invoking, no
+// imports, wrapped in try/catch so storage being unavailable never breaks paint.
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('kodapos.theme');var dark=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(dark)document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 export const Route = createRootRoute({
   head: () => ({
@@ -50,6 +55,15 @@ function NotFound() {
 function RootComponent() {
   useEffect(() => {
     applyDensity(getDensity());
+    applyTheme(getTheme());
+
+    // Keep "system" theme tracking OS changes live.
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      if (getTheme() === 'system') applyTheme('system');
+    };
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
   }, []);
 
   return (
@@ -70,6 +84,7 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang="id">
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
         {children}

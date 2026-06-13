@@ -3,7 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: var(--font-sans);
   background: var(--background);
   color: var(--foreground);
@@ -67,49 +67,49 @@
   --tracking-normal: 0em;
 }
 
-/* Dark mode auto-detected from OS preference. tweakcn ships these under a
-   .dark class for toggle-driven theming; we wrap them in a media query
-   instead to preserve the current behavior (no theme toggle UI). */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.2050 0 0);
-    --foreground: oklch(0.9850 0 0);
-    --card: oklch(0.1650 0 0);
-    --card-foreground: oklch(0.9850 0 0);
-    --popover: oklch(0.2050 0 0);
-    --popover-foreground: oklch(0.9850 0 0);
-    --primary: oklch(0.9220 0 0);
-    --primary-foreground: oklch(0.2050 0 0);
-    --secondary: oklch(0.2690 0 0);
-    --secondary-foreground: oklch(0.9850 0 0);
-    --muted: oklch(0.2690 0 0);
-    --muted-foreground: oklch(0.7080 0 0);
-    --accent: oklch(0.3710 0 0);
-    --accent-foreground: oklch(0.9850 0 0);
-    --destructive: oklch(0.7040 0.1910 22.2160);
-    --destructive-foreground: oklch(0.9850 0 0);
-    --border: oklch(0.2690 0 0);
-    --input: oklch(0.2690 0 0);
-    --ring: oklch(0.5560 0 0);
-    --chart-1: oklch(0.8100 0.1000 252);
-    --chart-2: oklch(0.6200 0.1900 260);
-    --chart-3: oklch(0.5500 0.2200 263);
-    --chart-4: oklch(0.4900 0.2200 264);
-    --chart-5: oklch(0.4200 0.1800 266);
-    --sidebar: oklch(0.2690 0 0);
-    --sidebar-foreground: oklch(0.9850 0 0);
-    --sidebar-primary: oklch(0.4880 0.2430 264.3760);
-    --sidebar-primary-foreground: oklch(0.9850 0 0);
-    /* tweakcn ships --sidebar-accent equal to --sidebar (both 0.2690), which
-       makes the SidebarMenuButton[data-active=true] highlight invisible.
-       Bumping accent slightly brighter so active state reads in dark mode. */
-    --sidebar-accent: oklch(0.3500 0 0);
-    --sidebar-accent-foreground: oklch(0.9850 0 0);
-    /* Lifted clear of --sidebar (0.2690) so sidebar dividers stay visible
-       against the sidebar surface, instead of blending into it. */
-    --sidebar-border: oklch(0.3450 0 0);
-    --sidebar-ring: oklch(0.4390 0 0);
-  }
+/* Dark mode is driven by a `.dark` class on <html>. An inline head script
+   (see __root.tsx) adds the class before paint based on the stored theme
+   preference (light/dark/system); in "system" mode it follows the OS via
+   prefers-color-scheme. This is the single source of truth for dark tokens. */
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.2050 0 0);
+  --foreground: oklch(0.9850 0 0);
+  --card: oklch(0.1650 0 0);
+  --card-foreground: oklch(0.9850 0 0);
+  --popover: oklch(0.2050 0 0);
+  --popover-foreground: oklch(0.9850 0 0);
+  --primary: oklch(0.9220 0 0);
+  --primary-foreground: oklch(0.2050 0 0);
+  --secondary: oklch(0.2690 0 0);
+  --secondary-foreground: oklch(0.9850 0 0);
+  --muted: oklch(0.2690 0 0);
+  --muted-foreground: oklch(0.7080 0 0);
+  --accent: oklch(0.3710 0 0);
+  --accent-foreground: oklch(0.9850 0 0);
+  --destructive: oklch(0.7040 0.1910 22.2160);
+  --destructive-foreground: oklch(0.9850 0 0);
+  --border: oklch(0.2690 0 0);
+  --input: oklch(0.2690 0 0);
+  --ring: oklch(0.5560 0 0);
+  --chart-1: oklch(0.8100 0.1000 252);
+  --chart-2: oklch(0.6200 0.1900 260);
+  --chart-3: oklch(0.5500 0.2200 263);
+  --chart-4: oklch(0.4900 0.2200 264);
+  --chart-5: oklch(0.4200 0.1800 266);
+  --sidebar: oklch(0.2690 0 0);
+  --sidebar-foreground: oklch(0.9850 0 0);
+  --sidebar-primary: oklch(0.4880 0.2430 264.3760);
+  --sidebar-primary-foreground: oklch(0.9850 0 0);
+  /* tweakcn ships --sidebar-accent equal to --sidebar (both 0.2690), which
+     makes the SidebarMenuButton[data-active=true] highlight invisible.
+     Bumping accent slightly brighter so active state reads in dark mode. */
+  --sidebar-accent: oklch(0.3500 0 0);
+  --sidebar-accent-foreground: oklch(0.9850 0 0);
+  /* Lifted clear of --sidebar (0.2690) so sidebar dividers stay visible
+     against the sidebar surface, instead of blending into it. */
+  --sidebar-border: oklch(0.3450 0 0);
+  --sidebar-ring: oklch(0.4390 0 0);
 }
 
 @theme inline {
