@@ -536,6 +536,10 @@ msgstr "You do not have access to this page. Switch to the owner to open it."
 msgid "Anggota"
 msgstr "Members"
 
+#: src/routes/_pos/changelog.tsx
+msgid "Apa yang baru di kodapos."
+msgstr "What's new in kodapos."
+
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/gift-cards.tsx
@@ -1527,8 +1531,8 @@ msgid "Dasbor"
 msgstr "Dashboard"
 
 #: src/components/latest-change.tsx
-msgid "Dasbor baru"
-msgstr "New dashboard"
+#~ msgid "Dasbor baru"
+#~ msgstr "New dashboard"
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Dashboard v2 shipped to prod"
@@ -3688,8 +3692,8 @@ msgid "Nama wajib diisi."
 msgstr "Name is required."
 
 #: src/components/latest-change.tsx
-msgid "Navigasi sidebar & dasbor."
-msgstr "Sidebar navigation & dashboard."
+#~ msgid "Navigasi sidebar & dasbor."
+#~ msgstr "Sidebar navigation & dashboard."
 
 #: src/components/net-revenue-chart.tsx
 #~ msgid "Net revenue"
@@ -3916,6 +3920,10 @@ msgstr "Supplier added."
 #: src/routes/_pos/reports/export.tsx
 #~ msgid "Pemasukan"
 #~ msgstr "Inflow"
+
+#: src/routes/_pos/changelog.tsx
+msgid "Pembaruan"
+msgstr "What's new"
 
 #: src/components/latest-change.tsx
 msgid "PEMBARUAN"

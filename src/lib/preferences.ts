@@ -121,6 +121,31 @@ export function getTimeFormat(): TimeFormatPref {
 }
 
 // ---------------------------------------------------------------------------
+// Changelog card dismissal (browser-only, SSR-safe)
+// ---------------------------------------------------------------------------
+
+const CHANGELOG_DISMISSED_KEY = 'kodapos.changelogDismissed';
+
+/** The latest changelog version the user dismissed, or null. */
+export function getDismissedChangelog(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(CHANGELOG_DISMISSED_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function storeDismissedChangelog(version: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(CHANGELOG_DISMISSED_KEY, version);
+  } catch {
+    /* ignore (private mode, etc.) */
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Auto-lock idle timeout (browser-only, SSR-safe)
 // ---------------------------------------------------------------------------
 
