@@ -131,7 +131,18 @@ export default defineSchema({
         canEditMenu: v.boolean(),
       })
     ),
+    hourlyRateIDR: v.optional(v.number()),
   }).index('by_cafe_active', ['cafeId', 'archived']),
+
+  scheduledShifts: defineTable({
+    cafeId: v.id('cafes'),
+    staffId: v.id('cafeStaff'),
+    date: v.string(), // 'YYYY-MM-DD'
+    startTime: v.string(), // 'HH:MM'
+    endTime: v.string(), // 'HH:MM'
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index('by_cafe_date', ['cafeId', 'date']),
 
   cafeSettings: defineTable({
     cafeId: v.id('cafes'),

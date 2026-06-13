@@ -26,6 +26,7 @@ const cafeStaffDoc = v.object({
   phone: v.optional(v.string()),
   email: v.optional(v.string()),
   permissions: v.optional(permissionsValidator),
+  hourlyRateIDR: v.optional(v.number()),
 });
 
 function assertName(name: string): string {
@@ -157,6 +158,20 @@ export const updateDetails = mutation({
       phone: phone?.trim() || undefined,
       email: email?.trim() || undefined,
     });
+    return null;
+  },
+});
+
+export const setHourlyRate = mutation({
+  args: { id: v.id('cafeStaff'), hourlyRateIDR: v.number() },
+  returns: v.null(),
+  handler: async (ctx, { id, hourlyRateIDR }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await requireOwned(ctx, cafeId, id, 'Kasir');
+    if (!Number.isInteger(hourlyRateIDR) || hourlyRateIDR < 0) {
+      throw new Error('Tarif tidak valid.');
+    }
+    await ctx.db.patch(id, { hourlyRateIDR });
     return null;
   },
 });
