@@ -437,6 +437,7 @@ function SecuritySection({
 interface NotificationsDraft {
   emailSummaryOnClose: boolean;
   summaryEmail: string;
+  emailLowStockDaily: boolean;
 }
 
 function EmailSummarySection() {
@@ -451,6 +452,8 @@ function EmailSummarySection() {
     return {
       emailSummaryOnClose: n.emailSummaryOnClose,
       summaryEmail: ('summaryEmail' in n ? n.summaryEmail : undefined) ?? '',
+      emailLowStockDaily:
+        ('emailLowStockDaily' in n ? n.emailLowStockDaily : undefined) ?? false,
     };
   }, [s]);
 
@@ -484,6 +487,7 @@ function EmailSummarySection() {
         notifications: {
           emailSummaryOnClose: d.emailSummaryOnClose,
           ...(summaryEmail !== undefined ? { summaryEmail } : {}),
+          emailLowStockDaily: d.emailLowStockDaily,
         },
       });
     } catch (e) {
@@ -531,6 +535,22 @@ function EmailSummarySection() {
               className="mt-1.5 max-w-xs"
             />
           </Field>
+
+          <RowSep />
+
+          <SettingRow
+            label={<Trans>Email peringatan stok menipis harian</Trans>}
+            description={<Trans>Memakai email penerima yang sama.</Trans>}
+            control={
+              <Switch
+                checked={draft.emailLowStockDaily}
+                onCheckedChange={(checked) =>
+                  setDraft({ ...draft, emailLowStockDaily: checked })
+                }
+                aria-label={t`Email peringatan stok menipis harian`}
+              />
+            }
+          />
         </FieldGroup>
 
         {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
