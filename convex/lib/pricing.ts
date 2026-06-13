@@ -33,6 +33,35 @@ export function promoDiscountIDR(
 }
 
 /**
+ * Subtotal (IDR) of the lines a promo's scope applies to. Pure, so both
+ * `buildOrder` (authoritative) and the sale screen (preview) compute the
+ * scoped base identically and never drift.
+ *
+ * - `order` / undefined → all lines.
+ * - `item` → lines whose `menuItemId` is in `targetItemIds`.
+ * - `category` → lines whose `categoryId` is in `targetCategoryIds`.
+ *
+ * Missing/empty targets (or no matching line) yield 0, so a scoped promo with
+ * no cart match is still applicable but discounts nothing.
+ */
+export function scopedSubtotalIDR(
+  lines: Array<{ menuItemId: string; categoryId: string; lineTotalIDR: number }>,
+  scope: 'order' | 'item' | 'category' | undefined,
+  targetItemIds?: readonly string[],
+  targetCategoryIds?: readonly string[],
+): number {
+  if (scope === 'item') {
+    const set = new Set(targetItemIds ?? []);
+    return lines.reduce((sum, l) => (set.has(l.menuItemId) ? sum + l.lineTotalIDR : sum), 0);
+  }
+  if (scope === 'category') {
+    const set = new Set(targetCategoryIds ?? []);
+    return lines.reduce((sum, l) => (set.has(l.categoryId) ? sum + l.lineTotalIDR : sum), 0);
+  }
+  return lines.reduce((sum, l) => sum + l.lineTotalIDR, 0);
+}
+
+/**
  * Single source of truth for order totals. Pure (no ctx/React/convex-server
  * imports) so both `createCashSale` (server) and the sale screen (client) can
  * import it and never drift. PB1 tax is applied AFTER service charge.

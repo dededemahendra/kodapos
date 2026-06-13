@@ -601,6 +601,7 @@ describe('orders.createCashSale', () => {
       name: 'Diskon 25',
       type: 'percent',
       value: 25,
+      scope: 'order',
     });
   });
 
@@ -685,6 +686,110 @@ describe('orders.createCashSale', () => {
     const order = await t.run(async (ctx) => await ctx.db.get(result.orderId));
     expect(order?.discountIDR).toBe(0);
     expect(order?.appliedPromo).toBeUndefined();
+    expect(result.totalIDR).toBe(18000);
+  });
+
+  // Scoped discount: a cart of item A (cat X, 18000) + item B (cat Y, 12000),
+  // subtotal 30000. A scoped promo discounts ONLY its matching lines.
+  async function setupScoped(t: ReturnType<typeof convexTest>) {
+    const s = await setup(t); // itemId = A (Espresso 18000) in categoryId X
+    const catY = await s.asOwner.mutation(api.menu.categories.create, { name: 'Pastry' });
+    const itemB = await s.asOwner.mutation(api.menu.items.create, {
+      categoryId: catY, name: 'Croissant', priceIDR: 12000,
+    });
+    return { ...s, catX: s.categoryId, catY, itemA: s.itemId, itemB };
+  }
+
+  it('scope:item discounts only the targeted item line (10% of A only)', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setupScoped(t);
+    const promoId = await s.asOwner.mutation(api.promotions.create, {
+      name: 'A 10%', type: 'percent', value: 10, scope: 'item', targetItemIds: [s.itemA],
+    });
+    const result = await s.asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'scope-item', shiftId: s.shiftId, cashierId: s.cashierId,
+      lines: [
+        { menuItemId: s.itemA, qty: 1, modifierOptionIds: [] },
+        { menuItemId: s.itemB, qty: 1, modifierOptionIds: [] },
+      ],
+      cashTenderedIDR: 30000, promoId, createdAtClient: 1700000000000,
+    });
+    const order = await t.run((ctx) => ctx.db.get(result.orderId));
+    // 10% of A's line (18000) = 1800; NOT 10% of subtotal 30000 (= 3000)
+    expect(order?.discountIDR).toBe(1800);
+    expect(order?.appliedPromo?.scope).toBe('item');
+    expect(result.totalIDR).toBe(28200); // 30000 - 1800
+  });
+
+  it('scope:category discounts only the targeted category line (10% of X only)', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setupScoped(t);
+    const promoId = await s.asOwner.mutation(api.promotions.create, {
+      name: 'X 10%', type: 'percent', value: 10, scope: 'category', targetCategoryIds: [s.catX],
+    });
+    const result = await s.asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'scope-cat', shiftId: s.shiftId, cashierId: s.cashierId,
+      lines: [
+        { menuItemId: s.itemA, qty: 1, modifierOptionIds: [] },
+        { menuItemId: s.itemB, qty: 1, modifierOptionIds: [] },
+      ],
+      cashTenderedIDR: 30000, promoId, createdAtClient: 1700000000000,
+    });
+    const order = await t.run((ctx) => ctx.db.get(result.orderId));
+    expect(order?.discountIDR).toBe(1800); // 10% of A (cat X) only
+    expect(order?.appliedPromo?.scope).toBe('category');
+    expect(result.totalIDR).toBe(28200);
+  });
+
+  it('scope:order discounts the whole subtotal (unchanged) + snapshots scope', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setupScoped(t);
+    const promoId = await s.asOwner.mutation(api.promotions.create, {
+      name: 'All 10%', type: 'percent', value: 10, scope: 'order',
+    });
+    const result = await s.asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'scope-order', shiftId: s.shiftId, cashierId: s.cashierId,
+      lines: [
+        { menuItemId: s.itemA, qty: 1, modifierOptionIds: [] },
+        { menuItemId: s.itemB, qty: 1, modifierOptionIds: [] },
+      ],
+      cashTenderedIDR: 30000, promoId, createdAtClient: 1700000000000,
+    });
+    const order = await t.run((ctx) => ctx.db.get(result.orderId));
+    expect(order?.discountIDR).toBe(3000); // 10% of full 30000
+    expect(order?.appliedPromo?.scope).toBe('order');
+  });
+
+  it('a codeless promo with no scope defaults appliedPromo.scope to order', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setupScoped(t);
+    const promoId = await s.asOwner.mutation(api.promotions.create, {
+      name: 'Legacy', type: 'percent', value: 10,
+    });
+    const result = await s.asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'scope-default', shiftId: s.shiftId, cashierId: s.cashierId,
+      lines: [{ menuItemId: s.itemA, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000, promoId, createdAtClient: 1700000000000,
+    });
+    const order = await t.run((ctx) => ctx.db.get(result.orderId));
+    expect(order?.appliedPromo?.scope).toBe('order');
+    expect(order?.discountIDR).toBe(1800);
+  });
+
+  it('scope:item targeting an item NOT in the cart → discount 0, order completes', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setupScoped(t);
+    const promoId = await s.asOwner.mutation(api.promotions.create, {
+      name: 'B 10%', type: 'percent', value: 10, scope: 'item', targetItemIds: [s.itemB],
+    });
+    const result = await s.asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'scope-nomatch', shiftId: s.shiftId, cashierId: s.cashierId,
+      lines: [{ menuItemId: s.itemA, qty: 1, modifierOptionIds: [] }], // only A in cart
+      cashTenderedIDR: 20000, promoId, createdAtClient: 1700000000000,
+    });
+    const order = await t.run((ctx) => ctx.db.get(result.orderId));
+    expect(order?.discountIDR).toBe(0);
+    expect(order?.paymentStatus).toBe('paid');
     expect(result.totalIDR).toBe(18000);
   });
 
