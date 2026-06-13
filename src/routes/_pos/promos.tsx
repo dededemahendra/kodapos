@@ -127,7 +127,7 @@ function PromosInner() {
               )}
               <span className="text-sm text-muted-foreground">
                 {scope === 'item' ? (
-                  <Trans>Item</Trans>
+                  <Trans context="promo scope badge">Item</Trans>
                 ) : scope === 'category' ? (
                   <Trans>Kategori</Trans>
                 ) : (

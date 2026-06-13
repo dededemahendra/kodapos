@@ -189,6 +189,14 @@ msgstr "{changedCount} bahan akan disesuaikan"
 msgid "{itemCount} item"
 msgstr "{itemCount} item"
 
+#: src/components/promo/promo-form-dialog.tsx
+msgid "{n} item dipilih"
+msgstr "{n} item dipilih"
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "{n} kategori dipilih"
+msgstr "{n} kategori dipilih"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "@namakafe"
 msgstr "@namakafe"
@@ -559,6 +567,10 @@ msgstr "Arus Keluar"
 #: src/routes/_pos/reports/export.tsx
 msgid "Arus Masuk"
 msgstr "Arus Masuk"
+
+#: src/components/sale/promo-picker-dialog.tsx
+msgid "atau pilih promo"
+msgstr "atau pilih promo"
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Atur cara pelanggan memperoleh dan menukar poin."
@@ -1139,6 +1151,10 @@ msgstr "Buka/tutup shift"
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Bulatkan total transaksi ke satuan terdekat."
 #~ msgstr "Bulatkan total transaksi ke satuan terdekat."
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Cakupan"
+msgstr "Cakupan"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Callback Token"
@@ -2162,6 +2178,11 @@ msgstr "Isi saldo"
 msgid "Item"
 msgstr "Item"
 
+#: src/routes/_pos/promos.tsx
+msgctxt "promo scope badge"
+msgid "Item"
+msgstr "Item"
+
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Item baru"
 msgstr "Item baru"
@@ -2195,10 +2216,18 @@ msgstr "Item Menu"
 msgid "Item sedang habis."
 msgstr "Item sedang habis."
 
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Item target"
+msgstr "Item target"
+
 #: src/components/stats.tsx
 #: src/routes/_pos/reports/index.tsx
 msgid "Item terjual"
 msgstr "Item terjual"
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Item tertentu"
+msgstr "Item tertentu"
 
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Item tidak ditemukan."
@@ -2445,6 +2474,7 @@ msgstr "Katalog"
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/route.tsx
+#: src/routes/_pos/promos.tsx
 #: src/routes/_pos/reports/expenses.tsx
 msgid "Kategori"
 msgstr "Kategori"
@@ -2464,6 +2494,14 @@ msgstr "Kategori ditambahkan."
 #: src/components/menu/category-table.tsx
 msgid "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
 msgstr "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Kategori target"
+msgstr "Kategori target"
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Kategori tertentu"
+msgstr "Kategori tertentu"
 
 #: src/components/menu/category-table.tsx
 msgid "Kategori yang diarsipkan akan muncul di sini."
@@ -2606,6 +2644,10 @@ msgstr "Kirim ringkasan saat tutup shift"
 msgid "Kirim struk & notifikasi via WhatsApp."
 msgstr "Kirim struk & notifikasi via WhatsApp."
 
+#: src/routes/_pos/promos.tsx
+msgid "Kode & cakupan"
+msgstr "Kode & cakupan"
+
 #: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
@@ -2617,6 +2659,10 @@ msgstr "Kode kartu"
 msgid "Kode pos"
 msgstr "Kode pos"
 
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Kode promo"
+msgstr "Kode promo"
+
 #: src/routes/_public/order.$token.tsx
 msgid "Kode QR ini tidak dikenali. Mohon pindai ulang QR di meja Anda."
 msgstr "Kode QR ini tidak dikenali. Mohon pindai ulang QR di meja Anda."
@@ -2624,6 +2670,10 @@ msgstr "Kode QR ini tidak dikenali. Mohon pindai ulang QR di meja Anda."
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Kode QRIS"
 msgstr "Kode QRIS"
+
+#: src/components/sale/promo-picker-dialog.tsx
+msgid "Kode tidak valid."
+msgstr "Kode tidak valid."
 
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Konfirmasi"
@@ -2890,6 +2940,10 @@ msgstr "Masuk sebagai pemilik"
 #: src/routes/_pos/time-clock.tsx
 msgid "Masuk sejak {0}"
 msgstr "Masuk sejak {0}"
+
+#: src/components/sale/promo-picker-dialog.tsx
+msgid "Masukkan kode"
+msgstr "Masukkan kode"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Masukkan kunci API (opsional)"
@@ -3386,6 +3440,7 @@ msgstr "Opsi ({0})"
 msgid "opsional"
 msgstr "opsional"
 
+#: src/components/promo/promo-form-dialog.tsx
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Opsional"
 msgstr "Opsional"
@@ -3396,6 +3451,10 @@ msgstr "Opsional"
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Opsional (maks {0})"
 msgstr "Opsional (maks {0})"
+
+#: src/routes/_pos/promos.tsx
+msgid "Order"
+msgstr "Order"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "OVO"
@@ -3410,6 +3469,10 @@ msgstr "Pajak"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Pajak & Pembayaran"
 msgstr "Pajak & Pembayaran"
+
+#: src/components/sale/promo-picker-dialog.tsx
+msgid "Pakai"
+msgstr "Pakai"
 
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Pas"
@@ -3859,11 +3922,16 @@ msgstr "Pilih bahan…"
 #~ msgid "Pilih bahasa tampilan kasir."
 #~ msgstr "Pilih bahasa tampilan kasir."
 
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Pilih item"
+msgstr "Pilih item"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Pilih jenis usaha"
 msgstr "Pilih jenis usaha"
 
 #: src/components/menu/item-edit-form.tsx
+#: src/components/promo/promo-form-dialog.tsx
 msgid "Pilih kategori"
 msgstr "Pilih kategori"
 
@@ -3874,6 +3942,10 @@ msgstr "Pilih kategori lain atau tambah item di menu."
 #: src/components/menu/item-edit-form.tsx
 msgid "Pilih kategori terlebih dahulu."
 msgstr "Pilih kategori terlebih dahulu."
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Pilih minimal satu target."
+msgstr "Pilih minimal satu target."
 
 #: src/routes/_pos/pin.tsx
 msgid "Pilih nama Anda dan masukkan PIN 4 digit."
@@ -4448,6 +4520,10 @@ msgstr "Selisih"
 #: src/components/menu/modifier-group-form.tsx
 msgid "Selisih harga"
 msgstr "Selisih harga"
+
+#: src/components/promo/promo-form-dialog.tsx
+msgid "Seluruh order"
+msgstr "Seluruh order"
 
 #: src/components/sale/refund-dialog.tsx
 msgid "Seluruh sisa"
@@ -5148,6 +5224,10 @@ msgstr "Test cetak"
 #: src/components/dashboard-activity.tsx
 #~ msgid "This morning"
 #~ msgstr "This morning"
+
+#: src/routes/_pos/promos.tsx
+msgid "Tidak ada"
+msgstr "Tidak ada"
 
 #: src/components/inventory/ingredient-picker.tsx
 msgid "Tidak ada bahan cocok."
