@@ -21,6 +21,7 @@ import {
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
+import { exportTablePdf } from '~/lib/pdf';
 import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/reports/other-income')({
@@ -122,6 +123,34 @@ function OtherIncomeReport() {
     downloadCSV(`pendapatan-lain-${range}.csv`, csv);
   }
 
+  async function exportPDF() {
+    if (!data) return;
+    try {
+      await exportTablePdf({
+        filename: 'pendapatan-lain.pdf',
+        title: 'Other income',
+        subtitle:
+          'from' in range ? `${range.from} to ${range.to}` : range.preset,
+        columns: [
+          { key: 'at', header: 'Date' },
+          { key: 'source', header: 'Source' },
+          { key: 'note', header: 'Note' },
+          { key: 'amountIDR', header: 'Amount' },
+        ],
+        rows: data.rows.map((r) => ({
+          at: new Date(r.at).toLocaleDateString('en-GB'),
+          source: r.source,
+          note: r.note ?? '',
+          amountIDR: formatIDR(r.amountIDR),
+        })),
+        numericKeys: ['amountIDR'],
+        footRows: [['', '', 'Total', formatIDR(data.totalIDR)]],
+      });
+    } catch {
+      toast.error(t`Gagal mengunduh PDF.`);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -140,6 +169,15 @@ function OtherIncomeReport() {
             disabled={!data || data.rows.length === 0}
           >
             <Trans>Unduh CSV</Trans>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={exportPDF}
+            disabled={!data || data.rows.length === 0}
+          >
+            <Trans>Unduh PDF</Trans>
           </Button>
           <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
             <Plus />

@@ -17,6 +17,7 @@ import { Spinner } from '~/components/ui/spinner';
 import { StatusBadge } from '~/components/ui/status-badge';
 import type { StatusBadgeVariant } from '~/components/ui/status-badge-variant';
 import { formatIDR } from '~/lib/money';
+import { exportTablePdf } from '~/lib/pdf';
 import { toast } from '~/lib/toast';
 
 type PoStatus = 'open' | 'partial' | 'received' | 'cancelled';
@@ -135,6 +136,53 @@ export function PurchaseOrderDetail({
     }
   }
 
+  async function exportPDF() {
+    if (!detail) return;
+    try {
+      await exportTablePdf({
+        filename: 'pesanan-beli.pdf',
+        title: 'Purchase order',
+        subtitle: `${detail.supplierName ?? 'No supplier'} · ${new Date(
+          detail.createdAt
+        ).toLocaleDateString('en-GB')}`,
+        columns: [
+          { key: 'name', header: 'Ingredient' },
+          { key: 'ordered', header: 'Ordered' },
+          { key: 'received', header: 'Received' },
+          { key: 'remaining', header: 'Remaining' },
+          { key: 'cost', header: 'Unit cost' },
+          { key: 'total', header: 'Line total' },
+        ],
+        rows: detail.lines.map((l) => ({
+          name: l.ingredientName,
+          ordered: `${l.orderedQty} ${l.unit}`,
+          received: String(l.receivedQty),
+          remaining: String(l.remainingQty),
+          cost: formatIDR(l.unitCostIDR),
+          total: formatIDR(l.orderedQty * l.unitCostIDR),
+        })),
+        numericKeys: ['cost', 'total'],
+        footRows: [
+          [
+            '',
+            '',
+            '',
+            '',
+            'Total',
+            formatIDR(
+              detail.lines.reduce(
+                (s, l) => s + l.orderedQty * l.unitCostIDR,
+                0
+              )
+            ),
+          ],
+        ],
+      });
+    } catch {
+      toast.error(t`Gagal mengunduh PDF.`);
+    }
+  }
+
   const orderedTotal = detail
     ? detail.lines.reduce((sum, l) => sum + l.orderedQty * l.unitCostIDR, 0)
     : 0;
@@ -173,6 +221,15 @@ export function PurchaseOrderDetail({
                 <span className="text-muted-foreground tabular-nums">
                   <Trans>Diterima</Trans> {formatIDR(receivedTotal)}
                 </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto"
+                  onClick={exportPDF}
+                >
+                  <Trans>Unduh PDF</Trans>
+                </Button>
               </div>
 
               {detail.note ? (

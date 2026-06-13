@@ -20,6 +20,8 @@ import {
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
+import { exportTablePdf } from '~/lib/pdf';
+import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/reports/export')({
   component: AccountingExport,
@@ -168,6 +170,63 @@ function AccountingExport() {
     downloadCSV(`buku-besar-${data.fromKey}-${data.toKey}.csv`, csv);
   }
 
+  // English type labels for the off-catalog PDF document.
+  const typeEnglish: Record<EntryType, string> = {
+    sale: 'Sale',
+    refund: 'Refund',
+    expense: 'Expense',
+    other_income: 'Other income',
+    purchase: 'Purchase',
+  };
+
+  async function exportPDF() {
+    if (!data) return;
+    try {
+      const rows = data.entries.map((e) => ({
+        date: e.dateKey,
+        type: typeEnglish[e.type],
+        ref: e.ref,
+        description: e.description,
+        account: e.account,
+        method: e.method ?? '',
+        inflow: e.inflowIDR ? formatIDR(e.inflowIDR) : '',
+        outflow: e.outflowIDR ? formatIDR(e.outflowIDR) : '',
+      }));
+      await exportTablePdf({
+        filename: `buku-besar-${data.fromKey}-${data.toKey}.pdf`,
+        title: 'Ledger',
+        subtitle: `${data.fromKey} to ${data.toKey}`,
+        columns: [
+          { key: 'date', header: 'Date' },
+          { key: 'type', header: 'Type' },
+          { key: 'ref', header: 'Ref' },
+          { key: 'description', header: 'Description' },
+          { key: 'account', header: 'Account' },
+          { key: 'method', header: 'Method' },
+          { key: 'inflow', header: 'Inflow' },
+          { key: 'outflow', header: 'Outflow' },
+        ],
+        rows,
+        numericKeys: ['inflow', 'outflow'],
+        footRows: [
+          [
+            '',
+            '',
+            '',
+            '',
+            '',
+            'Total',
+            formatIDR(data.summary.inflowIDR),
+            formatIDR(data.summary.outflowIDR),
+          ],
+          ['', '', '', '', '', 'Net', formatIDR(data.summary.netIDR), ''],
+        ],
+      });
+    } catch {
+      toast.error(t`Gagal mengunduh PDF.`);
+    }
+  }
+
   const reversed = useMemo(
     () => (data ? [...data.entries].reverse() : []),
     [data]
@@ -184,6 +243,15 @@ function AccountingExport() {
           disabled={!data || data.entries.length === 0}
         >
           <Trans>Unduh Buku Besar (CSV)</Trans>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={exportPDF}
+          disabled={!data || data.entries.length === 0}
+        >
+          <Trans>Unduh PDF</Trans>
         </Button>
       </div>
 
