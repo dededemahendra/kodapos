@@ -15,9 +15,6 @@ export function AuthCard({ title, subtitle, children }: AuthCardProps) {
   return (
     <main className="min-h-screen grid place-items-center bg-muted/30 p-4 sm:p-6">
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex items-center justify-center">
-          <span className="text-xl font-bold tracking-tight">kodapos</span>
-        </div>
         <Card>
           <CardContent className="p-6">
             {(title || subtitle) && (
