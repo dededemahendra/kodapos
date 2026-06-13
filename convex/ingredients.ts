@@ -177,6 +177,77 @@ export const upsert = mutation({
   },
 });
 
+const importResult = v.object({
+  created: v.number(),
+  skipped: v.number(),
+  errors: v.array(
+    v.object({ row: v.number(), name: v.string(), reason: v.string() })
+  ),
+});
+
+export const bulkImport = mutation({
+  args: {
+    rows: v.array(
+      v.object({
+        name: v.string(),
+        unit: v.string(),
+        reorderThreshold: v.number(),
+        lastCostPerUnitIDR: v.optional(v.number()),
+      })
+    ),
+  },
+  returns: importResult,
+  handler: async (ctx, { rows }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    if (rows.length > 1000) throw new Error('Terlalu banyak baris.');
+
+    const existing = await ctx.db
+      .query('ingredients')
+      .withIndex('by_cafe_name', (q) => q.eq('cafeId', cafeId))
+      .collect();
+    const names = new Set(existing.map((r) => r.name.toLowerCase()));
+
+    let created = 0;
+    let skipped = 0;
+    const errors: Array<{ row: number; name: string; reason: string }> = [];
+
+    for (const [i, raw] of rows.entries()) {
+      try {
+        const cost = raw.lastCostPerUnitIDR ?? 0;
+        const cleanName = assertIngredient(raw.name, raw.reorderThreshold, cost);
+        const unit = raw.unit.trim();
+        if (unit !== 'g' && unit !== 'ml' && unit !== 'piece') {
+          throw new Error('Satuan tidak valid.');
+        }
+        const lowerName = cleanName.toLowerCase();
+        if (names.has(lowerName)) {
+          skipped++;
+          continue;
+        }
+        await ctx.db.insert('ingredients', {
+          cafeId,
+          name: cleanName,
+          canonicalUnit: unit,
+          reorderThreshold: raw.reorderThreshold,
+          lastCostPerUnitIDR: cost,
+          archived: false,
+          createdAt: Date.now(),
+        });
+        names.add(lowerName);
+        created++;
+      } catch (err) {
+        errors.push({
+          row: i,
+          name: raw.name,
+          reason: err instanceof Error ? err.message : 'Baris tidak valid.',
+        });
+      }
+    }
+
+    return { created, skipped, errors };
+  },
+});
+
 export const archive = mutation({
   args: { id: v.id('ingredients') },
   returns: v.null(),

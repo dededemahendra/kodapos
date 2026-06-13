@@ -4,8 +4,9 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, Ban, CircleCheck, Plus, Power, UtensilsCrossed } from 'lucide-react';
+import { Archive, Ban, CircleCheck, Plus, Power, Upload, UtensilsCrossed } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { CsvImportDialog } from '~/components/import/csv-import-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
@@ -45,8 +46,10 @@ function ItemsListPage() {
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState<string>('all');
   const [archiveTarget, setArchiveTarget] = useState<ItemRow | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const categories = useQuery(api.menu.categories.list, {});
+  const bulkImportItems = useMutation(api.menu.items.bulkImport);
   const allItems = useQuery(api.menu.items.list, {
     includeArchived: true,
     includeInactive: true,
@@ -306,12 +309,18 @@ function ItemsListPage() {
           ) : null
         }
         actions={
-          <Button asChild>
-            <Link to="/menu/items/$itemId" params={{ itemId: 'new' }}>
-              <Plus />
-              <Trans>Tambah Item</Trans>
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload />
+              <Trans>Impor CSV</Trans>
+            </Button>
+            <Button asChild>
+              <Link to="/menu/items/$itemId" params={{ itemId: 'new' }}>
+                <Plus />
+                <Trans>Tambah Item</Trans>
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -355,6 +364,22 @@ function ItemsListPage() {
         emptyState={emptyState}
         getRowClassName={(row) => (isLow(row) ? 'bg-destructive/10' : '')}
         initialSort={[{ id: 'name', desc: false }]}
+      />
+
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        kind="items"
+        onImport={(rows) =>
+          bulkImportItems({
+            rows: rows as Array<{
+              name: string;
+              category: string;
+              priceIDR: number;
+              barcode?: string;
+            }>,
+          })
+        }
       />
 
       <ConfirmDialog

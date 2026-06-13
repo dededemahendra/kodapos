@@ -105,6 +105,21 @@ msgstr "{0} / item"
 msgid "{0} bahan · {1} stok rendah"
 msgstr "{0} ingredients · {1} low stock"
 
+#. placeholder {0}: rows.length
+#: src/components/import/csv-import-dialog.tsx
+msgid "{0} baris siap diimpor"
+msgstr "{0} rows ready to import"
+
+#. placeholder {0}: res.created
+#. placeholder {0}: result.created
+#. placeholder {1}: res.skipped
+#. placeholder {1}: result.skipped
+#. placeholder {2}: res.errors.length
+#. placeholder {2}: result.errors.length
+#: src/components/import/csv-import-dialog.tsx
+msgid "{0} dibuat, {1} dilewati, {2} gagal"
+msgstr "{0} created, {1} skipped, {2} failed"
+
 #. placeholder {0}: o.lineCount
 #. placeholder {0}: o.lines.length
 #. placeholder {0}: table.itemCount
@@ -465,6 +480,7 @@ msgstr "Reason"
 msgid "Alasan (opsional)"
 msgstr "Reason (optional)"
 
+#: src/components/import/csv-import-dialog.tsx
 #: src/routes/_pos/inventory/index.tsx
 msgid "Ambang"
 msgstr "Threshold"
@@ -704,6 +720,7 @@ msgstr "Goods received."
 msgid "Barang yang sudah diterima tetap berada di stok. Pesanan tidak bisa menerima barang lagi setelah dibatalkan."
 msgstr "Goods already received stay in stock. The order cannot receive any more goods after it is cancelled."
 
+#: src/components/import/csv-import-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
 msgid "Barcode"
 msgstr "Barcode"
@@ -715,6 +732,13 @@ msgstr "Barcode generated."
 #: src/components/sale/sale-screen.tsx
 msgid "Barcode tidak ditemukan."
 msgstr "Barcode not found."
+
+#. placeholder {0}: e.row + 1
+#. placeholder {1}: e.name
+#. placeholder {2}: e.reason
+#: src/components/import/csv-import-dialog.tsx
+msgid "Baris {0} · {1}: {2}"
+msgstr "Row {0} · {1}: {2}"
 
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Baru"
@@ -729,6 +753,7 @@ msgstr "Spoiled/Expired"
 #: src/components/customer/customer-form-dialog.tsx
 #: src/components/expenses/expense-dialog.tsx
 #: src/components/giftcard/gift-card-form-dialog.tsx
+#: src/components/import/csv-import-dialog.tsx
 #: src/components/income/income-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/inventory/purchase-form.tsx
@@ -1008,6 +1033,7 @@ msgstr "Large"
 msgid "Besok"
 msgstr "Tomorrow"
 
+#: src/components/import/csv-import-dialog.tsx
 #: src/routes/_pos/reports/margin.tsx
 msgid "Biaya"
 msgstr "Cost"
@@ -1576,6 +1602,10 @@ msgstr "Email receipt"
 msgid "Email wajib diisi."
 msgstr "Email is required."
 
+#: src/components/import/csv-import-dialog.tsx
+msgid "File kosong atau hanya berisi baris header. Periksa lalu coba lagi."
+msgstr "File is empty or only contains a header row. Check it and try again."
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Fitur cetak akan tersedia segera."
 msgstr "Print feature coming soon."
@@ -1603,6 +1633,10 @@ msgstr "Failed to clock in."
 #: src/routes/_pos/time-clock.tsx
 msgid "Gagal clock out."
 msgstr "Failed to clock out."
+
+#: src/components/import/csv-import-dialog.tsx
+msgid "Gagal membaca file."
+msgstr "Failed to read file."
 
 #: src/components/inventory/purchase-order-detail.tsx
 msgid "Gagal membatalkan pesanan beli."
@@ -1775,6 +1809,10 @@ msgstr "Could not delete."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Gagal menghubungkan integrasi."
 msgstr "Failed to connect integration."
+
+#: src/components/import/csv-import-dialog.tsx
+msgid "Gagal mengimpor."
+msgstr "Failed to import."
 
 #: src/components/sale/receipt-preview.tsx
 msgid "Gagal mengirim email."
@@ -2074,6 +2112,7 @@ msgstr "Remove tier"
 msgid "Hapus varian"
 msgstr "Delete variant"
 
+#: src/components/import/csv-import-dialog.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Harga"
@@ -2152,6 +2191,23 @@ msgstr "Rain — expected down {0}%"
 #: src/routes/_pos/settings/profile.tsx
 msgid "Identitas"
 msgstr "Identity"
+
+#: src/components/import/csv-import-dialog.tsx
+msgid "Impor"
+msgstr "Import"
+
+#: src/components/import/csv-import-dialog.tsx
+msgid "Impor bahan"
+msgstr "Import ingredients"
+
+#: src/routes/_pos/inventory/index.tsx
+#: src/routes/_pos/menu/index.tsx
+msgid "Impor CSV"
+msgstr "Import CSV"
+
+#: src/components/import/csv-import-dialog.tsx
+msgid "Impor item menu"
+msgstr "Import menu items"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Instagram"
@@ -2478,6 +2534,7 @@ msgstr "Catalog"
 
 #: src/components/app-shared.tsx
 #: src/components/expenses/expense-dialog.tsx
+#: src/components/import/csv-import-dialog.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/menu/index.tsx
@@ -2682,6 +2739,11 @@ msgstr "QRIS code"
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "Kode tidak valid."
 msgstr "Invalid code."
+
+#. placeholder {0}: missingColumns.join(', ')
+#: src/components/import/csv-import-dialog.tsx
+msgid "Kolom wajib tidak ditemukan: {0}"
+msgstr "Required columns not found: {0}"
 
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Konfirmasi"
@@ -3230,6 +3292,7 @@ msgid "Naikkan urutan"
 msgstr "Move up"
 
 #: src/components/customer/customer-form-dialog.tsx
+#: src/components/import/csv-import-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
@@ -3930,6 +3993,10 @@ msgstr "Select ingredient…"
 #~ msgid "Pilih bahasa tampilan kasir."
 #~ msgstr "Select the cashier display language."
 
+#: src/components/import/csv-import-dialog.tsx
+msgid "Pilih file CSV"
+msgstr "Choose a CSV file"
+
 #: src/components/promo/promo-form-dialog.tsx
 msgid "Pilih item"
 msgstr "Choose items"
@@ -4451,6 +4518,7 @@ msgstr "Balance: {balance} points"
 msgid "Saran"
 msgstr "Suggested"
 
+#: src/components/import/csv-import-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
 #: src/routes/_pos/forecast.tsx
 msgid "Satuan"
@@ -4508,6 +4576,7 @@ msgstr "Tuesday"
 msgid "Selengkapnya"
 msgstr "Learn more"
 
+#: src/components/import/csv-import-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/kitchen.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
@@ -5253,6 +5322,10 @@ msgstr "No ingredients below threshold."
 msgid "Tidak ada bahan diarsipkan."
 msgstr "No archived ingredients."
 
+#: src/components/import/csv-import-dialog.tsx
+msgid "Tidak ada baris untuk diimpor."
+msgstr "No rows to import."
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Tidak ada grup diarsipkan."
 msgstr "No archived groups."
@@ -5569,6 +5642,18 @@ msgstr "Download CSV"
 #: src/routes/_pos/reports/sales.tsx
 msgid "Unduh PDF"
 msgstr "Download PDF"
+
+#: src/components/import/csv-import-dialog.tsx
+msgid "Unduh template"
+msgstr "Download template"
+
+#: src/components/import/csv-import-dialog.tsx
+msgid "Unggah file CSV dengan kolom name, category, price, dan barcode (opsional)."
+msgstr "Upload a CSV file with name, category, price, and barcode (optional) columns."
+
+#: src/components/import/csv-import-dialog.tsx
+msgid "Unggah file CSV dengan kolom name, unit, reorder, dan cost (opsional)."
+msgstr "Upload a CSV file with name, unit, reorder, and cost (optional) columns."
 
 #: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/settings/tax.tsx
