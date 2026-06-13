@@ -536,6 +536,10 @@ msgstr "Anda tidak punya akses ke halaman ini. Masuk sebagai pemilik untuk membu
 msgid "Anggota"
 msgstr "Anggota"
 
+#: src/routes/_pos/changelog.tsx
+msgid "Apa yang baru di kodapos."
+msgstr "Apa yang baru di kodapos."
+
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/gift-cards.tsx
@@ -1527,8 +1531,8 @@ msgid "Dasbor"
 msgstr "Dasbor"
 
 #: src/components/latest-change.tsx
-msgid "Dasbor baru"
-msgstr "Dasbor baru"
+#~ msgid "Dasbor baru"
+#~ msgstr "Dasbor baru"
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Dashboard v2 shipped to prod"
@@ -3688,8 +3692,8 @@ msgid "Nama wajib diisi."
 msgstr "Nama wajib diisi."
 
 #: src/components/latest-change.tsx
-msgid "Navigasi sidebar & dasbor."
-msgstr "Navigasi sidebar & dasbor."
+#~ msgid "Navigasi sidebar & dasbor."
+#~ msgstr "Navigasi sidebar & dasbor."
 
 #: src/components/net-revenue-chart.tsx
 #~ msgid "Net revenue"
@@ -3916,6 +3920,10 @@ msgstr "Pemasok ditambahkan."
 #: src/routes/_pos/reports/export.tsx
 #~ msgid "Pemasukan"
 #~ msgstr "Pemasukan"
+
+#: src/routes/_pos/changelog.tsx
+msgid "Pembaruan"
+msgstr "Pembaruan"
 
 #: src/components/latest-change.tsx
 msgid "PEMBARUAN"
