@@ -1,6 +1,6 @@
 {
   "name": "kodapos",
-  "version": "0.0.0",
+  "version": "1.4.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.14.4",
