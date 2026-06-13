@@ -2,12 +2,13 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { CheckCircle2, Clock, QrCode, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { CartReviewSheet } from '~/components/public/cart-review-sheet';
 import { ItemPickerSheet } from '~/components/public/item-picker-sheet';
 import { PublicMenuView } from '~/components/public/public-menu';
+import { QrPaymentView } from '~/components/public/qr-payment-view';
 import { cartLineKey, type CartLine, type MenuItem, type PickResult } from '~/components/public/types';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -42,7 +43,18 @@ function OrderPage() {
   const [error, setError] = useState<string | null>(null);
   const [selfOrderId, setSelfOrderId] = useState<Id<'selfOrders'> | null>(null);
 
+  // Pay-now (QRIS) state. `charge` holds the last issued charge so the QR view
+  // always has a qrString/amount/expiry even before the status query catches up.
+  const [payMode, setPayMode] = useState(false);
+  const [charge, setCharge] = useState<{
+    qrString: string;
+    expiresAt: number;
+    totalIDR: number;
+  } | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
+
   const submit = useMutation(api.public.submitSelfOrder);
+  const createCharge = useAction(api.public.createSelfOrderCharge);
   const status = useQuery(
     api.public.selfOrderStatus,
     selfOrderId ? { selfOrderId, qrToken: token } : 'skip'
@@ -103,23 +115,30 @@ function OrderPage() {
     setCart((prev) => prev.filter((l) => l.key !== key));
   }
 
+  /** Submit the self-order (idempotent via clientId). Returns its id. */
+  async function submitOrder(): Promise<Id<'selfOrders'>> {
+    const result = await submit({
+      qrToken: token,
+      clientId,
+      lines: cart.map((l) => ({
+        menuItemId: l.menuItemId,
+        qty: l.qty,
+        ...(l.variantId ? { variantId: l.variantId } : {}),
+        modifierOptionIds: l.modifierOptionIds,
+      })),
+      ...(note.trim() ? { customerNote: note.trim() } : {}),
+    });
+    return result.selfOrderId;
+  }
+
+  // Pay-at-counter: the existing, unchanged flow.
   async function handleSubmit() {
     if (cart.length === 0) return;
     setSubmitting(true);
     setError(null);
     try {
-      const result = await submit({
-        qrToken: token,
-        clientId,
-        lines: cart.map((l) => ({
-          menuItemId: l.menuItemId,
-          qty: l.qty,
-          ...(l.variantId ? { variantId: l.variantId } : {}),
-          modifierOptionIds: l.modifierOptionIds,
-        })),
-        ...(note.trim() ? { customerNote: note.trim() } : {}),
-      });
-      setSelfOrderId(result.selfOrderId);
+      const id = await submitOrder();
+      setSelfOrderId(id);
       setCartOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -128,15 +147,80 @@ function OrderPage() {
     }
   }
 
+  // Pay-now (QRIS): submit, then create a charge and switch to the QR view.
+  async function handlePayNow() {
+    if (cart.length === 0) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const id = await submitOrder();
+      const result = await createCharge({ qrToken: token, selfOrderId: id });
+      setSelfOrderId(id);
+      setCharge(result);
+      setPayMode(true);
+      setCartOpen(false);
+    } catch (err) {
+      // The charge action can throw (e.g. QRIS suddenly unavailable). Surface it
+      // inline; the cart still offers "Bayar di kasir" as a fallback.
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function regenerateCharge() {
+    if (!selfOrderId) return;
+    setRegenerating(true);
+    setError(null);
+    try {
+      const result = await createCharge({ qrToken: token, selfOrderId });
+      setCharge(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setRegenerating(false);
+    }
+  }
+
+  // Fallback from the QR view to pay-at-counter: keep the same self-order (it is
+  // already submitted) and just show the standard confirmation.
+  function payAtCounterFallback() {
+    setPayMode(false);
+    setCharge(null);
+    setError(null);
+  }
+
   function orderAgain() {
     setCart([]);
     setNote('');
     setSelfOrderId(null);
     setError(null);
+    setPayMode(false);
+    setCharge(null);
     setClientId(newClientId());
   }
 
   // --- render ----------------------------------------------------------------
+  // Pay-now QR view: while in payMode show the QR + countdown + paid transition.
+  if (payMode && charge) {
+    const paymentStatus = status?.paymentStatus ?? 'awaiting';
+    return (
+      <QrPaymentView
+        // The status query exposes the QR/amount/expiry only while awaiting; the
+        // last `charge` result is the authoritative source otherwise.
+        qrString={status?.qrString ?? charge.qrString}
+        totalIDR={status?.totalIDR ?? charge.totalIDR}
+        expiresAt={status?.expiresAt ?? charge.expiresAt}
+        paymentStatus={paymentStatus}
+        orderStatus={status?.status ?? 'new'}
+        regenerating={regenerating}
+        error={error}
+        onRegenerate={regenerateCharge}
+        onPayAtCounter={payAtCounterFallback}
+      />
+    );
+  }
+
   if (selfOrderId) {
     return <ConfirmationView status={status?.status ?? 'new'} onOrderAgain={orderAgain} />;
   }
@@ -193,6 +277,8 @@ function OrderPage() {
         onSetQty={setQty}
         onRemove={removeLine}
         onSubmit={handleSubmit}
+        onPayNow={handlePayNow}
+        payNowAvailable={menu.payNowAvailable}
         submitting={submitting}
         error={error}
       />

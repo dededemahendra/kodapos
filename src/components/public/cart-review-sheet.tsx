@@ -29,6 +29,8 @@ export function CartReviewSheet({
   onSetQty,
   onRemove,
   onSubmit,
+  onPayNow,
+  payNowAvailable,
   submitting,
   error,
 }: {
@@ -40,7 +42,12 @@ export function CartReviewSheet({
   onNoteChange: (note: string) => void;
   onSetQty: (key: string, qty: number) => void;
   onRemove: (key: string) => void;
+  /** Pay-at-counter submit (the existing, unchanged flow). */
   onSubmit: () => void;
+  /** Pay-now QRIS submit (submit + create charge). */
+  onPayNow: () => void;
+  /** When true, offer the QRIS pay-now action alongside pay-at-counter. */
+  payNowAvailable: boolean;
   submitting: boolean;
   error: string | null;
 }) {
@@ -163,16 +170,41 @@ export function CartReviewSheet({
           </p>
         ) : null}
 
-        <Button
-          type="button"
-          className="mt-4 w-full"
-          size="lg"
-          onClick={onSubmit}
-          disabled={submitting || cart.length === 0}
-        >
-          {submitting ? <Spinner className="mr-2" /> : null}
-          <Trans>Kirim pesanan</Trans>
-        </Button>
+        {payNowAvailable ? (
+          <div className="mt-4 flex flex-col gap-2">
+            <Button
+              type="button"
+              className="w-full"
+              size="lg"
+              onClick={onPayNow}
+              disabled={submitting || cart.length === 0}
+            >
+              {submitting ? <Spinner className="mr-2" /> : null}
+              <Trans>Bayar sekarang (QRIS)</Trans>
+            </Button>
+            <Button
+              type="button"
+              className="w-full"
+              size="lg"
+              variant="outline"
+              onClick={onSubmit}
+              disabled={submitting || cart.length === 0}
+            >
+              <Trans>Bayar di kasir</Trans>
+            </Button>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            className="mt-4 w-full"
+            size="lg"
+            onClick={onSubmit}
+            disabled={submitting || cart.length === 0}
+          >
+            {submitting ? <Spinner className="mr-2" /> : null}
+            <Trans>Kirim pesanan</Trans>
+          </Button>
+        )}
       </SheetContent>
     </Sheet>
   );

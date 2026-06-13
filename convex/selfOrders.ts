@@ -3,6 +3,7 @@ import type { Doc } from './_generated/dataModel';
 import { mutation, type QueryCtx, query } from './_generated/server';
 import { heldLineValidator } from './lib/heldOrder';
 import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { buildOrder, settleSale } from './lib/sale';
 
 /**
  * Staff (OWNER-GATED) side of QR self-ordering. The public, unauthenticated
@@ -20,6 +21,12 @@ const queueRow = v.object({
   tableName: v.optional(v.string()),
   lineCount: v.number(),
   subtotalIDR: v.number(),
+  // Pay-now surfacing for the queue card ("Lunas (QRIS)" + the charged total).
+  // Absent on pay-at-counter self-orders.
+  paymentStatus: v.optional(
+    v.union(v.literal('unpaid'), v.literal('awaiting'), v.literal('paid'))
+  ),
+  totalIDR: v.optional(v.number()),
   customerNote: v.optional(v.string()),
   createdAt: v.number(),
   // A compact line preview for the queue card (display fields only).
@@ -49,6 +56,8 @@ export const queue = query({
         ...(r.tableName ? { tableName: r.tableName } : {}),
         lineCount: r.lines.length,
         subtotalIDR: r.subtotalIDR,
+        ...(r.paymentStatus ? { paymentStatus: r.paymentStatus } : {}),
+        ...(r.totalIDR !== undefined ? { totalIDR: r.totalIDR } : {}),
         ...(r.customerNote ? { customerNote: r.customerNote } : {}),
         createdAt: r.createdAt,
         lines: r.lines.map((l) => ({
@@ -142,8 +151,109 @@ export const reject = mutation({
   returns: v.null(),
   handler: async (ctx, { id }) => {
     const { cafeId } = await requireOwnerCafe(ctx);
-    await requireOwned(ctx, cafeId, id, 'Pesanan');
+    const row = await requireOwned(ctx, cafeId, id, 'Pesanan');
+    // A pay-now (QRIS) self-order with a charge in-flight (awaiting) or already
+    // paid can't be rejected: the customer may pay (or has paid) a live QR, so
+    // rejecting would collect money on a never-fired order. It must be accepted
+    // (or refunded out of band), never dropped.
+    if (row.paymentStatus === 'awaiting' || row.paymentStatus === 'paid') {
+      throw new Error('Tidak bisa menolak pesanan yang sedang atau sudah dibayar.');
+    }
     await ctx.db.patch(id, { status: 'rejected' });
     return null;
+  },
+});
+
+// ---------------------------------------------------------------------------
+// acceptPaid — staff accept of a PRE-PAID (QRIS-dynamic) self-order. Turns the
+// pre-collected charge into a real PAID order on the staff's open shift/cashier,
+// records the existing providerRef (NO re-charge), and fires it to the kitchen.
+// ---------------------------------------------------------------------------
+
+export const acceptPaid = mutation({
+  args: { id: v.id('selfOrders'), cashierId: v.id('cafeStaff') },
+  returns: v.object({ orderId: v.id('orders') }),
+  handler: async (ctx, { id, cashierId }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const so = await requireOwned(ctx, cafeId, id, 'Pesanan');
+
+    // Idempotent fast-path: already accepted → return the existing order.
+    if (so.acceptedOrderId) return { orderId: so.acceptedOrderId };
+
+    // A rejected self-order must never be turned into a real order, even if a
+    // payment somehow landed on it ('new' is the normal path; 'accepted' covers
+    // the idempotent retry before acceptedOrderId is stamped).
+    if (so.status !== 'new' && so.status !== 'accepted') {
+      throw new Error('Pesanan sudah ditolak.');
+    }
+
+    if (so.paymentStatus !== 'paid') throw new Error('Pesanan belum dibayar.');
+    if (so.paidAmountIDR === undefined) throw new Error('Pesanan belum dibayar.');
+
+    // The register context: this cafe's single open shift + the chosen cashier.
+    const shift = await ctx.db
+      .query('shifts')
+      .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'open'))
+      .unique();
+    if (!shift) throw new Error('Buka shift dulu.');
+    await requireOwned(ctx, cafeId, cashierId, 'Kasir');
+
+    const lines = so.lines.map((l) => ({
+      menuItemId: l.menuItemId,
+      qty: l.qty,
+      modifierOptionIds: l.modifierOptionIds,
+      ...(l.variantId ? { variantId: l.variantId } : {}),
+    }));
+
+    // Build the order via the shared checkout core. The clientId is derived from
+    // the self-order id so a retried acceptPaid hits buildOrder's idempotency
+    // (a 2nd order is never created) on top of the acceptedOrderId fast-path.
+    const { orderId, totalIDR } = await buildOrder(
+      ctx,
+      {
+        clientId: `sop_${id}`,
+        shiftId: shift._id,
+        cashierId,
+        lines,
+        orderType: 'dine_in',
+        ...(so.tableId ? { tableId: so.tableId } : {}),
+      },
+      { method: 'qris_dynamic' }
+    );
+
+    // Guard the money path: the server-recomputed total must match the amount the
+    // customer already paid. A drift (e.g. a price edit after payment) rolls back
+    // the inserted order + payment (Convex rolls back on throw) and is handled
+    // manually rather than silently over/under-charging.
+    if (totalIDR !== so.paidAmountIDR) {
+      throw new Error('Harga berubah sejak pembayaran, tangani manual.');
+    }
+
+    // Stamp the pre-collected charge onto the new order's qris_dynamic payment row
+    // (mirror patchCharge) so the providerRef round-trips for reconcile/audit.
+    const payment = await ctx.db
+      .query('payments')
+      .withIndex('by_order', (q) => q.eq('orderId', orderId))
+      .filter((q) => q.eq(q.field('method'), 'qris_dynamic'))
+      .unique();
+    if (payment) {
+      await ctx.db.patch(payment._id, {
+        ...(so.providerRef ? { providerRef: so.providerRef } : {}),
+        ...(so.expiresAt !== undefined ? { expiresAt: so.expiresAt } : {}),
+        providerStatus: 'pending',
+      });
+    }
+
+    // Settle: inventory + loyalty side effects + order → paid + payment confirmedAt
+    // + kitchenStatus 'new'. (No re-charge; the funds were collected up-front.)
+    await settleSale(ctx, orderId);
+
+    await ctx.db.patch(id, {
+      status: 'accepted',
+      acceptedAt: Date.now(),
+      acceptedOrderId: orderId,
+    });
+
+    return { orderId };
   },
 });

@@ -551,7 +551,7 @@ describe('public.selfOrderStatus', () => {
       selfOrderId,
       qrToken: QR_TOKEN,
     });
-    expect(status).toEqual({ status: 'new' });
+    expect(status).toEqual({ status: 'new', paymentStatus: 'unpaid' });
   });
 
   it('returns null for a wrong/unknown qrToken (no enumeration oracle)', async () => {

@@ -9,6 +9,9 @@ import { qrisWebhookSecret, resolveProvider } from './payments/providers';
 const http = httpRouter();
 auth.addHttpRoutes(http);
 
+// `/webhooks/qris` is the MOCK/dev + `simulateWebhook` route ONLY: it hardwires
+// MockProvider on purpose (real Xendit traffic uses `/webhooks/qris/xendit`
+// below, which resolves the per-cafe provider from config).
 http.route({
   path: '/webhooks/qris',
   method: 'POST',
@@ -21,9 +24,18 @@ http.route({
       const r = await ctx.runMutation(internal.payments.qrisDynamic.confirmFromWebhook, {
         providerRef: event.providerRef,
       });
-      return new Response(r, { status: 200 }); // 'settled' | 'unknown' — 200 acks either way
+      if (r === 'unknown') {
+        // Not a counter order — maybe a pay-now self-order charge (public surface).
+        await ctx.runMutation(internal.payments.qrisDynamic.confirmSelfOrderFromWebhook, {
+          providerRef: event.providerRef,
+        });
+      }
+      return new Response(r, { status: 200 }); // 200 acks either way
     }
     await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, { providerRef: event.providerRef });
+    await ctx.runMutation(internal.payments.qrisDynamic.voidSelfOrderCharge, {
+      providerRef: event.providerRef,
+    });
     return new Response('ok', { status: 200 });
   }),
 });
@@ -38,19 +50,32 @@ http.route({
     const payment = await ctx.runQuery(internal.payments.qrisDynamic.getPaymentCafeByRef, {
       providerRef: ref,
     });
-    if (!payment) return new Response('ok', { status: 200 }); // unknown ref — ack, nothing to do
-    const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, {
-      cafeId: payment.cafeId,
-    });
+    // The ref may instead belong to a pay-now self-order charge (public surface).
+    const selfOrder = payment
+      ? null
+      : await ctx.runQuery(internal.payments.qrisDynamic.getSelfOrderCafeByRef, { providerRef: ref });
+    if (!payment && !selfOrder) return new Response('ok', { status: 200 }); // unknown ref — ack, nothing to do
+    const cafeId = payment ? payment.cafeId : selfOrder!.cafeId;
+    const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, { cafeId });
     // If the cafe disconnected QRIS, config is null → Mock → 401; order is reconciled/swept later (see spec follow-ups).
     const event = await resolveProvider(config).verifyWebhook({ body, headers: req.headers });
     if (!event) return new Response('invalid token', { status: 401 });
-    if (event.status === 'paid') {
-      await ctx.runMutation(internal.payments.qrisDynamic.confirmFromWebhook, {
+    if (payment) {
+      if (event.status === 'paid') {
+        await ctx.runMutation(internal.payments.qrisDynamic.confirmFromWebhook, {
+          providerRef: event.providerRef,
+        });
+      } else {
+        await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, {
+          providerRef: event.providerRef,
+        });
+      }
+    } else if (event.status === 'paid') {
+      await ctx.runMutation(internal.payments.qrisDynamic.confirmSelfOrderFromWebhook, {
         providerRef: event.providerRef,
       });
     } else {
-      await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, {
+      await ctx.runMutation(internal.payments.qrisDynamic.voidSelfOrderCharge, {
         providerRef: event.providerRef,
       });
     }
