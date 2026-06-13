@@ -644,6 +644,10 @@ msgstr "Set Owner PIN"
 msgid "Atur program poin dan lihat ringkasannya."
 msgstr "Manage the points program and view its summary."
 
+#: src/routes/_pos/time-clock.tsx
+msgid "Atur tarif per jam staf dan catat jam kerja."
+msgstr "Set staff hourly rates and track worked hours."
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Aturan"
 msgstr "Rule"
@@ -793,6 +797,7 @@ msgstr "Spoiled/Expired"
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/components/sale/sale-screen.tsx
+#: src/components/schedule/shift-form-dialog.tsx
 #: src/components/settings/save-bar.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/components/tables/table-manage-dialog.tsx
@@ -838,6 +843,7 @@ msgstr "Takeaway"
 
 #: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "Bayar"
 msgstr "Pay"
 
@@ -894,6 +900,10 @@ msgstr "No groups attached."
 msgid "Belum ada item."
 msgstr "No items yet."
 
+#: src/routes/_pos/schedule.tsx
+msgid "Belum ada jadwal minggu ini."
+msgstr "No shifts this week."
+
 #: src/routes/_pos/time-clock.tsx
 msgid "Belum ada jam kerja pada rentang ini."
 msgstr "No work hours in this range."
@@ -922,6 +932,10 @@ msgstr "No tables yet."
 #: src/components/menu/modifier-group-form.tsx
 msgid "Belum ada opsi. Tambahkan minimal satu."
 msgstr "No options yet. Add at least one."
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Belum ada payroll pada rentang ini."
+msgstr "No payroll in this range."
 
 #: src/routes/_pos/customers.tsx
 msgid "Belum ada pelanggan."
@@ -1306,6 +1320,7 @@ msgstr "Record stock:"
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
+#: src/components/schedule/shift-form-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/waste.tsx
 #: src/routes/_pos/reports/expenses.tsx
@@ -1833,6 +1848,10 @@ msgstr "Failed to set PIN."
 msgid "Gagal mengganti PIN."
 msgstr "Failed to change PIN."
 
+#: src/routes/_pos/schedule.tsx
+msgid "Gagal menghapus jadwal."
+msgstr "Failed to delete shift."
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gagal menghapus logo."
 msgstr "Failed to remove logo."
@@ -1913,6 +1932,10 @@ msgstr "Failed to save group."
 #: src/components/menu/item-edit-form.tsx
 msgid "Gagal menyimpan item."
 msgstr "Failed to save item."
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Gagal menyimpan jadwal."
+msgstr "Failed to save shift."
 
 #: src/components/menu/category-form-dialog.tsx
 msgid "Gagal menyimpan kategori."
@@ -2107,6 +2130,7 @@ msgstr "Page not found"
 #: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/reservations.tsx
+#: src/routes/_pos/schedule.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Hapus"
 msgstr "Remove"
@@ -2127,6 +2151,10 @@ msgstr "Remove discount"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Hapus gambar"
 msgstr "Remove image"
+
+#: src/routes/_pos/schedule.tsx
+msgid "Hapus jadwal?"
+msgstr "Delete shift?"
 
 #: src/components/tables/table-manage-dialog.tsx
 msgid "Hapus meja?"
@@ -2357,6 +2385,26 @@ msgstr "Items"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Izin akses"
 msgstr "Access permissions"
+
+#: src/routes/_pos/schedule.tsx
+msgid "Jadwal"
+msgstr "Schedule"
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Jadwal dibuat."
+msgstr "Shift created."
+
+#: src/routes/_pos/schedule.tsx
+msgid "Jadwal dihapus."
+msgstr "Shift deleted."
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Jadwal diperbarui."
+msgstr "Shift updated."
+
+#: src/routes/_pos/schedule.tsx
+msgid "Jadwal ini akan dihapus permanen."
+msgstr "This shift will be permanently deleted."
 
 #: src/routes/_pos/time-clock.tsx
 msgid "Jam"
@@ -3067,6 +3115,10 @@ msgstr "Switch to owner"
 msgid "Masuk sejak {0}"
 msgstr "In since {0}"
 
+#: src/routes/_pos/settings/staff.tsx
+msgid "Masukkan angka yang valid."
+msgstr "Enter a valid number."
+
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "Masukkan kode"
 msgstr "Enter code"
@@ -3241,6 +3293,7 @@ msgstr "Closing…"
 #: src/components/menu/modifier-group-form.tsx
 #: src/components/promo/promo-form-dialog.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
+#: src/components/schedule/shift-form-dialog.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 msgid "Menyimpan…"
 msgstr "Saving…"
@@ -3276,6 +3329,18 @@ msgstr "Min"
 #: src/routes/_pos/settings/profile.tsx
 msgid "Minggu"
 msgstr "Sunday"
+
+#: src/routes/_pos/schedule.tsx
+msgid "Minggu berikutnya"
+msgstr "Next week"
+
+#: src/routes/_pos/schedule.tsx
+msgid "Minggu ini"
+msgstr "This week"
+
+#: src/routes/_pos/schedule.tsx
+msgid "Minggu sebelumnya"
+msgstr "Previous week"
 
 #: src/routes/_public/signup.tsx
 msgid "Minimal 8 karakter"
@@ -3340,6 +3405,10 @@ msgstr "Load"
 msgid "Muat lebih banyak"
 msgstr "Load more"
 
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Mulai"
+msgstr "Start"
+
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Mulai dengan kategori →"
 msgstr "Start with categories →"
@@ -3363,6 +3432,7 @@ msgstr "Move up"
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/settings/tax.tsx
 #: src/routes/_pos/suppliers.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "Nama"
 msgstr "Name"
 
@@ -3619,6 +3689,10 @@ msgstr "Password must be at least 8 characters."
 #: src/lib/auth-validation.ts
 msgid "Password wajib diisi."
 msgstr "Password is required."
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Payroll"
+msgstr "Payroll"
 
 #: src/components/app-shared.tsx
 #: src/components/customer/customer-detail-sheet.tsx
@@ -4100,6 +4174,14 @@ msgstr "Choose a supplier"
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "Pilih promo"
 msgstr "Choose a promo"
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Pilih staf"
+msgstr "Select staff"
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Pilih staf terlebih dahulu."
+msgstr "Select a staff member first."
 
 #: src/components/reports/range-picker.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
@@ -4676,6 +4758,11 @@ msgstr "Learn more"
 msgid "Selesai"
 msgstr "Done"
 
+#: src/components/schedule/shift-form-dialog.tsx
+msgctxt "shift end time"
+msgid "Selesai"
+msgstr "End"
+
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Selesaikan nanti"
 msgstr "Finish later"
@@ -4823,6 +4910,7 @@ msgstr "Who's on duty?"
 #: src/components/promo/promo-form-dialog.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/customer-section.tsx
+#: src/components/schedule/shift-form-dialog.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -4868,6 +4956,7 @@ msgid "Sistem"
 msgstr "System"
 
 #: src/components/app-shared.tsx
+#: src/components/schedule/shift-form-dialog.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/time-clock.tsx
 msgid "Staf"
@@ -5053,6 +5142,11 @@ msgstr "Add menu items to print barcode labels."
 msgid "Tambah item pertama untuk mulai berjualan."
 msgstr "Add your first item to start selling."
 
+#: src/components/schedule/shift-form-dialog.tsx
+#: src/routes/_pos/schedule.tsx
+msgid "Tambah jadwal"
+msgstr "Add shift"
+
 #: src/components/sale/cart-line-row.tsx
 msgid "Tambah jumlah"
 msgstr "Increase quantity"
@@ -5139,6 +5233,10 @@ msgstr "Add ingredients in inventory to start a stock take."
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Tambahkan beberapa item beserta harganya."
 msgstr "Add some items along with their prices."
+
+#: src/routes/_pos/schedule.tsx
+msgid "Tambahkan jadwal kerja staf untuk minggu yang dipilih."
+msgstr "Add staff work shifts for the selected week."
 
 #: src/components/menu/category-table.tsx
 msgid "Tambahkan kategori untuk mengelompokkan item menu Anda."
@@ -5234,6 +5332,7 @@ msgstr "Mark available"
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
+#: src/components/schedule/shift-form-dialog.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -5248,6 +5347,10 @@ msgstr "Date"
 #: src/components/reservations/reservation-form-dialog.tsx
 msgid "Tanggal dan waktu wajib diisi."
 msgstr "Date and time are required."
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Tanggal wajib diisi."
+msgstr "Date is required."
 
 #: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/hold-order-dialog.tsx
@@ -5276,6 +5379,18 @@ msgstr "No rounding"
 #: src/components/sale/customer-section.tsx
 msgid "Tanpa reward"
 msgstr "No reward"
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Tarif per jam"
+msgstr "Hourly rate"
+
+#: src/routes/_pos/settings/staff.tsx
+msgid "Tarif per jam (Rp)"
+msgstr "Hourly rate (Rp)"
+
+#: src/routes/_pos/time-clock.tsx
+msgid "Tarif/jam"
+msgstr "Rate/hour"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Teks footer"
@@ -5444,6 +5559,10 @@ msgstr "No archived items."
 #: src/routes/_pos/menu/index.tsx
 #~ msgid "Tidak ada item."
 #~ msgstr "No items."
+
+#: src/routes/_pos/schedule.tsx
+msgid "Tidak ada jadwal."
+msgstr "No shifts."
 
 #: src/routes/_pos/gift-cards.tsx
 msgid "Tidak ada kartu hadiah diarsipkan."
@@ -5648,6 +5767,7 @@ msgstr "Counted cash (Rp)"
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/reservations.tsx
+#: src/routes/_pos/schedule.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Ubah"
 msgstr "Edit"
@@ -5668,6 +5788,10 @@ msgstr "Edit group"
 #: src/routes/_pos/settings/profile.tsx
 #~ msgid "Ubah informasi dasar kafe Anda."
 #~ msgstr "Update your cafe's basic information."
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Ubah jadwal"
+msgstr "Edit shift"
 
 #: src/components/menu/category-form-dialog.tsx
 msgid "Ubah kategori"
@@ -5753,6 +5877,7 @@ msgstr "Download CSV"
 #: src/routes/_pos/reports/products.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/sales.tsx
+#: src/routes/_pos/time-clock.tsx
 msgid "Unduh PDF"
 msgstr "Download PDF"
 
@@ -5870,6 +5995,14 @@ msgstr "Required?"
 #: src/routes/_pos/reservations.tsx
 msgid "Waktu"
 msgstr "Time"
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Waktu mulai dan selesai wajib diisi."
+msgstr "Start and end times are required."
+
+#: src/components/schedule/shift-form-dialog.tsx
+msgid "Waktu selesai harus setelah mulai."
+msgstr "End time must be after start time."
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Weekly summary exported"

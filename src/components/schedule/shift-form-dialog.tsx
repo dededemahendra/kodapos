@@ -177,7 +177,7 @@ export function ShiftFormDialog({
             </Field>
             <Field>
               <FieldLabel htmlFor="shift-end">
-                <Trans>Selesai</Trans>
+                <Trans context="shift end time">Selesai</Trans>
               </FieldLabel>
               <Input
                 id="shift-end"
