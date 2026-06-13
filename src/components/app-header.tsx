@@ -1,5 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useLingui } from "@lingui/react/macro";
+import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -8,7 +9,8 @@ import { AppBreadcrumbs } from "~/components/app-breadcrumbs";
 import { navLinks } from "~/components/app-shared";
 import { CustomSidebarTrigger } from "~/components/custom-sidebar-trigger";
 import { NavUser } from "~/components/nav-user";
-import { BellIcon } from "lucide-react";
+import { applyTheme, storeTheme } from "~/lib/preferences";
+import { BellIcon, MoonIcon, SunIcon } from "lucide-react";
 
 export function AppHeader() {
 	const { t } = useLingui();
@@ -17,6 +19,20 @@ export function AppHeader() {
 		(item) =>
 			item.path && (path === item.path || path.startsWith(`${item.path}/`))
 	);
+
+	// Resolved dark state, synced from the documentElement class on mount (the
+	// no-flash head script already set it before paint).
+	const [isDark, setIsDark] = useState(false);
+	useEffect(() => {
+		setIsDark(document.documentElement.classList.contains("dark"));
+	}, []);
+
+	function toggleTheme() {
+		const next = isDark ? "light" : "dark";
+		storeTheme(next);
+		applyTheme(next);
+		setIsDark(next === "dark");
+	}
 
 	return (
 		<header
@@ -35,6 +51,14 @@ export function AppHeader() {
 				<AppBreadcrumbs page={activeItem ?? null} />
 			</div>
 			<div className="flex items-center gap-3">
+				<Button
+					aria-label={t`Ganti tema`}
+					size="icon-sm"
+					variant="ghost"
+					onClick={toggleTheme}
+				>
+					{isDark ? <SunIcon /> : <MoonIcon />}
+				</Button>
 				<Button aria-label={t`Notifikasi`} size="icon-sm" variant="outline">
 					<BellIcon />
 				</Button>

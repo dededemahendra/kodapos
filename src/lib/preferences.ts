@@ -37,6 +37,50 @@ export function applyDensity(density: Density): void {
 }
 
 // ---------------------------------------------------------------------------
+// Theme (light / dark / system) — browser-only, SSR-safe
+// ---------------------------------------------------------------------------
+
+export type Theme = 'light' | 'dark' | 'system';
+
+export const DEFAULT_THEME: Theme = 'system';
+
+const THEME_KEY = 'kodapos.theme';
+
+function isValidTheme(value: string | null | undefined): value is Theme {
+  return value === 'light' || value === 'dark' || value === 'system';
+}
+
+/** Browser-only read; returns DEFAULT_THEME on the server. */
+export function getTheme(): Theme {
+  if (typeof window === 'undefined') return DEFAULT_THEME;
+  try {
+    const stored = window.localStorage.getItem(THEME_KEY);
+    return isValidTheme(stored) ? stored : DEFAULT_THEME;
+  } catch {
+    return DEFAULT_THEME;
+  }
+}
+
+export function storeTheme(theme: Theme): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    /* ignore (private mode, etc.) */
+  }
+}
+
+/** Toggles the `.dark` class on <html>; guarded for SSR. */
+export function applyTheme(theme: Theme): void {
+  if (typeof document === 'undefined') return;
+  const dark =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.classList.toggle('dark', dark);
+}
+
+// ---------------------------------------------------------------------------
 // Date / time format readers (browser-only, SSR-safe)
 // ---------------------------------------------------------------------------
 

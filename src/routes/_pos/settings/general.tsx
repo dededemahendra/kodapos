@@ -22,9 +22,13 @@ import { Switch } from '~/components/ui/switch';
 import { type Locale, LOCALES } from '~/lib/locale';
 import {
   applyDensity,
+  applyTheme,
   getDensity,
+  getTheme,
   storeDensity,
+  storeTheme,
   type Density,
+  type Theme,
   useBoolPreference,
   usePreference,
 } from '~/lib/preferences';
@@ -204,9 +208,13 @@ function RegionSection({
 function AppearanceSection({
   density,
   handleDensity,
+  theme,
+  handleTheme,
 }: {
   density: Density;
   handleDensity: (v: string) => void;
+  theme: Theme;
+  handleTheme: (v: string) => void;
 }) {
   return (
     <Card>
@@ -240,12 +248,25 @@ function AppearanceSection({
           <RowSep />
 
           <SettingRow
-            label={<Trans>Mode gelap</Trans>}
-            description={<Trans>Mengikuti sistem.</Trans>}
+            label={<Trans>Tema</Trans>}
+            description={<Trans>Pilih tema terang, gelap, atau ikuti sistem.</Trans>}
             control={
-              <span className="text-sm text-muted-foreground">
-                <Trans>Mengikuti sistem.</Trans>
-              </span>
+              <Select value={theme} onValueChange={handleTheme}>
+                <SelectTrigger className="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="system">
+                    <Trans>Sistem</Trans>
+                  </SelectItem>
+                  <SelectItem value="light">
+                    <Trans>Terang</Trans>
+                  </SelectItem>
+                  <SelectItem value="dark">
+                    <Trans>Gelap</Trans>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             }
           />
         </FieldGroup>
@@ -594,6 +615,15 @@ function GeneralSettings() {
     applyDensity(d);
   }
 
+  // Tampilan — tema (live)
+  const [theme, setThemeState] = useState<Theme>(() => getTheme());
+  function handleTheme(v: string) {
+    const t = v as Theme;
+    setThemeState(t);
+    storeTheme(t);
+    applyTheme(t);
+  }
+
   // Bahasa & Wilayah
   const [timezone, setTimezone] = usePreference<string>('timezone', 'Asia/Jakarta');
   const [dateFormat, setDateFormat] = usePreference<string>('dateFormat', 'dmy-short');
@@ -635,7 +665,12 @@ function GeneralSettings() {
         setTimeFormat={setTimeFormat}
       />
 
-      <AppearanceSection density={density} handleDensity={handleDensity} />
+      <AppearanceSection
+        density={density}
+        handleDensity={handleDensity}
+        theme={theme}
+        handleTheme={handleTheme}
+      />
 
       <EmailSummarySection />
 

@@ -2086,6 +2086,14 @@ msgstr "Ganti PIN"
 msgid "Ganti PIN untuk {staffName}"
 msgstr "Ganti PIN untuk {staffName}"
 
+#: src/components/app-header.tsx
+msgid "Ganti tema"
+msgstr "Ganti tema"
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Gelap"
+msgstr "Gelap"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "GoFood"
 msgstr "GoFood"
@@ -3373,8 +3381,8 @@ msgid "Mencari…"
 msgstr "Mencari…"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Mengikuti sistem."
-msgstr "Mengikuti sistem."
+#~ msgid "Mengikuti sistem."
+#~ msgstr "Mengikuti sistem."
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
@@ -3513,8 +3521,8 @@ msgid "Modal awal (Rp)"
 msgstr "Modal awal (Rp)"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Mode gelap"
-msgstr "Mode gelap"
+#~ msgid "Mode gelap"
+#~ msgstr "Mode gelap"
 
 #: src/components/app-shared.tsx
 msgid "Modifier"
@@ -4331,6 +4339,10 @@ msgstr "Pilih staf terlebih dahulu."
 msgid "Pilih tanggal"
 msgstr "Pilih tanggal"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Pilih tema terang, gelap, atau ikuti sistem."
+msgstr "Pilih tema terang, gelap, atau ikuti sistem."
+
 #: src/routes/_pos/shift/open.tsx
 msgid "Pilih ulang"
 msgstr "Pilih ulang"
@@ -5103,6 +5115,7 @@ msgid "sisa {0}"
 msgstr "sisa {0}"
 
 #: src/components/inventory/stock-take-dialog.tsx
+#: src/routes/_pos/settings/general.tsx
 msgid "Sistem"
 msgstr "Sistem"
 
@@ -5571,9 +5584,17 @@ msgstr "Telepon"
 msgid "Telp"
 msgstr "Telp"
 
+#: src/routes/_pos/settings/general.tsx
+msgid "Tema"
+msgstr "Tema"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
 msgstr "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
+
+#: src/routes/_pos/settings/general.tsx
+msgid "Terang"
+msgstr "Terang"
 
 #: src/components/sale/manual-discount-dialog.tsx
 msgid "Terapkan"
