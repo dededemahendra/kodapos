@@ -9,8 +9,9 @@ import { AppBreadcrumbs } from "~/components/app-breadcrumbs";
 import { navLinks } from "~/components/app-shared";
 import { CustomSidebarTrigger } from "~/components/custom-sidebar-trigger";
 import { NavUser } from "~/components/nav-user";
+import { NotificationsMenu } from "~/components/notifications-menu";
 import { applyTheme, storeTheme } from "~/lib/preferences";
-import { BellIcon, MoonIcon, SunIcon } from "lucide-react";
+import { MoonIcon, SunIcon } from "lucide-react";
 
 export function AppHeader() {
 	const { t } = useLingui();
@@ -59,9 +60,7 @@ export function AppHeader() {
 				>
 					{isDark ? <SunIcon /> : <MoonIcon />}
 				</Button>
-				<Button aria-label={t`Notifikasi`} size="icon-sm" variant="outline">
-					<BellIcon />
-				</Button>
+				<NotificationsMenu />
 				<Separator
 					className="h-4 data-[orientation=vertical]:self-center"
 					orientation="vertical"
