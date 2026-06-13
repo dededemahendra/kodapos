@@ -2,7 +2,12 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { useNavigate } from '@tanstack/react-router';
-import { DEFAULT_SERVICE_CHARGE_NAME, computeOrderTotals, promoDiscountIDR } from 'convex/lib/pricing';
+import {
+  DEFAULT_SERVICE_CHARGE_NAME,
+  computeOrderTotals,
+  promoDiscountIDR,
+  scopedSubtotalIDR,
+} from 'convex/lib/pricing';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
@@ -109,6 +114,11 @@ export function SaleScreen({
                 name: row.promo.name,
                 type: row.promo.type,
                 value: row.promo.value,
+                ...(row.promo.scope ? { scope: row.promo.scope } : {}),
+                ...(row.promo.targetItemIds ? { targetItemIds: row.promo.targetItemIds } : {}),
+                ...(row.promo.targetCategoryIds
+                  ? { targetCategoryIds: row.promo.targetCategoryIds }
+                  : {}),
               }
             : null,
           lines: row.lines.map((l) => ({ ...l, lineKey: genLineKey() })),
@@ -164,8 +174,25 @@ export function SaleScreen({
   }
 
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
+  // Map each cart line to the scope-helper shape, resolving its category from the
+  // loaded items so a scoped promo previews against only its matching lines. The
+  // server recomputes the discount authoritatively from the promo doc at checkout.
+  const scopeLines = cart.lines.map((l) => ({
+    menuItemId: l.menuItemId as string,
+    categoryId: (items.find((r) => r.item._id === l.menuItemId)?.item.categoryId ?? '') as string,
+    lineTotalIDR: l.qty * l.unitPriceIDR,
+  }));
   const promoDisc = cart.promo
-    ? promoDiscountIDR(cart.promo.type, cart.promo.value, subtotal)
+    ? promoDiscountIDR(
+        cart.promo.type,
+        cart.promo.value,
+        scopedSubtotalIDR(
+          scopeLines,
+          cart.promo.scope,
+          cart.promo.targetItemIds,
+          cart.promo.targetCategoryIds
+        )
+      )
     : 0;
   const manualDisc = cart.manualDiscount
     ? promoDiscountIDR(cart.manualDiscount.type, cart.manualDiscount.value, subtotal - promoDisc)

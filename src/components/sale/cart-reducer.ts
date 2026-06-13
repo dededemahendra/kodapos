@@ -25,6 +25,9 @@ export type CartPromo = {
   name: string;
   type: 'percent' | 'fixed';
   value: number;
+  scope?: 'order' | 'item' | 'category';
+  targetItemIds?: string[];
+  targetCategoryIds?: string[];
 };
 
 export type ManualDiscount = { type: 'percent' | 'fixed'; value: number };

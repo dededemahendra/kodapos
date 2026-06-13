@@ -91,6 +91,13 @@ export function HoldOrderDialog({
                 name: cart.promo.name,
                 type: cart.promo.type,
                 value: cart.promo.value,
+                ...(cart.promo.scope ? { scope: cart.promo.scope } : {}),
+                ...(cart.promo.targetItemIds
+                  ? { targetItemIds: cart.promo.targetItemIds as Id<'menuItems'>[] }
+                  : {}),
+                ...(cart.promo.targetCategoryIds
+                  ? { targetCategoryIds: cart.promo.targetCategoryIds as Id<'categories'>[] }
+                  : {}),
               },
             }
           : {}),

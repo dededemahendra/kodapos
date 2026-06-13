@@ -6,7 +6,12 @@ import { manualDiscountValidator } from './discount';
 import { redeemGiftCard } from './giftcard';
 import { DEFAULT_LOYALTY, earnMultiplierFor, pointsEarned, redemptionIDR } from './loyalty';
 import { orderTypeValidator } from './orderType';
-import { computeOrderTotals, DEFAULT_SERVICE_CHARGE_NAME, promoDiscountIDR } from './pricing';
+import {
+  computeOrderTotals,
+  DEFAULT_SERVICE_CHARGE_NAME,
+  promoDiscountIDR,
+  scopedSubtotalIDR,
+} from './pricing';
 import { requireActiveCashier } from './staff';
 
 export const lineInput = v.object({
@@ -106,6 +111,10 @@ export async function buildOrder(
   if (args.tableId) await requireOwned(ctx, cafeId, args.tableId, 'Meja');
 
   const builtLines: Doc<'orders'>['lines'] = [];
+  // Parallel to builtLines: each line's menuItemId + categoryId + lineTotal, used
+  // by the scoped-promo computation below (category scope needs the item's
+  // category, which isn't on the order line snapshot).
+  const scopeLines: Array<{ menuItemId: string; categoryId: string; lineTotalIDR: number }> = [];
   for (const line of args.lines) {
     if (!Number.isInteger(line.qty) || line.qty < 1 || line.qty > 99) {
       throw new Error('Jumlah item tidak valid.');
@@ -205,6 +214,7 @@ export async function buildOrder(
       ...(variant ? { variantId: variant._id, variantName: variant.name } : {}),
       recipeSnapshot,
     });
+    scopeLines.push({ menuItemId: item._id, categoryId: item.categoryId, lineTotalIDR });
   }
 
   const subtotalIDR = builtLines.reduce((sum, l) => sum + l.lineTotalIDR, 0);
@@ -215,12 +225,24 @@ export async function buildOrder(
   if (args.promoId) {
     const promo = await requireOwned(ctx, cafeId, args.promoId, 'Promo');
     if (promo.archived) throw new Error('Promo tidak tersedia.');
-    discountIDR = promoDiscountIDR(promo.type, promo.value, subtotalIDR);
+    // Scope the discount to its matching lines (server reads the promo doc by id;
+    // the client never dictates the scope). An order/undefined scope sums all
+    // lines (unchanged); a scoped promo with no matching line yields 0.
+    const scoped = scopedSubtotalIDR(
+      scopeLines,
+      promo.scope,
+      promo.targetItemIds,
+      promo.targetCategoryIds
+    );
+    discountIDR = promoDiscountIDR(promo.type, promo.value, scoped);
     appliedPromo = {
       promoId: promo._id,
       name: promo.name,
       type: promo.type,
       value: promo.value,
+      scope: promo.scope ?? 'order',
+      ...(promo.targetItemIds ? { targetItemIds: promo.targetItemIds } : {}),
+      ...(promo.targetCategoryIds ? { targetCategoryIds: promo.targetCategoryIds } : {}),
     };
   }
 

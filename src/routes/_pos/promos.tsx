@@ -8,6 +8,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { Archive, BadgePercent, Pencil, Plus } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { PromoFormDialog } from '~/components/promo/promo-form-dialog';
+import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
@@ -110,6 +111,32 @@ function PromosInner() {
             {formatPromoValue(row.original.type, row.original.value)}
           </span>
         ),
+      },
+      {
+        id: 'code',
+        enableSorting: false,
+        header: () => <Trans>Kode & cakupan</Trans>,
+        cell: ({ row }) => {
+          const { code, scope } = row.original;
+          return (
+            <div className="flex items-center gap-2">
+              {code ? (
+                <Badge variant="secondary" className="font-mono">{code}</Badge>
+              ) : (
+                <span className="text-sm text-muted-foreground"><Trans>Tidak ada</Trans></span>
+              )}
+              <span className="text-sm text-muted-foreground">
+                {scope === 'item' ? (
+                  <Trans context="promo scope badge">Item</Trans>
+                ) : scope === 'category' ? (
+                  <Trans>Kategori</Trans>
+                ) : (
+                  <Trans>Order</Trans>
+                )}
+              </span>
+            </div>
+          );
+        },
       },
       {
         id: 'status',

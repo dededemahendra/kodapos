@@ -398,6 +398,15 @@ export default defineSchema({
         name: v.string(),
         type: v.union(v.literal('percent'), v.literal('fixed')),
         value: v.number(),
+        // Discount scope snapshot. Optional for back-compat with pre-scope
+        // orders; buildOrder always writes it going forward ('order' default).
+        scope: v.optional(
+          v.union(v.literal('order'), v.literal('item'), v.literal('category'))
+        ),
+        // Target snapshot so audit/refund can reconstruct the scoped subtotal.
+        // Optional: present only for item/category-scoped promos.
+        targetItemIds: v.optional(v.array(v.id('menuItems'))),
+        targetCategoryIds: v.optional(v.array(v.id('categories'))),
       })
     ),
     // Service charge (added in the service-charge slice). Optional for
@@ -525,9 +534,18 @@ export default defineSchema({
     name: v.string(),
     type: v.union(v.literal('percent'), v.literal('fixed')),
     value: v.number(),
+    // Optional coupon code (stored UPPERCASE, unique per cafe). Absent = no code.
+    code: v.optional(v.string()),
+    // Discount scope. Absent = 'order' (whole-order, back-compat with pre-scope
+    // promos). 'item'/'category' discount only the matching lines' subtotal.
+    scope: v.optional(v.union(v.literal('order'), v.literal('item'), v.literal('category'))),
+    targetItemIds: v.optional(v.array(v.id('menuItems'))),
+    targetCategoryIds: v.optional(v.array(v.id('categories'))),
     archived: v.boolean(),
     createdAt: v.number(),
-  }).index('by_cafe_active', ['cafeId', 'archived']),
+  })
+    .index('by_cafe_active', ['cafeId', 'archived'])
+    .index('by_cafe_code', ['cafeId', 'code']),
 
   suppliers: defineTable({
     cafeId: v.id('cafes'),
