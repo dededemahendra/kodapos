@@ -3251,6 +3251,10 @@ msgstr "Masukkan kode 8 digit."
 msgid "Masukkan kunci API (opsional)"
 msgstr "Masukkan kunci API (opsional)"
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Masukkan PIN pemilik untuk melanjutkan."
+msgstr "Masukkan PIN pemilik untuk melanjutkan."
+
 #: src/routes/_public/signin.tsx
 msgid "Masukkan sandi"
 msgstr "Masukkan sandi"
@@ -4365,6 +4369,7 @@ msgstr "PIN"
 msgid "PIN 4 digit"
 msgstr "PIN 4 digit"
 
+#: src/components/permission/pin-confirm-dialog.tsx
 #: src/components/permission/switch-to-owner.tsx
 msgid "PIN pemilik"
 msgstr "PIN pemilik"
@@ -4377,6 +4382,7 @@ msgstr "PIN Pemilik"
 msgid "PIN Pemilik & Kasir"
 msgstr "PIN Pemilik & Kasir"
 
+#: src/components/permission/pin-confirm-dialog.tsx
 #: src/components/permission/switch-to-owner.tsx
 #: src/routes/_pos/pin.tsx
 msgid "PIN salah."
@@ -4894,8 +4900,8 @@ msgid "Sedang berjalan"
 msgstr "Sedang berjalan"
 
 #: src/routes/_pos/settings/general.tsx
-msgid "Segera"
-msgstr "Segera"
+#~ msgid "Segera"
+#~ msgstr "Segera"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Segera hadir."
@@ -5190,6 +5196,7 @@ msgstr "Stok opname selesai · {0} bahan disesuaikan."
 
 #: src/components/inventory/stock-summary.tsx
 #: src/components/sale/item-card.tsx
+#: src/components/sale/register-top-bar.tsx
 #: src/routes/_pos/inventory/index.tsx
 msgid "Stok rendah"
 msgstr "Stok rendah"
