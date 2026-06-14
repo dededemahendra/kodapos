@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* Registers the enter/exit animation utilities (animate-in, fade-in, zoom-in,
+   slide-in-from-*) that the shadcn dropdown/select/popover/dialog components
+   reference for their open/close reveal. Without this they are dead classes. */
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
