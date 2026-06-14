@@ -6,6 +6,7 @@ import {
   CreditCard,
   Heart,
   LayoutGrid,
+  Lightbulb,
   LineChart,
   Package,
   Rocket,
@@ -30,6 +31,7 @@ import {
   DOC_GROUPS,
   DOC_ORDER,
   DOCS,
+  type DocBlock,
   type DocIcon,
   type DocTopic,
   sectionId,
@@ -139,22 +141,14 @@ function DocsPage() {
                 <h2 className="text-xl font-semibold tracking-tight">
                   {localized(section.heading, locale)}
                 </h2>
-                {section.blocks.map((block, bi) =>
-                  block.type === 'p' ? (
-                    <p key={`${ids[si]}-b${bi}`} className="leading-7 text-muted-foreground">
-                      {localized(block.text, locale)}
-                    </p>
-                  ) : (
-                    <ul
-                      key={`${ids[si]}-b${bi}`}
-                      className="list-disc space-y-1.5 pl-6 leading-7 text-muted-foreground marker:text-muted-foreground/50"
-                    >
-                      {block.items.map((item, ii) => (
-                        <li key={`${ids[si]}-b${bi}-i${ii}`}>{localized(item, locale)}</li>
-                      ))}
-                    </ul>
-                  )
-                )}
+                {section.blocks.map((block, bi) => (
+                  <DocBlockView
+                    key={`${ids[si]}-b${bi}`}
+                    block={block}
+                    locale={locale}
+                    idBase={`${ids[si]}-b${bi}`}
+                  />
+                ))}
               </section>
             ))}
           </div>
@@ -188,6 +182,46 @@ function DocsPage() {
       </aside>
     </div>
   );
+}
+
+function DocBlockView({
+  block,
+  locale,
+  idBase,
+}: {
+  block: DocBlock;
+  locale: Locale;
+  idBase: string;
+}) {
+  switch (block.type) {
+    case 'p':
+      return <p className="leading-7 text-muted-foreground">{localized(block.text, locale)}</p>;
+    case 'ul':
+      return (
+        <ul className="list-disc space-y-1.5 pl-6 leading-7 text-muted-foreground marker:text-muted-foreground/50">
+          {block.items.map((item, i) => (
+            <li key={`${idBase}-i${i}`}>{localized(item, locale)}</li>
+          ))}
+        </ul>
+      );
+    case 'steps':
+      return (
+        <ol className="list-decimal space-y-1.5 pl-6 leading-7 text-muted-foreground marker:font-medium marker:text-foreground">
+          {block.items.map((item, i) => (
+            <li key={`${idBase}-i${i}`} className="pl-1">
+              {localized(item, locale)}
+            </li>
+          ))}
+        </ol>
+      );
+    case 'note':
+      return (
+        <div className="flex gap-2.5 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm leading-6 text-foreground">
+          <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
+          <p>{localized(block.text, locale)}</p>
+        </div>
+      );
+  }
 }
 
 function DocsNav({ activeSlug, locale }: { activeSlug: string; locale: Locale }) {
