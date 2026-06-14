@@ -21,6 +21,48 @@ export interface DocTopic {
   sections: DocSection[];
 }
 
+/** Sidebar grouping for the docs nav (defines order + section labels). */
+export interface DocGroup {
+  label: Localized;
+  slugs: string[];
+}
+
+export const DOC_GROUPS: DocGroup[] = [
+  { label: { id: 'Mulai', en: 'Getting started' }, slugs: ['getting-started'] },
+  {
+    label: { id: 'Penjualan', en: 'Selling' },
+    slugs: ['register', 'payments', 'void-refund'],
+  },
+  {
+    label: { id: 'Katalog & stok', en: 'Catalog & inventory' },
+    slugs: ['menu-recipes', 'inventory'],
+  },
+  {
+    label: { id: 'Pelanggan', en: 'Customers' },
+    slugs: ['customers-loyalty', 'promotions'],
+  },
+  {
+    label: { id: 'Operasional', en: 'Operations' },
+    slugs: ['tables-kitchen', 'staff-shifts'],
+  },
+  {
+    label: { id: 'Analitik & pengaturan', en: 'Analytics & settings' },
+    slugs: ['reports', 'settings'],
+  },
+];
+
+/** Section anchor id, stable across locale (derived from the English heading). */
+export function sectionId(slug: string, heading: Localized, index: number): string {
+  const base = heading.en
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  return `${slug}-${base || index}`;
+}
+
+/** Topic slugs in sidebar order, for prev/next paging. */
+export const DOC_ORDER: string[] = DOC_GROUPS.flatMap((g) => g.slugs);
+
 export const DOCS: DocTopic[] = [
   {
     slug: 'getting-started',

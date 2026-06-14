@@ -1097,6 +1097,10 @@ msgstr "Clocked out successfully."
 msgid "Beri diskon"
 msgstr "Give discount"
 
+#: src/routes/_pos/docs.tsx
+msgid "Berikutnya"
+msgstr "Next"
+
 #. placeholder {0}: formatCountdown(expiresAt - now)
 #: src/components/public/qr-payment-view.tsx
 msgid "Berlaku <0>{0}</0>"
@@ -1569,6 +1573,10 @@ msgstr "Contact details"
 #: src/components/inventory/purchase-order-detail.tsx
 msgid "Detail pesanan beli dan penerimaan barang."
 msgstr "Purchase order details and goods receipt."
+
+#: src/routes/_pos/docs.tsx
+msgid "Di halaman ini"
+msgstr "On this page"
 
 #: src/components/inventory/purchase-order-detail.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
@@ -3859,8 +3867,8 @@ msgid "Pakai sandi"
 msgstr "Use password"
 
 #: src/routes/_pos/docs.tsx
-msgid "Panduan lengkap setiap fitur kodapos."
-msgstr "A complete guide to every kodapos feature."
+#~ msgid "Panduan lengkap setiap fitur kodapos."
+#~ msgstr "A complete guide to every kodapos feature."
 
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Pas"
@@ -4939,6 +4947,10 @@ msgstr "Partial"
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 #~ msgstr "Some preferences apply after reloading the app."
+
+#: src/routes/_pos/docs.tsx
+msgid "Sebelumnya"
+msgstr "Previous"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Secret API Key"
