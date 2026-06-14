@@ -25,6 +25,8 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { Textarea } from '~/components/ui/textarea';
+import { DEFAULT_WHATSAPP_TEMPLATE } from 'convex/lib/whatsapp';
 
 export const Route = createFileRoute('/_pos/settings/integrations')({
   component: SettingsIntegrations,
@@ -129,12 +131,17 @@ function SettingsIntegrations() {
   const s = useQuery(api.settings.get);
   const connect = useMutation(api.settings.connectIntegration);
   const connectQris = useMutation(api.settings.connectQrisProvider);
+  const connectWa = useMutation(api.settings.connectWhatsapp);
   const disconnect = useMutation(api.settings.disconnectIntegration);
 
   const [dialogKey, setDialogKey] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState('');
   const [xnditKey, setXnditKey] = useState('');
   const [xnditToken, setXnditToken] = useState('');
+  const [waEndpoint, setWaEndpoint] = useState('');
+  const [waHeader, setWaHeader] = useState('Authorization');
+  const [waToken, setWaToken] = useState('');
+  const [waTemplate, setWaTemplate] = useState(DEFAULT_WHATSAPP_TEMPLATE);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -156,6 +163,23 @@ function SettingsIntegrations() {
     setApiKey('');
     setXnditKey('');
     setXnditToken('');
+    setWaToken('');
+    if (key === 'whatsapp') {
+      // Prefill the non-secret fields from any saved config (token re-entered).
+      const wa = s?.integrations.find((i) => i.key === 'whatsapp');
+      const c = (wa?.config ?? {}) as {
+        endpoint?: string;
+        headerName?: string;
+        bodyTemplate?: string;
+      };
+      setWaEndpoint(c.endpoint ?? '');
+      setWaHeader(c.headerName || 'Authorization');
+      setWaTemplate(c.bodyTemplate || DEFAULT_WHATSAPP_TEMPLATE);
+    } else {
+      setWaEndpoint('');
+      setWaHeader('Authorization');
+      setWaTemplate(DEFAULT_WHATSAPP_TEMPLATE);
+    }
     setError(null);
     setDialogKey(key);
   }
@@ -165,6 +189,7 @@ function SettingsIntegrations() {
     setApiKey('');
     setXnditKey('');
     setXnditToken('');
+    setWaToken('');
   }
 
   async function handleConnect(key: string) {
@@ -173,6 +198,13 @@ function SettingsIntegrations() {
     try {
       if (key === 'qris') {
         await connectQris({ secretApiKey: xnditKey.trim(), callbackToken: xnditToken.trim() });
+      } else if (key === 'whatsapp') {
+        await connectWa({
+          endpoint: waEndpoint.trim(),
+          headerName: waHeader.trim() || 'Authorization',
+          token: waToken.trim(),
+          bodyTemplate: waTemplate.trim(),
+        });
       } else {
         const trimmed = apiKey.trim();
         if (trimmed) {
@@ -321,6 +353,63 @@ function SettingsIntegrations() {
               </div>
               <p className="text-xs text-muted-foreground">
                 <Trans>Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server.</Trans>
+              </p>
+            </div>
+          ) : dialogKey === 'whatsapp' ? (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <label htmlFor="waEndpoint" className="text-sm font-medium">
+                  <Trans>URL endpoint</Trans>
+                </label>
+                <Input
+                  id="waEndpoint"
+                  value={waEndpoint}
+                  onChange={(e) => setWaEndpoint(e.target.value)}
+                  placeholder="https://api.fonnte.com/send"
+                  autoFocus
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label htmlFor="waHeader" className="text-sm font-medium">
+                    <Trans>Nama header otorisasi</Trans>
+                  </label>
+                  <Input
+                    id="waHeader"
+                    value={waHeader}
+                    onChange={(e) => setWaHeader(e.target.value)}
+                    placeholder="Authorization"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="waToken" className="text-sm font-medium">
+                    <Trans>Token</Trans>
+                  </label>
+                  <Input
+                    id="waToken"
+                    value={waToken}
+                    onChange={(e) => setWaToken(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="waTemplate" className="text-sm font-medium">
+                  <Trans>Template body (JSON)</Trans>
+                </label>
+                <Textarea
+                  id="waTemplate"
+                  value={waTemplate}
+                  onChange={(e) => setWaTemplate(e.target.value)}
+                  rows={3}
+                  className="font-mono text-xs"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                <Trans>
+                  Gunakan {'{{phone}}'} dan {'{{message}}'} sebagai placeholder. Token disimpan aman
+                  di server dan tidak pernah ditampilkan kembali.
+                </Trans>
               </p>
             </div>
           ) : (

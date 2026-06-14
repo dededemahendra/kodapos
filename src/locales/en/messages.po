@@ -1969,6 +1969,10 @@ msgstr "Could not send the email."
 msgid "Gagal mengirim ringkasan."
 msgstr "Could not send the summary."
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Gagal mengirim WhatsApp."
+msgstr "Failed to send WhatsApp."
+
 #: src/components/giftcard/gift-card-form-dialog.tsx
 msgid "Gagal mengisi saldo kartu."
 msgstr "Failed to top up card balance."
@@ -2185,6 +2189,10 @@ msgstr "Archived modifier groups will appear here."
 #: src/routes/_pos/menu/modifiers.$groupId.tsx
 msgid "Grup tidak ditemukan."
 msgstr "Group not found."
+
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Gunakan {{phone}} dan {{message}} sebagai placeholder. Token disimpan aman di server dan tidak pernah ditampilkan kembali."
+msgstr "Use {{phone}} and {{message}} as placeholders. The token is stored securely on the server and never shown again."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan."
@@ -2930,6 +2938,10 @@ msgstr "Resend code"
 msgid "Kirim ulang kode ({cooldown}s)"
 msgstr "Resend code ({cooldown}s)"
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Kirim WhatsApp"
+msgstr "Send WhatsApp"
+
 #: src/components/auth/otp-input.tsx
 msgid "Kode"
 msgstr "Code"
@@ -3644,6 +3656,10 @@ msgstr "Your name"
 msgid "Nama grup"
 msgstr "Group name"
 
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Nama header otorisasi"
+msgstr "Authorization header name"
+
 #: src/components/menu/cafe-profile-form.tsx
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/receipt.tsx
@@ -3780,6 +3796,10 @@ msgstr "Fixed"
 #: src/routes/_pos/settings/profile.tsx
 msgid "Nomor HP"
 msgstr "Phone number"
+
+#: src/components/sale/receipt-preview.tsx
+msgid "Nomor WhatsApp"
+msgstr "WhatsApp number"
 
 #: src/routes/_pos/menu/index.tsx
 msgid "Nonaktif"
@@ -5303,6 +5323,10 @@ msgstr "Receipt & Printer"
 msgid "Struk dikirim ke email."
 msgstr "Receipt sent to email."
 
+#: src/components/sale/receipt-preview.tsx
+msgid "Struk dikirim via WhatsApp."
+msgstr "Receipt sent via WhatsApp."
+
 #: src/routes/_pos/settings/general.tsx
 msgid "Suara saat transaksi berhasil"
 msgstr "Sound on successful sale"
@@ -5690,6 +5714,10 @@ msgstr "Theme"
 msgid "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
 msgstr "Paste the keys from your Xendit dashboard. Keys are stored securely on the server."
 
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Template body (JSON)"
+msgstr "Body template (JSON)"
+
 #: src/routes/_pos/help.tsx
 msgid "Temukan jawaban dan pelajari cara memakai kodapos."
 msgstr "Find answers and learn how to use kodapos."
@@ -5931,6 +5959,10 @@ msgstr "Review inventory"
 #: src/routes/_pos/reports/export.tsx
 msgid "Tipe"
 msgstr "Type"
+
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Token"
+msgstr "Token"
 
 #: src/routes/_pos/self-orders.tsx
 msgid "Tolak"
@@ -6213,6 +6245,10 @@ msgstr "Upload logo"
 msgid "Unggah QR statis dari penyedia Anda."
 msgstr "Upload the static QR from your provider."
 
+#: src/routes/_pos/settings/integrations.tsx
+msgid "URL endpoint"
+msgstr "Endpoint URL"
+
 #: src/routes/__root.tsx
 msgid "URL yang kamu buka tidak ada di kodapos."
 msgstr "The URL you opened doesn't exist in kodapos."
@@ -6315,6 +6351,7 @@ msgstr "End time must be after start time."
 #~ msgid "Weekly summary exported"
 #~ msgstr "Weekly summary exported"
 
+#: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "WhatsApp"
 msgstr "WhatsApp"

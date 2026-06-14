@@ -64,12 +64,18 @@ export function ReceiptPreview({
   const { cashierId } = useActiveCashier();
   const voidSale = useMutation(api.orders.voidSale);
   const sendReceipt = useAction(api.email.sendReceipt);
+  const sendWaReceipt = useAction(api.whatsapp.sendReceipt);
+  const settings = useQuery(api.settings.get);
+  const waConnected =
+    settings?.integrations.some((i) => i.key === 'whatsapp' && i.connected) ?? false;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [voiding, setVoiding] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
+  const [waPhone, setWaPhone] = useState('');
+  const [waSending, setWaSending] = useState(false);
 
   // Optional printed order-number prefix (Settings → Pesanan → "Awalan nomor
   // pesanan"). Receipt content stays English/off-catalog.
@@ -327,6 +333,49 @@ export function ReceiptPreview({
                     <Button type="submit" disabled={sending || !email.trim()}>
                       {sending && <Spinner data-icon="inline-start" />}
                       <Trans>Kirim email</Trans>
+                    </Button>
+                  </form>
+                </PopoverContent>
+              </Popover>
+            ) : null}
+            {order && waConnected ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button type="button" variant="outline">
+                    <Trans>WhatsApp</Trans>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72">
+                  <form
+                    className="flex flex-col gap-2"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!orderId) return;
+                      const to = waPhone.trim();
+                      if (!to) return;
+                      setWaSending(true);
+                      try {
+                        await sendWaReceipt({ orderId, to });
+                        toast.success(t`Struk dikirim via WhatsApp.`);
+                      } catch (err) {
+                        toast.error(
+                          err instanceof Error ? err.message : t`Gagal mengirim WhatsApp.`
+                        );
+                      } finally {
+                        setWaSending(false);
+                      }
+                    }}
+                  >
+                    <Input
+                      type="tel"
+                      value={waPhone}
+                      onChange={(e) => setWaPhone(e.target.value)}
+                      placeholder="08xxxxxxxxxx"
+                      aria-label={t`Nomor WhatsApp`}
+                    />
+                    <Button type="submit" disabled={waSending || !waPhone.trim()}>
+                      {waSending && <Spinner data-icon="inline-start" />}
+                      <Trans>Kirim WhatsApp</Trans>
                     </Button>
                   </form>
                 </PopoverContent>
