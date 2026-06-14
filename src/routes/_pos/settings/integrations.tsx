@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
+import { Skeleton } from '~/components/ui/skeleton';
 import { Spinner } from '~/components/ui/spinner';
 import { Textarea } from '~/components/ui/textarea';
 import { DEFAULT_WHATSAPP_TEMPLATE } from 'convex/lib/whatsapp';
@@ -147,9 +148,35 @@ function SettingsIntegrations() {
 
   if (s === undefined) {
     return (
-      <p className="text-muted-foreground">
-        <Trans>Memuat…</Trans>
-      </p>
+      <div className="space-y-2">
+        <SettingsPageHeader
+          title={<Trans>Integrasi</Trans>}
+          description={
+            <Trans>
+              Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh
+              menyusul.)
+            </Trans>
+          }
+        />
+        {[0, 1].map((g) => (
+          <div key={g}>
+            <Skeleton className="mb-2 mt-6 h-4 w-28" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[0, 1].map((i) => (
+                <div key={i} className="rounded-lg border p-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="size-8 rounded" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <Skeleton className="mt-3 h-3 w-full" />
+                  <Skeleton className="mt-2 h-3 w-2/3" />
+                  <Skeleton className="mt-4 h-8 w-24" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     );
   }
 
