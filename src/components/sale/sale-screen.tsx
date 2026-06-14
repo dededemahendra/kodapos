@@ -71,6 +71,7 @@ export function SaleScreen({
   const { cashierId } = useActiveCashier();
   const [confirmClearCart] = useBoolPreference('confirmClearCart', true);
   const [saleSound] = useBoolPreference('saleSound', false);
+  const [printAuto] = useBoolPreference('printAuto', false);
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
@@ -562,6 +563,7 @@ export function SaleScreen({
         }}
         orderId={receiptOrderId}
         onDone={() => setReceiptOrderId(null)}
+        autoPrint={printAuto}
       />
       <PromoPickerDialog
         open={promoPickerOpen}

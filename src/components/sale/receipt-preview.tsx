@@ -3,7 +3,7 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_SERVICE_CHARGE_NAME } from 'convex/lib/pricing';
 import { useAction, useMutation, useQuery } from 'convex/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,11 +54,14 @@ export function ReceiptPreview({
   onOpenChange,
   orderId,
   onDone,
+  autoPrint = false,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   orderId: Id<'orders'> | null;
   onDone: () => void;
+  /** Auto-print to the thermal printer when the receipt opens (fresh sale only). */
+  autoPrint?: boolean;
 }) {
   const cafe = useQuery(api.cafes.myCafe, {});
   const order = useQuery(api.orders.getById, orderId ? { id: orderId } : 'skip');
@@ -86,7 +89,9 @@ export function ReceiptPreview({
   // Thermal printing (WebUSB ESC/POS) when configured; else browser print.
   const [printerMode] = usePreference<string>('printerMode', 'browser');
   const [paperWidth] = usePreference<string>('paperWidth', '80');
+  const [printCopies] = usePreference<string>('printCopies', '1');
   const [cashDrawer] = useBoolPreference('cashDrawer', false);
+  const autoPrintedRef = useRef<string | null>(null);
   // Owner-PIN gate for void/refund (Settings → Keamanan). Only meaningful when a
   // PIN is actually set; otherwise the action proceeds directly.
   const [pinForVoid] = useBoolPreference('pinForVoid', true);
@@ -102,22 +107,27 @@ export function ReceiptPreview({
     setConfirmOpen(true);
   }
 
+  async function printThermalCopies(): Promise<void> {
+    if (!order) return;
+    const bytes = buildReceiptBytes(
+      order as unknown as ReceiptOrder,
+      (cafe ?? null) as unknown as ReceiptCafe | null,
+      {
+        widthChars: paperWidth === '58' ? 32 : 48,
+        orderNumber: `${orderPrefix}${order._id.slice(-4).toUpperCase()}`,
+        voided: order.paymentStatus === 'void',
+        drawerKick: cashDrawer && order.payments.some((p) => p.method === 'cash'),
+      }
+    );
+    const copies = Math.max(1, Math.min(5, Number(printCopies) || 1));
+    for (let i = 0; i < copies; i++) await printBytes(bytes);
+  }
+
   async function handlePrint(): Promise<void> {
     if (!order) return;
     if (printerMode === 'thermal' && isThermalSupported()) {
       try {
-        await printBytes(
-          buildReceiptBytes(
-            order as unknown as ReceiptOrder,
-            (cafe ?? null) as unknown as ReceiptCafe | null,
-            {
-              widthChars: paperWidth === '58' ? 32 : 48,
-              orderNumber: `${orderPrefix}${order._id.slice(-4).toUpperCase()}`,
-              voided: order.paymentStatus === 'void',
-              drawerKick: cashDrawer && order.payments.some((p) => p.method === 'cash'),
-            }
-          )
-        );
+        await printThermalCopies();
       } catch (err) {
         toast.error(err instanceof Error ? err.message : t`Gagal mencetak.`);
       }
@@ -125,6 +135,19 @@ export function ReceiptPreview({
     }
     window.print();
   }
+
+  // Auto-print a fresh sale's receipt to the thermal printer (never falls back to
+  // the browser print dialog). Fires once per order; history views pass autoPrint=false.
+  useEffect(() => {
+    if (!autoPrint || !open || !order || !orderId) return;
+    if (printerMode !== 'thermal' || !isThermalSupported()) return;
+    if (autoPrintedRef.current === orderId) return;
+    autoPrintedRef.current = orderId;
+    void printThermalCopies().catch((err) =>
+      toast.error(err instanceof Error ? err.message : t`Gagal mencetak.`)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPrint, open, order, orderId, printerMode]);
 
   if (!orderId) return null;
 
