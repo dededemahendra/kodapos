@@ -622,7 +622,7 @@ function SettingsReceipt() {
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      window.alert(t`Fitur cetak akan tersedia segera.`)
+                      toast.info(t`Gunakan bagian Pencetak termal (USB) di bawah untuk mencetak.`)
                     }
                   >
                     <Trans>Test cetak</Trans>
