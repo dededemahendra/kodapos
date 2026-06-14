@@ -34,6 +34,7 @@ export const sendReceipt = action({
 
     const order = await ctx.runQuery(api.orders.getById, { id: orderId });
     if (!order) throw new Error('Pesanan tidak ditemukan.');
+    if (order.paymentStatus === 'pending') throw new Error('Pesanan belum dibayar.');
     const cafe = await ctx.runQuery(api.cafes.myCafe, {});
 
     const html = buildReceiptHtml(order as ReceiptOrder, cafe as ReceiptCafe | null);

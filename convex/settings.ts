@@ -4,6 +4,7 @@ import { internalQuery, mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
 import { DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
+import { assertValidTemplate } from './lib/whatsapp';
 
 /**
  * Default settings used whenever a cafe has no `cafeSettings` row yet, or a
@@ -150,19 +151,40 @@ export const get = query({
 
     // Strip server-only secrets (Xendit creds) from the qris integration before
     // returning to the client — only the non-sensitive provider + key hint leak.
-    const integrations = (row?.integrations ?? DEFAULT_SETTINGS.integrations).map((i) =>
-      i.key === 'qris'
-        ? {
-            key: i.key,
-            connected: i.connected,
-            ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
-            config: {
-              provider: (i.config as { provider?: string } | undefined)?.provider ?? 'xendit',
-              keyHint: (i.config as { keyHint?: string } | undefined)?.keyHint ?? '',
-            },
-          }
-        : i
-    );
+    const integrations = (row?.integrations ?? DEFAULT_SETTINGS.integrations).map((i) => {
+      // Strip server-only secrets before returning to the client.
+      if (i.key === 'qris') {
+        return {
+          key: i.key,
+          connected: i.connected,
+          ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
+          config: {
+            provider: (i.config as { provider?: string } | undefined)?.provider ?? 'xendit',
+            keyHint: (i.config as { keyHint?: string } | undefined)?.keyHint ?? '',
+          },
+        };
+      }
+      if (i.key === 'whatsapp') {
+        const c = (i.config ?? {}) as {
+          endpoint?: string;
+          headerName?: string;
+          bodyTemplate?: string;
+          tokenHint?: string;
+        };
+        return {
+          key: i.key,
+          connected: i.connected,
+          ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
+          config: {
+            endpoint: c.endpoint ?? '',
+            headerName: c.headerName ?? 'Authorization',
+            bodyTemplate: c.bodyTemplate ?? '',
+            tokenHint: c.tokenHint ?? '',
+          },
+        };
+      }
+      return i;
+    });
 
     return {
       payment,
@@ -313,6 +335,39 @@ export const connectQrisProvider = mutation({
       connected: true,
       connectedAt: Date.now(),
       config: { provider: 'xendit', secretApiKey: key, callbackToken: token, keyHint },
+    });
+    await ctx.db.patch(id, { integrations: existing, updatedAt: Date.now() });
+    return null;
+  },
+});
+
+export const connectWhatsapp = mutation({
+  args: {
+    endpoint: v.string(),
+    headerName: v.optional(v.string()),
+    token: v.string(),
+    bodyTemplate: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, { endpoint, headerName, token, bodyTemplate }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const url = endpoint.trim();
+    if (!/^https?:\/\//i.test(url)) throw new Error('URL endpoint tidak valid.');
+    const tok = token.trim();
+    if (!tok) throw new Error('Token wajib diisi.');
+    const header = (headerName ?? '').trim() || 'Authorization';
+    const template = bodyTemplate.trim();
+    assertValidTemplate(template);
+
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    const row = await ctx.db.get(id);
+    const tokenHint = tok.length > 6 ? `${tok.slice(0, 3)}…${tok.slice(-3)}` : '••••';
+    const existing = (row?.integrations ?? []).filter((i) => i.key !== 'whatsapp');
+    existing.push({
+      key: 'whatsapp',
+      connected: true,
+      connectedAt: Date.now(),
+      config: { endpoint: url, headerName: header, token: tok, bodyTemplate: template, tokenHint },
     });
     await ctx.db.patch(id, { integrations: existing, updatedAt: Date.now() });
     return null;
