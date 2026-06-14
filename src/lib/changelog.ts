@@ -1,4 +1,7 @@
-import type { Locale } from './locale';
+import { type Localized, localized } from './localized';
+
+export { localized };
+export type { Localized };
 
 /**
  * User-facing "what's new" feed shown in the sidebar card and the /changelog
@@ -11,8 +14,6 @@ import type { Locale } from './locale';
  * re-appears (dismissal is tracked per-version) whenever the latest version
  * changes.
  */
-export type Localized = { id: string; en: string };
-
 export interface ChangelogEntry {
   version: string;
   /** ISO date (Asia/Jakarta), yyyy-mm-dd. */
@@ -70,8 +71,3 @@ export const CHANGELOG: ChangelogEntry[] = [
 ];
 
 export const LATEST_CHANGE: ChangelogEntry = CHANGELOG[0]!;
-
-/** Picks the copy for the active locale (falls back to Indonesian). */
-export function localized(value: Localized, locale: Locale): string {
-  return value[locale] ?? value.id;
-}
