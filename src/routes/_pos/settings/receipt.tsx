@@ -24,6 +24,17 @@ import {
 import { Switch } from '~/components/ui/switch';
 import { FieldGroup } from '~/components/ui/field';
 import { cn } from '~/lib/utils';
+import { useBoolPreference, usePreference } from '~/lib/preferences';
+import { EscPos } from '~/lib/escpos';
+import {
+  clearSavedPrinter,
+  getSavedPrinterInfo,
+  isThermalSupported,
+  type PrinterInfo,
+  printBytes,
+  requestThermalPrinter,
+} from '~/lib/thermal-printer';
+import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/settings/receipt')({
   component: SettingsReceipt,
@@ -624,6 +635,9 @@ function SettingsReceipt() {
           {/* Error + SaveBar */}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <SaveBar dirty={dirty} onReset={reset} onSave={handleSave} />
+
+          {/* Device-local thermal printer (saved on this device, not the server) */}
+          <ThermalPrinterSection />
         </div>
 
         {/* ---------------------------------------------------------------- */}
@@ -643,5 +657,155 @@ function SettingsReceipt() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Thermal printer (USB / WebUSB ESC/POS) — device-local, not server settings.
+// ---------------------------------------------------------------------------
+
+function ThermalPrinterSection() {
+  const { t } = useLingui();
+  const supported = isThermalSupported();
+  const [printerMode, setPrinterMode] = usePreference<string>('printerMode', 'browser');
+  const [paperWidth, setPaperWidth] = usePreference<string>('paperWidth', '80');
+  const [cashDrawer, setCashDrawer] = useBoolPreference('cashDrawer', false);
+  const [info, setInfo] = useState<PrinterInfo | null>(() => getSavedPrinterInfo());
+  const [busy, setBusy] = useState(false);
+
+  async function pair() {
+    setBusy(true);
+    try {
+      setInfo(await requestThermalPrinter());
+    } catch (err) {
+      // A user cancelling the chooser is not an error.
+      if (err instanceof Error && err.name !== 'NotFoundError') {
+        toast.error(err.message);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function unpair() {
+    clearSavedPrinter();
+    setInfo(null);
+  }
+
+  async function testPrint() {
+    setBusy(true);
+    try {
+      const bytes = new EscPos()
+        .init()
+        .align('center')
+        .bold(true)
+        .doubleSize(true)
+        .line('kodapos')
+        .doubleSize(false)
+        .bold(false)
+        .line('Test print OK')
+        .line(new Date().toLocaleString('en-GB'))
+        .feed(3)
+        .cut()
+        .encode();
+      await printBytes(bytes);
+      toast.success(t`Tes cetak terkirim.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t`Gagal mencetak.`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <SettingsSection title={<Trans>Pencetak termal (USB)</Trans>}>
+      <FieldGroup>
+        <SettingRow
+          label={<Trans>Gunakan pencetak termal</Trans>}
+          description={
+            supported ? (
+              <Trans>Cetak struk langsung ke printer termal USB.</Trans>
+            ) : (
+              <Trans>Browser ini tidak mendukung WebUSB. Gunakan Chrome atau Edge.</Trans>
+            )
+          }
+          control={
+            <Switch
+              checked={printerMode === 'thermal'}
+              onCheckedChange={(v) => setPrinterMode(v ? 'thermal' : 'browser')}
+              disabled={!supported}
+            />
+          }
+        />
+
+        <RowSep />
+
+        <SettingRow
+          label={<Trans>Perangkat</Trans>}
+          description={info ? info.name : <Trans>Belum dipasangkan</Trans>}
+          control={
+            <div className="flex gap-2">
+              {info ? (
+                <Button type="button" variant="ghost" size="sm" onClick={unpair} disabled={busy}>
+                  <Trans>Lepas</Trans>
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void pair()}
+                disabled={!supported || busy}
+              >
+                {info ? <Trans>Ganti</Trans> : <Trans>Pasangkan</Trans>}
+              </Button>
+            </div>
+          }
+        />
+
+        <RowSep />
+
+        <SettingRow
+          label={<Trans>Lebar kertas</Trans>}
+          control={
+            <Select value={paperWidth} onValueChange={setPaperWidth}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="58"><Trans>58 mm</Trans></SelectItem>
+                <SelectItem value="80"><Trans>80 mm</Trans></SelectItem>
+              </SelectContent>
+            </Select>
+          }
+        />
+
+        <RowSep />
+
+        <SettingRow
+          label={<Trans>Buka laci kas saat tunai</Trans>}
+          control={
+            <Switch checked={cashDrawer} onCheckedChange={setCashDrawer} disabled={!supported} />
+          }
+        />
+
+        <RowSep />
+
+        <SettingRow
+          label={<Trans>Tes cetak</Trans>}
+          control={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void testPrint()}
+              disabled={!supported || !info || busy}
+            >
+              <Trans>Tes cetak</Trans>
+            </Button>
+          }
+        />
+      </FieldGroup>
+    </SettingsSection>
   );
 }

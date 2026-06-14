@@ -25,6 +25,9 @@ import { useActiveCashier } from '~/lib/active-cashier';
 import { formatIDR } from '~/lib/money';
 import { usePermissions } from '~/lib/permissions';
 import { usePreference, useBoolPreference } from '~/lib/preferences';
+import { buildReceiptBytes } from '~/lib/receipt-print';
+import { isThermalSupported, printBytes } from '~/lib/thermal-printer';
+import type { ReceiptCafe, ReceiptOrder } from 'convex/lib/receipt';
 import { formatPromoValue } from '~/lib/promo';
 import { toast } from '~/lib/toast';
 import { RefundDialog } from './refund-dialog';
@@ -80,6 +83,10 @@ export function ReceiptPreview({
   // Optional printed order-number prefix (Settings → Pesanan → "Awalan nomor
   // pesanan"). Receipt content stays English/off-catalog.
   const [orderPrefix] = usePreference<string>('orderPrefix', '');
+  // Thermal printing (WebUSB ESC/POS) when configured; else browser print.
+  const [printerMode] = usePreference<string>('printerMode', 'browser');
+  const [paperWidth] = usePreference<string>('paperWidth', '80');
+  const [cashDrawer] = useBoolPreference('cashDrawer', false);
   // Owner-PIN gate for void/refund (Settings → Keamanan). Only meaningful when a
   // PIN is actually set; otherwise the action proceeds directly.
   const [pinForVoid] = useBoolPreference('pinForVoid', true);
@@ -93,6 +100,30 @@ export function ReceiptPreview({
   function openVoid(): void {
     setReason('');
     setConfirmOpen(true);
+  }
+
+  async function handlePrint(): Promise<void> {
+    if (!order) return;
+    if (printerMode === 'thermal' && isThermalSupported()) {
+      try {
+        await printBytes(
+          buildReceiptBytes(
+            order as unknown as ReceiptOrder,
+            (cafe ?? null) as unknown as ReceiptCafe | null,
+            {
+              widthChars: paperWidth === '58' ? 32 : 48,
+              orderNumber: `${orderPrefix}${order._id.slice(-4).toUpperCase()}`,
+              voided: order.paymentStatus === 'void',
+              drawerKick: cashDrawer && order.payments.some((p) => p.method === 'cash'),
+            }
+          )
+        );
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t`Gagal mencetak.`);
+      }
+      return;
+    }
+    window.print();
   }
 
   if (!orderId) return null;
@@ -381,7 +412,7 @@ export function ReceiptPreview({
                 </PopoverContent>
               </Popover>
             ) : null}
-            <Button type="button" variant="outline" onClick={() => window.print()}>
+            <Button type="button" variant="outline" onClick={() => void handlePrint()}>
               <Trans>Cetak</Trans>
             </Button>
             <Button type="button" onClick={onDone}>
