@@ -1758,8 +1758,8 @@ msgid "File kosong atau hanya berisi baris header. Periksa lalu coba lagi."
 msgstr "File is empty or only contains a header row. Check it and try again."
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Fitur cetak akan tersedia segera."
-msgstr "Print feature coming soon."
+#~ msgid "Fitur cetak akan tersedia segera."
+#~ msgstr "Print feature coming soon."
 
 #: src/lib/auth-validation.ts
 msgid "Format email tidak valid."
@@ -2215,6 +2215,10 @@ msgstr "Group not found."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Gunakan {{phone}} dan {{message}} sebagai placeholder. Token disimpan aman di server dan tidak pernah ditampilkan kembali."
 msgstr "Use {{phone}} and {{message}} as placeholders. The token is stored securely on the server and never shown again."
+
+#: src/routes/_pos/settings/receipt.tsx
+msgid "Gunakan bagian Pencetak termal (USB) di bawah untuk mencetak."
+msgstr "Use the Thermal printer (USB) section below to print."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan."
