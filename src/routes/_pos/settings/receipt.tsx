@@ -538,100 +538,6 @@ function SettingsReceipt() {
             </FieldGroup>
           </SettingsSection>
 
-          {/* 3. Printer */}
-          <SettingsSection title={<Trans>Printer</Trans>}>
-            <FieldGroup>
-              <SettingRow
-                label={<Trans>Cetak otomatis</Trans>}
-                description={
-                  <Trans>Cetak struk otomatis setelah pembayaran.</Trans>
-                }
-                control={
-                  <Switch
-                    checked={draft.autoPrint}
-                    onCheckedChange={(v) => setField('autoPrint', v)}
-                  />
-                }
-              />
-
-              <RowSep />
-
-              <SettingRow
-                label={<Trans>Jumlah salinan</Trans>}
-                control={
-                  <Input
-                    type="number"
-                    min={1}
-                    max={5}
-                    value={draft.printCopies}
-                    onChange={(e) =>
-                      setField(
-                        'printCopies',
-                        Math.min(5, Math.max(1, Number(e.target.value)))
-                      )
-                    }
-                    className="w-20"
-                  />
-                }
-              />
-
-              <RowSep />
-
-              <SettingRow
-                label={<Trans>Jenis printer</Trans>}
-                control={
-                  <Select
-                    value={draft.printerType}
-                    onValueChange={(v) =>
-                      setField('printerType', v as 'bluetooth' | 'usb' | 'network')
-                    }
-                  >
-                    <SelectTrigger className="w-36">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bluetooth"><Trans>Bluetooth</Trans></SelectItem>
-                      <SelectItem value="usb"><Trans>USB</Trans></SelectItem>
-                      <SelectItem value="network">
-                        <Trans>Jaringan</Trans>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                }
-              />
-
-              <RowSep />
-
-              <SettingRow
-                label={<Trans>Buka laci kas</Trans>}
-                control={
-                  <Switch
-                    checked={draft.openDrawer}
-                    onCheckedChange={(v) => setField('openDrawer', v)}
-                  />
-                }
-              />
-
-              <RowSep />
-
-              <SettingRow
-                label={<Trans>Test cetak</Trans>}
-                control={
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      toast.info(t`Gunakan bagian Pencetak termal (USB) di bawah untuk mencetak.`)
-                    }
-                  >
-                    <Trans>Test cetak</Trans>
-                  </Button>
-                }
-              />
-            </FieldGroup>
-          </SettingsSection>
-
           {/* Error + SaveBar */}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <SaveBar dirty={dirty} onReset={reset} onSave={handleSave} />
@@ -669,6 +575,8 @@ function ThermalPrinterSection() {
   const supported = isThermalSupported();
   const [printerMode, setPrinterMode] = usePreference<string>('printerMode', 'browser');
   const [paperWidth, setPaperWidth] = usePreference<string>('paperWidth', '80');
+  const [printAuto, setPrintAuto] = useBoolPreference('printAuto', false);
+  const [printCopies, setPrintCopies] = usePreference<string>('printCopies', '1');
   const [cashDrawer, setCashDrawer] = useBoolPreference('cashDrawer', false);
   const [info, setInfo] = useState<PrinterInfo | null>(() => getSavedPrinterInfo());
   const [busy, setBusy] = useState(false);
@@ -777,6 +685,38 @@ function ThermalPrinterSection() {
                 <SelectItem value="80"><Trans>80 mm</Trans></SelectItem>
               </SelectContent>
             </Select>
+          }
+        />
+
+        <RowSep />
+
+        <SettingRow
+          label={<Trans>Cetak otomatis</Trans>}
+          description={<Trans>Cetak struk otomatis setelah pembayaran.</Trans>}
+          control={
+            <Switch
+              checked={printAuto}
+              onCheckedChange={setPrintAuto}
+              disabled={!supported}
+            />
+          }
+        />
+
+        <RowSep />
+
+        <SettingRow
+          label={<Trans>Jumlah salinan</Trans>}
+          control={
+            <Input
+              type="number"
+              min={1}
+              max={5}
+              value={printCopies}
+              onChange={(e) =>
+                setPrintCopies(String(Math.min(5, Math.max(1, Number(e.target.value) || 1))))
+              }
+              className="w-20"
+            />
           }
         />
 

@@ -1163,8 +1163,8 @@ msgid "Bisa diubah kapan saja di Pengaturan."
 msgstr "Bisa diubah kapan saja di Pengaturan."
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Bluetooth"
-msgstr "Bluetooth"
+#~ msgid "Bluetooth"
+#~ msgstr "Bluetooth"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Browser ini tidak mendukung WebUSB. Gunakan Chrome atau Edge."
@@ -1269,8 +1269,8 @@ msgid "Buka dokumentasi"
 msgstr "Buka dokumentasi"
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Buka laci kas"
-msgstr "Buka laci kas"
+#~ msgid "Buka laci kas"
+#~ msgstr "Buka laci kas"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Buka laci kas saat tunai"
@@ -2217,8 +2217,8 @@ msgid "Gunakan {{phone}} dan {{message}} sebagai placeholder. Token disimpan ama
 msgstr "Gunakan {{phone}} dan {{message}} sebagai placeholder. Token disimpan aman di server dan tidak pernah ditampilkan kembali."
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Gunakan bagian Pencetak termal (USB) di bawah untuk mencetak."
-msgstr "Gunakan bagian Pencetak termal (USB) di bawah untuk mencetak."
+#~ msgid "Gunakan bagian Pencetak termal (USB) di bawah untuk mencetak."
+#~ msgstr "Gunakan bagian Pencetak termal (USB) di bawah untuk mencetak."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan."
@@ -2563,12 +2563,12 @@ msgid "Jam operasional"
 msgstr "Jam operasional"
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Jaringan"
-msgstr "Jaringan"
+#~ msgid "Jaringan"
+#~ msgstr "Jaringan"
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Jenis printer"
-msgstr "Jenis printer"
+#~ msgid "Jenis printer"
+#~ msgstr "Jenis printer"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Jenis usaha"
@@ -4632,8 +4632,8 @@ msgid "Prefiks yang ditambahkan di depan nomor pesanan."
 msgstr "Prefiks yang ditambahkan di depan nomor pesanan."
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Printer"
-msgstr "Printer"
+#~ msgid "Printer"
+#~ msgstr "Printer"
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/reports/products.tsx
@@ -5878,8 +5878,8 @@ msgid "Tes cetak terkirim."
 msgstr "Tes cetak terkirim."
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "Test cetak"
-msgstr "Test cetak"
+#~ msgid "Test cetak"
+#~ msgstr "Test cetak"
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "This morning"
@@ -6312,8 +6312,8 @@ msgstr "URL yang kamu buka tidak ada di kodapos."
 #~ msgstr "Urutan"
 
 #: src/routes/_pos/settings/receipt.tsx
-msgid "USB"
-msgstr "USB"
+#~ msgid "USB"
+#~ msgstr "USB"
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx
