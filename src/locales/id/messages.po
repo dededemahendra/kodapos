@@ -1097,6 +1097,10 @@ msgstr "Berhasil clock out."
 msgid "Beri diskon"
 msgstr "Beri diskon"
 
+#: src/routes/_pos/docs.tsx
+msgid "Berikutnya"
+msgstr "Berikutnya"
+
 #. placeholder {0}: formatCountdown(expiresAt - now)
 #: src/components/public/qr-payment-view.tsx
 msgid "Berlaku <0>{0}</0>"
@@ -1288,6 +1292,14 @@ msgstr "Cara tanggal ditampilkan di struk dan laporan."
 msgid "Cari bahan…"
 msgstr "Cari bahan…"
 
+#: src/routes/_pos/help.tsx
+msgid "Cari bantuan"
+msgstr "Cari bantuan"
+
+#: src/routes/_pos/help.tsx
+msgid "Cari bantuan, mis. QRIS, shift, stok"
+msgstr "Cari bantuan, mis. QRIS, shift, stok"
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Cari grup…"
 msgstr "Cari grup…"
@@ -1446,6 +1458,10 @@ msgstr "Clock in"
 msgid "Clock out"
 msgstr "Clock out"
 
+#: src/routes/_pos/help.tsx
+msgid "Coba kata kunci lain atau pilih kategori berbeda."
+msgstr "Coba kata kunci lain atau pilih kategori berbeda."
+
 #: src/routes/_pos/time-clock.tsx
 msgid "Coba pilih rentang lain."
 msgstr "Coba pilih rentang lain."
@@ -1557,6 +1573,10 @@ msgstr "Detail kontak"
 #: src/components/inventory/purchase-order-detail.tsx
 msgid "Detail pesanan beli dan penerimaan barang."
 msgstr "Detail pesanan beli dan penerimaan barang."
+
+#: src/routes/_pos/docs.tsx
+msgid "Di halaman ini"
+msgstr "Di halaman ini"
 
 #: src/components/inventory/purchase-order-detail.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
@@ -3569,6 +3589,10 @@ msgstr "Muat lebih banyak"
 msgid "Mulai"
 msgstr "Mulai"
 
+#: src/routes/_pos/help.tsx
+msgid "Mulai cepat"
+msgstr "Mulai cepat"
+
 #: src/routes/_pos/onboarding/menu.tsx
 msgid "Mulai dengan kategori →"
 msgstr "Mulai dengan kategori →"
@@ -3842,6 +3866,10 @@ msgstr "Pakai"
 msgid "Pakai sandi"
 msgstr "Pakai sandi"
 
+#: src/routes/_pos/docs.tsx
+#~ msgid "Panduan lengkap setiap fitur kodapos."
+#~ msgstr "Panduan lengkap setiap fitur kodapos."
+
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Pas"
 msgstr "Pas"
@@ -3857,6 +3885,10 @@ msgstr "Password wajib diisi."
 #: src/routes/_pos/time-clock.tsx
 msgid "Payroll"
 msgstr "Payroll"
+
+#: src/routes/_pos/help.tsx
+msgid "Pelajari selengkapnya"
+msgstr "Pelajari selengkapnya"
 
 #: src/components/app-shared.tsx
 #: src/components/customer/customer-detail-sheet.tsx
@@ -4158,6 +4190,10 @@ msgstr "Persentase pajak"
 #: src/components/menu/cafe-profile-form.tsx
 msgid "Persentase PPN"
 msgstr "Persentase PPN"
+
+#: src/routes/_pos/help.tsx
+msgid "Pertanyaan umum"
+msgstr "Pertanyaan umum"
 
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
@@ -4912,6 +4948,10 @@ msgstr "Sebagian"
 #~ msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 #~ msgstr "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 
+#: src/routes/_pos/docs.tsx
+msgid "Sebelumnya"
+msgstr "Sebelumnya"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Secret API Key"
 msgstr "Secret API Key"
@@ -4986,6 +5026,7 @@ msgstr "Seluruh sisa"
 msgid "Sembunyikan password"
 msgstr "Sembunyikan password"
 
+#: src/routes/_pos/help.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/recipes.tsx
@@ -5626,6 +5667,10 @@ msgstr "Tema"
 msgid "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
 msgstr "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
 
+#: src/routes/_pos/help.tsx
+msgid "Temukan jawaban dan pelajari cara memakai kodapos."
+msgstr "Temukan jawaban dan pelajari cara memakai kodapos."
+
 #: src/routes/_pos/settings/general.tsx
 msgid "Terang"
 msgstr "Terang"
@@ -5762,6 +5807,10 @@ msgstr "Tidak ada baris untuk diimpor."
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Tidak ada grup diarsipkan."
 msgstr "Tidak ada grup diarsipkan."
+
+#: src/routes/_pos/help.tsx
+msgid "Tidak ada hasil"
+msgstr "Tidak ada hasil"
 
 #: src/components/sale/menu-pane.tsx
 msgid "Tidak ada item di kategori ini."

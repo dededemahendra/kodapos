@@ -205,6 +205,12 @@
 
 html, body { margin: 0; padding: 0; min-height: 100vh; }
 
+/* Smooth in-page anchor scrolling (e.g. the docs "On this page" links),
+   disabled when the user prefers reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
 /* Density mode — root font-size scaling (rem-based UI scales with it).
    Default is 16px (browser/Tailwind baseline).
    compact   → slightly smaller (15 px) for denser dashboards.
