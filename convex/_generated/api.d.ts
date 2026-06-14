@@ -51,6 +51,7 @@ import type * as lib_shiftSummary from "../lib/shiftSummary.js";
 import type * as lib_staff from "../lib/staff.js";
 import type * as lib_time from "../lib/time.js";
 import type * as lib_weather from "../lib/weather.js";
+import type * as lib_whatsapp from "../lib/whatsapp.js";
 import type * as loyalty from "../loyalty.js";
 import type * as loyaltyRewards from "../loyaltyRewards.js";
 import type * as menu_categories from "../menu/categories.js";
@@ -88,6 +89,7 @@ import type * as tables from "../tables.js";
 import type * as timeClock from "../timeClock.js";
 import type * as users from "../users.js";
 import type * as waste from "../waste.js";
+import type * as whatsapp from "../whatsapp.js";
 
 import type {
   ApiFromModules,
@@ -139,6 +141,7 @@ declare const fullApi: ApiFromModules<{
   "lib/staff": typeof lib_staff;
   "lib/time": typeof lib_time;
   "lib/weather": typeof lib_weather;
+  "lib/whatsapp": typeof lib_whatsapp;
   loyalty: typeof loyalty;
   loyaltyRewards: typeof loyaltyRewards;
   "menu/categories": typeof menu_categories;
@@ -176,6 +179,7 @@ declare const fullApi: ApiFromModules<{
   timeClock: typeof timeClock;
   users: typeof users;
   waste: typeof waste;
+  whatsapp: typeof whatsapp;
 }>;
 
 /**
