@@ -228,7 +228,11 @@ async function purgeForCafe(ctx: MutationCtx, cafeId: Id<'cafes'>): Promise<void
       .query(table)
       .filter((q) => q.eq(q.field('cafeId'), cafeId))
       .collect();
-    for (const row of rows) await ctx.db.delete(row._id);
+    for (const row of rows) {
+      // Never delete the cafe owner staff row (the signed-in account).
+      if (table === 'cafeStaff' && (row as { role?: string }).role === 'owner') continue;
+      await ctx.db.delete(row._id);
+    }
   }
 }
 
@@ -255,6 +259,17 @@ export const run = internalMutation({
     const cafeId = cafe._id;
 
     if (args.purge === true) await purgeForCafe(ctx, cafeId);
+
+    // shifts.current uses unique(), so there must never be more than one open
+    // shift. Close any pre-existing open shift before we seed a fresh one; this
+    // keeps additive re-runs safe (otherwise each run would add another open one).
+    const priorOpen = await ctx.db
+      .query('shifts')
+      .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'open'))
+      .collect();
+    for (const s of priorOpen) {
+      await ctx.db.patch(s._id, { status: 'closed', closedAt: s.closedAt ?? now });
+    }
 
     // Cafe tax config drives order math (mirrors buildOrder).
     const taxEnabled = cafe.taxEnabled === true;
@@ -1273,5 +1288,34 @@ export const run = internalMutation({
       purged: args.purge === true,
       ...counts,
     };
+  },
+});
+
+/**
+ * Maintenance: leave at most one open shift for a cafe by closing all but the
+ * most recent open one. Fixes a duplicate-open-shift state (e.g. from running
+ * the seeder additively) that makes `shifts.current` (which uses unique()) throw.
+ * Run with: convex run seed:closeExtraShifts
+ */
+export const closeExtraShifts = internalMutation({
+  args: { cafeId: v.optional(v.id('cafes')) },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const cafe = args.cafeId
+      ? await ctx.db.get(args.cafeId)
+      : await ctx.db.query('cafes').first();
+    if (!cafe) throw new Error('No cafe found.');
+    const open = await ctx.db
+      .query('shifts')
+      .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafe._id).eq('status', 'open'))
+      .collect();
+    if (open.length <= 1) return { closed: 0, remainingOpen: open.length };
+    open.sort((a, b) => b.openedAt - a.openedAt); // newest first
+    const now = Date.now();
+    const extra = open.slice(1);
+    for (const s of extra) {
+      await ctx.db.patch(s._id, { status: 'closed', closedAt: s.closedAt ?? now });
+    }
+    return { closed: extra.length, remainingOpen: 1 };
   },
 });
