@@ -612,6 +612,10 @@ msgstr "Archive promo?"
 msgid "Arsipkan reward?"
 msgstr "Archive reward?"
 
+#: src/routes/_pos/help.tsx
+msgid "artikel"
+msgstr "articles"
+
 #: src/routes/_pos/reports/export.tsx
 msgid "Arus Keluar"
 msgstr "Outflow"
@@ -1251,6 +1255,10 @@ msgstr "Open \"Manage tables\" to add a table."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Buka detail"
 msgstr "Open details"
+
+#: src/routes/_pos/help.tsx
+msgid "Buka dokumentasi"
+msgstr "Open documentation"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Buka laci kas"
@@ -2306,6 +2314,10 @@ msgstr "A variant's price replaces the item's base price when selected at the re
 #: src/routes/_pos/time-clock.tsx
 msgid "Hari ini"
 msgstr "Today"
+
+#: src/routes/_pos/help.tsx
+msgid "Hasil pencarian"
+msgstr "Search results"
 
 #: src/components/inventory/stock-take-dialog.tsx
 msgid "Hitung fisik"
@@ -5026,7 +5038,6 @@ msgstr "All remaining"
 msgid "Sembunyikan password"
 msgstr "Hide password"
 
-#: src/routes/_pos/help.tsx
 #: src/routes/_pos/inventory/adjustments.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/recipes.tsx
@@ -5548,6 +5559,10 @@ msgstr "Show a warning when ingredient stock approaches the threshold."
 msgid "Tampilkan rincian pajak"
 msgstr "Show tax breakdown"
 
+#: src/routes/_pos/help.tsx
+msgid "Tampilkan semua"
+msgstr "Show all"
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Tampilkan tombol nominal saat pembayaran tunai."
 #~ msgstr "Show quick-amount buttons during cash payment."
@@ -5658,6 +5673,14 @@ msgstr "Phone"
 #: src/routes/_pos/customers.tsx
 msgid "Telp"
 msgstr "Phone"
+
+#: src/routes/_pos/help.tsx
+msgid "Telusuri berdasarkan topik"
+msgstr "Browse by topic"
+
+#: src/routes/_pos/help.tsx
+msgid "Telusuri dokumentasi lengkap untuk panduan langkah demi langkah."
+msgstr "Browse the full documentation for step-by-step guides."
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Tema"
@@ -5883,6 +5906,10 @@ msgstr "Could not resend the code."
 #: src/routes/_pos/reservations.tsx
 msgid "Tidak datang"
 msgstr "No-show"
+
+#: src/routes/_pos/help.tsx
+msgid "Tidak menemukan yang Anda cari?"
+msgstr "Cannot find what you are looking for?"
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Tier"
