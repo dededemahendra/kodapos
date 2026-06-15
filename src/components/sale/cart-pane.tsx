@@ -75,7 +75,7 @@ export function CartPane({
   const empty = cart.lines.length === 0;
 
   return (
-    <aside className="border-l border-border flex flex-col h-full">
+    <aside className="border-l border-border flex flex-col h-full min-h-0">
       <div className="px-3 py-2 border-b border-border space-y-2">
         {/* Wrap so the action buttons never clip in a narrow cart — they flow
             onto the next line instead of overflowing the panel width. */}
@@ -128,7 +128,7 @@ export function CartPane({
           ))}
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto px-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3">
         {empty ? (
           <p className="text-muted-foreground text-sm mt-6 text-center">
             <Trans>Belum ada item.</Trans>

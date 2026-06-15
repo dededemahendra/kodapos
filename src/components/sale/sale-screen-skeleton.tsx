@@ -7,7 +7,7 @@ import { Skeleton } from '~/components/ui/skeleton';
  */
 export function SaleScreenSkeleton() {
   return (
-    <div className="grid h-full grid-cols-[1fr_minmax(320px,30%)]">
+    <div className="grid h-full min-h-0 grid-cols-[1fr_minmax(320px,30%)] overflow-hidden">
       {/* Menu pane */}
       <div className="flex min-h-0 flex-col">
         <div className="border-b border-border px-3 py-2">
