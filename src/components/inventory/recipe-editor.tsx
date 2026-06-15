@@ -110,7 +110,7 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
       <div className="flex items-baseline justify-between mb-3">
         <h2 className="text-lg font-bold"><Trans>Resep</Trans></h2>
         <span className="text-sm text-muted-foreground">
-          ≈ <span className="font-semibold tabular-nums">{formatIDR(costPreview)}</span>{' '}
+          ≈ <span className="font-semibold tabular-nums">{formatIDR(Math.round(costPreview))}</span>{' '}
           / <Trans>porsi</Trans>
         </span>
       </div>

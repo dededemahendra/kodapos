@@ -141,7 +141,7 @@ function SalesReport() {
             tickFormatter={(value) => String(value).slice(5)}
           />
           <ChartTooltip
-            content={<ChartTooltipContent formatter={(value) => formatIDR(Number(value))} />}
+            content={<ChartTooltipContent formatter={(value) => formatIDR(Math.round(Number(value)))} />}
             cursor={false}
           />
           <Bar dataKey="revenueIDR" fill="var(--color-revenueIDR)" radius={4} />

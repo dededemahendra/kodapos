@@ -158,8 +158,8 @@ export function PurchaseOrderDetail({
           ordered: `${l.orderedQty} ${l.unit}`,
           received: String(l.receivedQty),
           remaining: String(l.remainingQty),
-          cost: formatIDR(l.unitCostIDR),
-          total: formatIDR(l.orderedQty * l.unitCostIDR),
+          cost: formatIDR(Math.round(l.unitCostIDR)),
+          total: formatIDR(Math.round(l.orderedQty * l.unitCostIDR)),
         })),
         numericKeys: ['cost', 'total'],
         footRows: [
@@ -170,9 +170,8 @@ export function PurchaseOrderDetail({
             '',
             'Total',
             formatIDR(
-              detail.lines.reduce(
-                (s, l) => s + l.orderedQty * l.unitCostIDR,
-                0
+              Math.round(
+                detail.lines.reduce((s, l) => s + l.orderedQty * l.unitCostIDR, 0)
               )
             ),
           ],
@@ -245,7 +244,7 @@ export function PurchaseOrderDetail({
                     <div className="flex items-start justify-between gap-2">
                       <span className="font-medium">{line.ingredientName}</span>
                       <span className="text-muted-foreground tabular-nums">
-                        {formatIDR(line.unitCostIDR)}
+                        {formatIDR(Math.round(line.unitCostIDR))}
                       </span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground tabular-nums">

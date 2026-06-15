@@ -94,7 +94,7 @@ export const recent = query({
         wasteReason: m.wasteReason ?? 'lainnya',
         ...(m.note ? { note: m.note } : {}),
         costPerUnitIDR,
-        totalCostIDR: qtyWasted * costPerUnitIDR,
+        totalCostIDR: Math.round(qtyWasted * costPerUnitIDR),
       });
     }
     return out;

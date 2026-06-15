@@ -122,7 +122,7 @@ export function NetRevenueChart() {
 								content={
 									<ChartTooltipContent
 										hideLabel
-										formatter={(value) => formatIDR(Number(value))}
+										formatter={(value) => formatIDR(Math.round(Number(value)))}
 									/>
 								}
 								cursor={false}
