@@ -29,6 +29,7 @@ const menuItemWithStatus = v.object({
   priceIDR: v.number(),
   isActive: v.boolean(),
   archived: v.boolean(),
+  soldOut: v.optional(v.boolean()),
   position: v.number(),
   createdAt: v.number(),
   imageStorageId: v.optional(v.id('_storage')),
