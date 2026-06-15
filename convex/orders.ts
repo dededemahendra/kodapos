@@ -105,6 +105,8 @@ const orderSummary = v.object({
     v.object({
       menuItemId: v.id('menuItems'),
       nameSnapshot: v.string(),
+      variantId: v.optional(v.id('menuItemVariants')),
+      variantName: v.optional(v.string()),
       qty: v.number(),
       unitPriceIDR: v.number(),
       modifiersSnapshot: v.array(
