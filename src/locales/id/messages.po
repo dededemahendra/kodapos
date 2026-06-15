@@ -790,6 +790,10 @@ msgstr "Barcode dibuat."
 msgid "Barcode tidak ditemukan."
 msgstr "Barcode tidak ditemukan."
 
+#: src/components/ui/data-table.tsx
+msgid "Baris"
+msgstr "Baris"
+
 #. placeholder {0}: e.row + 1
 #. placeholder {1}: e.name
 #. placeholder {2}: e.reason
@@ -1105,6 +1109,7 @@ msgstr "Berhasil clock out."
 msgid "Beri diskon"
 msgstr "Beri diskon"
 
+#: src/components/ui/data-table.tsx
 #: src/routes/_pos/docs.tsx
 msgid "Berikutnya"
 msgstr "Berikutnya"
@@ -2234,6 +2239,11 @@ msgstr "Gunakan pencetak termal"
 msgid "Habis"
 msgstr "Habis"
 
+#. placeholder {0}: pageIndex + 1
+#: src/components/ui/data-table.tsx
+msgid "Halaman {0} dari {pageCount}"
+msgstr "Halaman {0} dari {pageCount}"
+
 #: src/routes/_public/privacy.tsx
 msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
 msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
@@ -2249,6 +2259,14 @@ msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkai
 #: src/components/coming-soon.tsx
 msgid "Halaman ini sedang dalam pengembangan."
 msgstr "Halaman ini sedang dalam pengembangan."
+
+#: src/components/ui/data-table.tsx
+msgid "Halaman pertama"
+msgstr "Halaman pertama"
+
+#: src/components/ui/data-table.tsx
+msgid "Halaman terakhir"
+msgstr "Halaman terakhir"
 
 #: src/routes/__root.tsx
 msgid "Halaman tidak ditemukan"
@@ -3472,6 +3490,10 @@ msgstr "Memuat struk…"
 #: src/routes/_pos/shifts.tsx
 msgid "Memuat…"
 msgstr "Memuat…"
+
+#: src/components/ui/data-table.tsx
+msgid "Menampilkan {fromRow}-{toRow} dari {totalRows}"
+msgstr "Menampilkan {fromRow}-{toRow} dari {totalRows}"
 
 #: src/components/inventory/movement-history-sheet.tsx
 msgid "Menampilkan 100 pergerakan terbaru."
@@ -5026,6 +5048,7 @@ msgstr "Sebagian"
 #~ msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 #~ msgstr "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 
+#: src/components/ui/data-table.tsx
 #: src/routes/_pos/docs.tsx
 msgid "Sebelumnya"
 msgstr "Sebelumnya"

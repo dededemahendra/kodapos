@@ -790,6 +790,10 @@ msgstr "Barcode generated."
 msgid "Barcode tidak ditemukan."
 msgstr "Barcode not found."
 
+#: src/components/ui/data-table.tsx
+msgid "Baris"
+msgstr "Rows"
+
 #. placeholder {0}: e.row + 1
 #. placeholder {1}: e.name
 #. placeholder {2}: e.reason
@@ -1105,6 +1109,7 @@ msgstr "Clocked out successfully."
 msgid "Beri diskon"
 msgstr "Give discount"
 
+#: src/components/ui/data-table.tsx
 #: src/routes/_pos/docs.tsx
 msgid "Berikutnya"
 msgstr "Next"
@@ -2234,6 +2239,11 @@ msgstr "Use thermal printer"
 msgid "Habis"
 msgstr "Sold out"
 
+#. placeholder {0}: pageIndex + 1
+#: src/components/ui/data-table.tsx
+msgid "Halaman {0} dari {pageCount}"
+msgstr "Page {0} of {pageCount}"
+
 #: src/routes/_public/privacy.tsx
 msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
 msgstr "This page will be filled in before the official launch. For questions about our privacy policy, contact the kodapos team."
@@ -2249,6 +2259,14 @@ msgstr "This page will be filled in before the official launch. For questions ab
 #: src/components/coming-soon.tsx
 msgid "Halaman ini sedang dalam pengembangan."
 msgstr "This page is under development."
+
+#: src/components/ui/data-table.tsx
+msgid "Halaman pertama"
+msgstr "First page"
+
+#: src/components/ui/data-table.tsx
+msgid "Halaman terakhir"
+msgstr "Last page"
 
 #: src/routes/__root.tsx
 msgid "Halaman tidak ditemukan"
@@ -3472,6 +3490,10 @@ msgstr "Loading receipt…"
 #: src/routes/_pos/shifts.tsx
 msgid "Memuat…"
 msgstr "Loading…"
+
+#: src/components/ui/data-table.tsx
+msgid "Menampilkan {fromRow}-{toRow} dari {totalRows}"
+msgstr "Showing {fromRow}-{toRow} of {totalRows}"
 
 #: src/components/inventory/movement-history-sheet.tsx
 msgid "Menampilkan 100 pergerakan terbaru."
@@ -5026,6 +5048,7 @@ msgstr "Partial"
 #~ msgid "Sebagian preferensi diterapkan saat aplikasi dimuat ulang."
 #~ msgstr "Some preferences apply after reloading the app."
 
+#: src/components/ui/data-table.tsx
 #: src/routes/_pos/docs.tsx
 msgid "Sebelumnya"
 msgstr "Previous"
