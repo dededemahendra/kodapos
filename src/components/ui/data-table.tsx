@@ -13,11 +13,20 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   ChevronsUpDown,
   ChevronUp,
 } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 import { Button } from '~/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { Skeleton } from '~/components/ui/skeleton';
 import {
   Table,
@@ -72,6 +81,11 @@ export function DataTable<T>({
 
   const pageCount = table.getPageCount();
   const pageIndex = table.getState().pagination.pageIndex;
+  const currentPageSize = table.getState().pagination.pageSize;
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const fromRow = totalRows === 0 ? 0 : pageIndex * currentPageSize + 1;
+  const toRow = Math.min((pageIndex + 1) * currentPageSize, totalRows);
+  const PAGE_SIZES = [10, 20, 50, 100];
 
   return (
     <div className="rounded-md border bg-card">
@@ -160,36 +174,89 @@ export function DataTable<T>({
           )}
         </TableBody>
       </Table>
-      {view === 'data' && pageCount > 1 ? (
-        <div className="flex items-center justify-end gap-3 border-t px-3 py-2 text-sm">
+      {view === 'data' && totalRows > 10 ? (
+        <div className="flex flex-col gap-3 border-t px-3 py-2.5 text-sm sm:flex-row sm:items-center sm:justify-between">
           <span className="tabular-nums text-muted-foreground">
-            {pageIndex + 1} / {pageCount}
+            <Trans>
+              Menampilkan {fromRow}-{toRow} dari {totalRows}
+            </Trans>
           </span>
-          <div className="flex gap-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft />
-              <span className="sr-only">
-                <Trans>Sebelumnya</Trans>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">
+                <Trans>Baris</Trans>
               </span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight />
-              <span className="sr-only">
-                <Trans>Berikutnya</Trans>
-              </span>
-            </Button>
+              <Select
+                value={String(currentPageSize)}
+                onValueChange={(v) => table.setPageSize(Number(v))}
+              >
+                <SelectTrigger className="h-8 w-[4.5rem]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZES.map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <span className="tabular-nums text-muted-foreground">
+              <Trans>
+                Halaman {pageIndex + 1} dari {pageCount}
+              </Trans>
+            </span>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <ChevronsLeft />
+                <span className="sr-only">
+                  <Trans>Halaman pertama</Trans>
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <ChevronLeft />
+                <span className="sr-only">
+                  <Trans>Sebelumnya</Trans>
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                <ChevronRight />
+                <span className="sr-only">
+                  <Trans>Berikutnya</Trans>
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={() => table.setPageIndex(pageCount - 1)}
+                disabled={!table.getCanNextPage()}
+              >
+                <ChevronsRight />
+                <span className="sr-only">
+                  <Trans>Halaman terakhir</Trans>
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       ) : null}
