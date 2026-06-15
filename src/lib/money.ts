@@ -6,10 +6,11 @@ const FORMATTER = new Intl.NumberFormat('id-ID', {
 });
 
 export function formatIDR(amount: number): string {
-  if (!Number.isInteger(amount)) {
-    throw new Error(`formatIDR requires an integer, got ${amount}`);
-  }
-  return FORMATTER.format(amount).replace(/^Rp\s?/, 'Rp ');
+  // Display formatter: round to whole rupiah. Fractional inputs are legitimate
+  // for aggregates (COGS, stock value = qty * unit cost, recipe cost), so we
+  // round rather than throw. The integer invariant for order money is enforced
+  // server-side (computeOrderTotals) and covered by tests.
+  return FORMATTER.format(Math.round(amount)).replace(/^Rp\s?/, 'Rp ');
 }
 
 export function parseIDR(input: string): number {
