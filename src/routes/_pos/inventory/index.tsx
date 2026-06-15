@@ -65,9 +65,8 @@ function InventoryIndex() {
       all: active.length,
       low: active.filter(isLow).length,
       archived: ingredients.filter((r) => r.archived).length,
-      stockValueIDR: active.reduce(
-        (sum, r) => sum + r.currentStockQty * r.lastCostPerUnitIDR,
-        0
+      stockValueIDR: Math.round(
+        active.reduce((sum, r) => sum + r.currentStockQty * r.lastCostPerUnitIDR, 0)
       ),
     };
   }, [ingredients]);

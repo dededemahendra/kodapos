@@ -8,8 +8,10 @@ describe('formatIDR', () => {
     expect(formatIDR(1_250_000)).toBe('Rp 1.250.000');
   });
 
-  it('rejects non-integer inputs by throwing', () => {
-    expect(() => formatIDR(1.5 as unknown as number)).toThrow(/integer/i);
+  it('rounds fractional inputs to whole rupiah', () => {
+    expect(formatIDR(1.5)).toBe('Rp 2');
+    expect(formatIDR(1.4)).toBe('Rp 1');
+    expect(formatIDR(8_495_827.000000013)).toBe('Rp 8.495.827');
   });
 });
 
