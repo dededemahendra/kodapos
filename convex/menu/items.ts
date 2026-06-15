@@ -32,6 +32,7 @@ const menuItemWithStatus = v.object({
   position: v.number(),
   createdAt: v.number(),
   imageStorageId: v.optional(v.id('_storage')),
+  barcode: v.optional(v.string()),
   hasRecipe: v.boolean(),
   lowStockIngredientNames: v.array(v.string()),
   imageUrl: v.union(v.string(), v.null()),
