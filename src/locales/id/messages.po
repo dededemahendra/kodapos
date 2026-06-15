@@ -1123,6 +1123,10 @@ msgstr "Berlaku <0>{0}</0>"
 msgid "Bersih"
 msgstr "Bersih"
 
+#: src/components/notifications-menu.tsx
+msgid "Bersihkan"
+msgstr "Bersihkan"
+
 #: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Besar"
@@ -3244,8 +3248,12 @@ msgid "Lihat semua"
 msgstr "Lihat semua"
 
 #: src/components/notifications-menu.tsx
-msgid "Lihat semua {lowStockCount} bahan stok rendah"
-msgstr "Lihat semua {lowStockCount} bahan stok rendah"
+#~ msgid "Lihat semua {lowStockCount} bahan stok rendah"
+#~ msgstr "Lihat semua {lowStockCount} bahan stok rendah"
+
+#: src/components/notifications-menu.tsx
+msgid "Lihat semua {moreLowStock} bahan stok rendah lainnya"
+msgstr "Lihat semua {moreLowStock} bahan stok rendah lainnya"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
@@ -6171,6 +6179,10 @@ msgstr "Turunkan urutan"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Tutup detail"
 msgstr "Tutup detail"
+
+#: src/components/notifications-menu.tsx
+msgid "Tutup notifikasi"
+msgstr "Tutup notifikasi"
 
 #: src/routes/_pos/shift/close.tsx
 msgid "Tutup Shift"
