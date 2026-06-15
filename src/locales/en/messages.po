@@ -3463,8 +3463,8 @@ msgid "Memproses…"
 msgstr "Processing…"
 
 #: src/components/sale/sale-screen.tsx
-msgid "Memuat menu…"
-msgstr "Loading menu…"
+#~ msgid "Memuat menu…"
+#~ msgstr "Loading menu…"
 
 #: src/components/shift/shift-order-list.tsx
 #: src/routes/_pos/history.tsx

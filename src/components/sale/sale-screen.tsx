@@ -33,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog';
-import { Spinner } from '~/components/ui/spinner';
+import { SaleScreenSkeleton } from './sale-screen-skeleton';
 import { cartReducer, initialCart, type CartState } from './cart-reducer';
 import { CartPane } from './cart-pane';
 import { HoldOrderDialog } from './hold-order-dialog';
@@ -246,14 +246,7 @@ export function SaleScreen({
     shift === undefined ||
     settings === undefined
   ) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] gap-2 text-muted-foreground">
-        <Spinner />
-        <span>
-          <Trans>Memuat menu…</Trans>
-        </span>
-      </div>
-    );
+    return <SaleScreenSkeleton />;
   }
 
   const defaultMethod = settings.payment.defaultMethod;
