@@ -134,7 +134,7 @@ function InventoryIndex() {
         header: () => <Trans>Biaya / satuan</Trans>,
         cell: ({ row }) => (
           <span className="tabular-nums">
-            {formatIDR(row.original.lastCostPerUnitIDR)}
+            {formatIDR(Math.round(row.original.lastCostPerUnitIDR))}
           </span>
         ),
       },

@@ -173,12 +173,15 @@ export const margin = query({
       }
     }
     const items = Array.from(byName, ([name, a]) => {
-      const marginIDR = a.revenueIDR - a.cogsIDR;
+      // COGS is qty * wastage * unit cost, so it is fractional; round to whole
+      // rupiah (amounts are displayed via formatIDR, which requires integers).
+      const cogsIDR = Math.round(a.cogsIDR);
+      const marginIDR = a.revenueIDR - cogsIDR;
       return {
         name,
         qty: a.qty,
         revenueIDR: a.revenueIDR,
-        cogsIDR: a.cogsIDR,
+        cogsIDR,
         marginIDR,
         marginPct: a.revenueIDR === 0 ? 0 : Math.round((marginIDR / a.revenueIDR) * 100),
       };
@@ -277,7 +280,10 @@ export const profitLoss = query({
       }
     }
     const netRevenueIDR = revenueIDR - refundsIDR;
-    const cogsIDR = grossCogsIDR - refundCogsIDR;
+    // COGS is qty * wastage * unit cost, so it is fractional; round to whole
+    // rupiah so every derived figure (and formatIDR, which requires an integer)
+    // stays integral.
+    const cogsIDR = Math.round(grossCogsIDR - refundCogsIDR);
     const expenses = await ctx.db
       .query('expenses')
       .withIndex('by_cafe_at', (q) =>

@@ -182,8 +182,8 @@ function PurchaseDetailSheet({
                       <td className="py-2 text-right tabular-nums">
                         {l.qty} {l.unit}
                       </td>
-                      <td className="py-2 text-right tabular-nums">{formatIDR(l.unitCostIDR)}</td>
-                      <td className="py-2 text-right tabular-nums">{formatIDR(l.subtotalIDR)}</td>
+                      <td className="py-2 text-right tabular-nums">{formatIDR(Math.round(l.unitCostIDR))}</td>
+                      <td className="py-2 text-right tabular-nums">{formatIDR(Math.round(l.subtotalIDR))}</td>
                     </tr>
                   ))}
                 </tbody>
