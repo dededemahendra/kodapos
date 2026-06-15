@@ -215,8 +215,8 @@ msgid "{itemCount} item"
 msgstr "{itemCount} items"
 
 #: src/components/notifications-menu.tsx
-msgid "{lowStockCount} bahan perlu diisi ulang"
-msgstr "{lowStockCount} ingredients need restocking"
+#~ msgid "{lowStockCount} bahan perlu diisi ulang"
+#~ msgstr "{lowStockCount} ingredients need restocking"
 
 #: src/components/promo/promo-form-dialog.tsx
 msgid "{n} item dipilih"
@@ -231,8 +231,8 @@ msgid "{points} poin"
 msgstr "{points} points"
 
 #: src/components/notifications-menu.tsx
-msgid "{selfOrderCount} pesanan masuk menunggu"
-msgstr "{selfOrderCount} incoming orders waiting"
+#~ msgid "{selfOrderCount} pesanan masuk menunggu"
+#~ msgstr "{selfOrderCount} incoming orders waiting"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "@namakafe"
@@ -3243,6 +3243,10 @@ msgstr "View history"
 msgid "Lihat semua"
 msgstr "View all"
 
+#: src/components/notifications-menu.tsx
+msgid "Lihat semua {lowStockCount} bahan stok rendah"
+msgstr "See all {lowStockCount} low-stock ingredients"
+
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/waste.tsx
@@ -4396,6 +4400,10 @@ msgstr "Order rejected."
 msgid "Pesanan ini akan dihapus dari daftar pesanan masuk."
 msgstr "This order will be removed from the incoming orders list."
 
+#: src/components/notifications-menu.tsx
+msgid "Pesanan masuk"
+msgstr "Incoming order"
+
 #: src/components/app-shared.tsx
 #: src/components/sale/register-top-bar.tsx
 #: src/routes/_pos/self-orders.tsx
@@ -5143,6 +5151,10 @@ msgstr "All ({0})"
 msgid "Semua bahan masih di atas ambang pemesanan ulang."
 msgstr "All ingredients are above their reorder threshold."
 
+#: src/components/notifications-menu.tsx
+msgid "Semua beres"
+msgstr "All caught up"
+
 #: src/components/sale/sale-screen.tsx
 msgid "Semua item akan dihapus dari pesanan ini."
 msgstr "All items will be removed from this order."
@@ -5287,6 +5299,13 @@ msgstr "Remaining"
 #: src/components/sale/refund-dialog.tsx
 msgid "sisa {0}"
 msgstr "remaining {0}"
+
+#. placeholder {0}: i.currentStockQty
+#. placeholder {1}: i.unit
+#. placeholder {2}: i.reorderThreshold
+#: src/components/notifications-menu.tsx
+msgid "Sisa {0} {1}, ambang {2}"
+msgstr "{0} {1} left, threshold {2}"
 
 #: src/components/inventory/stock-take-dialog.tsx
 #: src/routes/_pos/settings/general.tsx
@@ -5965,8 +5984,12 @@ msgid "Tidak ada kategori diarsipkan."
 msgstr "No archived categories."
 
 #: src/components/notifications-menu.tsx
-msgid "Tidak ada notifikasi baru"
-msgstr "No new notifications"
+#~ msgid "Tidak ada notifikasi baru"
+#~ msgstr "No new notifications"
+
+#: src/components/notifications-menu.tsx
+msgid "Tidak ada notifikasi baru."
+msgstr "No new notifications."
 
 #: src/routes/_pos/customers.tsx
 msgid "Tidak ada pelanggan cocok."
