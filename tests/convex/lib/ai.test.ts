@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildLLMRequest, parseLLMResponse } from '../../../convex/lib/ai';
+import {
+  buildLLMRequest,
+  normalizeHistory,
+  parseLLMResponse,
+} from '../../../convex/lib/ai';
 
 describe('buildLLMRequest', () => {
   const msgs = [
@@ -38,8 +42,40 @@ describe('parseLLMResponse', () => {
     expect(parseLLMResponse('anthropic', { content: [{ text: 'yo' }] })).toBe('yo');
   });
 
+  it('concatenates Anthropic text blocks and skips non-text leading blocks', () => {
+    const json = { content: [{ type: 'thinking' }, { type: 'text', text: 'a' }, { type: 'text', text: 'b' }] };
+    expect(parseLLMResponse('anthropic', json)).toBe('ab');
+  });
+
   it('throws on an empty response', () => {
     expect(() => parseLLMResponse('openai', {})).toThrow();
     expect(() => parseLLMResponse('anthropic', { content: [] })).toThrow();
+  });
+});
+
+describe('normalizeHistory', () => {
+  it('coalesces consecutive same-role turns into alternating roles', () => {
+    expect(
+      normalizeHistory([
+        { role: 'user', content: 'a' },
+        { role: 'user', content: 'b' },
+        { role: 'assistant', content: 'c' },
+        { role: 'user', content: 'd' },
+      ])
+    ).toEqual([
+      { role: 'user', content: 'a\n\nb' },
+      { role: 'assistant', content: 'c' },
+      { role: 'user', content: 'd' },
+    ]);
+  });
+
+  it('drops a leading assistant turn and empty messages', () => {
+    expect(
+      normalizeHistory([
+        { role: 'assistant', content: 'hi' },
+        { role: 'user', content: '  ' },
+        { role: 'user', content: 'q' },
+      ])
+    ).toEqual([{ role: 'user', content: 'q' }]);
   });
 });

@@ -91,6 +91,7 @@ export function AiInsights() {
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder={t`Tanya tentang data Anda, mis. hari terbaik bulan ini`}
                 aria-label={t`Tanya AI`}
+                maxLength={2000}
               />
               <Button type="submit" variant="outline" disabled={loading || !question.trim()}>
                 <Trans>Tanya</Trans>
