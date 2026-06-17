@@ -37,7 +37,7 @@ export const Route = createFileRoute('/_pos/settings/integrations')({
 // Catalog
 // ---------------------------------------------------------------------------
 
-type IntegrationCategory = 'payment' | 'delivery' | 'accounting' | 'messaging';
+type IntegrationCategory = 'payment' | 'delivery' | 'accounting' | 'messaging' | 'ai';
 
 interface CatalogEntry {
   key: string;
@@ -111,14 +111,28 @@ const CATALOG: CatalogEntry[] = [
     description: msg`Kirim struk & notifikasi via WhatsApp.`,
     category: 'messaging',
   },
+  // ai
+  {
+    key: 'ai',
+    name: msg`Asisten AI`,
+    description: msg`Wawasan & tanya-jawab data dengan kunci API Anda sendiri (OpenAI/Anthropic).`,
+    category: 'ai',
+  },
 ];
 
-const CATEGORIES: IntegrationCategory[] = ['payment', 'delivery', 'accounting', 'messaging'];
+const CATEGORIES: IntegrationCategory[] = [
+  'payment',
+  'delivery',
+  'accounting',
+  'messaging',
+  'ai',
+];
 
 function CategoryHeading({ category }: { category: IntegrationCategory }) {
   if (category === 'payment') return <Trans>Pembayaran</Trans>;
   if (category === 'delivery') return <Trans>Pesan-antar</Trans>;
   if (category === 'accounting') return <Trans>Akuntansi</Trans>;
+  if (category === 'ai') return <Trans>AI</Trans>;
   return <Trans>Pesan</Trans>;
 }
 
@@ -133,6 +147,7 @@ function SettingsIntegrations() {
   const connect = useMutation(api.settings.connectIntegration);
   const connectQris = useMutation(api.settings.connectQrisProvider);
   const connectWa = useMutation(api.settings.connectWhatsapp);
+  const connectAiKey = useMutation(api.settings.connectAi);
   const disconnect = useMutation(api.settings.disconnectIntegration);
 
   const [dialogKey, setDialogKey] = useState<string | null>(null);
@@ -143,6 +158,9 @@ function SettingsIntegrations() {
   const [waHeader, setWaHeader] = useState('Authorization');
   const [waToken, setWaToken] = useState('');
   const [waTemplate, setWaTemplate] = useState(DEFAULT_WHATSAPP_TEMPLATE);
+  const [aiProvider, setAiProvider] = useState<'openai' | 'anthropic'>('openai');
+  const [aiKey, setAiKey] = useState('');
+  const [aiModel, setAiModel] = useState('gpt-4o-mini');
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -191,6 +209,16 @@ function SettingsIntegrations() {
     setXnditKey('');
     setXnditToken('');
     setWaToken('');
+    setAiKey('');
+    if (key === 'ai') {
+      const ai = s?.integrations.find((i) => i.key === 'ai');
+      const c = (ai?.config ?? {}) as { provider?: string; model?: string };
+      const provider = c.provider === 'anthropic' ? 'anthropic' : 'openai';
+      setAiProvider(provider);
+      // Ignore the previously-shipped invalid alias so the valid default fills in.
+      const stored = c.model && c.model !== 'claude-3-5-haiku-latest' ? c.model : '';
+      setAiModel(stored || (provider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini'));
+    }
     if (key === 'whatsapp') {
       // Prefill the non-secret fields from any saved config (token re-entered).
       const wa = s?.integrations.find((i) => i.key === 'whatsapp');
@@ -217,6 +245,7 @@ function SettingsIntegrations() {
     setXnditKey('');
     setXnditToken('');
     setWaToken('');
+    setAiKey('');
   }
 
   async function handleConnect(key: string) {
@@ -231,6 +260,12 @@ function SettingsIntegrations() {
           headerName: waHeader.trim() || 'Authorization',
           token: waToken.trim(),
           bodyTemplate: waTemplate.trim(),
+        });
+      } else if (key === 'ai') {
+        await connectAiKey({
+          provider: aiProvider,
+          apiKey: aiKey.trim(),
+          model: aiModel.trim(),
         });
       } else {
         const trimmed = apiKey.trim();
@@ -436,6 +471,59 @@ function SettingsIntegrations() {
                 <Trans>
                   Gunakan {'{{phone}}'} dan {'{{message}}'} sebagai placeholder. Token disimpan aman
                   di server dan tidak pernah ditampilkan kembali.
+                </Trans>
+              </p>
+            </div>
+          ) : dialogKey === 'ai' ? (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <span className="text-sm font-medium">
+                  <Trans>Penyedia</Trans>
+                </span>
+                <div className="flex gap-2">
+                  {(['openai', 'anthropic'] as const).map((p) => (
+                    <Button
+                      key={p}
+                      type="button"
+                      size="sm"
+                      variant={aiProvider === p ? 'default' : 'outline'}
+                      onClick={() => {
+                        setAiProvider(p);
+                        setAiModel(p === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini');
+                      }}
+                    >
+                      {p === 'openai' ? 'OpenAI' : 'Anthropic'}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="aiKey" className="text-sm font-medium">
+                  <Trans>API key</Trans>
+                </label>
+                <Input
+                  id="aiKey"
+                  value={aiKey}
+                  onChange={(e) => setAiKey(e.target.value)}
+                  placeholder={aiProvider === 'anthropic' ? 'sk-ant-...' : 'sk-...'}
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="aiModel" className="text-sm font-medium">
+                  <Trans>Model</Trans>
+                </label>
+                <Input
+                  id="aiModel"
+                  value={aiModel}
+                  onChange={(e) => setAiModel(e.target.value)}
+                  placeholder={aiProvider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini'}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                <Trans>
+                  Kunci dipakai dari server Anda dan tidak pernah ditampilkan kembali. Biaya token
+                  ditagih ke akun penyedia Anda.
                 </Trans>
               </p>
             </div>
