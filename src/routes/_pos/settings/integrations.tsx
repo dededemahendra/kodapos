@@ -215,7 +215,9 @@ function SettingsIntegrations() {
       const c = (ai?.config ?? {}) as { provider?: string; model?: string };
       const provider = c.provider === 'anthropic' ? 'anthropic' : 'openai';
       setAiProvider(provider);
-      setAiModel(c.model || (provider === 'anthropic' ? 'claude-3-5-haiku-latest' : 'gpt-4o-mini'));
+      // Ignore the previously-shipped invalid alias so the valid default fills in.
+      const stored = c.model && c.model !== 'claude-3-5-haiku-latest' ? c.model : '';
+      setAiModel(stored || (provider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini'));
     }
     if (key === 'whatsapp') {
       // Prefill the non-secret fields from any saved config (token re-entered).
@@ -487,7 +489,7 @@ function SettingsIntegrations() {
                       variant={aiProvider === p ? 'default' : 'outline'}
                       onClick={() => {
                         setAiProvider(p);
-                        setAiModel(p === 'anthropic' ? 'claude-3-5-haiku-latest' : 'gpt-4o-mini');
+                        setAiModel(p === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini');
                       }}
                     >
                       {p === 'openai' ? 'OpenAI' : 'Anthropic'}
@@ -515,7 +517,7 @@ function SettingsIntegrations() {
                   id="aiModel"
                   value={aiModel}
                   onChange={(e) => setAiModel(e.target.value)}
-                  placeholder={aiProvider === 'anthropic' ? 'claude-3-5-haiku-latest' : 'gpt-4o-mini'}
+                  placeholder={aiProvider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini'}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
