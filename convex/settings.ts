@@ -183,6 +183,23 @@ export const get = query({
           },
         };
       }
+      if (i.key === 'ai') {
+        const c = (i.config ?? {}) as {
+          provider?: string;
+          model?: string;
+          keyHint?: string;
+        };
+        return {
+          key: i.key,
+          connected: i.connected,
+          ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
+          config: {
+            provider: c.provider ?? 'openai',
+            model: c.model ?? '',
+            keyHint: c.keyHint ?? '',
+          },
+        };
+      }
       return i;
     });
 
@@ -368,6 +385,35 @@ export const connectWhatsapp = mutation({
       connected: true,
       connectedAt: Date.now(),
       config: { endpoint: url, headerName: header, token: tok, bodyTemplate: template, tokenHint },
+    });
+    await ctx.db.patch(id, { integrations: existing, updatedAt: Date.now() });
+    return null;
+  },
+});
+
+export const connectAi = mutation({
+  args: {
+    provider: v.union(v.literal('openai'), v.literal('anthropic')),
+    apiKey: v.string(),
+    model: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, { provider, apiKey, model }) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    const key = apiKey.trim();
+    if (!key) throw new Error('API key wajib diisi.');
+    const m = model.trim();
+    if (!m) throw new Error('Model wajib diisi.');
+
+    const id = await getOrCreateSettingsId(ctx, cafeId);
+    const row = await ctx.db.get(id);
+    const keyHint = key.length > 8 ? `${key.slice(0, 4)}…${key.slice(-4)}` : '••••';
+    const existing = (row?.integrations ?? []).filter((i) => i.key !== 'ai');
+    existing.push({
+      key: 'ai',
+      connected: true,
+      connectedAt: Date.now(),
+      config: { provider, apiKey: key, model: m, keyHint },
     });
     await ctx.db.patch(id, { integrations: existing, updatedAt: Date.now() });
     return null;

@@ -9,6 +9,7 @@
  */
 
 import type * as accounting from "../accounting.js";
+import type * as ai from "../ai.js";
 import type * as alerts from "../alerts.js";
 import type * as auth from "../auth.js";
 import type * as auth_rate from "../auth_rate.js";
@@ -26,6 +27,7 @@ import type * as heldOrders from "../heldOrders.js";
 import type * as http from "../http.js";
 import type * as ingredients from "../ingredients.js";
 import type * as kitchen from "../kitchen.js";
+import type * as lib_ai from "../lib/ai.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_demand from "../lib/demand.js";
 import type * as lib_discount from "../lib/discount.js";
@@ -100,6 +102,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounting: typeof accounting;
+  ai: typeof ai;
   alerts: typeof alerts;
   auth: typeof auth;
   auth_rate: typeof auth_rate;
@@ -117,6 +120,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   ingredients: typeof ingredients;
   kitchen: typeof kitchen;
+  "lib/ai": typeof lib_ai;
   "lib/auth": typeof lib_auth;
   "lib/demand": typeof lib_demand;
   "lib/discount": typeof lib_discount;
