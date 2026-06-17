@@ -43,6 +43,7 @@ import type * as lib_payment from "../lib/payment.js";
 import type * as lib_phone from "../lib/phone.js";
 import type * as lib_pin from "../lib/pin.js";
 import type * as lib_pricing from "../lib/pricing.js";
+import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as lib_receipt from "../lib/receipt.js";
 import type * as lib_refund from "../lib/refund.js";
 import type * as lib_resend from "../lib/resend.js";
@@ -136,6 +137,7 @@ declare const fullApi: ApiFromModules<{
   "lib/phone": typeof lib_phone;
   "lib/pin": typeof lib_pin;
   "lib/pricing": typeof lib_pricing;
+  "lib/rateLimit": typeof lib_rateLimit;
   "lib/receipt": typeof lib_receipt;
   "lib/refund": typeof lib_refund;
   "lib/resend": typeof lib_resend;

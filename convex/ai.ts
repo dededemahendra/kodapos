@@ -1,8 +1,9 @@
 import { v } from 'convex/values';
 import { api, internal } from './_generated/api';
-import { action, internalQuery } from './_generated/server';
+import { action, internalMutation, internalQuery } from './_generated/server';
 import type { ActionCtx } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
+import { enforceRateLimit } from './lib/rateLimit';
 import {
   type AiProvider,
   ASK_SYSTEM_PROMPT,
@@ -42,6 +43,34 @@ export const config = internalQuery({
   },
 });
 
+/** Fixed-window AI usage limit per cafe (bounds runaway token cost on the
+ * owner's key; the client is already single-flight). */
+const AI_WINDOW_MS = 10 * 60_000;
+// Cafe-wide budget (shared across the dashboard card, ask box, and chat page,
+// and across devices) — a cost ceiling on the owner's key, not a per-surface cap.
+const AI_MAX_PER_WINDOW = 40;
+
+type AiConfig = { provider: AiProvider; apiKey: string; model: string };
+
+/**
+ * Per-cafe rate gate for the AI actions, run (via runMutation) at the START of
+ * each action before any data-gathering or LLM call. Owner-scoped.
+ */
+export const rateLimit = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await enforceRateLimit(ctx, {
+      identifier: `ai:${cafeId}`,
+      windowMs: AI_WINDOW_MS,
+      max: AI_MAX_PER_WINDOW,
+      message: 'Batas penggunaan AI tercapai. Coba lagi sebentar.',
+    });
+    return null;
+  },
+});
+
 /** Gathers a compact JSON snapshot of the cafe's last-30-days data for the prompt. */
 async function gatherSummary(ctx: ActionCtx): Promise<string> {
   const range = { preset: 'last30' } as const;
@@ -78,9 +107,7 @@ async function gatherSummary(ctx: ActionCtx): Promise<string> {
   return JSON.stringify(summary);
 }
 
-async function callAi(ctx: ActionCtx, system: string, messages: ChatMsg[]): Promise<string> {
-  const cfg = await ctx.runQuery(internal.ai.config, {});
-  if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
+async function callAi(cfg: AiConfig, system: string, messages: ChatMsg[]): Promise<string> {
   const req = buildLLMRequest(cfg.provider, cfg.model, cfg.apiKey, system, messages);
 
   // Bound a hung upstream connection so it fails cleanly instead of running to
@@ -116,9 +143,12 @@ async function callAi(ctx: ActionCtx, system: string, messages: ChatMsg[]): Prom
 export const insights = action({
   args: {},
   returns: v.string(),
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<string> => {
+    const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
+    if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
+    await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
-    return callAi(ctx, INSIGHTS_SYSTEM_PROMPT, [
+    return callAi(cfg, INSIGHTS_SYSTEM_PROMPT, [
       { role: 'user', content: `Cafe data (JSON):\n${data}` },
     ]);
   },
@@ -128,11 +158,14 @@ export const insights = action({
 export const ask = action({
   args: { question: v.string() },
   returns: v.string(),
-  handler: async (ctx, { question }) => {
+  handler: async (ctx, { question }): Promise<string> => {
     const q = question.trim().slice(0, 4000);
     if (!q) throw new Error('Pertanyaan kosong.');
+    const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
+    if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
+    await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
-    return callAi(ctx, ASK_SYSTEM_PROMPT, [
+    return callAi(cfg, ASK_SYSTEM_PROMPT, [
       { role: 'user', content: `Cafe data (JSON):\n${data}\n\nQuestion: ${q}` },
     ]);
   },
@@ -149,7 +182,7 @@ export const chat = action({
     ),
   },
   returns: v.string(),
-  handler: async (ctx, { messages }) => {
+  handler: async (ctx, { messages }): Promise<string> => {
     // Bound the history (last 12 turns) and per-message length to cap token
     // cost, then normalize to alternating roles (required by Anthropic).
     const history = normalizeHistory(
@@ -158,8 +191,11 @@ export const chat = action({
     if (history.length === 0 || history[history.length - 1]!.role !== 'user') {
       throw new Error('Pertanyaan kosong.');
     }
+    const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
+    if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
+    await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
     const system = `${ASK_SYSTEM_PROMPT}\n\nCafe data (JSON):\n${data}`;
-    return callAi(ctx, system, history);
+    return callAi(cfg, system, history);
   },
 });
