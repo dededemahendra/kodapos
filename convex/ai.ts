@@ -7,6 +7,7 @@ import {
   type AiProvider,
   ASK_SYSTEM_PROMPT,
   buildLLMRequest,
+  type ChatMsg,
   INSIGHTS_SYSTEM_PROMPT,
   parseLLMResponse,
 } from './lib/ai';
@@ -73,10 +74,10 @@ async function gatherSummary(ctx: ActionCtx): Promise<string> {
   return JSON.stringify(summary);
 }
 
-async function callAi(ctx: ActionCtx, system: string, user: string): Promise<string> {
+async function callAi(ctx: ActionCtx, system: string, messages: ChatMsg[]): Promise<string> {
   const cfg = await ctx.runQuery(internal.ai.config, {});
   if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
-  const req = buildLLMRequest(cfg.provider, cfg.model, cfg.apiKey, system, user);
+  const req = buildLLMRequest(cfg.provider, cfg.model, cfg.apiKey, system, messages);
   const res = await fetch(req.url, { method: 'POST', headers: req.headers, body: req.body });
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
@@ -92,7 +93,9 @@ export const insights = action({
   returns: v.string(),
   handler: async (ctx) => {
     const data = await gatherSummary(ctx);
-    return callAi(ctx, INSIGHTS_SYSTEM_PROMPT, `Cafe data (JSON):\n${data}`);
+    return callAi(ctx, INSIGHTS_SYSTEM_PROMPT, [
+      { role: 'user', content: `Cafe data (JSON):\n${data}` },
+    ]);
   },
 });
 
@@ -104,6 +107,34 @@ export const ask = action({
     const q = question.trim();
     if (!q) throw new Error('Pertanyaan kosong.');
     const data = await gatherSummary(ctx);
-    return callAi(ctx, ASK_SYSTEM_PROMPT, `Cafe data (JSON):\n${data}\n\nQuestion: ${q}`);
+    return callAi(ctx, ASK_SYSTEM_PROMPT, [
+      { role: 'user', content: `Cafe data (JSON):\n${data}\n\nQuestion: ${q}` },
+    ]);
+  },
+});
+
+/** Multi-turn chat grounded in the cafe's recent data (the dedicated AI page). */
+export const chat = action({
+  args: {
+    messages: v.array(
+      v.object({
+        role: v.union(v.literal('user'), v.literal('assistant')),
+        content: v.string(),
+      })
+    ),
+  },
+  returns: v.string(),
+  handler: async (ctx, { messages }) => {
+    // Bound the history (last 12 turns) and per-message length to cap token cost.
+    const history: ChatMsg[] = messages
+      .filter((m) => m.content.trim())
+      .slice(-12)
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
+    if (history.length === 0 || history[history.length - 1]!.role !== 'user') {
+      throw new Error('Pertanyaan kosong.');
+    }
+    const data = await gatherSummary(ctx);
+    const system = `${ASK_SYSTEM_PROMPT}\n\nCafe data (JSON):\n${data}`;
+    return callAi(ctx, system, history);
   },
 });

@@ -4,6 +4,11 @@
 
 export type AiProvider = 'openai' | 'anthropic';
 
+export interface ChatMsg {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface LLMRequest {
   url: string;
   headers: Record<string, string>;
@@ -12,13 +17,15 @@ export interface LLMRequest {
 
 const MAX_TOKENS = 700;
 
-/** Builds the HTTP request for a chat completion on the given provider. */
+/** Builds the HTTP request for a chat completion on the given provider. The
+ * `system` instruction is sent separately (Anthropic) or as the leading system
+ * message (OpenAI); `messages` is the user/assistant turn history. */
 export function buildLLMRequest(
   provider: AiProvider,
   model: string,
   apiKey: string,
   system: string,
-  user: string
+  messages: ChatMsg[]
 ): LLMRequest {
   if (provider === 'anthropic') {
     return {
@@ -28,12 +35,7 @@ export function buildLLMRequest(
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({
-        model,
-        max_tokens: MAX_TOKENS,
-        system,
-        messages: [{ role: 'user', content: user }],
-      }),
+      body: JSON.stringify({ model, max_tokens: MAX_TOKENS, system, messages }),
     };
   }
   // openai (and OpenAI-compatible)
@@ -47,10 +49,7 @@ export function buildLLMRequest(
       model,
       max_tokens: MAX_TOKENS,
       temperature: 0.3,
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: user },
-      ],
+      messages: [{ role: 'system', content: system }, ...messages],
     }),
   };
 }
