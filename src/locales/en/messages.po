@@ -418,6 +418,10 @@ msgstr "Admin"
 msgid "AI"
 msgstr "AI"
 
+#: src/routes/_pos/ai.tsx
+msgid "AI bisa keliru. Periksa informasi penting."
+msgstr "AI can make mistakes. Check important information."
+
 #: src/routes/_public/index.tsx
 msgid "AI-native POS untuk kafe & QSR Indonesia."
 msgstr "AI-native POS for Indonesian cafes & QSRs."
@@ -633,7 +637,6 @@ msgid "Arus Masuk"
 msgstr "Inflow"
 
 #: src/components/app-shared.tsx
-#: src/routes/_pos/ai.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Asisten AI"
 msgstr "AI Assistant"
@@ -2645,8 +2648,8 @@ msgstr "Operating hours"
 #~ msgstr "Network"
 
 #: src/routes/_pos/ai.tsx
-msgid "Jawaban didasarkan pada data penjualan & stok 30 hari terakhir."
-msgstr "Answers are based on the last 30 days of sales & stock data."
+#~ msgid "Jawaban didasarkan pada data penjualan & stok 30 hari terakhir."
+#~ msgstr "Answers are based on the last 30 days of sales & stock data."
 
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Jenis printer"
@@ -4399,8 +4402,8 @@ msgid "Pesan"
 msgstr "Message"
 
 #: src/routes/_pos/ai.tsx
-msgid "Pesan ke asisten AI"
-msgstr "Message the AI assistant"
+#~ msgid "Pesan ke asisten AI"
+#~ msgstr "Message the AI assistant"
 
 #: src/routes/_public/order.$token.tsx
 msgid "Pesan lagi"
@@ -5177,6 +5180,22 @@ msgstr "Coming soon."
 msgid "Selamat datang"
 msgstr "Welcome"
 
+#: src/routes/_pos/ai.tsx
+msgid "Selamat malam"
+msgstr "Good evening"
+
+#: src/routes/_pos/ai.tsx
+msgid "Selamat pagi"
+msgstr "Good morning"
+
+#: src/routes/_pos/ai.tsx
+msgid "Selamat siang"
+msgstr "Good afternoon"
+
+#: src/routes/_pos/ai.tsx
+msgid "Selamat sore"
+msgstr "Good evening"
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Selasa"
 msgstr "Tuesday"
@@ -5849,8 +5868,12 @@ msgid "Tanya AI"
 msgstr "Ask AI"
 
 #: src/routes/_pos/ai.tsx
-msgid "Tanya apa saja tentang kafe Anda"
-msgstr "Ask anything about your cafe"
+msgid "Tanya apa saja tentang data kafe Anda."
+msgstr "Ask anything about your cafe data."
+
+#: src/routes/_pos/ai.tsx
+#~ msgid "Tanya apa saja tentang kafe Anda"
+#~ msgstr "Ask anything about your cafe"
 
 #: src/components/ai-insights.tsx
 msgid "Tanya tentang data Anda, mis. hari terbaik bulan ini"

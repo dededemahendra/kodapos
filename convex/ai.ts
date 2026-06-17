@@ -9,6 +9,7 @@ import {
   buildLLMRequest,
   type ChatMsg,
   INSIGHTS_SYSTEM_PROMPT,
+  normalizeHistory,
   parseLLMResponse,
 } from './lib/ai';
 
@@ -44,12 +45,15 @@ export const config = internalQuery({
 /** Gathers a compact JSON snapshot of the cafe's last-30-days data for the prompt. */
 async function gatherSummary(ctx: ActionCtx): Promise<string> {
   const range = { preset: 'last30' } as const;
+  // The summary is optional grounding context: if one query fails (transient
+  // read error, odd data shape), omit that section rather than failing the
+  // whole assistant call.
   const [cafe, kpis, overview, products, lowStock] = await Promise.all([
-    ctx.runQuery(api.cafes.myCafe, {}),
-    ctx.runQuery(api.dashboard.kpis, {}),
-    ctx.runQuery(api.reports.overview, { range }),
-    ctx.runQuery(api.reports.products, { range }),
-    ctx.runQuery(api.dashboard.lowStock, {}),
+    ctx.runQuery(api.cafes.myCafe, {}).catch(() => null),
+    ctx.runQuery(api.dashboard.kpis, {}).catch(() => null),
+    ctx.runQuery(api.reports.overview, { range }).catch(() => null),
+    ctx.runQuery(api.reports.products, { range }).catch(() => null),
+    ctx.runQuery(api.dashboard.lowStock, {}).catch(() => null),
   ]);
   const summary = {
     cafe: cafe?.name ?? 'Cafe',
@@ -78,10 +82,31 @@ async function callAi(ctx: ActionCtx, system: string, messages: ChatMsg[]): Prom
   const cfg = await ctx.runQuery(internal.ai.config, {});
   if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
   const req = buildLLMRequest(cfg.provider, cfg.model, cfg.apiKey, system, messages);
-  const res = await fetch(req.url, { method: 'POST', headers: req.headers, body: req.body });
+
+  // Bound a hung upstream connection so it fails cleanly instead of running to
+  // the Convex action time limit.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 60_000);
+  let res: Response;
+  try {
+    res = await fetch(req.url, {
+      method: 'POST',
+      headers: req.headers,
+      body: req.body,
+      signal: controller.signal,
+    });
+  } catch {
+    throw new Error('Gagal memanggil AI (waktu habis atau jaringan bermasalah).');
+  } finally {
+    clearTimeout(timer);
+  }
+
   if (!res.ok) {
+    // Keep the raw provider body server-side only (it can carry account/quota
+    // metadata); surface just the status to the client.
     const detail = await res.text().catch(() => '');
-    throw new Error(`Gagal memanggil AI (${res.status}). ${detail.slice(0, 150)}`.trim());
+    console.error(`AI provider error ${res.status}: ${detail.slice(0, 500)}`);
+    throw new Error(`Gagal memanggil AI (${res.status}).`);
   }
   const json = await res.json();
   return parseLLMResponse(cfg.provider, json);
@@ -104,7 +129,7 @@ export const ask = action({
   args: { question: v.string() },
   returns: v.string(),
   handler: async (ctx, { question }) => {
-    const q = question.trim();
+    const q = question.trim().slice(0, 4000);
     if (!q) throw new Error('Pertanyaan kosong.');
     const data = await gatherSummary(ctx);
     return callAi(ctx, ASK_SYSTEM_PROMPT, [
@@ -125,11 +150,11 @@ export const chat = action({
   },
   returns: v.string(),
   handler: async (ctx, { messages }) => {
-    // Bound the history (last 12 turns) and per-message length to cap token cost.
-    const history: ChatMsg[] = messages
-      .filter((m) => m.content.trim())
-      .slice(-12)
-      .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
+    // Bound the history (last 12 turns) and per-message length to cap token
+    // cost, then normalize to alternating roles (required by Anthropic).
+    const history = normalizeHistory(
+      messages.slice(-12).map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }))
+    );
     if (history.length === 0 || history[history.length - 1]!.role !== 'user') {
       throw new Error('Pertanyaan kosong.');
     }

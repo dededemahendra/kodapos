@@ -15,7 +15,30 @@ export interface LLMRequest {
   body: string;
 }
 
-const MAX_TOKENS = 700;
+const MAX_TOKENS = 1024;
+
+/**
+ * Normalizes a chat history into a strictly user/assistant-alternating list
+ * starting with a user turn. Trims empties, coalesces consecutive same-role
+ * turns (joining their text), and drops a leading assistant turn. The Anthropic
+ * Messages API rejects non-alternating roles, so this keeps any client history
+ * valid regardless of how it was assembled (e.g. after a failed send).
+ */
+export function normalizeHistory(messages: ChatMsg[]): ChatMsg[] {
+  const out: ChatMsg[] = [];
+  for (const m of messages) {
+    const content = m.content.trim();
+    if (!content) continue;
+    const last = out[out.length - 1];
+    if (last && last.role === m.role) {
+      last.content = `${last.content}\n\n${content}`;
+    } else {
+      out.push({ role: m.role, content });
+    }
+  }
+  while (out.length > 0 && out[0]!.role === 'assistant') out.shift();
+  return out;
+}
 
 /** Builds the HTTP request for a chat completion on the given provider. The
  * `system` instruction is sent separately (Anthropic) or as the leading system
@@ -57,9 +80,17 @@ export function buildLLMRequest(
 /** Extracts the assistant text from a provider's JSON response. Throws if absent. */
 export function parseLLMResponse(provider: AiProvider, json: unknown): string {
   if (provider === 'anthropic') {
-    const text = (json as { content?: Array<{ text?: string }> })?.content?.[0]?.text;
+    // content is an array of typed blocks; concatenate every text block (skips
+    // non-text blocks like thinking/tool_use that some models emit first).
+    const blocks = (json as { content?: Array<{ text?: string }> })?.content;
+    const text = Array.isArray(blocks)
+      ? blocks
+          .map((b) => (typeof b.text === 'string' ? b.text : ''))
+          .join('')
+          .trim()
+      : '';
     if (!text) throw new Error('Respons AI kosong.');
-    return text.trim();
+    return text;
   }
   const text = (json as { choices?: Array<{ message?: { content?: string } }> })?.choices?.[0]
     ?.message?.content;
