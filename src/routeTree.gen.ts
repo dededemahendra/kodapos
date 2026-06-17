@@ -37,6 +37,7 @@ import { Route as PosDocsRouteImport } from './routes/_pos/docs'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 import { Route as PosCustomersRouteImport } from './routes/_pos/customers'
 import { Route as PosChangelogRouteImport } from './routes/_pos/changelog'
+import { Route as PosAiRouteImport } from './routes/_pos/ai'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
 import { Route as PosSaleRouteRouteImport } from './routes/_pos/sale/route'
@@ -216,6 +217,11 @@ const PosCustomersRoute = PosCustomersRouteImport.update({
 const PosChangelogRoute = PosChangelogRouteImport.update({
   id: '/changelog',
   path: '/changelog',
+  getParentRoute: () => PosRoute,
+} as any)
+const PosAiRoute = PosAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => PosRoute,
 } as any)
 const PosShiftRouteRoute = PosShiftRouteRouteImport.update({
@@ -440,6 +446,7 @@ export interface FileRoutesByFullPath {
   '/sale': typeof PosSaleRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/ai': typeof PosAiRoute
   '/changelog': typeof PosChangelogRoute
   '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
@@ -506,6 +513,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/ai': typeof PosAiRoute
   '/changelog': typeof PosChangelogRoute
   '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
@@ -578,6 +586,7 @@ export interface FileRoutesById {
   '/_pos/sale': typeof PosSaleRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
+  '/_pos/ai': typeof PosAiRoute
   '/_pos/changelog': typeof PosChangelogRoute
   '/_pos/customers': typeof PosCustomersRoute
   '/_pos/dashboard': typeof PosDashboardRoute
@@ -651,6 +660,7 @@ export interface FileRouteTypes {
     | '/sale'
     | '/settings'
     | '/shift'
+    | '/ai'
     | '/changelog'
     | '/customers'
     | '/dashboard'
@@ -717,6 +727,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/shift'
+    | '/ai'
     | '/changelog'
     | '/customers'
     | '/dashboard'
@@ -788,6 +799,7 @@ export interface FileRouteTypes {
     | '/_pos/sale'
     | '/_pos/settings'
     | '/_pos/shift'
+    | '/_pos/ai'
     | '/_pos/changelog'
     | '/_pos/customers'
     | '/_pos/dashboard'
@@ -1052,6 +1064,13 @@ declare module '@tanstack/react-router' {
       path: '/changelog'
       fullPath: '/changelog'
       preLoaderRoute: typeof PosChangelogRouteImport
+      parentRoute: typeof PosRoute
+    }
+    '/_pos/ai': {
+      id: '/_pos/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof PosAiRouteImport
       parentRoute: typeof PosRoute
     }
     '/_pos/shift': {
@@ -1503,6 +1522,7 @@ interface PosRouteChildren {
   PosSaleRouteRoute: typeof PosSaleRouteRouteWithChildren
   PosSettingsRouteRoute: typeof PosSettingsRouteRouteWithChildren
   PosShiftRouteRoute: typeof PosShiftRouteRouteWithChildren
+  PosAiRoute: typeof PosAiRoute
   PosChangelogRoute: typeof PosChangelogRoute
   PosCustomersRoute: typeof PosCustomersRoute
   PosDashboardRoute: typeof PosDashboardRoute
@@ -1533,6 +1553,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosSaleRouteRoute: PosSaleRouteRouteWithChildren,
   PosSettingsRouteRoute: PosSettingsRouteRouteWithChildren,
   PosShiftRouteRoute: PosShiftRouteRouteWithChildren,
+  PosAiRoute: PosAiRoute,
   PosChangelogRoute: PosChangelogRoute,
   PosCustomersRoute: PosCustomersRoute,
   PosDashboardRoute: PosDashboardRoute,
