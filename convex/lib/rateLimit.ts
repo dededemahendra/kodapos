@@ -11,10 +11,13 @@ export async function enforceRateLimit(
   opts: { identifier: string; windowMs: number; max: number; message: string }
 ): Promise<void> {
   const now = Date.now();
+  // .first() (not .unique()): if a rare write race ever produced two rows for
+  // one identifier, .unique() would throw forever and permanently break that
+  // bucket; .first() degrades gracefully instead.
   const existing = await ctx.db
     .query('otpRateLimit')
     .withIndex('by_identifier', (q) => q.eq('identifier', opts.identifier))
-    .unique();
+    .first();
 
   if (existing === null) {
     await ctx.db.insert('otpRateLimit', { identifier: opts.identifier, windowStart: now, count: 1 });

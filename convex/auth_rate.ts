@@ -29,3 +29,22 @@ export const checkAndBump = internalMutation({
     });
   },
 });
+
+/**
+ * Nightly cleanup: every identifier (per email for OTP/reset, per cafe for AI)
+ * leaves a permanent row, so prune rows whose window ended long ago. A day-old
+ * cutoff is far beyond any limiter window, so live buckets are never deleted.
+ */
+export const pruneStale = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const cutoff = Date.now() - 24 * 60 * 60_000;
+    const stale = await ctx.db
+      .query('otpRateLimit')
+      .withIndex('by_window', (q) => q.lt('windowStart', cutoff))
+      .take(2000);
+    for (const row of stale) await ctx.db.delete(row._id);
+    return null;
+  },
+});

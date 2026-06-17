@@ -18,7 +18,9 @@ export default defineSchema({
     identifier: v.string(),
     windowStart: v.number(),
     count: v.number(),
-  }).index('by_identifier', ['identifier']),
+  })
+    .index('by_identifier', ['identifier'])
+    .index('by_window', ['windowStart']),
 
   cafes: defineTable({
     name: v.string(),
