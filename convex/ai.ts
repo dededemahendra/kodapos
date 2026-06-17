@@ -12,6 +12,7 @@ import {
   INSIGHTS_SYSTEM_PROMPT,
   normalizeHistory,
   parseLLMResponse,
+  RESTOCK_SYSTEM_PROMPT,
 } from './lib/ai';
 
 /**
@@ -197,5 +198,78 @@ export const chat = action({
     const data = await gatherSummary(ctx);
     const system = `${ASK_SYSTEM_PROMPT}\n\nCafe data (JSON):\n${data}`;
     return callAi(cfg, system, history);
+  },
+});
+
+/**
+ * Compact JSON snapshot for the restock advisor: the heuristic shopping list
+ * (ingredients to buy with suggested qty + current stock) plus the demand
+ * forecast (so the model can explain *why* each quantity makes sense). Returns
+ * `learning` when the forecast hasn't activated yet, and the line count so the
+ * action can skip the LLM call when there's nothing to order.
+ */
+async function gatherRestock(
+  ctx: ActionCtx
+): Promise<{ json: string; lineCount: number; learning: boolean }> {
+  const [cafe, restock, demand] = await Promise.all([
+    ctx.runQuery(api.cafes.myCafe, {}).catch(() => null),
+    ctx.runQuery(api.restock.suggestion, {}).catch(() => null),
+    ctx.runQuery(api.forecast.demand, {}).catch(() => null),
+  ]);
+  if (!restock || restock.status === 'learning') {
+    return { json: '', lineCount: 0, learning: true };
+  }
+  const demandLines =
+    demand?.status === 'ready'
+      ? demand.lines
+          .slice(0, 12)
+          .map((l) => ({
+            name: l.name,
+            tomorrowQty: l.tomorrowQty,
+            sevenDayQty: l.sevenDayQty,
+            drivers: l.drivers,
+          }))
+      : [];
+  const summary = {
+    cafe: cafe?.name ?? 'Cafe',
+    restock: restock.lines.map((l) => ({
+      name: l.name,
+      unit: l.unit,
+      suggestedQty: l.suggestedQty,
+      currentStockQty: l.currentStockQty,
+    })),
+    demand: demandLines,
+  };
+  return { json: JSON.stringify(summary), lineCount: restock.lines.length, learning: false };
+}
+
+/**
+ * Turn the heuristic shopping list + demand forecast into a plain-language
+ * restock briefing (what to order, how much, and why). Skips the LLM call (and
+ * the rate-limit budget) when the forecast is still learning or there's nothing
+ * to order, returning a fixed off-catalog message instead.
+ */
+export const restock = action({
+  args: {},
+  returns: v.string(),
+  handler: async (ctx): Promise<string> => {
+    const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
+    if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
+    // Rate-limit before gathering, not just before the LLM call: gatherRestock
+    // runs computeDemand twice (each scans the trailing order window), so the cap
+    // has to cover that work too — otherwise the learning / nothing-to-order
+    // paths would be uncapped heavy reads. Config is checked first, so an
+    // unconfigured caller throws without ever consuming the budget.
+    await ctx.runMutation(internal.ai.rateLimit, {});
+    const { json, lineCount, learning } = await gatherRestock(ctx);
+    if (learning) {
+      return 'Perkiraan permintaan masih belajar, jadi saran restock AI belum tersedia. Coba lagi setelah perkiraan aktif.';
+    }
+    if (lineCount === 0) {
+      return 'Stok Anda cukup untuk minggu ini. Tidak ada bahan yang perlu dipesan sekarang.';
+    }
+    return callAi(cfg, RESTOCK_SYSTEM_PROMPT, [
+      { role: 'user', content: `Cafe restock data (JSON):\n${json}` },
+    ]);
   },
 });
