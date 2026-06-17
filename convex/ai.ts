@@ -1,8 +1,9 @@
 import { v } from 'convex/values';
 import { api, internal } from './_generated/api';
-import { action, internalQuery } from './_generated/server';
+import { action, internalMutation, internalQuery } from './_generated/server';
 import type { ActionCtx } from './_generated/server';
 import { requireOwnerCafe } from './lib/auth';
+import { enforceRateLimit } from './lib/rateLimit';
 import {
   type AiProvider,
   ASK_SYSTEM_PROMPT,
@@ -39,6 +40,30 @@ export const config = internalQuery({
     if (!c?.apiKey || !c.model) return null;
     const provider: AiProvider = c.provider === 'anthropic' ? 'anthropic' : 'openai';
     return { provider, apiKey: c.apiKey, model: c.model };
+  },
+});
+
+/** Fixed-window AI usage limit per cafe (bounds runaway token cost on the
+ * owner's key; the client is already single-flight). */
+const AI_WINDOW_MS = 10 * 60_000;
+const AI_MAX_PER_WINDOW = 30;
+
+/**
+ * Per-cafe rate gate for the AI actions, run (via runMutation) at the START of
+ * each action before any data-gathering or LLM call. Owner-scoped.
+ */
+export const rateLimit = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const { cafeId } = await requireOwnerCafe(ctx);
+    await enforceRateLimit(ctx, {
+      identifier: `ai:${cafeId}`,
+      windowMs: AI_WINDOW_MS,
+      max: AI_MAX_PER_WINDOW,
+      message: 'Batas penggunaan AI tercapai. Coba lagi sebentar.',
+    });
+    return null;
   },
 });
 
@@ -117,6 +142,7 @@ export const insights = action({
   args: {},
   returns: v.string(),
   handler: async (ctx) => {
+    await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
     return callAi(ctx, INSIGHTS_SYSTEM_PROMPT, [
       { role: 'user', content: `Cafe data (JSON):\n${data}` },
@@ -131,6 +157,7 @@ export const ask = action({
   handler: async (ctx, { question }) => {
     const q = question.trim().slice(0, 4000);
     if (!q) throw new Error('Pertanyaan kosong.');
+    await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
     return callAi(ctx, ASK_SYSTEM_PROMPT, [
       { role: 'user', content: `Cafe data (JSON):\n${data}\n\nQuestion: ${q}` },
@@ -158,6 +185,7 @@ export const chat = action({
     if (history.length === 0 || history[history.length - 1]!.role !== 'user') {
       throw new Error('Pertanyaan kosong.');
     }
+    await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
     const system = `${ASK_SYSTEM_PROMPT}\n\nCafe data (JSON):\n${data}`;
     return callAi(ctx, system, history);

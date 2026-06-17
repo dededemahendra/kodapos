@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { internalMutation } from './_generated/server';
+import { enforceRateLimit } from './lib/rateLimit';
 
 /** Fixed window length (ms) for OTP / reset code issuance. */
 const WINDOW_MS = 10 * 60_000;
@@ -20,27 +21,11 @@ const MAX_PER_WINDOW = 5;
 export const checkAndBump = internalMutation({
   args: { identifier: v.string() },
   handler: async (ctx, { identifier }) => {
-    const now = Date.now();
-    const existing = await ctx.db
-      .query('otpRateLimit')
-      .withIndex('by_identifier', (q) => q.eq('identifier', identifier))
-      .unique();
-
-    if (existing === null) {
-      await ctx.db.insert('otpRateLimit', { identifier, windowStart: now, count: 1 });
-      return;
-    }
-
-    if (now - existing.windowStart > WINDOW_MS) {
-      // Window elapsed: start a fresh one.
-      await ctx.db.patch(existing._id, { windowStart: now, count: 1 });
-      return;
-    }
-
-    if (existing.count >= MAX_PER_WINDOW) {
-      throw new Error('Terlalu banyak permintaan kode. Coba lagi nanti.');
-    }
-
-    await ctx.db.patch(existing._id, { count: existing.count + 1 });
+    await enforceRateLimit(ctx, {
+      identifier,
+      windowMs: WINDOW_MS,
+      max: MAX_PER_WINDOW,
+      message: 'Terlalu banyak permintaan kode. Coba lagi nanti.',
+    });
   },
 });
