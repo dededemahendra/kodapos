@@ -414,6 +414,10 @@ msgstr "Ada"
 msgid "Admin"
 msgstr "Admin"
 
+#: src/routes/_pos/settings/integrations.tsx
+msgid "AI"
+msgstr "AI"
+
 #: src/routes/_public/index.tsx
 msgid "AI-native POS untuk kafe & QSR Indonesia."
 msgstr "AI-native POS untuk kafe & QSR Indonesia."
@@ -540,6 +544,10 @@ msgstr "Anggota"
 msgid "Apa yang baru di kodapos."
 msgstr "Apa yang baru di kodapos."
 
+#: src/routes/_pos/settings/integrations.tsx
+msgid "API key"
+msgstr "API key"
+
 #: src/components/menu/category-table.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/gift-cards.tsx
@@ -623,6 +631,10 @@ msgstr "Arus Keluar"
 #: src/routes/_pos/reports/export.tsx
 msgid "Arus Masuk"
 msgstr "Arus Masuk"
+
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Asisten AI"
+msgstr "Asisten AI"
 
 #: src/components/auth/or-divider.tsx
 msgid "atau"
@@ -1265,6 +1277,14 @@ msgstr "Buat semua"
 msgid "Buat ulang QR"
 msgstr "Buat ulang QR"
 
+#: src/components/ai-insights.tsx
+msgid "Buat wawasan"
+msgstr "Buat wawasan"
+
+#: src/components/ai-insights.tsx
+msgid "Buat wawasan atau ajukan pertanyaan tentang penjualan dan stok Anda."
+msgstr "Buat wawasan atau ajukan pertanyaan tentang penjualan dan stok Anda."
+
 #: src/routes/_pos/tables.tsx
 msgid "Buka \"Kelola meja\" untuk menambah meja."
 msgstr "Buka \"Kelola meja\" untuk menambah meja."
@@ -1276,6 +1296,10 @@ msgstr "Buka detail"
 #: src/routes/_pos/help.tsx
 msgid "Buka dokumentasi"
 msgstr "Buka dokumentasi"
+
+#: src/components/ai-insights.tsx
+msgid "Buka Integrasi"
+msgstr "Buka Integrasi"
 
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Buka laci kas"
@@ -1849,6 +1873,10 @@ msgstr "Gagal memperbarui status."
 msgid "Gagal memproses pembayaran."
 msgstr "Gagal memproses pembayaran."
 
+#: src/components/ai-insights.tsx
+msgid "Gagal memuat wawasan."
+msgstr "Gagal memuat wawasan."
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Gagal memutuskan integrasi."
 msgstr "Gagal memutuskan integrasi."
@@ -2026,6 +2054,10 @@ msgstr "Gagal mengunggah logo."
 #: src/routes/_pos/settings/tax.tsx
 msgid "Gagal mengunggah QRIS."
 msgstr "Gagal mengunggah QRIS."
+
+#: src/components/ai-insights.tsx
+msgid "Gagal menjawab."
+msgstr "Gagal menjawab."
 
 #: src/routes/_pos/self-orders.tsx
 msgid "Gagal menolak pesanan."
@@ -2411,6 +2443,10 @@ msgstr "Hubungkan {dialogEntryName}"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
 msgstr "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
+
+#: src/components/ai-insights.tsx
+msgid "Hubungkan kunci API AI Anda untuk wawasan dan tanya-jawab data penjualan & stok."
+msgstr "Hubungkan kunci API AI Anda untuk wawasan dan tanya-jawab data penjualan & stok."
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Hubungkan penyedia di halaman Integrasi."
@@ -3100,6 +3136,10 @@ msgstr "Kuat"
 msgid "Kunci API"
 msgstr "Kunci API"
 
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Kunci dipakai dari server Anda dan tidak pernah ditampilkan kembali. Biaya token ditagih ke akun penyedia Anda."
+msgstr "Kunci dipakai dari server Anda dan tidak pernah ditampilkan kembali. Biaya token ditagih ke akun penyedia Anda."
+
 #: src/routes/_pos/settings/general.tsx
 msgid "Kunci otomatis saat tidak aktif"
 msgstr "Kunci otomatis saat tidak aktif"
@@ -3519,6 +3559,10 @@ msgstr "Menampilkan 100 transaksi terakhir."
 msgid "Mencari…"
 msgstr "Mencari…"
 
+#: src/components/ai-insights.tsx
+msgid "Menganalisis…"
+msgstr "Menganalisis…"
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Mengikuti sistem."
 #~ msgstr "Mengikuti sistem."
@@ -3662,6 +3706,10 @@ msgstr "Modal awal (Rp)"
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Mode gelap"
 #~ msgstr "Mode gelap"
+
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Model"
+msgstr "Model"
 
 #: src/components/app-shared.tsx
 msgid "Modifier"
@@ -4236,6 +4284,10 @@ msgstr "Penukaran"
 #: src/routes/_pos/loyalty.tsx
 msgid "Penukaran poin"
 msgstr "Penukaran poin"
+
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Penyedia"
+msgstr "Penyedia"
 
 #: src/components/app-shared.tsx
 #: src/components/customer/customer-detail-sheet.tsx
@@ -5754,6 +5806,18 @@ msgstr "Tanpa pembulatan"
 msgid "Tanpa reward"
 msgstr "Tanpa reward"
 
+#: src/components/ai-insights.tsx
+msgid "Tanya"
+msgstr "Tanya"
+
+#: src/components/ai-insights.tsx
+msgid "Tanya AI"
+msgstr "Tanya AI"
+
+#: src/components/ai-insights.tsx
+msgid "Tanya tentang data Anda, mis. hari terbaik bulan ini"
+msgstr "Tanya tentang data Anda, mis. hari terbaik bulan ini"
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Tarif per jam"
 msgstr "Tarif per jam"
@@ -6458,6 +6522,14 @@ msgstr "Waktu mulai dan selesai wajib diisi."
 #: src/components/schedule/shift-form-dialog.tsx
 msgid "Waktu selesai harus setelah mulai."
 msgstr "Waktu selesai harus setelah mulai."
+
+#: src/routes/_pos/settings/integrations.tsx
+msgid "Wawasan & tanya-jawab data dengan kunci API Anda sendiri (OpenAI/Anthropic)."
+msgstr "Wawasan & tanya-jawab data dengan kunci API Anda sendiri (OpenAI/Anthropic)."
+
+#: src/components/ai-insights.tsx
+msgid "Wawasan AI"
+msgstr "Wawasan AI"
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Weekly summary exported"
