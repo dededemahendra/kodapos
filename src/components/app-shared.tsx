@@ -21,6 +21,7 @@ import {
 	NotebookText,
 	Package,
 	Settings,
+	Sparkles,
 	TrendingUp,
 	UtensilsCrossed,
 	Users,
@@ -91,6 +92,7 @@ export const navGroups: SidebarNavGroup[] = [
 	{
 		label: msg`Laporan`,
 		items: [
+			{ title: msg`Asisten AI`, path: "/ai", icon: <Sparkles />, requires: 'canViewReports' },
 			{ title: msg`Prediksi`, path: "/forecast", icon: <TrendingUp />, requires: 'canViewReports' },
 			{
 				title: msg`Laporan`,

@@ -632,6 +632,8 @@ msgstr "Arus Keluar"
 msgid "Arus Masuk"
 msgstr "Arus Masuk"
 
+#: src/components/app-shared.tsx
+#: src/routes/_pos/ai.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Asisten AI"
 msgstr "Asisten AI"
@@ -700,6 +702,10 @@ msgstr "Awalan nomor order"
 msgid "Awalan nomor pesanan"
 msgstr "Awalan nomor pesanan"
 
+#: src/routes/_pos/ai.tsx
+msgid "Bagaimana penjualan 30 hari terakhir?"
+msgstr "Bagaimana penjualan 30 hari terakhir?"
+
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_pos/reports/orders.tsx
@@ -722,6 +728,10 @@ msgstr "bahan"
 #: src/routes/_pos/recipes.tsx
 msgid "Bahan"
 msgstr "Bahan"
+
+#: src/routes/_pos/ai.tsx
+msgid "Bahan apa yang perlu segera diisi ulang?"
+msgstr "Bahan apa yang perlu segera diisi ulang?"
 
 #: src/components/inventory/ingredient-form.tsx
 #: src/routes/_pos/inventory/index.tsx
@@ -1298,6 +1308,7 @@ msgid "Buka dokumentasi"
 msgstr "Buka dokumentasi"
 
 #: src/components/ai-insights.tsx
+#: src/routes/_pos/ai.tsx
 msgid "Buka Integrasi"
 msgstr "Buka Integrasi"
 
@@ -2056,6 +2067,7 @@ msgid "Gagal mengunggah QRIS."
 msgstr "Gagal mengunggah QRIS."
 
 #: src/components/ai-insights.tsx
+#: src/routes/_pos/ai.tsx
 msgid "Gagal menjawab."
 msgstr "Gagal menjawab."
 
@@ -2440,6 +2452,10 @@ msgstr "Hubungkan"
 msgid "Hubungkan {dialogEntryName}"
 msgstr "Hubungkan {dialogEntryName}"
 
+#: src/routes/_pos/ai.tsx
+msgid "Hubungkan asisten AI"
+msgstr "Hubungkan asisten AI"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
 msgstr "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
@@ -2523,6 +2539,10 @@ msgstr "Item"
 msgctxt "promo scope badge"
 msgid "Item"
 msgstr "Item"
+
+#: src/routes/_pos/ai.tsx
+msgid "Item apa yang paling laku?"
+msgstr "Item apa yang paling laku?"
 
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Item baru"
@@ -2623,6 +2643,10 @@ msgstr "Jam operasional"
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Jaringan"
 #~ msgstr "Jaringan"
+
+#: src/routes/_pos/ai.tsx
+msgid "Jawaban didasarkan pada data penjualan & stok 30 hari terakhir."
+msgstr "Jawaban didasarkan pada data penjualan & stok 30 hari terakhir."
 
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Jenis printer"
@@ -2982,6 +3006,7 @@ msgstr "Keterangan"
 msgid "Ketersediaan"
 msgstr "Ketersediaan"
 
+#: src/routes/_pos/ai.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Kirim"
 msgstr "Kirim"
@@ -3560,6 +3585,7 @@ msgid "Mencari…"
 msgstr "Mencari…"
 
 #: src/components/ai-insights.tsx
+#: src/routes/_pos/ai.tsx
 msgid "Menganalisis…"
 msgstr "Menganalisis…"
 
@@ -4371,6 +4397,10 @@ msgstr "Perubahan stok bahan ini akan tercatat di sini."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pesan"
 msgstr "Pesan"
+
+#: src/routes/_pos/ai.tsx
+msgid "Pesan ke asisten AI"
+msgstr "Pesan ke asisten AI"
 
 #: src/routes/_public/order.$token.tsx
 msgid "Pesan lagi"
@@ -5664,6 +5694,10 @@ msgstr "Tambahkan jadwal kerja staf untuk minggu yang dipilih."
 msgid "Tambahkan kategori untuk mengelompokkan item menu Anda."
 msgstr "Tambahkan kategori untuk mengelompokkan item menu Anda."
 
+#: src/routes/_pos/ai.tsx
+msgid "Tambahkan kunci API AI Anda (OpenAI atau Anthropic) untuk bertanya tentang data kafe Anda."
+msgstr "Tambahkan kunci API AI Anda (OpenAI atau Anthropic) untuk bertanya tentang data kafe Anda."
+
 #: src/components/tables/table-manage-dialog.tsx
 msgid "Tambahkan meja untuk mulai mengelola lantai."
 msgstr "Tambahkan meja untuk mulai mengelola lantai."
@@ -5814,9 +5848,17 @@ msgstr "Tanya"
 msgid "Tanya AI"
 msgstr "Tanya AI"
 
+#: src/routes/_pos/ai.tsx
+msgid "Tanya apa saja tentang kafe Anda"
+msgstr "Tanya apa saja tentang kafe Anda"
+
 #: src/components/ai-insights.tsx
 msgid "Tanya tentang data Anda, mis. hari terbaik bulan ini"
 msgstr "Tanya tentang data Anda, mis. hari terbaik bulan ini"
+
+#: src/routes/_pos/ai.tsx
+msgid "Tanya tentang penjualan, stok, pelanggan…"
+msgstr "Tanya tentang penjualan, stok, pelanggan…"
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Tarif per jam"

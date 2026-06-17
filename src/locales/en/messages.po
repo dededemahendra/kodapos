@@ -632,6 +632,8 @@ msgstr "Outflow"
 msgid "Arus Masuk"
 msgstr "Inflow"
 
+#: src/components/app-shared.tsx
+#: src/routes/_pos/ai.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Asisten AI"
 msgstr "AI Assistant"
@@ -700,6 +702,10 @@ msgstr "Order number prefix"
 msgid "Awalan nomor pesanan"
 msgstr "Order number prefix"
 
+#: src/routes/_pos/ai.tsx
+msgid "Bagaimana penjualan 30 hari terakhir?"
+msgstr "How were sales the last 30 days?"
+
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_pos/reports/orders.tsx
@@ -722,6 +728,10 @@ msgstr "ingredient"
 #: src/routes/_pos/recipes.tsx
 msgid "Bahan"
 msgstr "Ingredient"
+
+#: src/routes/_pos/ai.tsx
+msgid "Bahan apa yang perlu segera diisi ulang?"
+msgstr "Which ingredients need restocking soon?"
 
 #: src/components/inventory/ingredient-form.tsx
 #: src/routes/_pos/inventory/index.tsx
@@ -1298,6 +1308,7 @@ msgid "Buka dokumentasi"
 msgstr "Open documentation"
 
 #: src/components/ai-insights.tsx
+#: src/routes/_pos/ai.tsx
 msgid "Buka Integrasi"
 msgstr "Open Integrations"
 
@@ -2056,6 +2067,7 @@ msgid "Gagal mengunggah QRIS."
 msgstr "Failed to upload QRIS."
 
 #: src/components/ai-insights.tsx
+#: src/routes/_pos/ai.tsx
 msgid "Gagal menjawab."
 msgstr "Failed to answer."
 
@@ -2440,6 +2452,10 @@ msgstr "Connect"
 msgid "Hubungkan {dialogEntryName}"
 msgstr "Connect {dialogEntryName}"
 
+#: src/routes/_pos/ai.tsx
+msgid "Hubungkan asisten AI"
+msgstr "Connect the AI assistant"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
 msgstr "Connect your restaurant/POS to other services. (Settings are saved; full activation coming soon.)"
@@ -2523,6 +2539,10 @@ msgstr "Items"
 msgctxt "promo scope badge"
 msgid "Item"
 msgstr "Item"
+
+#: src/routes/_pos/ai.tsx
+msgid "Item apa yang paling laku?"
+msgstr "Which items sell best?"
 
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Item baru"
@@ -2623,6 +2643,10 @@ msgstr "Operating hours"
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Jaringan"
 #~ msgstr "Network"
+
+#: src/routes/_pos/ai.tsx
+msgid "Jawaban didasarkan pada data penjualan & stok 30 hari terakhir."
+msgstr "Answers are based on the last 30 days of sales & stock data."
 
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Jenis printer"
@@ -2982,6 +3006,7 @@ msgstr "Description"
 msgid "Ketersediaan"
 msgstr "Availability"
 
+#: src/routes/_pos/ai.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Kirim"
 msgstr "Send"
@@ -3560,6 +3585,7 @@ msgid "Mencari…"
 msgstr "Searching…"
 
 #: src/components/ai-insights.tsx
+#: src/routes/_pos/ai.tsx
 msgid "Menganalisis…"
 msgstr "Analyzing…"
 
@@ -4371,6 +4397,10 @@ msgstr "Stock changes for this ingredient will be recorded here."
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Pesan"
 msgstr "Message"
+
+#: src/routes/_pos/ai.tsx
+msgid "Pesan ke asisten AI"
+msgstr "Message the AI assistant"
 
 #: src/routes/_public/order.$token.tsx
 msgid "Pesan lagi"
@@ -5664,6 +5694,10 @@ msgstr "Add staff work shifts for the selected week."
 msgid "Tambahkan kategori untuk mengelompokkan item menu Anda."
 msgstr "Add a category to group your menu items."
 
+#: src/routes/_pos/ai.tsx
+msgid "Tambahkan kunci API AI Anda (OpenAI atau Anthropic) untuk bertanya tentang data kafe Anda."
+msgstr "Add your AI API key (OpenAI or Anthropic) to ask about your cafe data."
+
 #: src/components/tables/table-manage-dialog.tsx
 msgid "Tambahkan meja untuk mulai mengelola lantai."
 msgstr "Add a table to start managing the floor."
@@ -5814,9 +5848,17 @@ msgstr "Ask"
 msgid "Tanya AI"
 msgstr "Ask AI"
 
+#: src/routes/_pos/ai.tsx
+msgid "Tanya apa saja tentang kafe Anda"
+msgstr "Ask anything about your cafe"
+
 #: src/components/ai-insights.tsx
 msgid "Tanya tentang data Anda, mis. hari terbaik bulan ini"
 msgstr "Ask about your data, e.g. best day this month"
+
+#: src/routes/_pos/ai.tsx
+msgid "Tanya tentang penjualan, stok, pelanggan…"
+msgstr "Ask about sales, stock, customers…"
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Tarif per jam"
