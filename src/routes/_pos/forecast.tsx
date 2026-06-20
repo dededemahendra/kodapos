@@ -16,6 +16,7 @@ import { Spinner } from '~/components/ui/spinner';
 import { StatusBadge } from '~/components/ui/status-badge';
 import { waUrl, formatRestockText } from '~/lib/whatsapp';
 import { RenderDriver, type ForecastDriver } from '~/components/forecast/render-driver';
+import { AiRestockAdvice } from '~/components/ai-restock-advice';
 
 export const Route = createFileRoute('/_pos/forecast')({
   component: ForecastPage,
@@ -103,6 +104,7 @@ function RestockPanel() {
         </Empty>
       ) : (
         <div className="mt-4 space-y-4">
+          <AiRestockAdvice />
           <DataTable columns={columns} data={lines as RestockLine[]} emptyState={null} initialSort={[{ id: 'name', desc: false }]} />
           <div className="flex flex-wrap items-center gap-2">
             <Select value={supplierId} onValueChange={setSupplierId}>

@@ -1278,6 +1278,14 @@ msgstr "Create a reservation for this date to see it here."
 msgid "Buat reward untuk ditukar pelanggan dengan poin."
 msgstr "Create rewards customers can redeem with points."
 
+#: src/components/ai-restock-advice.tsx
+msgid "Buat ringkasan AI tentang apa yang perlu dipesan dan alasannya."
+msgstr "Generate an AI summary of what to order and why."
+
+#: src/components/ai-restock-advice.tsx
+msgid "Buat saran"
+msgstr "Generate advice"
+
 #: src/routes/_pos/menu/modifiers.tsx
 msgid "Buat satu grup untuk dipakai ulang di banyak item."
 msgstr "Create a group to reuse across many items."
@@ -1311,6 +1319,7 @@ msgid "Buka dokumentasi"
 msgstr "Open documentation"
 
 #: src/components/ai-insights.tsx
+#: src/components/ai-restock-advice.tsx
 #: src/routes/_pos/ai.tsx
 msgid "Buka Integrasi"
 msgstr "Open Integrations"
@@ -1875,6 +1884,10 @@ msgstr "Failed to create the purchase order."
 #: src/components/sale/qr-print-dialog.tsx
 msgid "Gagal membuat QR."
 msgstr "Failed to generate the QR."
+
+#: src/components/ai-restock-advice.tsx
+msgid "Gagal membuat saran restock."
+msgstr "Could not generate restock advice."
 
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 msgid "Gagal membuat tagihan QRIS."
@@ -2482,6 +2495,10 @@ msgstr "Connect the AI assistant"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
 msgstr "Connect your restaurant/POS to other services. (Settings are saved; full activation coming soon.)"
+
+#: src/components/ai-restock-advice.tsx
+msgid "Hubungkan kunci API AI Anda untuk saran restock yang menjelaskan jumlah dan alasannya."
+msgstr "Connect your AI API key for restock advice that explains the quantities and reasons."
 
 #: src/components/ai-insights.tsx
 msgid "Hubungkan kunci API AI Anda untuk wawasan dan tanya-jawab data penjualan & stok."
@@ -3585,6 +3602,7 @@ msgstr "Loading shift…"
 msgid "Memuat struk…"
 msgstr "Loading receipt…"
 
+#: src/components/ai-restock-advice.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -3622,6 +3640,7 @@ msgid "Mencari…"
 msgstr "Searching…"
 
 #: src/components/ai-insights.tsx
+#: src/components/ai-restock-advice.tsx
 #: src/routes/_pos/ai.tsx
 msgid "Menganalisis…"
 msgstr "Analyzing…"
@@ -5157,6 +5176,10 @@ msgstr "New password"
 #: src/routes/_pos/forecast.tsx
 msgid "Saran"
 msgstr "Suggested"
+
+#: src/components/ai-restock-advice.tsx
+msgid "Saran Restock AI"
+msgstr "AI Restock Advice"
 
 #: src/components/import/csv-import-dialog.tsx
 #: src/components/inventory/ingredient-form.tsx
