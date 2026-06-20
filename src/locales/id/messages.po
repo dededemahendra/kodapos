@@ -569,6 +569,10 @@ msgstr "Anda tidak punya akses ke halaman ini. Masuk sebagai pemilik untuk membu
 msgid "Anggota"
 msgstr "Anggota"
 
+#: src/components/marketing/loyalty-avatars.tsx
+msgid "Anggota emas"
+msgstr "Anggota emas"
+
 #: src/components/marketing/feature-section.tsx
 #~ msgid "Antarmuka ringan yang siap dipakai di tablet, HP, atau laptop."
 #~ msgstr "Antarmuka ringan yang siap dipakai di tablet, HP, atau laptop."
@@ -4410,6 +4414,10 @@ msgstr "Pelajari selengkapnya"
 msgid "Pelanggan"
 msgstr "Pelanggan"
 
+#: src/components/marketing/loyalty-avatars.tsx
+msgid "Pelanggan baru"
+msgstr "Pelanggan baru"
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Pelanggan dengan belanja lebih tinggi memperoleh pengali poin."
 msgstr "Pelanggan dengan belanja lebih tinggi memperoleh pengali poin."
@@ -4433,6 +4441,10 @@ msgstr "Pelanggan ditambahkan."
 #: src/components/marketing/feature-section.tsx
 #~ msgid "Pelanggan memesan dari meja lewat kode QR."
 #~ msgstr "Pelanggan memesan dari meja lewat kode QR."
+
+#: src/components/marketing/loyalty-avatars.tsx
+msgid "Pelanggan setia"
+msgstr "Pelanggan setia"
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Pelanggan teratas"
@@ -5706,6 +5718,10 @@ msgstr "Senin"
 #: src/components/menu/category-table.tsx
 msgid "Seret untuk menata ulang"
 msgstr "Seret untuk menata ulang"
+
+#: src/components/marketing/loyalty-avatars.tsx
+msgid "Sering berkunjung"
+msgstr "Sering berkunjung"
 
 #: src/routes/_pos/time-clock.tsx
 msgid "Sesi"
