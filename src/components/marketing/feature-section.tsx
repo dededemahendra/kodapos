@@ -1,6 +1,7 @@
 import { Trans } from '@lingui/react/macro';
 import { ShieldCheck } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
+import { LoyaltyAvatars } from './loyalty-avatars';
 import { Card, CardContent } from '~/components/ui/card';
 import { SectionHeading } from './section-heading';
 
@@ -258,57 +259,8 @@ export function FeatureSection() {
             {/* Card 5: Customer loyalty - Loyalitas pelanggan */}
             <Card className="col-span-full lg:col-span-3">
               <CardContent className="p-6">
-                <div className="mb-4 flex items-center gap-4">
-                  {/* Overlapping avatar stack - staggered pop in */}
-                  <div className="flex -space-x-3">
-                    {[
-                      { initial: 'A', label: 'Ayu', delay: 0.0 },
-                      { initial: 'S', label: 'Sari', delay: 0.1 },
-                      { initial: 'R', label: 'Rian', delay: 0.2 },
-                    ].map(({ initial, label, delay }) => (
-                      <motion.div
-                        key={label}
-                        title={label}
-                        className="flex size-10 items-center justify-center rounded-full bg-muted ring-2 ring-background text-sm font-semibold text-foreground"
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={VP}
-                        variants={{
-                          hidden: { scale: 0.7, opacity: 0, y: 4 },
-                          visible: {
-                            scale: 1,
-                            opacity: 1,
-                            y: 0,
-                            transition: { duration: 0.45, ease: [0.34, 1.56, 0.64, 1], delay },
-                          },
-                        }}
-                      >
-                        {initial}
-                      </motion.div>
-                    ))}
-                  </div>
-                  {/* Name pills fade in after avatars */}
-                  <div className="flex gap-1.5 flex-wrap">
-                    {[
-                      { name: 'Ayu', delay: 0.35 },
-                      { name: 'Sari', delay: 0.42 },
-                      { name: 'Rian', delay: 0.49 },
-                    ].map(({ name, delay }) => (
-                      <motion.span
-                        key={name}
-                        className="rounded-full border border-border bg-card px-2.5 py-0.5 text-xs text-muted-foreground"
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={VP}
-                        variants={{
-                          hidden: { opacity: 0 },
-                          visible: { opacity: 1, transition: { duration: 0.4, delay } },
-                        }}
-                      >
-                        {name}
-                      </motion.span>
-                    ))}
-                  </div>
+                <div className="mb-4">
+                  <LoyaltyAvatars />
                 </div>
                 <h3 className="text-lg font-medium">
                   <Trans>Loyalitas pelanggan</Trans>
