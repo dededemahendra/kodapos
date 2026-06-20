@@ -1,4 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { CtaBand } from '~/components/marketing/cta-band';
+import { Faq } from '~/components/marketing/faq';
 import { FeatureSection } from '~/components/marketing/feature-section';
 import { Hero } from '~/components/marketing/hero';
 import { HowItWorks } from '~/components/marketing/how-it-works';
@@ -33,8 +35,8 @@ function PublicHome() {
         <WhyIndonesia />
         <Testimonials />
         <Pricing />
-        {/* <Faq /> Task 6 */}
-        {/* <CtaBand /> Task 6 */}
+        <Faq />
+        <CtaBand />
       </main>
       <MarketingFooter />
     </div>
