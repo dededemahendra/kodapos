@@ -1,5 +1,5 @@
 import { useRouterState } from "@tanstack/react-router";
-import { useLingui } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -11,7 +11,8 @@ import { CustomSidebarTrigger } from "~/components/custom-sidebar-trigger";
 import { NavUser } from "~/components/nav-user";
 import { NotificationsMenu } from "~/components/notifications-menu";
 import { applyTheme, storeTheme } from "~/lib/preferences";
-import { MoonIcon, SunIcon } from "lucide-react";
+import { Kbd } from "~/components/ui/kbd";
+import { MoonIcon, Search, SunIcon } from "lucide-react";
 
 export function AppHeader() {
 	const { t } = useLingui();
@@ -28,11 +29,25 @@ export function AppHeader() {
 		setIsDark(document.documentElement.classList.contains("dark"));
 	}, []);
 
+	// The palette opens on either Cmd+K or Ctrl+K; show the modifier that matches
+	// the user's platform instead of a hardcoded ⌘. Resolved on mount to keep SSR
+	// output stable.
+	const [isMac, setIsMac] = useState(false);
+	useEffect(() => {
+		setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform));
+	}, []);
+
 	function toggleTheme() {
 		const next = isDark ? "light" : "dark";
 		storeTheme(next);
 		applyTheme(next);
 		setIsDark(next === "dark");
+	}
+
+	function openCommandPalette() {
+		document.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
+		);
 	}
 
 	return (
@@ -52,6 +67,26 @@ export function AppHeader() {
 				<AppBreadcrumbs page={activeItem ?? null} />
 			</div>
 			<div className="flex items-center gap-3">
+				<Button
+					aria-label={t`Cari`}
+					size="sm"
+					variant="ghost"
+					className="hidden md:flex items-center gap-2 text-muted-foreground hover:text-foreground"
+					onClick={openCommandPalette}
+				>
+					<Search className="size-4" />
+					<span className="text-sm"><Trans>Cari</Trans></span>
+					<Kbd>{isMac ? "⌘K" : "Ctrl K"}</Kbd>
+				</Button>
+				<Button
+					aria-label={t`Cari`}
+					size="icon-sm"
+					variant="ghost"
+					className="flex md:hidden"
+					onClick={openCommandPalette}
+				>
+					<Search />
+				</Button>
 				<Button
 					aria-label={t`Ganti tema`}
 					size="icon-sm"
