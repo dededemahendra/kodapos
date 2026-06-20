@@ -3903,6 +3903,10 @@ msgstr "Menganalisis…"
 msgid "Menu"
 msgstr "Menu"
 
+#: src/components/marketing/how-it-works.tsx
+msgid "Menu apa yang paling laris minggu ini?"
+msgstr "Menu apa yang paling laris minggu ini?"
+
 #: src/components/dashboard-invoices.tsx
 msgid "Menunggu"
 msgstr "Menunggu"
