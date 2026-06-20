@@ -675,6 +675,10 @@ msgstr "Arus Masuk"
 msgid "Asisten AI"
 msgstr "Asisten AI"
 
+#: src/components/marketing/hero.tsx
+msgid "Asisten AI kini hadir di kodapos"
+msgstr "Asisten AI kini hadir di kodapos"
+
 #: src/components/auth/or-divider.tsx
 msgid "atau"
 msgstr "atau"
@@ -3015,7 +3019,6 @@ msgstr "Kas masuk / keluar"
 
 #: src/components/app-shared.tsx
 #: src/components/dashboard-invoices.tsx
-#: src/components/marketing/hero.tsx
 #: src/components/staff/staff-picker-card.tsx
 #: src/routes/_pos/onboarding/route.tsx
 #: src/routes/_pos/reports/cashiers.tsx
@@ -3467,7 +3470,6 @@ msgid "Lanjutkan dengan Google"
 msgstr "Lanjutkan dengan Google"
 
 #: src/components/app-shared.tsx
-#: src/components/marketing/hero.tsx
 #: src/components/nav-user.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Laporan"
@@ -3506,7 +3508,6 @@ msgid "Layanan"
 msgstr "Layanan"
 
 #: src/components/marketing/feature-section.tsx
-#: src/components/marketing/hero.tsx
 msgid "Layar dapur"
 msgstr "Layar dapur"
 
@@ -3604,7 +3605,6 @@ msgid "Lokasi cuaca diperbarui."
 msgstr "Lokasi cuaca diperbarui."
 
 #: src/components/app-shared.tsx
-#: src/components/marketing/hero.tsx
 #: src/routes/_pos/loyalty.tsx
 msgid "Loyalitas"
 msgstr "Loyalitas"
@@ -3736,7 +3736,6 @@ msgid "Max"
 msgstr "Max"
 
 #: src/components/app-shared.tsx
-#: src/components/marketing/hero.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/hold-order-dialog.tsx
 #: src/components/sale/register-top-bar.tsx
@@ -4722,7 +4721,6 @@ msgid "Pesan lagi"
 msgstr "Pesan lagi"
 
 #: src/components/marketing/feature-section.tsx
-#: src/components/marketing/hero.tsx
 msgid "Pesan mandiri QR"
 msgstr "Pesan mandiri QR"
 
@@ -5052,8 +5050,8 @@ msgid "POS pintar untuk kafe dan resto di Indonesia."
 msgstr "POS pintar untuk kafe dan resto di Indonesia."
 
 #: src/components/marketing/hero.tsx
-msgid "POS untuk kafe dan resto"
-msgstr "POS untuk kafe dan resto"
+#~ msgid "POS untuk kafe dan resto"
+#~ msgstr "POS untuk kafe dan resto"
 
 #. placeholder {0}: order.taxRatePct
 #: src/components/sale/receipt-preview.tsx
@@ -5178,7 +5176,6 @@ msgid "QR tidak valid"
 msgstr "QR tidak valid"
 
 #: src/components/channel-sales-chart.tsx
-#: src/components/marketing/hero.tsx
 #: src/components/sale/payment-methods.tsx
 msgid "QRIS"
 msgstr "QRIS"
@@ -5864,7 +5861,6 @@ msgid "Stok cukup untuk minggu ini."
 msgstr "Stok cukup untuk minggu ini."
 
 #: src/components/marketing/feature-section.tsx
-#: src/components/marketing/hero.tsx
 msgid "Stok dan resep"
 msgstr "Stok dan resep"
 
