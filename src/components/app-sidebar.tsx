@@ -2,7 +2,7 @@
 
 import { Link } from "@tanstack/react-router";
 import { useLingui } from "@lingui/react";
-import { Coffee } from "lucide-react";
+import { BrandMark } from "~/components/brand-mark";
 import { cn } from "~/lib/utils";
 import {
 	Sidebar,
@@ -44,7 +44,7 @@ export function AppSidebar() {
 			<SidebarHeader className="h-14 justify-center border-b px-2">
 				<SidebarMenuButton asChild>
 					<Link onClick={closeMobile} to="/dashboard">
-						<Coffee className="text-primary" />
+						<BrandMark className="h-5! w-auto! text-primary" />
 						<span className="font-medium text-foreground!">kodapos</span>
 					</Link>
 				</SidebarMenuButton>

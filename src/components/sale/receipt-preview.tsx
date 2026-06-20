@@ -161,7 +161,7 @@ export function ReceiptPreview({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         {order === undefined || cafe === undefined ? (
           <p className="text-muted-foreground">
             <Trans>Memuat struk…</Trans>
@@ -317,8 +317,8 @@ export function ReceiptPreview({
             ) : null}
           </div>
         )}
-        <div className="flex gap-2 justify-between mt-4">
-          <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 justify-between mt-4">
+          <div className="flex flex-wrap gap-2">
             {order?.paymentStatus === 'paid' && can('canVoid') ? (
               <Button
                 type="button"
@@ -348,7 +348,7 @@ export function ReceiptPreview({
               </Button>
             ) : null}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {order ? (
               <Popover>
                 <PopoverTrigger asChild>

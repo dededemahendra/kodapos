@@ -9,6 +9,7 @@ import { convex } from '~/lib/convex';
 import { i18n } from '~/lib/i18n';
 import { applyDensity, applyTheme, getDensity, getTheme } from '~/lib/preferences';
 import globalsCss from '~/styles/globals.css?url';
+import faviconUrl from '~/assets/kodapos-logo.svg?url';
 
 // Runs in <head> before paint to set the `.dark` class from the stored theme
 // preference, avoiding a light/dark flash on first render. Self-invoking, no
@@ -35,6 +36,7 @@ export const Route = createRootRoute({
       { title: 'kodapos' },
     ],
     links: [
+      { rel: 'icon', type: 'image/svg+xml', href: faviconUrl },
       { rel: 'stylesheet', href: globalsCss },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       {
