@@ -440,8 +440,8 @@ msgstr "AI memperkirakan permintaan harian dari pola penjualan dan cuaca lokal."
 #~ msgstr "AI-native POS untuk kafe & QSR Indonesia."
 
 #: src/components/marketing/pricing.tsx
-msgid "Akses awal"
-msgstr "Akses awal"
+#~ msgid "Akses awal"
+#~ msgstr "Akses awal"
 
 #: src/components/permission/require-permission.tsx
 msgid "Akses ditolak"
@@ -688,6 +688,10 @@ msgstr "Arus Masuk"
 msgid "Asisten AI"
 msgstr "Asisten AI"
 
+#: src/components/marketing/pricing.tsx
+msgid "Asisten AI dan prakiraan permintaan"
+msgstr "Asisten AI dan prakiraan permintaan"
+
 #: src/components/marketing/hero.tsx
 msgid "Asisten AI kini hadir di kodapos"
 msgstr "Asisten AI kini hadir di kodapos"
@@ -864,6 +868,10 @@ msgstr "Bantuan"
 #: src/components/marketing/why-indonesia.tsx
 msgid "Bantuan langsung lewat WhatsApp saat Anda membutuhkannya."
 msgstr "Bantuan langsung lewat WhatsApp saat Anda membutuhkannya."
+
+#: src/components/marketing/pricing.tsx
+msgid "Banyak outlet skala besar"
+msgstr "Banyak outlet skala besar"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Bar"
@@ -1286,6 +1294,10 @@ msgstr "Bisa. Atur staf, peran, dan shift, lalu pantau aktivitas tiap kasir."
 #: src/components/marketing/faq.tsx
 msgid "Bisakah dipakai banyak kasir?"
 msgstr "Bisakah dipakai banyak kasir?"
+
+#: src/components/marketing/pricing.tsx
+msgid "Bisnis"
+msgstr "Bisnis"
 
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Bluetooth"
@@ -1930,6 +1942,10 @@ msgstr "Duduk"
 #: src/components/marketing/pricing.tsx
 msgid "Dukungan lewat WhatsApp"
 msgstr "Dukungan lewat WhatsApp"
+
+#: src/components/marketing/pricing.tsx
+msgid "Dukungan prioritas"
+msgstr "Dukungan prioritas"
 
 #: src/components/marketing/why-indonesia.tsx
 msgid "Dukungan WhatsApp"
@@ -2597,6 +2613,7 @@ msgstr "Hapus varian"
 #: src/components/import/csv-import-dialog.tsx
 #: src/components/marketing/marketing-footer.tsx
 #: src/components/marketing/marketing-header.tsx
+#: src/components/marketing/pricing.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/recipes.tsx
 msgid "Harga"
@@ -2616,6 +2633,10 @@ msgstr "Harga akan diumumkan sebelum masa akses awal berakhir."
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Harga dasar {0}"
 msgstr "Harga dasar {0}"
+
+#: src/components/marketing/pricing.tsx
+msgid "harga diumumkan nanti"
+msgstr "harga diumumkan nanti"
 
 #: src/components/marketing/pricing.tsx
 msgid "Harga sederhana"
@@ -2662,6 +2683,10 @@ msgstr "HPP memakai biaya bahan terkini; pengeluaran di luar inventaris."
 #: src/routes/_pos/recipes.tsx
 msgid "HPP/cup"
 msgstr "HPP/cup"
+
+#: src/components/marketing/pricing.tsx
+msgid "Hubungi kami"
+msgstr "Hubungi kami"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan"
@@ -2733,6 +2758,10 @@ msgstr "Instagram"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Integrasi"
 msgstr "Integrasi"
+
+#: src/components/marketing/pricing.tsx
+msgid "Integrasi khusus"
+msgstr "Integrasi khusus"
 
 #: src/components/app-shared.tsx
 msgid "Inventaris"
@@ -3103,6 +3132,10 @@ msgstr "Kasir tidak dikenal."
 #~ msgid "Kasir, meja, layar dapur, dan pesan mandiri lewat QR. Terima QRIS, tunai, atau split tanpa ribet."
 #~ msgstr "Kasir, meja, layar dapur, dan pesan mandiri lewat QR. Terima QRIS, tunai, atau split tanpa ribet."
 
+#: src/components/marketing/pricing.tsx
+msgid "Kasir, stok, dan laporan"
+msgstr "Kasir, stok, dan laporan"
+
 #. placeholder {0}: order.cashierName
 #: src/components/sale/receipt-preview.tsx
 msgid "Kasir: {0}"
@@ -3176,6 +3209,10 @@ msgstr "Kecil"
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kedai kopi"
 msgstr "Kedai kopi"
+
+#: src/components/marketing/pricing.tsx
+msgid "Kelola banyak cabang"
+msgstr "Kelola banyak cabang"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kelola identitas, kontak, dan jam operasional kafe Anda."
@@ -3714,6 +3751,10 @@ msgstr "Maks ({maxPoints})"
 #~ msgid "Manajemen meja"
 #~ msgstr "Manajemen meja"
 
+#: src/components/marketing/pricing.tsx
+msgid "Manajer akun khusus"
+msgstr "Manajer akun khusus"
+
 #: src/routes/_pos/recipes.tsx
 #: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/route.tsx
@@ -4125,8 +4166,12 @@ msgid "Mulai gratis"
 msgstr "Mulai gratis"
 
 #: src/components/marketing/pricing.tsx
-msgid "Mulai sekarang tanpa biaya selama masa akses awal."
-msgstr "Mulai sekarang tanpa biaya selama masa akses awal."
+msgid "Mulai gratis hari ini. Paket Pro dan Bisnis segera hadir."
+msgstr "Mulai gratis hari ini. Paket Pro dan Bisnis segera hadir."
+
+#: src/components/marketing/pricing.tsx
+#~ msgid "Mulai sekarang tanpa biaya selama masa akses awal."
+#~ msgstr "Mulai sekarang tanpa biaya selama masa akses awal."
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Naikkan urutan"
@@ -5146,6 +5191,10 @@ msgstr "Poin tidak valid."
 msgid "Poin yang diperoleh atau ditukar akan tercatat di sini."
 msgstr "Poin yang diperoleh atau ditukar akan tercatat di sini."
 
+#: src/components/marketing/pricing.tsx
+msgid "Populer"
+msgstr "Populer"
+
 #: src/components/inventory/recipe-editor.tsx
 msgid "porsi"
 msgstr "porsi"
@@ -5214,6 +5263,10 @@ msgstr "Prefiks yang ditambahkan di depan nomor pesanan."
 #: src/components/marketing/marketing-footer.tsx
 msgid "Privasi"
 msgstr "Privasi"
+
+#: src/components/marketing/pricing.tsx
+msgid "Pro"
+msgstr "Pro"
 
 #: src/components/app-shared.tsx
 #: src/components/marketing/marketing-footer.tsx
@@ -5646,13 +5699,17 @@ msgstr "Sedang"
 msgid "Sedang berjalan"
 msgstr "Sedang berjalan"
 
-#: src/routes/_pos/settings/general.tsx
-#~ msgid "Segera"
-#~ msgstr "Segera"
+#: src/components/marketing/pricing.tsx
+msgid "Segera"
+msgstr "Segera"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Segera hadir."
 msgstr "Segera hadir."
+
+#: src/components/marketing/pricing.tsx
+msgid "selama akses awal"
+msgstr "selama akses awal"
 
 #: src/routes/display.tsx
 msgid "Selamat datang"
@@ -5747,8 +5804,20 @@ msgid "Semua beres"
 msgstr "Semua beres"
 
 #: src/components/marketing/pricing.tsx
-msgid "Semua fitur terbuka"
-msgstr "Semua fitur terbuka"
+msgid "Semua di paket Gratis"
+msgstr "Semua di paket Gratis"
+
+#: src/components/marketing/pricing.tsx
+msgid "Semua di paket Pro"
+msgstr "Semua di paket Pro"
+
+#: src/components/marketing/pricing.tsx
+msgid "Semua fitur inti"
+msgstr "Semua fitur inti"
+
+#: src/components/marketing/pricing.tsx
+#~ msgid "Semua fitur terbuka"
+#~ msgstr "Semua fitur terbuka"
 
 #: src/components/sale/sale-screen.tsx
 msgid "Semua item akan dihapus dari pesanan ini."
@@ -6366,8 +6435,8 @@ msgid "Tanggal wajib diisi."
 msgstr "Tanggal wajib diisi."
 
 #: src/components/marketing/pricing.tsx
-msgid "Tanpa biaya pemasangan"
-msgstr "Tanpa biaya pemasangan"
+#~ msgid "Tanpa biaya pemasangan"
+#~ msgstr "Tanpa biaya pemasangan"
 
 #: src/components/marketing/pricing.tsx
 msgid "Tanpa kartu kredit"
@@ -7076,13 +7145,25 @@ msgstr "Unggah logo"
 msgid "Unggah QR statis dari penyedia Anda."
 msgstr "Unggah QR statis dari penyedia Anda."
 
+#: src/components/marketing/pricing.tsx
+msgid "Untuk banyak outlet."
+msgstr "Untuk banyak outlet."
+
 #: src/components/marketing/why-indonesia.tsx
 msgid "Untuk Indonesia"
 msgstr "Untuk Indonesia"
 
 #: src/components/marketing/pricing.tsx
-msgid "untuk saat ini"
-msgstr "untuk saat ini"
+msgid "Untuk kafe yang berkembang."
+msgstr "Untuk kafe yang berkembang."
+
+#: src/components/marketing/pricing.tsx
+msgid "Untuk mulai berjualan."
+msgstr "Untuk mulai berjualan."
+
+#: src/components/marketing/pricing.tsx
+#~ msgid "untuk saat ini"
+#~ msgstr "untuk saat ini"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "URL endpoint"
