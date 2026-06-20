@@ -62,7 +62,7 @@ export function Testimonials() {
                 type="button"
                 onClick={() => setActive(i)}
                 className={[
-                  'flex items-center gap-2 rounded-full transition-all duration-300',
+                  'group flex items-center gap-2 rounded-full transition-all duration-300',
                   'overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
                   i === active
                     ? 'bg-foreground text-background px-3 py-1'
@@ -80,7 +80,9 @@ export function Testimonials() {
                 <span
                   className={[
                     'whitespace-nowrap text-sm font-medium transition-all duration-300',
-                    i === active ? 'max-w-[120px] opacity-100' : 'max-w-0 opacity-0',
+                    i === active
+                      ? 'max-w-[120px] opacity-100'
+                      : 'max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100',
                   ].join(' ')}
                 >
                   {t.name}
