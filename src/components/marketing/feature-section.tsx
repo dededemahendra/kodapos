@@ -1,5 +1,5 @@
 import { Trans } from '@lingui/react/macro';
-import { CloudSun, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { Card, CardContent } from '~/components/ui/card';
 import { SectionHeading } from './section-heading';
@@ -151,57 +151,37 @@ export function FeatureSection() {
               </CardContent>
             </Card>
 
-            {/* Card 3: Area-chart card - Laporan waktu nyata */}
+            {/* Card 3: Bar-chart card - Laporan waktu nyata */}
             <Card className="col-span-full sm:col-span-3 lg:col-span-2">
               <CardContent className="p-6">
                 <div className="mb-4 h-12 w-full text-primary">
-                  <svg
-                    viewBox="0 0 120 44"
-                    className="h-full w-full"
-                    fill="none"
+                  <motion.div
+                    className="flex h-full items-end gap-1.5"
                     aria-hidden="true"
-                    preserveAspectRatio="none"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={VP}
+                    variants={{
+                      visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+                    }}
                   >
-                    <defs>
-                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    {/* Faint baseline */}
-                    <line x1="0" y1="42" x2="120" y2="42" stroke="currentColor" strokeWidth="1" className="opacity-20" />
-                    {/* Gradient fill area fades in after the line */}
-                    <motion.path
-                      d="M0,36 C10,34 20,30 30,26 C40,22 50,28 60,20 C70,14 80,18 90,10 C100,4 110,8 120,5 L120,42 L0,42 Z"
-                      fill="url(#areaGradient)"
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={VP}
-                      variants={{
-                        hidden: { opacity: 0 },
-                        visible: { opacity: 1, transition: { duration: 0.5, delay: 0.55 } },
-                      }}
-                    />
-                    {/* Sparkline draws in */}
-                    <motion.path
-                      d="M0,36 C10,34 20,30 30,26 C40,22 50,28 60,20 C70,14 80,18 90,10 C100,4 110,8 120,5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={VP}
-                      variants={{
-                        hidden: { pathLength: 0, opacity: 0 },
-                        visible: {
-                          pathLength: 1,
-                          opacity: 1,
-                          transition: { duration: 0.7, ease: 'easeOut', delay: 0.1 },
-                        },
-                      }}
-                    />
-                  </svg>
+                    {[42, 68, 54, 88, 62, 96, 74].map((h, i) => (
+                      <motion.div
+                        // biome-ignore lint/suspicious/noArrayIndexKey: static bar heights
+                        key={i}
+                        className={`flex-1 origin-bottom rounded-sm ${i % 2 === 0 ? 'bg-primary' : 'bg-primary/40'}`}
+                        style={{ height: `${h}%` }}
+                        variants={{
+                          hidden: { scaleY: 0, opacity: 0 },
+                          visible: {
+                            scaleY: 1,
+                            opacity: 1,
+                            transition: { duration: 0.5, ease: 'easeOut' },
+                          },
+                        }}
+                      />
+                    ))}
+                  </motion.div>
                 </div>
                 <h3 className="text-lg font-medium">
                   <Trans>Laporan waktu nyata</Trans>
@@ -217,20 +197,7 @@ export function FeatureSection() {
             {/* Card 4: Demand forecast - Prakiraan permintaan */}
             <Card className="col-span-full lg:col-span-3">
               <CardContent className="p-6">
-                <div className="mb-4 relative h-12 w-full text-primary">
-                  {/* CloudSun fades in */}
-                  <motion.div
-                    className="absolute top-0 right-0"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={VP}
-                    variants={{
-                      hidden: { opacity: 0 },
-                      visible: { opacity: 1, transition: { duration: 0.5, delay: 0.6 } },
-                    }}
-                  >
-                    <CloudSun className="size-5 text-muted-foreground opacity-60" aria-hidden="true" />
-                  </motion.div>
+                <div className="mb-4 h-12 w-full text-primary">
                   <svg
                     viewBox="0 0 180 44"
                     className="h-full w-full"
