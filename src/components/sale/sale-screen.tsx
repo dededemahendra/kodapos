@@ -298,7 +298,7 @@ export function SaleScreen({
   }
 
   return (
-    <div className="grid grid-cols-[1fr_minmax(320px,30%)] h-full min-h-0 overflow-hidden">
+    <div className="grid grid-cols-[1fr_280px] md:grid-cols-[1fr_320px] lg:grid-cols-[1fr_380px] h-full min-h-0 overflow-hidden">
       <MenuPane categories={categories} items={items} onItemTap={onItemTap} onScan={onScan} />
       <CartPane
         cart={cart}
