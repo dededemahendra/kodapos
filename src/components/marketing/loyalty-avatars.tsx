@@ -4,13 +4,16 @@ import type { MouseEvent, ReactNode } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 
+/** DiceBear "notionists" generates illustrated (non real person) avatars from a seed. */
+function avatarUrl(seed: string) {
+  return `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(seed)}`;
+}
+
 function TooltipAvatar({
   name,
-  initial,
   designation,
 }: {
   name: string;
-  initial: string;
   designation: ReactNode;
 }) {
   const x = useMotionValue(0);
@@ -32,19 +35,26 @@ function TooltipAvatar({
         <span className="text-sm font-medium whitespace-nowrap">{name}</span>
         <span className="text-xs text-background/60 whitespace-nowrap">{designation}</span>
       </motion.div>
-      {/* Avatar circle */}
-      <div className="size-10 rounded-full bg-muted text-foreground ring-2 ring-background flex items-center justify-center text-sm font-semibold transition group-hover:scale-105 group-hover:z-30">
-        {initial}
+      {/* Avatar */}
+      <div className="size-10 overflow-hidden rounded-full bg-muted ring-2 ring-background transition group-hover:scale-105 group-hover:z-30">
+        <img
+          src={avatarUrl(name)}
+          alt=""
+          width={40}
+          height={40}
+          loading="lazy"
+          className="size-full object-cover"
+        />
       </div>
     </div>
   );
 }
 
 const people = [
-  { name: 'Emma Carter', initial: 'E', designation: <Trans>Pelanggan setia</Trans> },
-  { name: 'Liam Bennett', initial: 'L', designation: <Trans>Anggota emas</Trans> },
-  { name: 'Olivia Hayes', initial: 'O', designation: <Trans>Sering berkunjung</Trans> },
-  { name: 'Noah Parker', initial: 'N', designation: <Trans>Pelanggan baru</Trans> },
+  { name: 'Emma Carter', designation: <Trans>Pelanggan setia</Trans> },
+  { name: 'Liam Bennett', designation: <Trans>Anggota emas</Trans> },
+  { name: 'Olivia Hayes', designation: <Trans>Sering berkunjung</Trans> },
+  { name: 'Noah Parker', designation: <Trans>Pelanggan baru</Trans> },
 ];
 
 export function LoyaltyAvatars() {
