@@ -82,10 +82,10 @@ export function CommandPalette() {
     : permittedNav;
 
   const QUICK_ACTIONS = [
-    { key: 'sale', label: t`Kasir baru`, icon: <Calculator className="size-4" />, path: '/sale' },
-    { key: 'menu', label: t`Tambah item menu`, icon: <Plus className="size-4" />, path: '/menu' },
-    { key: 'shift', label: t`Buka shift`, icon: <Clock className="size-4" />, path: '/shift' },
-    { key: 'customers', label: t`Tambah pelanggan`, icon: <Users className="size-4" />, path: '/customers' },
+    { key: 'sale', label: t`Buka kasir`, icon: <Calculator className="size-4" />, path: '/sale' },
+    { key: 'menu', label: t`Kelola menu`, icon: <Plus className="size-4" />, path: '/menu' },
+    { key: 'shift', label: t`Buka shift`, icon: <Clock className="size-4" />, path: '/shift/open' },
+    { key: 'customers', label: t`Kelola pelanggan`, icon: <Users className="size-4" />, path: '/customers' },
   ] as const;
 
   const matchingActions = queryLower
@@ -98,7 +98,7 @@ export function CommandPalette() {
   const isLoading = isLive && liveResults === undefined;
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
+    <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
       <CommandInput
         placeholder={t`Cari...`}
         value={query}

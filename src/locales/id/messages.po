@@ -1315,6 +1315,10 @@ msgstr "Buka dokumentasi"
 msgid "Buka Integrasi"
 msgstr "Buka Integrasi"
 
+#: src/components/command-palette.tsx
+msgid "Buka kasir"
+msgstr "Buka kasir"
+
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Buka laci kas"
 #~ msgstr "Buka laci kas"
@@ -2852,8 +2856,8 @@ msgid "Kasir"
 msgstr "Kasir"
 
 #: src/components/command-palette.tsx
-msgid "Kasir baru"
-msgstr "Kasir baru"
+#~ msgid "Kasir baru"
+#~ msgstr "Kasir baru"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
@@ -2945,6 +2949,14 @@ msgstr "Kelola kasir, kontak, izin akses, dan PIN."
 #: src/routes/_pos/tables.tsx
 msgid "Kelola meja"
 msgstr "Kelola meja"
+
+#: src/components/command-palette.tsx
+msgid "Kelola menu"
+msgstr "Kelola menu"
+
+#: src/components/command-palette.tsx
+msgid "Kelola pelanggan"
+msgstr "Kelola pelanggan"
 
 #: src/components/nav-user.tsx
 msgid "Kelola staf"
@@ -5624,8 +5636,8 @@ msgid "Tambah Item"
 msgstr "Tambah Item"
 
 #: src/components/command-palette.tsx
-msgid "Tambah item menu"
-msgstr "Tambah item menu"
+#~ msgid "Tambah item menu"
+#~ msgstr "Tambah item menu"
 
 #: src/routes/_pos/recipes.tsx
 msgid "Tambah item menu dulu untuk mulai menyusun resep."
@@ -5672,7 +5684,6 @@ msgstr "Tambah ke pesanan"
 msgid "Tambah meja"
 msgstr "Tambah meja"
 
-#: src/components/command-palette.tsx
 #: src/components/customer/customer-form-dialog.tsx
 #: src/routes/_pos/customers.tsx
 msgid "Tambah pelanggan"
