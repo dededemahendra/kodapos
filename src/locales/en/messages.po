@@ -422,6 +422,7 @@ msgstr "Admin"
 msgid "AI"
 msgstr "AI"
 
+#: src/components/marketing/ai-spotlight.tsx
 #: src/routes/_pos/ai.tsx
 msgid "AI bisa keliru. Periksa informasi penting."
 msgstr "AI can make mistakes. Check important information."
@@ -793,6 +794,10 @@ msgstr "ingredient"
 #: src/routes/_pos/recipes.tsx
 msgid "Bahan"
 msgstr "Ingredient"
+
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Bahan apa yang perlu distok?"
+msgstr "What ingredients should I restock?"
 
 #: src/routes/_pos/ai.tsx
 msgid "Bahan apa yang perlu segera diisi ulang?"
