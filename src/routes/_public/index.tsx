@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { FeatureSection } from '~/components/marketing/feature-section';
 import { Hero } from '~/components/marketing/hero';
+import { HowItWorks } from '~/components/marketing/how-it-works';
 import { MarketingHeader } from '~/components/marketing/marketing-header';
 import { MarketingFooter } from '~/components/marketing/marketing-footer';
+import { WhyIndonesia } from '~/components/marketing/why-indonesia';
 
 export const Route = createFileRoute('/_public/')({
   head: () => ({
@@ -25,8 +27,8 @@ function PublicHome() {
       <main>
         <Hero />
         <FeatureSection />
-        {/* <HowItWorks /> Task 4 */}
-        {/* <WhyIndonesia /> Task 4 */}
+        <HowItWorks />
+        <WhyIndonesia />
         {/* <Testimonials /> Task 5 */}
         {/* <Pricing /> Task 5 */}
         {/* <Faq /> Task 6 */}
