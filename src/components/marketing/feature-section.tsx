@@ -1,5 +1,5 @@
 import { Trans } from '@lingui/react/macro';
-import { BarChart3, CloudSun, ShieldCheck, Users } from 'lucide-react';
+import { CloudSun, ShieldCheck } from 'lucide-react';
 import { Card, CardContent } from '~/components/ui/card';
 import { SectionHeading } from './section-heading';
 
@@ -17,9 +17,24 @@ export function FeatureSection() {
           {/* Card 1: Stat card - Berbasis web */}
           <Card className="col-span-full sm:col-span-3 lg:col-span-2">
             <CardContent className="p-6">
-              <div className="mb-4 flex flex-col items-start gap-1">
+              <div className="mb-4 flex flex-col items-start gap-2">
                 <span className="text-4xl font-bold text-primary leading-none">100%</span>
-                <div className="h-1 w-10 rounded-full bg-primary/30" />
+                {/* Elegant hand-drawn-style curved underline */}
+                <svg
+                  viewBox="0 0 80 12"
+                  className="w-20 h-3 text-primary"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2,8 C16,3 32,11 48,6 C60,2 70,9 78,7"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="opacity-50"
+                  />
+                </svg>
               </div>
               <h3 className="text-lg font-medium">
                 <Trans>Berbasis web</Trans>
@@ -33,9 +48,17 @@ export function FeatureSection() {
           {/* Card 2: ShieldCheck card - Aman secara bawaan */}
           <Card className="col-span-full sm:col-span-3 lg:col-span-2">
             <CardContent className="p-6">
-              <div className="mb-4 flex items-center justify-center size-14 rounded-full border-2 border-border relative">
-                <div className="absolute inset-[-6px] rounded-full border border-border/40" />
-                <ShieldCheck className="size-6 text-primary" />
+              <div className="mb-4 relative flex items-center justify-center" style={{ width: 64, height: 64 }}>
+                {/* Soft radial glow behind the shield */}
+                <div className="absolute inset-0 rounded-full bg-primary/5" />
+                {/* Outermost ring - very faint */}
+                <div className="absolute inset-0 rounded-full border border-border/20" />
+                {/* Middle ring */}
+                <div className="absolute inset-[8px] rounded-full border border-border/40" />
+                {/* Inner ring */}
+                <div className="absolute inset-[16px] rounded-full border-2 border-border" />
+                {/* Icon centered */}
+                <ShieldCheck className="relative z-10 size-6 text-primary" />
               </div>
               <h3 className="text-lg font-medium">
                 <Trans>Aman secara bawaan</Trans>
@@ -46,16 +69,39 @@ export function FeatureSection() {
             </CardContent>
           </Card>
 
-          {/* Card 3: Bar-chart card - Laporan waktu nyata */}
+          {/* Card 3: Area-chart card - Laporan waktu nyata */}
           <Card className="col-span-full sm:col-span-3 lg:col-span-2">
             <CardContent className="p-6">
-              <div className="mb-4 flex items-end gap-1 h-10">
-                <div className="w-3 rounded-t bg-primary/30 h-4" />
-                <div className="w-3 rounded-t bg-primary/60 h-6" />
-                <div className="w-3 rounded-t bg-primary h-9" />
-                <div className="w-3 rounded-t bg-primary/60 h-7" />
-                <div className="w-3 rounded-t bg-primary/30 h-5" />
-                <BarChart3 className="ml-2 size-5 text-muted-foreground self-end" />
+              <div className="mb-4 h-12 w-full text-primary">
+                <svg
+                  viewBox="0 0 120 44"
+                  className="h-full w-full"
+                  fill="none"
+                  aria-hidden="true"
+                  preserveAspectRatio="none"
+                >
+                  <defs>
+                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="currentColor" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {/* Faint baseline */}
+                  <line x1="0" y1="42" x2="120" y2="42" stroke="currentColor" strokeWidth="1" className="opacity-20" />
+                  {/* Gradient fill area */}
+                  <path
+                    d="M0,36 C10,34 20,30 30,26 C40,22 50,28 60,20 C70,14 80,18 90,10 C100,4 110,8 120,5 L120,42 L0,42 Z"
+                    fill="url(#areaGradient)"
+                  />
+                  {/* Smooth sparkline */}
+                  <path
+                    d="M0,36 C10,34 20,30 30,26 C40,22 50,28 60,20 C70,14 80,18 90,10 C100,4 110,8 120,5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
               <h3 className="text-lg font-medium">
                 <Trans>Laporan waktu nyata</Trans>
@@ -71,31 +117,37 @@ export function FeatureSection() {
           {/* Card 4: Demand forecast - Prakiraan permintaan */}
           <Card className="col-span-full lg:col-span-3">
             <CardContent className="p-6">
-              <div className="mb-4 flex items-center gap-3">
-                <CloudSun className="size-7 text-primary" />
+              <div className="mb-4 relative h-12 w-full text-primary">
+                {/* Small CloudSun icon in corner */}
+                <CloudSun className="absolute top-0 right-0 size-5 text-muted-foreground opacity-60" aria-hidden="true" />
                 <svg
-                  viewBox="0 0 120 40"
-                  className="h-10 flex-1 text-primary"
+                  viewBox="0 0 180 44"
+                  className="h-full w-full"
                   fill="none"
                   aria-hidden="true"
+                  preserveAspectRatio="none"
                 >
-                  <polyline
-                    points="0,35 20,25 40,30 60,15 80,20 100,8 120,12"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                    className="opacity-40"
+                  <defs>
+                    <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="currentColor" stopOpacity="0.20" />
+                      <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {/* Gradient fill beneath smooth curve */}
+                  <path
+                    d="M0,38 C20,36 40,34 60,30 C80,26 100,20 120,14 C140,8 160,6 180,3 L180,42 L0,42 Z"
+                    fill="url(#forecastGradient)"
                   />
-                  <polyline
-                    points="0,35 20,25 40,30 60,15 80,20 100,8 120,12"
+                  {/* Smooth upward trend line */}
+                  <path
+                    d="M0,38 C20,36 40,34 60,30 C80,26 100,20 120,14 C140,8 160,6 180,3"
                     stroke="currentColor"
                     strokeWidth="2"
-                    strokeLinejoin="round"
                     strokeLinecap="round"
-                    strokeDasharray="4 3"
-                    className="opacity-80"
+                    strokeLinejoin="round"
                   />
+                  {/* Faint baseline */}
+                  <line x1="0" y1="42" x2="180" y2="42" stroke="currentColor" strokeWidth="1" className="opacity-20" />
                 </svg>
               </div>
               <h3 className="text-lg font-medium">
@@ -110,22 +162,32 @@ export function FeatureSection() {
           {/* Card 5: Customer loyalty - Loyalitas pelanggan */}
           <Card className="col-span-full lg:col-span-3">
             <CardContent className="p-6">
-              <div className="mb-4 flex items-center gap-3">
-                <Users className="size-6 text-primary" />
-                <div className="flex gap-2">
+              <div className="mb-4 flex items-center gap-4">
+                {/* Overlapping avatar stack */}
+                <div className="flex -space-x-3">
                   {[
-                    { initial: 'A', name: 'Ayu' },
-                    { initial: 'S', name: 'Sari' },
-                    { initial: 'R', name: 'Rian' },
-                  ].map(({ initial, name }) => (
-                    <div key={name} className="flex flex-col items-center gap-1">
-                      <div className="flex size-9 items-center justify-center rounded-full bg-muted border border-border text-sm font-semibold text-foreground">
-                        {initial}
-                      </div>
-                      <span className="rounded-full border border-border bg-background px-2 py-0.5 text-xs text-muted-foreground">
-                        {name}
-                      </span>
+                    { initial: 'A', label: 'Ayu' },
+                    { initial: 'S', label: 'Sari' },
+                    { initial: 'R', label: 'Rian' },
+                  ].map(({ initial, label }) => (
+                    <div
+                      key={label}
+                      title={label}
+                      className="flex size-10 items-center justify-center rounded-full bg-muted ring-2 ring-background text-sm font-semibold text-foreground"
+                    >
+                      {initial}
                     </div>
+                  ))}
+                </div>
+                {/* Name pills */}
+                <div className="flex gap-1.5 flex-wrap">
+                  {['Ayu', 'Sari', 'Rian'].map((name) => (
+                    <span
+                      key={name}
+                      className="rounded-full border border-border bg-card px-2.5 py-0.5 text-xs text-muted-foreground"
+                    >
+                      {name}
+                    </span>
                   ))}
                 </div>
               </div>
