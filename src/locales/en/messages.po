@@ -861,6 +861,10 @@ msgstr "Bakery"
 msgid "Bantuan"
 msgstr "Help"
 
+#: src/components/marketing/why-indonesia.tsx
+msgid "Bantuan langsung lewat WhatsApp saat Anda membutuhkannya."
+msgstr "Direct help over WhatsApp when you need it."
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Bar"
 msgstr "Bar"
@@ -1708,6 +1712,10 @@ msgstr "Weather — expected up {0}%"
 msgid "Cuaca — perkiraan turun {0}%"
 msgstr "Weather — expected down {0}%"
 
+#: src/components/marketing/why-indonesia.tsx
+msgid "Cukup tablet, HP, atau laptop yang sudah Anda punya."
+msgstr "Just the tablet, phone, or laptop you already own."
+
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Customer"
 #~ msgstr "Customer"
@@ -1922,6 +1930,10 @@ msgstr "Seated"
 #: src/components/marketing/pricing.tsx
 msgid "Dukungan lewat WhatsApp"
 msgstr "Support over WhatsApp"
+
+#: src/components/marketing/why-indonesia.tsx
+msgid "Dukungan WhatsApp"
+msgstr "WhatsApp support"
 
 #: src/components/reservations/reservation-form-dialog.tsx
 msgid "Durasi (menit)"
@@ -6361,6 +6373,10 @@ msgstr "No supplier"
 msgid "Tanpa pembulatan"
 msgstr "No rounding"
 
+#: src/components/marketing/why-indonesia.tsx
+msgid "Tanpa perangkat khusus"
+msgstr "No special hardware"
+
 #: src/components/sale/customer-section.tsx
 msgid "Tanpa reward"
 msgstr "No reward"
@@ -7031,6 +7047,10 @@ msgstr "Upload logo"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Unggah QR statis dari penyedia Anda."
 msgstr "Upload the static QR from your provider."
+
+#: src/components/marketing/why-indonesia.tsx
+msgid "Untuk Indonesia"
+msgstr "For Indonesia"
 
 #: src/components/marketing/pricing.tsx
 msgid "untuk saat ini"
