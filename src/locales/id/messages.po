@@ -1323,6 +1323,10 @@ msgstr "Buka Integrasi"
 msgid "Buka laci kas saat tunai"
 msgstr "Buka laci kas saat tunai"
 
+#: src/components/command-palette.tsx
+msgid "Buka shift"
+msgstr "Buka shift"
+
 #: src/routes/_pos/shift/open.tsx
 msgid "Buka Shift"
 msgstr "Buka Shift"
@@ -1355,6 +1359,10 @@ msgstr "Callback Token"
 msgid "Cara tanggal ditampilkan di struk dan laporan."
 msgstr "Cara tanggal ditampilkan di struk dan laporan."
 
+#: src/components/app-header.tsx
+msgid "Cari"
+msgstr "Cari"
+
 #: src/routes/_pos/inventory/index.tsx
 msgid "Cari bahan…"
 msgstr "Cari bahan…"
@@ -1383,6 +1391,10 @@ msgstr "Cari nama atau telepon…"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Cari nama staf…"
 msgstr "Cari nama staf…"
+
+#: src/components/command-palette.tsx
+msgid "Cari..."
+msgstr "Cari..."
 
 #: src/components/menu/modifier-group-form.tsx
 msgid "Cashier harus memilih"
@@ -2290,6 +2302,10 @@ msgstr "Gunakan pencetak termal"
 msgid "Habis"
 msgstr "Habis"
 
+#: src/components/command-palette.tsx
+msgid "Halaman"
+msgstr "Halaman"
+
 #. placeholder {0}: pageIndex + 1
 #: src/components/ui/data-table.tsx
 msgid "Halaman {0} dari {pageCount}"
@@ -2572,6 +2588,7 @@ msgid "Item ditandai tersedia."
 msgstr "Item ditandai tersedia."
 
 #: src/components/app-shared.tsx
+#: src/components/command-palette.tsx
 #: src/routes/_pos/menu/index.tsx
 msgid "Item Menu"
 msgstr "Item Menu"
@@ -2833,6 +2850,10 @@ msgstr "Kas masuk / keluar"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Kasir"
 msgstr "Kasir"
+
+#: src/components/command-palette.tsx
+msgid "Kasir baru"
+msgstr "Kasir baru"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
@@ -4072,6 +4093,7 @@ msgid "Pelajari selengkapnya"
 msgstr "Pelajari selengkapnya"
 
 #: src/components/app-shared.tsx
+#: src/components/command-palette.tsx
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
 #: src/routes/_pos/customers.tsx
@@ -5601,6 +5623,10 @@ msgstr "Tambah bahan pertama untuk mulai melacak stok."
 msgid "Tambah Item"
 msgstr "Tambah Item"
 
+#: src/components/command-palette.tsx
+msgid "Tambah item menu"
+msgstr "Tambah item menu"
+
 #: src/routes/_pos/recipes.tsx
 msgid "Tambah item menu dulu untuk mulai menyusun resep."
 msgstr "Tambah item menu dulu untuk mulai menyusun resep."
@@ -5646,6 +5672,7 @@ msgstr "Tambah ke pesanan"
 msgid "Tambah meja"
 msgstr "Tambah meja"
 
+#: src/components/command-palette.tsx
 #: src/components/customer/customer-form-dialog.tsx
 #: src/routes/_pos/customers.tsx
 msgid "Tambah pelanggan"
@@ -6096,6 +6123,10 @@ msgstr "Tidak ada grup diarsipkan."
 msgid "Tidak ada hasil"
 msgstr "Tidak ada hasil"
 
+#: src/components/command-palette.tsx
+msgid "Tidak ada hasil untuk «{query}»"
+msgstr "Tidak ada hasil untuk «{query}»"
+
 #: src/components/sale/menu-pane.tsx
 msgid "Tidak ada item di kategori ini."
 msgstr "Tidak ada item di kategori ini."
@@ -6179,6 +6210,10 @@ msgstr "Tidak menemukan yang Anda cari?"
 #: src/routes/_pos/loyalty.tsx
 msgid "Tier"
 msgstr "Tier"
+
+#: src/components/command-palette.tsx
+msgid "Tindakan Cepat"
+msgstr "Tindakan Cepat"
 
 #: src/routes/_pos/forecast.tsx
 msgid "Tinggi"
