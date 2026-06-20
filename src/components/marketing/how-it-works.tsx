@@ -103,9 +103,11 @@ function OrderPaymentIllustration() {
         <div className="h-2 w-12 rounded-full bg-primary/50" />
       </div>
       {/* QRIS hint */}
-      <div className="flex items-center gap-3 pt-1">
-        <QrDots />
-        <div className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold leading-none text-primary-foreground">
+      <div className="flex items-center justify-between gap-2 pt-1">
+        <div className="rounded-md border border-border bg-background p-1.5">
+          <QrDots />
+        </div>
+        <div className="rounded-full bg-primary px-3 py-1 text-[10px] font-semibold leading-none text-primary-foreground">
           Bayar
         </div>
       </div>
@@ -120,7 +122,7 @@ function ReportsAiIllustration() {
     <div className="space-y-2" aria-hidden="true">
       {/* mini bar chart */}
       <motion.div
-        className="flex h-8 items-end gap-1"
+        className="flex h-10 items-end gap-1.5"
         initial="hidden"
         whileInView="visible"
         viewport={VP}
@@ -140,9 +142,9 @@ function ReportsAiIllustration() {
         ))}
       </motion.div>
 
-      {/* AI chat input */}
+      {/* AI chat input: prompt on its own line, controls below */}
       <motion.div
-        className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 p-1.5"
+        className="rounded-lg border border-border bg-muted/40 p-2"
         initial="hidden"
         whileInView="visible"
         viewport={VP}
@@ -151,18 +153,22 @@ function ReportsAiIllustration() {
           visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut', delay: 0.35 } },
         }}
       >
-        <Button variant="outline" size="icon" className="size-6 shrink-0 [&_svg]:size-3" tabIndex={-1}>
-          <Plus aria-hidden="true" />
-        </Button>
-        <Button variant="outline" size="icon" className="size-6 shrink-0 [&_svg]:size-3" tabIndex={-1}>
-          <Globe aria-hidden="true" />
-        </Button>
-        <span className="flex-1 truncate text-[10px] leading-none text-muted-foreground">
+        <p className="line-clamp-1 px-0.5 text-[11px] leading-relaxed text-foreground/80">
           <Trans>Menu apa yang paling laris minggu ini?</Trans>
-        </span>
-        <Button size="icon" className="size-6 shrink-0 [&_svg]:size-3" tabIndex={-1}>
-          <ArrowUp aria-hidden="true" />
-        </Button>
+        </p>
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex gap-1.5">
+            <Button variant="outline" size="icon" className="size-6 [&_svg]:size-3" tabIndex={-1}>
+              <Plus aria-hidden="true" />
+            </Button>
+            <Button variant="outline" size="icon" className="size-6 [&_svg]:size-3" tabIndex={-1}>
+              <Globe aria-hidden="true" />
+            </Button>
+          </div>
+          <Button size="icon" className="size-6 [&_svg]:size-3" tabIndex={-1}>
+            <ArrowUp aria-hidden="true" />
+          </Button>
+        </div>
       </motion.div>
     </div>
   );
