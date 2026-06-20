@@ -92,7 +92,7 @@ export function NotificationsMenu() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button aria-label={t`Notifikasi`} size="icon-sm" variant="outline" className="relative">
+        <Button aria-label={t`Notifikasi`} size="icon-sm" variant="ghost" className="relative">
           <BellIcon />
           {total > 0 ? (
             <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium leading-none text-white">

@@ -71,7 +71,7 @@ export function AppHeader() {
 					aria-label={t`Cari`}
 					size="sm"
 					variant="ghost"
-					className="hidden md:flex items-center gap-2 text-muted-foreground hover:text-foreground"
+					className="hidden md:flex items-center gap-2 border border-input text-muted-foreground hover:text-foreground"
 					onClick={openCommandPalette}
 				>
 					<Search className="size-4" />
@@ -82,7 +82,7 @@ export function AppHeader() {
 					aria-label={t`Cari`}
 					size="icon-sm"
 					variant="ghost"
-					className="flex md:hidden"
+					className="flex md:hidden border border-input"
 					onClick={openCommandPalette}
 				>
 					<Search />

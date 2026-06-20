@@ -6,7 +6,7 @@ import { api } from "convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { Languages, LifeBuoy, LineChart, LogOut, RefreshCw, Settings, Users } from "lucide-react";
 import { Trans } from "@lingui/react/macro";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -46,12 +46,14 @@ export function NavUser() {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Avatar className="size-8 cursor-pointer">
+					{cafe?.logoUrl ? <AvatarImage src={cafe.logoUrl} alt={name} /> : null}
 					<AvatarFallback>{initial}</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-60">
 				<DropdownMenuLabel className="flex items-center gap-3">
 					<Avatar className="size-10">
+						{cafe?.logoUrl ? <AvatarImage src={cafe.logoUrl} alt={name} /> : null}
 						<AvatarFallback>{initial}</AvatarFallback>
 					</Avatar>
 					<div className="min-w-0">
