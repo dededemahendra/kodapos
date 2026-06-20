@@ -26,6 +26,7 @@ export function AiRestockAdvice() {
   const connected = settings?.integrations.some((i) => i.key === 'ai' && i.connected) ?? false;
 
   async function generate() {
+    setResult(null);
     setLoading(true);
     try {
       setResult(await runRestock({}));
@@ -52,8 +53,9 @@ export function AiRestockAdvice() {
       </CardHeader>
       <CardContent>
         {settings === undefined ? (
-          <div className="flex items-center py-2 text-muted-foreground">
+          <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
             <Spinner />
+            <Trans>Memuat…</Trans>
           </div>
         ) : !connected ? (
           <p className="text-sm text-muted-foreground">

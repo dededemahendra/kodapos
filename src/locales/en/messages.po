@@ -3568,6 +3568,7 @@ msgstr "Loading shift…"
 msgid "Memuat struk…"
 msgstr "Loading receipt…"
 
+#: src/components/ai-restock-advice.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/routes/_pos/inventory/purchases.tsx

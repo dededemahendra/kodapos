@@ -3568,6 +3568,7 @@ msgstr "Memuat shift…"
 msgid "Memuat struk…"
 msgstr "Memuat struk…"
 
+#: src/components/ai-restock-advice.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/routes/_pos/inventory/purchases.tsx

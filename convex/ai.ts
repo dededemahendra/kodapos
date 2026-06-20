@@ -232,7 +232,7 @@ async function gatherRestock(
       : [];
   const summary = {
     cafe: cafe?.name ?? 'Cafe',
-    restock: restock.lines.map((l) => ({
+    restock: restock.lines.slice(0, 20).map((l) => ({
       name: l.name,
       unit: l.unit,
       suggestedQty: l.suggestedQty,
