@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { AiSpotlight } from '~/components/marketing/ai-spotlight';
 import { CtaBand } from '~/components/marketing/cta-band';
 import { Faq } from '~/components/marketing/faq';
 import { FeatureSection } from '~/components/marketing/feature-section';
@@ -31,6 +32,7 @@ function PublicHome() {
       <main>
         <Hero />
         <FeatureSection />
+        <AiSpotlight />
         <HowItWorks />
         <WhyIndonesia />
         <Testimonials />

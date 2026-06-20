@@ -682,6 +682,7 @@ msgid "Arus Masuk"
 msgstr "Inflow"
 
 #: src/components/app-shared.tsx
+#: src/components/marketing/ai-spotlight.tsx
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Asisten AI"
 msgstr "AI Assistant"
@@ -689,6 +690,10 @@ msgstr "AI Assistant"
 #: src/components/marketing/hero.tsx
 msgid "Asisten AI kini hadir di kodapos"
 msgstr "AI assistant is now in kodapos"
+
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Asisten AI kodapos menjawab dari data kafe Anda sendiri. Tahu penjualan, stok, dan menu terlaris tanpa membuka laporan."
+msgstr "kodapos AI answers from your own cafe data. Know your sales, stock, and best sellers without opening a report."
 
 #: src/components/auth/or-divider.tsx
 msgid "atau"
@@ -1182,6 +1187,10 @@ msgstr "Don't have an account?"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Belum terhubung"
 msgstr "Not connected"
+
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Berapa penjualan hari ini?"
+msgstr "What are today's sales?"
 
 #: src/components/marketing/feature-section.tsx
 msgid "Berbasis web"
@@ -2858,6 +2867,10 @@ msgstr "Operating hours"
 #~ msgid "Jawaban didasarkan pada data penjualan & stok 30 hari terakhir."
 #~ msgstr "Answers are based on the last 30 days of sales & stock data."
 
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Jawaban instan dari data Anda"
+msgstr "Instant answers from your data"
+
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Jenis printer"
 #~ msgstr "Printer type"
@@ -4079,6 +4092,7 @@ msgstr "Get started in three steps"
 msgid "Mulai dengan kategori →"
 msgstr "Start with categories →"
 
+#: src/components/marketing/ai-spotlight.tsx
 #: src/components/marketing/cta-band.tsx
 #: src/components/marketing/hero.tsx
 #: src/components/marketing/pricing.tsx
@@ -4374,6 +4388,10 @@ msgstr "Tax & Payment"
 msgid "Pakai"
 msgstr "Apply"
 
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Pakai kunci API Anda sendiri"
+msgstr "Use your own API key"
+
 #: src/routes/_public/signin.tsx
 msgid "Pakai sandi"
 msgstr "Use password"
@@ -4653,6 +4671,10 @@ msgstr "Incoming delivery"
 #: src/routes/_pos/reports/route.tsx
 msgid "Penjualan"
 msgstr "Sales"
+
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Penjualan hari ini Rp 2.450.000, naik 12% dari kemarin. Menu terlaris: Es Kopi Susu."
+msgstr "Today's sales are Rp 2,450,000, up 12% from yesterday. Best seller: Es Kopi Susu."
 
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Penjualan tunai"
@@ -5528,6 +5550,10 @@ msgstr "Suggested"
 msgid "Saran Restock AI"
 msgstr "AI Restock Advice"
 
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Saran stok otomatis"
+msgstr "Automatic restock advice"
+
 #: src/components/marketing/hero.tsx
 msgid "Satu aplikasi untuk kasir, stok, dan laporan. Jual lebih cepat, jaga margin, dan ambil keputusan dengan bantuan AI."
 msgstr "One app for the register, stock, and reports. Sell faster, protect your margins, and decide with help from AI."
@@ -5958,6 +5984,10 @@ msgstr "Low stock: {0}"
 msgid "Stok saat ini:"
 msgstr "Current stock:"
 
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Stok susu cukup untuk 2 hari. Mau saya buatkan daftar belanja?"
+msgstr "Milk stock lasts about 2 days. Want me to make a shopping list?"
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Struk & Cetak"
 #~ msgstr "Receipt & Printing"
@@ -6338,6 +6368,10 @@ msgstr "Ask"
 msgid "Tanya AI"
 msgstr "Ask AI"
 
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Tanya apa saja tentang bisnis Anda"
+msgstr "Ask anything about your business"
+
 #: src/routes/_pos/ai.tsx
 msgid "Tanya apa saja tentang data kafe Anda."
 msgstr "Ask anything about your cafe data."
@@ -6353,6 +6387,10 @@ msgstr "Ask anything about your cafe data."
 #: src/components/ai-insights.tsx
 msgid "Tanya tentang data Anda, mis. hari terbaik bulan ini"
 msgstr "Ask about your data, e.g. best day this month"
+
+#: src/components/marketing/ai-spotlight.tsx
+msgid "Tanya tentang penjualan, stok, pelanggan..."
+msgstr "Ask about sales, stock, customers..."
 
 #: src/routes/_pos/ai.tsx
 msgid "Tanya tentang penjualan, stok, pelanggan…"
