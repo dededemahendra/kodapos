@@ -81,9 +81,9 @@ export function CartPane({
   const empty = cart.lines.length === 0;
 
   return (
-    <aside className="border-l border-border flex flex-col h-full min-h-0">
+    <aside className="border-l border-border flex flex-col h-full min-h-0 min-w-0">
       <div className="px-3 py-2 border-b border-border space-y-2">
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           <h2 className="mr-auto text-sm font-semibold">
             <Trans>Pesanan ({cart.lines.length})</Trans>
           </h2>

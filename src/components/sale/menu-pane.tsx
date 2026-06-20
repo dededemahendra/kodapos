@@ -54,7 +54,7 @@ export function MenuPane({
   }, [items, activeCategoryId]);
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0 min-w-0">
       <form onSubmit={handleScan} className="flex items-center gap-2 px-3 py-2 border-b border-border">
         <ScanLine className="size-4 shrink-0 text-muted-foreground" />
         <Input

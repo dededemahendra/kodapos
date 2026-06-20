@@ -3205,6 +3205,7 @@ msgstr "Barcode labels"
 #: src/components/expenses/expense-categories.tsx
 #: src/components/inventory/waste-dialog.tsx
 #: src/components/inventory/waste-reason.tsx
+#: src/components/sale/cart-pane.tsx
 #: src/routes/_pos/reports/expenses.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/settings/profile.tsx
@@ -3597,6 +3598,7 @@ msgstr "Analyzing…"
 #~ msgstr "Follows system."
 
 #: src/components/app-shared.tsx
+#: src/components/sale/sale-screen.tsx
 #: src/routes/_pos/menu/items.$itemId.tsx
 #: src/routes/_pos/onboarding/route.tsx
 msgid "Menu"
@@ -4420,6 +4422,7 @@ msgstr "Orders"
 
 #. placeholder {0}: cart.lines.length
 #: src/components/sale/cart-pane.tsx
+#: src/components/sale/sale-screen.tsx
 msgid "Pesanan ({0})"
 msgstr "Order ({0})"
 
@@ -5569,11 +5572,11 @@ msgstr "Build your cafe menu"
 msgid "Syarat Layanan"
 msgstr "Terms of Service"
 
-#: src/components/sale/cart-pane.tsx
 #: src/components/sale/hold-order-dialog.tsx
 msgid "Tahan"
 msgstr "Hold"
 
+#: src/components/sale/cart-pane.tsx
 #: src/components/sale/hold-order-dialog.tsx
 msgid "Tahan pesanan"
 msgstr "Hold order"
