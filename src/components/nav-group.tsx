@@ -14,16 +14,22 @@ import {
 	SidebarMenuSub,
 	SidebarMenuSubButton,
 	SidebarMenuSubItem,
+	useSidebar,
 } from "~/components/ui/sidebar";
 import type { SidebarNavGroup, SidebarNavItem } from "~/components/app-shared";
 
 export function NavGroup({ label, items }: SidebarNavGroup) {
 	const path = useRouterState({ select: (s) => s.location.pathname });
 	const { i18n } = useLingui();
+	const { isMobile, setOpenMobile } = useSidebar();
 	// `matches` = on this page or a nested page; `exact` = this page only.
 	const matches = (p?: string) =>
 		!!p && (path === p || path.startsWith(`${p}/`));
 	const exact = (p?: string) => !!p && path === p;
+	// Defer the Sheet close to the next tick so React finishes the navigation
+	// click handler first — closing synchronously can race with AnimatePresence
+	// exit animations inside the Sheet, causing a removeChild DOM error.
+	const closeMobile = () => { if (isMobile) setTimeout(() => setOpenMobile(false), 0); };
 
 	return (
 		<SidebarGroup>
@@ -32,6 +38,7 @@ export function NavGroup({ label, items }: SidebarNavGroup) {
 				{items.map((item) =>
 					item.subItems?.length ? (
 						<CollapsibleNavItem
+							closeMobile={closeMobile}
 							exact={exact}
 							item={item}
 							key={item.path ?? item.title.id}
@@ -44,7 +51,7 @@ export function NavGroup({ label, items }: SidebarNavGroup) {
 								isActive={matches(item.path)}
 								tooltip={i18n._(item.title)}
 							>
-								<Link to={item.path as string}>
+								<Link onClick={closeMobile} to={item.path as string}>
 									{item.icon}
 									<span>{i18n._(item.title)}</span>
 								</Link>
@@ -61,10 +68,12 @@ function CollapsibleNavItem({
 	item,
 	matches,
 	exact,
+	closeMobile,
 }: {
 	item: SidebarNavItem;
 	matches: (p?: string) => boolean;
 	exact: (p?: string) => boolean;
+	closeMobile: () => void;
 }) {
 	const { i18n } = useLingui();
 	const subItems = item.subItems ?? [];
@@ -108,7 +117,7 @@ function CollapsibleNavItem({
 							{subItems.map((sub) => (
 								<SidebarMenuSubItem key={sub.path ?? sub.title.id}>
 									<SidebarMenuSubButton asChild isActive={exact(sub.path)}>
-										<Link to={sub.path as string}>
+										<Link onClick={closeMobile} to={sub.path as string}>
 											<span>{i18n._(sub.title)}</span>
 										</Link>
 									</SidebarMenuSubButton>

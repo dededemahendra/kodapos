@@ -12,6 +12,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from "~/components/ui/sidebar";
 import { footerNavLinks, navGroups } from "~/components/app-shared";
 import type { SidebarNavItem } from "~/components/app-shared";
@@ -22,6 +23,8 @@ import { usePermissions } from "~/lib/permissions";
 export function AppSidebar() {
 	const { i18n } = useLingui();
 	const { can, isOwner, isLoading } = usePermissions();
+	const { isMobile, setOpenMobile } = useSidebar();
+	const closeMobile = () => { if (isMobile) setTimeout(() => setOpenMobile(false), 0); };
 	const allowed = (req?: SidebarNavItem['requires']) =>
 		!req || isLoading || (req === 'owner' ? isOwner : can(req));
 	const visibleGroups = navGroups
@@ -40,7 +43,7 @@ export function AppSidebar() {
 		>
 			<SidebarHeader className="h-14 justify-center border-b px-2">
 				<SidebarMenuButton asChild>
-					<Link to="/dashboard">
+					<Link onClick={closeMobile} to="/dashboard">
 						<Coffee className="text-primary" />
 						<span className="font-medium text-foreground!">kodapos</span>
 					</Link>
@@ -61,7 +64,7 @@ export function AppSidebar() {
 								className="text-muted-foreground"
 								size="sm"
 							>
-								<Link to={item.path as string}>
+								<Link onClick={closeMobile} to={item.path as string}>
 									{item.icon}
 									<span>{i18n._(item.title)}</span>
 								</Link>

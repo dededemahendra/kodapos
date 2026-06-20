@@ -3,6 +3,7 @@ import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from 'convex/react';
 import { type ReactNode, useEffect } from 'react';
 import { AppHeader } from '~/components/app-header';
+import { CommandPalette } from '~/components/command-palette';
 import { AppSidebar } from '~/components/app-sidebar';
 import { RegisterTopBar } from '~/components/sale/register-top-bar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
@@ -44,6 +45,7 @@ function PosLayout() {
       </Unauthenticated>
       <Authenticated>
         <AutoLock />
+        <CommandPalette />
         <OnboardingGate>
           {showNav ? (
             <SidebarProvider>

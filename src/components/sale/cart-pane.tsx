@@ -1,8 +1,14 @@
 import { useLingui } from '@lingui/react/macro';
 import { Trans } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
-import { X } from 'lucide-react';
+import { Banknote, Ellipsis, PauseCircle, Trash2, X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu';
 import { formatIDR } from '~/lib/money';
 import { usePermissions } from '~/lib/permissions';
 import { formatPromoValue } from '~/lib/promo';
@@ -75,34 +81,50 @@ export function CartPane({
   const empty = cart.lines.length === 0;
 
   return (
-    <aside className="border-l border-border flex flex-col h-full min-h-0">
+    <aside className="border-l border-border flex flex-col h-full min-h-0 min-w-0">
       <div className="px-3 py-2 border-b border-border space-y-2">
-        {/* Wrap so the action buttons never clip in a narrow cart — they flow
-            onto the next line instead of overflowing the panel width. */}
         <div className="flex flex-wrap items-center gap-1">
           <h2 className="mr-auto text-sm font-semibold">
             <Trans>Pesanan ({cart.lines.length})</Trans>
           </h2>
           {onSwitch ? (
-              <Button type="button" size="sm" variant="outline" asChild>
-                <Link to="/pin"><Trans>Ganti kasir</Trans></Link>
-              </Button>
-            ) : null}
-            {onKas ? (
-              <Button type="button" size="sm" variant="outline" onClick={onKas}>
-                <Trans>Kas</Trans>
-              </Button>
-            ) : null}
-            {onShowHeld ? (
-              <Button type="button" size="sm" variant="outline" onClick={onShowHeld}>
-                <Trans>Ditahan ({heldCount ?? 0})</Trans>
-              </Button>
-            ) : null}
-            {onHold ? (
-              <Button type="button" size="sm" variant="outline" onClick={onHold} disabled={empty}>
-                <Trans>Tahan</Trans>
-              </Button>
-            ) : null}
+            <Button type="button" size="sm" variant="outline" asChild>
+              <Link to="/pin"><Trans>Ganti kasir</Trans></Link>
+            </Button>
+          ) : null}
+          {onShowHeld ? (
+            <Button type="button" size="sm" variant="outline" onClick={onShowHeld}>
+              <Trans>Ditahan ({heldCount ?? 0})</Trans>
+            </Button>
+          ) : null}
+          {(onKas || onHold) ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" size="icon-sm" variant="outline" aria-label={t`Lainnya`}>
+                  <Ellipsis />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onKas ? (
+                  <DropdownMenuItem onClick={onKas}>
+                    <Banknote /><Trans>Kas</Trans>
+                  </DropdownMenuItem>
+                ) : null}
+                {onHold ? (
+                  <DropdownMenuItem onClick={onHold} disabled={empty}>
+                    <PauseCircle /><Trans>Tahan pesanan</Trans>
+                  </DropdownMenuItem>
+                ) : null}
+                <DropdownMenuItem
+                  onClick={onKosongkan}
+                  disabled={empty}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 /><Trans>Kosongkan</Trans>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
             <Button
               type="button"
               size="sm"
@@ -113,6 +135,7 @@ export function CartPane({
             >
               <Trans>Kosongkan</Trans>
             </Button>
+          )}
         </div>
         <div className="flex flex-wrap gap-1">
           {ORDER_TYPE_OPTIONS.map((o) => (
