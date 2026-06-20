@@ -234,6 +234,12 @@ html[data-density="comfortable"] {
   --kodapos-touch: 40px;
 }
 
+/* Accordion open/close animations used by shadcn Accordion component */
+@keyframes accordion-down { from { height: 0 } to { height: var(--radix-accordion-content-height) } }
+@keyframes accordion-up { from { height: var(--radix-accordion-content-height) } to { height: 0 } }
+@utility animate-accordion-down { animation: accordion-down 0.2s ease-out; }
+@utility animate-accordion-up { animation: accordion-up 0.2s ease-out; }
+
 /* Receipt + label printing. Hides everything except the print-area root. */
 @media print {
   body * {
