@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import { Trans } from '@lingui/react/macro';
+import { MotionConfig, motion } from 'motion/react';
 import { SectionHeading } from './section-heading';
+
+const VP = { once: true, margin: '-80px' } as const;
 
 function avatarUrl(seed: string) {
   return `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(seed)}`;
@@ -36,8 +39,18 @@ export function Testimonials() {
   const person = TESTIMONIALS[active]!;
 
   return (
-    <section className="py-20">
-      <div className="mx-auto max-w-4xl px-6">
+    <MotionConfig reducedMotion="user">
+      <section className="py-20">
+        <motion.div
+          className="mx-auto max-w-4xl px-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          variants={{
+            hidden: { opacity: 0, y: 16 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+          }}
+        >
         <SectionHeading>
           <Trans>Dipakai pemilik kafe seperti Anda</Trans>
         </SectionHeading>
@@ -95,7 +108,8 @@ export function Testimonials() {
         <p className="mt-8 text-center text-xs text-muted-foreground">
           <Trans>Placeholder. Ganti dengan testimoni pelanggan asli.</Trans>
         </p>
-      </div>
-    </section>
+        </motion.div>
+      </section>
+    </MotionConfig>
   );
 }
