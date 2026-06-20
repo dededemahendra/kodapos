@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { FeatureSection } from '~/components/marketing/feature-section';
 import { Hero } from '~/components/marketing/hero';
 import { MarketingHeader } from '~/components/marketing/marketing-header';
 import { MarketingFooter } from '~/components/marketing/marketing-footer';
@@ -23,7 +24,7 @@ function PublicHome() {
       <MarketingHeader />
       <main>
         <Hero />
-        {/* <FeatureSection /> Task 3 */}
+        <FeatureSection />
         {/* <HowItWorks /> Task 4 */}
         {/* <WhyIndonesia /> Task 4 */}
         {/* <Testimonials /> Task 5 */}
