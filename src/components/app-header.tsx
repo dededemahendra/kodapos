@@ -29,6 +29,14 @@ export function AppHeader() {
 		setIsDark(document.documentElement.classList.contains("dark"));
 	}, []);
 
+	// The palette opens on either Cmd+K or Ctrl+K; show the modifier that matches
+	// the user's platform instead of a hardcoded ⌘. Resolved on mount to keep SSR
+	// output stable.
+	const [isMac, setIsMac] = useState(false);
+	useEffect(() => {
+		setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform));
+	}, []);
+
 	function toggleTheme() {
 		const next = isDark ? "light" : "dark";
 		storeTheme(next);
@@ -68,7 +76,7 @@ export function AppHeader() {
 				>
 					<Search className="size-4" />
 					<span className="text-sm"><Trans>Cari</Trans></span>
-					<Kbd>⌘K</Kbd>
+					<Kbd>{isMac ? "⌘K" : "Ctrl K"}</Kbd>
 				</Button>
 				<Button
 					aria-label={t`Cari`}

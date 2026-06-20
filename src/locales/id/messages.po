@@ -6138,8 +6138,12 @@ msgid "Tidak ada hasil"
 msgstr "Tidak ada hasil"
 
 #: src/components/command-palette.tsx
-msgid "Tidak ada hasil untuk «{query}»"
-msgstr "Tidak ada hasil untuk «{query}»"
+msgid "Tidak ada hasil untuk \"{query}\""
+msgstr "Tidak ada hasil untuk \"{query}\""
+
+#: src/components/command-palette.tsx
+#~ msgid "Tidak ada hasil untuk «{query}»"
+#~ msgstr "Tidak ada hasil untuk «{query}»"
 
 #: src/components/sale/menu-pane.tsx
 msgid "Tidak ada item di kategori ini."

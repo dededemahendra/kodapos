@@ -107,7 +107,7 @@ export function CommandPalette() {
       <CommandList>
         {!isLoading && !hasLiveResults && matchingActions.length === 0 && matchingNav.length === 0 && (
           <CommandEmpty>
-            <Trans>Tidak ada hasil untuk «{query}»</Trans>
+            <Trans>Tidak ada hasil untuk "{query}"</Trans>
           </CommandEmpty>
         )}
 
