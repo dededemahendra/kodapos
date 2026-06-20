@@ -6,12 +6,11 @@ import {
   Calculator,
   Clock,
   Plus,
-  Search,
   UtensilsCrossed,
   Users,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { navLinks, type SidebarNavItem } from '~/components/app-shared';
+import { navGroups, type SidebarNavItem } from '~/components/app-shared';
 import {
   CommandDialog,
   CommandEmpty,
@@ -63,8 +62,14 @@ export function CommandPalette() {
   // Permission-filtered nav items (mirrors app-sidebar logic)
   const allowed = (req?: SidebarNavItem['requires']) =>
     !req || permLoading || (req === 'owner' ? isOwner : can(req));
-  const permittedNav = navLinks.filter(
-    (item) => item.path && allowed(item.requires)
+  const permittedNav = navGroups.flatMap((g) =>
+    g.items.flatMap((item) => {
+      if (!allowed(item.requires)) return [];
+      if (item.subItems?.length) {
+        return item.subItems.filter((s) => s.path && allowed(s.requires));
+      }
+      return item.path ? [item] : [];
+    })
   );
 
   const queryLower = trimmed.toLowerCase();
