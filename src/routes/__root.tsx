@@ -16,6 +16,18 @@ import globalsCss from '~/styles/globals.css?url';
 const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('kodapos.theme');var dark=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(dark)document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 export const Route = createRootRoute({
+  errorComponent: ({ error, reset }) => (
+    <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
+      <h1 className="text-2xl font-bold"><Trans>Terjadi kesalahan</Trans></h1>
+      <p className="text-muted-foreground text-sm max-w-md">
+        {error instanceof Error ? error.message : <Trans>Sesuatu yang tidak terduga terjadi.</Trans>}
+      </p>
+      <div className="flex gap-3">
+        <button onClick={reset} className="text-primary underline text-sm"><Trans>Coba lagi</Trans></button>
+        <Link to="/dashboard" className="text-primary underline text-sm"><Trans>Ke dasbor</Trans></Link>
+      </div>
+    </main>
+  ),
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -86,7 +98,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body>
+      <body translate="no">
         {children}
         <Scripts />
       </body>
