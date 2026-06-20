@@ -1,8 +1,9 @@
+import { useLingui } from '@lingui/react/macro';
 import { Trans } from '@lingui/react/macro';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
-import { AlertTriangle, Monitor } from 'lucide-react';
+import { AlertTriangle, ChefHat, Clock, History, LayoutGrid, Monitor, PackageSearch, Users } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { NavUser } from '~/components/nav-user';
@@ -10,6 +11,7 @@ import { usePermissions } from '~/lib/permissions';
 import { useBoolPreference } from '~/lib/preferences';
 
 export function RegisterTopBar() {
+  const { t } = useLingui();
   const cafe = useQuery(api.cafes.myCafe, {});
   const { isOwner } = usePermissions();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -33,7 +35,10 @@ export function RegisterTopBar() {
           size="sm"
           variant={isActive('/tables') ? 'secondary' : 'ghost'}
         >
-          <Link to="/tables"><Trans>Meja</Trans></Link>
+          <Link to="/tables">
+            <LayoutGrid className="shrink-0" />
+            <span className="hidden md:inline"><Trans>Meja</Trans></span>
+          </Link>
         </Button>
         <Button
           asChild
@@ -41,9 +46,10 @@ export function RegisterTopBar() {
           variant={isActive('/self-orders') ? 'secondary' : 'ghost'}
         >
           <Link to="/self-orders">
-            <Trans>Pesanan Masuk</Trans>
+            <Users className="shrink-0" />
+            <span className="hidden md:inline"><Trans>Pesanan Masuk</Trans></span>
             {pendingCount > 0 ? (
-              <Badge variant="destructive" className="ml-1.5">
+              <Badge variant="destructive" className="ml-1">
                 {pendingCount}
               </Badge>
             ) : null}
@@ -54,14 +60,20 @@ export function RegisterTopBar() {
           size="sm"
           variant={isActive('/kitchen') ? 'secondary' : 'ghost'}
         >
-          <Link to="/kitchen"><Trans>Dapur</Trans></Link>
+          <Link to="/kitchen">
+            <ChefHat className="shrink-0" />
+            <span className="hidden md:inline"><Trans>Dapur</Trans></span>
+          </Link>
         </Button>
         <Button
           asChild
           size="sm"
           variant={isActive('/history') ? 'secondary' : 'ghost'}
         >
-          <Link to="/history"><Trans>Riwayat</Trans></Link>
+          <Link to="/history">
+            <History className="shrink-0" />
+            <span className="hidden md:inline"><Trans>Riwayat</Trans></span>
+          </Link>
         </Button>
       </div>
       <div className="flex items-center gap-2">
@@ -73,9 +85,9 @@ export function RegisterTopBar() {
             className="text-amber-600 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-500"
           >
             <Link to="/inventory">
-              <AlertTriangle />
-              <Trans>Stok rendah</Trans>
-              <Badge variant="destructive" className="ml-1.5">
+              <AlertTriangle className="shrink-0" />
+              <span className="hidden md:inline"><Trans>Stok rendah</Trans></span>
+              <Badge variant="destructive" className="ml-1">
                 {lowStockCount}
               </Badge>
             </Link>
@@ -85,15 +97,20 @@ export function RegisterTopBar() {
           size="sm"
           variant="ghost"
           onClick={() => window.open('/display', 'kodaposCustomerDisplay')}
+          aria-label={t`Layar pelanggan`}
         >
-          <Monitor /><Trans>Layar pelanggan</Trans>
+          <Monitor className="shrink-0" />
+          <span className="hidden lg:inline"><Trans>Layar pelanggan</Trans></span>
         </Button>
         <Button
           asChild
           size="sm"
           variant={isActive('/shift') ? 'secondary' : 'ghost'}
         >
-          <Link to="/shift/close"><Trans>Shift</Trans></Link>
+          <Link to="/shift/close">
+            <Clock className="shrink-0" />
+            <span className="hidden lg:inline"><Trans>Shift</Trans></span>
+          </Link>
         </Button>
         {isOwner && (
           <Button
@@ -101,7 +118,10 @@ export function RegisterTopBar() {
             size="sm"
             variant={isActive('/dashboard') ? 'secondary' : 'ghost'}
           >
-            <Link to="/dashboard"><Trans>Admin</Trans></Link>
+            <Link to="/dashboard">
+              <PackageSearch className="shrink-0" />
+              <span className="hidden lg:inline"><Trans>Admin</Trans></span>
+            </Link>
           </Button>
         )}
         <NavUser />
