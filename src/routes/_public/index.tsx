@@ -1,6 +1,6 @@
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Coffee } from 'lucide-react';
+import { BrandMark } from '~/components/brand-mark';
 import { Button } from '~/components/ui/button';
 
 export const Route = createFileRoute('/_public/')({
@@ -11,7 +11,7 @@ function PublicHome() {
   return (
     <main className="min-h-screen p-8 max-w-3xl mx-auto">
       <header className="flex items-center gap-3">
-        <Coffee className="size-8 text-primary" />
+        <BrandMark className="h-8 w-auto text-primary" />
         <h1 className="text-3xl font-bold text-primary">kodapos</h1>
       </header>
       <p className="text-muted-foreground mt-2">
