@@ -73,6 +73,8 @@ export function SaleScreen({
   const [saleSound] = useBoolPreference('saleSound', false);
   const [printAuto] = useBoolPreference('printAuto', false);
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
+  // Phone-only: which pane the tab bar shows. Ignored at md+ where both render.
+  const [mobileView, setMobileView] = useState<'menu' | 'order'>('menu');
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
   const [openMethod, setOpenMethod] = useState<PaymentMethod | null>(null);
@@ -298,8 +300,46 @@ export function SaleScreen({
   }
 
   return (
-    <div className="grid grid-cols-[1fr_280px] md:grid-cols-[1fr_320px] lg:grid-cols-[1fr_380px] h-full min-h-0 overflow-hidden">
-      <MenuPane categories={categories} items={items} onItemTap={onItemTap} onScan={onScan} />
+    <div className="flex flex-col h-full min-h-0 overflow-hidden md:grid md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_380px]">
+      {/* Phone-only tab bar: the menu and cart can't sit side by side under md,
+          so they swap full-width here. Hidden on tablet+ where the grid shows
+          both. The count keeps the cart discoverable after adding items. */}
+      <div className="flex gap-1 border-b border-border p-2 md:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileView('menu')}
+          className={`flex-1 rounded-md py-2 text-sm font-medium ${
+            mobileView === 'menu'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          <Trans>Menu</Trans>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileView('order')}
+          className={`flex-1 rounded-md py-2 text-sm font-medium ${
+            mobileView === 'order'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          <Trans>Pesanan ({cart.lines.length})</Trans>
+        </button>
+      </div>
+      <div
+        className={`min-w-0 min-h-0 flex-1 flex-col md:flex ${
+          mobileView === 'menu' ? 'flex' : 'hidden'
+        }`}
+      >
+        <MenuPane categories={categories} items={items} onItemTap={onItemTap} onScan={onScan} />
+      </div>
+      <div
+        className={`min-w-0 min-h-0 flex-1 flex-col md:flex ${
+          mobileView === 'order' ? 'flex' : 'hidden'
+        }`}
+      >
       <CartPane
         cart={cart}
         dispatch={dispatch}
@@ -350,6 +390,7 @@ export function SaleScreen({
             }
           : {})}
       />
+      </div>
       <ModifierPickerDialog
         open={pickerRow !== null}
         onOpenChange={(open) => {
