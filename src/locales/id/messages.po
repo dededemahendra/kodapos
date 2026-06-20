@@ -94,8 +94,8 @@ msgid "(Lebih)"
 msgstr "(Lebih)"
 
 #: src/components/marketing/testimonials.tsx
-msgid "[Contoh testimoni. Ganti dengan kutipan pelanggan asli sebelum tayang.]"
-msgstr "[Contoh testimoni. Ganti dengan kutipan pelanggan asli sebelum tayang.]"
+#~ msgid "[Contoh testimoni. Ganti dengan kutipan pelanggan asli sebelum tayang.]"
+#~ msgstr "[Contoh testimoni. Ganti dengan kutipan pelanggan asli sebelum tayang.]"
 
 #. placeholder {0}: tier.name
 #. placeholder {1}: tier.earnMultiplier
@@ -3108,6 +3108,10 @@ msgstr "Kasir tidak dikenal."
 msgid "Kasir: {0}"
 msgstr "Kasir: {0}"
 
+#: src/components/marketing/testimonials.tsx
+msgid "Kasirnya ringan dan cepat, antrian jam sibuk jauh lebih lancar."
+msgstr "Kasirnya ringan dan cepat, antrian jam sibuk jauh lebih lancar."
+
 #: src/components/app-shared.tsx
 msgid "Katalog"
 msgstr "Katalog"
@@ -3534,6 +3538,10 @@ msgstr "Laporan"
 #: src/components/marketing/feature-section.tsx
 #~ msgid "Laporan dan laba rugi"
 #~ msgstr "Laporan dan laba rugi"
+
+#: src/components/marketing/testimonials.tsx
+msgid "Laporan harian bikin saya tahu menu mana yang harus didorong."
+msgstr "Laporan harian bikin saya tahu menu mana yang harus didorong."
 
 #: src/routes/_pos/reports/cashiers.tsx
 #~ msgid "Laporan Kasir"
@@ -4179,8 +4187,8 @@ msgid "Nama kafe wajib diisi."
 msgstr "Nama kafe wajib diisi."
 
 #: src/components/marketing/testimonials.tsx
-msgid "Nama Kafe, Kota"
-msgstr "Nama Kafe, Kota"
+#~ msgid "Nama Kafe, Kota"
+#~ msgstr "Nama Kafe, Kota"
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Nama kasir baru"
@@ -4219,8 +4227,8 @@ msgid "Nama pemasok"
 msgstr "Nama pemasok"
 
 #: src/components/marketing/testimonials.tsx
-msgid "Nama Pemilik"
-msgstr "Nama Pemilik"
+#~ msgid "Nama Pemilik"
+#~ msgstr "Nama Pemilik"
 
 #: src/components/promo/promo-form-dialog.tsx
 msgid "Nama promo"
@@ -4587,9 +4595,21 @@ msgstr "Pembulatan"
 msgid "Pemilik"
 msgstr "Pemilik"
 
+#: src/components/marketing/testimonials.tsx
+msgid "Pemilik kafe"
+msgstr "Pemilik kafe"
+
+#: src/components/marketing/testimonials.tsx
+msgid "Pemilik kedai"
+msgstr "Pemilik kedai"
+
 #: src/routes/_pos/settings/staff.tsx
 msgid "Pemilik memiliki semua izin."
 msgstr "Pemilik memiliki semua izin."
+
+#: src/components/marketing/testimonials.tsx
+msgid "Pemilik resto"
+msgstr "Pemilik resto"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Pencetak termal (USB)"
@@ -5071,8 +5091,12 @@ msgid "Pindai atau ketik barcode produk."
 msgstr "Pindai atau ketik barcode produk."
 
 #: src/components/marketing/testimonials.tsx
-msgid "Placeholder. Akan diganti dengan testimoni pelanggan asli."
-msgstr "Placeholder. Akan diganti dengan testimoni pelanggan asli."
+#~ msgid "Placeholder. Akan diganti dengan testimoni pelanggan asli."
+#~ msgstr "Placeholder. Akan diganti dengan testimoni pelanggan asli."
+
+#: src/components/marketing/testimonials.tsx
+msgid "Placeholder. Ganti dengan testimoni pelanggan asli."
+msgstr "Placeholder. Ganti dengan testimoni pelanggan asli."
 
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/loyalty/reward-form-dialog.tsx
@@ -5951,6 +5975,10 @@ msgstr "Stok Bahan"
 #: src/components/marketing/feature-section.tsx
 #~ msgid "Stok bahan berkurang otomatis dari resep tiap menu."
 #~ msgstr "Stok bahan berkurang otomatis dari resep tiap menu."
+
+#: src/components/marketing/testimonials.tsx
+msgid "Stok bahan kepantau, jadi jarang kehabisan saat ramai."
+msgstr "Stok bahan kepantau, jadi jarang kehabisan saat ramai."
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Stok baru"
