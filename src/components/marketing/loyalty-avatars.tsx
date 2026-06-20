@@ -12,9 +12,11 @@ function avatarUrl(seed: string) {
 function TooltipAvatar({
   name,
   designation,
+  image,
 }: {
   name: string;
   designation: ReactNode;
+  image?: string;
 }) {
   const x = useMotionValue(0);
   const rotate = useSpring(useTransform(x, [-100, 100], [-45, 45]), { stiffness: 100, damping: 15 });
@@ -38,7 +40,7 @@ function TooltipAvatar({
       {/* Avatar */}
       <div className="size-10 overflow-hidden rounded-full bg-muted ring-2 ring-background transition group-hover:scale-105 group-hover:z-30">
         <img
-          src={avatarUrl(name)}
+          src={image ?? avatarUrl(name)}
           alt=""
           width={40}
           height={40}
@@ -53,7 +55,11 @@ function TooltipAvatar({
 const people = [
   { name: 'Emma Carter', designation: <Trans>Pelanggan setia</Trans> },
   { name: 'Liam Bennett', designation: <Trans>Anggota emas</Trans> },
-  { name: 'Olivia Hayes', designation: <Trans>Sering berkunjung</Trans> },
+  {
+    name: 'Olivia Hayes',
+    designation: <Trans>Sering berkunjung</Trans>,
+    image: 'https://api.dicebear.com/10.x/notionists/svg?seed=plb42zor',
+  },
   { name: 'Noah Parker', designation: <Trans>Pelanggan baru</Trans> },
 ];
 
