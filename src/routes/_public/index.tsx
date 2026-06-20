@@ -4,6 +4,8 @@ import { Hero } from '~/components/marketing/hero';
 import { HowItWorks } from '~/components/marketing/how-it-works';
 import { MarketingHeader } from '~/components/marketing/marketing-header';
 import { MarketingFooter } from '~/components/marketing/marketing-footer';
+import { Pricing } from '~/components/marketing/pricing';
+import { Testimonials } from '~/components/marketing/testimonials';
 import { WhyIndonesia } from '~/components/marketing/why-indonesia';
 
 export const Route = createFileRoute('/_public/')({
@@ -29,8 +31,8 @@ function PublicHome() {
         <FeatureSection />
         <HowItWorks />
         <WhyIndonesia />
-        {/* <Testimonials /> Task 5 */}
-        {/* <Pricing /> Task 5 */}
+        <Testimonials />
+        <Pricing />
         {/* <Faq /> Task 6 */}
         {/* <CtaBand /> Task 6 */}
       </main>
