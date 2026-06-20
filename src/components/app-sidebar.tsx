@@ -24,7 +24,7 @@ export function AppSidebar() {
 	const { i18n } = useLingui();
 	const { can, isOwner, isLoading } = usePermissions();
 	const { isMobile, setOpenMobile } = useSidebar();
-	const closeMobile = () => { if (isMobile) setOpenMobile(false); };
+	const closeMobile = () => { if (isMobile) setTimeout(() => setOpenMobile(false), 0); };
 	const allowed = (req?: SidebarNavItem['requires']) =>
 		!req || isLoading || (req === 'owner' ? isOwner : can(req));
 	const visibleGroups = navGroups

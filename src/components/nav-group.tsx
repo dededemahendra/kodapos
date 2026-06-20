@@ -26,7 +26,10 @@ export function NavGroup({ label, items }: SidebarNavGroup) {
 	const matches = (p?: string) =>
 		!!p && (path === p || path.startsWith(`${p}/`));
 	const exact = (p?: string) => !!p && path === p;
-	const closeMobile = () => { if (isMobile) setOpenMobile(false); };
+	// Defer the Sheet close to the next tick so React finishes the navigation
+	// click handler first — closing synchronously can race with AnimatePresence
+	// exit animations inside the Sheet, causing a removeChild DOM error.
+	const closeMobile = () => { if (isMobile) setTimeout(() => setOpenMobile(false), 0); };
 
 	return (
 		<SidebarGroup>
