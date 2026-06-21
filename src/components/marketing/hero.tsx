@@ -80,14 +80,12 @@ export function Hero() {
           variants={delayedGroup}
           className="mt-10 flex flex-col items-center justify-center gap-2 sm:flex-row"
         >
-          <div className="rounded-[14px] border border-border bg-foreground/10 p-0.5">
-            <Button asChild size="lg" className="rounded-xl px-5 text-base">
-              <Link to="/signup">
-                <Trans>Mulai gratis</Trans>
-              </Link>
-            </Button>
-          </div>
-          <Button asChild size="lg" variant="ghost" className="rounded-xl px-5 text-base">
+          <Button asChild size="lg">
+            <Link to="/signup">
+              <Trans>Mulai gratis</Trans>
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="ghost">
             <a href="#features">
               <Trans>Lihat fitur</Trans>
             </a>
