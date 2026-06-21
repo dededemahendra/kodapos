@@ -94,9 +94,11 @@ export function Hero() {
           </Button>
         </AnimatedGroup>
 
-        <p className="mt-5 text-sm text-muted-foreground">
-          <Trans>Gratis selama akses awal. Tanpa kartu kredit.</Trans>
-        </p>
+        <AnimatedGroup variants={delayedGroup} className="mt-5">
+          <p className="text-sm text-muted-foreground">
+            <Trans>Gratis selama akses awal. Tanpa kartu kredit.</Trans>
+          </p>
+        </AnimatedGroup>
       </div>
 
       <AnimatedGroup variants={delayedGroup}>
