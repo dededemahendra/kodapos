@@ -4,7 +4,7 @@ import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { BarChart3 } from 'lucide-react';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
-import { Spinner } from '~/components/ui/spinner';
+import { StatCardsSkeleton } from '~/components/ui/loading-skeletons';
 import { formatIDR } from '~/lib/money';
 import { useReportRange } from '~/components/reports/use-report-range';
 
@@ -16,11 +16,7 @@ function OverviewReport() {
   const { range } = useReportRange();
   const data = useQuery(api.reports.overview, { range });
   if (data === undefined) {
-    return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        <Spinner />
-      </div>
-    );
+    return <StatCardsSkeleton count={4} />;
   }
   if (data.orders === 0) {
     return (

@@ -12,7 +12,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
-import { Spinner } from '~/components/ui/spinner';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { formatIDR } from '~/lib/money';
 
 export function ShiftOrderList({ shiftId }: { shiftId: Id<'shifts'> }) {
@@ -21,11 +21,7 @@ export function ShiftOrderList({ shiftId }: { shiftId: Id<'shifts'> }) {
   const orders = useQuery(api.orders.listForShift, { shiftId });
 
   if (orders === undefined) {
-    return (
-      <div className="flex gap-2 text-muted-foreground items-center">
-        <Spinner /><span><Trans>Memuat riwayat…</Trans></span>
-      </div>
-    );
+    return <ListSkeleton rows={5} />;
   }
 
   if (orders.length === 0) {

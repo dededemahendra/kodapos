@@ -10,6 +10,7 @@ import { useEditableState } from '~/components/settings/use-editable-state';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldTitle } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
 import {
   Select,
   SelectContent,
@@ -488,9 +489,7 @@ function EmailSummarySection() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            <Trans>Memuat…</Trans>
-          </p>
+          <FormSkeleton rows={3} />
         </CardContent>
       </Card>
     );

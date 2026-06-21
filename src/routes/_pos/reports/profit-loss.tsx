@@ -18,7 +18,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
-import { Spinner } from '~/components/ui/spinner';
+import { SummaryRowsSkeleton } from '~/components/ui/loading-skeletons';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
 import { exportTablePdf } from '~/lib/pdf';
@@ -134,9 +134,9 @@ function ProfitLossReport() {
       </div>
 
       {data === undefined ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <Card className="mx-auto max-w-md p-4">
+          <SummaryRowsSkeleton rows={6} />
+        </Card>
       ) : data.revenueIDR === 0 &&
         data.refundsIDR === 0 &&
         data.expensesIDR === 0 &&

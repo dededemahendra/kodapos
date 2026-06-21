@@ -3931,8 +3931,8 @@ msgstr "Processing…"
 
 #: src/components/shift/shift-order-list.tsx
 #: src/routes/_pos/history.tsx
-msgid "Memuat riwayat…"
-msgstr "Loading history…"
+#~ msgid "Memuat riwayat…"
+#~ msgstr "Loading history…"
 
 #: src/routes/_pos.tsx
 #~ msgid "Memuat sesi…"
@@ -3949,21 +3949,12 @@ msgstr "Loading receipt…"
 #: src/components/ai-restock-advice.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
-#: src/routes/_pos/inventory/purchases.tsx
-#: src/routes/_pos/loyalty.tsx
-#: src/routes/_pos/menu/items.$itemId.tsx
-#: src/routes/_pos/menu/modifiers.$groupId.tsx
 #: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/onboarding/profile.tsx
 #: src/routes/_pos/pin.tsx
-#: src/routes/_pos/settings/general.tsx
-#: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/receipt.tsx
 #: src/routes/_pos/settings/staff.tsx
-#: src/routes/_pos/settings/tax.tsx
-#: src/routes/_pos/shift/close.tsx
 #: src/routes/_pos/shift/open.tsx
-#: src/routes/_pos/shifts.tsx
 msgid "Memuat…"
 msgstr "Loading…"
 

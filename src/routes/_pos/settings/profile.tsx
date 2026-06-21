@@ -14,6 +14,7 @@ import {
 } from '~/components/settings/primitives';
 import { useEditableState } from '~/components/settings/use-editable-state';
 import { Button } from '~/components/ui/button';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
 import { Input } from '~/components/ui/input';
 import {
   Select,
@@ -128,11 +129,7 @@ function SettingsProfile() {
   const { draft, setDraft, dirty, reset } = useEditableState<ProfileDraft>(initialDraft);
 
   if (cafe === undefined) {
-    return (
-      <p className="text-muted-foreground">
-        <Trans>Memuat…</Trans>
-      </p>
-    );
+    return <FormSkeleton rows={8} />;
   }
   if (cafe === null) {
     return (

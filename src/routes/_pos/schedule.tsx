@@ -17,8 +17,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
-import { Spinner } from '~/components/ui/spinner';
+import { Skeleton } from '~/components/ui/skeleton';
 import { useMutation } from 'convex/react';
 import { toast } from '~/lib/toast';
 
@@ -154,8 +155,13 @@ function SchedulePage() {
 
       <div className="mt-6">
         {data === undefined ? (
-          <div className="flex justify-center py-12">
-            <Spinner />
+          <div className="space-y-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <ListSkeleton rows={2} />
+              </div>
+            ))}
           </div>
         ) : shifts.length === 0 ? (
           <Empty>

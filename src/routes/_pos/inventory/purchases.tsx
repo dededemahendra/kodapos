@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import { PurchaseForm } from '~/components/inventory/purchase-form';
 import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import {
   Empty,
   EmptyDescription,
@@ -153,9 +154,7 @@ function PurchaseDetailSheet({
         </SheetHeader>
         <div className="mt-4 text-sm">
           {detail === undefined ? (
-            <p className="text-muted-foreground">
-              <Trans>Memuat…</Trans>
-            </p>
+            <ListSkeleton rows={4} />
           ) : detail === null ? (
             <p className="text-muted-foreground">
               <Trans>Pembelian tidak ditemukan.</Trans>
