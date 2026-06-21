@@ -5,6 +5,8 @@ import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { RecipeEditor } from '~/components/inventory/recipe-editor';
 import { ItemEditForm } from '~/components/menu/item-edit-form';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
+import { Skeleton } from '~/components/ui/skeleton';
 
 export const Route = createFileRoute('/_pos/menu/items/$itemId')({
   component: ItemEditPage,
@@ -19,7 +21,14 @@ function ItemEditPage() {
     isNew ? 'skip' : { id: itemId as Id<'menuItems'> }
   );
 
-  if (!isNew && detail === undefined) return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
+  if (!isNew && detail === undefined)
+    return (
+      <div>
+        <Skeleton className="mb-2 h-3 w-40" />
+        <Skeleton className="mb-4 h-7 w-48" />
+        <FormSkeleton rows={5} />
+      </div>
+    );
   if (!isNew && detail === null) return <p className="text-muted-foreground"><Trans>Item tidak ditemukan.</Trans></p>;
 
   return (

@@ -23,7 +23,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
-import { Spinner } from '~/components/ui/spinner';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
 import { exportTablePdf } from '~/lib/pdf';
@@ -227,9 +227,7 @@ function ExpensesReport() {
       ) : null}
 
       {data === undefined ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <ListSkeleton rows={6} />
       ) : data.rows.length === 0 ? (
         <Empty>
           <EmptyHeader>

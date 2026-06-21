@@ -14,6 +14,7 @@ import { SaveBar } from '~/components/settings/save-bar';
 import { useEditableState } from '~/components/settings/use-editable-state';
 import { Button } from '~/components/ui/button';
 import { FieldGroup } from '~/components/ui/field';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
 import { Input } from '~/components/ui/input';
 import {
   Select,
@@ -125,11 +126,7 @@ function SettingsTax() {
   const { draft, setDraft, dirty, reset } = useEditableState<TaxPaymentDraft>(initialDraft);
 
   if (s === undefined) {
-    return (
-      <p className="text-muted-foreground">
-        <Trans>Memuat…</Trans>
-      </p>
-    );
+    return <FormSkeleton rows={8} />;
   }
   if (!draft) return null;
 

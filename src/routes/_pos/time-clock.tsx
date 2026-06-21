@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
@@ -61,11 +62,7 @@ function ClockSection() {
   const clockOut = useMutation(api.timeClock.clockOut);
 
   if (staff === undefined || inNow === undefined) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner />
-      </div>
-    );
+    return <ListSkeleton rows={5} />;
   }
 
   const inByCashier = new Map(inNow.map((r) => [r.cashierId, r] as const));

@@ -5,6 +5,7 @@ import { useQuery } from 'convex/react';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { Skeleton } from '~/components/ui/skeleton';
 import {
   readDisplay,
   subscribeDisplay,
@@ -30,16 +31,25 @@ function CustomerDisplay() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <header className="flex items-center gap-4 border-b px-8 py-6">
-        {cafe?.logoUrl ? (
-          <img
-            src={cafe.logoUrl}
-            alt=""
-            className="h-12 w-12 rounded-md object-cover"
-          />
-        ) : null}
-        <span className="text-3xl font-bold tracking-tight">
-          {cafe?.name ?? 'kodapos'}
-        </span>
+        {cafe === undefined ? (
+          <>
+            <Skeleton className="h-12 w-12 rounded-md" />
+            <Skeleton className="h-8 w-48" />
+          </>
+        ) : (
+          <>
+            {cafe?.logoUrl ? (
+              <img
+                src={cafe.logoUrl}
+                alt=""
+                className="h-12 w-12 rounded-md object-cover"
+              />
+            ) : null}
+            <span className="text-3xl font-bold tracking-tight">
+              {cafe?.name ?? 'kodapos'}
+            </span>
+          </>
+        )}
       </header>
 
       {isIdle ? (

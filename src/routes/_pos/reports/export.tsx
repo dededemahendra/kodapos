@@ -17,7 +17,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
-import { Spinner } from '~/components/ui/spinner';
+import { ListSkeleton, SummaryRowsSkeleton } from '~/components/ui/loading-skeletons';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
 import { exportTablePdf } from '~/lib/pdf';
@@ -329,12 +329,14 @@ function AccountingExport() {
             </div>
           </dl>
         </Card>
-      ) : null}
+      ) : (
+        <Card className="p-4">
+          <SummaryRowsSkeleton rows={6} />
+        </Card>
+      )}
 
       {data === undefined ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <ListSkeleton rows={6} />
       ) : data.entries.length === 0 ? (
         <Empty>
           <EmptyHeader>

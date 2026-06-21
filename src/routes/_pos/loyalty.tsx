@@ -11,6 +11,7 @@ import { RewardFormDialog } from '~/components/loyalty/reward-form-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
+import { FormSkeleton, ListSkeleton } from '~/components/ui/loading-skeletons';
 import { RowActions } from '~/components/ui/row-actions';
 import { RowSep, SettingRow, SettingsSection } from '~/components/settings/primitives';
 import { SaveBar } from '~/components/settings/save-bar';
@@ -296,9 +297,7 @@ function LoyaltyPage() {
         {/* Program config                                                    */}
         {/* ---------------------------------------------------------------- */}
         {config === undefined || !draft ? (
-          <p className="text-muted-foreground text-sm">
-            <Trans>Memuat…</Trans>
-          </p>
+          <FormSkeleton rows={4} />
         ) : (
           <>
             <SettingsSection
@@ -493,9 +492,7 @@ function LoyaltyPage() {
           </CardHeader>
           <CardContent>
             {stats === undefined ? (
-              <p className="text-muted-foreground text-sm">
-                <Trans>Memuat…</Trans>
-              </p>
+              <ListSkeleton rows={4} />
             ) : stats.topCustomers.length === 0 ? (
               <Empty>
                 <EmptyHeader>

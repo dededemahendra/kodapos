@@ -16,6 +16,7 @@ import {
 } from '~/components/ui/empty';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
+import { SummaryRowsSkeleton } from '~/components/ui/loading-skeletons';
 import { Spinner } from '~/components/ui/spinner';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { formatIDR } from '~/lib/money';
@@ -52,7 +53,7 @@ function ShiftClosePage() {
   }
 
   if (current === undefined) {
-    return <p className="text-muted-foreground p-6"><Trans>Memuat…</Trans></p>;
+    return <div className="p-6"><SummaryRowsSkeleton rows={6} /></div>;
   }
 
   if (current === null) {
@@ -120,7 +121,7 @@ function ShiftClosePage() {
     <main className="max-w-3xl mx-auto p-6 grid grid-cols-2 gap-8">
       <section>
         <h1 className="text-2xl font-bold mb-3"><Trans>Tutup Shift</Trans></h1>
-        {panelShift ? <ShiftSummaryPanel shift={panelShift} /> : <Spinner />}
+        {panelShift ? <ShiftSummaryPanel shift={panelShift} /> : <SummaryRowsSkeleton rows={6} />}
       </section>
       <section>
         <form onSubmit={onSubmit}>

@@ -10,8 +10,8 @@ import { TableManageDialog } from '~/components/tables/table-manage-dialog';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { CardGridSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
-import { Spinner } from '~/components/ui/spinner';
 import { usePermissions } from '~/lib/permissions';
 import { formatIDR } from '~/lib/money';
 
@@ -57,9 +57,7 @@ function TablesPage() {
       />
 
       {floor === undefined ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <CardGridSkeleton count={8} />
       ) : floor.length === 0 ? (
         <Empty>
           <EmptyHeader>

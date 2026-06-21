@@ -4,6 +4,8 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { ModifierGroupForm } from '~/components/menu/modifier-group-form';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
+import { Skeleton } from '~/components/ui/skeleton';
 
 export const Route = createFileRoute('/_pos/menu/modifiers/$groupId')({
   component: ModifierGroupEditor,
@@ -18,7 +20,13 @@ function ModifierGroupEditor() {
     isNew ? 'skip' : { id: groupId as Id<'modifierGroups'> }
   );
 
-  if (!isNew && existing === undefined) return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
+  if (!isNew && existing === undefined)
+    return (
+      <div>
+        <Skeleton className="mb-4 h-7 w-48" />
+        <FormSkeleton rows={5} />
+      </div>
+    );
   if (!isNew && existing === null) return <p className="text-muted-foreground"><Trans>Grup tidak ditemukan.</Trans></p>;
 
   return (

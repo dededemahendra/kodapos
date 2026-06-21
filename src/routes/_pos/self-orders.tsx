@@ -16,6 +16,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
+import { CardGridSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
 import { Spinner } from '~/components/ui/spinner';
 import { useActiveCashier } from '~/lib/active-cashier';
@@ -56,9 +57,11 @@ function SelfOrdersPage() {
       <PageHeader title={<Trans>Pesanan Masuk</Trans>} />
 
       {queue === undefined ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <CardGridSkeleton
+          count={6}
+          className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          cardClassName="h-40"
+        />
       ) : queue.length === 0 ? (
         <Empty>
           <EmptyHeader>

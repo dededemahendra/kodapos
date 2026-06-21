@@ -5,7 +5,7 @@ import { useQuery } from 'convex/react';
 import { PinGate } from '~/components/staff/pin-gate';
 import { ShiftOrderList } from '~/components/shift/shift-order-list';
 import { ShiftGate } from '~/components/shift/shift-gate';
-import { Spinner } from '~/components/ui/spinner';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 
 export const Route = createFileRoute('/_pos/history')({
   component: HistoryPage,
@@ -26,9 +26,10 @@ function HistoryList() {
 
   if (shift === undefined) {
     return (
-      <div className="p-6 flex gap-2 text-muted-foreground items-center">
-        <Spinner /><span><Trans>Memuat riwayat…</Trans></span>
-      </div>
+      <main className="p-6 space-y-3">
+        <h1 className="text-2xl font-bold"><Trans>Riwayat shift ini</Trans></h1>
+        <ListSkeleton rows={5} />
+      </main>
     );
   }
 

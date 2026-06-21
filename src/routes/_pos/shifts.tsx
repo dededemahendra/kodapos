@@ -13,6 +13,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 import { toast } from '~/lib/toast';
@@ -160,9 +161,7 @@ function ShiftHistoryPage() {
       ) : null}
 
       {status === 'LoadingFirstPage' ? (
-        <div className="flex gap-2 text-muted-foreground items-center">
-          <Spinner /><span><Trans>Memuat…</Trans></span>
-        </div>
+        <ListSkeleton rows={5} />
       ) : results.length === 0 ? (
         <Empty>
           <EmptyHeader>

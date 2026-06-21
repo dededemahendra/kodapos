@@ -12,7 +12,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/
 import { Input } from '~/components/ui/input';
 import { PageHeader } from '~/components/ui/page-header';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
-import { Spinner } from '~/components/ui/spinner';
+import { CardGridSkeleton, ListSkeleton } from '~/components/ui/loading-skeletons';
 import { StatusBadge } from '~/components/ui/status-badge';
 import { waUrl, formatRestockText } from '~/lib/whatsapp';
 import { RenderDriver, type ForecastDriver } from '~/components/forecast/render-driver';
@@ -92,7 +92,7 @@ function RestockPanel() {
       <h2 className="text-lg font-semibold"><Trans>Daftar Belanja</Trans></h2>
       {isSent ? <StatusBadge variant="success"><Trans>Terkirim</Trans></StatusBadge> : null}
       {data === undefined ? (
-        <div className="mt-4 flex items-center justify-center py-8 text-muted-foreground"><Spinner /></div>
+        <ListSkeleton rows={4} className="mt-4" />
       ) : data.status === 'learning' ? (
         <p className="mt-2 text-sm text-muted-foreground"><Trans>Daftar belanja akan muncul setelah perkiraan aktif.</Trans></p>
       ) : lines.length === 0 ? (
@@ -139,7 +139,7 @@ function ForecastInner() {
     <main className="p-6">
       <PageHeader title={<Trans>Prediksi Permintaan</Trans>} />
       {data === undefined ? (
-        <div className="mt-6 flex items-center justify-center py-12 text-muted-foreground"><Spinner /></div>
+        <CardGridSkeleton count={6} className="mt-6" />
       ) : data.status === 'learning' ? (
         <Empty className="mt-6">
           <EmptyHeader>

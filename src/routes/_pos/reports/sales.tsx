@@ -16,7 +16,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
-import { Spinner } from '~/components/ui/spinner';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
+import { Skeleton } from '~/components/ui/skeleton';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
 import { exportTablePdf } from '~/lib/pdf';
@@ -62,8 +63,9 @@ function SalesReport() {
 
   if (data === undefined) {
     return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        <Spinner />
+      <div className="space-y-4">
+        <Skeleton className="h-60 w-full rounded-lg" />
+        <ListSkeleton rows={6} />
       </div>
     );
   }

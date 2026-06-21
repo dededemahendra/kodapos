@@ -7,8 +7,8 @@ import { ORDER_TYPE_OPTIONS } from '~/components/sale/order-types';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import { CardGridSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
-import { Spinner } from '~/components/ui/spinner';
 import { cn } from '~/lib/utils';
 
 export const Route = createFileRoute('/_pos/kitchen')({ component: KitchenPage });
@@ -26,9 +26,7 @@ function KitchenPage() {
       <PageHeader title={<Trans>Dapur</Trans>} />
 
       {tickets === undefined ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <CardGridSkeleton count={8} />
       ) : tickets.length === 0 ? (
         <Empty>
           <EmptyHeader>

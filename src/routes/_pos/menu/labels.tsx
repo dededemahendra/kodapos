@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import { Spinner } from '~/components/ui/spinner';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { formatIDR } from '~/lib/money';
 import { toast } from '~/lib/toast';
 
@@ -115,11 +115,7 @@ function LabelsContent() {
   }, [items, selection]);
 
   if (items === undefined) {
-    return (
-      <div className="grid place-items-center py-12">
-        <Spinner />
-      </div>
-    );
+    return <ListSkeleton rows={6} />;
   }
 
   if (items.length === 0) {
