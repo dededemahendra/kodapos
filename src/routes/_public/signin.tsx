@@ -26,6 +26,7 @@ import {
   validatePasswordRequired,
   validatePasswordSignup,
 } from '~/lib/auth-validation';
+import { seo } from '~/lib/seo';
 
 // `email`/`code` no longer live in the query string: the magic link now carries
 // them in the URL FRAGMENT (#) so they never reach a server log / Referer. Only
@@ -33,6 +34,7 @@ import {
 type SigninSearch = { reset?: string };
 
 export const Route = createFileRoute('/_public/signin')({
+  head: () => seo({ title: 'Masuk, kodapos', path: '/signin', noindex: true }),
   validateSearch: (s: Record<string, unknown>): SigninSearch => ({
     ...(typeof s.reset === 'string' ? { reset: s.reset } : {}),
   }),

@@ -28,8 +28,16 @@ import {
   validateName,
   validatePasswordSignup,
 } from '~/lib/auth-validation';
+import { seo } from '~/lib/seo';
 
 export const Route = createFileRoute('/_public/signup')({
+  head: () =>
+    seo({
+      title: 'Daftar gratis, kodapos',
+      description: 'Buat akun kodapos gratis dan mulai berjualan. Tanpa kartu kredit.',
+      path: '/signup',
+      noindex: true,
+    }),
   component: SignupPage,
 });
 
