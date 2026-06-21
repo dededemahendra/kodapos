@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { Trans, useLingui } from '@lingui/react/macro';
+import { MotionConfig, motion } from 'motion/react';
 import { BrandMark } from '~/components/brand-mark';
 import { DecorIcon } from '~/components/decor-icon';
 import { AnimatedGroup } from '~/components/marketing/animated-group';
@@ -49,7 +50,20 @@ function OnboardingLayout() {
           <DecorIcon position="top-right" />
           <DecorIcon position="bottom-left" />
           <DecorIcon position="bottom-right" />
-          <Outlet />
+          {/* Re-keying on the path remounts on each step change, replaying the
+              entrance so the wizard transitions between steps instead of
+              swapping instantly. reducedMotion="user" keeps the fade but drops
+              the translate for users who ask for less motion. */}
+          <MotionConfig reducedMotion="user">
+            <motion.div
+              key={path}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Outlet />
+            </motion.div>
+          </MotionConfig>
         </div>
       </AnimatedGroup>
     </div>
