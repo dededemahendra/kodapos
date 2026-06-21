@@ -24,7 +24,7 @@ msgstr "— Pilih —"
 #~ msgid "— Pilih kategori —"
 #~ msgstr "— Pilih kategori —"
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "…"
 msgstr "…"
@@ -242,8 +242,8 @@ msgstr "{points} poin"
 msgid "@namakafe"
 msgstr "@namakafe"
 
-#: src/routes/_pos/onboarding/cashier.tsx
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "← Kembali"
 msgstr "← Kembali"
 
@@ -731,15 +731,15 @@ msgstr "Atur metode pembayaran"
 msgid "Atur pajak, biaya layanan, dan metode pembayaran."
 msgstr "Atur pajak, biaya layanan, dan metode pembayaran."
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "Atur PIN"
 msgstr "Atur PIN"
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (opsional)."
 msgstr "Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (opsional)."
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "Atur PIN Pemilik"
 msgstr "Atur PIN Pemilik"
 
@@ -1069,7 +1069,7 @@ msgstr "Belum ada jam kerja pada rentang ini."
 msgid "Belum ada kartu hadiah."
 msgstr "Belum ada kartu hadiah."
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "Belum ada kasir tambahan."
 msgstr "Belum ada kasir tambahan."
 
@@ -1290,7 +1290,7 @@ msgstr "Biaya/satuan"
 #~ msgid "Billing health"
 #~ msgstr "Billing health"
 
-#: src/routes/_pos/onboarding/profile.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "Bisa diubah kapan saja di Pengaturan."
 msgstr "Bisa diubah kapan saja di Pengaturan."
 
@@ -1322,7 +1322,7 @@ msgstr "Buah (pcs)"
 msgid "Buang"
 msgstr "Buang"
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Buat 2-3 kategori (Kopi, Non-Kopi, Makanan)."
 msgstr "Buat 2-3 kategori (Kopi, Non-Kopi, Makanan)."
 
@@ -1350,11 +1350,11 @@ msgstr "Buat barcode"
 msgid "Buat barcode dulu untuk item terpilih yang belum punya barcode."
 msgstr "Buat barcode dulu untuk item terpilih yang belum punya barcode."
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Buat grup modifier (mis. Ukuran) dan pasang ke item."
 msgstr "Buat grup modifier (mis. Ukuran) dan pasang ke item."
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
 msgstr "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
 
@@ -2128,7 +2128,7 @@ msgstr "Gagal memutuskan integrasi."
 msgid "Gagal menahan pesanan."
 msgstr "Gagal menahan pesanan."
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "Gagal menambah kasir."
 msgstr "Gagal menambah kasir."
 
@@ -2225,7 +2225,7 @@ msgstr "Gagal mengarsipkan promo."
 msgid "Gagal mengarsipkan reward."
 msgstr "Gagal mengarsipkan reward."
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "Gagal mengatur PIN."
 msgstr "Gagal mengatur PIN."
 
@@ -2429,7 +2429,7 @@ msgstr "Ganti kasir"
 msgid "Ganti keranjang saat ini?"
 msgstr "Ganti keranjang saat ini?"
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Ganti PIN"
 msgstr "Ganti PIN"
@@ -3138,7 +3138,7 @@ msgstr "Kasir"
 msgid "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
 msgstr "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "Kasir lain (opsional)"
 msgstr "Kasir lain (opsional)"
 
@@ -3559,7 +3559,7 @@ msgstr "Label Barcode"
 msgid "Lainnya"
 msgstr "Lainnya"
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Langkah singkat"
 msgstr "Langkah singkat"
 
@@ -3567,7 +3567,7 @@ msgstr "Langkah singkat"
 #~ msgid "Langsung cetak setelah pembayaran berhasil."
 #~ msgstr "Langsung cetak setelah pembayaran berhasil."
 
-#: src/routes/_pos/onboarding/profile.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "Lanjut →"
 msgstr "Lanjut →"
 
@@ -3575,7 +3575,7 @@ msgstr "Lanjut →"
 msgid "Lanjut ke Tutup Shift"
 msgstr "Lanjut ke Tutup Shift"
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Lanjut: PIN & Kasir →"
 msgstr "Lanjut: PIN & Kasir →"
 
@@ -3658,7 +3658,7 @@ msgstr "Lengkap"
 msgid "Lepas"
 msgstr "Lepas"
 
-#: src/routes/_pos/onboarding/profile.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "Lewati semua"
 msgstr "Lewati semua"
 
@@ -4085,7 +4085,7 @@ msgstr "Minggu sebelumnya"
 msgid "Minimal 8 karakter"
 msgstr "Minimal 8 karakter"
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "mis. Andi"
 msgstr "mis. Andi"
@@ -4164,7 +4164,7 @@ msgstr "Mulai cepat"
 msgid "Mulai dalam tiga langkah"
 msgstr "Mulai dalam tiga langkah"
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Mulai dengan kategori →"
 msgstr "Mulai dengan kategori →"
 
@@ -4193,11 +4193,11 @@ msgstr "Naikkan urutan"
 #: src/components/loyalty/reward-form-dialog.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/modifiers.tsx
-#: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/settings/tax.tsx
@@ -5120,7 +5120,7 @@ msgstr "Pilihan"
 msgid "PIN"
 msgstr "PIN"
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "PIN 4 digit"
 msgstr "PIN 4 digit"
@@ -5130,11 +5130,11 @@ msgstr "PIN 4 digit"
 msgid "PIN pemilik"
 msgstr "PIN pemilik"
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "PIN Pemilik"
 msgstr "PIN Pemilik"
 
-#: src/routes/_pos/onboarding/cashier.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 msgid "PIN Pemilik & Kasir"
 msgstr "PIN Pemilik & Kasir"
 
@@ -5301,7 +5301,7 @@ msgstr "Produk"
 msgid "Profil"
 msgstr "Profil"
 
-#: src/routes/_pos/onboarding/profile.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Profil kafe"
 msgstr "Profil kafe"
@@ -5766,9 +5766,9 @@ msgid "Selengkapnya"
 msgstr "Selengkapnya"
 
 #: src/components/import/csv-import-dialog.tsx
+#: src/components/onboarding/steps/cashier-step.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/kitchen.tsx
-#: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/reservations.tsx
 msgid "Selesai"
 msgstr "Selesai"
@@ -5778,7 +5778,7 @@ msgctxt "shift end time"
 msgid "Selesai"
 msgstr "Selesai"
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Selesaikan nanti"
 msgstr "Selesaikan nanti"
 
@@ -6190,7 +6190,7 @@ msgstr "Sumber"
 msgid "Sunting bahan dan jumlah untuk resep item ini."
 msgstr "Sunting bahan dan jumlah untuk resep item ini."
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Susun menu kafe"
 msgstr "Susun menu kafe"
 
@@ -6207,9 +6207,9 @@ msgstr "Tahan"
 msgid "Tahan pesanan"
 msgstr "Tahan pesanan"
 
+#: src/components/onboarding/steps/cashier-step.tsx
 #: src/components/public/cart-review-sheet.tsx
 #: src/components/public/item-picker-sheet.tsx
-#: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tambah"
 msgstr "Tambah"
@@ -6335,7 +6335,7 @@ msgstr "Tambah, ubah nama, atau arsipkan meja."
 msgid "Tambahkan bahan di inventaris untuk mulai stok opname."
 msgstr "Tambahkan bahan di inventaris untuk mulai stok opname."
 
-#: src/routes/_pos/onboarding/menu.tsx
+#: src/components/onboarding/steps/menu-step.tsx
 msgid "Tambahkan beberapa item beserta harganya."
 msgstr "Tambahkan beberapa item beserta harganya."
 
