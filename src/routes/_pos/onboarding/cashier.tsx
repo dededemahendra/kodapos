@@ -145,7 +145,7 @@ function OnboardingCashier() {
       <div className="flex gap-2">
         <Button onClick={() => void finish()}><Trans>Selesai</Trans></Button>
         <Button asChild variant="ghost" className="text-muted-foreground">
-          <Link to="/onboarding/menu"><Trans>← Kembali</Trans></Link>
+          <Link to="/onboarding/menu" viewTransition><Trans>← Kembali</Trans></Link>
         </Button>
       </div>
 

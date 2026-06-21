@@ -275,3 +275,24 @@ html[data-density="comfortable"] {
   }
 }
 
+/* Onboarding wizard step transition. The step content carries
+   `view-transition-name: onboarding-step`; intra-onboarding navigations pass
+   `viewTransition`, so the browser cross-animates the outgoing and incoming
+   step as a horizontal slide (old slides left, new slides in from the right).
+   Wrapped in prefers-reduced-motion so it falls back to the browser's default
+   cross-fade for users who ask for less motion. */
+@keyframes kp-step-out {
+  to { opacity: 0; transform: translateX(-24px); }
+}
+@keyframes kp-step-in {
+  from { opacity: 0; transform: translateX(24px); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(onboarding-step) {
+    animation: kp-step-out 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  ::view-transition-new(onboarding-step) {
+    animation: kp-step-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
