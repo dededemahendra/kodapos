@@ -58,7 +58,7 @@ function OnboardingProfile() {
         submitLabel={t`Lanjut →`}
         onSubmit={async (values) => {
           await updateProfile(values);
-          navigate({ to: '/onboarding/menu' });
+          navigate({ to: '/onboarding/menu', viewTransition: true });
         }}
         secondaryAction={{
           label: t`Lewati semua`,

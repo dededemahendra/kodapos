@@ -47,7 +47,7 @@ function OnboardingMenu() {
           <Trans>Mulai dengan kategori →</Trans>
         </Button>
         <Button asChild variant="outline">
-          <Link to="/onboarding/cashier"><Trans>Lanjut: PIN & Kasir →</Trans></Link>
+          <Link to="/onboarding/cashier" viewTransition><Trans>Lanjut: PIN & Kasir →</Trans></Link>
         </Button>
         <Button variant="ghost" onClick={() => finish('/menu')}>
           <Trans>Selesaikan nanti</Trans>
@@ -55,7 +55,7 @@ function OnboardingMenu() {
       </div>
       <div className="mt-4">
         <Button asChild variant="ghost" className="px-0 text-muted-foreground">
-          <Link to="/onboarding/profile"><Trans>← Kembali</Trans></Link>
+          <Link to="/onboarding/profile" viewTransition><Trans>← Kembali</Trans></Link>
         </Button>
       </div>
     </>
