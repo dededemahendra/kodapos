@@ -1751,6 +1751,10 @@ msgstr "Daftar belanja akan muncul setelah perkiraan aktif."
 msgid "Daftar dan atur menu"
 msgstr "Daftar dan atur menu"
 
+#: src/components/legal/legal-page.tsx
+msgid "Daftar isi"
+msgstr "Daftar isi"
+
 #: src/components/net-revenue-chart.tsx
 #~ msgid "Daily net sales, last 7 days."
 #~ msgstr "Daily net sales, last 7 days."
@@ -1929,6 +1933,10 @@ msgstr "Diterima"
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Ditutup pada"
 msgstr "Ditutup pada"
+
+#: src/components/legal/legal-page.tsx
+msgid "Dokumen ini adalah draf template dan belum ditinjau oleh penasihat hukum. Lengkapi rincian dalam tanda kurung dan tinjau bersama pengacara sebelum peluncuran resmi."
+msgstr "Dokumen ini adalah draf template dan belum ditinjau oleh penasihat hukum. Lengkapi rincian dalam tanda kurung dan tinjau bersama pengacara sebelum peluncuran resmi."
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/docs.tsx
@@ -2518,12 +2526,12 @@ msgid "Halaman {0} dari {pageCount}"
 msgstr "Halaman {0} dari {pageCount}"
 
 #: src/routes/_public/privacy.tsx
-msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
-msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
+#~ msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
+#~ msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait kebijakan privasi, hubungi tim kodapos."
 
 #: src/routes/_public/terms.tsx
-msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait syarat dan ketentuan, hubungi tim kodapos."
-msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait syarat dan ketentuan, hubungi tim kodapos."
+#~ msgid "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait syarat dan ketentuan, hubungi tim kodapos."
+#~ msgstr "Halaman ini akan diisi sebelum peluncuran resmi. Untuk pertanyaan terkait syarat dan ketentuan, hubungi tim kodapos."
 
 #: src/components/permission/require-permission.tsx
 #~ msgid "Halaman ini perlu akses pemilik. Anda login sebagai pemilik, tetapi kasir aktif di kasir ini bukan pemilik — masuk sebagai pemilik untuk membukanya."
@@ -3198,8 +3206,8 @@ msgid "Keamanan"
 msgstr "Keamanan"
 
 #: src/routes/_public/privacy.tsx
-msgid "Kebijakan Privasi"
-msgstr "Kebijakan Privasi"
+#~ msgid "Kebijakan Privasi"
+#~ msgstr "Kebijakan Privasi"
 
 #: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/settings/receipt.tsx
@@ -3249,9 +3257,7 @@ msgstr "Keluar"
 msgid "Kemarin"
 msgstr "Kemarin"
 
-#: src/routes/_public/privacy.tsx
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/terms.tsx
 msgid "Kembali"
 msgstr "Kembali"
 
@@ -3259,6 +3265,7 @@ msgstr "Kembali"
 msgid "Kembali ke /sale"
 msgstr "Kembali ke /sale"
 
+#: src/components/legal/legal-page.tsx
 #: src/routes/__root.tsx
 msgid "Kembali ke beranda"
 msgstr "Kembali ke beranda"
@@ -6181,8 +6188,8 @@ msgid "Susun menu kafe"
 msgstr "Susun menu kafe"
 
 #: src/routes/_public/terms.tsx
-msgid "Syarat Layanan"
-msgstr "Syarat Layanan"
+#~ msgid "Syarat Layanan"
+#~ msgstr "Syarat Layanan"
 
 #: src/components/sale/hold-order-dialog.tsx
 msgid "Tahan"
@@ -6593,6 +6600,10 @@ msgstr "Template body (JSON)"
 #: src/routes/_pos/help.tsx
 msgid "Temukan jawaban dan pelajari cara memakai kodapos."
 msgstr "Temukan jawaban dan pelajari cara memakai kodapos."
+
+#: src/components/legal/legal-page.tsx
+msgid "Terakhir diperbarui"
+msgstr "Terakhir diperbarui"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Terang"
