@@ -1,34 +1,46 @@
-import { Trans } from '@lingui/react/macro';
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { BrandMark } from '~/components/brand-mark';
-import { Button } from '~/components/ui/button';
+import { createFileRoute } from '@tanstack/react-router';
+import { AiSpotlight } from '~/components/marketing/ai-spotlight';
+import { CtaBand } from '~/components/marketing/cta-band';
+import { Faq } from '~/components/marketing/faq';
+import { FeatureSection } from '~/components/marketing/feature-section';
+import { Hero } from '~/components/marketing/hero';
+import { HowItWorks } from '~/components/marketing/how-it-works';
+import { MarketingHeader } from '~/components/marketing/marketing-header';
+import { MarketingFooter } from '~/components/marketing/marketing-footer';
+import { Pricing } from '~/components/marketing/pricing';
+import { Testimonials } from '~/components/marketing/testimonials';
+import { WhyIndonesia } from '~/components/marketing/why-indonesia';
 
 export const Route = createFileRoute('/_public/')({
+  head: () => ({
+    meta: [
+      { title: 'kodapos, POS pintar untuk kafe dan resto' },
+      {
+        name: 'description',
+        content:
+          'Satu aplikasi untuk kasir, stok, dan laporan. Jual lebih cepat, jaga margin, dan ambil keputusan dengan bantuan AI.',
+      },
+    ],
+  }),
   component: PublicHome,
 });
 
 function PublicHome() {
   return (
-    <main className="min-h-screen p-8 max-w-3xl mx-auto">
-      <header className="flex items-center gap-3">
-        <BrandMark className="h-8 w-auto text-primary" />
-        <h1 className="text-3xl font-bold text-primary">kodapos</h1>
-      </header>
-      <p className="text-muted-foreground mt-2">
-        <Trans>AI-native POS untuk kafe & QSR Indonesia.</Trans>
-      </p>
-      <div className="mt-6 flex gap-3">
-        <Button asChild>
-          <Link to="/signin">
-            <Trans>Masuk</Trans>
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link to="/signup">
-            <Trans>Daftar</Trans>
-          </Link>
-        </Button>
-      </div>
-    </main>
+    <div id="top" className="min-h-screen bg-background text-foreground">
+      <MarketingHeader />
+      <main>
+        <Hero />
+        <FeatureSection />
+        <AiSpotlight />
+        <HowItWorks />
+        <WhyIndonesia />
+        <Testimonials />
+        <Pricing />
+        <Faq />
+        <CtaBand />
+      </main>
+      <MarketingFooter />
+    </div>
   );
 }
