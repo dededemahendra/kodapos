@@ -13,6 +13,7 @@ import {
 } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { aiErrorMessage } from '~/lib/ai-error';
 import { toast } from '~/lib/toast';
 
 /**
@@ -22,7 +23,7 @@ import { toast } from '~/lib/toast';
  * AI integration is configured in Settings.
  */
 export function AiInsights() {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const settings = useQuery(api.settings.get);
   const runInsights = useAction(api.ai.insights);
   const runAsk = useAction(api.ai.ask);
@@ -37,7 +38,7 @@ export function AiInsights() {
     try {
       setResult(await runInsights({}));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t`Gagal memuat wawasan.`);
+      toast.error(i18n._(aiErrorMessage(err)));
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,7 @@ export function AiInsights() {
     try {
       setResult(await runAsk({ question: q }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t`Gagal menjawab.`);
+      toast.error(i18n._(aiErrorMessage(err)));
     } finally {
       setLoading(false);
     }
