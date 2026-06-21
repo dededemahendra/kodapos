@@ -45,10 +45,12 @@ export function Hero() {
         aria-hidden
         className="absolute inset-0 -z-10 [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]"
       />
-      {/* Meteor streaks, above the fade so they read, behind the content */}
-      <Meteors number={30} className="-z-[5]" />
+      {/* Meteor streaks behind the content (kept at z-0, content sits at z-10) */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <Meteors number={44} />
+      </div>
 
-      <div className="mx-auto max-w-6xl px-6 pt-20 text-center md:pt-28">
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-20 text-center md:pt-28">
         <AnimatedGroup variants={transitionVariants}>
           <a
             href="#fitur"
@@ -98,7 +100,7 @@ export function Hero() {
       </div>
 
       <AnimatedGroup variants={delayedGroup}>
-        <div className="relative mx-auto mt-12 max-w-5xl px-6 sm:mt-16">
+        <div className="relative z-10 mx-auto mt-12 max-w-5xl px-6 sm:mt-16">
           <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-transparent from-55% to-background" />
           <div className="relative overflow-hidden rounded-2xl border border-border bg-background p-2 shadow-xl ring-1 ring-border/50">
             <RegisterPreview />

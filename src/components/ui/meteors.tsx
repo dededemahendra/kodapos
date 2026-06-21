@@ -48,11 +48,11 @@ export function Meteors({
           key={idx}
           style={style}
           className={cn(
-            'pointer-events-none absolute size-0.5 rotate-[var(--angle)] animate-meteor rounded-full bg-muted-foreground/60 shadow-[0_0_0_1px_var(--color-border)]',
+            'pointer-events-none absolute size-1 rotate-[var(--angle)] animate-meteor rounded-full bg-foreground/80 shadow-[0_0_6px_1px_var(--color-foreground)]',
             className,
           )}
         >
-          <div className="pointer-events-none absolute top-1/2 -z-10 h-px w-[50px] -translate-y-1/2 bg-gradient-to-r from-muted-foreground/60 to-transparent" />
+          <div className="pointer-events-none absolute top-1/2 h-0.5 w-[80px] -translate-y-1/2 bg-gradient-to-r from-foreground/70 to-transparent" />
         </span>
       ))}
     </>
