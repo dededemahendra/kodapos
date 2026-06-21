@@ -240,6 +240,18 @@ html[data-density="comfortable"] {
 @utility animate-accordion-down { animation: accordion-down 0.2s ease-out; }
 @utility animate-accordion-up { animation: accordion-up 0.2s ease-out; }
 
+/* Meteor streaks (magicui Meteors). The per-meteor animation-duration/delay are
+   set inline; this utility just registers the keyframes + timing function. */
+@keyframes meteor {
+  0% { transform: rotate(var(--angle)) translateX(0); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: rotate(var(--angle)) translateX(-500px); opacity: 0; }
+}
+@utility animate-meteor { animation: meteor linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-meteor { animation: none; opacity: 0; }
+}
+
 /* Receipt + label printing. Hides everything except the print-area root. */
 @media print {
   body * {

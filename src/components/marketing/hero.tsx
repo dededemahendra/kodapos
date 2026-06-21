@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowRight } from 'lucide-react';
 import type { Variants } from 'motion/react';
 import { Button } from '~/components/ui/button';
+import { Meteors } from '~/components/ui/meteors';
 import { AnimatedGroup } from './animated-group';
 import { RegisterPreview } from './register-preview';
 
@@ -44,6 +45,8 @@ export function Hero() {
         aria-hidden
         className="absolute inset-0 -z-10 [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]"
       />
+      {/* Meteor streaks, above the fade so they read, behind the content */}
+      <Meteors number={30} className="-z-[5]" />
 
       <div className="mx-auto max-w-6xl px-6 pt-20 text-center md:pt-28">
         <AnimatedGroup variants={transitionVariants}>
