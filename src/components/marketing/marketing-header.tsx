@@ -1,5 +1,6 @@
 import { Trans } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
+import { MotionConfig, motion } from 'motion/react';
 import { Button } from '~/components/ui/button';
 import { BrandMark } from '~/components/brand-mark';
 import { useLocale } from '~/components/locale-provider';
@@ -8,7 +9,13 @@ import { LOCALES, type Locale } from '~/lib/locale';
 export function MarketingHeader() {
   const { locale, setLocale } = useLocale();
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+    <MotionConfig reducedMotion="user">
+      <motion.header
+        className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+      >
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
         <a href="/#top" className="flex items-center gap-2">
           <BrandMark className="h-5 w-auto text-foreground" />
@@ -43,6 +50,7 @@ export function MarketingHeader() {
           </Button>
         </div>
       </div>
-    </header>
+      </motion.header>
+    </MotionConfig>
   );
 }
