@@ -1,13 +1,26 @@
-import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
+import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { Trans, useLingui } from '@lingui/react/macro';
+import { AnimatePresence, MotionConfig, motion, type Variants } from 'motion/react';
+import { useEffect, useRef } from 'react';
 import { BrandMark } from '~/components/brand-mark';
 import { DecorIcon } from '~/components/decor-icon';
 import { AnimatedGroup } from '~/components/marketing/animated-group';
 import { type WizardStep, WizardStepper } from '~/components/menu/wizard-stepper';
+import { CashierStep } from '~/components/onboarding/steps/cashier-step';
+import { MenuStep } from '~/components/onboarding/steps/menu-step';
+import { ProfileStep } from '~/components/onboarding/steps/profile-step';
 
 export const Route = createFileRoute('/_pos/onboarding')({
   component: OnboardingLayout,
 });
+
+// Direction-aware horizontal slide. Forward (advancing) brings the new step in
+// from the right and pushes the old one off to the left; back reverses it.
+const stepVariants: Variants = {
+  enter: (dir: number) => ({ x: dir >= 0 ? 40 : -40, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir >= 0 ? -40 : 40, opacity: 0 }),
+};
 
 function OnboardingLayout() {
   const { t } = useLingui();
@@ -20,9 +33,21 @@ function OnboardingLayout() {
     { label: t`Kasir`, enabled: true },
   ];
 
-  let currentIndex = 0;
-  if (path.includes('/onboarding/menu')) currentIndex = 1;
-  else if (path.includes('/onboarding/cashier')) currentIndex = 3;
+  // Resolve the active step from the URL. The wizard renders the step itself
+  // (rather than via Outlet) so AnimatePresence can animate the outgoing and
+  // incoming steps together — works in every browser, unlike View Transitions.
+  const step = path.includes('/onboarding/cashier')
+    ? { key: 'cashier', index: 3, node: <CashierStep /> }
+    : path.includes('/onboarding/menu')
+      ? { key: 'menu', index: 1, node: <MenuStep /> }
+      : { key: 'profile', index: 0, node: <ProfileStep /> };
+
+  const currentIndex = step.index;
+  const prevIndex = useRef(currentIndex);
+  const direction = currentIndex < prevIndex.current ? -1 : 1;
+  useEffect(() => {
+    prevIndex.current = currentIndex;
+  }, [currentIndex]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-muted">
@@ -49,11 +74,24 @@ function OnboardingLayout() {
           <DecorIcon position="top-right" />
           <DecorIcon position="bottom-left" />
           <DecorIcon position="bottom-right" />
-          {/* The step content is a named view-transition target. Intra-onboarding
-              navigations pass `viewTransition`, so the browser slides the
-              outgoing step out and the incoming step in (see globals.css). */}
-          <div style={{ viewTransitionName: 'onboarding-step' }}>
-            <Outlet />
+          {/* Clip the slide so the exiting/entering steps never overflow the
+              card; the decor marks sit outside this wrapper and stay unclipped. */}
+          <div className="relative overflow-hidden">
+            <MotionConfig reducedMotion="user">
+              <AnimatePresence mode="popLayout" custom={direction} initial={false}>
+                <motion.div
+                  key={step.key}
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {step.node}
+                </motion.div>
+              </AnimatePresence>
+            </MotionConfig>
           </div>
         </div>
       </AnimatedGroup>
