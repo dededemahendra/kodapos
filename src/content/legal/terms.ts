@@ -18,7 +18,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'Layanan kodapos disediakan oleh [nama badan usaha], yang beralamat di [alamat terdaftar] (selanjutnya disebut "kami"). Dengan mendaftar atau menggunakan layanan, Anda menyatakan telah membaca, memahami, dan menyetujui Syarat Layanan ini beserta Kebijakan Privasi kami.',
+            text: 'Layanan kodapos disediakan oleh Dede Mahendra (selanjutnya disebut "kami"). Dengan mendaftar atau menggunakan layanan, Anda menyatakan telah membaca, memahami, dan menyetujui Syarat Layanan ini beserta Kebijakan Privasi kami.',
           },
           {
             type: 'p',
@@ -104,7 +104,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'Layanan dapat terhubung dengan penyedia pihak ketiga, seperti pemrosesan pembayaran QRIS dan pengiriman email. Penggunaan layanan pihak ketiga tunduk pada syarat dan kebijakan privasi masing-masing penyedia, dan kami tidak bertanggung jawab atas tindakan mereka.',
+            text: 'Layanan dapat terhubung dengan penyedia pihak ketiga, seperti pemrosesan pembayaran QRIS, pengiriman email, pesan WhatsApp, dan penyedia AI. Penggunaan layanan pihak ketiga tunduk pada syarat dan kebijakan privasi masing-masing penyedia, dan kami tidak bertanggung jawab atas tindakan mereka.',
           },
         ],
       },
@@ -166,7 +166,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'Syarat ini diatur oleh dan ditafsirkan berdasarkan hukum Republik Indonesia. Setiap sengketa yang timbul akan diselesaikan terlebih dahulu secara musyawarah, dan jika tidak tercapai, melalui jalur hukum di yurisdiksi [kota atau pengadilan yang berlaku].',
+            text: 'Syarat ini diatur oleh dan ditafsirkan berdasarkan hukum Republik Indonesia. Setiap sengketa yang timbul akan diselesaikan terlebih dahulu secara musyawarah, dan jika tidak tercapai, melalui pengadilan yang berwenang di Indonesia.',
           },
         ],
       },
@@ -176,7 +176,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'Untuk pertanyaan tentang Syarat Layanan ini, hubungi kami di [email kontak].',
+            text: 'Untuk pertanyaan tentang Syarat Layanan ini, hubungi kami di contact@kodapos.app.',
           },
         ],
       },
@@ -194,7 +194,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'The kodapos service is provided by [legal entity name], located at [registered address] (referred to as "we" or "us"). By signing up or using the service, you confirm that you have read, understood, and agree to these Terms of Service and our Privacy Policy.',
+            text: 'The kodapos service is provided by Dede Mahendra (referred to as "we" or "us"). By signing up or using the service, you confirm that you have read, understood, and agree to these Terms of Service and our Privacy Policy.',
           },
           {
             type: 'p',
@@ -280,7 +280,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'The service may connect with third party providers, such as QRIS payment processing and email delivery. Use of third party services is subject to each provider own terms and privacy policy, and we are not responsible for their actions.',
+            text: 'The service may connect with third party providers, such as QRIS payment processing, email delivery, WhatsApp messaging, and AI providers. Use of third party services is subject to each provider\'s own terms and privacy policy, and we are not responsible for their actions.',
           },
         ],
       },
@@ -342,7 +342,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'These terms are governed by and construed in accordance with the laws of the Republic of Indonesia. Any dispute will first be resolved amicably, and if not resolved, through the courts in the jurisdiction of [applicable city or court].',
+            text: 'These terms are governed by and construed in accordance with the laws of the Republic of Indonesia. Any dispute will first be resolved amicably, and if not resolved, through the competent courts of Indonesia.',
           },
         ],
       },
@@ -352,7 +352,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'For questions about these Terms of Service, contact us at [contact email].',
+            text: 'For questions about these Terms of Service, contact us at contact@kodapos.app.',
           },
         ],
       },

@@ -19,7 +19,7 @@ export const PRIVACY: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'Layanan kodapos dikelola oleh [nama badan usaha], beralamat di [alamat terdaftar]. Untuk data akun pemilik dan staf usaha, kami bertindak sebagai pengendali data. Untuk data pelanggan akhir yang Anda simpan di kodapos, kami bertindak sebagai prosesor yang memproses data atas nama Anda.',
+            text: 'Layanan kodapos dikelola oleh Dede Mahendra ("kami"). Untuk pertanyaan terkait privasi, hubungi kami di contact@kodapos.app. Untuk data akun pemilik dan staf usaha, kami bertindak sebagai pengendali data. Untuk data pelanggan akhir yang Anda simpan di kodapos, kami bertindak sebagai prosesor yang memproses data atas nama Anda.',
           },
         ],
       },
@@ -33,9 +33,10 @@ export const PRIVACY: LegalContent = {
             items: [
               'Data akun: nama, email, dan nomor telepon yang Anda berikan saat mendaftar.',
               'Profil usaha: nama usaha, alamat, kontak, jam operasional, dan logo.',
+              'Data staf: nama, nomor telepon, email, peran, tarif per jam, serta catatan kehadiran (jam masuk dan keluar), jadwal, dan sesi kasir untuk staf yang Anda undang ke akun usaha Anda.',
               'Data transaksi: penjualan, item, harga, metode pembayaran, dan catatan terkait.',
-              'Data pelanggan akhir: nama, nomor telepon, atau email pelanggan yang Anda simpan untuk fitur seperti loyalitas dan pesanan mandiri.',
-              'Data teknis: alamat IP, jenis perangkat dan peramban, serta log penggunaan untuk keamanan dan peningkatan layanan.',
+              'Data pelanggan akhir: nama, nomor telepon, atau email pelanggan yang Anda simpan atau yang diberikan pelanggan untuk fitur seperti loyalitas, pesanan mandiri, reservasi, dan pengiriman struk.',
+              'Data teknis dan log: log akses dan penggunaan, yang dapat mencakup alamat IP, yang dihasilkan oleh penyedia hosting dan keamanan kami untuk mengoperasikan dan melindungi layanan.',
             ],
           },
         ],
@@ -50,6 +51,7 @@ export const PRIVACY: LegalContent = {
             items: [
               'Menyediakan, mengoperasikan, dan memelihara layanan.',
               'Mengautentikasi akun dan menjaga keamanan.',
+              'Memproses pembayaran serta mengirim struk atau konfirmasi pesanan kepada pelanggan.',
               'Menampilkan laporan dan menyediakan fitur AI atas permintaan Anda.',
               'Mengirim pemberitahuan layanan dan, jika relevan, ringkasan operasional yang Anda aktifkan.',
               'Meningkatkan kualitas dan keandalan layanan.',
@@ -89,10 +91,12 @@ export const PRIVACY: LegalContent = {
             type: 'list',
             items: [
               'Convex, untuk hosting basis data dan backend.',
-              'Resend, untuk pengiriman email transaksional seperti kode verifikasi.',
+              'Resend, untuk pengiriman email transaksional seperti kode verifikasi, struk, dan ringkasan operasional.',
               'Cloudflare, untuk hosting dan pengiriman aplikasi.',
-              'Penyedia AI, untuk memproses permintaan fitur AI.',
+              'Penyedia AI yang terhubung dengan akun Anda, untuk memproses permintaan fitur AI.',
               'Penyedia pembayaran QRIS, untuk memproses pembayaran.',
+              'Penyedia pesan WhatsApp yang Anda konfigurasikan, untuk mengirim struk pesanan kepada pelanggan jika Anda mengaktifkan fitur ini.',
+              'Penyedia peta, untuk mencari koordinat alamat usaha Anda (geocoding).',
             ],
           },
           {
@@ -144,7 +148,7 @@ export const PRIVACY: LegalContent = {
           },
           {
             type: 'p',
-            text: 'Untuk menggunakan hak ini, hubungi kami di [email kontak]. Jika permintaan berkaitan dengan data pelanggan akhir suatu usaha, kami akan mengarahkannya kepada usaha tersebut sebagai pengendali data.',
+            text: 'Untuk menggunakan hak ini, hubungi kami di contact@kodapos.app. Jika permintaan berkaitan dengan data pelanggan akhir suatu usaha, kami akan mengarahkannya kepada usaha tersebut sebagai pengendali data.',
           },
         ],
       },
@@ -154,7 +158,7 @@ export const PRIVACY: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'Saat Anda menggunakan fitur AI, data bisnis yang relevan dengan permintaan Anda dikirim ke penyedia AI untuk menghasilkan jawaban. Data ini digunakan untuk memproses permintaan Anda dan tidak digunakan untuk melatih model publik. Keluaran AI bisa keliru, jadi periksa informasi penting sebelum mengandalkannya.',
+            text: 'Saat Anda menggunakan fitur AI, ringkasan data bisnis yang relevan dengan permintaan Anda (seperti angka penjualan, produk teratas, dan tingkat stok) dikirim ke penyedia AI yang terhubung dengan akun Anda untuk menghasilkan jawaban. Kami tidak mengirimkan data pribadi pelanggan akhir ke penyedia AI. Pemrosesan oleh penyedia AI tunduk pada ketentuan layanan mereka. Keluaran AI bisa keliru, jadi periksa informasi penting sebelum mengandalkannya.',
           },
         ],
       },
@@ -164,7 +168,7 @@ export const PRIVACY: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'Kami menggunakan penyimpanan lokal peramban (local storage) untuk menyimpan preferensi seperti bahasa dan tema, serta untuk menjaga sesi masuk Anda. Kami tidak menggunakan cookie iklan pihak ketiga.',
+            text: 'Kami menggunakan penyimpanan lokal peramban (local storage) dan cookie milik kami sendiri untuk menyimpan preferensi seperti bahasa, tema, dan tampilan antarmuka, serta untuk menjaga sesi masuk Anda. Kami tidak menggunakan cookie iklan atau pelacakan pihak ketiga.',
           },
         ],
       },
@@ -204,7 +208,7 @@ export const PRIVACY: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'Untuk pertanyaan atau permintaan terkait privasi, hubungi narahubung pelindungan data kami di [email kontak] atau [narahubung pelindungan data].',
+            text: 'Untuk pertanyaan atau permintaan terkait privasi, hubungi kami di contact@kodapos.app.',
           },
         ],
       },
@@ -222,7 +226,7 @@ export const PRIVACY: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'The kodapos service is operated by [legal entity name], located at [registered address]. For the account data of business owners and staff, we act as the data controller. For the end-customer data you store in kodapos, we act as a processor that processes data on your behalf.',
+            text: 'The kodapos service is operated by Dede Mahendra ("we" or "us"). For privacy questions, contact us at contact@kodapos.app. For the account data of business owners and staff, we act as the data controller. For the end-customer data you store in kodapos, we act as a processor that processes data on your behalf.',
           },
         ],
       },
@@ -236,9 +240,10 @@ export const PRIVACY: LegalContent = {
             items: [
               'Account data: the name, email, and phone number you provide at sign up.',
               'Business profile: business name, address, contacts, operating hours, and logo.',
+              'Staff data: name, phone, email, role, hourly rate, and attendance records (clock in and out), schedules, and cashier sessions for staff you invite into your business account.',
               'Transaction data: sales, items, prices, payment methods, and related notes.',
-              'End-customer data: customer name, phone, or email you store for features such as loyalty and self ordering.',
-              'Technical data: IP address, device and browser type, and usage logs for security and service improvement.',
+              'End-customer data: customer name, phone, or email you store or that customers provide for features such as loyalty, self ordering, reservations, and sending receipts.',
+              'Technical and log data: access and usage logs, which may include IP address, generated by our hosting and security providers to operate and protect the service.',
             ],
           },
         ],
@@ -253,6 +258,7 @@ export const PRIVACY: LegalContent = {
             items: [
               'Provide, operate, and maintain the service.',
               'Authenticate accounts and keep them secure.',
+              'Process payments and send receipts or order confirmations to customers.',
               'Show reports and provide AI features at your request.',
               'Send service notifications and, where relevant, operational summaries you enable.',
               'Improve the quality and reliability of the service.',
@@ -292,10 +298,12 @@ export const PRIVACY: LegalContent = {
             type: 'list',
             items: [
               'Convex, for database and backend hosting.',
-              'Resend, for transactional email such as verification codes.',
+              'Resend, for transactional email such as verification codes, receipts, and operational summaries.',
               'Cloudflare, for application hosting and delivery.',
-              'An AI provider, for processing AI feature requests.',
+              'An AI provider connected to your account, for processing AI feature requests.',
               'A QRIS payment provider, for processing payments.',
+              'A WhatsApp messaging provider you configure, to send order receipts to customers where you enable this feature.',
+              'A mapping provider, to look up the coordinates of your business address (geocoding).',
             ],
           },
           {
@@ -347,7 +355,7 @@ export const PRIVACY: LegalContent = {
           },
           {
             type: 'p',
-            text: 'To exercise these rights, contact us at [contact email]. If a request concerns the end-customer data of a business, we will direct it to that business as the data controller.',
+            text: 'To exercise these rights, contact us at contact@kodapos.app. If a request concerns the end-customer data of a business, we will direct it to that business as the data controller.',
           },
         ],
       },
@@ -357,7 +365,7 @@ export const PRIVACY: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'When you use AI features, the business data relevant to your request is sent to an AI provider to generate a response. This data is used to process your request and is not used to train public models. AI output can be wrong, so check important information before relying on it.',
+            text: 'When you use AI features, a summary of the business data relevant to your request (such as sales figures, top products, and stock levels) is sent to the AI provider connected to your account to generate a response. We do not send end-customer personal data to the AI provider. Processing by the AI provider is subject to its own terms. AI output can be wrong, so check important information before relying on it.',
           },
         ],
       },
@@ -367,7 +375,7 @@ export const PRIVACY: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'We use browser local storage to remember preferences such as language and theme, and to keep you signed in. We do not use third party advertising cookies.',
+            text: 'We use browser local storage and our own first party cookies to remember preferences such as language, theme, and interface layout, and to keep you signed in. We do not use third party advertising or tracking cookies.',
           },
         ],
       },
@@ -407,7 +415,7 @@ export const PRIVACY: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'For privacy questions or requests, contact our data protection contact at [contact email] or [data protection contact].',
+            text: 'For privacy questions or requests, contact us at contact@kodapos.app.',
           },
         ],
       },
