@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { HOMEPAGE_JSON_LD, seo } from '~/lib/seo';
 import { AiSpotlight } from '~/components/marketing/ai-spotlight';
 import { CtaBand } from '~/components/marketing/cta-band';
 import { Faq } from '~/components/marketing/faq';
@@ -12,22 +13,18 @@ import { Testimonials } from '~/components/marketing/testimonials';
 import { WhyIndonesia } from '~/components/marketing/why-indonesia';
 
 export const Route = createFileRoute('/_public/')({
-  head: () => ({
-    meta: [
-      { title: 'kodapos, POS pintar untuk kafe dan resto' },
-      {
-        name: 'description',
-        content:
-          'Satu aplikasi untuk kasir, stok, dan laporan. Jual lebih cepat, jaga margin, dan ambil keputusan dengan bantuan AI.',
-      },
-    ],
-  }),
+  head: () => seo({ title: 'kodapos, POS pintar untuk kafe dan resto', path: '/' }),
   component: PublicHome,
 });
 
 function PublicHome() {
   return (
     <div id="top" className="min-h-screen bg-background text-foreground">
+      {/* Structured data: Organization + WebSite + SoftwareApplication. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(HOMEPAGE_JSON_LD) }}
+      />
       <MarketingHeader />
       <main>
         <Hero />

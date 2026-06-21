@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+# Customer-facing, per-token, and auth surfaces should not be indexed.
+Disallow: /order/
+Disallow: /display
+
+Sitemap: https://kodapos.app/sitemap.xml

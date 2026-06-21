@@ -1,0 +1,16 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" font-family="Geist, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <rect x="40" y="40" width="1120" height="550" rx="28" fill="#fafafa" stroke="#e5e5e5" stroke-width="2"/>
+  <!-- corner plus marks (brand motif) -->
+  <g stroke="#d4d4d4" stroke-width="2.5" stroke-linecap="round">
+    <path d="M40 70 v-30 M25 55 h30"/>
+    <path d="M1160 70 v-30 M1145 55 h30"/>
+    <path d="M40 560 v30 M25 575 h30"/>
+    <path d="M1160 560 v30 M1145 575 h30"/>
+  </g>
+  <text x="104" y="262" font-size="44" font-weight="600" letter-spacing="8" fill="#a3a3a3">POS</text>
+  <text x="100" y="372" font-size="104" font-weight="800" letter-spacing="-4" fill="#171717">kodapos</text>
+  <text x="104" y="438" font-size="38" font-weight="500" fill="#525252">Jalankan kafe Anda, bukan kasirnya.</text>
+  <rect x="104" y="484" width="392" height="58" rx="29" fill="#171717"/>
+  <text x="134" y="522" font-size="25" font-weight="600" fill="#ffffff">Gratis selama akses awal</text>
+</svg>
