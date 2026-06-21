@@ -16,19 +16,34 @@ const TESTIMONIALS = [
     seed: 'Sari Pemilik',
     name: 'Sari',
     role: <Trans>Pemilik kafe</Trans>,
-    quote: <Trans>Kasirnya ringan dan cepat, antrian jam sibuk jauh lebih lancar.</Trans>,
+    quote: (
+      <Trans>
+        Sejak pakai kodapos, antrian saat jam sibuk jauh lebih lancar. Kasirnya ringan, staf baru
+        langsung paham, dan saya tidak lagi begadang menutup laporan tiap malam.
+      </Trans>
+    ),
   },
   {
     seed: 'Budi Pemilik',
     name: 'Budi',
     role: <Trans>Pemilik resto</Trans>,
-    quote: <Trans>Laporan harian bikin saya tahu menu mana yang harus didorong.</Trans>,
+    quote: (
+      <Trans>
+        Laporan harian bikin saya tahu menu mana yang harus didorong dan mana yang merugi. Sekarang
+        keputusan berdasarkan angka, bukan sekadar tebakan.
+      </Trans>
+    ),
   },
   {
     seed: 'Ayu Pemilik',
     name: 'Ayu',
     role: <Trans>Pemilik kedai</Trans>,
-    quote: <Trans>Stok bahan kepantau, jadi jarang kehabisan saat ramai.</Trans>,
+    quote: (
+      <Trans>
+        Stok bahan selalu terpantau, jadi jarang kehabisan saat ramai. Pelanggan pun lebih puas
+        karena pesanan keluar lebih cepat dan jarang salah.
+      </Trans>
+    ),
   },
 ];
 

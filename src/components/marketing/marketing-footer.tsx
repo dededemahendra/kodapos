@@ -2,7 +2,7 @@
 
 import { Trans } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
-import { Globe, Mail, MessageCircle } from 'lucide-react';
+import { Globe, Heart, Mail, MessageCircle } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { BrandMark } from '~/components/brand-mark';
 
@@ -35,8 +35,11 @@ export function MarketingFooter() {
                 <BrandMark className="h-5 w-auto text-foreground" />
                 <span className="font-semibold">kodapos</span>
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">
-                <Trans>POS pintar untuk kafe dan resto di Indonesia.</Trans>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                <Trans>
+                  POS pintar untuk kafe dan resto di Indonesia. Satu aplikasi untuk kasir, stok, dan
+                  laporan, dengan bantuan AI.
+                </Trans>
               </p>
               <ul className="mt-5 flex items-center gap-4 text-muted-foreground">
                 {SOCIALS.map(({ Icon, label }) => (
@@ -112,9 +115,11 @@ export function MarketingFooter() {
 
           {/* Bottom bar */}
           <div className="mt-12 flex flex-col gap-3 border-t border-border pt-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-            <span>© 2026 kodapos</span>
-            <span>
-              <Trans>Dibuat untuk kafe Indonesia</Trans>
+            <span>© 2026 kodapos. All rights reserved.</span>
+            <span className="inline-flex items-center gap-1.5">
+              Made with
+              <Heart className="size-3.5 fill-red-500 text-red-500" aria-hidden="true" />
+              by Dede Mahendra
             </span>
           </div>
         </motion.div>

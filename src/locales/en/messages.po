@@ -1837,8 +1837,8 @@ msgid "Dibuat untuk kafe dan resto di Indonesia"
 msgstr "Built for cafes and restaurants in Indonesia"
 
 #: src/components/marketing/marketing-footer.tsx
-msgid "Dibuat untuk kafe Indonesia"
-msgstr "Built for Indonesian cafes"
+#~ msgid "Dibuat untuk kafe Indonesia"
+#~ msgstr "Built for Indonesian cafes"
 
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Dibuka oleh"
@@ -3142,8 +3142,8 @@ msgid "Kasir: {0}"
 msgstr "Cashier: {0}"
 
 #: src/components/marketing/testimonials.tsx
-msgid "Kasirnya ringan dan cepat, antrian jam sibuk jauh lebih lancar."
-msgstr "The register is light and fast, rush-hour queues move much smoother."
+#~ msgid "Kasirnya ringan dan cepat, antrian jam sibuk jauh lebih lancar."
+#~ msgstr "The register is light and fast, rush-hour queues move much smoother."
 
 #: src/components/app-shared.tsx
 msgid "Katalog"
@@ -3577,8 +3577,12 @@ msgstr "Reports"
 #~ msgstr "Reports and profit and loss"
 
 #: src/components/marketing/testimonials.tsx
-msgid "Laporan harian bikin saya tahu menu mana yang harus didorong."
-msgstr "The daily reports show me which items to push."
+msgid "Laporan harian bikin saya tahu menu mana yang harus didorong dan mana yang merugi. Sekarang keputusan berdasarkan angka, bukan sekadar tebakan."
+msgstr "The daily reports show me which items to push and which ones lose money. Now decisions are based on numbers, not guesswork."
+
+#: src/components/marketing/testimonials.tsx
+#~ msgid "Laporan harian bikin saya tahu menu mana yang harus didorong."
+#~ msgstr "The daily reports show me which items to push."
 
 #: src/routes/_pos/reports/cashiers.tsx
 #~ msgid "Laporan Kasir"
@@ -5208,8 +5212,12 @@ msgid "Porsi (%)"
 msgstr "Share (%)"
 
 #: src/components/marketing/marketing-footer.tsx
-msgid "POS pintar untuk kafe dan resto di Indonesia."
-msgstr "Smart POS for cafes and restaurants in Indonesia."
+#~ msgid "POS pintar untuk kafe dan resto di Indonesia."
+#~ msgstr "Smart POS for cafes and restaurants in Indonesia."
+
+#: src/components/marketing/marketing-footer.tsx
+msgid "POS pintar untuk kafe dan resto di Indonesia. Satu aplikasi untuk kasir, stok, dan laporan, dengan bantuan AI."
+msgstr "Smart POS for cafes and restaurants in Indonesia. One app for the register, stock, and reports, with help from AI."
 
 #: src/components/marketing/hero.tsx
 #~ msgid "POS untuk kafe dan resto"
@@ -5707,6 +5715,10 @@ msgstr "Soon"
 msgid "Segera hadir."
 msgstr "Coming soon."
 
+#: src/components/marketing/testimonials.tsx
+msgid "Sejak pakai kodapos, antrian saat jam sibuk jauh lebih lancar. Kasirnya ringan, staf baru langsung paham, dan saya tidak lagi begadang menutup laporan tiap malam."
+msgstr "Since we started using kodapos, rush-hour queues move much smoother. The register is light, new staff pick it up right away, and I no longer stay up closing reports every night."
+
 #: src/components/marketing/pricing.tsx
 msgid "selama akses awal"
 msgstr "during early access"
@@ -6046,8 +6058,12 @@ msgstr "Stock"
 #~ msgstr "Ingredient stock drops automatically from each item recipe."
 
 #: src/components/marketing/testimonials.tsx
-msgid "Stok bahan kepantau, jadi jarang kehabisan saat ramai."
-msgstr "Ingredient stock stays tracked, so we rarely run out when it is busy."
+#~ msgid "Stok bahan kepantau, jadi jarang kehabisan saat ramai."
+#~ msgstr "Ingredient stock stays tracked, so we rarely run out when it is busy."
+
+#: src/components/marketing/testimonials.tsx
+msgid "Stok bahan selalu terpantau, jadi jarang kehabisan saat ramai. Pelanggan pun lebih puas karena pesanan keluar lebih cepat dan jarang salah."
+msgstr "Ingredient stock is always tracked, so we rarely run out when it is busy. Customers are happier too because orders come out faster and with fewer mistakes."
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Stok baru"
