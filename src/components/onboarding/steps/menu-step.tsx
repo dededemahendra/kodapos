@@ -50,7 +50,7 @@ export function MenuStep() {
         </Button>
       </div>
       <div className="mt-4">
-        <Button asChild variant="ghost" className="px-0 text-muted-foreground">
+        <Button asChild variant="ghost" className="text-muted-foreground">
           <Link to="/onboarding/profile"><Trans>← Kembali</Trans></Link>
         </Button>
       </div>
