@@ -4,7 +4,10 @@ import { useMutation, useQuery } from 'convex/react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { useEffect, useRef } from 'react';
+import { Store } from 'lucide-react';
 import { CafeProfileForm, type CafeProfileFormValues } from '~/components/menu/cafe-profile-form';
+import { OnboardingStepHeader } from '~/components/onboarding/step-header';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
 
 export const Route = createFileRoute('/_pos/onboarding/profile')({
   component: OnboardingProfile,
@@ -31,7 +34,7 @@ function OnboardingProfile() {
   }, [cafe, createForOwner]);
 
   if (cafe === undefined || cafe === null) {
-    return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
+    return <FormSkeleton rows={5} />;
   }
 
   const initial: CafeProfileFormValues = {
@@ -44,9 +47,12 @@ function OnboardingProfile() {
   if (cafe.addressLine) initial.addressLine = cafe.addressLine;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-1"><Trans>Profil kafe</Trans></h1>
-      <p className="text-muted-foreground mb-6 text-sm"><Trans>Bisa diubah kapan saja di Pengaturan.</Trans></p>
+    <>
+      <OnboardingStepHeader
+        icon={<Store />}
+        title={<Trans>Profil kafe</Trans>}
+        description={<Trans>Bisa diubah kapan saja di Pengaturan.</Trans>}
+      />
       <CafeProfileForm
         initial={initial}
         submitLabel={t`Lanjut →`}
@@ -62,6 +68,6 @@ function OnboardingProfile() {
           },
         }}
       />
-    </div>
+    </>
   );
 }
