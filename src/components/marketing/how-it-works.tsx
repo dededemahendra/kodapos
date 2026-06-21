@@ -203,7 +203,7 @@ const STEPS = [
 export function HowItWorks() {
   return (
     <MotionConfig reducedMotion="user">
-      <section id="cara" className="scroll-mt-16 py-20">
+      <section id="how-it-works" className="scroll-mt-16 py-20">
         <div className="mx-auto max-w-5xl px-6">
           <SectionHeading sub={<Trans>Tanpa pelatihan panjang, tanpa pemasangan rumit.</Trans>}>
             <Trans>Mulai dalam tiga langkah</Trans>

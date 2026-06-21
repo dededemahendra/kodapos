@@ -15,9 +15,9 @@ export function MarketingHeader() {
           <span className="font-semibold">kodapos</span>
         </a>
         <nav className="ml-6 hidden gap-6 text-sm text-muted-foreground md:flex">
-          <a href="#fitur" className="transition-colors hover:text-foreground"><Trans>Fitur</Trans></a>
-          <a href="#cara" className="transition-colors hover:text-foreground"><Trans>Cara kerja</Trans></a>
-          <a href="#harga" className="transition-colors hover:text-foreground"><Trans>Harga</Trans></a>
+          <a href="#features" className="transition-colors hover:text-foreground"><Trans>Fitur</Trans></a>
+          <a href="#how-it-works" className="transition-colors hover:text-foreground"><Trans>Cara kerja</Trans></a>
+          <a href="#pricing" className="transition-colors hover:text-foreground"><Trans>Harga</Trans></a>
           <a href="#faq" className="transition-colors hover:text-foreground">FAQ</a>
         </nav>
         <div className="ml-auto flex items-center gap-2">
