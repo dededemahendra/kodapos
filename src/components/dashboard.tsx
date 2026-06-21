@@ -20,9 +20,6 @@ export function Dashboard() {
 				<BillingHealth />
 				<DashboardActivity />
 			</div>
-			<p className="px-4 py-3 text-right text-xs text-muted-foreground">
-				kodapos v{__APP_VERSION__}
-			</p>
 		</div>
 	);
 }

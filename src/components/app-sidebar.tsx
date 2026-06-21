@@ -46,6 +46,9 @@ export function AppSidebar() {
 					<Link onClick={closeMobile} to="/dashboard">
 						<BrandMark className="h-5! w-auto! text-primary" />
 						<span className="font-medium text-foreground!">kodapos</span>
+						<span className="text-[10px] font-normal text-muted-foreground">
+							v{__APP_VERSION__}
+						</span>
 					</Link>
 				</SidebarMenuButton>
 			</SidebarHeader>
