@@ -2,6 +2,7 @@ import { useRouterState } from "@tanstack/react-router";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { DecorIcon } from "~/components/decor-icon";
@@ -65,6 +66,12 @@ export function AppHeader() {
 					orientation="vertical"
 				/>
 				<AppBreadcrumbs page={activeItem ?? null} />
+				<Badge
+					variant="secondary"
+					className="hidden font-medium text-muted-foreground sm:inline-flex"
+				>
+					<Trans>Akses awal</Trans>
+				</Badge>
 			</div>
 			<div className="flex items-center gap-3">
 				<Button

@@ -439,9 +439,9 @@ msgstr "AI memperkirakan permintaan harian dari pola penjualan dan cuaca lokal."
 #~ msgid "AI-native POS untuk kafe & QSR Indonesia."
 #~ msgstr "AI-native POS untuk kafe & QSR Indonesia."
 
-#: src/components/marketing/pricing.tsx
-#~ msgid "Akses awal"
-#~ msgstr "Akses awal"
+#: src/components/app-header.tsx
+msgid "Akses awal"
+msgstr "Akses awal"
 
 #: src/components/permission/require-permission.tsx
 msgid "Akses ditolak"
