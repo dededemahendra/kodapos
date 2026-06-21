@@ -40,7 +40,7 @@ const BUSINESS_FEATURES = [
 export function Pricing() {
   return (
     <MotionConfig reducedMotion="user">
-      <section id="harga" className="scroll-mt-16 border-y border-border bg-muted/30 py-20">
+      <section id="pricing" className="scroll-mt-16 border-y border-border bg-muted/30 py-20">
         <div className="mx-auto max-w-6xl px-6">
           {/* Header */}
           <div className="mx-auto mb-11 max-w-2xl text-center">

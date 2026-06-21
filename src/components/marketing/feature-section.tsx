@@ -11,7 +11,7 @@ const VP = { once: true, margin: '-80px' } as const;
 export function FeatureSection() {
   return (
     <MotionConfig reducedMotion="user">
-      <section id="fitur" className="scroll-mt-16 border-y border-border bg-muted/30 py-20">
+      <section id="features" className="scroll-mt-16 border-y border-border bg-muted/30 py-20">
         <div className="mx-auto max-w-5xl px-6">
           <SectionHeading sub={<Trans>Dari pesanan pertama sampai laporan akhir bulan.</Trans>}>
             <Trans>Semua yang dibutuhkan kafe Anda, dalam satu tempat</Trans>

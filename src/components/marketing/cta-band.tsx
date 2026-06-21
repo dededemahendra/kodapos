@@ -20,7 +20,7 @@ export function CtaBand() {
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg" variant="secondary">
-              <a href="#fitur">
+              <a href="#features">
                 <Trans>Lihat fitur</Trans>
               </a>
             </Button>

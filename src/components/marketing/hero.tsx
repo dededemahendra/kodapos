@@ -53,7 +53,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto max-w-6xl px-6 pt-20 text-center md:pt-28">
         <AnimatedGroup variants={transitionVariants}>
           <a
-            href="#fitur"
+            href="#features"
             className="group mx-auto flex w-fit items-center gap-3 rounded-full border border-border bg-muted/60 p-1 pl-4 text-sm shadow-sm transition-colors hover:bg-muted"
           >
             <span className="text-foreground">
@@ -88,7 +88,7 @@ export function Hero() {
             </Button>
           </div>
           <Button asChild size="lg" variant="ghost" className="rounded-xl px-5 text-base">
-            <a href="#fitur">
+            <a href="#features">
               <Trans>Lihat fitur</Trans>
             </a>
           </Button>

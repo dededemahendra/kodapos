@@ -6,14 +6,14 @@ describe('normalizeLocale', () => {
     expect(normalizeLocale('id')).toBe('id');
     expect(normalizeLocale('en')).toBe('en');
   });
-  it('falls back to id for unknown/empty values', () => {
-    expect(normalizeLocale('fr')).toBe('id');
-    expect(normalizeLocale(null)).toBe('id');
-    expect(normalizeLocale(undefined)).toBe('id');
-    expect(normalizeLocale('')).toBe('id');
+  it('falls back to the default (en) for unknown/empty values', () => {
+    expect(normalizeLocale('fr')).toBe('en');
+    expect(normalizeLocale(null)).toBe('en');
+    expect(normalizeLocale(undefined)).toBe('en');
+    expect(normalizeLocale('')).toBe('en');
   });
-  it('exposes the supported locales with labels', () => {
-    expect(LOCALES.map((l) => l.value)).toEqual(['id', 'en']);
+  it('exposes the supported locales with labels, English first', () => {
+    expect(LOCALES.map((l) => l.value)).toEqual(['en', 'id']);
     expect(LOCALES.find((l) => l.value === 'id')?.label).toBe('Indonesia');
   });
 });
