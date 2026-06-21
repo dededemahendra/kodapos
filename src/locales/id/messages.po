@@ -422,6 +422,10 @@ msgstr "Admin"
 msgid "AI"
 msgstr "AI"
 
+#: src/lib/ai-error.ts
+msgid "AI belum terhubung. Hubungkan kunci API di Pengaturan, Integrasi."
+msgstr "AI belum terhubung. Hubungkan kunci API di Pengaturan, Integrasi."
+
 #: src/components/marketing/ai-spotlight.tsx
 #: src/routes/_pos/ai.tsx
 msgid "AI bisa keliru. Periksa informasi penting."
@@ -2018,6 +2022,10 @@ msgstr "File kosong atau hanya berisi baris header. Periksa lalu coba lagi."
 msgid "Fitur"
 msgstr "Fitur"
 
+#: src/lib/ai-error.ts
+msgid "Fitur AI sedang tidak tersedia. Periksa pengaturan AI Anda atau coba lagi nanti."
+msgstr "Fitur AI sedang tidak tersedia. Periksa pengaturan AI Anda atau coba lagi nanti."
+
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Fitur cetak akan tersedia segera."
 #~ msgstr "Fitur cetak akan tersedia segera."
@@ -2075,8 +2083,8 @@ msgid "Gagal membuat QR."
 msgstr "Gagal membuat QR."
 
 #: src/components/ai-restock-advice.tsx
-msgid "Gagal membuat saran restock."
-msgstr "Gagal membuat saran restock."
+#~ msgid "Gagal membuat saran restock."
+#~ msgstr "Gagal membuat saran restock."
 
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 msgid "Gagal membuat tagihan QRIS."
@@ -2106,8 +2114,8 @@ msgid "Gagal memproses pembayaran."
 msgstr "Gagal memproses pembayaran."
 
 #: src/components/ai-insights.tsx
-msgid "Gagal memuat wawasan."
-msgstr "Gagal memuat wawasan."
+#~ msgid "Gagal memuat wawasan."
+#~ msgstr "Gagal memuat wawasan."
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Gagal memutuskan integrasi."
@@ -2287,7 +2295,6 @@ msgstr "Gagal mengunggah logo."
 msgid "Gagal mengunggah QRIS."
 msgstr "Gagal mengunggah QRIS."
 
-#: src/components/ai-insights.tsx
 #: src/routes/_pos/ai.tsx
 msgid "Gagal menjawab."
 msgstr "Gagal menjawab."
@@ -4832,6 +4839,10 @@ msgstr "Perkiraan total"
 #: src/routes/_pos/reports/profit-loss.tsx
 msgid "Perlengkapan"
 msgstr "Perlengkapan"
+
+#: src/lib/ai-error.ts
+msgid "Permintaan AI gagal karena masalah jaringan. Coba lagi."
+msgstr "Permintaan AI gagal karena masalah jaringan. Coba lagi."
 
 #: src/components/customer/customer-detail-sheet.tsx
 msgid "Perolehan"

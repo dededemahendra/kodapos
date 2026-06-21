@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
+import { aiErrorMessage } from '~/lib/ai-error';
 import { toast } from '~/lib/toast';
 
 /**
@@ -17,7 +18,7 @@ import { toast } from '~/lib/toast';
  * Settings.
  */
 export function AiRestockAdvice() {
-  const { t } = useLingui();
+  const { i18n } = useLingui();
   const settings = useQuery(api.settings.get);
   const runRestock = useAction(api.ai.restock);
   const [result, setResult] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export function AiRestockAdvice() {
     try {
       setResult(await runRestock({}));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t`Gagal membuat saran restock.`);
+      toast.error(i18n._(aiErrorMessage(err)));
     } finally {
       setLoading(false);
     }

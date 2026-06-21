@@ -422,6 +422,10 @@ msgstr "Admin"
 msgid "AI"
 msgstr "AI"
 
+#: src/lib/ai-error.ts
+msgid "AI belum terhubung. Hubungkan kunci API di Pengaturan, Integrasi."
+msgstr "AI is not connected. Add your API key in Settings, Integrations."
+
 #: src/components/marketing/ai-spotlight.tsx
 #: src/routes/_pos/ai.tsx
 msgid "AI bisa keliru. Periksa informasi penting."
@@ -2018,6 +2022,10 @@ msgstr "File is empty or only contains a header row. Check it and try again."
 msgid "Fitur"
 msgstr "Features"
 
+#: src/lib/ai-error.ts
+msgid "Fitur AI sedang tidak tersedia. Periksa pengaturan AI Anda atau coba lagi nanti."
+msgstr "AI features are currently unavailable. Check your AI settings or try again later."
+
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Fitur cetak akan tersedia segera."
 #~ msgstr "Print feature coming soon."
@@ -2075,8 +2083,8 @@ msgid "Gagal membuat QR."
 msgstr "Failed to generate the QR."
 
 #: src/components/ai-restock-advice.tsx
-msgid "Gagal membuat saran restock."
-msgstr "Could not generate restock advice."
+#~ msgid "Gagal membuat saran restock."
+#~ msgstr "Could not generate restock advice."
 
 #: src/components/sale/qris-dynamic-payment-dialog.tsx
 msgid "Gagal membuat tagihan QRIS."
@@ -2106,8 +2114,8 @@ msgid "Gagal memproses pembayaran."
 msgstr "Failed to process payment."
 
 #: src/components/ai-insights.tsx
-msgid "Gagal memuat wawasan."
-msgstr "Failed to load insights."
+#~ msgid "Gagal memuat wawasan."
+#~ msgstr "Failed to load insights."
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Gagal memutuskan integrasi."
@@ -2287,7 +2295,6 @@ msgstr "Failed to upload logo."
 msgid "Gagal mengunggah QRIS."
 msgstr "Failed to upload QRIS."
 
-#: src/components/ai-insights.tsx
 #: src/routes/_pos/ai.tsx
 msgid "Gagal menjawab."
 msgstr "Failed to answer."
@@ -4832,6 +4839,10 @@ msgstr "Estimated total"
 #: src/routes/_pos/reports/profit-loss.tsx
 msgid "Perlengkapan"
 msgstr "Supplies"
+
+#: src/lib/ai-error.ts
+msgid "Permintaan AI gagal karena masalah jaringan. Coba lagi."
+msgstr "The AI request failed due to a network problem. Please try again."
 
 #: src/components/customer/customer-detail-sheet.tsx
 msgid "Perolehan"
