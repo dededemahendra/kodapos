@@ -275,7 +275,6 @@ msgstr "+ Pasang grup…"
 msgid "+ Pendapatan lain"
 msgstr "+ Pendapatan lain"
 
-#: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "+ Tambah"
 msgstr "+ Tambah"
@@ -1069,6 +1068,10 @@ msgstr "Belum ada jam kerja pada rentang ini."
 #: src/routes/_pos/gift-cards.tsx
 msgid "Belum ada kartu hadiah."
 msgstr "Belum ada kartu hadiah."
+
+#: src/routes/_pos/onboarding/cashier.tsx
+msgid "Belum ada kasir tambahan."
+msgstr "Belum ada kasir tambahan."
 
 #: src/components/menu/category-table.tsx
 msgid "Belum ada kategori."
@@ -3949,8 +3952,6 @@ msgstr "Memuat struk…"
 #: src/components/ai-restock-advice.tsx
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
-#: src/routes/_pos/onboarding/cashier.tsx
-#: src/routes/_pos/onboarding/profile.tsx
 #: src/routes/_pos/pin.tsx
 #: src/routes/_pos/settings/receipt.tsx
 #: src/routes/_pos/settings/staff.tsx
@@ -4800,6 +4801,10 @@ msgstr "Penyesuaian"
 #: src/routes/_pos/inventory/adjustments.tsx
 msgid "Penyesuaian Stok"
 msgstr "Penyesuaian Stok"
+
+#: src/routes/_pos/onboarding/route.tsx
+msgid "Penyiapan"
+msgstr "Penyiapan"
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Peran"
@@ -6204,6 +6209,7 @@ msgstr "Tahan pesanan"
 
 #: src/components/public/cart-review-sheet.tsx
 #: src/components/public/item-picker-sheet.tsx
+#: src/routes/_pos/onboarding/cashier.tsx
 #: src/routes/_pos/settings/tax.tsx
 msgid "Tambah"
 msgstr "Tambah"
