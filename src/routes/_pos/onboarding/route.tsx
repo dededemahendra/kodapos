@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { MotionConfig, motion } from 'motion/react';
+import { useEffect, useRef } from 'react';
 import { BrandMark } from '~/components/brand-mark';
 import { DecorIcon } from '~/components/decor-icon';
 import { AnimatedGroup } from '~/components/marketing/animated-group';
@@ -24,6 +25,15 @@ function OnboardingLayout() {
   let currentIndex = 0;
   if (path.includes('/onboarding/menu')) currentIndex = 1;
   else if (path.includes('/onboarding/cashier')) currentIndex = 3;
+
+  // Slide direction: advancing slides the next step in from the right, going
+  // back slides it in from the left. Tracked across renders since this layout
+  // stays mounted while only the step Outlet changes.
+  const prevIndex = useRef(currentIndex);
+  const direction = currentIndex < prevIndex.current ? -1 : 1;
+  useEffect(() => {
+    prevIndex.current = currentIndex;
+  }, [currentIndex]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-muted">
@@ -50,20 +60,23 @@ function OnboardingLayout() {
           <DecorIcon position="top-right" />
           <DecorIcon position="bottom-left" />
           <DecorIcon position="bottom-right" />
-          {/* Re-keying on the path remounts on each step change, replaying the
-              entrance so the wizard transitions between steps instead of
-              swapping instantly. reducedMotion="user" keeps the fade but drops
-              the translate for users who ask for less motion. */}
-          <MotionConfig reducedMotion="user">
-            <motion.div
-              key={path}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <Outlet />
-            </motion.div>
-          </MotionConfig>
+          {/* Re-keying on the path remounts on each step change, sliding the
+              new step in horizontally (direction-aware). The wrapper clips the
+              slide so it can't cause horizontal overflow; the decor marks sit
+              outside it and stay unclipped. reducedMotion="user" keeps the fade
+              but drops the slide for users who ask for less motion. */}
+          <div className="overflow-hidden">
+            <MotionConfig reducedMotion="user">
+              <motion.div
+                key={path}
+                initial={{ opacity: 0, x: direction * 28 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Outlet />
+              </motion.div>
+            </MotionConfig>
+          </div>
         </div>
       </AnimatedGroup>
     </div>
