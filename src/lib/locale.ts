@@ -1,11 +1,11 @@
 export type Locale = 'id' | 'en';
 
 export const LOCALES: { value: Locale; label: string }[] = [
-  { value: 'id', label: 'Indonesia' },
   { value: 'en', label: 'English' },
+  { value: 'id', label: 'Indonesia' },
 ];
 
-export const DEFAULT_LOCALE: Locale = 'id';
+export const DEFAULT_LOCALE: Locale = 'en';
 const STORAGE_KEY = 'kodapos.locale';
 
 export function normalizeLocale(value: string | null | undefined): Locale {
