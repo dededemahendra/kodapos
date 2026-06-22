@@ -11,6 +11,7 @@ const cafeFields = {
   _creationTime: v.number(),
   name: v.string(),
   ownerUserId: v.id('users'),
+  businessId: v.optional(v.id('businesses')),
   createdAt: v.number(),
   phone: v.optional(v.string()),
   addressLine: v.optional(v.string()),

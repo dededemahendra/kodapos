@@ -25,6 +25,7 @@ export default defineSchema({
   cafes: defineTable({
     name: v.string(),
     ownerUserId: v.id('users'),
+    businessId: v.optional(v.id('businesses')),
     createdAt: v.number(),
     // Profile (added in Phase 1 · Slice 1). Optional in schema for
     // backward compatibility with existing rows; required when written
@@ -54,7 +55,51 @@ export default defineSchema({
         })
       )
     ),
+  })
+    .index('by_owner', ['ownerUserId'])
+    .index('by_business', ['businessId']),
+
+  // Multi-outlet v1 (Phase 1). A "business" groups one or more cafes
+  // (outlets) under a single owner. Membership + active-outlet tables
+  // back the active-outlet resolution introduced in later phases.
+  businesses: defineTable({
+    name: v.string(),
+    ownerUserId: v.id('users'),
+    createdAt: v.number(),
   }).index('by_owner', ['ownerUserId']),
+
+  businessMembers: defineTable({
+    businessId: v.id('businesses'),
+    userId: v.id('users'),
+    role: v.union(v.literal('owner'), v.literal('manager')),
+    createdAt: v.number(),
+  })
+    .index('by_business', ['businessId'])
+    .index('by_user', ['userId']),
+
+  businessInvites: defineTable({
+    businessId: v.id('businesses'),
+    email: v.string(),
+    role: v.literal('manager'),
+    cafeIds: v.array(v.id('cafes')),
+    createdAt: v.number(),
+  })
+    .index('by_email', ['email'])
+    .index('by_business', ['businessId']),
+
+  memberOutletAccess: defineTable({
+    businessMemberId: v.id('businessMembers'),
+    cafeId: v.id('cafes'),
+    createdAt: v.number(),
+  })
+    .index('by_member', ['businessMemberId'])
+    .index('by_cafe', ['cafeId']),
+
+  activeOutlet: defineTable({
+    userId: v.id('users'),
+    cafeId: v.id('cafes'),
+    updatedAt: v.number(),
+  }).index('by_user', ['userId']),
 
   categories: defineTable({
     cafeId: v.id('cafes'),
