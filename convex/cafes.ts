@@ -59,10 +59,17 @@ export const createForOwner = mutation({
     if (existing) {
       return existing._id;
     }
+    const now = Date.now();
+    const businessId = await ctx.db.insert('businesses', {
+      name,
+      ownerUserId: userId,
+      createdAt: now,
+    });
     const cafeId = await ctx.db.insert('cafes', {
       name,
       ownerUserId: userId,
-      createdAt: Date.now(),
+      businessId,
+      createdAt: now,
       timezone: 'Asia/Jakarta',
       taxRatePct: 11,
       taxEnabled: true,
@@ -74,8 +81,15 @@ export const createForOwner = mutation({
       name: ownerName,
       role: 'owner',
       archived: false,
-      createdAt: Date.now(),
+      createdAt: now,
     });
+    await ctx.db.insert('businessMembers', {
+      businessId,
+      userId,
+      role: 'owner',
+      createdAt: now,
+    });
+    await ctx.db.insert('activeOutlet', { userId, cafeId, updatedAt: now });
     return cafeId;
   },
 });
