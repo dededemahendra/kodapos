@@ -30,7 +30,7 @@ describe('requireActiveOutlet — owner', () => {
 
   it('honors the persisted active outlet when the owner has multiple outlets', async () => {
     const t = convexTest(schema, modules);
-    const { asOwner, businessId, userId, cafeId: first } = await seedOwner(t);
+    const { asOwner, businessId, userId } = await seedOwner(t);
     // A second outlet under the same business.
     const second = await t.run((ctx) =>
       ctx.db.insert('cafes', { name: 'Cabang 2', ownerUserId: userId, businessId, createdAt: 2 })
@@ -46,7 +46,6 @@ describe('requireActiveOutlet — owner', () => {
 
     const resolved = await asOwner.run((ctx) => requireActiveOutlet(ctx));
     expect(resolved.cafeId).toBe(second);
-    expect([first, second]).toContain(resolved.cafeId);
   });
 
   it('falls back to the first accessible outlet when the active outlet is not accessible', async () => {
