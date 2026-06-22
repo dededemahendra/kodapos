@@ -63,6 +63,7 @@ import type * as menu_itemStock from "../menu/itemStock.js";
 import type * as menu_items from "../menu/items.js";
 import type * as menu_modifierGroups from "../menu/modifierGroups.js";
 import type * as menu_variants from "../menu/variants.js";
+import type * as multiOutlet from "../multiOutlet.js";
 import type * as orders from "../orders.js";
 import type * as otherIncome from "../otherIncome.js";
 import type * as otp_ResendOTP from "../otp/ResendOTP.js";
@@ -158,6 +159,7 @@ declare const fullApi: ApiFromModules<{
   "menu/items": typeof menu_items;
   "menu/modifierGroups": typeof menu_modifierGroups;
   "menu/variants": typeof menu_variants;
+  multiOutlet: typeof multiOutlet;
   orders: typeof orders;
   otherIncome: typeof otherIncome;
   "otp/ResendOTP": typeof otp_ResendOTP;

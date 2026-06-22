@@ -1,6 +1,6 @@
 import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
-import { api } from '../../convex/_generated/api';
+import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
 
@@ -80,6 +80,50 @@ describe('createForOwner — business bootstrap', () => {
     const second = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
     expect(second).toBe(first);
 
+    const businesses = await t.run((ctx) =>
+      ctx.db.query('businesses').withIndex('by_owner', (q) => q.eq('ownerUserId', userId as Id<'users'>)).collect()
+    );
+    expect(businesses).toHaveLength(1);
+  });
+});
+
+describe('backfillBusinesses migration', () => {
+  it('wraps a legacy cafe in a business + owner membership + active outlet, idempotently', async () => {
+    const t = convexTest(schema, modules);
+
+    // A legacy cafe inserted WITHOUT businessId (pre-migration shape).
+    const { userId, cafeId } = await t.run(async (ctx) => {
+      const userId = await ctx.db.insert('users', { name: 'Legacy Owner', email: 'legacy@x.com' });
+      const cafeId = await ctx.db.insert('cafes', {
+        name: 'Warung Lama',
+        ownerUserId: userId,
+        createdAt: 1,
+      });
+      return { userId, cafeId };
+    });
+
+    const first = await t.mutation(internal.multiOutlet.backfillBusinesses, {});
+    expect(first.migrated).toBe(1);
+
+    const cafe = await t.run((ctx) => ctx.db.get(cafeId as Id<'cafes'>));
+    expect(cafe?.businessId).toBeDefined();
+
+    const business = await t.run((ctx) => ctx.db.get(cafe!.businessId as Id<'businesses'>));
+    expect(business?.ownerUserId).toBe(userId);
+
+    const member = await t.run((ctx) =>
+      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>)).first()
+    );
+    expect(member?.role).toBe('owner');
+
+    const active = await t.run((ctx) =>
+      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>)).first()
+    );
+    expect(active?.cafeId).toBe(cafeId);
+
+    // Idempotent: re-running migrates nothing and does not duplicate the business.
+    const second = await t.mutation(internal.multiOutlet.backfillBusinesses, {});
+    expect(second.migrated).toBe(0);
     const businesses = await t.run((ctx) =>
       ctx.db.query('businesses').withIndex('by_owner', (q) => q.eq('ownerUserId', userId as Id<'users'>)).collect()
     );
