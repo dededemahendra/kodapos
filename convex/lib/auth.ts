@@ -42,7 +42,7 @@ export async function requireActiveOutlet(
 
   // Transitional fallback: an owner whose data predates the multi-outlet
   // backfill has a cafe but no businessMembers row. Behave exactly like the
-  // legacy requireActiveOutlet (oldest cafe by owner, via by_owner.first()) so
+  // legacy requireOwnerCafe (oldest cafe by owner, via by_owner.first()) so
   // this phase is safe to deploy before the backfill has run everywhere.
   // Removable once the backfill is confirmed run in all environments.
   if (!member) {
