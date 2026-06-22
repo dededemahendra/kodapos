@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 import { DEFAULT_LOYALTY } from './lib/loyalty';
 
 const configValidator = v.object({
@@ -23,7 +23,7 @@ export const getConfig = query({
   args: {},
   returns: configValidator,
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const settings = await ctx.db
       .query('cafeSettings')
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
@@ -36,7 +36,7 @@ export const updateConfig = mutation({
   args: configValidator,
   returns: v.null(),
   handler: async (ctx, cfg) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (cfg.earnRatePerIDR <= 0) throw new Error('Nilai perolehan poin harus lebih dari 0.');
     if (cfg.redeemBlockPoints <= 0 || cfg.redeemBlockIDR <= 0) {
       throw new Error('Nilai penukaran poin harus lebih dari 0.');
@@ -97,7 +97,7 @@ export const stats = query({
     ),
   }),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const active = await ctx.db
       .query('customers')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))

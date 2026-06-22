@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from '../_generated/dataModel';
 import { mutation, type QueryCtx, query } from '../_generated/server';
-import { requireOwned, requireOwnerCafe } from '../lib/auth';
+import { requireOwned, requireActiveOutlet } from '../lib/auth';
 
 const optionInput = v.object({
   id: v.optional(v.id('modifierOptions')),
@@ -84,7 +84,7 @@ export const upsert = mutation({
   },
   returns: v.id('modifierGroups'),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cleanName = assertGroup(
       args.name,
       args.required,
@@ -165,7 +165,7 @@ export const archive = mutation({
   args: { id: v.id('modifierGroups') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Grup modifier');
     await ctx.db.patch(id, { archived: true });
     return null;
@@ -176,7 +176,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(groupWithOptions),
   handler: async (ctx, { includeArchived = false }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const groups = await ctx.db
       .query('modifierGroups')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
@@ -195,7 +195,7 @@ export const getById = query({
   args: { id: v.id('modifierGroups') },
   returns: v.union(groupWithOptions, v.null()),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const group = await ctx.db.get(id);
     if (!group || group.cafeId !== cafeId) return null;
     const options = await loadOptionsForGroup(ctx, group._id);

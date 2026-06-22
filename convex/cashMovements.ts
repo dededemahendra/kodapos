@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 
 function assertIDR(n: number, label: string): number {
   if (!Number.isInteger(n)) throw new Error(`${label} harus berupa angka bulat (rupiah).`);
@@ -16,7 +16,7 @@ export const record = mutation({
   },
   returns: v.id('cashMovements'),
   handler: async (ctx, { direction, amountIDR, note }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const shift = await ctx.db
       .query('shifts')
       .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'open'))
@@ -48,7 +48,7 @@ export const listForShift = query({
     })
   ),
   handler: async (ctx, { shiftId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('cashMovements')
       .withIndex('by_shift', (q) => q.eq('shiftId', shiftId))

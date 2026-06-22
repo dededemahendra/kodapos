@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { orderTypeValidator } from './lib/orderType';
 
 const ticket = v.object({
@@ -30,7 +30,7 @@ export const tickets = query({
   args: {},
   returns: v.array(ticket),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
 
     const openShift = await ctx.db
       .query('shifts')
@@ -97,7 +97,7 @@ export const advance = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { orderId, status }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, orderId, 'Pesanan');
     await ctx.db.patch(orderId, { kitchenStatus: status });
     return null;

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 
 const giftCardDoc = v.object({
   _id: v.id('giftCards'),
@@ -45,7 +45,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(giftCardDoc),
   handler: async (ctx, { includeArchived = false }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('giftCards')
       .withIndex('by_cafe_code', (q) => q.eq('cafeId', cafeId))
@@ -61,7 +61,7 @@ export const getByCode = query({
   args: { code: v.string() },
   returns: v.union(giftCardSummary, v.null()),
   handler: async (ctx, { code }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const normalized = normalizeCode(code);
     const card = await ctx.db
       .query('giftCards')
@@ -81,7 +81,7 @@ export const transactions = query({
   args: { id: v.id('giftCards') },
   returns: v.array(txnDoc),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Kartu hadiah');
     return await ctx.db
       .query('giftCardTransactions')
@@ -95,7 +95,7 @@ export const issue = mutation({
   args: { code: v.string(), balanceIDR: v.number() },
   returns: v.id('giftCards'),
   handler: async (ctx, { code, balanceIDR }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const normalized = normalizeCode(code);
     if (normalized.length < 4) throw new Error('Kode kartu minimal 4 karakter.');
     if (!Number.isInteger(balanceIDR) || balanceIDR <= 0) {
@@ -130,7 +130,7 @@ export const topup = mutation({
   args: { id: v.id('giftCards'), amountIDR: v.number() },
   returns: v.null(),
   handler: async (ctx, { id, amountIDR }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const card = await requireOwned(ctx, cafeId, id, 'Kartu hadiah');
     if (!Number.isInteger(amountIDR) || amountIDR <= 0) {
       throw new Error('Jumlah pengisian harus lebih dari 0.');
@@ -152,7 +152,7 @@ export const archive = mutation({
   args: { id: v.id('giftCards') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Kartu hadiah');
     await ctx.db.patch(id, { status: 'archived' });
     return null;

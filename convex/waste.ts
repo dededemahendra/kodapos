@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
 
 const wasteReason = v.union(
@@ -20,7 +20,7 @@ export const record = mutation({
   },
   returns: v.id('inventoryMovements'),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const ing = await requireOwned(ctx, cafeId, args.ingredientId, 'Bahan');
     if (!Number.isInteger(args.qtyWasted) || args.qtyWasted < 1) {
       throw new Error('Jumlah limbah harus bilangan bulat ≥ 1.');
@@ -61,7 +61,7 @@ export const recent = query({
   args: { days: v.optional(v.number()) },
   returns: v.array(wasteRow),
   handler: async (ctx, { days = 30 }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     // Exclusive lower bound: a 0-day window excludes everything (the cutoff
     // instant itself is not "within the last N days"), and a row recorded in
     // the same millisecond as the query can't leak in.

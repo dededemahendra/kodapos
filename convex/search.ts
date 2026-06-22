@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 
 export const global = query({
   args: { term: v.string() },
@@ -25,7 +25,7 @@ export const global = query({
     if (term.trim().length < 2) {
       return { menuItems: [], customers: [] };
     }
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const q = term.trim().toLowerCase();
 
     // Menu items: scope to cafe's active (non-archived, isActive) items, filter by name

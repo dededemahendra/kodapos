@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 
 export const record = mutation({
   args: {
@@ -9,7 +9,7 @@ export const record = mutation({
   },
   returns: v.id('cashierSessions'),
   handler: async (ctx, { cashierId, type }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const openShift = await ctx.db
       .query('shifts')
       .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'open'))
@@ -36,7 +36,7 @@ export const listForShift = query({
     })
   ),
   handler: async (ctx, { shiftId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('cashierSessions')
       .withIndex('by_shift', (q) => q.eq('shiftId', shiftId))

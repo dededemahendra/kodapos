@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { hashPin, verifyPin as verifyPinHash } from './lib/pin';
 
 const permissionsValidator = v.object({
@@ -45,7 +45,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(cafeStaffDoc),
   handler: async (ctx, { includeArchived = false }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('cafeStaff')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
@@ -63,7 +63,7 @@ export const create = mutation({
   args: { name: v.string(), pin: v.string() },
   returns: v.id('cafeStaff'),
   handler: async (ctx, { name, pin }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cleanName = assertName(name);
     const cleanPin = assertPin(pin);
     const pinHash = await hashPin(cleanPin);
@@ -82,7 +82,7 @@ export const updateName = mutation({
   args: { id: v.id('cafeStaff'), name: v.string() },
   returns: v.null(),
   handler: async (ctx, { id, name }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Staf');
     await ctx.db.patch(id, { name: assertName(name) });
     return null;
@@ -93,7 +93,7 @@ export const archive = mutation({
   args: { id: v.id('cafeStaff') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await requireOwned(ctx, cafeId, id, 'Staf');
     if (row.role === 'owner') {
       const owners = await ctx.db
@@ -121,7 +121,7 @@ export const verifyPin = query({
   args: { id: v.id('cafeStaff'), pin: v.string() },
   returns: v.boolean(),
   handler: async (ctx, { id, pin }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await ctx.db.get(id);
     if (!row || row.cafeId !== cafeId || row.archived) return false;
     if (!row.pinHash) return false;
@@ -133,7 +133,7 @@ export const resetPin = mutation({
   args: { id: v.id('cafeStaff'), pin: v.string() },
   returns: v.null(),
   handler: async (ctx, { id, pin }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Staf');
     const cleanPin = assertPin(pin);
     const pinHash = await hashPin(cleanPin);
@@ -151,7 +151,7 @@ export const updateDetails = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { id, name, phone, email }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Staf');
     await ctx.db.patch(id, {
       name: assertName(name),
@@ -166,7 +166,7 @@ export const setHourlyRate = mutation({
   args: { id: v.id('cafeStaff'), hourlyRateIDR: v.number() },
   returns: v.null(),
   handler: async (ctx, { id, hourlyRateIDR }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Kasir');
     if (!Number.isInteger(hourlyRateIDR) || hourlyRateIDR < 0) {
       throw new Error('Tarif tidak valid.');
@@ -183,7 +183,7 @@ export const setPermissions = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { id, permissions }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Staf');
     await ctx.db.patch(id, { permissions });
     return null;
@@ -197,7 +197,7 @@ export const permissionsFor = query({
     permissions: permissionsValidator,
   }),
   handler: async (ctx, { cashierId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const staff = await ctx.db.get(cashierId);
     if (!staff || staff.cafeId !== cafeId) throw new Error('Kasir tidak ditemukan.');
     return {

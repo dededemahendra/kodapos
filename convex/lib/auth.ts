@@ -42,7 +42,7 @@ export async function requireActiveOutlet(
 
   // Transitional fallback: an owner whose data predates the multi-outlet
   // backfill has a cafe but no businessMembers row. Behave exactly like the
-  // legacy requireOwnerCafe (oldest cafe by owner, via by_owner.first()) so
+  // legacy requireActiveOutlet (oldest cafe by owner, via by_owner.first()) so
   // this phase is safe to deploy before the backfill has run everywhere.
   // Removable once the backfill is confirmed run in all environments.
   if (!member) {
@@ -103,16 +103,9 @@ export async function requireBusinessOwner(
 }
 
 /**
- * @deprecated Transitional alias kept so the ~230 existing call sites compile
- * during the Phase 2 rename. Removed in the same phase (Task 2) once every
- * call site references `requireActiveOutlet` directly.
- */
-export const requireOwnerCafe = requireActiveOutlet;
-
-/**
  * Fetch a row from a multi-tenant table and assert it belongs to the
  * given cafe. Throws a Bahasa Indonesia "tidak ditemukan." error suitable
- * for direct render via `<FieldError>`. Use after `requireOwnerCafe(ctx)`.
+ * for direct render via `<FieldError>`. Use after `requireActiveOutlet(ctx)`.
  *
  * Centralizes the `ctx.db.get → row.cafeId !== cafeId → throw` triad
  * that appears on every owned-row mutation. The constrained `Table` type

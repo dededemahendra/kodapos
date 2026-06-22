@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 import { mutation, type MutationCtx, query, type QueryCtx } from '../_generated/server';
-import { requireOwned, requireOwnerCafe } from '../lib/auth';
+import { requireOwned, requireActiveOutlet } from '../lib/auth';
 import { itemRecipeStatus } from './itemStock';
 
 const menuItemDoc = v.object({
@@ -213,7 +213,7 @@ export const create = mutation({
   },
   returns: v.id('menuItems'),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cleanName = assertItem(args.name, args.priceIDR);
     await requireOwned(ctx, cafeId, args.categoryId, 'Kategori');
     const bc = args.barcode?.trim();
@@ -252,7 +252,7 @@ export const update = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const item = await requireOwned(ctx, cafeId, args.id, 'Item');
     await requireOwned(ctx, cafeId, args.categoryId, 'Kategori');
     const cleanName = assertItem(args.name, args.priceIDR);
@@ -288,7 +288,7 @@ export const setActive = mutation({
   args: { id: v.id('menuItems'), isActive: v.boolean() },
   returns: v.null(),
   handler: async (ctx, { id, isActive }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Item');
     await ctx.db.patch(id, { isActive });
     return null;
@@ -299,7 +299,7 @@ export const setSoldOut = mutation({
   args: { id: v.id('menuItems'), soldOut: v.boolean() },
   returns: v.null(),
   handler: async (ctx, { id, soldOut }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Item');
     await ctx.db.patch(id, { soldOut });
     return null;
@@ -310,7 +310,7 @@ export const reorder = mutation({
   args: { id: v.id('menuItems'), direction: v.union(v.literal('up'), v.literal('down')) },
   returns: v.null(),
   handler: async (ctx, { id, direction }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const item = await requireOwned(ctx, cafeId, id, 'Item');
     const siblings = await ctx.db
       .query('menuItems')
@@ -332,7 +332,7 @@ export const archive = mutation({
   args: { id: v.id('menuItems') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Item');
     await ctx.db.patch(id, { archived: true });
     return null;
@@ -343,7 +343,7 @@ export const assignBarcode = mutation({
   args: { id: v.id('menuItems') },
   returns: v.string(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const item = await requireOwned(ctx, cafeId, id, 'Item');
     if (item.barcode) throw new Error('Item sudah punya barcode.');
     return await assignOneBarcode(ctx, cafeId, item._id);
@@ -354,7 +354,7 @@ export const assignMissingBarcodes = mutation({
   args: {},
   returns: v.object({ assigned: v.number() }),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     // Sellable items mirror listForSale: active + not archived.
     const items = await ctx.db
       .query('menuItems')
@@ -389,7 +389,7 @@ export const bulkImport = mutation({
   },
   returns: importResult,
   handler: async (ctx, { rows }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (rows.length > 1000) throw new Error('Terlalu banyak baris.');
 
     // Preload the cafe's active categories (lowercased name -> id), active
@@ -493,7 +493,7 @@ export const list = query({
   },
   returns: v.array(menuItemWithStatus),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     // Catalog admin view: fetch all of the cafe's items (only the cafeId index
     // prefix is constrained) and filter archived/inactive in JS, because this
     // endpoint optionally includes both via flags. Café-scale (dozens of rows),
@@ -541,7 +541,7 @@ export const listForSale = query({
   args: {},
   returns: v.array(itemForSale),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const items = await ctx.db
       .query('menuItems')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
@@ -566,7 +566,7 @@ export const getById = query({
   args: { id: v.id('menuItems') },
   returns: v.union(itemDetail, v.null()),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const item = await ctx.db.get(id);
     if (!item || item.cafeId !== cafeId) return null;
     const attachedGroups = await resolveAttachedGroups(ctx, id);

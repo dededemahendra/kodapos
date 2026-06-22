@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 
 const ingredientDoc = v.object({
   _id: v.id('ingredients'),
@@ -47,7 +47,7 @@ export const getForItem = query({
   args: { menuItemId: v.id('menuItems') },
   returns: v.union(recipeDetail, v.null()),
   handler: async (ctx, { menuItemId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const item = await ctx.db.get(menuItemId);
     if (!item || item.cafeId !== cafeId) return null;
     const recipe = await ctx.db
@@ -77,7 +77,7 @@ export const listForCatalog = query({
   args: {},
   returns: v.array(recipeCatalogRow),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     // Non-archived items; per-item recipe + ingredient reads (café-scale,
     // dozens of items). Cost mirrors getForItem.
     const items = await ctx.db
@@ -132,7 +132,7 @@ export const upsert = mutation({
   },
   returns: v.union(v.id('recipes'), v.null()),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, args.menuItemId, 'Item');
 
     // Validate each line up-front.

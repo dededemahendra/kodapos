@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 
 const purchaseRow = v.object({
   id: v.id('purchases'),
@@ -14,7 +14,7 @@ export const recent = query({
   args: { days: v.optional(v.number()) },
   returns: v.array(purchaseRow),
   handler: async (ctx, { days = 30 }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cutoff = Date.now() - days * 86_400_000;
     const purchases = await ctx.db
       .query('purchases')
@@ -44,7 +44,7 @@ export const record = mutation({
   },
   returns: v.id('purchases'),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (args.lines.length === 0) {
       throw new Error('Pembelian harus punya minimal satu bahan.');
     }
@@ -107,7 +107,7 @@ export const get = query({
   args: { id: v.id('purchases') },
   returns: v.union(purchaseDetail, v.null()),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const p = await ctx.db.get(id);
     if (!p || p.cafeId !== cafeId) return null;
     const lines = [];

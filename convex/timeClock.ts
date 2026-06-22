@@ -1,13 +1,13 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
 export const clockIn = mutation({
   args: { cashierId: v.id('cafeStaff') },
   returns: v.id('timeClock'),
   handler: async (ctx, { cashierId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, cashierId, 'Staf');
     const open = await ctx.db
       .query('timeClock')
@@ -27,7 +27,7 @@ export const clockOut = mutation({
   args: { cashierId: v.id('cafeStaff') },
   returns: v.null(),
   handler: async (ctx, { cashierId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, cashierId, 'Staf');
     const open = await ctx.db
       .query('timeClock')
@@ -50,7 +50,7 @@ export const currentlyIn = query({
     })
   ),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('timeClock')
       .withIndex('by_cafe_clockin', (q) => q.eq('cafeId', cafeId))
@@ -87,7 +87,7 @@ export const report = query({
     toKey: v.string(),
   }),
   handler: async (ctx, { range }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const now = Date.now();
     const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, now);
@@ -146,7 +146,7 @@ export const payroll = query({
     toKey: v.string(),
   }),
   handler: async (ctx, { range }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const now = Date.now();
     const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, now);

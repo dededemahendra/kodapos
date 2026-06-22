@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { action, internalMutation, internalQuery, mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 import { parseGeocode } from './lib/weather';
 
 const cafeFields = {
@@ -149,7 +149,7 @@ export const updateProfile = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const trimmedName = args.name.trim();
     if (trimmedName.length < 1) {
       throw new Error('Nama kafe wajib diisi.');
@@ -197,7 +197,7 @@ export const updateProfileDetails = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const name = args.name.trim();
     if (name.length < 1) throw new Error('Nama kafe wajib diisi.');
     if (name.length > 80) throw new Error('Nama kafe maksimal 80 karakter.');
@@ -230,7 +230,7 @@ export const generateUploadUrl = mutation({
   args: {},
   returns: v.string(),
   handler: async (ctx) => {
-    await requireOwnerCafe(ctx);
+    await requireActiveOutlet(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -239,7 +239,7 @@ export const setLogo = mutation({
   args: { storageId: v.id('_storage') },
   returns: v.null(),
   handler: async (ctx, { storageId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cafe = await ctx.db.get(cafeId);
     if (cafe?.logoStorageId) await ctx.storage.delete(cafe.logoStorageId);
     await ctx.db.patch(cafeId, { logoStorageId: storageId });
@@ -251,7 +251,7 @@ export const removeLogo = mutation({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cafe = await ctx.db.get(cafeId);
     if (cafe?.logoStorageId) {
       await ctx.storage.delete(cafe.logoStorageId);
@@ -264,7 +264,7 @@ export const removeLogo = mutation({
 /**
  * One-shot cleanup for owners with duplicate cafe rows (caused by the
  * non-idempotent createForOwner mutation before it was fixed). Keeps the
- * OLDEST cafe (the one that `requireOwnerCafe`/`myCafe` now pick via
+ * OLDEST cafe (the one that `requireActiveOutlet`/`myCafe` now pick via
  * `.first()`); deletes every empty newer duplicate. A "duplicate" is only
  * deleted if it has no categories, items, modifier groups, staff rows,
  * shifts, or orders attached — keeping anything that has data, so the
@@ -352,7 +352,7 @@ export const markSetupComplete = mutation({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cafe = await ctx.db.get(cafeId);
     if (cafe?.setupCompletedAt) {
       return null;
@@ -367,7 +367,7 @@ export const myCafeForGeocode = internalQuery({
   args: {},
   returns: v.object({ cafeId: v.id('cafes'), city: v.union(v.string(), v.null()) }),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cafe = await ctx.db.get(cafeId);
     return { cafeId, city: cafe?.city ?? null };
   },

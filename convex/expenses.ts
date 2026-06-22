@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { EXPENSE_CATEGORIES, expenseCategoryValidator } from './lib/expense';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
@@ -14,7 +14,7 @@ export const record = mutation({
   },
   returns: v.id('expenses'),
   handler: async (ctx, { category, amountIDR, note }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (!Number.isInteger(amountIDR) || amountIDR <= 0) {
       throw new Error('Jumlah harus lebih dari nol.');
     }
@@ -47,7 +47,7 @@ export const list = query({
     ),
   }),
   handler: async (ctx, { range }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const { startMs, endMs } = resolveRange(tz, range, Date.now());
     const rows = await ctx.db
@@ -84,7 +84,7 @@ export const remove = mutation({
   args: { id: v.id('expenses') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Pengeluaran');
     await ctx.db.delete(id);
     return null;

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
 import type { QueryCtx } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 import { methodTotals } from './lib/payment';
 import { type RangeArgs, dayKeyFn, eachDayKey, resolveRange, tzFor } from './lib/time';
 
@@ -22,7 +22,7 @@ async function paidInRange(
   ctx: QueryCtx,
   range: RangeArgs
 ) {
-  const { cafeId } = await requireOwnerCafe(ctx);
+  const { cafeId } = await requireActiveOutlet(ctx);
   const tz = await tzFor(ctx, cafeId);
   const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, Date.now());
   const rows = await ctx.db

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { type MutationCtx, mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 
 const promotionDoc = v.object({
   _id: v.id('promotions'),
@@ -94,7 +94,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(promotionDoc),
   handler: async (ctx, { includeArchived = false }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('promotions')
       .withIndex('by_cafe_active', (q) =>
@@ -109,7 +109,7 @@ export const resolveByCode = query({
   args: { code: v.string() },
   returns: v.union(promotionDoc, v.null()),
   handler: async (ctx, { code }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const upper = code.trim().toUpperCase();
     if (upper.length < 1) return null;
     const rows = await ctx.db
@@ -132,7 +132,7 @@ export const create = mutation({
   },
   returns: v.id('promotions'),
   handler: async (ctx, { name, type, value, code, scope, targetItemIds, targetCategoryIds }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cleanName = assertPromo(name, type, value);
     const cleanCode = code && code.trim() ? assertPromoCode(code) : undefined;
     if (cleanCode) await assertCodeUnique(ctx, cafeId, cleanCode);
@@ -165,7 +165,7 @@ export const update = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { id, name, type, value, code, scope, targetItemIds, targetCategoryIds }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Promo');
     const cleanName = assertPromo(name, type, value);
     const cleanCode = code && code.trim() ? assertPromoCode(code) : undefined;
@@ -189,7 +189,7 @@ export const archive = mutation({
   args: { id: v.id('promotions') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Promo');
     await ctx.db.patch(id, { archived: true });
     return null;

@@ -17,7 +17,7 @@ import { resolveProvider } from './payments/providers';
  * Public (UNAUTHENTICATED) QR self-order intake. These functions are kodapos's
  * first surface reachable without a login, so the security posture is the spine:
  *
- *  - They NEVER call `requireOwnerCafe`. The cafe/table are resolved ONLY from an
+ *  - They NEVER call `requireActiveOutlet`. The cafe/table are resolved ONLY from an
  *    unguessable per-table `qrToken` (a 128-bit capability). An unknown token
  *    yields `null` (menuForTable) or a generic throw (submit) — no error oracle.
  *  - `menuForTable` exposes ONLY sellable menu data — no cost, stock, recipe, or
@@ -602,7 +602,7 @@ export const markSelfOrderCharged = internalMutation({
 /**
  * Public (UNAUTHENTICATED) pay-now charge. The customer holds only the table's
  * `qrToken` + the `selfOrderId` they just created. This NEVER calls
- * `requireOwnerCafe`. Security spine:
+ * `requireActiveOutlet`. Security spine:
  *
  *  - The amount is RECOMPUTED server-side (`computeOrderTotals` over the stored
  *    snapshot lines + the cafe's tax/SC config) — the client can never set it,

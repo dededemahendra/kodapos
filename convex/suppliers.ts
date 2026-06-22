@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { normalizePhone } from './lib/phone';
 
 const supplierDoc = v.object({
@@ -26,7 +26,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(supplierDoc),
   handler: async (ctx, { includeArchived = false }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('suppliers')
       .withIndex('by_cafe_active', (q) =>
@@ -41,7 +41,7 @@ export const create = mutation({
   args: { name: v.string(), phone: v.string() },
   returns: v.id('suppliers'),
   handler: async (ctx, { name, phone }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const clean = assertSupplier(name, phone);
     return await ctx.db.insert('suppliers', {
       cafeId,
@@ -57,7 +57,7 @@ export const update = mutation({
   args: { id: v.id('suppliers'), name: v.string(), phone: v.string() },
   returns: v.null(),
   handler: async (ctx, { id, name, phone }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Pemasok');
     const clean = assertSupplier(name, phone);
     await ctx.db.patch(id, { name: clean.name, phone: clean.phone });
@@ -69,7 +69,7 @@ export const archive = mutation({
   args: { id: v.id('suppliers') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Pemasok');
     await ctx.db.patch(id, { archived: true });
     return null;

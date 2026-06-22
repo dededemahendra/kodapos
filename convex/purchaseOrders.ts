@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 
 const statusV = v.union(
   v.literal('open'),
@@ -37,7 +37,7 @@ export const create = mutation({
   },
   returns: v.id('purchaseOrders'),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (args.lines.length === 0) {
       throw new Error('Pesanan beli harus punya minimal satu bahan.');
     }
@@ -98,7 +98,7 @@ export const receive = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const po = await requireOwned(ctx, cafeId, args.id, 'Pesanan beli');
     if (po.status === 'received' || po.status === 'cancelled') {
       throw new Error('PO sudah selesai atau dibatalkan.');
@@ -154,7 +154,7 @@ export const cancel = mutation({
   args: { id: v.id('purchaseOrders') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const po = await requireOwned(ctx, cafeId, id, 'Pesanan beli');
     if (po.status === 'received' || po.status === 'cancelled') {
       throw new Error('PO sudah selesai atau dibatalkan.');
@@ -180,7 +180,7 @@ export const list = query({
   args: { status: v.optional(statusV) },
   returns: v.array(poSummary),
   handler: async (ctx, { status }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = status
       ? // bounded; PO volume per cafe is modest
         await ctx.db
@@ -239,7 +239,7 @@ export const get = query({
   args: { id: v.id('purchaseOrders') },
   returns: v.union(poDetail, v.null()),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const po = await ctx.db.get(id);
     if (!po || po.cafeId !== cafeId) return null;
     const lines = [];
