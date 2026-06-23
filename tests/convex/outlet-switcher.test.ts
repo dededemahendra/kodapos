@@ -2,6 +2,7 @@ import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
+import { resolveOutletAccess } from '../../convex/lib/auth';
 import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
@@ -177,6 +178,12 @@ describe('manager-access hardening', () => {
     const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
     const outlets = await asMgr.query(api.outlets.myOutlets, {});
     expect(outlets.map((o) => o.cafeId)).toEqual([live]);
+
+    // Directly exercise the helper fix: resolveOutletAccess itself must drop the
+    // dangling id so every consumer (active-pick, setActiveOutlet) sees clean ids,
+    // not just myOutlets (which independently null-filters its cafe gets).
+    const access = await asMgr.run((ctx) => resolveOutletAccess(ctx, mgrUserId));
+    expect(access?.accessibleCafeIds).toEqual([live]);
   });
 
   it('myOutlets returns outlets sorted by name', async () => {
