@@ -19,8 +19,12 @@ export function usePermissions(): {
   // operational register UI (canVoid/canEditMenu/...) for an operating cashier.
   const cafe = useQuery(api.cafes.myCafe, {});
   const isAccountOwner = cafe?.role === 'owner';
+  // A signed-in business member (owner OR manager) has owner-like back-office
+  // capability for their active outlet. When a cashier is PIN-active, the
+  // cashier's role/permissions still drive the operational register UI.
+  const isAccountMember = cafe != null;
   return {
-    can: (p) => (data ? data.role === 'owner' || data.permissions[p] : isAccountOwner),
+    can: (p) => (data ? data.role === 'owner' || data.permissions[p] : isAccountMember),
     isOwner: isAccountOwner || data?.role === 'owner',
     isLoading: cafe === undefined || (cashierId !== null && data === undefined),
   };

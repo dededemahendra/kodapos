@@ -121,15 +121,16 @@ export const navGroups: SidebarNavGroup[] = [
 			{
 				title: msg`Pengaturan`,
 				icon: <Settings />,
-				requires: 'owner',
+				// (no `requires` here — managers reach per-outlet settings; owner-only
+				// sub-items are gated individually below)
 				subItems: [
 					{ title: msg`Umum`, path: "/settings/general" },
 					{ title: msg`Profil`, path: "/settings/profile" },
 					{ title: msg`Staf`, path: "/settings/staff" },
-					{ title: msg`Tim`, path: "/settings/members" },
+					{ title: msg`Tim`, path: "/settings/members", requires: 'owner' },
 					{ title: msg`Pajak & Pembayaran`, path: "/settings/tax" },
 					{ title: msg`Struk & Printer`, path: "/settings/receipt" },
-					{ title: msg`Integrasi`, path: "/settings/integrations" },
+					{ title: msg`Integrasi`, path: "/settings/integrations", requires: 'owner' },
 				],
 			},
 		],

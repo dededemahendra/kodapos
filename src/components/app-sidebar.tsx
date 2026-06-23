@@ -28,7 +28,16 @@ export function AppSidebar() {
 	const allowed = (req?: SidebarNavItem['requires']) =>
 		!req || isLoading || (req === 'owner' ? isOwner : can(req));
 	const visibleGroups = navGroups
-		.map((g) => ({ ...g, items: g.items.filter((it) => allowed(it.requires)) }))
+		.map((g) => ({
+			...g,
+			items: g.items
+				.filter((it) => allowed(it.requires))
+				.map((it) =>
+					it.subItems
+						? { ...it, subItems: it.subItems.filter((s) => allowed(s.requires)) }
+						: it
+				),
+		}))
 		.filter((g) => g.items.length > 0);
 
 	return (

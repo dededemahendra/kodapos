@@ -3,6 +3,7 @@ import type { MessageDescriptor } from '@lingui/core';
 import { useLingui } from '@lingui/react';
 import { Trans, useLingui as useLinguiMacro } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
@@ -30,8 +31,16 @@ import { Textarea } from '~/components/ui/textarea';
 import { DEFAULT_WHATSAPP_TEMPLATE } from 'convex/lib/whatsapp';
 
 export const Route = createFileRoute('/_pos/settings/integrations')({
-  component: SettingsIntegrations,
+  component: SettingsIntegrationsPage,
 });
+
+function SettingsIntegrationsPage() {
+  return (
+    <RequirePermission owner>
+      <SettingsIntegrations />
+    </RequirePermission>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Catalog

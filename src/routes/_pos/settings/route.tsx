@@ -1,5 +1,4 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { RequirePermission } from '~/components/permission/require-permission';
 
 export const Route = createFileRoute('/_pos/settings')({
   component: SettingsLayout,
@@ -10,10 +9,8 @@ export const Route = createFileRoute('/_pos/settings')({
 // own section rail. This avoids a redundant double sidebar.
 function SettingsLayout() {
   return (
-    <RequirePermission owner>
-      <div className="p-6">
-        <Outlet />
-      </div>
-    </RequirePermission>
+    <div className="p-6">
+      <Outlet />
+    </div>
   );
 }

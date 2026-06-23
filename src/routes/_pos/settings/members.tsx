@@ -1,5 +1,6 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
@@ -341,6 +342,7 @@ function MembersPage() {
 	}
 
 	return (
+		<RequirePermission owner>
 		<div className="space-y-6 max-w-2xl">
 			<div className="flex items-start justify-between gap-4">
 				<SettingsPageHeader
@@ -551,5 +553,6 @@ function MembersPage() {
 				}}
 			/>
 		</div>
+		</RequirePermission>
 	);
 }
