@@ -135,6 +135,19 @@ describe('businessOverview', () => {
     const t = convexTest(schema, modules);
     await expect(t.query(api.reports.businessOverview, { range: RANGE })).rejects.toThrow('not authenticated');
   });
+
+  it('throws no outlet access for a member with zero granted outlets', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t); // owner + business + cafe
+    const businessId = (await t.run((ctx) => ctx.db.get(refs.cafeId)))!.businessId as Id<'businesses'>;
+    // A manager member with NO memberOutletAccess rows -> empty accessible set.
+    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'noaccess@x.com' }));
+    await t.run((ctx) =>
+      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+    );
+    const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
+    await expect(asMgr.query(api.reports.businessOverview, { range: RANGE })).rejects.toThrow('no outlet access');
+  });
 });
 
 describe('overview is unchanged after the refactor', () => {
