@@ -91,3 +91,48 @@ describe('myCafe resolves the active outlet', () => {
     expect(await t.query(api.cafes.myCafe, {})).toBeNull();
   });
 });
+
+describe('setActiveOutlet', () => {
+  it('switches the active outlet to an accessible cafe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, userId, businessId, cafeId: first } = await seedOwner(t);
+    const second = await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Cabang 2', ownerUserId: userId, businessId, createdAt: 2 })
+    );
+
+    await asOwner.mutation(api.outlets.setActiveOutlet, { cafeId: second });
+
+    const active = await t.run((ctx) =>
+      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId)).first()
+    );
+    expect(active?.cafeId).toBe(second);
+    const cafe = await asOwner.query(api.cafes.myCafe, {});
+    expect(cafe?._id).toBe(second);
+    expect(second).not.toBe(first);
+  });
+
+  it('rejects switching to an outlet the user cannot access', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await seedOwner(t);
+    const otherUser = await t.run((ctx) => ctx.db.insert('users', { name: 'X', email: 'x2@x.com' }));
+    const otherBiz = await t.run((ctx) => ctx.db.insert('businesses', { name: 'B', ownerUserId: otherUser, createdAt: 1 }));
+    const foreign = await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Foreign', ownerUserId: otherUser, businessId: otherBiz, createdAt: 1 })
+    );
+
+    await expect(asOwner.mutation(api.outlets.setActiveOutlet, { cafeId: foreign })).rejects.toThrow('no outlet access');
+  });
+
+  it('upserts (does not duplicate) the activeOutlet row', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, userId, businessId } = await seedOwner(t);
+    const second = await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Cabang 2', ownerUserId: userId, businessId, createdAt: 2 })
+    );
+    await asOwner.mutation(api.outlets.setActiveOutlet, { cafeId: second });
+    const rows = await t.run((ctx) =>
+      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId)).collect()
+    );
+    expect(rows).toHaveLength(1);
+  });
+});
