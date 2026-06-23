@@ -108,6 +108,11 @@ msgstr "{0} · {1}× points"
 msgid "{0} / item"
 msgstr "{0} / item"
 
+#. placeholder {0}: revokingMember.name ?? revokingMember.email ?? 'Anggota ini'
+#: src/routes/_pos/settings/members.tsx
+msgid "{0} akan kehilangan akses ke semua outlet."
+msgstr "{0} will lose access to all outlets."
+
 #. placeholder {0}: counts.all
 #. placeholder {1}: counts.low
 #: src/routes/_pos/inventory/index.tsx
@@ -459,6 +464,7 @@ msgstr "Access denied"
 #: src/routes/_pos/menu/modifiers.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/reservations.tsx
+#: src/routes/_pos/settings/members.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Aksi baris"
 msgstr "Row actions"
@@ -570,6 +576,7 @@ msgid "Anda tidak punya akses ke halaman ini. Masuk sebagai pemilik untuk membuk
 msgstr "You do not have access to this page. Switch to the owner to open it."
 
 #: src/routes/_pos/loyalty.tsx
+#: src/routes/_pos/settings/members.tsx
 msgid "Anggota"
 msgstr "Members"
 
@@ -953,6 +960,7 @@ msgstr "Spoiled/Expired"
 #: src/components/ui/confirm-dialog.tsx
 #: src/routes/_pos/reports/orders.tsx
 #: src/routes/_pos/settings/integrations.tsx
+#: src/routes/_pos/settings/members.tsx
 msgid "Batal"
 msgstr "Cancel"
 
@@ -962,6 +970,7 @@ msgid "Batal"
 msgstr "Void"
 
 #: src/components/sale/receipt-preview.tsx
+#: src/routes/_pos/settings/members.tsx
 msgid "Batalkan"
 msgstr "Void"
 
@@ -985,6 +994,10 @@ msgstr "Cancel PO"
 #: src/components/inventory/purchase-order-detail.tsx
 msgid "Batalkan PO?"
 msgstr "Cancel PO?"
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Batalkan undangan?"
+msgstr "Cancel invitation?"
 
 #: src/components/sale/order-types.tsx
 msgid "Bawa pulang"
@@ -1085,6 +1098,10 @@ msgstr "No waste yet"
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Belum ada limbah tercatat dalam 30 hari terakhir."
 msgstr "No waste recorded in the last 30 days."
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Belum ada manajer."
+msgstr "No managers yet."
 
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/tables.tsx
@@ -1991,10 +2008,19 @@ msgstr "Edit modifier group"
 msgid "Edit menu"
 msgstr "Edit menu"
 
+#: src/routes/_pos/settings/members.tsx
+msgid "Edit outlet"
+msgstr "Edit outlets"
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Edit outlet untuk {memberName}"
+msgstr "Edit outlets for {memberName}"
+
 #: src/routes/_pos/reports/route.tsx
 msgid "Ekspor Akuntansi"
 msgstr "Accounting export"
 
+#: src/routes/_pos/settings/members.tsx
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Email"
@@ -2117,6 +2143,10 @@ msgstr "Failed to update item."
 #: src/routes/_pos/settings/profile.tsx
 msgid "Gagal memperbarui lokasi cuaca."
 msgstr "Failed to update weather location."
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Gagal memperbarui outlet."
+msgstr "Failed to update outlets."
 
 #: src/routes/_pos/reservations.tsx
 msgid "Gagal memperbarui status."
@@ -2282,6 +2312,10 @@ msgstr "Could not send the email."
 #: src/routes/_pos/shifts.tsx
 msgid "Gagal mengirim ringkasan."
 msgstr "Could not send the summary."
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Gagal mengirim undangan."
+msgstr "Failed to send invitation."
 
 #: src/components/sale/receipt-preview.tsx
 msgid "Gagal mengirim WhatsApp."
@@ -2584,9 +2618,14 @@ msgstr "Page not found"
 #: src/routes/_pos/reports/other-income.tsx
 #: src/routes/_pos/reservations.tsx
 #: src/routes/_pos/schedule.tsx
+#: src/routes/_pos/settings/members.tsx
 #: src/routes/_pos/settings/profile.tsx
 msgid "Hapus"
 msgstr "Remove"
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Hapus anggota?"
+msgstr "Remove member?"
 
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/purchase-order-form-dialog.tsx
@@ -3253,6 +3292,10 @@ msgstr "Manage your cafe's identity, contact info, and operating hours."
 msgid "Kelola kasir, kontak, izin akses, dan PIN."
 msgstr "Manage cashiers, contact info, access permissions, and PINs."
 
+#: src/routes/_pos/settings/members.tsx
+msgid "Kelola manajer outlet dan undangan yang tertunda."
+msgstr "Manage outlet managers and pending invitations."
+
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/tables.tsx
 msgid "Kelola meja"
@@ -3401,6 +3444,10 @@ msgstr "Resend code"
 #: src/routes/_public/signin.tsx
 msgid "Kirim ulang kode ({cooldown}s)"
 msgstr "Resend code ({cooldown}s)"
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Kirim undangan"
+msgstr "Send invitation"
 
 #: src/components/sale/receipt-preview.tsx
 msgid "Kirim WhatsApp"
@@ -3785,6 +3832,10 @@ msgstr "Max ({maxPoints})"
 #~ msgid "Manajemen meja"
 #~ msgstr "Table management"
 
+#: src/routes/_pos/settings/members.tsx
+msgid "Manajer"
+msgstr "Manager"
+
 #: src/components/marketing/pricing.tsx
 msgid "Manajer akun khusus"
 msgstr "Dedicated account manager"
@@ -3966,6 +4017,7 @@ msgstr "Loading receipt…"
 #: src/components/inventory/recipe-editor.tsx
 #: src/components/inventory/stock-adjust-dialog.tsx
 #: src/routes/_pos/pin.tsx
+#: src/routes/_pos/settings/members.tsx
 #: src/routes/_pos/settings/receipt.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/shift/open.tsx
@@ -4223,6 +4275,10 @@ msgstr "Move up"
 msgid "Nama"
 msgstr "Name"
 
+#: src/routes/_pos/settings/members.tsx
+msgid "Nama / Email"
+msgstr "Name / Email"
+
 #: src/components/sale/hold-order-dialog.tsx
 msgid "Nama / meja"
 msgstr "Name / table"
@@ -4337,6 +4393,10 @@ msgstr "Variant name"
 #: src/lib/auth-validation.ts
 msgid "Nama wajib diisi."
 msgstr "Name is required."
+
+#: src/routes/_pos/settings/members.tsx
+msgid "nama@contoh.com"
+msgstr "name@example.com"
 
 #: src/components/latest-change.tsx
 #~ msgid "Navigasi sidebar & dasbor."
@@ -4471,8 +4531,17 @@ msgid "Order"
 msgstr "Order"
 
 #: src/components/outlet-switcher.tsx
+#: src/routes/_pos/settings/members.tsx
 msgid "Outlet"
 msgstr "Outlet"
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Outlet berhasil diperbarui."
+msgstr "Outlets updated successfully."
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Outlet yang dapat diakses"
+msgstr "Accessible outlets"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "OVO"
@@ -4675,6 +4744,7 @@ msgstr "Rounding"
 
 #: src/components/nav-user.tsx
 #: src/components/staff/staff-picker-card.tsx
+#: src/routes/_pos/settings/members.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Pemilik"
 msgstr "Owner"
@@ -4835,6 +4905,7 @@ msgstr "Stock Adjustments"
 msgid "Penyiapan"
 msgstr "Setup"
 
+#: src/routes/_pos/settings/members.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Peran"
 msgstr "Role"
@@ -5890,6 +5961,10 @@ msgstr "All categories"
 msgid "Semua metode"
 msgstr "All methods"
 
+#: src/routes/_pos/settings/members.tsx
+msgid "Semua outlet"
+msgstr "All outlets"
+
 #: src/routes/_pos/reports/orders.tsx
 msgid "Semua status"
 msgstr "All statuses"
@@ -6001,6 +6076,7 @@ msgstr "Who's on duty?"
 #: src/components/schedule/shift-form-dialog.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/components/tables/table-manage-dialog.tsx
+#: src/routes/_pos/settings/members.tsx
 #: src/routes/_pos/settings/staff.tsx
 msgid "Simpan"
 msgstr "Save"
@@ -6848,6 +6924,10 @@ msgstr "No archived categories."
 msgid "Tidak ada notifikasi baru."
 msgstr "No new notifications."
 
+#: src/routes/_pos/settings/members.tsx
+msgid "Tidak ada outlet tersedia."
+msgstr "No outlets available."
+
 #: src/routes/_pos/customers.tsx
 msgid "Tidak ada pelanggan cocok."
 msgstr "No matching customers."
@@ -6880,6 +6960,10 @@ msgstr "No open shift."
 msgid "Tidak ada staf yang ditemukan."
 msgstr "No staff found."
 
+#: src/routes/_pos/settings/members.tsx
+msgid "Tidak ada undangan tertunda."
+msgstr "No pending invitations."
+
 #: src/routes/_public/signin.tsx
 msgid "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi."
 msgstr "Could not send the code. Email may not be configured. Try signing in with a password."
@@ -6903,6 +6987,11 @@ msgstr "No. kodapos runs in the browser, so it works on the tablet, phone, or la
 #: src/routes/_pos/loyalty.tsx
 msgid "Tier"
 msgstr "Tier"
+
+#: src/components/app-shared.tsx
+#: src/routes/_pos/settings/members.tsx
+msgid "Tim"
+msgstr "Team"
 
 #: src/components/command-palette.tsx
 msgid "Tindakan Cepat"
@@ -7158,6 +7247,31 @@ msgstr "Label size"
 #: src/routes/_pos/settings/general.tsx
 msgid "Umum"
 msgstr "General"
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Undang manajer"
+msgstr "Invite manager"
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Undang manajer untuk memberi akses ke outlet tertentu."
+msgstr "Invite a manager to give them access to specific outlets."
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Undangan terkirim."
+msgstr "Invitation sent."
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Undangan tertunda"
+msgstr "Pending invitations"
+
+#. placeholder {0}: cancellingInvite.email
+#: src/routes/_pos/settings/members.tsx
+msgid "Undangan untuk {0} akan dibatalkan."
+msgstr "The invitation for {0} will be cancelled."
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Undangan yang dikirim akan muncul di sini sampai diterima."
+msgstr "Sent invitations will appear here until accepted."
 
 #: src/routes/_pos/reports/export.tsx
 msgid "Unduh Buku Besar (CSV)"

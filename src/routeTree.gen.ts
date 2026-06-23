@@ -56,6 +56,7 @@ import { Route as PosSettingsTaxRouteImport } from './routes/_pos/settings/tax'
 import { Route as PosSettingsStaffRouteImport } from './routes/_pos/settings/staff'
 import { Route as PosSettingsReceiptRouteImport } from './routes/_pos/settings/receipt'
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
+import { Route as PosSettingsMembersRouteImport } from './routes/_pos/settings/members'
 import { Route as PosSettingsIntegrationsRouteImport } from './routes/_pos/settings/integrations'
 import { Route as PosSettingsGeneralRouteImport } from './routes/_pos/settings/general'
 import { Route as PosReportsSalesRouteImport } from './routes/_pos/reports/sales'
@@ -314,6 +315,11 @@ const PosSettingsProfileRoute = PosSettingsProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => PosSettingsRouteRoute,
 } as any)
+const PosSettingsMembersRoute = PosSettingsMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
 const PosSettingsIntegrationsRoute = PosSettingsIntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
@@ -493,6 +499,7 @@ export interface FileRoutesByFullPath {
   '/reports/sales': typeof PosReportsSalesRoute
   '/settings/general': typeof PosSettingsGeneralRoute
   '/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/settings/members': typeof PosSettingsMembersRoute
   '/settings/profile': typeof PosSettingsProfileRoute
   '/settings/receipt': typeof PosSettingsReceiptRoute
   '/settings/staff': typeof PosSettingsStaffRoute
@@ -560,6 +567,7 @@ export interface FileRoutesByTo {
   '/reports/sales': typeof PosReportsSalesRoute
   '/settings/general': typeof PosSettingsGeneralRoute
   '/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/settings/members': typeof PosSettingsMembersRoute
   '/settings/profile': typeof PosSettingsProfileRoute
   '/settings/receipt': typeof PosSettingsReceiptRoute
   '/settings/staff': typeof PosSettingsStaffRoute
@@ -634,6 +642,7 @@ export interface FileRoutesById {
   '/_pos/reports/sales': typeof PosReportsSalesRoute
   '/_pos/settings/general': typeof PosSettingsGeneralRoute
   '/_pos/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/_pos/settings/members': typeof PosSettingsMembersRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
   '/_pos/settings/receipt': typeof PosSettingsReceiptRoute
   '/_pos/settings/staff': typeof PosSettingsStaffRoute
@@ -707,6 +716,7 @@ export interface FileRouteTypes {
     | '/reports/sales'
     | '/settings/general'
     | '/settings/integrations'
+    | '/settings/members'
     | '/settings/profile'
     | '/settings/receipt'
     | '/settings/staff'
@@ -774,6 +784,7 @@ export interface FileRouteTypes {
     | '/reports/sales'
     | '/settings/general'
     | '/settings/integrations'
+    | '/settings/members'
     | '/settings/profile'
     | '/settings/receipt'
     | '/settings/staff'
@@ -847,6 +858,7 @@ export interface FileRouteTypes {
     | '/_pos/reports/sales'
     | '/_pos/settings/general'
     | '/_pos/settings/integrations'
+    | '/_pos/settings/members'
     | '/_pos/settings/profile'
     | '/_pos/settings/receipt'
     | '/_pos/settings/staff'
@@ -1199,6 +1211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosSettingsProfileRouteImport
       parentRoute: typeof PosSettingsRouteRoute
     }
+    '/_pos/settings/members': {
+      id: '/_pos/settings/members'
+      path: '/members'
+      fullPath: '/settings/members'
+      preLoaderRoute: typeof PosSettingsMembersRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
     '/_pos/settings/integrations': {
       id: '/_pos/settings/integrations'
       path: '/integrations'
@@ -1482,6 +1501,7 @@ const PosSaleRouteRouteWithChildren = PosSaleRouteRoute._addFileChildren(
 interface PosSettingsRouteRouteChildren {
   PosSettingsGeneralRoute: typeof PosSettingsGeneralRoute
   PosSettingsIntegrationsRoute: typeof PosSettingsIntegrationsRoute
+  PosSettingsMembersRoute: typeof PosSettingsMembersRoute
   PosSettingsProfileRoute: typeof PosSettingsProfileRoute
   PosSettingsReceiptRoute: typeof PosSettingsReceiptRoute
   PosSettingsStaffRoute: typeof PosSettingsStaffRoute
@@ -1491,6 +1511,7 @@ interface PosSettingsRouteRouteChildren {
 const PosSettingsRouteRouteChildren: PosSettingsRouteRouteChildren = {
   PosSettingsGeneralRoute: PosSettingsGeneralRoute,
   PosSettingsIntegrationsRoute: PosSettingsIntegrationsRoute,
+  PosSettingsMembersRoute: PosSettingsMembersRoute,
   PosSettingsProfileRoute: PosSettingsProfileRoute,
   PosSettingsReceiptRoute: PosSettingsReceiptRoute,
   PosSettingsStaffRoute: PosSettingsStaffRoute,

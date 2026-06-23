@@ -126,6 +126,7 @@ export const navGroups: SidebarNavGroup[] = [
 					{ title: msg`Umum`, path: "/settings/general" },
 					{ title: msg`Profil`, path: "/settings/profile" },
 					{ title: msg`Staf`, path: "/settings/staff" },
+					{ title: msg`Tim`, path: "/settings/members" },
 					{ title: msg`Pajak & Pembayaran`, path: "/settings/tax" },
 					{ title: msg`Struk & Printer`, path: "/settings/receipt" },
 					{ title: msg`Integrasi`, path: "/settings/integrations" },
