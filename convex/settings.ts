@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { internalQuery, mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
-import { requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireBusinessOwner } from './lib/auth';
 import { DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
 import { assertValidTemplate } from './lib/whatsapp';
 
@@ -318,7 +318,7 @@ export const connectIntegration = mutation({
   args: { key: v.string(), config: v.optional(v.any()) },
   returns: v.null(),
   handler: async (ctx, { key, config }) => {
-    const { cafeId } = await requireActiveOutlet(ctx);
+    const { cafeId } = await requireBusinessOwner(ctx);
     const id = await getOrCreateSettingsId(ctx, cafeId);
     const row = await ctx.db.get(id);
     const existing = row?.integrations ?? [];
@@ -338,7 +338,7 @@ export const connectQrisProvider = mutation({
   args: { secretApiKey: v.string(), callbackToken: v.string() },
   returns: v.null(),
   handler: async (ctx, { secretApiKey, callbackToken }) => {
-    const { cafeId } = await requireActiveOutlet(ctx);
+    const { cafeId } = await requireBusinessOwner(ctx);
     const key = secretApiKey.trim();
     const token = callbackToken.trim();
     if (!key.startsWith('xnd_')) throw new Error('Secret API Key Xendit tidak valid.');
@@ -367,7 +367,7 @@ export const connectWhatsapp = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { endpoint, headerName, token, bodyTemplate }) => {
-    const { cafeId } = await requireActiveOutlet(ctx);
+    const { cafeId } = await requireBusinessOwner(ctx);
     const url = endpoint.trim();
     if (!/^https?:\/\//i.test(url)) throw new Error('URL endpoint tidak valid.');
     const tok = token.trim();
@@ -399,7 +399,7 @@ export const connectAi = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { provider, apiKey, model }) => {
-    const { cafeId } = await requireActiveOutlet(ctx);
+    const { cafeId } = await requireBusinessOwner(ctx);
     const key = apiKey.trim();
     if (!key) throw new Error('API key wajib diisi.');
     const m = model.trim();
@@ -424,7 +424,7 @@ export const disconnectIntegration = mutation({
   args: { key: v.string() },
   returns: v.null(),
   handler: async (ctx, { key }) => {
-    const { cafeId } = await requireActiveOutlet(ctx);
+    const { cafeId } = await requireBusinessOwner(ctx);
     // Disconnecting QRIS while a dynamic order is awaiting payment would strand it:
     // a later genuine webhook can't be verified (no cafe config), so the order
     // gets swept to void even though the customer paid. Block until it resolves.
