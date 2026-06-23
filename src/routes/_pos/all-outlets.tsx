@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from 'convex/react';
 import { api } from 'convex/_generated/api';
-import { useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { RequirePermission } from '~/components/permission/require-permission';
-import { Button } from '~/components/ui/button';
+import { RangePicker } from '~/components/reports/range-picker';
+import { parseReportSearch, useAllOutletsRange } from '~/components/reports/use-report-range';
 import { DashboardCard } from '~/components/dashboard-card';
 import {
   Table,
@@ -17,10 +17,9 @@ import {
 import { formatCount, formatIDR } from '~/lib/formater';
 
 export const Route = createFileRoute('/_pos/all-outlets')({
+  validateSearch: parseReportSearch,
   component: AllOutletsPage,
 });
-
-type Preset = 'today' | 'last7' | 'last30';
 
 function AllOutletsPage() {
   return (
@@ -31,14 +30,8 @@ function AllOutletsPage() {
 }
 
 function AllOutlets() {
-  const [preset, setPreset] = useState<Preset>('last7');
-  const data = useQuery(api.reports.businessOverview, { range: { preset } });
-
-  const presets: { key: Preset; label: React.ReactNode }[] = [
-    { key: 'today', label: <Trans>Hari ini</Trans> },
-    { key: 'last7', label: <Trans>7 hari</Trans> },
-    { key: 'last30', label: <Trans>30 hari</Trans> },
-  ];
+  const { search, range, setPreset, setCustom } = useAllOutletsRange();
+  const data = useQuery(api.reports.businessOverview, { range });
 
   const tiles =
     data === undefined
@@ -52,22 +45,11 @@ function AllOutlets() {
 
   return (
     <div className="p-4">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-semibold text-lg">
           <Trans>Semua outlet</Trans>
         </h1>
-        <div className="flex gap-1">
-          {presets.map((p) => (
-            <Button
-              key={p.key}
-              size="sm"
-              variant={preset === p.key ? 'default' : 'outline'}
-              onClick={() => setPreset(p.key)}
-            >
-              {p.label}
-            </Button>
-          ))}
-        </div>
+        <RangePicker search={search} setPreset={setPreset} setCustom={setCustom} />
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-px bg-border lg:grid-cols-4">

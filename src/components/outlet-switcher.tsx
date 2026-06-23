@@ -74,7 +74,7 @@ export function OutletSwitcher() {
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
 								className="gap-2"
-								onSelect={() => navigate({ to: '/all-outlets' })}
+								onSelect={() => navigate({ to: '/all-outlets', search: { preset: 'today' as const } })}
 							>
 								<LayoutGrid className="size-4 text-muted-foreground" />
 								<Trans>Semua outlet</Trans>

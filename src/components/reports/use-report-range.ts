@@ -53,3 +53,17 @@ export function useReportRange(): RangeControls {
     setCustom: (from, to) => navigate({ search: { from, to } }),
   };
 }
+
+const allOutletsRouteApi = getRouteApi('/_pos/all-outlets');
+
+/** Reads/writes the range from URL search on the /_pos/all-outlets route. */
+export function useAllOutletsRange(): RangeControls {
+  const search = allOutletsRouteApi.useSearch();
+  const navigate = allOutletsRouteApi.useNavigate();
+  return {
+    search,
+    range: toRange(search),
+    setPreset: (preset) => navigate({ search: { preset } }),
+    setCustom: (from, to) => navigate({ search: { from, to } }),
+  };
+}
