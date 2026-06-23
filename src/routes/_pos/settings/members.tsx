@@ -312,7 +312,18 @@ function EditOutletsDialog({
 // Page
 // ---------------------------------------------------------------------------
 
+// Owner-only: gate at the boundary so the owner-only queries (listMembers /
+// listPendingInvites, which throw 'owner access required' for a manager) never
+// run for a non-owner — a manager sees the fallback, not a query error.
 function MembersPage() {
+	return (
+		<RequirePermission owner>
+			<MembersBody />
+		</RequirePermission>
+	);
+}
+
+function MembersBody() {
 	const { t } = useLingui();
 
 	const members = useQuery(api.invites.listMembers, {});
@@ -342,7 +353,6 @@ function MembersPage() {
 	}
 
 	return (
-		<RequirePermission owner>
 		<div className="space-y-6 max-w-2xl">
 			<div className="flex items-start justify-between gap-4">
 				<SettingsPageHeader
@@ -553,6 +563,5 @@ function MembersPage() {
 				}}
 			/>
 		</div>
-		</RequirePermission>
 	);
 }
