@@ -1030,6 +1030,10 @@ msgstr "Minimum spend"
 msgid "Belum"
 msgstr "Not set"
 
+#: src/components/no-access.tsx
+msgid "Belum ada akses"
+msgstr "No access yet"
+
 #: src/components/dashboard-activity.tsx
 msgid "Belum ada aktivitas."
 msgstr "No activity yet."
@@ -1370,6 +1374,10 @@ msgstr "Generate barcode"
 #: src/routes/_pos/menu/labels.tsx
 msgid "Buat barcode dulu untuk item terpilih yang belum punya barcode."
 msgstr "Generate a barcode first for selected items that don't have one yet."
+
+#: src/components/no-access.tsx
+msgid "Buat bisnis sendiri"
+msgstr "Create your own business"
 
 #: src/components/onboarding/steps/menu-step.tsx
 msgid "Buat grup modifier (mis. Ukuran) dan pasang ke item."
@@ -2761,6 +2769,10 @@ msgstr "Cost/cup"
 msgid "Hubungi kami"
 msgstr "Contact us"
 
+#: src/components/no-access.tsx
+msgid "Hubungi pemilik bisnis Anda untuk mendapat akses ke outlet, atau buat bisnis Anda sendiri."
+msgstr "Contact your business owner for outlet access, or create your own business."
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan"
 msgstr "Connect"
@@ -3317,6 +3329,7 @@ msgid "Kelola staf"
 msgstr "Manage staff"
 
 #: src/components/nav-user.tsx
+#: src/components/no-access.tsx
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Keluar"
