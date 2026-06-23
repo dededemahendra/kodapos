@@ -3,7 +3,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { Button } from "~/components/ui/button";
 import {
@@ -31,6 +31,17 @@ export function AddOutletDialog({
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	// Reset the form each time the dialog opens. It stays mounted in the
+	// sidebar across navigation, so resetting on open (rather than on close)
+	// avoids a blank-input flash during the close animation and uniformly
+	// covers every close path (cancel, escape, backdrop, success).
+	useEffect(() => {
+		if (open) {
+			setName("");
+			setError(null);
+		}
+	}, [open]);
+
 	async function handleSubmit(e: React.FormEvent): Promise<void> {
 		e.preventDefault();
 		const trimmed = name.trim();
@@ -43,7 +54,6 @@ export function AddOutletDialog({
 		try {
 			await createOutlet({ name: trimmed });
 			onOpenChange(false);
-			setName("");
 			await navigate({ to: "/settings/profile" });
 		} catch (err) {
 			setError(err instanceof Error ? err.message : t`Gagal membuat outlet.`);
