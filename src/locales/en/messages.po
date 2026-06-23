@@ -970,7 +970,6 @@ msgid "Batal"
 msgstr "Void"
 
 #: src/components/sale/receipt-preview.tsx
-#: src/routes/_pos/settings/members.tsx
 msgid "Batalkan"
 msgstr "Void"
 
@@ -994,6 +993,10 @@ msgstr "Cancel PO"
 #: src/components/inventory/purchase-order-detail.tsx
 msgid "Batalkan PO?"
 msgstr "Cancel PO?"
+
+#: src/routes/_pos/settings/members.tsx
+msgid "Batalkan undangan"
+msgstr "Cancel invitation"
 
 #: src/routes/_pos/settings/members.tsx
 msgid "Batalkan undangan?"

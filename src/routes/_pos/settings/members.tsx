@@ -485,7 +485,7 @@ function MembersPage() {
 												label={t`Aksi baris`}
 												items={[
 													{
-														label: t`Batalkan`,
+														label: t`Batalkan undangan`,
 														onSelect: () => setCancellingInvite(inv),
 														destructive: true,
 													},
@@ -509,6 +509,7 @@ function MembersPage() {
 
 			{/* ── Edit outlets dialog ───────────────────────────────────────── */}
 			<EditOutletsDialog
+				key={editingMember?.memberId ?? 'none'}
 				member={editingMember}
 				outlets={outletList}
 				onClose={() => setEditingMember(null)}
@@ -542,7 +543,7 @@ function MembersPage() {
 						? t`Undangan untuk ${cancellingInvite.email} akan dibatalkan.`
 						: undefined
 				}
-				confirmLabel={<Trans>Batalkan</Trans>}
+				confirmLabel={<Trans>Batalkan undangan</Trans>}
 				destructive
 				onConfirm={async () => {
 					if (!cancellingInvite) return;
