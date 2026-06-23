@@ -227,6 +227,17 @@ describe('member management', () => {
     await expect(asOwner.mutation(api.invites.revokeMember, { memberId: ownerMember!._id })).rejects.toThrow();
   });
 
+  it('rejects a manager from the owner-only member queries/mutations', async () => {
+    const t = convexTest(schema, modules);
+    const { mgrUserId, memberId } = await seedOwnerWithManager(t);
+    const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
+    await expect(asMgr.query(api.invites.listMembers, {})).rejects.toThrow('owner access required');
+    await expect(asMgr.query(api.invites.listPendingInvites, {})).rejects.toThrow('owner access required');
+    await expect(
+      asMgr.mutation(api.invites.revokeMember, { memberId })
+    ).rejects.toThrow('owner access required');
+  });
+
   it('rejects mutating members, outlets, and invites of another business', async () => {
     const t = convexTest(schema, modules);
     // Business A (the attacker owner) with a manager.

@@ -116,7 +116,14 @@ export const mine = query({
 export const myCafe = query({
   args: {},
   returns: v.union(
-    v.object({ ...cafeFields, logoUrl: v.optional(v.string()) }),
+    v.object({
+      ...cafeFields,
+      logoUrl: v.optional(v.string()),
+      // The signed-in user's business-member role for this outlet. Drives the
+      // client owner gate (a manager has an account + a non-null cafe, so
+      // "has a cafe" no longer implies owner).
+      role: v.union(v.literal('owner'), v.literal('manager')),
+    }),
     v.null()
   ),
   handler: async (ctx) => {
@@ -125,9 +132,9 @@ export const myCafe = query({
     // Resolve the active outlet (not the oldest cafe) so the client re-scopes
     // when the user switches outlets. Returns null on no-access rather than
     // throwing, preserving the query's null-on-signed-out contract.
-    let cafeId;
+    let resolved;
     try {
-      cafeId = (await requireActiveOutlet(ctx)).cafeId;
+      resolved = await requireActiveOutlet(ctx);
     } catch (e) {
       // A signed-in user with no reachable outlet resolves to null (the
       // query's contract). Re-throw anything unexpected so real failures
@@ -137,12 +144,12 @@ export const myCafe = query({
       }
       throw e;
     }
-    const cafe = await ctx.db.get(cafeId);
+    const cafe = await ctx.db.get(resolved.cafeId);
     if (!cafe) return null;
     const logoUrl = cafe.logoStorageId
       ? await ctx.storage.getUrl(cafe.logoStorageId)
       : null;
-    return { ...cafe, ...(logoUrl ? { logoUrl } : {}) };
+    return { ...cafe, role: resolved.role, ...(logoUrl ? { logoUrl } : {}) };
   },
 });
 

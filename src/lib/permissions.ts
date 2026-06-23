@@ -11,14 +11,14 @@ export function usePermissions(): {
 } {
   const { cashierId } = useActiveCashier();
   const data = useQuery(api.staff.permissionsFor, cashierId ? { cashierId } : 'skip');
-  // The signed-in account is always the cafe owner (only owners have accounts;
-  // the server authorizes owner actions by the JWT, not the active cashier). So
-  // the owner gate is account-based: the owner can always reach owner-only pages
-  // (settings/staff), regardless of which cashier is PIN-active on the register.
-  // The active cashier's role/permissions still drive the operational register
-  // UI (canVoid/canEditMenu/...) so an operating cashier sees a restricted view.
+  // The owner gate is account-based: the business owner can always reach
+  // owner-only pages (settings/members), regardless of which cashier is
+  // PIN-active on the register. Since Phase 4, managers also have accounts and a
+  // non-null cafe, so ownership is the business-member ROLE (`myCafe.role`), not
+  // merely "has a cafe". The active cashier's role/permissions still drive the
+  // operational register UI (canVoid/canEditMenu/...) for an operating cashier.
   const cafe = useQuery(api.cafes.myCafe, {});
-  const isAccountOwner = cafe != null;
+  const isAccountOwner = cafe?.role === 'owner';
   return {
     can: (p) => (data ? data.role === 'owner' || data.permissions[p] : isAccountOwner),
     isOwner: isAccountOwner || data?.role === 'owner',

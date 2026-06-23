@@ -91,6 +91,32 @@ describe('myCafe resolves the active outlet', () => {
     const t = convexTest(schema, modules);
     expect(await t.query(api.cafes.myCafe, {})).toBeNull();
   });
+
+  it('reports the business-member role: owner for an owner', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await seedOwner(t);
+    const cafe = await asOwner.query(api.cafes.myCafe, {});
+    expect(cafe?.role).toBe('owner');
+  });
+
+  it('reports the business-member role: manager for a manager', async () => {
+    const t = convexTest(schema, modules);
+    const { userId: ownerId, businessId } = await seedOwner(t);
+    const granted = await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Cabang Manajer', ownerUserId: ownerId, businessId, createdAt: 2 })
+    );
+    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'role-mgr@x.com' }));
+    const mgrMemberId = await t.run((ctx) =>
+      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+    );
+    await t.run((ctx) =>
+      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: granted, createdAt: 5 })
+    );
+    const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
+    const cafe = await asMgr.query(api.cafes.myCafe, {});
+    expect(cafe?._id).toBe(granted);
+    expect(cafe?.role).toBe('manager');
+  });
 });
 
 describe('createOutlet', () => {
