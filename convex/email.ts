@@ -14,6 +14,7 @@ import {
   type ShiftSummaryData,
 } from './lib/shiftSummary';
 import { sendEmail } from './lib/resend';
+import { buildInviteEmail } from './lib/inviteEmail';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -96,6 +97,33 @@ export const sendShiftSummaryScheduled = internalAction({
       await postShiftSummary(to, data as ShiftSummaryData);
     } catch (err) {
       console.error(`sendShiftSummaryScheduled failed for shift ${shiftId}:`, err);
+    }
+    return null;
+  },
+});
+
+/**
+ * Scheduled invite-email send fired by `invites.inviteManager`. System-side:
+ * no-ops when RESEND_API_KEY is unset and swallows send failures so a failed
+ * email never breaks the (already-committed) invite. Links to SITE_URL/signin
+ * when a real frontend origin is configured.
+ */
+export const sendInviteEmailScheduled = internalAction({
+  args: { to: v.string(), businessName: v.string() },
+  returns: v.null(),
+  handler: async (_ctx, { to, businessName }) => {
+    const key = process.env.RESEND_API_KEY;
+    if (!key) {
+      console.warn(`sendInviteEmailScheduled: RESEND_API_KEY unset, skipping invite to ${to}`);
+      return null;
+    }
+    const origin = process.env.SITE_URL ?? null;
+    const signInUrl = origin ? `${origin}/signin` : null;
+    try {
+      const { subject, html, text } = buildInviteEmail({ businessName, signInUrl });
+      await sendEmail({ to, subject, html, text });
+    } catch (err) {
+      console.error(`sendInviteEmailScheduled failed for ${to}:`, err);
     }
     return null;
   },
