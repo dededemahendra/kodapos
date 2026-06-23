@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { mutation } from './_generated/server';
@@ -54,5 +55,54 @@ export const inviteManager = mutation({
       businessName: business?.name ?? 'kodapos',
     });
     return inviteId;
+  },
+});
+
+export const acceptPendingInvites = mutation({
+  args: {},
+  returns: v.object({ accepted: v.number() }),
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return { accepted: 0 };
+
+    const user = await ctx.db.get(userId);
+    const email = (user as { email?: string } | null)?.email?.trim().toLowerCase();
+    if (!email) return { accepted: 0 };
+
+    // One business per user: if already a member, leave invites pending.
+    const existingMember = await ctx.db
+      .query('businessMembers')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .first();
+    if (existingMember) return { accepted: 0 };
+
+    const invites = await ctx.db
+      .query('businessInvites')
+      .withIndex('by_email', (q) => q.eq('email', email))
+      .collect();
+    if (invites.length === 0) return { accepted: 0 };
+
+    // Accept the first invite (a user joins one business); delete the rest so
+    // stale duplicates do not linger. (UI prevents multi-business invites, but
+    // be defensive.)
+    const [invite, ...extra] = invites;
+    if (!invite) return { accepted: 0 };
+    const now = Date.now();
+    const memberId = await ctx.db.insert('businessMembers', {
+      businessId: invite.businessId,
+      userId,
+      role: 'manager',
+      createdAt: now,
+    });
+    for (const cafeId of invite.cafeIds) {
+      await ctx.db.insert('memberOutletAccess', {
+        businessMemberId: memberId,
+        cafeId,
+        createdAt: now,
+      });
+    }
+    await ctx.db.delete(invite._id);
+    for (const e of extra) await ctx.db.delete(e._id);
+    return { accepted: 1 };
   },
 });
