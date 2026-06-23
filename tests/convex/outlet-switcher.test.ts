@@ -92,6 +92,58 @@ describe('myCafe resolves the active outlet', () => {
   });
 });
 
+describe('createOutlet', () => {
+  it('creates an outlet under the owner business, with staff, and switches to it', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, userId, businessId } = await seedOwner(t);
+
+    const newId = await asOwner.mutation(api.outlets.createOutlet, { name: '  Cabang 2  ' });
+
+    const cafe = await t.run((ctx) => ctx.db.get(newId as Id<'cafes'>));
+    expect(cafe?.name).toBe('Cabang 2'); // trimmed
+    expect(cafe?.businessId).toBe(businessId);
+    expect(cafe?.taxEnabled).toBe(true);
+
+    const staff = await t.run((ctx) =>
+      ctx.db.query('cafeStaff').withIndex('by_cafe_active', (q) => q.eq('cafeId', newId as Id<'cafes'>)).collect()
+    );
+    expect(staff.some((s) => s.role === 'owner')).toBe(true);
+
+    const active = await t.run((ctx) =>
+      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId)).first()
+    );
+    expect(active?.cafeId).toBe(newId);
+
+    const outlets = await asOwner.query(api.outlets.myOutlets, {});
+    expect(outlets).toHaveLength(2);
+    expect(outlets.find((o) => o.isActive)?.cafeId).toBe(newId);
+  });
+
+  it('rejects an empty name', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await seedOwner(t);
+    await expect(asOwner.mutation(api.outlets.createOutlet, { name: '   ' })).rejects.toThrow('wajib diisi');
+  });
+
+  it('rejects a manager (owner-only)', async () => {
+    const t = convexTest(schema, modules);
+    const { userId: ownerId, businessId } = await seedOwner(t);
+    const granted = await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Cabang', ownerUserId: ownerId, businessId, createdAt: 2 })
+    );
+    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'm3@x.com' }));
+    const mgrMemberId = await t.run((ctx) =>
+      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+    );
+    await t.run((ctx) =>
+      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: granted, createdAt: 5 })
+    );
+    const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
+
+    await expect(asMgr.mutation(api.outlets.createOutlet, { name: 'Nakal' })).rejects.toThrow('owner access required');
+  });
+});
+
 describe('setActiveOutlet', () => {
   it('switches the active outlet to an accessible cafe', async () => {
     const t = convexTest(schema, modules);

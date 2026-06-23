@@ -1,7 +1,7 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { resolveOutletAccess } from './lib/auth';
+import { requireBusinessOwner, resolveOutletAccess } from './lib/auth';
 
 export const myOutlets = query({
   args: {},
@@ -31,6 +31,55 @@ export const myOutlets = query({
     return cafes
       .filter((c): c is NonNullable<typeof c> => c !== null)
       .map((c) => ({ cafeId: c._id, name: c.name, isActive: c._id === activeCafeId }));
+  },
+});
+
+export const createOutlet = mutation({
+  args: { name: v.string() },
+  returns: v.id('cafes'),
+  handler: async (ctx, { name }) => {
+    const { userId, businessId } = await requireBusinessOwner(ctx);
+    // businessId is only null for an owner whose data predates the backfill;
+    // by the time an owner adds a second outlet the backfill has run.
+    if (!businessId) {
+      throw new Error('no outlet access');
+    }
+    const trimmed = name.trim();
+    if (trimmed.length < 1) {
+      throw new Error('Nama outlet wajib diisi.');
+    }
+    if (trimmed.length > 80) {
+      throw new Error('Nama outlet maksimal 80 karakter.');
+    }
+    const now = Date.now();
+    const cafeId = await ctx.db.insert('cafes', {
+      name: trimmed,
+      ownerUserId: userId,
+      businessId,
+      createdAt: now,
+      timezone: 'Asia/Jakarta',
+      taxRatePct: 11,
+      taxEnabled: true,
+    });
+    const user = await ctx.db.get(userId);
+    const ownerName = (user as { name?: string } | null)?.name?.trim() || 'Pemilik';
+    await ctx.db.insert('cafeStaff', {
+      cafeId,
+      name: ownerName,
+      role: 'owner',
+      archived: false,
+      createdAt: now,
+    });
+    const existing = await ctx.db
+      .query('activeOutlet')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .first();
+    if (existing) {
+      await ctx.db.patch(existing._id, { cafeId, updatedAt: now });
+    } else {
+      await ctx.db.insert('activeOutlet', { userId, cafeId, updatedAt: now });
+    }
+    return cafeId;
   },
 });
 
