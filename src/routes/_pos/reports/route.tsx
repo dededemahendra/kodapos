@@ -3,7 +3,7 @@ import { Link, Outlet, createFileRoute } from '@tanstack/react-router';
 import { RequirePermission } from '~/components/permission/require-permission';
 import { PageHeader } from '~/components/ui/page-header';
 import { RangePicker } from '~/components/reports/range-picker';
-import { type ReportSearch, parseReportSearch } from '~/components/reports/use-report-range';
+import { type ReportSearch, parseReportSearch, useReportRange } from '~/components/reports/use-report-range';
 
 export const Route = createFileRoute('/_pos/reports')({
   validateSearch: parseReportSearch,
@@ -25,11 +25,14 @@ const TABS = [
 ] as const;
 
 function ReportsLayout() {
+  const { search, setPreset, setCustom } = useReportRange();
   return (
     <RequirePermission perm="canViewReports">
     <main className="p-6">
       <PageHeader title={<Trans>Laporan</Trans>} />
-      <div className="mt-2"><RangePicker /></div>
+      <div className="mt-2">
+        <RangePicker search={search} setPreset={setPreset} setCustom={setCustom} />
+      </div>
       <nav className="mt-4 flex gap-4 border-b border-border text-sm">
         {TABS.map((t) => (
           <Link

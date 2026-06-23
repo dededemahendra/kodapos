@@ -5,7 +5,7 @@ import type { DateRange } from 'react-day-picker';
 import { Button } from '~/components/ui/button';
 import { Calendar } from '~/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
-import { type ReportPreset, useReportRange } from './use-report-range';
+import type { ReportPreset, ReportSearch } from './use-report-range';
 
 const PRESET_LABELS: Array<{ value: ReportPreset; label: React.ReactNode }> = [
   { value: 'today', label: <Trans>Hari ini</Trans> },
@@ -29,8 +29,15 @@ function keyToDate(key: string): Date {
   return new Date(y, m - 1, d);
 }
 
-export function RangePicker() {
-  const { search, setPreset, setCustom } = useReportRange();
+export function RangePicker({
+  search,
+  setPreset,
+  setCustom,
+}: {
+  search: ReportSearch;
+  setPreset: (preset: ReportPreset) => void;
+  setCustom: (from: string, to: string) => void;
+}) {
   const activePreset = 'preset' in search ? search.preset : null;
   const [open, setOpen] = useState(false);
 
