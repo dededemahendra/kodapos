@@ -372,6 +372,7 @@ msgid "24 jam"
 msgstr "24 jam"
 
 #: src/components/reports/range-picker.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/time-clock.tsx
 msgid "30 hari"
 msgstr "30 hari"
@@ -389,6 +390,7 @@ msgid "58 mm"
 msgstr "58 mm"
 
 #: src/components/reports/range-picker.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/forecast.tsx
 #: src/routes/_pos/time-clock.tsx
 msgid "7 hari"
@@ -2736,6 +2738,7 @@ msgid "Harga varian menggantikan harga dasar item saat dipilih di kasir."
 msgstr "Harga varian menggantikan harga dasar item saat dipilih di kasir."
 
 #: src/components/reports/range-picker.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/time-clock.tsx
 msgid "Hari ini"
 msgstr "Hari ini"
@@ -2866,6 +2869,7 @@ msgid "Isi saldo"
 msgstr "Isi saldo"
 
 #: src/components/menu/category-table.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/recipes.tsx
 #: src/routes/_pos/reports/margin.tsx
@@ -2920,6 +2924,7 @@ msgid "Item target"
 msgstr "Item target"
 
 #: src/components/stats.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/reports/index.tsx
 msgid "Item terjual"
 msgstr "Item terjual"
@@ -4547,6 +4552,7 @@ msgid "Order"
 msgstr "Order"
 
 #: src/components/outlet-switcher.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/settings/members.tsx
 msgid "Outlet"
 msgstr "Outlet"
@@ -4786,6 +4792,7 @@ msgid "Pencetak termal (USB)"
 msgstr "Pencetak termal (USB)"
 
 #: src/components/net-revenue-chart.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/index.tsx
 #: src/routes/_pos/reports/margin.tsx
@@ -5526,7 +5533,12 @@ msgstr "Qty ({unit})"
 msgid "Rabu"
 msgstr "Rabu"
 
+#: src/routes/_pos/all-outlets.tsx
+msgid "Rata-rata"
+msgstr "Rata-rata"
+
 #: src/components/stats.tsx
+#: src/routes/_pos/all-outlets.tsx
 msgid "Rata-rata transaksi"
 msgstr "Rata-rata transaksi"
 
@@ -5977,6 +5989,8 @@ msgstr "Semua kategori"
 msgid "Semua metode"
 msgstr "Semua metode"
 
+#: src/components/outlet-switcher.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/settings/members.tsx
 msgid "Semua outlet"
 msgstr "Semua outlet"
@@ -7079,6 +7093,7 @@ msgid "Total tagihan"
 msgstr "Total tagihan"
 
 #: src/components/stats.tsx
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/index.tsx
 #: src/routes/_pos/reports/payments.tsx

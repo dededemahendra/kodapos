@@ -3,9 +3,10 @@
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { Check, ChevronsUpDown, Plus, Store } from "lucide-react";
+import { Check, ChevronsUpDown, LayoutGrid, Plus, Store } from "lucide-react";
 import { useState } from "react";
 import { Trans } from "@lingui/react/macro";
+import { useNavigate } from "@tanstack/react-router";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -26,6 +27,7 @@ export function OutletSwitcher() {
 	const initial = activeName.charAt(0).toUpperCase();
 	const { isOwner } = usePermissions();
 	const [addOpen, setAddOpen] = useState(false);
+	const navigate = useNavigate();
 
 	async function handleSelect(cafeId: Id<"cafes">): Promise<void> {
 		if (!active || cafeId === active.cafeId) return;
@@ -67,6 +69,18 @@ export function OutletSwitcher() {
 							{o.isActive ? <Check className="ml-auto size-4" /> : null}
 						</DropdownMenuItem>
 					))}
+					{outlets && outlets.length > 1 ? (
+						<>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem
+								className="gap-2"
+								onSelect={() => navigate({ to: '/all-outlets' })}
+							>
+								<LayoutGrid className="size-4 text-muted-foreground" />
+								<Trans>Semua outlet</Trans>
+							</DropdownMenuItem>
+						</>
+					) : null}
 					{isOwner ? (
 						<>
 							<DropdownMenuSeparator />
