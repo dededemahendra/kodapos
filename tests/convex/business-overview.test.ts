@@ -133,7 +133,7 @@ describe('businessOverview', () => {
 
   it('throws when unauthenticated', async () => {
     const t = convexTest(schema, modules);
-    await expect(t.query(api.reports.businessOverview, { range: RANGE })).rejects.toThrow();
+    await expect(t.query(api.reports.businessOverview, { range: RANGE })).rejects.toThrow('not authenticated');
   });
 });
 

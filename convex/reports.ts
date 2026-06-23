@@ -486,7 +486,7 @@ export const businessOverview = query({
         itemsSold: ov.itemsSold,
       });
     }
-    outlets.sort((a, b) => a.name.localeCompare(b.name));
+    outlets.sort((a, b) => a.name.localeCompare(b.name, 'id-ID'));
     const totals = outlets.reduce(
       (t, o) => ({
         revenueIDR: t.revenueIDR + o.revenueIDR,
