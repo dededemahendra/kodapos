@@ -152,6 +152,43 @@ describe('createOutlet', () => {
   });
 });
 
+describe('manager-access hardening', () => {
+  it('myOutlets omits a manager grant whose cafe was deleted', async () => {
+    const t = convexTest(schema, modules);
+    const { userId: ownerId, businessId } = await seedOwner(t);
+    const live = await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Hidup', ownerUserId: ownerId, businessId, createdAt: 2 })
+    );
+    const ghost = await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Hantu', ownerUserId: ownerId, businessId, createdAt: 3 })
+    );
+    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' }));
+    const mgrMemberId = await t.run((ctx) =>
+      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+    );
+    await t.run((ctx) =>
+      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: live, createdAt: 5 })
+    );
+    await t.run((ctx) =>
+      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: ghost, createdAt: 5 })
+    );
+    await t.run((ctx) => ctx.db.delete(ghost)); // dangling grant
+
+    const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
+    const outlets = await asMgr.query(api.outlets.myOutlets, {});
+    expect(outlets.map((o) => o.cafeId)).toEqual([live]);
+  });
+
+  it('myOutlets returns outlets sorted by name', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, userId, businessId } = await seedOwner(t, 'Zeta');
+    await t.run((ctx) => ctx.db.insert('cafes', { name: 'Alpha', ownerUserId: userId, businessId, createdAt: 2 }));
+    await t.run((ctx) => ctx.db.insert('cafes', { name: 'Mid', ownerUserId: userId, businessId, createdAt: 3 }));
+    const outlets = await asOwner.query(api.outlets.myOutlets, {});
+    expect(outlets.map((o) => o.name)).toEqual(['Alpha', 'Mid', 'Zeta']);
+  });
+});
+
 describe('setActiveOutlet', () => {
   it('switches the active outlet to an accessible cafe', async () => {
     const t = convexTest(schema, modules);

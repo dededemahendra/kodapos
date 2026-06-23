@@ -65,7 +65,10 @@ export async function resolveOutletAccess(
       .query('memberOutletAccess')
       .withIndex('by_member', (q) => q.eq('businessMemberId', member._id))
       .collect();
-    accessibleCafeIds = access.map((a) => a.cafeId);
+    // Skip grants whose cafe was deleted, so a stale memberOutletAccess row
+    // never yields a dangling id downstream (myOutlets/active pick).
+    const maybeCafes = await Promise.all(access.map((a) => ctx.db.get(a.cafeId)));
+    accessibleCafeIds = maybeCafes.filter((c) => c !== null).map((c) => c!._id);
   }
 
   return { member, accessibleCafeIds, businessId: member.businessId, role: member.role };

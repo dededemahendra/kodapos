@@ -30,7 +30,8 @@ export const myOutlets = query({
     const cafes = await Promise.all(access.accessibleCafeIds.map((id) => ctx.db.get(id)));
     return cafes
       .filter((c): c is NonNullable<typeof c> => c !== null)
-      .map((c) => ({ cafeId: c._id, name: c.name, isActive: c._id === activeCafeId }));
+      .map((c) => ({ cafeId: c._id, name: c.name, isActive: c._id === activeCafeId }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   },
 });
 
