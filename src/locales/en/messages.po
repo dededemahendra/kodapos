@@ -4445,6 +4445,10 @@ msgstr "Optional (max {0})"
 msgid "Order"
 msgstr "Order"
 
+#: src/components/outlet-switcher.tsx
+msgid "Outlet"
+msgstr "Outlet"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "OVO"
 msgstr "OVO"

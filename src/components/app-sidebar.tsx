@@ -2,7 +2,7 @@
 
 import { Link } from "@tanstack/react-router";
 import { useLingui } from "@lingui/react";
-import { BrandMark } from "~/components/brand-mark";
+import { OutletSwitcher } from "~/components/outlet-switcher";
 import { cn } from "~/lib/utils";
 import {
 	Sidebar,
@@ -42,15 +42,11 @@ export function AppSidebar() {
 			variant="sidebar"
 		>
 			<SidebarHeader className="h-14 justify-center border-b px-2">
-				<SidebarMenuButton asChild>
-					<Link onClick={closeMobile} to="/dashboard">
-						<BrandMark className="h-5! w-auto! text-primary" />
-						<span className="font-medium text-foreground!">kodapos</span>
-						<span className="text-[10px] font-normal text-muted-foreground">
-							v{__APP_VERSION__}
-						</span>
-					</Link>
-				</SidebarMenuButton>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<OutletSwitcher />
+					</SidebarMenuItem>
+				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
 				{visibleGroups.map((group, index) => (
