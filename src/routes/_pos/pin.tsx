@@ -64,6 +64,7 @@ function PinPickerPage() {
         {staff.map((s) => (
           <StaffPickerCard
             key={s._id}
+            seed={s._id}
             name={s.name}
             role={s.role}
             hasPin={!!s.pinHash}

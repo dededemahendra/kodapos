@@ -22,6 +22,7 @@ import {
 	DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useLocale } from "~/components/locale-provider";
+import { defaultAvatarUrl } from "~/lib/avatar";
 import { useActiveCashier } from "~/lib/active-cashier";
 import { LOCALES, type Locale } from "~/lib/locale";
 
@@ -34,6 +35,9 @@ export function NavUser() {
 	const cafe = useQuery(api.cafes.myCafe, {});
 	const name = cafe?.name ?? "kodapos";
 	const initial = name.charAt(0).toUpperCase();
+	// Default to an illustrated DiceBear avatar (seeded by the stable cafe id)
+	// when no logo is uploaded, instead of a plain initial.
+	const avatarUrl = cafe?.logoUrl ?? (cafe ? defaultAvatarUrl(cafe._id) : undefined);
 
 	async function handleSignOut(): Promise<void> {
 		if (cashierId) { try { await record({ cashierId, type: 'logout' }); } catch { /* best effort */ } }
@@ -46,14 +50,14 @@ export function NavUser() {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Avatar className="size-8 cursor-pointer">
-					{cafe?.logoUrl ? <AvatarImage src={cafe.logoUrl} alt={name} /> : null}
+					{avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
 					<AvatarFallback>{initial}</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-60">
 				<DropdownMenuLabel className="flex items-center gap-3">
 					<Avatar className="size-10">
-						{cafe?.logoUrl ? <AvatarImage src={cafe.logoUrl} alt={name} /> : null}
+						{avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
 						<AvatarFallback>{initial}</AvatarFallback>
 					</Avatar>
 					<div className="min-w-0">
