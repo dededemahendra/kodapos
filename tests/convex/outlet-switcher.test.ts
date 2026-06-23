@@ -125,6 +125,14 @@ describe('createOutlet', () => {
     await expect(asOwner.mutation(api.outlets.createOutlet, { name: '   ' })).rejects.toThrow('wajib diisi');
   });
 
+  it('rejects a name longer than 80 characters', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await seedOwner(t);
+    await expect(
+      asOwner.mutation(api.outlets.createOutlet, { name: 'a'.repeat(81) })
+    ).rejects.toThrow('maksimal 80');
+  });
+
   it('rejects a manager (owner-only)', async () => {
     const t = convexTest(schema, modules);
     const { userId: ownerId, businessId } = await seedOwner(t);
