@@ -29,15 +29,41 @@ export function parseReportSearch(search: Record<string, unknown>): ReportSearch
 
 const routeApi = getRouteApi('/_pos/reports');
 
+export type RangeControls = {
+  search: ReportSearch;
+  range: RangeArgs;
+  setPreset: (preset: ReportPreset) => void;
+  setCustom: (from: string, to: string) => void;
+};
+
+/** Derive the Convex range args from a validated report search. Shared by every
+ * route that exposes a report range (reports, all-outlets). */
+export function toRange(search: ReportSearch): RangeArgs {
+  return 'from' in search ? { from: search.from, to: search.to } : { preset: search.preset };
+}
+
 /** Reads/writes the report range from URL search on the /_pos/reports route. */
-export function useReportRange() {
+export function useReportRange(): RangeControls {
   const search = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
-  const range: RangeArgs = 'from' in search ? { from: search.from, to: search.to } : { preset: search.preset };
   return {
     search,
-    range,
-    setPreset: (preset: ReportPreset) => navigate({ search: { preset } }),
-    setCustom: (from: string, to: string) => navigate({ search: { from, to } }),
+    range: toRange(search),
+    setPreset: (preset) => navigate({ search: { preset } }),
+    setCustom: (from, to) => navigate({ search: { from, to } }),
+  };
+}
+
+const allOutletsRouteApi = getRouteApi('/_pos/all-outlets');
+
+/** Reads/writes the range from URL search on the /_pos/all-outlets route. */
+export function useAllOutletsRange(): RangeControls {
+  const search = allOutletsRouteApi.useSearch();
+  const navigate = allOutletsRouteApi.useNavigate();
+  return {
+    search,
+    range: toRange(search),
+    setPreset: (preset) => navigate({ search: { preset } }),
+    setCustom: (from, to) => navigate({ search: { from, to } }),
   };
 }

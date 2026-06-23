@@ -372,7 +372,6 @@ msgid "24 jam"
 msgstr "24 jam"
 
 #: src/components/reports/range-picker.tsx
-#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/time-clock.tsx
 msgid "30 hari"
 msgstr "30 hari"
@@ -390,7 +389,6 @@ msgid "58 mm"
 msgstr "58 mm"
 
 #: src/components/reports/range-picker.tsx
-#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/forecast.tsx
 #: src/routes/_pos/time-clock.tsx
 msgid "7 hari"
@@ -1149,6 +1147,7 @@ msgstr "Belum ada pendapatan lain."
 msgid "Belum ada pengeluaran pada rentang ini."
 msgstr "Belum ada pengeluaran pada rentang ini."
 
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/sales.tsx
 msgid "Belum ada penjualan pada rentang ini."
@@ -1747,6 +1746,7 @@ msgstr "Coba ubah filter atau rentang tanggal di atas."
 msgid "Coba ubah kata pencarian atau tambah kasir baru."
 msgstr "Coba ubah kata pencarian atau tambah kasir baru."
 
+#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/reports/cashiers.tsx
 #: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/payments.tsx
@@ -2738,7 +2738,6 @@ msgid "Harga varian menggantikan harga dasar item saat dipilih di kasir."
 msgstr "Harga varian menggantikan harga dasar item saat dipilih di kasir."
 
 #: src/components/reports/range-picker.tsx
-#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/time-clock.tsx
 msgid "Hari ini"
 msgstr "Hari ini"
@@ -2868,8 +2867,8 @@ msgstr "Inventaris"
 msgid "Isi saldo"
 msgstr "Isi saldo"
 
+#: src/components/all-outlets/outlets-table.tsx
 #: src/components/menu/category-table.tsx
-#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/_pos/recipes.tsx
 #: src/routes/_pos/reports/margin.tsx
@@ -4551,8 +4550,8 @@ msgstr "Opsional (maks {0})"
 msgid "Order"
 msgstr "Order"
 
+#: src/components/all-outlets/outlets-table.tsx
 #: src/components/outlet-switcher.tsx
-#: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/settings/members.tsx
 msgid "Outlet"
 msgstr "Outlet"
@@ -4791,6 +4790,8 @@ msgstr "Pemilik resto"
 msgid "Pencetak termal (USB)"
 msgstr "Pencetak termal (USB)"
 
+#: src/components/all-outlets/outlets-revenue-chart.tsx
+#: src/components/all-outlets/outlets-table.tsx
 #: src/components/net-revenue-chart.tsx
 #: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/reports/cashiers.tsx
@@ -4833,6 +4834,10 @@ msgstr "Pendapatan lain"
 #: src/routes/_pos/reports/route.tsx
 msgid "Pendapatan Lain"
 msgstr "Pendapatan Lain"
+
+#: src/components/all-outlets/outlets-revenue-chart.tsx
+msgid "Pendapatan per outlet"
+msgstr "Pendapatan per outlet"
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Pengali poin"
@@ -5533,7 +5538,7 @@ msgstr "Qty ({unit})"
 msgid "Rabu"
 msgstr "Rabu"
 
-#: src/routes/_pos/all-outlets.tsx
+#: src/components/all-outlets/outlets-table.tsx
 msgid "Rata-rata"
 msgstr "Rata-rata"
 
@@ -6761,6 +6766,10 @@ msgstr "Terang"
 msgid "Terapkan"
 msgstr "Terapkan"
 
+#: src/components/all-outlets/outlets-table.tsx
+msgid "Teratas"
+msgstr "Teratas"
+
 #: src/components/giftcard/gift-card-form-dialog.tsx
 msgid "Terbitkan"
 msgstr "Terbitkan"
@@ -7092,6 +7101,7 @@ msgstr "Total <0>{0}</0>"
 msgid "Total tagihan"
 msgstr "Total tagihan"
 
+#: src/components/all-outlets/outlets-table.tsx
 #: src/components/stats.tsx
 #: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/reports/cashiers.tsx
