@@ -15,6 +15,7 @@ import {
   TableRow,
 } from '~/components/ui/table';
 import { formatCount, formatIDR } from '~/lib/formater';
+import { OutletsRevenueChart } from '~/components/all-outlets/outlets-revenue-chart';
 
 export const Route = createFileRoute('/_pos/all-outlets')({
   validateSearch: parseReportSearch,
@@ -62,6 +63,8 @@ function AllOutlets() {
           </DashboardCard>
         ))}
       </div>
+
+      {data ? <OutletsRevenueChart outlets={data.outlets} /> : null}
 
       <Table>
         <TableHeader>
