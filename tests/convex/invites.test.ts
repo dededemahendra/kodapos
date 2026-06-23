@@ -226,4 +226,42 @@ describe('member management', () => {
     );
     await expect(asOwner.mutation(api.invites.revokeMember, { memberId: ownerMember!._id })).rejects.toThrow();
   });
+
+  it('rejects mutating members, outlets, and invites of another business', async () => {
+    const t = convexTest(schema, modules);
+    // Business A (the attacker owner) with a manager.
+    const { asOwner: ownerA, memberId: mgrA } = await seedOwnerWithManager(t);
+
+    // Business B: independent owner + manager + pending invite + outlet.
+    const ownerBUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'B', email: 'ownerb@x.com' }));
+    const asOwnerB = t.withIdentity({ subject: `${ownerBUserId}|test_session` });
+    const cafeB = await asOwnerB.mutation(api.cafes.createForOwner, { name: 'Bisnis B' });
+    await asOwnerB.mutation(api.invites.inviteManager, { email: 'mgrb@x.com', cafeIds: [cafeB] });
+    const mgrBUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'MgrB', email: 'mgrb@x.com' }));
+    await t.withIdentity({ subject: `${mgrBUserId}|test_session` }).mutation(api.invites.acceptPendingInvites, {});
+    const mgrBMember = await t.run((ctx) =>
+      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', mgrBUserId)).first()
+    );
+    await asOwnerB.mutation(api.invites.inviteManager, { email: 'pendingb@x.com', cafeIds: [cafeB] });
+    const inviteB = (await asOwnerB.query(api.invites.listPendingInvites, {}))[0]!.inviteId;
+
+    // Owner A cannot touch business B's manager, invite, or use B's outlet.
+    await expect(
+      ownerA.mutation(api.invites.revokeMember, { memberId: mgrBMember!._id })
+    ).rejects.toThrow('Anggota tidak ditemukan.');
+    await expect(
+      ownerA.mutation(api.invites.setManagerOutlets, { memberId: mgrBMember!._id, cafeIds: [cafeB] })
+    ).rejects.toThrow('Anggota tidak ditemukan.');
+    await expect(
+      ownerA.mutation(api.invites.cancelInvite, { inviteId: inviteB })
+    ).rejects.toThrow('Undangan tidak ditemukan.');
+    // And cannot grant business A's own manager an outlet from business B.
+    await expect(
+      ownerA.mutation(api.invites.setManagerOutlets, { memberId: mgrA, cafeIds: [cafeB] })
+    ).rejects.toThrow('Outlet tidak ditemukan.');
+
+    // Business B is untouched.
+    expect(await t.run((ctx) => ctx.db.get(mgrBMember!._id))).not.toBeNull();
+    expect(await asOwnerB.query(api.invites.listPendingInvites, {})).toHaveLength(1);
+  });
 });
