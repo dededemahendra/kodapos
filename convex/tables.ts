@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 
 const tableDoc = v.object({
   _id: v.id('tables'),
@@ -23,7 +23,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(tableDoc),
   handler: async (ctx, { includeArchived = false }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('tables')
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
@@ -43,7 +43,7 @@ export const create = mutation({
   args: { name: v.string() },
   returns: v.id('tables'),
   handler: async (ctx, { name }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const clean = assertName(name);
     const rows = await ctx.db
       .query('tables')
@@ -64,7 +64,7 @@ export const update = mutation({
   args: { id: v.id('tables'), name: v.string() },
   returns: v.null(),
   handler: async (ctx, { id, name }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Meja');
     const clean = assertName(name);
     await ctx.db.patch(id, { name: clean });
@@ -76,7 +76,7 @@ export const archive = mutation({
   args: { id: v.id('tables') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Meja');
     await ctx.db.patch(id, { archived: true });
     return null;
@@ -87,7 +87,7 @@ export const ensureQrToken = mutation({
   args: { id: v.id('tables') },
   returns: v.string(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const table = await requireOwned(ctx, cafeId, id, 'Meja');
     // Idempotent: never regenerate an existing token — already-printed QR codes
     // must keep resolving. Only mint one the first time.
@@ -113,7 +113,7 @@ export const floor = query({
     })
   ),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tables = (
       await ctx.db
         .query('tables')

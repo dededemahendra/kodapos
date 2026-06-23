@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
@@ -33,7 +33,7 @@ export const list = query({
   args: { from: v.string(), to: v.string() },
   returns: v.object({ rows: v.array(rowValidator) }),
   handler: async (ctx, { from, to }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const found = await ctx.db
       .query('scheduledShifts')
       .withIndex('by_cafe_date', (q) => q.eq('cafeId', cafeId).gte('date', from).lte('date', to))
@@ -70,7 +70,7 @@ export const create = mutation({
   },
   returns: v.id('scheduledShifts'),
   handler: async (ctx, { staffId, date, startTime, endTime, note }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, staffId, 'Staf');
     const cleanDate = assertDate(date);
     const cleanStart = assertTime(startTime);
@@ -100,7 +100,7 @@ export const update = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const existing = await requireOwned(ctx, cafeId, args.id, 'Jadwal');
     if (args.staffId !== undefined) await requireOwned(ctx, cafeId, args.staffId, 'Staf');
 
@@ -131,7 +131,7 @@ export const remove = mutation({
   args: { id: v.id('scheduledShifts') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Jadwal');
     await ctx.db.delete(id);
     return null;

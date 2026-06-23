@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { internal } from '../_generated/api';
 import type { Id } from '../_generated/dataModel';
 import { action, internalAction, internalMutation, internalQuery, mutation } from '../_generated/server';
-import { requireOwnerCafe } from '../lib/auth';
+import { requireActiveOutlet } from '../lib/auth';
 import { buildOrder, settleSale, saleArgs, voidPendingOrder } from '../lib/sale';
 import { resolveProvider, qrisWebhookSecret } from './providers';
 import { signMockBody } from './providers/mock';
@@ -16,7 +16,7 @@ export const assertQrisConnected = internalQuery({
   args: {},
   returns: v.any(),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await ctx.db
       .query('cafeSettings')
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
@@ -238,7 +238,7 @@ export const cancelQrisDynamicSale = mutation({
   args: { orderId: v.id('orders') },
   returns: v.null(),
   handler: async (ctx, { orderId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const order = await ctx.db.get(orderId);
     if (!order || order.cafeId !== cafeId) throw new Error('Pesanan tidak ditemukan.');
     await voidPendingOrder(ctx, orderId, 'void');

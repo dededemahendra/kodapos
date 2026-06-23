@@ -6,37 +6,132 @@ type TenantTable = {
   [T in TableNames]: DataModel[T]['document'] extends { cafeId: Id<'cafes'> } ? T : never;
 }[TableNames];
 
+export type ActiveOutlet = {
+  userId: Id<'users'>;
+  cafeId: Id<'cafes'>;
+  businessId: Id<'businesses'> | null;
+  role: 'owner' | 'manager';
+};
+
+export type OutletAccess = {
+  member: Doc<'businessMembers'> | null;
+  accessibleCafeIds: Id<'cafes'>[];
+  businessId: Id<'businesses'> | null;
+  role: 'owner' | 'manager';
+};
+
 /**
- * Resolve the signed-in owner's cafe. Throws if no user identity or no cafe.
- * Every Slice 1 menu mutation/query calls this first.
+ * Resolve which outlets a user may operate, plus their membership context.
+ * Returns null when the user can reach no outlet (no membership and no cafe).
+ * Shared by requireActiveOutlet (active pick), outlets.myOutlets (switcher
+ * list) and outlets.setActiveOutlet (access validation). Never writes.
  */
-export async function requireOwnerCafe(
+export async function resolveOutletAccess(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<'users'>
+): Promise<OutletAccess | null> {
+  const member = await ctx.db
+    .query('businessMembers')
+    .withIndex('by_user', (q) => q.eq('userId', userId))
+    .first();
+
+  // Transitional fallback: an owner whose data predates the multi-outlet
+  // backfill has a cafe but no businessMembers row. Mirror the legacy
+  // requireOwnerCafe behavior (oldest cafe by owner). Removable once the
+  // backfill is confirmed run in all environments.
+  if (!member) {
+    const cafe = await ctx.db
+      .query('cafes')
+      .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
+      .first();
+    if (!cafe) return null;
+    return {
+      member: null,
+      accessibleCafeIds: [cafe._id],
+      businessId: cafe.businessId ?? null,
+      role: 'owner',
+    };
+  }
+
+  let accessibleCafeIds: Id<'cafes'>[];
+  if (member.role === 'owner') {
+    const cafes = await ctx.db
+      .query('cafes')
+      .withIndex('by_business', (q) => q.eq('businessId', member.businessId))
+      .collect();
+    accessibleCafeIds = cafes.map((c) => c._id);
+  } else {
+    const access = await ctx.db
+      .query('memberOutletAccess')
+      .withIndex('by_member', (q) => q.eq('businessMemberId', member._id))
+      .collect();
+    // Skip grants whose cafe was deleted, so a stale memberOutletAccess row
+    // never yields a dangling id downstream (myOutlets/active pick).
+    const maybeCafes = await Promise.all(access.map((a) => ctx.db.get(a.cafeId)));
+    accessibleCafeIds = maybeCafes.filter((c) => c !== null).map((c) => c!._id);
+  }
+
+  return { member, accessibleCafeIds, businessId: member.businessId, role: member.role };
+}
+
+/**
+ * Resolve the outlet (cafe) the signed-in user is currently operating.
+ *
+ * Returns a superset of the legacy `{ userId, cafeId }` shape so the ~230
+ * existing call sites keep working unchanged. Resolution:
+ *   1. owner  -> all cafes in their business
+ *      manager-> the cafes granted via memberOutletAccess
+ *   2. active outlet = the persisted choice when still accessible, else the
+ *      first accessible outlet (an ephemeral default — this helper runs in
+ *      queries and MUST NOT write; only setActiveOutlet persists a choice).
+ *
+ * Throws 'not authenticated' with no identity and 'no outlet access' when the
+ * user can reach no outlet.
+ */
+export async function requireActiveOutlet(
   ctx: QueryCtx | MutationCtx
-): Promise<{ userId: Id<'users'>; cafeId: Id<'cafes'> }> {
+): Promise<ActiveOutlet> {
   const userId = await getAuthUserId(ctx);
   if (!userId) {
     throw new Error('not authenticated');
   }
-  // .first() (not .unique()) is defensive against data corruption where
-  // the same owner ends up with multiple cafe rows. The mutation that
-  // creates cafes (cafes.createForOwner) is now idempotent, but historical
-  // duplicates from before that fix may still exist. Picking the oldest
-  // cafe (which is what .first() returns under by_owner) keeps behavior
-  // deterministic for affected users.
-  const cafe = await ctx.db
-    .query('cafes')
-    .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
-    .first();
-  if (!cafe) {
-    throw new Error('cafe not found');
+
+  const access = await resolveOutletAccess(ctx, userId);
+  if (!access || access.accessibleCafeIds.length === 0) {
+    throw new Error('no outlet access');
   }
-  return { userId, cafeId: cafe._id };
+
+  const active = await ctx.db
+    .query('activeOutlet')
+    .withIndex('by_user', (q) => q.eq('userId', userId))
+    .first();
+  const cafeId =
+    active && access.accessibleCafeIds.includes(active.cafeId)
+      ? active.cafeId
+      : access.accessibleCafeIds[0]!;
+
+  return { userId, cafeId, businessId: access.businessId, role: access.role };
+}
+
+/**
+ * Owner-only gate for business-level operations (manage members, add/remove
+ * outlets, business settings). Resolves the active outlet first, then asserts
+ * the member is the owner. Consumed by later phases.
+ */
+export async function requireBusinessOwner(
+  ctx: QueryCtx | MutationCtx
+): Promise<ActiveOutlet & { role: 'owner' }> {
+  const resolved = await requireActiveOutlet(ctx);
+  if (resolved.role !== 'owner') {
+    throw new Error('owner access required');
+  }
+  return { ...resolved, role: 'owner' };
 }
 
 /**
  * Fetch a row from a multi-tenant table and assert it belongs to the
  * given cafe. Throws a Bahasa Indonesia "tidak ditemukan." error suitable
- * for direct render via `<FieldError>`. Use after `requireOwnerCafe(ctx)`.
+ * for direct render via `<FieldError>`. Use after `requireActiveOutlet(ctx)`.
  *
  * Centralizes the `ctx.db.get → row.cafeId !== cafeId → throw` triad
  * that appears on every owned-row mutation. The constrained `Table` type

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { heldLineValidator, heldPromoValidator } from './lib/heldOrder';
 import { orderTypeValidator } from './lib/orderType';
 
@@ -15,7 +15,7 @@ export const hold = mutation({
   },
   returns: v.id('heldOrders'),
   handler: async (ctx, { cashierId, label, orderType, lines, promo, tableId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (lines.length === 0) throw new Error('Keranjang kosong.');
     await requireOwned(ctx, cafeId, cashierId, 'Kasir');
     const shift = await ctx.db
@@ -60,7 +60,7 @@ export const listForShift = query({
   args: { shiftId: v.id('shifts') },
   returns: v.array(heldRow),
   handler: async (ctx, { shiftId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('heldOrders')
       .withIndex('by_shift', (q) => q.eq('shiftId', shiftId))
@@ -84,7 +84,7 @@ export const remove = mutation({
   args: { id: v.id('heldOrders') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Pesanan ditahan');
     await ctx.db.delete(id);
     return null;

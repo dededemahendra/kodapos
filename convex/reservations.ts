@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import type { MutationCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { startOfLocalDay, tzFor } from './lib/time';
 
 const statusValidator = v.union(
@@ -78,7 +78,7 @@ export const create = mutation({
   },
   returns: v.id('reservations'),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (args.tableId) await requireOwned(ctx, cafeId, args.tableId, 'Meja');
     if (args.customerId) await requireOwned(ctx, cafeId, args.customerId, 'Pelanggan');
 
@@ -124,7 +124,7 @@ export const update = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const existing = await requireOwned(ctx, cafeId, args.id, 'Reservasi');
 
     if (args.tableId) await requireOwned(ctx, cafeId, args.tableId, 'Meja');
@@ -166,7 +166,7 @@ export const setStatus = mutation({
   args: { id: v.id('reservations'), status: statusValidator },
   returns: v.null(),
   handler: async (ctx, { id, status }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Reservasi');
     await ctx.db.patch(id, { status });
     return null;
@@ -177,7 +177,7 @@ export const remove = mutation({
   args: { id: v.id('reservations') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Reservasi');
     await ctx.db.delete(id);
     return null;
@@ -192,7 +192,7 @@ export const list = query({
   },
   returns: v.object({ rows: v.array(rowValidator) }),
   handler: async (ctx, { from, to, status }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const startOfToday = startOfLocalDay(tz, 0, Date.now());
     const lo = from ?? startOfToday;
@@ -239,7 +239,7 @@ export const todayByTable = query({
     })
   ),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const now = Date.now();
     const startOfToday = startOfLocalDay(tz, 0, now);

@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { api, internal } from './_generated/api';
 import { action, internalMutation, internalQuery } from './_generated/server';
 import type { ActionCtx } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 import { enforceRateLimit } from './lib/rateLimit';
 import {
   type AiProvider,
@@ -18,7 +18,7 @@ import {
 /**
  * Server-only read of the connected AI integration config, including the secret
  * API key. Internal so it never reaches the client; auth propagates from the
- * calling action, so `requireOwnerCafe` scopes it to the owner.
+ * calling action, so `requireActiveOutlet` scopes it to the owner.
  */
 export const config = internalQuery({
   args: {},
@@ -31,7 +31,7 @@ export const config = internalQuery({
     })
   ),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await ctx.db
       .query('cafeSettings')
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
@@ -61,7 +61,7 @@ export const rateLimit = internalMutation({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await enforceRateLimit(ctx, {
       identifier: `ai:${cafeId}`,
       windowMs: AI_WINDOW_MS,

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
-import { requireOwned, requireOwnerCafe } from '../lib/auth';
+import { requireOwned, requireActiveOutlet } from '../lib/auth';
 
 const categoryDoc = v.object({
   _id: v.id('categories'),
@@ -23,7 +23,7 @@ export const create = mutation({
   args: { name: v.string() },
   returns: v.id('categories'),
   handler: async (ctx, { name }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cleanName = assertName(name);
     const existing = await ctx.db
       .query('categories')
@@ -45,7 +45,7 @@ export const update = mutation({
   args: { id: v.id('categories'), name: v.string() },
   returns: v.null(),
   handler: async (ctx, { id, name }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Kategori');
     await ctx.db.patch(id, { name: assertName(name) });
     return null;
@@ -56,7 +56,7 @@ export const reorder = mutation({
   args: { id: v.id('categories'), direction: v.union(v.literal('up'), v.literal('down')) },
   returns: v.null(),
   handler: async (ctx, { id, direction }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await requireOwned(ctx, cafeId, id, 'Kategori');
     const siblings = await ctx.db
       .query('categories')
@@ -76,7 +76,7 @@ export const setOrder = mutation({
   args: { orderedIds: v.array(v.id('categories')) },
   returns: v.null(),
   handler: async (ctx, { orderedIds }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const current = await ctx.db
       .query('categories')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
@@ -101,7 +101,7 @@ export const archive = mutation({
   args: { id: v.id('categories') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Kategori');
     await ctx.db.patch(id, { archived: true });
     return null;
@@ -112,7 +112,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(categoryDoc),
   handler: async (ctx, { includeArchived = false }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('categories')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))

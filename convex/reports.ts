@@ -1,7 +1,9 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
 import type { QueryCtx } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import type { Id } from './_generated/dataModel';
+import { getAuthUserId } from '@convex-dev/auth/server';
+import { requireActiveOutlet, resolveOutletAccess } from './lib/auth';
 import { methodTotals } from './lib/payment';
 import { type RangeArgs, dayKeyFn, eachDayKey, resolveRange, tzFor } from './lib/time';
 
@@ -22,7 +24,7 @@ async function paidInRange(
   ctx: QueryCtx,
   range: RangeArgs
 ) {
-  const { cafeId } = await requireOwnerCafe(ctx);
+  const { cafeId } = await requireActiveOutlet(ctx);
   const tz = await tzFor(ctx, cafeId);
   const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, Date.now());
   const rows = await ctx.db
@@ -32,6 +34,47 @@ async function paidInRange(
     )
     .collect();
   return { cafeId, tz, fromKey, toKey, paid: rows.filter((o) => o.paymentStatus === 'paid') };
+}
+
+/**
+ * Per-cafe overview metrics for a window. Pulled out of `overview` so the
+ * consolidated `businessOverview` can run the identical computation for each
+ * accessible outlet. Net revenue = paid order totals minus refunds dated in
+ * the window; AOV is off net revenue.
+ */
+async function computeOverview(
+  ctx: QueryCtx,
+  cafeId: Id<'cafes'>,
+  range: RangeArgs
+): Promise<{
+  revenueIDR: number;
+  refundsIDR: number;
+  orders: number;
+  aovIDR: number;
+  itemsSold: number;
+  fromKey: string;
+  toKey: string;
+}> {
+  const tz = await tzFor(ctx, cafeId);
+  const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, Date.now());
+  const rows = await ctx.db
+    .query('orders')
+    .withIndex('by_cafe_created', (q) =>
+      q.eq('cafeId', cafeId).gte('createdAtClient', startMs).lte('createdAtClient', endMs)
+    )
+    .collect();
+  const paid = rows.filter((o) => o.paymentStatus === 'paid');
+  const grossRevenueIDR = paid.reduce((s, o) => s + o.totalIDR, 0);
+  const refunds = await ctx.db
+    .query('refunds')
+    .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs))
+    .collect();
+  const refundsIDR = refunds.reduce((s, r) => s + r.amountIDR, 0);
+  const revenueIDR = grossRevenueIDR - refundsIDR;
+  const orders = paid.length;
+  const itemsSold = paid.reduce((s, o) => s + o.lines.reduce((n, l) => n + l.qty, 0), 0);
+  const aovIDR = orders === 0 ? 0 : Math.round(revenueIDR / orders);
+  return { revenueIDR, refundsIDR, orders, aovIDR, itemsSold, fromKey, toKey };
 }
 
 export const overview = query({
@@ -46,23 +89,8 @@ export const overview = query({
     toKey: v.string(),
   }),
   handler: async (ctx, { range }) => {
-    const { cafeId, tz, fromKey, toKey, paid } = await paidInRange(ctx, range);
-    const grossRevenueIDR = paid.reduce((s, o) => s + o.totalIDR, 0);
-    // Net out refunds dated (by `refund.at`) in this window.
-    const { startMs, endMs } = resolveRange(tz, range, Date.now());
-    const refunds = await ctx.db
-      .query('refunds')
-      .withIndex('by_cafe_at', (q) =>
-        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
-      )
-      .collect();
-    const refundsIDR = refunds.reduce((s, r) => s + r.amountIDR, 0);
-    const revenueIDR = grossRevenueIDR - refundsIDR;
-    const orders = paid.length;
-    const itemsSold = paid.reduce((s, o) => s + o.lines.reduce((n, l) => n + l.qty, 0), 0);
-    // AOV off net revenue to stay consistent with the headline revenue figure.
-    const aovIDR = orders === 0 ? 0 : Math.round(revenueIDR / orders);
-    return { revenueIDR, refundsIDR, orders, aovIDR, itemsSold, fromKey, toKey };
+    const { cafeId } = await requireActiveOutlet(ctx);
+    return computeOverview(ctx, cafeId, range);
   },
 });
 
@@ -403,5 +431,72 @@ export const cashiers = query({
     }
     rows.sort((x, y) => y.revenueIDR - x.revenueIDR || x.name.localeCompare(y.name, 'id-ID'));
     return { rows, fromKey, toKey };
+  },
+});
+
+export const businessOverview = query({
+  args: { range: rangeArg },
+  returns: v.object({
+    outlets: v.array(
+      v.object({
+        cafeId: v.id('cafes'),
+        name: v.string(),
+        revenueIDR: v.number(),
+        refundsIDR: v.number(),
+        orders: v.number(),
+        aovIDR: v.number(),
+        itemsSold: v.number(),
+      })
+    ),
+    totals: v.object({
+      revenueIDR: v.number(),
+      refundsIDR: v.number(),
+      orders: v.number(),
+      aovIDR: v.number(),
+      itemsSold: v.number(),
+    }),
+    fromKey: v.string(),
+    toKey: v.string(),
+  }),
+  handler: async (ctx, { range }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error('not authenticated');
+    const access = await resolveOutletAccess(ctx, userId);
+    if (!access || access.accessibleCafeIds.length === 0) {
+      throw new Error('no outlet access');
+    }
+    const outlets = [];
+    let fromKey = '';
+    let toKey = '';
+    for (const cafeId of access.accessibleCafeIds) {
+      const cafe = await ctx.db.get(cafeId);
+      if (!cafe) continue; // tolerate a dangling id defensively
+      const ov = await computeOverview(ctx, cafeId, range);
+      // Outlets in one business share a timezone in practice; use each
+      // computed window (last wins) for the range label.
+      fromKey = ov.fromKey;
+      toKey = ov.toKey;
+      outlets.push({
+        cafeId,
+        name: cafe.name,
+        revenueIDR: ov.revenueIDR,
+        refundsIDR: ov.refundsIDR,
+        orders: ov.orders,
+        aovIDR: ov.aovIDR,
+        itemsSold: ov.itemsSold,
+      });
+    }
+    outlets.sort((a, b) => a.name.localeCompare(b.name, 'id-ID'));
+    const totals = outlets.reduce(
+      (t, o) => ({
+        revenueIDR: t.revenueIDR + o.revenueIDR,
+        refundsIDR: t.refundsIDR + o.refundsIDR,
+        orders: t.orders + o.orders,
+        itemsSold: t.itemsSold + o.itemsSold,
+      }),
+      { revenueIDR: 0, refundsIDR: 0, orders: 0, itemsSold: 0 }
+    );
+    const aovIDR = totals.orders === 0 ? 0 : Math.round(totals.revenueIDR / totals.orders);
+    return { outlets, totals: { ...totals, aovIDR }, fromKey, toKey };
   },
 });

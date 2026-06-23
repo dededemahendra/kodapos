@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { internalAction, internalMutation, internalQuery, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 import { computeDemand } from './lib/demand';
 import { computeRestock } from './lib/restockCompute';
 import { DAY_MS, DEFAULT_TZ, dayKeyFn } from './lib/time';
@@ -39,7 +39,7 @@ export const demand = query({
     })
   ),
   handler: async (ctx, _args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const snap = await ctx.db
       .query('forecasts')
       .withIndex('by_cafe_generated', (q) => q.eq('cafeId', cafeId))

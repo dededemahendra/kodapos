@@ -1,14 +1,14 @@
 import { v } from 'convex/values';
 import { api, internal } from './_generated/api';
 import { action, internalQuery } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 import { buildReceiptText, type ReceiptCafe, type ReceiptOrder } from './lib/receipt';
 import { buildWhatsappBody, normalizePhone } from './lib/whatsapp';
 
 /**
  * Server-only read of the connected WhatsApp integration config, including the
  * secret token. Internal so it is never exposed to the client; auth propagates
- * from the calling action, so `requireOwnerCafe` scopes it to the owner.
+ * from the calling action, so `requireActiveOutlet` scopes it to the owner.
  */
 export const config = internalQuery({
   args: {},
@@ -22,7 +22,7 @@ export const config = internalQuery({
     })
   ),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await ctx.db
       .query('cafeSettings')
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))

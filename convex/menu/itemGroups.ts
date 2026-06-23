@@ -1,12 +1,12 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
-import { requireOwned, requireOwnerCafe } from '../lib/auth';
+import { requireOwned, requireActiveOutlet } from '../lib/auth';
 
 export const attach = mutation({
   args: { menuItemId: v.id('menuItems'), modifierGroupId: v.id('modifierGroups') },
   returns: v.null(),
   handler: async (ctx, { menuItemId, modifierGroupId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, menuItemId, 'Item');
     await requireOwned(ctx, cafeId, modifierGroupId, 'Grup modifier');
     const existing = await ctx.db
@@ -30,7 +30,7 @@ export const detach = mutation({
   args: { menuItemId: v.id('menuItems'), modifierGroupId: v.id('modifierGroups') },
   returns: v.null(),
   handler: async (ctx, { menuItemId, modifierGroupId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, menuItemId, 'Item');
     const joins = await ctx.db
       .query('menuItemModifierGroups')
@@ -50,7 +50,7 @@ export const reorder = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { menuItemId, modifierGroupId, direction }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, menuItemId, 'Item');
     const joins = await ctx.db
       .query('menuItemModifierGroups')

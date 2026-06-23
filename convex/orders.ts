@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { manualDiscountValidator } from './lib/discount';
 import { orderTypeValidator } from './lib/orderType';
 import { methodTotals } from './lib/payment';
@@ -80,7 +80,7 @@ export const voidSale = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { orderId, reason, cashierId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const order = await ctx.db.get(orderId);
     if (!order || order.cafeId !== cafeId) throw new Error('Pesanan tidak ditemukan.');
     if (cashierId) await requireOwned(ctx, cafeId, cashierId, 'Kasir');
@@ -207,7 +207,7 @@ export const listForShift = query({
   args: { shiftId: v.id('shifts') },
   returns: v.array(orderSummary),
   handler: async (ctx, { shiftId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, shiftId, 'Shift');
     const rows = await ctx.db
       .query('orders')
@@ -247,7 +247,7 @@ export const search = query({
   },
   returns: v.object({ page: v.array(orderRow), isDone: v.boolean(), continueCursor: v.string() }),
   handler: async (ctx, { range, cashierId, paymentMethod, orderType, status, paginationOpts }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const { startMs, endMs } = resolveRange(tz, range, Date.now());
     let q = ctx.db
@@ -284,7 +284,7 @@ export const getById = query({
   args: { id: v.id('orders') },
   returns: v.union(orderDetail, v.null()),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const order = await ctx.db.get(id);
     if (!order || order.cafeId !== cafeId) return null;
     const cashier = await ctx.db.get(order.cashierId);
@@ -337,7 +337,7 @@ export const refundInfo = query({
     ),
   }),
   handler: async (ctx, { orderId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const order = await requireOwned(ctx, cafeId, orderId, 'Pesanan');
 
     // Cumulative refunded qty per line, derived from the refunds ledger.

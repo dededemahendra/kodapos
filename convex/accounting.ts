@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 import { dayKeyFn, resolveRange, tzFor } from './lib/time';
 
 // Same range arg shape as reports.* so the page's `useReportRange` range fits.
@@ -86,7 +86,7 @@ export const ledger = query({
     toKey: v.string(),
   }),
   handler: async (ctx, { range }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, Date.now());
     const keyOf = dayKeyFn(tz);

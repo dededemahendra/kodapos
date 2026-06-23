@@ -1,12 +1,13 @@
 import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import { Authenticated, AuthLoading, Unauthenticated, useQuery } from 'convex/react';
-import { type ReactNode, useEffect } from 'react';
+import { Authenticated, AuthLoading, Unauthenticated, useMutation, useQuery } from 'convex/react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { AppHeader } from '~/components/app-header';
 import { CommandPalette } from '~/components/command-palette';
 import { AppSidebar } from '~/components/app-sidebar';
 import { RegisterTopBar } from '~/components/sale/register-top-bar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
+import { NoAccess } from '~/components/no-access';
 import { LoadingCounter } from '~/components/ui/loading-counter';
 import { Toaster } from '~/components/ui/sonner';
 import { useAutoLock } from '~/lib/use-auto-lock';
@@ -86,18 +87,31 @@ function SignedOutRedirect() {
 }
 
 function OnboardingGate({ children }: { children: ReactNode }) {
-  // Use the cached reactive query so the gate resolves synchronously on
-  // re-render rather than after an awaited fetch. `undefined` = still loading;
-  // we MUST NOT render `_pos` content until we know the cafe state, otherwise a
-  // cafe-less user briefly sees the app before the onboarding redirect fires.
   const cafe = useQuery(api.cafes.myCafe, {});
   const path = useRouterState({ select: (s) => s.location.pathname });
-  // A cafe-less authenticated user (e.g. a Google sign-up that skipped the
-  // inline cafe-creation step) needs to land in onboarding to create one;
-  // an owner mid-onboarding (cafe exists but no setupCompletedAt) too. The
-  // onboarding routes are exempt to avoid a redirect loop.
+  const acceptInvites = useMutation(api.invites.acceptPendingInvites);
+  const [accepting, setAccepting] = useState(true);
+
+  // After any sign-in, convert a pending manager invite into access. Idempotent
+  // and safe to call once per mount; it no-ops for owners and the uninvited.
+  useEffect(() => {
+    let cancelled = false;
+    acceptInvites({})
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setAccepting(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [acceptInvites]);
+
   const alreadyOnOnboarding = path.startsWith('/onboarding');
-  const needsOnboarding = cafe !== undefined && (cafe === null || !cafe.setupCompletedAt);
+  // An owner mid-onboarding (cafe exists but no setupCompletedAt) is routed to
+  // the wizard. A user with NO accessible outlet (cafe === null) is NOT pushed
+  // into onboarding any more; they see the no-access screen (which offers an
+  // explicit "create your own business").
+  const needsOnboarding = cafe !== undefined && cafe !== null && !cafe.setupCompletedAt;
 
   useEffect(() => {
     if (needsOnboarding && !alreadyOnOnboarding && typeof window !== 'undefined') {
@@ -105,11 +119,15 @@ function OnboardingGate({ children }: { children: ReactNode }) {
     }
   }, [needsOnboarding, alreadyOnOnboarding]);
 
-  // Loading: don't flash app content.
-  if (cafe === undefined) {
+  // Still resolving cafe state or still accepting invites: don't flash content
+  // (an invited manager's cafe becomes non-null once accept commits).
+  if (cafe === undefined || accepting) {
     return <LoadingCounter />;
   }
-  // Redirecting a cafe-less user (and not already on onboarding): render nothing.
+  // Signed in but no accessible outlet, and no invite was accepted: no-access.
+  if (cafe === null && !alreadyOnOnboarding) {
+    return <NoAccess />;
+  }
   if (needsOnboarding && !alreadyOnOnboarding) {
     return null;
   }

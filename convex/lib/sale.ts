@@ -1,7 +1,7 @@
 import { type Infer, v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
-import { requireOwned, requireOwnerCafe } from './auth';
+import { requireOwned, requireActiveOutlet } from './auth';
 import { manualDiscountValidator } from './discount';
 import { redeemGiftCard } from './giftcard';
 import { DEFAULT_LOYALTY, earnMultiplierFor, pointsEarned, redemptionIDR } from './loyalty';
@@ -78,7 +78,7 @@ export async function buildOrder(
   args: SaleArgs,
   payment: PaymentInput
 ): Promise<{ orderId: Id<'orders'>; totalIDR: number; changeIDR: number }> {
-  const { cafeId } = await requireOwnerCafe(ctx);
+  const { cafeId } = await requireActiveOutlet(ctx);
 
   // Idempotency check FIRST — an existing order bypasses all further validation
   // (including the payment-method guard) because the order is already committed.

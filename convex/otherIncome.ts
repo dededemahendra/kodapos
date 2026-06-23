@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
 export const record = mutation({
@@ -11,7 +11,7 @@ export const record = mutation({
   },
   returns: v.id('otherIncome'),
   handler: async (ctx, { source, amountIDR, note }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (!Number.isInteger(amountIDR) || amountIDR <= 0) {
       throw new Error('Jumlah harus lebih dari nol.');
     }
@@ -45,7 +45,7 @@ export const list = query({
     totalIDR: v.number(),
   }),
   handler: async (ctx, { range }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const { startMs, endMs } = resolveRange(tz, range, Date.now());
     const rows = await ctx.db
@@ -76,7 +76,7 @@ export const remove = mutation({
   args: { id: v.id('otherIncome') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Pendapatan');
     await ctx.db.delete(id);
     return null;

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 import { query } from './_generated/server';
-import { requireOwnerCafe } from './lib/auth';
+import { requireActiveOutlet } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
 import { methodTotals } from './lib/payment';
 import { DAY_MS, dayKeyFn, startOfLocalDay, tzFor } from './lib/time';
@@ -66,7 +66,7 @@ export const kpis = query({
     itemsSoldDeltaPct: v.number(),
   }),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const now = Date.now();
     const todayStart = startOfLocalDay(tz, 0, now);
@@ -130,7 +130,7 @@ export const revenueDaily = query({
   args: {},
   returns: v.array(v.object({ day: v.string(), revenueIDR: v.number() })),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const { windowStart, buckets, bucketFor } = sevenDayBuckets(
       tz,
@@ -169,7 +169,7 @@ export const paymentMethods = query({
     v.object({ day: v.string(), cash: v.number(), qris: v.number() })
   ),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const { windowStart, buckets, bucketFor } = sevenDayBuckets(
       tz,
@@ -208,7 +208,7 @@ export const recentOrders = query({
     })
   ),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('orders')
       .withIndex('by_cafe_created', (q) => q.eq('cafeId', cafeId))
@@ -251,7 +251,7 @@ export const lowStock = query({
     ),
   }),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const ingredients = await ctx.db
       .query('ingredients')
       .withIndex('by_cafe_active', (q) =>
@@ -291,7 +291,7 @@ export const recentActivity = query({
     })
   ),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const orders = await ctx.db
       .query('orders')
       .withIndex('by_cafe_created', (q) => q.eq('cafeId', cafeId))

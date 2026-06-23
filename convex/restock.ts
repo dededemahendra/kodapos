@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { computeDemand } from './lib/demand';
 import { computeRestock } from './lib/restockCompute';
 
@@ -30,7 +30,7 @@ export const suggestion = query({
     })
   ),
   handler: async (ctx, _args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const snap = await ctx.db
       .query('restockSuggestions')
       .withIndex('by_cafe_generated', (q) => q.eq('cafeId', cafeId))
@@ -54,7 +54,7 @@ export const markSent = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { id, supplierId, sentLines }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const suggestion = await requireOwned(ctx, cafeId, id, 'Saran belanja');
     if (suggestion.status !== 'draft') {
       throw new Error('Saran belanja sudah dikirim atau ditolak.');

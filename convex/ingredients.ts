@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
 
 const ingredientDoc = v.object({
@@ -64,7 +64,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(ingredientWithStock),
   handler: async (ctx, { includeArchived = false }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('ingredients')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId))
@@ -84,7 +84,7 @@ export const get = query({
   args: { id: v.id('ingredients') },
   returns: v.union(ingredientWithStock, v.null()),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await ctx.db.get(id);
     if (!row || row.cafeId !== cafeId) return null;
     return { ...row, currentStockQty: await currentStockQty(ctx, cafeId, row._id) };
@@ -95,7 +95,7 @@ export const listMovements = query({
   args: { ingredientId: v.id('ingredients') },
   returns: v.object({ rows: v.array(movementRow), truncated: v.boolean() }),
   handler: async (ctx, { ingredientId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, ingredientId, 'Bahan');
     // Oldest→newest so we can accumulate a running balance; the newest row's
     // balance then equals current stock.
@@ -136,7 +136,7 @@ export const upsert = mutation({
   },
   returns: v.id('ingredients'),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cleanName = assertIngredient(
       args.name,
       args.reorderThreshold,
@@ -198,7 +198,7 @@ export const bulkImport = mutation({
   },
   returns: importResult,
   handler: async (ctx, { rows }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     if (rows.length > 1000) throw new Error('Terlalu banyak baris.');
 
     const existing = await ctx.db
@@ -252,7 +252,7 @@ export const archive = mutation({
   args: { id: v.id('ingredients') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Bahan');
     await ctx.db.patch(id, { archived: true });
     return null;
@@ -273,7 +273,7 @@ export const recentAdjustments = query({
   args: { days: v.optional(v.number()) },
   returns: v.array(adjustmentRow),
   handler: async (ctx, { days = 30 }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cutoff = Date.now() - days * 86_400_000;
     const movements = await ctx.db
       .query('inventoryMovements')
@@ -315,7 +315,7 @@ export const adjustStock = mutation({
   },
   returns: v.union(v.id('inventoryMovements'), v.null()),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, args.ingredientId, 'Bahan');
     if (!Number.isInteger(args.newQty) || args.newQty < 0) {
       throw new Error('Stok harus berupa angka bulat ≥ 0.');
@@ -344,7 +344,7 @@ export const performStockTake = mutation({
   },
   returns: v.object({ adjusted: v.number() }),
   handler: async (ctx, { counts, note }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     for (const c of counts) {
       if (!Number.isInteger(c.countedQty) || c.countedQty < 0) {
         throw new Error('Stok harus berupa angka bulat ≥ 0.');

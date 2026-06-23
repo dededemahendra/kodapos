@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { normalizePhone } from './lib/phone';
 
 const customerDoc = v.object({
@@ -61,7 +61,7 @@ export const list = query({
   args: { includeArchived: v.optional(v.boolean()), search: v.optional(v.string()) },
   returns: v.array(customerDoc),
   handler: async (ctx, { includeArchived = false, search }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('customers')
       .withIndex('by_cafe_active', (q) =>
@@ -84,7 +84,7 @@ export const findByPhone = query({
   args: { phone: v.string() },
   returns: v.union(customerDoc, v.null()),
   handler: async (ctx, { phone }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     return await findActiveByPhone(ctx, cafeId, phone);
   },
 });
@@ -96,7 +96,7 @@ export const getDetail = query({
     v.null()
   ),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const c = await ctx.db.get(id);
     if (!c || c.cafeId !== cafeId) return null;
     const all = await ctx.db
@@ -113,7 +113,7 @@ export const create = mutation({
   args: { name: v.string(), phone: v.string(), note: v.optional(v.string()) },
   returns: v.id('customers'),
   handler: async (ctx, { name, phone, note }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const clean = assertCustomer(name, phone);
     const norm = normalizePhone(clean.phone);
     const dupe = await findActiveByPhone(ctx, cafeId, norm);
@@ -141,7 +141,7 @@ export const update = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { id, name, phone, note }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Pelanggan');
     const clean = assertCustomer(name, phone);
     const norm = normalizePhone(clean.phone);
@@ -160,7 +160,7 @@ export const archive = mutation({
   args: { id: v.id('customers') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Pelanggan');
     await ctx.db.patch(id, { archived: true });
     return null;
@@ -171,7 +171,7 @@ export const adjustPoints = mutation({
   args: { id: v.id('customers'), points: v.number(), note: v.optional(v.string()) },
   returns: v.null(),
   handler: async (ctx, { id, points, note }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const c = await requireOwned(ctx, cafeId, id, 'Pelanggan');
     if (!Number.isInteger(points) || points === 0) throw new Error('Poin tidak valid.');
     const next = c.pointsBalance + points;

@@ -2,12 +2,12 @@ import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 import { mutation, type QueryCtx, query } from './_generated/server';
 import { heldLineValidator } from './lib/heldOrder';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { buildOrder, settleSale } from './lib/sale';
 
 /**
  * Staff (OWNER-GATED) side of QR self-ordering. The public, unauthenticated
- * intake lives in `convex/public.ts`; everything here calls `requireOwnerCafe`
+ * intake lives in `convex/public.ts`; everything here calls `requireActiveOutlet`
  * and scopes every read/write to the owner's cafe. A self-order only becomes a
  * real order via `accept` → the authenticated /sale register path.
  */
@@ -44,7 +44,7 @@ export const queue = query({
   args: {},
   returns: v.array(queueRow),
   handler: async (ctx, _args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const rows = await ctx.db
       .query('selfOrders')
       .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'new'))
@@ -121,7 +121,7 @@ export const getForCart = query({
     lines: v.array(heldLineValidator),
   }),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await requireOwned(ctx, cafeId, id, 'Pesanan');
     const lines = await Promise.all(row.lines.map((l) => toRecallLine(ctx, l)));
     return {
@@ -139,7 +139,7 @@ export const accept = mutation({
   args: { id: v.id('selfOrders') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Pesanan');
     await ctx.db.patch(id, { status: 'accepted', acceptedAt: Date.now() });
     return null;
@@ -150,7 +150,7 @@ export const reject = mutation({
   args: { id: v.id('selfOrders') },
   returns: v.null(),
   handler: async (ctx, { id }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const row = await requireOwned(ctx, cafeId, id, 'Pesanan');
     // A pay-now (QRIS) self-order with a charge in-flight (awaiting) or already
     // paid can't be rejected: the customer may pay (or has paid) a live QR, so
@@ -174,7 +174,7 @@ export const acceptPaid = mutation({
   args: { id: v.id('selfOrders'), cashierId: v.id('cafeStaff') },
   returns: v.object({ orderId: v.id('orders') }),
   handler: async (ctx, { id, cashierId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const so = await requireOwned(ctx, cafeId, id, 'Pesanan');
 
     // Idempotent fast-path: already accepted → return the existing order.

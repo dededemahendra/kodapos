@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import type { MutationCtx } from './_generated/server';
 import { mutation } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { methodTotals } from './lib/payment';
 import { type RefundOrderLine, validateRefundLines } from './lib/refund';
 
@@ -56,7 +56,7 @@ export const create = mutation({
   },
   returns: v.id('refunds'),
   handler: async (ctx, args) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
 
     // Idempotency FIRST — an existing refund for this clientId is returned
     // unchanged, bypassing all further validation.

@@ -37,6 +37,7 @@ import { Route as PosDocsRouteImport } from './routes/_pos/docs'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 import { Route as PosCustomersRouteImport } from './routes/_pos/customers'
 import { Route as PosChangelogRouteImport } from './routes/_pos/changelog'
+import { Route as PosAllOutletsRouteImport } from './routes/_pos/all-outlets'
 import { Route as PosAiRouteImport } from './routes/_pos/ai'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
@@ -56,6 +57,7 @@ import { Route as PosSettingsTaxRouteImport } from './routes/_pos/settings/tax'
 import { Route as PosSettingsStaffRouteImport } from './routes/_pos/settings/staff'
 import { Route as PosSettingsReceiptRouteImport } from './routes/_pos/settings/receipt'
 import { Route as PosSettingsProfileRouteImport } from './routes/_pos/settings/profile'
+import { Route as PosSettingsMembersRouteImport } from './routes/_pos/settings/members'
 import { Route as PosSettingsIntegrationsRouteImport } from './routes/_pos/settings/integrations'
 import { Route as PosSettingsGeneralRouteImport } from './routes/_pos/settings/general'
 import { Route as PosReportsSalesRouteImport } from './routes/_pos/reports/sales'
@@ -219,6 +221,11 @@ const PosChangelogRoute = PosChangelogRouteImport.update({
   path: '/changelog',
   getParentRoute: () => PosRoute,
 } as any)
+const PosAllOutletsRoute = PosAllOutletsRouteImport.update({
+  id: '/all-outlets',
+  path: '/all-outlets',
+  getParentRoute: () => PosRoute,
+} as any)
 const PosAiRoute = PosAiRouteImport.update({
   id: '/ai',
   path: '/ai',
@@ -312,6 +319,11 @@ const PosSettingsReceiptRoute = PosSettingsReceiptRouteImport.update({
 const PosSettingsProfileRoute = PosSettingsProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => PosSettingsRouteRoute,
+} as any)
+const PosSettingsMembersRoute = PosSettingsMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
   getParentRoute: () => PosSettingsRouteRoute,
 } as any)
 const PosSettingsIntegrationsRoute = PosSettingsIntegrationsRouteImport.update({
@@ -447,6 +459,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
   '/ai': typeof PosAiRoute
+  '/all-outlets': typeof PosAllOutletsRoute
   '/changelog': typeof PosChangelogRoute
   '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
@@ -493,6 +506,7 @@ export interface FileRoutesByFullPath {
   '/reports/sales': typeof PosReportsSalesRoute
   '/settings/general': typeof PosSettingsGeneralRoute
   '/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/settings/members': typeof PosSettingsMembersRoute
   '/settings/profile': typeof PosSettingsProfileRoute
   '/settings/receipt': typeof PosSettingsReceiptRoute
   '/settings/staff': typeof PosSettingsStaffRoute
@@ -514,6 +528,7 @@ export interface FileRoutesByTo {
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
   '/ai': typeof PosAiRoute
+  '/all-outlets': typeof PosAllOutletsRoute
   '/changelog': typeof PosChangelogRoute
   '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
@@ -560,6 +575,7 @@ export interface FileRoutesByTo {
   '/reports/sales': typeof PosReportsSalesRoute
   '/settings/general': typeof PosSettingsGeneralRoute
   '/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/settings/members': typeof PosSettingsMembersRoute
   '/settings/profile': typeof PosSettingsProfileRoute
   '/settings/receipt': typeof PosSettingsReceiptRoute
   '/settings/staff': typeof PosSettingsStaffRoute
@@ -587,6 +603,7 @@ export interface FileRoutesById {
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
   '/_pos/ai': typeof PosAiRoute
+  '/_pos/all-outlets': typeof PosAllOutletsRoute
   '/_pos/changelog': typeof PosChangelogRoute
   '/_pos/customers': typeof PosCustomersRoute
   '/_pos/dashboard': typeof PosDashboardRoute
@@ -634,6 +651,7 @@ export interface FileRoutesById {
   '/_pos/reports/sales': typeof PosReportsSalesRoute
   '/_pos/settings/general': typeof PosSettingsGeneralRoute
   '/_pos/settings/integrations': typeof PosSettingsIntegrationsRoute
+  '/_pos/settings/members': typeof PosSettingsMembersRoute
   '/_pos/settings/profile': typeof PosSettingsProfileRoute
   '/_pos/settings/receipt': typeof PosSettingsReceiptRoute
   '/_pos/settings/staff': typeof PosSettingsStaffRoute
@@ -661,6 +679,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shift'
     | '/ai'
+    | '/all-outlets'
     | '/changelog'
     | '/customers'
     | '/dashboard'
@@ -707,6 +726,7 @@ export interface FileRouteTypes {
     | '/reports/sales'
     | '/settings/general'
     | '/settings/integrations'
+    | '/settings/members'
     | '/settings/profile'
     | '/settings/receipt'
     | '/settings/staff'
@@ -728,6 +748,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shift'
     | '/ai'
+    | '/all-outlets'
     | '/changelog'
     | '/customers'
     | '/dashboard'
@@ -774,6 +795,7 @@ export interface FileRouteTypes {
     | '/reports/sales'
     | '/settings/general'
     | '/settings/integrations'
+    | '/settings/members'
     | '/settings/profile'
     | '/settings/receipt'
     | '/settings/staff'
@@ -800,6 +822,7 @@ export interface FileRouteTypes {
     | '/_pos/settings'
     | '/_pos/shift'
     | '/_pos/ai'
+    | '/_pos/all-outlets'
     | '/_pos/changelog'
     | '/_pos/customers'
     | '/_pos/dashboard'
@@ -847,6 +870,7 @@ export interface FileRouteTypes {
     | '/_pos/reports/sales'
     | '/_pos/settings/general'
     | '/_pos/settings/integrations'
+    | '/_pos/settings/members'
     | '/_pos/settings/profile'
     | '/_pos/settings/receipt'
     | '/_pos/settings/staff'
@@ -1066,6 +1090,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosChangelogRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_pos/all-outlets': {
+      id: '/_pos/all-outlets'
+      path: '/all-outlets'
+      fullPath: '/all-outlets'
+      preLoaderRoute: typeof PosAllOutletsRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_pos/ai': {
       id: '/_pos/ai'
       path: '/ai'
@@ -1197,6 +1228,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/settings/profile'
       preLoaderRoute: typeof PosSettingsProfileRouteImport
+      parentRoute: typeof PosSettingsRouteRoute
+    }
+    '/_pos/settings/members': {
+      id: '/_pos/settings/members'
+      path: '/members'
+      fullPath: '/settings/members'
+      preLoaderRoute: typeof PosSettingsMembersRouteImport
       parentRoute: typeof PosSettingsRouteRoute
     }
     '/_pos/settings/integrations': {
@@ -1482,6 +1520,7 @@ const PosSaleRouteRouteWithChildren = PosSaleRouteRoute._addFileChildren(
 interface PosSettingsRouteRouteChildren {
   PosSettingsGeneralRoute: typeof PosSettingsGeneralRoute
   PosSettingsIntegrationsRoute: typeof PosSettingsIntegrationsRoute
+  PosSettingsMembersRoute: typeof PosSettingsMembersRoute
   PosSettingsProfileRoute: typeof PosSettingsProfileRoute
   PosSettingsReceiptRoute: typeof PosSettingsReceiptRoute
   PosSettingsStaffRoute: typeof PosSettingsStaffRoute
@@ -1491,6 +1530,7 @@ interface PosSettingsRouteRouteChildren {
 const PosSettingsRouteRouteChildren: PosSettingsRouteRouteChildren = {
   PosSettingsGeneralRoute: PosSettingsGeneralRoute,
   PosSettingsIntegrationsRoute: PosSettingsIntegrationsRoute,
+  PosSettingsMembersRoute: PosSettingsMembersRoute,
   PosSettingsProfileRoute: PosSettingsProfileRoute,
   PosSettingsReceiptRoute: PosSettingsReceiptRoute,
   PosSettingsStaffRoute: PosSettingsStaffRoute,
@@ -1523,6 +1563,7 @@ interface PosRouteChildren {
   PosSettingsRouteRoute: typeof PosSettingsRouteRouteWithChildren
   PosShiftRouteRoute: typeof PosShiftRouteRouteWithChildren
   PosAiRoute: typeof PosAiRoute
+  PosAllOutletsRoute: typeof PosAllOutletsRoute
   PosChangelogRoute: typeof PosChangelogRoute
   PosCustomersRoute: typeof PosCustomersRoute
   PosDashboardRoute: typeof PosDashboardRoute
@@ -1554,6 +1595,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosSettingsRouteRoute: PosSettingsRouteRouteWithChildren,
   PosShiftRouteRoute: PosShiftRouteRouteWithChildren,
   PosAiRoute: PosAiRoute,
+  PosAllOutletsRoute: PosAllOutletsRoute,
   PosChangelogRoute: PosChangelogRoute,
   PosCustomersRoute: PosCustomersRoute,
   PosDashboardRoute: PosDashboardRoute,

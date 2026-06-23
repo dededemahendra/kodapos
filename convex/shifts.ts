@@ -4,7 +4,7 @@ import { internal } from './_generated/api';
 import { internalQuery, mutation, query } from './_generated/server';
 import type { Doc } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
-import { requireOwned, requireOwnerCafe } from './lib/auth';
+import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { cashCollectedIDR, methodTotals } from './lib/payment';
 import { requireActiveCashier } from './lib/staff';
 
@@ -55,7 +55,7 @@ export const current = query({
   args: {},
   returns: v.union(shiftWithCashier, v.null()),
   handler: async (ctx) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const open = await ctx.db
       .query('shifts')
       .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'open'))
@@ -70,7 +70,7 @@ export const open = mutation({
   args: { cashierId: v.id('cafeStaff'), openingFloatIDR: v.number() },
   returns: v.id('shifts'),
   handler: async (ctx, { cashierId, openingFloatIDR }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const cashier = await requireActiveCashier(ctx, cafeId, cashierId);
     const floatIDR = assertIDR(openingFloatIDR, 'Modal awal');
     const existingOpen = await ctx.db
@@ -96,7 +96,7 @@ export const close = mutation({
   args: { id: v.id('shifts'), countedCashIDR: v.number() },
   returns: v.null(),
   handler: async (ctx, { id, countedCashIDR }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const shift = await requireOwned(ctx, cafeId, id, 'Shift');
     if (shift.status !== 'open') {
       throw new Error('Shift sudah ditutup.');
@@ -143,7 +143,7 @@ export const closeoutSummary = query({
     varianceIDR: v.union(v.number(), v.null()),
   }),
   handler: async (ctx, { shiftId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const shift = await requireOwned(ctx, cafeId, shiftId, 'Shift');
     const { cashSalesIDR, cashInIDR, cashOutIDR, expectedCashIDR } = await shiftCashBreakdown(
       ctx,
@@ -269,7 +269,7 @@ export const summaryDataOwned = query({
   args: { shiftId: v.id('shifts') },
   returns: shiftSummaryData,
   handler: async (ctx, { shiftId }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const shift = await requireOwned(ctx, cafeId, shiftId, 'Shift');
     return await buildSummaryData(ctx, shift);
   },
@@ -283,7 +283,7 @@ export const listClosed = query({
     continueCursor: v.string(),
   }),
   handler: async (ctx, { paginationOpts }) => {
-    const { cafeId } = await requireOwnerCafe(ctx);
+    const { cafeId } = await requireActiveOutlet(ctx);
     const result = await ctx.db
       .query('shifts')
       .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'closed'))
