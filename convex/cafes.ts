@@ -128,8 +128,14 @@ export const myCafe = query({
     let cafeId;
     try {
       cafeId = (await requireActiveOutlet(ctx)).cafeId;
-    } catch {
-      return null;
+    } catch (e) {
+      // A signed-in user with no reachable outlet resolves to null (the
+      // query's contract). Re-throw anything unexpected so real failures
+      // are not silently hidden.
+      if (e instanceof Error && (e.message === 'not authenticated' || e.message === 'no outlet access')) {
+        return null;
+      }
+      throw e;
     }
     const cafe = await ctx.db.get(cafeId);
     if (!cafe) return null;

@@ -1,7 +1,7 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { query } from './_generated/server';
-import { requireActiveOutlet, resolveOutletAccess } from './lib/auth';
+import { resolveOutletAccess } from './lib/auth';
 
 export const myOutlets = query({
   args: {},
@@ -15,14 +15,18 @@ export const myOutlets = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
-    let activeCafeId;
-    try {
-      activeCafeId = (await requireActiveOutlet(ctx)).cafeId;
-    } catch {
-      return [];
-    }
     const access = await resolveOutletAccess(ctx, userId);
-    if (!access) return [];
+    if (!access || access.accessibleCafeIds.length === 0) return [];
+    // Mirror requireActiveOutlet's active pick (persisted choice when still
+    // accessible, else first accessible) without resolving access twice.
+    const active = await ctx.db
+      .query('activeOutlet')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .first();
+    const activeCafeId =
+      active && access.accessibleCafeIds.includes(active.cafeId)
+        ? active.cafeId
+        : access.accessibleCafeIds[0]!;
     const cafes = await Promise.all(access.accessibleCafeIds.map((id) => ctx.db.get(id)));
     return cafes
       .filter((c): c is NonNullable<typeof c> => c !== null)
