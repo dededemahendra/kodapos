@@ -7,16 +7,9 @@ import { RequirePermission } from '~/components/permission/require-permission';
 import { RangePicker } from '~/components/reports/range-picker';
 import { parseReportSearch, useAllOutletsRange } from '~/components/reports/use-report-range';
 import { DashboardCard } from '~/components/dashboard-card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table';
 import { formatCount, formatIDR } from '~/lib/formater';
 import { OutletsRevenueChart } from '~/components/all-outlets/outlets-revenue-chart';
+import { OutletsTable } from '~/components/all-outlets/outlets-table';
 import { StatCardsSkeleton } from '~/components/ui/loading-skeletons';
 import { Skeleton } from '~/components/ui/skeleton';
 import {
@@ -112,28 +105,7 @@ function AllOutlets() {
 
       <OutletsRevenueChart outlets={data.outlets} />
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead><Trans>Outlet</Trans></TableHead>
-            <TableHead className="text-right"><Trans>Pendapatan</Trans></TableHead>
-            <TableHead className="text-right"><Trans>Transaksi</Trans></TableHead>
-            <TableHead className="text-right"><Trans>Rata-rata</Trans></TableHead>
-            <TableHead className="text-right"><Trans>Item</Trans></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.outlets.map((o) => (
-            <TableRow key={o.cafeId}>
-              <TableCell className="font-medium">{o.name}</TableCell>
-              <TableCell className="text-right">{formatIDR(o.revenueIDR)}</TableCell>
-              <TableCell className="text-right">{formatCount(o.orders)}</TableCell>
-              <TableCell className="text-right">{formatIDR(o.aovIDR)}</TableCell>
-              <TableCell className="text-right">{formatCount(o.itemsSold)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <OutletsTable outlets={data.outlets} />
     </div>
   );
 }
