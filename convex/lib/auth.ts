@@ -13,6 +13,64 @@ export type ActiveOutlet = {
   role: 'owner' | 'manager';
 };
 
+export type OutletAccess = {
+  member: Doc<'businessMembers'> | null;
+  accessibleCafeIds: Id<'cafes'>[];
+  businessId: Id<'businesses'> | null;
+  role: 'owner' | 'manager';
+};
+
+/**
+ * Resolve which outlets a user may operate, plus their membership context.
+ * Returns null when the user can reach no outlet (no membership and no cafe).
+ * Shared by requireActiveOutlet (active pick), outlets.myOutlets (switcher
+ * list) and outlets.setActiveOutlet (access validation). Never writes.
+ */
+export async function resolveOutletAccess(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<'users'>
+): Promise<OutletAccess | null> {
+  const member = await ctx.db
+    .query('businessMembers')
+    .withIndex('by_user', (q) => q.eq('userId', userId))
+    .first();
+
+  // Transitional fallback: an owner whose data predates the multi-outlet
+  // backfill has a cafe but no businessMembers row. Mirror the legacy
+  // requireOwnerCafe behavior (oldest cafe by owner). Removable once the
+  // backfill is confirmed run in all environments.
+  if (!member) {
+    const cafe = await ctx.db
+      .query('cafes')
+      .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
+      .first();
+    if (!cafe) return null;
+    return {
+      member: null,
+      accessibleCafeIds: [cafe._id],
+      businessId: cafe.businessId ?? null,
+      role: 'owner',
+    };
+  }
+
+  let accessibleCafeIds: Id<'cafes'>[];
+  if (member.role === 'owner') {
+    const cafes = await ctx.db
+      .query('cafes')
+      .withIndex('by_business', (q) => q.eq('businessId', member.businessId))
+      .collect();
+    accessibleCafeIds = cafes.map((c) => c._id);
+  } else {
+    const access = await ctx.db
+      .query('memberOutletAccess')
+      .withIndex('by_member', (q) => q.eq('businessMemberId', member._id))
+      .collect();
+    accessibleCafeIds = access.map((a) => a.cafeId);
+  }
+
+  return { member, accessibleCafeIds, businessId: member.businessId, role: member.role };
+}
+
 /**
  * Resolve the outlet (cafe) the signed-in user is currently operating.
  *
@@ -35,43 +93,8 @@ export async function requireActiveOutlet(
     throw new Error('not authenticated');
   }
 
-  const member = await ctx.db
-    .query('businessMembers')
-    .withIndex('by_user', (q) => q.eq('userId', userId))
-    .first();
-
-  // Transitional fallback: an owner whose data predates the multi-outlet
-  // backfill has a cafe but no businessMembers row. Behave exactly like the
-  // legacy requireOwnerCafe (oldest cafe by owner, via by_owner.first()) so
-  // this phase is safe to deploy before the backfill has run everywhere.
-  // Removable once the backfill is confirmed run in all environments.
-  if (!member) {
-    const cafe = await ctx.db
-      .query('cafes')
-      .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
-      .first();
-    if (!cafe) {
-      throw new Error('no outlet access');
-    }
-    return { userId, cafeId: cafe._id, businessId: cafe.businessId ?? null, role: 'owner' };
-  }
-
-  let accessibleCafeIds: Id<'cafes'>[];
-  if (member.role === 'owner') {
-    const cafes = await ctx.db
-      .query('cafes')
-      .withIndex('by_business', (q) => q.eq('businessId', member.businessId))
-      .collect();
-    accessibleCafeIds = cafes.map((c) => c._id);
-  } else {
-    const access = await ctx.db
-      .query('memberOutletAccess')
-      .withIndex('by_member', (q) => q.eq('businessMemberId', member._id))
-      .collect();
-    accessibleCafeIds = access.map((a) => a.cafeId);
-  }
-
-  if (accessibleCafeIds.length === 0) {
+  const access = await resolveOutletAccess(ctx, userId);
+  if (!access || access.accessibleCafeIds.length === 0) {
     throw new Error('no outlet access');
   }
 
@@ -80,11 +103,11 @@ export async function requireActiveOutlet(
     .withIndex('by_user', (q) => q.eq('userId', userId))
     .first();
   const cafeId =
-    active && accessibleCafeIds.includes(active.cafeId)
+    active && access.accessibleCafeIds.includes(active.cafeId)
       ? active.cafeId
-      : accessibleCafeIds[0]!;
+      : access.accessibleCafeIds[0]!;
 
-  return { userId, cafeId, businessId: member.businessId, role: member.role };
+  return { userId, cafeId, businessId: access.businessId, role: access.role };
 }
 
 /**

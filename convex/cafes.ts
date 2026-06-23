@@ -122,14 +122,16 @@ export const myCafe = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
-    // .first() (not .unique()) so a corrupted state with multiple cafes
-    // for the same owner still returns deterministically (the oldest one,
-    // since the index orders by insertion). The mutation is now
-    // idempotent so duplicates can only arise from data already in the DB.
-    const cafe = await ctx.db
-      .query('cafes')
-      .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
-      .first();
+    // Resolve the active outlet (not the oldest cafe) so the client re-scopes
+    // when the user switches outlets. Returns null on no-access rather than
+    // throwing, preserving the query's null-on-signed-out contract.
+    let cafeId;
+    try {
+      cafeId = (await requireActiveOutlet(ctx)).cafeId;
+    } catch {
+      return null;
+    }
+    const cafe = await ctx.db.get(cafeId);
     if (!cafe) return null;
     const logoUrl = cafe.logoStorageId
       ? await ctx.storage.getUrl(cafe.logoStorageId)

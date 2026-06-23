@@ -68,6 +68,7 @@ import type * as orders from "../orders.js";
 import type * as otherIncome from "../otherIncome.js";
 import type * as otp_ResendOTP from "../otp/ResendOTP.js";
 import type * as otp_ResendOTPReset from "../otp/ResendOTPReset.js";
+import type * as outlets from "../outlets.js";
 import type * as payments_providers_index from "../payments/providers/index.js";
 import type * as payments_providers_mock from "../payments/providers/mock.js";
 import type * as payments_providers_types from "../payments/providers/types.js";
@@ -164,6 +165,7 @@ declare const fullApi: ApiFromModules<{
   otherIncome: typeof otherIncome;
   "otp/ResendOTP": typeof otp_ResendOTP;
   "otp/ResendOTPReset": typeof otp_ResendOTPReset;
+  outlets: typeof outlets;
   "payments/providers/index": typeof payments_providers_index;
   "payments/providers/mock": typeof payments_providers_mock;
   "payments/providers/types": typeof payments_providers_types;
