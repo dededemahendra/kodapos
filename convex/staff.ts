@@ -192,14 +192,21 @@ export const setPermissions = mutation({
 
 export const permissionsFor = query({
   args: { cashierId: v.id('cafeStaff') },
-  returns: v.object({
-    role: v.union(v.literal('owner'), v.literal('cashier')),
-    permissions: permissionsValidator,
-  }),
+  // Nullable: a persisted active cashier that doesn't belong to the active
+  // outlet (e.g. after switching/creating an outlet) resolves to null rather
+  // than throwing. This query feeds an app-wide hook, so a throw would crash
+  // the whole app instead of degrading gracefully.
+  returns: v.union(
+    v.object({
+      role: v.union(v.literal('owner'), v.literal('cashier')),
+      permissions: permissionsValidator,
+    }),
+    v.null()
+  ),
   handler: async (ctx, { cashierId }) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     const staff = await ctx.db.get(cashierId);
-    if (!staff || staff.cafeId !== cafeId) throw new Error('Kasir tidak ditemukan.');
+    if (!staff || staff.cafeId !== cafeId) return null;
     return {
       role: staff.role,
       permissions: staff.role === 'owner' ? ALL_TRUE : { ...ALL_FALSE, ...(staff.permissions ?? {}) },

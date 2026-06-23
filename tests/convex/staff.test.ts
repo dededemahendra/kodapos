@@ -153,8 +153,9 @@ describe('staff.permissionsFor', () => {
     const asOwner = await setupOwner(t);
     const ownerStaff = (await asOwner.query(api.staff.list, {})).find((s) => s.role === 'owner');
     const res = await asOwner.query(api.staff.permissionsFor, { cashierId: ownerStaff!._id });
-    expect(res.role).toBe('owner');
-    expect(res.permissions).toEqual({
+    expect(res).not.toBeNull();
+    expect(res!.role).toBe('owner');
+    expect(res!.permissions).toEqual({
       canVoid: true,
       canDiscount: true,
       canManageShift: true,
@@ -172,10 +173,11 @@ describe('staff.permissionsFor', () => {
       permissions: { canVoid: false, canDiscount: true, canManageShift: false, canViewReports: true, canEditMenu: false },
     });
     const res = await asOwner.query(api.staff.permissionsFor, { cashierId });
-    expect(res.role).toBe('cashier');
-    expect(res.permissions.canViewReports).toBe(true);
-    expect(res.permissions.canDiscount).toBe(true);
-    expect(res.permissions.canEditMenu).toBe(false);
+    expect(res).not.toBeNull();
+    expect(res!.role).toBe('cashier');
+    expect(res!.permissions.canViewReports).toBe(true);
+    expect(res!.permissions.canDiscount).toBe(true);
+    expect(res!.permissions.canEditMenu).toBe(false);
   });
 
   it('a cashier with no permissions set is all-false', async () => {
@@ -183,8 +185,9 @@ describe('staff.permissionsFor', () => {
     const asOwner = await setupOwner(t);
     const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
     const res = await asOwner.query(api.staff.permissionsFor, { cashierId });
-    expect(res.role).toBe('cashier');
-    expect(res.permissions).toEqual({
+    expect(res).not.toBeNull();
+    expect(res!.role).toBe('cashier');
+    expect(res!.permissions).toEqual({
       canVoid: false,
       canDiscount: false,
       canManageShift: false,
@@ -193,13 +196,16 @@ describe('staff.permissionsFor', () => {
     });
   });
 
-  it('rejects a cashierId from another cafe', async () => {
+  it('returns null for a cashierId outside the active outlet (no throw)', async () => {
+    // A persisted active cashier from another outlet (e.g. after an outlet
+    // switch) must NOT throw — permissionsFor feeds an app-wide hook, so a
+    // throw crashes the whole app. It degrades to null (no permissions), which
+    // also keeps cross-business isolation: no foreign cashier's data is leaked.
     const t = convexTest(schema, modules);
     const ownerA = await setupOwner(t, 'a@x.com');
     const ownerB = await setupOwner(t, 'b@x.com');
     const cashierBId = await ownerB.mutation(api.staff.create, { name: 'Budi', pin: '5678' });
-    await expect(
-      ownerA.query(api.staff.permissionsFor, { cashierId: cashierBId })
-    ).rejects.toThrow(/tidak ditemukan/i);
+    const res = await ownerA.query(api.staff.permissionsFor, { cashierId: cashierBId });
+    expect(res).toBeNull();
   });
 });
