@@ -61,7 +61,7 @@ export function OutletSwitcher() {
 						{o.isActive ? <Check className="ml-auto size-4" /> : null}
 					</DropdownMenuItem>
 				))}
-				<DropdownMenuSeparator />
+				{outlets && outlets.length > 0 ? <DropdownMenuSeparator /> : null}
 				<DropdownMenuLabel className="font-normal text-[10px] text-muted-foreground">
 					kodapos v{__APP_VERSION__}
 				</DropdownMenuLabel>
