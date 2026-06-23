@@ -43,7 +43,7 @@ export function RangePicker({
 
   const selected: DateRange | undefined =
     'from' in search ? { from: keyToDate(search.from), to: keyToDate(search.to) } : undefined;
-  const customLabel = 'from' in search ? `${search.from} – ${search.to}` : null;
+  const customLabel = 'from' in search ? `${search.from} → ${search.to}` : null;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
