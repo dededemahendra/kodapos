@@ -272,8 +272,9 @@ export const removeLogo = mutation({
 /**
  * One-shot cleanup for owners with duplicate cafe rows (caused by the
  * non-idempotent createForOwner mutation before it was fixed). Keeps the
- * OLDEST cafe (the one that `requireActiveOutlet`/`myCafe` now pick via
- * `.first()`); deletes every empty newer duplicate. A "duplicate" is only
+ * OLDEST cafe by creation time; deletes every empty newer duplicate. (The
+ * active outlet is resolved separately by `requireActiveOutlet`/`myCafe`,
+ * not by oldest-cafe order.) A "duplicate" is only
  * deleted if it has no categories, items, modifier groups, staff rows,
  * shifts, or orders attached — keeping anything that has data, so the
  * caller can manually reconcile if a newer cafe accidentally accrued
