@@ -153,3 +153,77 @@ describe('acceptPendingInvites', () => {
     expect(result.accepted).toBe(0);
   });
 });
+
+describe('member management', () => {
+  async function seedOwnerWithManager(t: ReturnType<typeof convexTest>) {
+    const { asOwner, userId: ownerId, cafeId, businessId } = await seedOwner(t);
+    const second = await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Cabang 2', ownerUserId: ownerId, businessId, createdAt: 2 })
+    );
+    await asOwner.mutation(api.invites.inviteManager, { email: 'mgr@x.com', cafeIds: [cafeId] });
+    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' }));
+    const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
+    await asMgr.mutation(api.invites.acceptPendingInvites, {});
+    const member = await t.run((ctx) =>
+      ctx.db.query('businessMembers').filter((q) => q.eq(q.field('userId'), mgrUserId)).first()
+    );
+    return { asOwner, ownerId, cafeId, second, businessId, mgrUserId, memberId: member!._id };
+  }
+
+  it('lists members (owner + manager) and pending invites', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await seedOwnerWithManager(t);
+    await asOwner.mutation(api.invites.inviteManager, { email: 'pending@x.com', cafeIds: [cafeId] });
+
+    const members = await asOwner.query(api.invites.listMembers, {});
+    expect(members.some((m) => m.role === 'owner')).toBe(true);
+    const mgr = members.find((m) => m.role === 'manager');
+    expect(mgr?.email).toBe('mgr@x.com');
+    expect(mgr?.cafeIds).toEqual([cafeId]);
+
+    const invites = await asOwner.query(api.invites.listPendingInvites, {});
+    expect(invites.map((i) => i.email)).toContain('pending@x.com');
+  });
+
+  it('reassigns a manager outlets', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, second, memberId } = await seedOwnerWithManager(t);
+    await asOwner.mutation(api.invites.setManagerOutlets, { memberId, cafeIds: [second] });
+    const access = await t.run((ctx) =>
+      ctx.db.query('memberOutletAccess').withIndex('by_member', (q) => q.eq('businessMemberId', memberId)).collect()
+    );
+    expect(access.map((a) => a.cafeId)).toEqual([second]);
+  });
+
+  it('revokes a manager (deletes membership + access)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, mgrUserId, memberId } = await seedOwnerWithManager(t);
+    await asOwner.mutation(api.invites.revokeMember, { memberId });
+    const member = await t.run((ctx) =>
+      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', mgrUserId)).first()
+    );
+    expect(member).toBeNull();
+    const access = await t.run((ctx) =>
+      ctx.db.query('memberOutletAccess').withIndex('by_member', (q) => q.eq('businessMemberId', memberId)).collect()
+    );
+    expect(access).toHaveLength(0);
+  });
+
+  it('cancels a pending invite', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await seedOwner(t);
+    await asOwner.mutation(api.invites.inviteManager, { email: 'cancel@x.com', cafeIds: [cafeId] });
+    const invites = await asOwner.query(api.invites.listPendingInvites, {});
+    await asOwner.mutation(api.invites.cancelInvite, { inviteId: invites[0]!.inviteId });
+    expect(await asOwner.query(api.invites.listPendingInvites, {})).toHaveLength(0);
+  });
+
+  it('rejects revoking the owner and reassigning across businesses', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, ownerId } = await seedOwnerWithManager(t);
+    const ownerMember = await t.run((ctx) =>
+      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', ownerId)).first()
+    );
+    await expect(asOwner.mutation(api.invites.revokeMember, { memberId: ownerMember!._id })).rejects.toThrow();
+  });
+});
