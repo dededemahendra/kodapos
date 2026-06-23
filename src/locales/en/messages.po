@@ -921,6 +921,7 @@ msgstr "New"
 msgid "Basi/Kedaluwarsa"
 msgstr "Spoiled/Expired"
 
+#: src/components/add-outlet-dialog.tsx
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/customer/customer-form-dialog.tsx
 #: src/components/expenses/expense-dialog.tsx
@@ -1357,6 +1358,14 @@ msgstr "Create modifier groups (e.g. Size) and attach them to items."
 #: src/components/onboarding/steps/menu-step.tsx
 msgid "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
 msgstr "Create categories, add items, and group reusable modifiers. You can finish now or continue anytime from the main menu."
+
+#: src/components/add-outlet-dialog.tsx
+msgid "Buat outlet"
+msgstr "Create outlet"
+
+#: src/components/add-outlet-dialog.tsx
+msgid "Buat outlet baru. Anda bisa mengatur menu, pajak, dan jam buka setelahnya."
+msgstr "Create a new outlet. You can set up its menu, tax, and hours afterward."
 
 #: src/routes/_pos/inventory/purchase-orders.tsx
 msgid "Buat pesanan beli ke pemasok, lalu terima barang untuk menambah stok."
@@ -2076,6 +2085,10 @@ msgstr "Failed to generate barcode."
 #: src/components/menu/category-table.tsx
 #~ msgid "Gagal membuat kategori."
 #~ msgstr "Failed to create category."
+
+#: src/components/add-outlet-dialog.tsx
+msgid "Gagal membuat outlet."
+msgstr "Failed to create outlet."
 
 #: src/components/inventory/purchase-order-form-dialog.tsx
 msgid "Gagal membuat pesanan beli."
@@ -4118,6 +4131,10 @@ msgstr "e.g. not spicy"
 msgid "mis. Warren"
 msgstr "e.g. Warren"
 
+#: src/components/add-outlet-dialog.tsx
+msgid "Misalnya: Kopi Senja Cabang 2"
+msgstr "For example: Kopi Senja Branch 2"
+
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Modal awal"
 msgstr "Opening cash"
@@ -4268,6 +4285,14 @@ msgstr "Merchant name"
 #: src/components/menu/modifier-group-form.tsx
 msgid "Nama opsi (mis. Large)"
 msgstr "Option name (e.g. Large)"
+
+#: src/components/add-outlet-dialog.tsx
+msgid "Nama outlet"
+msgstr "Outlet name"
+
+#: src/components/add-outlet-dialog.tsx
+msgid "Nama outlet wajib diisi."
+msgstr "Outlet name is required."
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Nama pajak"
@@ -6283,6 +6308,11 @@ msgstr "Add to order"
 #: src/components/tables/table-manage-dialog.tsx
 msgid "Tambah meja"
 msgstr "Add table"
+
+#: src/components/add-outlet-dialog.tsx
+#: src/components/outlet-switcher.tsx
+msgid "Tambah outlet"
+msgstr "Add outlet"
 
 #: src/components/customer/customer-form-dialog.tsx
 #: src/routes/_pos/customers.tsx
