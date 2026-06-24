@@ -150,3 +150,22 @@ export async function requireOwned<T extends TenantTable>(
   }
   return row as Doc<T>;
 }
+
+/**
+ * Platform-operator gate. Resolves the signed-in user and asserts the
+ * isPlatformAdmin flag. Cross-tenant: not scoped to any cafe/business.
+ * Throws 'not authenticated' with no identity, 'not a platform admin' otherwise.
+ */
+export async function requirePlatformAdmin(
+  ctx: QueryCtx | MutationCtx
+): Promise<{ userId: Id<'users'>; user: Doc<'users'> }> {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) {
+    throw new Error('not authenticated');
+  }
+  const user = await ctx.db.get(userId);
+  if (!user || user.isPlatformAdmin !== true) {
+    throw new Error('not a platform admin');
+  }
+  return { userId, user };
+}
