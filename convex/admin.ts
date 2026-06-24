@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { query } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import type { Doc, Id } from './_generated/dataModel';
 import { requirePlatformAdmin, resolveOutletAccess } from './lib/auth';
 
@@ -62,5 +62,47 @@ export const me = query({
     if (!userId) return { isPlatformAdmin: false };
     const user = await ctx.db.get(userId);
     return { isPlatformAdmin: user?.isPlatformAdmin === true };
+  },
+});
+
+export const fixOutletAccess = mutation({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    await requirePlatformAdmin(ctx);
+    const cafes = await ctx.db
+      .query('cafes')
+      .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
+      .collect();
+    let fixed = false;
+    const now = Date.now();
+    for (const cafe of cafes) {
+      let businessId = cafe.businessId ?? null;
+      if (!businessId) {
+        businessId = await ctx.db.insert('businesses', {
+          name: cafe.name,
+          ownerUserId: userId,
+          createdAt: cafe.createdAt ?? now,
+        });
+        await ctx.db.patch(cafe._id, { businessId });
+        fixed = true;
+      }
+      const member = await ctx.db
+        .query('businessMembers')
+        .withIndex('by_user', (q) => q.eq('userId', userId))
+        .first();
+      if (!member) {
+        await ctx.db.insert('businessMembers', { businessId, userId, role: 'owner', createdAt: now });
+        fixed = true;
+      }
+      const active = await ctx.db
+        .query('activeOutlet')
+        .withIndex('by_user', (q) => q.eq('userId', userId))
+        .first();
+      if (!active) {
+        await ctx.db.insert('activeOutlet', { userId, cafeId: cafe._id, updatedAt: now });
+        fixed = true;
+      }
+    }
+    return { fixed };
   },
 });

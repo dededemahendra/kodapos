@@ -61,3 +61,32 @@ describe('admin.listUsers joins', () => {
     expect(await t.query(api.admin.me, {})).toEqual({ isPlatformAdmin: false });
   });
 });
+
+describe('admin.fixOutletAccess', () => {
+  it('repairs a pre-backfill owner and is idempotent', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Legacy', email: 'legacy@x.com' }));
+    await t.run((ctx) => ctx.db.insert('cafes', { name: 'Old Cafe', ownerUserId: ownerId, createdAt: 1 }));
+
+    const first = await as(t, adminId).mutation(api.admin.fixOutletAccess, { userId: ownerId });
+    expect(first).toEqual({ fixed: true });
+
+    const rows = await as(t, adminId).query(api.admin.listUsers, { search: 'legacy' });
+    expect(rows[0].accessHealth).toBe('ok');
+    expect(rows[0].role).toBe('owner');
+
+    const second = await as(t, adminId).mutation(api.admin.fixOutletAccess, { userId: ownerId });
+    expect(second).toEqual({ fixed: false });
+  });
+
+  it('rejects a non-admin caller', async () => {
+    const t = convexTest(schema, modules);
+    const uid = await t.run((ctx) => ctx.db.insert('users', { name: 'Reg', email: 'reg@x.com' }));
+    await expect(
+      as(t, uid).mutation(api.admin.fixOutletAccess, { userId: uid })
+    ).rejects.toThrow('not a platform admin');
+  });
+});
