@@ -96,6 +96,11 @@ export async function requireActiveOutlet(
     throw new Error('not authenticated');
   }
 
+  const callerUser = await ctx.db.get(userId);
+  if (callerUser?.deactivatedAt != null) {
+    throw new Error('account deactivated');
+  }
+
   const access = await resolveOutletAccess(ctx, userId);
   if (!access || access.accessibleCafeIds.length === 0) {
     throw new Error('no outlet access');

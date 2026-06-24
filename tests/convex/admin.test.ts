@@ -90,3 +90,34 @@ describe('admin.fixOutletAccess', () => {
     ).rejects.toThrow('not a platform admin');
   });
 });
+
+describe('admin.setDeactivated', () => {
+  it('blocks self-deactivation', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    await expect(
+      as(t, adminId).mutation(api.admin.setDeactivated, { userId: adminId, deactivated: true })
+    ).rejects.toThrow('cannot deactivate yourself');
+  });
+
+  it('deactivated user can no longer reach an outlet', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    // A normal owner with a working cafe (created through the real flow).
+    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Op', email: 'op@x.com' }));
+    await as(t, ownerId).mutation(api.cafes.createForOwner, { name: 'Kopi' });
+    // Sanity: works before deactivation.
+    expect(await as(t, ownerId).query(api.cafes.myCafe, {})).not.toBeNull();
+
+    await as(t, adminId).mutation(api.admin.setDeactivated, { userId: ownerId, deactivated: true });
+    // myCafe swallows the throw and returns null; a hard gate throws.
+    await expect(as(t, ownerId).query(api.shifts.current, {})).rejects.toThrow('account deactivated');
+
+    await as(t, adminId).mutation(api.admin.setDeactivated, { userId: ownerId, deactivated: false });
+    await expect(as(t, ownerId).query(api.shifts.current, {})).resolves.toBeDefined();
+  });
+});

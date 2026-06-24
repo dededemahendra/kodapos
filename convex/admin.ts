@@ -65,6 +65,18 @@ export const me = query({
   },
 });
 
+export const setDeactivated = mutation({
+  args: { userId: v.id('users'), deactivated: v.boolean() },
+  handler: async (ctx, { userId, deactivated }) => {
+    const { userId: callerId } = await requirePlatformAdmin(ctx);
+    if (userId === callerId) {
+      throw new Error('cannot deactivate yourself');
+    }
+    await ctx.db.patch(userId, { deactivatedAt: deactivated ? Date.now() : undefined });
+    return null;
+  },
+});
+
 export const fixOutletAccess = mutation({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
