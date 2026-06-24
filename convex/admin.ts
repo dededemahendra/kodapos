@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { mutation, query } from './_generated/server';
+import { internalMutation, mutation, query } from './_generated/server';
 import type { Doc, Id } from './_generated/dataModel';
 import { requirePlatformAdmin, resolveOutletAccess } from './lib/auth';
 
@@ -135,5 +135,30 @@ export const fixOutletAccess = mutation({
       }
     }
     return { fixed };
+  },
+});
+
+/**
+ * One-off bootstrap: grant platform-admin to a user by email. Internal only
+ * (not reachable from the client), so it bypasses requirePlatformAdmin and is
+ * the chicken-and-egg cure for the FIRST admin. After one admin exists, manage
+ * the rest from the /admin/users UI (setPlatformAdmin). Idempotent.
+ *
+ * Run with:
+ *   ./node_modules/.bin/convex run admin:grantPlatformAdminByEmail '{"email":"admin@kodapos.app"}'
+ */
+export const grantPlatformAdminByEmail = internalMutation({
+  args: { email: v.string() },
+  returns: v.object({ granted: v.boolean(), userId: v.union(v.id('users'), v.null()) }),
+  handler: async (ctx, { email }) => {
+    const user = await ctx.db
+      .query('users')
+      .withIndex('email', (q) => q.eq('email', email))
+      .first();
+    if (!user) {
+      return { granted: false, userId: null };
+    }
+    await ctx.db.patch(user._id, { isPlatformAdmin: true });
+    return { granted: true, userId: user._id };
   },
 });
