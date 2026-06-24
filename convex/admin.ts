@@ -77,6 +77,25 @@ export const setDeactivated = mutation({
   },
 });
 
+export const setPlatformAdmin = mutation({
+  args: { userId: v.id('users'), isAdmin: v.boolean() },
+  handler: async (ctx, { userId, isAdmin }) => {
+    const { userId: callerId } = await requirePlatformAdmin(ctx);
+    if (userId === callerId) {
+      throw new Error('cannot change your own admin status');
+    }
+    if (!isAdmin) {
+      const admins = await ctx.db.query('users').collect();
+      const adminCount = admins.filter((u) => u.isPlatformAdmin === true).length;
+      if (adminCount <= 1) {
+        throw new Error('cannot remove the last admin');
+      }
+    }
+    await ctx.db.patch(userId, { isPlatformAdmin: isAdmin ? true : undefined });
+    return null;
+  },
+});
+
 export const fixOutletAccess = mutation({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {

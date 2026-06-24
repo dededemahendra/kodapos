@@ -121,3 +121,32 @@ describe('admin.setDeactivated', () => {
     await expect(as(t, ownerId).query(api.shifts.current, {})).resolves.toBeDefined();
   });
 });
+
+describe('admin.setPlatformAdmin', () => {
+  it('grants admin to another user', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    const other = await t.run((ctx) => ctx.db.insert('users', { name: 'Op', email: 'op@x.com' }));
+    await as(t, adminId).mutation(api.admin.setPlatformAdmin, { userId: other, isAdmin: true });
+    expect(await as(t, other).query(api.admin.me, {})).toEqual({ isPlatformAdmin: true });
+  });
+
+  it('blocks changing your own status and removing the last admin', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    await expect(
+      as(t, adminId).mutation(api.admin.setPlatformAdmin, { userId: adminId, isAdmin: false })
+    ).rejects.toThrow('cannot change your own admin status');
+
+    const other = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Op', email: 'op@x.com', isPlatformAdmin: true })
+    );
+    // Demote the only OTHER admin while the caller stays admin -> allowed.
+    await as(t, adminId).mutation(api.admin.setPlatformAdmin, { userId: other, isAdmin: false });
+    expect(await as(t, other).query(api.admin.me, {})).toEqual({ isPlatformAdmin: false });
+  });
+});
