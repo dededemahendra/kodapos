@@ -3,7 +3,12 @@ import { useQuery } from 'convex/react';
 import { useEffect } from 'react';
 import { useActiveCashier } from './active-cashier';
 
-export type Permission = 'canVoid' | 'canDiscount' | 'canManageShift' | 'canViewReports' | 'canEditMenu';
+export type Permission =
+  | 'canVoid'
+  | 'canDiscount'
+  | 'canManageShift'
+  | 'canViewReports'
+  | 'canEditMenu';
 
 export function usePermissions(): {
   can: (p: Permission) => boolean;
@@ -43,6 +48,7 @@ export function usePermissions(): {
     can: (p) => (hasCashier ? data.role === 'owner' || data.permissions[p] : isAccountMember),
     isOwner: isAccountOwner || (hasCashier && data.role === 'owner'),
     isPlatformAdmin,
-    isLoading: cafe === undefined || adminMe === undefined || (cashierId !== null && data === undefined),
+    isLoading:
+      cafe === undefined || adminMe === undefined || (cashierId !== null && data === undefined),
   };
 }

@@ -6,7 +6,13 @@ import { ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '~/components/ui/badge';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Input } from '~/components/ui/input';
 import { RowActions } from '~/components/ui/row-actions';
 import { Spinner } from '~/components/ui/spinner';
@@ -31,13 +37,20 @@ function AdminUsersPage() {
   const setAdmin = useMutation(api.admin.setPlatformAdmin);
   const [confirm, setConfirm] = useState<ConfirmState>(null);
 
-  if (isLoading) return <div className="p-6"><Spinner /></div>;
+  if (isLoading)
+    return (
+      <div className="p-6">
+        <Spinner />
+      </div>
+    );
   if (!isPlatformAdmin) {
     return (
       <div className="p-6">
         <Empty>
           <EmptyHeader>
-            <EmptyMedia variant="icon"><ShieldCheck /></EmptyMedia>
+            <EmptyMedia variant="icon">
+              <ShieldCheck />
+            </EmptyMedia>
             <EmptyTitle>Admins only</EmptyTitle>
             <EmptyDescription>You do not have platform admin access.</EmptyDescription>
           </EmptyHeader>
@@ -85,11 +98,15 @@ function AdminUsersPage() {
       </div>
 
       {users === undefined ? (
-        <div className="py-10"><Spinner /></div>
+        <div className="py-10">
+          <Spinner />
+        </div>
       ) : users.length === 0 ? (
         <Empty>
           <EmptyHeader>
-            <EmptyMedia variant="icon"><ShieldCheck /></EmptyMedia>
+            <EmptyMedia variant="icon">
+              <ShieldCheck />
+            </EmptyMedia>
             <EmptyTitle>No users found</EmptyTitle>
             <EmptyDescription>Try a different search.</EmptyDescription>
           </EmptyHeader>
@@ -112,7 +129,11 @@ function AdminUsersPage() {
                 <tr key={u._id} className="border-b last:border-0">
                   <td className="p-3">
                     {u.name ?? 'unnamed'}
-                    {u.isPlatformAdmin && <Badge variant="secondary" className="ml-2">admin</Badge>}
+                    {u.isPlatformAdmin && (
+                      <Badge variant="secondary" className="ml-2">
+                        admin
+                      </Badge>
+                    )}
                   </td>
                   <td className="p-3 text-muted-foreground">{u.email ?? 'no email'}</td>
                   <td className="p-3">{u.cafeNames.join(', ') || 'none'}</td>
@@ -124,7 +145,9 @@ function AdminUsersPage() {
                       <Badge variant="outline">active</Badge>
                     )}
                     {u.accessHealth === 'no_outlet' && (
-                      <Badge variant="secondary" className="ml-2">no outlet</Badge>
+                      <Badge variant="secondary" className="ml-2">
+                        no outlet
+                      </Badge>
                     )}
                   </td>
                   <td className="p-3">
