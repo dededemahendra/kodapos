@@ -43,6 +43,6 @@ export function usePermissions(): {
     can: (p) => (hasCashier ? data.role === 'owner' || data.permissions[p] : isAccountMember),
     isOwner: isAccountOwner || (hasCashier && data.role === 'owner'),
     isPlatformAdmin,
-    isLoading: cafe === undefined || (cashierId !== null && data === undefined),
+    isLoading: cafe === undefined || adminMe === undefined || (cashierId !== null && data === undefined),
   };
 }

@@ -5,7 +5,6 @@ import { useMutation, useQuery } from 'convex/react';
 import { ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '~/components/ui/badge';
-import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Input } from '~/components/ui/input';
@@ -187,6 +186,13 @@ function AdminUsersPage() {
               : 'This change takes effect immediately.'
         }
         confirmLabel="Confirm"
+        destructive={
+          confirm?.kind === 'deactivate'
+            ? confirm.next
+            : confirm?.kind === 'admin'
+              ? !confirm.next
+              : false
+        }
         onConfirm={runConfirm}
       />
     </div>
