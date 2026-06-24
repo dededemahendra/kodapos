@@ -75,8 +75,8 @@ describe('admin.fixOutletAccess', () => {
     expect(first).toEqual({ fixed: true });
 
     const rows = await as(t, adminId).query(api.admin.listUsers, { search: 'legacy' });
-    expect(rows[0].accessHealth).toBe('ok');
-    expect(rows[0].role).toBe('owner');
+    expect(rows[0]!.accessHealth).toBe('ok');
+    expect(rows[0]!.role).toBe('owner');
 
     const second = await as(t, adminId).mutation(api.admin.fixOutletAccess, { userId: ownerId });
     expect(second).toEqual({ fixed: false });
