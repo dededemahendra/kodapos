@@ -28,7 +28,7 @@ export function CommandPalette() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
   const { t, i18n } = useLingui();
-  const { can, isOwner, isLoading: permLoading } = usePermissions();
+  const { can, isOwner, isPlatformAdmin, isLoading: permLoading } = usePermissions();
 
   const trimmed = query.trim();
   const isLive = open && trimmed.length >= 2;
@@ -61,7 +61,9 @@ export function CommandPalette() {
 
   // Permission-filtered nav items (mirrors app-sidebar logic)
   const allowed = (req?: SidebarNavItem['requires']) =>
-    !req || permLoading || (req === 'owner' ? isOwner : can(req));
+    !req ||
+    permLoading ||
+    (req === 'owner' ? isOwner : req === 'platformAdmin' ? isPlatformAdmin : can(req));
   const permittedNav = navGroups.flatMap((g) =>
     g.items.flatMap((item) => {
       if (!allowed(item.requires)) return [];
