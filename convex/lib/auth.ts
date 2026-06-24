@@ -104,7 +104,7 @@ export async function requireActiveUser(
  *   1. owner  -> all cafes in their business
  *      manager-> the cafes granted via memberOutletAccess
  *   2. active outlet = the persisted choice when still accessible, else the
- *      first accessible outlet (an ephemeral default -- this helper runs in
+ *      first accessible outlet (an ephemeral default; this helper runs in
  *      queries and MUST NOT write; only setActiveOutlet persists a choice).
  *
  * Throws 'not authenticated' with no identity and 'no outlet access' when the
