@@ -75,6 +75,28 @@ export async function resolveOutletAccess(
 }
 
 /**
+ * Resolve the signed-in, non-deactivated user. Throws 'not authenticated' with
+ * no identity and 'account deactivated' when the account has been deactivated
+ * by a platform admin. Use at the top of any handler that must be denied to a
+ * deactivated user but does not need full outlet resolution.
+ */
+export async function requireActiveUser(
+  ctx: QueryCtx | MutationCtx
+): Promise<{ userId: Id<'users'>; user: Doc<'users'> }> {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) {
+    throw new Error('not authenticated');
+  }
+  const user = await ctx.db.get(userId);
+  if (user?.deactivatedAt != null) {
+    throw new Error('account deactivated');
+  }
+  // user can be null only if the row was deleted mid-session; downstream
+  // resolution handles that (no outlet access), so return it as-is typed.
+  return { userId, user: user as Doc<'users'> };
+}
+
+/**
  * Resolve the outlet (cafe) the signed-in user is currently operating.
  *
  * Returns a superset of the legacy `{ userId, cafeId }` shape so the ~230
@@ -82,7 +104,7 @@ export async function resolveOutletAccess(
  *   1. owner  -> all cafes in their business
  *      manager-> the cafes granted via memberOutletAccess
  *   2. active outlet = the persisted choice when still accessible, else the
- *      first accessible outlet (an ephemeral default — this helper runs in
+ *      first accessible outlet (an ephemeral default -- this helper runs in
  *      queries and MUST NOT write; only setActiveOutlet persists a choice).
  *
  * Throws 'not authenticated' with no identity and 'no outlet access' when the
@@ -91,15 +113,7 @@ export async function resolveOutletAccess(
 export async function requireActiveOutlet(
   ctx: QueryCtx | MutationCtx
 ): Promise<ActiveOutlet> {
-  const userId = await getAuthUserId(ctx);
-  if (!userId) {
-    throw new Error('not authenticated');
-  }
-
-  const callerUser = await ctx.db.get(userId);
-  if (callerUser?.deactivatedAt != null) {
-    throw new Error('account deactivated');
-  }
+  const { userId } = await requireActiveUser(ctx);
 
   const access = await resolveOutletAccess(ctx, userId);
   if (!access || access.accessibleCafeIds.length === 0) {

@@ -2,8 +2,7 @@ import { v } from 'convex/values';
 import { query } from './_generated/server';
 import type { QueryCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { getAuthUserId } from '@convex-dev/auth/server';
-import { requireActiveOutlet, resolveOutletAccess } from './lib/auth';
+import { requireActiveOutlet, requireActiveUser, resolveOutletAccess } from './lib/auth';
 import { methodTotals } from './lib/payment';
 import { type RangeArgs, dayKeyFn, eachDayKey, resolveRange, tzFor } from './lib/time';
 
@@ -459,8 +458,7 @@ export const businessOverview = query({
     toKey: v.string(),
   }),
   handler: async (ctx, { range }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error('not authenticated');
+    const { userId } = await requireActiveUser(ctx);
     const access = await resolveOutletAccess(ctx, userId);
     if (!access || access.accessibleCafeIds.length === 0) {
       throw new Error('no outlet access');

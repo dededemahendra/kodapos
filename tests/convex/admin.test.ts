@@ -150,3 +150,28 @@ describe('admin.setPlatformAdmin', () => {
     expect(await as(t, other).query(api.admin.me, {})).toEqual({ isPlatformAdmin: false });
   });
 });
+
+describe('deactivation lockout (requireActiveUser)', () => {
+  it('blocks a deactivated user from businessOverview and createForOwner', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Op', email: 'op2@x.com' }));
+    await as(t, ownerId).mutation(api.cafes.createForOwner, { name: 'Kopi' });
+
+    // Works before deactivation.
+    await expect(
+      as(t, ownerId).query(api.reports.businessOverview, { range: { preset: 'today' } })
+    ).resolves.toBeDefined();
+
+    await as(t, adminId).mutation(api.admin.setDeactivated, { userId: ownerId, deactivated: true });
+
+    await expect(
+      as(t, ownerId).query(api.reports.businessOverview, { range: { preset: 'today' } })
+    ).rejects.toThrow('account deactivated');
+    await expect(
+      as(t, ownerId).mutation(api.cafes.createForOwner, { name: 'Another' })
+    ).rejects.toThrow('account deactivated');
+  });
+});
