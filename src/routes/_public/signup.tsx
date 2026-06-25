@@ -134,19 +134,33 @@ function SignupPage() {
     setAuthError(null);
     try {
       setRememberMe(true);
-      await signIn('password', {
-        flow: 'signUp',
-        email: email.value.trim(),
-        password: password.value,
-        name: name.value.trim(),
-      });
-      await createCafeWhenAuthReady(convex, cafeName.value.trim());
+      // Step 1: create the account. This IS the signup. If it throws, no account
+      // was created (or the email already exists), so surface the error and stop.
+      try {
+        await signIn('password', {
+          flow: 'signUp',
+          email: email.value.trim(),
+          password: password.value,
+          name: name.value.trim(),
+        });
+      } catch {
+        // signUp failures (e.g. email already registered) surface as a masked
+        // "Server Error" on the client; show a friendly message instead.
+        setAuthError(t`Gagal mendaftar.`);
+        return;
+      }
+      // Step 2: create the cafe inline as a best effort. The account already
+      // exists now, so a failure here (most often the auth-token propagation
+      // race that throws "not authenticated") must NOT fail the whole signup and
+      // orphan the account. The post-auth OnboardingGate routes the signed-in,
+      // cafe-less user into onboarding to finish setup, the same path Google
+      // signups already rely on.
+      try {
+        await createCafeWhenAuthReady(convex, cafeName.value.trim());
+      } catch {
+        // intentionally ignored; onboarding creates the cafe for a cafe-less user
+      }
       navigate({ to: '/onboarding/profile' });
-    } catch {
-      // signUp failures (e.g. email already registered) and cafe-creation errors
-      // surface as a masked "Server Error" on the client; show a friendly message
-      // rather than that raw string.
-      setAuthError(t`Gagal mendaftar.`);
     } finally {
       setSubmitting(false);
     }
