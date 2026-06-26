@@ -8,6 +8,7 @@ import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { SettingsPageHeader } from '~/components/settings/primitives';
+import { IntegrationLogo } from '~/components/settings/integration-logo';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import {
@@ -342,12 +343,9 @@ function SettingsIntegrations() {
                   <Card key={entry.key}>
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="size-8 rounded bg-muted grid place-items-center font-semibold text-sm">
-                            {resolvedName[0]}
-                          </div>
-                          <CardTitle className="text-base">{resolvedName}</CardTitle>
-                        </div>
+                        <CardTitle className="min-w-0 text-base">
+                          <IntegrationLogo entryKey={entry.key} name={resolvedName} />
+                        </CardTitle>
                         {isConnected ? (
                           <Badge>
                             <Trans>Terhubung</Trans>
