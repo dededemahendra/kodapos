@@ -95,6 +95,19 @@ export function formatDayKey(key: string): string {
   }).format(date);
 }
 
+/**
+ * Localized long weekday name for a day index where 0=Mon..6=Sun (matching
+ * convex/lib/forecast.ts), e.g. 4 → "Jumat" / "Friday". Anchored to a known
+ * Monday (2024-01-01 UTC) so it's a pure name lookup, timezone-independent.
+ */
+export function formatWeekday(dow: number): string {
+  const date = new Date(Date.UTC(2024, 0, 1 + dow));
+  return new Intl.DateTimeFormat(activeLocale(), {
+    weekday: 'long',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
 /** Locale-aware integer count with grouping separators, e.g. "1.234" / "1,234". */
 export function formatCount(value: number): string {
   return new Intl.NumberFormat(activeLocale()).format(value);
