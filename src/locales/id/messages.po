@@ -1231,8 +1231,8 @@ msgid "Belum masuk"
 msgstr "Belum masuk"
 
 #: src/routes/_public/signin.tsx
-msgid "Belum punya akun?"
-msgstr "Belum punya akun?"
+#~ msgid "Belum punya akun?"
+#~ msgstr "Belum punya akun?"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Belum terhubung"
@@ -1357,8 +1357,8 @@ msgstr "Buat 2-3 kategori (Kopi, Non-Kopi, Makanan)."
 #~ msgstr "Buat 2–3 kategori (Kopi, Non-Kopi, Makanan)."
 
 #: src/routes/_public/signup.tsx
-msgid "Buat akun"
-msgstr "Buat akun"
+#~ msgid "Buat akun"
+#~ msgstr "Buat akun"
 
 #: src/components/marketing/how-it-works.tsx
 msgid "Buat akun, lalu tambahkan menu, harga, dan stok dalam hitungan menit."
@@ -1515,6 +1515,10 @@ msgstr "Buka shift baru sebelum menerima penjualan."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Buka/tutup shift"
 msgstr "Buka/tutup shift"
+
+#: src/components/onboarding/steps/profile-step.tsx
+msgid "Bukan bisnis Anda? Keluar"
+msgstr "Bukan bisnis Anda? Keluar"
 
 #: src/components/marketing/why-indonesia.tsx
 msgid "Bukan sekadar terjemahan. kodapos paham cara kerja usaha lokal."
@@ -1780,8 +1784,6 @@ msgstr "Cukup tablet, HP, atau laptop yang sudah Anda punya."
 
 #: src/components/marketing/marketing-footer.tsx
 #: src/components/marketing/marketing-header.tsx
-#: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Daftar"
 msgstr "Daftar"
 
@@ -2230,8 +2232,8 @@ msgid "Gagal mencetak."
 msgstr "Gagal mencetak."
 
 #: src/routes/_public/signup.tsx
-msgid "Gagal mendaftar."
-msgstr "Gagal mendaftar."
+#~ msgid "Gagal mendaftar."
+#~ msgstr "Gagal mendaftar."
 
 #: src/components/giftcard/gift-card-form-dialog.tsx
 msgid "Gagal menerbitkan kartu hadiah."
@@ -3887,7 +3889,6 @@ msgstr "Margin muncul setelah ada item terjual pada rentang ini."
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Masuk"
 msgstr "Masuk"
 
@@ -4008,7 +4009,6 @@ msgstr "Memproses tautan masuk..."
 #: src/components/sale/qris-static-payment-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Memproses…"
 msgstr "Memproses…"
 
@@ -4166,7 +4166,6 @@ msgid "Minggu sebelumnya"
 msgstr "Minggu sebelumnya"
 
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Minimal 8 karakter"
 msgstr "Minimal 8 karakter"
 
@@ -4184,8 +4183,8 @@ msgstr "mis. Andi"
 #~ msgstr "mis. Kopi"
 
 #: src/routes/_public/signup.tsx
-msgid "mis. Kopi Senja"
-msgstr "mis. Kopi Senja"
+#~ msgid "mis. Kopi Senja"
+#~ msgstr "mis. Kopi Senja"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Mis. PB1 atau PPN."
@@ -4199,7 +4198,7 @@ msgstr "Mis. PB1 atau PPN."
 msgid "mis. tidak pedas"
 msgstr "mis. tidak pedas"
 
-#: src/routes/_public/signup.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "mis. Warren"
 msgstr "mis. Warren"
 
@@ -4303,7 +4302,7 @@ msgstr "Nama / Email"
 msgid "Nama / meja"
 msgstr "Nama / meja"
 
-#: src/routes/_public/signup.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "Nama Anda"
 msgstr "Nama Anda"
 
@@ -4318,7 +4317,6 @@ msgstr "Nama header otorisasi"
 #: src/components/menu/cafe-profile-form.tsx
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/receipt.tsx
-#: src/routes/_public/signup.tsx
 msgid "Nama kafe"
 msgstr "Nama kafe"
 
@@ -5813,7 +5811,7 @@ msgstr "Satu aplikasi untuk kasir, stok, dan laporan. Jual lebih cepat, jaga mar
 msgid "Satuan"
 msgstr "Satuan"
 
-#: src/routes/_public/signup.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 msgstr "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 
@@ -5938,7 +5936,6 @@ msgid "Seluruh sisa"
 msgstr "Seluruh sisa"
 
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Sembunyikan password"
 msgstr "Sembunyikan password"
 
@@ -6318,8 +6315,8 @@ msgid "Sudah direfund"
 msgstr "Sudah direfund"
 
 #: src/routes/_public/signup.tsx
-msgid "Sudah punya akun?"
-msgstr "Sudah punya akun?"
+#~ msgid "Sudah punya akun?"
+#~ msgstr "Sudah punya akun?"
 
 #: src/components/income/income-dialog.tsx
 #: src/routes/_pos/reports/other-income.tsx
@@ -6551,7 +6548,6 @@ msgid "Tampilkan nomor order"
 msgstr "Tampilkan nomor order"
 
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Tampilkan password"
 msgstr "Tampilkan password"
 
