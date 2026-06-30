@@ -46,11 +46,11 @@ describe('setName / myName', () => {
     const t = convexTest(schema, modules);
     const userId = await t.run((ctx) => ctx.db.insert('users', { email: 'o2@x.com' }));
     const asUser = t.withIdentity({ subject: `${userId}|test_session` });
-    await expect(asUser.mutation(api.users.setName, { name: '   ' })).rejects.toThrow();
+    await expect(asUser.mutation(api.users.setName, { name: '   ' })).rejects.toThrow('Nama wajib diisi.');
   });
 
   it('setName throws when unauthenticated', async () => {
     const t = convexTest(schema, modules);
-    await expect(t.mutation(api.users.setName, { name: 'X' })).rejects.toThrow();
+    await expect(t.mutation(api.users.setName, { name: 'X' })).rejects.toThrow('Not authenticated');
   });
 });
