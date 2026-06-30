@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, type ReactNode, useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
@@ -20,6 +20,8 @@ export interface CafeProfileFormProps {
   submitLabel: string;
   onSubmit: (values: CafeProfileFormValues) => Promise<void>;
   secondaryAction?: { label: string; onClick: () => void };
+  prepend?: ReactNode;
+  disableSubmit?: boolean;
 }
 
 export function CafeProfileForm({
@@ -27,6 +29,8 @@ export function CafeProfileForm({
   submitLabel,
   onSubmit,
   secondaryAction,
+  prepend,
+  disableSubmit,
 }: CafeProfileFormProps) {
   const { t } = useLingui();
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +63,7 @@ export function CafeProfileForm({
   return (
     <form onSubmit={handleSubmit} className="max-w-md">
       <FieldGroup>
+        {prepend}
         <Field>
           <FieldLabel htmlFor="name"><Trans>Nama kafe</Trans></FieldLabel>
           <Input id="name" name="name" required defaultValue={initial.name} maxLength={80} />
@@ -106,7 +111,7 @@ export function CafeProfileForm({
         </Field>
         {error && <FieldError>{error}</FieldError>}
         <div className="flex gap-2 items-center">
-          <Button type="submit" disabled={submitting}>
+          <Button type="submit" disabled={submitting || disableSubmit}>
             {submitting && <Spinner data-icon="inline-start" />}
             {submitting ? <Trans>Menyimpan…</Trans> : submitLabel}
           </Button>
