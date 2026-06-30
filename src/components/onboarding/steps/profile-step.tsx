@@ -81,21 +81,22 @@ export function ProfileStep() {
           />
         </div>
       </Field>
-      <label className="flex items-start gap-2 text-sm text-muted-foreground select-none">
+      <div className="flex items-start gap-2">
         <Checkbox
+          id="agreedCheckbox"
           checked={agreed}
           onCheckedChange={(c) => setAgreed(c === true)}
           className="mt-0.5"
         />
-        <span>
+        <label htmlFor="agreedCheckbox" className="text-sm text-muted-foreground select-none">
           <Trans>
             Saya menyetujui{' '}
             <Link to="/terms" className="text-primary underline">Syarat Layanan</Link>{' '}
             dan{' '}
             <Link to="/privacy" className="text-primary underline">Kebijakan Privasi</Link>.
           </Trans>
-        </span>
-      </label>
+        </label>
+      </div>
     </>
   );
 
@@ -120,10 +121,14 @@ export function ProfileStep() {
           label: t`Lewati semua`,
           onClick: async () => {
             if (gateBlocked) return;
-            await setName({ name: ownerNameTrimmed });
-            await updateProfile({ ...initial, ownerTermsAcceptedAt: Date.now() });
-            await markComplete();
-            navigate({ to: '/menu' });
+            try {
+              await setName({ name: ownerNameTrimmed });
+              await updateProfile({ ...initial, ownerTermsAcceptedAt: Date.now() });
+              await markComplete();
+              navigate({ to: '/menu' });
+            } catch (err) {
+              console.error('Onboarding skip failed', err);
+            }
           },
         }}
       />
