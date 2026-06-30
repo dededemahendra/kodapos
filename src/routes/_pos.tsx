@@ -7,7 +7,6 @@ import { CommandPalette } from '~/components/command-palette';
 import { AppSidebar } from '~/components/app-sidebar';
 import { RegisterTopBar } from '~/components/sale/register-top-bar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
-import { NoAccess } from '~/components/no-access';
 import { LoadingCounter } from '~/components/ui/loading-counter';
 import { Toaster } from '~/components/ui/sonner';
 import { useAutoLock } from '~/lib/use-auto-lock';
@@ -107,29 +106,25 @@ function OnboardingGate({ children }: { children: ReactNode }) {
   }, [acceptInvites]);
 
   const alreadyOnOnboarding = path.startsWith('/onboarding');
-  // An owner mid-onboarding (cafe exists but no setupCompletedAt) is routed to
-  // the wizard. A user with NO accessible outlet (cafe === null) is NOT pushed
-  // into onboarding any more; they see the no-access screen (which offers an
-  // explicit "create your own business").
+  const noCafe = cafe === null;
+  // An owner mid-onboarding (cafe exists but not yet completed) OR a brand-new
+  // cafe-less user (passwordless/Google register) both belong in the wizard.
   const needsOnboarding = cafe !== undefined && cafe !== null && !cafe.setupCompletedAt;
+  const shouldOnboard = (noCafe || needsOnboarding) && !alreadyOnOnboarding;
 
   useEffect(() => {
-    if (needsOnboarding && !alreadyOnOnboarding && typeof window !== 'undefined') {
+    if (shouldOnboard && typeof window !== 'undefined') {
       window.location.replace('/onboarding/profile');
     }
-  }, [needsOnboarding, alreadyOnOnboarding]);
+  }, [shouldOnboard]);
 
   // Still resolving cafe state or still accepting invites: don't flash content
   // (an invited manager's cafe becomes non-null once accept commits).
   if (cafe === undefined || accepting) {
     return <LoadingCounter />;
   }
-  // Signed in but no accessible outlet, and no invite was accepted: no-access.
-  if (cafe === null && !alreadyOnOnboarding) {
-    return <NoAccess />;
-  }
-  if (needsOnboarding && !alreadyOnOnboarding) {
-    return null;
+  if (shouldOnboard) {
+    return null; // redirecting to /onboarding/profile
   }
   return <>{children}</>;
 }
