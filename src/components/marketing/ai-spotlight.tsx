@@ -201,7 +201,7 @@ export function AiSpotlight() {
             variants={makeSlide(0.32)}
           >
             <Button asChild size="lg">
-              <Link to="/signup">
+              <Link to="/signin">
                 <Trans>Mulai gratis</Trans>
               </Link>
             </Button>

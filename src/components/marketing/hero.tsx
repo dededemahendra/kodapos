@@ -81,7 +81,7 @@ export function Hero() {
           className="mt-10 flex flex-col items-center justify-center gap-2 sm:flex-row"
         >
           <Button asChild size="lg">
-            <Link to="/signup">
+            <Link to="/signin">
               <Trans>Mulai gratis</Trans>
             </Link>
           </Button>

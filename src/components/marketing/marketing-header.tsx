@@ -46,7 +46,7 @@ export function MarketingHeader() {
             <Link to="/signin"><Trans>Masuk</Trans></Link>
           </Button>
           <Button asChild size="sm">
-            <Link to="/signup"><Trans>Daftar</Trans></Link>
+            <Link to="/signin"><Trans>Daftar</Trans></Link>
           </Button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import type { MessageDescriptor } from '@lingui/core';
 import { Trans, useLingui } from '@lingui/react/macro';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import {
   type ChangeEvent,
@@ -637,12 +637,6 @@ function SigninCard({
         </>
       )}
 
-      <div className="mt-6 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-        <Trans>Belum punya akun?</Trans>{' '}
-        <Link to="/signup" className="text-primary underline">
-          <Trans>Daftar</Trans>
-        </Link>
-      </div>
     </AuthCard>
   );
 }
