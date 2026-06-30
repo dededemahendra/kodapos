@@ -36,6 +36,9 @@ export default defineSchema({
     taxRatePct: v.optional(v.number()),
     taxEnabled: v.optional(v.boolean()),
     setupCompletedAt: v.optional(v.number()),
+    // When the owner accepted Terms & Privacy during onboarding (passwordless
+    // flow). Optional for backward compatibility with pre-existing cafes.
+    ownerTermsAcceptedAt: v.optional(v.number()),
     businessType: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
     email: v.optional(v.string()),

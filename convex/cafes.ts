@@ -161,6 +161,7 @@ export const updateProfile = mutation({
     timezone: v.string(),
     taxRatePct: v.number(),
     taxEnabled: v.boolean(),
+    ownerTermsAcceptedAt: v.optional(v.number()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -182,6 +183,9 @@ export const updateProfile = mutation({
       timezone: args.timezone,
       taxRatePct: args.taxRatePct,
       taxEnabled: args.taxEnabled,
+      ...(args.ownerTermsAcceptedAt !== undefined
+        ? { ownerTermsAcceptedAt: args.ownerTermsAcceptedAt }
+        : {}),
     });
     return null;
   },

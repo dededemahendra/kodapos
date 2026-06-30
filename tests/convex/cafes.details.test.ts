@@ -1,6 +1,7 @@
 import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
@@ -76,4 +77,22 @@ describe('cafes.updateProfileDetails', () => {
     const cafe = await asOwner.query(api.cafes.myCafe);
     expect(cafe?.city).toBeUndefined();
   });
+});
+
+it('updateProfile records ownerTermsAcceptedAt when provided', async () => {
+  const t = convexTest(schema, modules);
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'terms@x.com' }));
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Terms' });
+
+  await asOwner.mutation(api.cafes.updateProfile, {
+    name: 'Kopi Terms',
+    timezone: 'Asia/Jakarta',
+    taxRatePct: 11,
+    taxEnabled: true,
+    ownerTermsAcceptedAt: 1_700_000_000_000,
+  });
+
+  const cafe = await t.run((ctx) => ctx.db.get(cafeId as Id<'cafes'>));
+  expect(cafe!.ownerTermsAcceptedAt).toBe(1_700_000_000_000);
 });
