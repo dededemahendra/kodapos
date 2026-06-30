@@ -70,7 +70,10 @@ function SigninPage() {
   if (magic) {
     return <MagicLinkHandler email={magic.email} code={magic.code} />;
   }
-  return <SigninCard initialMode={search.reset !== undefined ? 'reset' : 'password'} />;
+  // Passwordless-first: the sign-in card lands on the emailed-code (otp) flow by
+  // default; password stays one tap away behind the "Pakai sandi" link. The
+  // `?reset` search param still routes straight into the password-reset flow.
+  return <SigninCard initialMode={search.reset !== undefined ? 'reset' : 'otp'} />;
 }
 
 /**
