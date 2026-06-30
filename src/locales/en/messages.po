@@ -1901,7 +1901,6 @@ msgid "Dibuka pada"
 msgstr "Opened at"
 
 #. placeholder {0}: idx + 1
-#: src/components/auth/otp-input.tsx
 #: src/components/staff/pin-entry.tsx
 msgid "Digit {0}"
 msgstr "Digit {0}"
