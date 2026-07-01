@@ -11,31 +11,35 @@ import { sendEmail } from '../lib/resend';
  */
 export function buildOtpEmail(code: string, link?: string): { html: string; text: string } {
   const text = [
-    'Your kodapos sign-in code is:',
+    'Your kodapos sign-in code:',
     '',
     code,
     '',
     'This code expires in 15 minutes.',
-    ...(link ? ['Tap to sign in: ' + link] : []),
+    ...(link ? ['', 'Tap to sign in: ' + link] : []),
     '',
     'If you did not request this, you can ignore this email.',
   ].join('\n');
 
+  // Brand primary (theme --primary, oklch(0.5417 0.179 288)) as a fixed hex,
+  // since email clients cannot resolve CSS variables.
   const linkBlock = link
-    ? `<p style="margin: 0 0 16px;">
-      <a href="${link}" style="background: #16a34a; color: #ffffff; padding: 10px 18px; border-radius: 6px; text-decoration: none;">Tap to sign in</a>
+    ? `<p style="margin: 28px 0 0;">
+      <a href="${link}" style="display: inline-block; background: #6E56CF; color: #ffffff; font-size: 14px; font-weight: 600; padding: 11px 22px; border-radius: 8px; text-decoration: none;">Tap to sign in</a>
     </p>`
     : '';
 
   const html = `<!doctype html>
 <html>
-  <body style="font-family: Arial, Helvetica, sans-serif; color: #1a1a1a; line-height: 1.5;">
-    <h2 style="margin: 0 0 12px;">Sign in to kodapos</h2>
-    <p style="margin: 0 0 8px;">Your sign-in code is:</p>
-    <p style="font-size: 32px; font-weight: 700; letter-spacing: 6px; margin: 0 0 16px;">${code}</p>
-    <p style="margin: 0 0 16px;">This code expires in 15 minutes.</p>
-    ${linkBlock}
-    <p style="color: #6b7280; font-size: 13px; margin: 0;">If you did not request this, you can ignore this email.</p>
+  <body style="margin: 0; padding: 0; background: #ffffff;">
+    <div style="max-width: 420px; margin: 0 auto; padding: 40px 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #18181b;">
+      <p style="margin: 0 0 28px; font-size: 15px; font-weight: 600;">kodapos</p>
+      <p style="margin: 0 0 10px; font-size: 15px; color: #52525b;">Your sign-in code</p>
+      <p style="margin: 0; font-size: 34px; font-weight: 700; letter-spacing: 8px;">${code}</p>
+      <p style="margin: 20px 0 0; font-size: 14px; color: #71717a;">This code expires in 15 minutes.</p>
+      ${linkBlock}
+      <p style="margin: 32px 0 0; font-size: 13px; color: #a1a1aa;">If you did not request this, you can ignore this email.</p>
+    </div>
   </body>
 </html>`;
 
