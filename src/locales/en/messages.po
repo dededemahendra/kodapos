@@ -588,9 +588,13 @@ msgstr "Gold member"
 #~ msgid "Antarmuka ringan yang siap dipakai di tablet, HP, atau laptop."
 #~ msgstr "A light interface ready on a tablet, phone, or laptop."
 
+#: src/routes/_public/changelog.tsx
+msgid "Apa yang baru di kodapos"
+msgstr "What's new in kodapos"
+
 #: src/routes/_pos/changelog.tsx
-msgid "Apa yang baru di kodapos."
-msgstr "What's new in kodapos."
+#~ msgid "Apa yang baru di kodapos."
+#~ msgstr "What's new in kodapos."
 
 #: src/components/marketing/faq.tsx
 msgid "Apakah data saya aman?"
@@ -2078,6 +2082,10 @@ msgstr "Features"
 #: src/lib/ai-error.ts
 msgid "Fitur AI sedang tidak tersedia. Periksa pengaturan AI Anda atau coba lagi nanti."
 msgstr "AI features are currently unavailable. Check your AI settings or try again later."
+
+#: src/routes/_public/changelog.tsx
+msgid "Fitur baru, peningkatan, dan perbaikan yang kami kirimkan untuk kafe dan resto Anda."
+msgstr "New features, improvements, and fixes we ship for your cafe and restaurant."
 
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Fitur cetak akan tersedia segera."
@@ -4713,7 +4721,8 @@ msgstr "Supplier added."
 #~ msgid "Pemasukan"
 #~ msgstr "Inflow"
 
-#: src/routes/_pos/changelog.tsx
+#: src/components/marketing/marketing-footer.tsx
+#: src/routes/_public/changelog.tsx
 msgid "Pembaruan"
 msgstr "What's new"
 

@@ -588,9 +588,13 @@ msgstr "Anggota emas"
 #~ msgid "Antarmuka ringan yang siap dipakai di tablet, HP, atau laptop."
 #~ msgstr "Antarmuka ringan yang siap dipakai di tablet, HP, atau laptop."
 
+#: src/routes/_public/changelog.tsx
+msgid "Apa yang baru di kodapos"
+msgstr "Apa yang baru di kodapos"
+
 #: src/routes/_pos/changelog.tsx
-msgid "Apa yang baru di kodapos."
-msgstr "Apa yang baru di kodapos."
+#~ msgid "Apa yang baru di kodapos."
+#~ msgstr "Apa yang baru di kodapos."
 
 #: src/components/marketing/faq.tsx
 msgid "Apakah data saya aman?"
@@ -2078,6 +2082,10 @@ msgstr "Fitur"
 #: src/lib/ai-error.ts
 msgid "Fitur AI sedang tidak tersedia. Periksa pengaturan AI Anda atau coba lagi nanti."
 msgstr "Fitur AI sedang tidak tersedia. Periksa pengaturan AI Anda atau coba lagi nanti."
+
+#: src/routes/_public/changelog.tsx
+msgid "Fitur baru, peningkatan, dan perbaikan yang kami kirimkan untuk kafe dan resto Anda."
+msgstr "Fitur baru, peningkatan, dan perbaikan yang kami kirimkan untuk kafe dan resto Anda."
 
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "Fitur cetak akan tersedia segera."
@@ -4713,7 +4721,8 @@ msgstr "Pemasok ditambahkan."
 #~ msgid "Pemasukan"
 #~ msgstr "Pemasukan"
 
-#: src/routes/_pos/changelog.tsx
+#: src/components/marketing/marketing-footer.tsx
+#: src/routes/_public/changelog.tsx
 msgid "Pembaruan"
 msgstr "Pembaruan"
 
