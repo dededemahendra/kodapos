@@ -37,10 +37,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        // "Sentry press": a hard darker bottom lip (0 3px 0) makes the button
+        // feel like a physical key. Clicking sinks it 2px and shrinks the lip to
+        // 1px so its resting bottom edge stays put. The top inner highlight + 1px
+        // ring keep the embossed definition; the lip/ring are neutral-black
+        // overlays so they darken the --primary fill in any theme.
         default:
           "bg-primary text-primary-foreground hover:bg-primary/90 " +
-          "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_2px_3px_-1px_rgba(0,0,0,0.3),0_0_0_1px_rgba(0,0,0,0.1)] " +
-          "active:translate-y-px active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_1px_2px_-1px_rgba(0,0,0,0.3),0_0_0_1px_rgba(0,0,0,0.1)]",
+          "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_0_0_1px_rgba(0,0,0,0.1),0_3px_0_0_rgba(0,0,0,0.22),0_5px_8px_-3px_rgba(0,0,0,0.28)] " +
+          "active:translate-y-[2px] active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_0_0_1px_rgba(0,0,0,0.1),0_1px_0_0_rgba(0,0,0,0.22),0_2px_4px_-3px_rgba(0,0,0,0.28)]",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 " +
           "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_2px_3px_-1px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.08)] " +
