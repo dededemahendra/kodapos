@@ -2487,6 +2487,14 @@ msgstr "Change image"
 msgid "Ganti kasir"
 msgstr "Switch cashier"
 
+#: src/components/theme-toggle.tsx
+msgid "Ganti ke mode gelap"
+msgstr "Switch to dark mode"
+
+#: src/components/theme-toggle.tsx
+msgid "Ganti ke mode terang"
+msgstr "Switch to light mode"
+
 #: src/components/sale/sale-screen.tsx
 msgid "Ganti keranjang saat ini?"
 msgstr "Replace the current cart?"

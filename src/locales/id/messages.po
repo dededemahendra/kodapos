@@ -2487,6 +2487,14 @@ msgstr "Ganti gambar"
 msgid "Ganti kasir"
 msgstr "Ganti kasir"
 
+#: src/components/theme-toggle.tsx
+msgid "Ganti ke mode gelap"
+msgstr "Ganti ke mode gelap"
+
+#: src/components/theme-toggle.tsx
+msgid "Ganti ke mode terang"
+msgstr "Ganti ke mode terang"
+
 #: src/components/sale/sale-screen.tsx
 msgid "Ganti keranjang saat ini?"
 msgstr "Ganti keranjang saat ini?"
