@@ -38,7 +38,7 @@ export function OtpInput({ digits = 8, onComplete, errorMessage, disabled }: Otp
   }, [errorMessage]);
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex w-full flex-col gap-2">
       <InputOTP
         ref={inputRef}
         maxLength={digits}
@@ -48,11 +48,14 @@ export function OtpInput({ digits = 8, onComplete, errorMessage, disabled }: Otp
         onComplete={onComplete}
         disabled={disabled}
         aria-label={t`Kode`}
+        containerClassName="w-full"
       >
-        <InputOTPGroup>
+        {/* Fill the card's content width so the cells stay inset like the other
+            controls (8 fixed-size cells would overflow the p-6 padding). */}
+        <InputOTPGroup className="w-full">
           {Array.from({ length: digits }, (_, idx) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length array of digit cells
-            <InputOTPSlot key={idx} index={idx} className="size-11 text-lg sm:size-12" />
+            <InputOTPSlot key={idx} index={idx} className="h-12 flex-1 text-lg" />
           ))}
         </InputOTPGroup>
       </InputOTP>
