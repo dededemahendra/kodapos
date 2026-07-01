@@ -20,6 +20,7 @@ import { Checkbox } from '~/components/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { sendResetOrSigninCode } from '~/lib/auth-reset';
 import { setRememberMe } from '~/lib/auth-storage';
 import {
   validateEmail,
@@ -262,20 +263,35 @@ function SigninCard({
     const emailErr = validateEmail(email.value);
     setEmail((prev) => ({ ...prev, touched: true, error: emailErr }));
     if (emailErr !== null) return;
+    const addr = email.value.trim();
     setSubmitting(true);
     setAuthError(null);
     setInfo(null);
     try {
       if (mode === 'otp') {
-        await signIn('resend-otp', { email: email.value.trim() });
+        await signIn('resend-otp', { email: addr });
+        setCodeSent(true);
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+        setInfo(t`Kode dikirim ke email Anda.`);
       } else {
-        await signIn('password', { flow: 'reset', email: email.value.trim() });
+        // Passwordless-first: most accounts have no password to reset, so the
+        // reset send throws before any email goes out. Fall back to a sign-in
+        // code (and switch to that flow) instead of a misleading email error.
+        const outcome = await sendResetOrSigninCode({
+          sendReset: () => signIn('password', { flow: 'reset', email: addr }),
+          sendSigninCode: () => signIn('resend-otp', { email: addr }),
+        });
+        setCodeSent(true);
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+        if (outcome === 'fallback') {
+          setMode('otp');
+          setInfo(t`Akun ini menggunakan kode masuk, bukan sandi. Kami mengirim kode ke email Anda.`);
+        } else {
+          setInfo(t`Kode reset dikirim ke email Anda.`);
+        }
       }
-      setCodeSent(true);
-      setCooldown(RESEND_COOLDOWN_SECONDS);
-      setInfo(t`Kode dikirim ke email Anda.`);
     } catch {
-      // Resend not configured (or send failed) surfaces as a masked server error.
+      // Both the reset and the sign-in code send failed: a genuine email outage.
       setAuthError(
         t`Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi.`,
       );

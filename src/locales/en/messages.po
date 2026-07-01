@@ -514,6 +514,10 @@ msgstr "Recent activity at your cafe."
 msgid "Akun"
 msgstr "Account"
 
+#: src/routes/_public/signin.tsx
+msgid "Akun ini menggunakan kode masuk, bukan sandi. Kami mengirim kode ke email Anda."
+msgstr "This account signs in with a code, not a password. We've sent one to your email."
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Akuntansi"
 msgstr "Accounting"
@@ -3537,6 +3541,10 @@ msgstr "This payment QR code is no longer valid. Regenerate it to pay."
 #: src/components/sale/qris-static-payment-dialog.tsx
 msgid "Kode QRIS"
 msgstr "QRIS code"
+
+#: src/routes/_public/signin.tsx
+msgid "Kode reset dikirim ke email Anda."
+msgstr "Reset code sent to your email."
 
 #: src/routes/_public/signin.tsx
 msgid "Kode salah atau sudah kedaluwarsa."
