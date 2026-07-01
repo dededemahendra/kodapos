@@ -21,11 +21,12 @@ export function buildOtpEmail(code: string, link?: string): { html: string; text
     'If you did not request this, you can ignore this email.',
   ].join('\n');
 
-  // Brand primary (theme --primary, oklch(0.5417 0.179 288)) as a fixed hex,
-  // since email clients cannot resolve CSS variables.
+  // Naked text link (not a filled button): minimal, and the brand primary
+  // (theme --primary, oklch(0.5417 0.179 288)) is a fixed hex since email
+  // clients cannot resolve CSS variables.
   const linkBlock = link
-    ? `<p style="margin: 28px 0 0;">
-      <a href="${link}" style="display: inline-block; background: #6E56CF; color: #ffffff; font-size: 14px; font-weight: 600; padding: 11px 22px; border-radius: 8px; text-decoration: none;">Tap to sign in</a>
+    ? `<p style="margin: 24px 0 0; font-size: 14px;">
+      <a href="${link}" style="color: #6E56CF; font-weight: 600; text-decoration: underline;">Tap to sign in</a>
     </p>`
     : '';
 
