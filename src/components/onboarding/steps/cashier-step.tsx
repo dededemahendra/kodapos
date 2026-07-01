@@ -16,7 +16,11 @@ import { Spinner } from '~/components/ui/spinner';
 
 export function CashierStep() {
   const { t } = useLingui();
-  const staff = useQuery(api.staff.list, {});
+  // Skip-guard staff.list on cafe presence: staff.list requires an active outlet
+  // and throws for a cafe-less user (e.g. direct nav to /onboarding/cashier
+  // before the profile step creates the cafe). myCafe is already cached upstream.
+  const cafe = useQuery(api.cafes.myCafe, {});
+  const staff = useQuery(api.staff.list, cafe ? {} : 'skip');
   const create = useMutation(api.staff.create);
   const resetPin = useMutation(api.staff.resetPin);
   const markComplete = useMutation(api.cafes.markSetupComplete);

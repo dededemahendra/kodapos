@@ -383,6 +383,26 @@ export const markSetupComplete = mutation({
   },
 });
 
+/**
+ * Record owner Terms acceptance on the active cafe, without touching the cafe
+ * profile fields. Lets the onboarding "skip" path persist consent without
+ * writing a stale form snapshot (the cafe-profile inputs are uncontrolled, so
+ * only the primary submit reads their current values). Idempotent: keeps the
+ * first acceptance timestamp.
+ */
+export const acceptOwnerTerms = mutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    const cafe = await ctx.db.get(cafeId);
+    if (cafe && !cafe.ownerTermsAcceptedAt) {
+      await ctx.db.patch(cafeId, { ownerTermsAcceptedAt: Date.now() });
+    }
+    return null;
+  },
+});
+
 /** The signed-in owner's cafe id + city, for the geocode action (which can't read ctx.db). */
 export const myCafeForGeocode = internalQuery({
   args: {},

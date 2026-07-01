@@ -116,3 +116,19 @@ it('myCafe returns ownerTermsAcceptedAt without a validator error', async () => 
   expect(cafe).not.toBeNull();
   expect(cafe!.ownerTermsAcceptedAt).toBe(1_700_000_000_000);
 });
+
+it('acceptOwnerTerms sets ownerTermsAcceptedAt once (idempotent)', async () => {
+  const t = convexTest(schema, modules);
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'aot@x.com' }));
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi AOT' });
+
+  await asOwner.mutation(api.cafes.acceptOwnerTerms, {});
+  const first = await t.run((ctx) => ctx.db.get(cafeId as Id<'cafes'>));
+  expect(typeof first!.ownerTermsAcceptedAt).toBe('number');
+
+  // A second call keeps the original timestamp (idempotent).
+  await asOwner.mutation(api.cafes.acceptOwnerTerms, {});
+  const second = await t.run((ctx) => ctx.db.get(cafeId as Id<'cafes'>));
+  expect(second!.ownerTermsAcceptedAt).toBe(first!.ownerTermsAcceptedAt);
+});

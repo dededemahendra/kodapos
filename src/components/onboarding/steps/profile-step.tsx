@@ -20,6 +20,7 @@ export function ProfileStep() {
   const savedName = useQuery(api.users.myName);
   const updateProfile = useMutation(api.cafes.updateProfile);
   const markComplete = useMutation(api.cafes.markSetupComplete);
+  const acceptOwnerTerms = useMutation(api.cafes.acceptOwnerTerms);
   const setName = useMutation(api.users.setName);
   const createForOwner = useMutation(api.cafes.createForOwner);
   const { signOut } = useAuthActions();
@@ -135,8 +136,12 @@ export function ProfileStep() {
           onClick: async () => {
             if (gateBlocked) return;
             try {
+              // Skip persists only identity + consent + completion; the cafe
+              // profile inputs are uncontrolled, so writing `initial` here would
+              // save a stale snapshot and drop any edits. Owner sets them later
+              // in Settings.
               await setName({ name: ownerNameTrimmed });
-              await updateProfile({ ...initial, ownerTermsAcceptedAt: Date.now() });
+              await acceptOwnerTerms({});
               await markComplete();
               navigate({ to: '/menu' });
             } catch (err) {

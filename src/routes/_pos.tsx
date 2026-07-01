@@ -93,12 +93,19 @@ function OnboardingGate({ children }: { children: ReactNode }) {
 
   // After any sign-in, convert a pending manager invite into access. Idempotent
   // and safe to call once per mount; it no-ops for owners and the uninvited.
+  // Only clear `accepting` on SUCCESS: on a transient failure we keep the
+  // spinner (a refresh retries the idempotent mutation) rather than falling
+  // through to the cafe-less onboarding redirect, which would turn an invited
+  // manager into the owner of a placeholder cafe and permanently strand the
+  // real invite.
   useEffect(() => {
     let cancelled = false;
     acceptInvites({})
-      .catch(() => {})
-      .finally(() => {
+      .then(() => {
         if (!cancelled) setAccepting(false);
+      })
+      .catch((err) => {
+        console.error('acceptPendingInvites failed', err);
       });
     return () => {
       cancelled = true;
@@ -112,11 +119,14 @@ function OnboardingGate({ children }: { children: ReactNode }) {
   const needsOnboarding = cafe !== undefined && cafe !== null && !cafe.setupCompletedAt;
   const shouldOnboard = (noCafe || needsOnboarding) && !alreadyOnOnboarding;
 
+  // Wait for `acceptPendingInvites` to resolve before redirecting: until then an
+  // invited manager still reads cafe === null, and redirecting would strand
+  // their invite (see the accept effect above).
   useEffect(() => {
-    if (shouldOnboard && typeof window !== 'undefined') {
+    if (shouldOnboard && !accepting && typeof window !== 'undefined') {
       window.location.replace('/onboarding/profile');
     }
-  }, [shouldOnboard]);
+  }, [shouldOnboard, accepting]);
 
   // Still resolving cafe state or still accepting invites: don't flash content
   // (an invited manager's cafe becomes non-null once accept commits).
