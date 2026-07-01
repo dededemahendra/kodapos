@@ -24,6 +24,33 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.7',
+    date: '2026-07-01',
+    title: { id: 'Masuk tanpa sandi', en: 'Passwordless sign-in' },
+    summary: {
+      id: 'Daftar dan masuk cukup dengan kode yang dikirim ke email Anda, tanpa perlu mengingat sandi.',
+      en: 'Register and sign in with a code sent to your email, no password to remember.',
+    },
+  },
+  {
+    version: '1.6',
+    date: '2026-06-26',
+    title: { id: 'Tampilan baru', en: 'A fresh new look' },
+    summary: {
+      id: 'Tema warna ungu yang lebih segar dengan mode terang dan gelap, plus logo brand asli di halaman integrasi.',
+      en: 'A fresher violet theme with light and dark modes, plus real brand logos on the integrations page.',
+    },
+  },
+  {
+    version: '1.5',
+    date: '2026-06-23',
+    title: { id: 'Banyak outlet', en: 'Multiple outlets' },
+    summary: {
+      id: 'Kelola beberapa outlet dalam satu akun, undang manajer per outlet, dan lihat ringkasan semua outlet dalam satu dasbor.',
+      en: 'Run several outlets under one account, invite managers per outlet, and see every outlet in one consolidated dashboard.',
+    },
+  },
+  {
     version: '1.4',
     date: '2026-06-13',
     title: { id: 'Notifikasi & menu profil', en: 'Notifications & profile menu' },

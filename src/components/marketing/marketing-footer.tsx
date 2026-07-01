@@ -75,6 +75,11 @@ export function MarketingFooter() {
                       FAQ
                     </a>
                   </li>
+                  <li>
+                    <Link to="/changelog" className="hover:text-foreground">
+                      <Trans>Pembaruan</Trans>
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
