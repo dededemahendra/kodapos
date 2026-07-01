@@ -1735,6 +1735,7 @@ msgid "Coba kodapos gratis hari ini. Tanpa kartu kredit."
 msgstr "Coba kodapos gratis hari ini. Tanpa kartu kredit."
 
 #: src/routes/__root.tsx
+#: src/routes/_pos.tsx
 msgid "Coba lagi"
 msgstr "Coba lagi"
 
@@ -6846,6 +6847,10 @@ msgstr "Terima pesanan di kasir, meja, atau lewat QR. Bayar dengan QRIS atau tun
 msgid "Terjadi kesalahan"
 msgstr "Terjadi kesalahan"
 
+#: src/routes/_pos.tsx
+msgid "Terjadi kesalahan saat memverifikasi akses Anda."
+msgstr "Terjadi kesalahan saat memverifikasi akses Anda."
+
 #: src/routes/_pos/reports/margin.tsx
 msgid "Terjual"
 msgstr "Terjual"
@@ -7013,6 +7018,10 @@ msgstr "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk
 #: src/routes/_public/signin.tsx
 msgid "Tidak dapat mengirim ulang kode."
 msgstr "Tidak dapat mengirim ulang kode."
+
+#: src/components/onboarding/steps/menu-step.tsx
+msgid "Tidak dapat menyelesaikan penyiapan. Coba lagi."
+msgstr "Tidak dapat menyelesaikan penyiapan. Coba lagi."
 
 #: src/routes/_pos/reservations.tsx
 msgid "Tidak datang"
