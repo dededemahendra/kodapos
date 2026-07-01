@@ -10,6 +10,24 @@ import { weatherConditionV, weatherSignalV } from './lib/weather';
 export default defineSchema({
   ...authTables,
 
+  // Override the Convex Auth `users` table to carry an extra `isPlatformAdmin`
+  // flag (operator-only /admin surface). Mirrors the default authTables.users
+  // shape + indexes exactly (email/phone are required by @convex-dev/auth),
+  // then adds the optional flag. Must come AFTER `...authTables` to override it.
+  users: defineTable({
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    isPlatformAdmin: v.optional(v.boolean()),
+    deactivatedAt: v.optional(v.number()),
+  })
+    .index('email', ['email'])
+    .index('phone', ['phone']),
+
   // Server-side issuance rate limit for emailed OTP / password-reset codes.
   // Keyed by a per-provider identifier (e.g. `otp:email` / `reset:email`) so the
   // two flows don't share a bucket. A fixed 10-minute window caps issuance and
