@@ -2863,6 +2863,10 @@ msgstr "Inventory"
 #~ msgid "Invoice #1045 marked paid"
 #~ msgstr "Invoice #1045 marked paid"
 
+#: src/components/onboarding/steps/profile-step.tsx
+msgid "Isi nama dan setujui syarat untuk lanjut atau lewati."
+msgstr "Enter your name and accept the terms to continue or skip."
+
 #: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/routes/_pos/gift-cards.tsx
 msgid "Isi saldo"
@@ -6997,6 +7001,10 @@ msgstr "No staff found."
 #: src/routes/_pos/settings/members.tsx
 msgid "Tidak ada undangan tertunda."
 msgstr "No pending invitations."
+
+#: src/components/onboarding/steps/profile-step.tsx
+msgid "Tidak dapat melewati penyiapan. Coba lagi."
+msgstr "Could not skip setup. Please try again."
 
 #: src/routes/_public/signin.tsx
 msgid "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi."

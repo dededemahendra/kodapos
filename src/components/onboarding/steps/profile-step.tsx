@@ -1,18 +1,18 @@
-import { useNavigate } from '@tanstack/react-router';
-import { api } from 'convex/_generated/api';
-import { useMutation, useQuery } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { Trans, useLingui } from '@lingui/react/macro';
-import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { api } from 'convex/_generated/api';
+import { useMutation, useQuery } from 'convex/react';
 import { Store, User } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { CafeProfileForm, type CafeProfileFormValues } from '~/components/menu/cafe-profile-form';
 import { OnboardingStepHeader } from '~/components/onboarding/step-header';
-import { FormSkeleton } from '~/components/ui/loading-skeletons';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Field, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
 
 export function ProfileStep() {
   const { t } = useLingui();
@@ -63,7 +63,9 @@ export function ProfileStep() {
   const prepend = (
     <>
       <Field>
-        <FieldLabel htmlFor="ownerName"><Trans>Nama Anda</Trans></FieldLabel>
+        <FieldLabel htmlFor="ownerName">
+          <Trans>Nama Anda</Trans>
+        </FieldLabel>
         <div className="relative">
           <User
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -91,12 +93,22 @@ export function ProfileStep() {
         <label htmlFor="agreedCheckbox" className="text-sm text-muted-foreground select-none">
           <Trans>
             Saya menyetujui{' '}
-            <Link to="/terms" className="text-primary underline">Syarat Layanan</Link>{' '}
+            <Link to="/terms" className="text-primary underline">
+              Syarat Layanan
+            </Link>{' '}
             dan{' '}
-            <Link to="/privacy" className="text-primary underline">Kebijakan Privasi</Link>.
+            <Link to="/privacy" className="text-primary underline">
+              Kebijakan Privasi
+            </Link>
+            .
           </Trans>
         </label>
       </div>
+      {gateBlocked && (
+        <p className="text-sm text-muted-foreground">
+          <Trans>Isi nama dan setujui syarat untuk lanjut atau lewati.</Trans>
+        </p>
+      )}
     </>
   );
 
@@ -119,6 +131,7 @@ export function ProfileStep() {
         }}
         secondaryAction={{
           label: t`Lewati semua`,
+          disabled: gateBlocked,
           onClick: async () => {
             if (gateBlocked) return;
             try {
@@ -128,6 +141,7 @@ export function ProfileStep() {
               navigate({ to: '/menu' });
             } catch (err) {
               console.error('Onboarding skip failed', err);
+              toast.error(t`Tidak dapat melewati penyiapan. Coba lagi.`);
             }
           },
         }}

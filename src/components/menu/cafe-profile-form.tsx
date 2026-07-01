@@ -1,6 +1,5 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { type FormEvent, type ReactNode, useState } from 'react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -19,7 +18,7 @@ export interface CafeProfileFormProps {
   initial: CafeProfileFormValues;
   submitLabel: string;
   onSubmit: (values: CafeProfileFormValues) => Promise<void>;
-  secondaryAction?: { label: string; onClick: () => void };
+  secondaryAction?: { label: string; onClick: () => void; disabled?: boolean };
   prepend?: ReactNode;
   disableSubmit?: boolean;
 }
@@ -65,11 +64,15 @@ export function CafeProfileForm({
       <FieldGroup>
         {prepend}
         <Field>
-          <FieldLabel htmlFor="name"><Trans>Nama kafe</Trans></FieldLabel>
+          <FieldLabel htmlFor="name">
+            <Trans>Nama kafe</Trans>
+          </FieldLabel>
           <Input id="name" name="name" required defaultValue={initial.name} maxLength={80} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="phone"><Trans>Nomor HP</Trans></FieldLabel>
+          <FieldLabel htmlFor="phone">
+            <Trans>Nomor HP</Trans>
+          </FieldLabel>
           <Input
             id="phone"
             name="phone"
@@ -79,15 +82,21 @@ export function CafeProfileForm({
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="addressLine"><Trans>Alamat (opsional)</Trans></FieldLabel>
+          <FieldLabel htmlFor="addressLine">
+            <Trans>Alamat (opsional)</Trans>
+          </FieldLabel>
           <Input id="addressLine" name="addressLine" defaultValue={initial.addressLine ?? ''} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="timezone"><Trans>Zona waktu</Trans></FieldLabel>
+          <FieldLabel htmlFor="timezone">
+            <Trans>Zona waktu</Trans>
+          </FieldLabel>
           <Input id="timezone" name="timezone" defaultValue={initial.timezone} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="taxRatePct"><Trans>Persentase PPN</Trans></FieldLabel>
+          <FieldLabel htmlFor="taxRatePct">
+            <Trans>Persentase PPN</Trans>
+          </FieldLabel>
           <Input
             id="taxRatePct"
             name="taxRatePct"
@@ -116,7 +125,12 @@ export function CafeProfileForm({
             {submitting ? <Trans>Menyimpan…</Trans> : submitLabel}
           </Button>
           {secondaryAction && (
-            <Button type="button" variant="ghost" onClick={secondaryAction.onClick}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={secondaryAction.onClick}
+              disabled={secondaryAction.disabled}
+            >
               {secondaryAction.label}
             </Button>
           )}
