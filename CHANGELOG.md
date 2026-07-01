@@ -4,7 +4,90 @@ All notable changes to kodapos. Format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
-QRIS payments (static, dynamic, Xendit BYO + reconciliation), loyalty + tiers, gift cards, the Pro-POS suite (stock-take, order types, held orders, void, expenses, margin + P&L reports, manual discount, split tender, tables, KDS, product variants), the full-screen register shell, employee time clock, barcode scan-to-cart, and purchase orders are now shipped (see Phase 2 below). Deferred observability: Sentry (16), PostHog (17). Deferred feature backlog: per-category weather sensitivity (C2c), restock suggestion history/dismiss + nightly persistence with draft/sent status, PDF purchase orders & PDF report export, item/category-scoped + coded promotions, and the bigger infra bets pending product direction (offline mode, multi-outlet, delivery, customer display). Production Convex cutover is still pending (deploy currently targets the DEV deployment).
+QRIS payments (static, dynamic, Xendit BYO + reconciliation), loyalty + tiers, gift cards, the Pro-POS suite (stock-take, order types, held orders, void, expenses, margin + P&L reports, manual discount, split tender, tables, KDS, product variants), the full-screen register shell, employee time clock, barcode scan-to-cart, purchase orders, multi-outlet v1 (businesses, managers, consolidated dashboard), passwordless-first auth (emailed OTP + onboarding profile), and the Cosmic Night theme are now shipped (see Phase 2 below). Deferred observability: Sentry (16), PostHog (17). Deferred feature backlog: per-category weather sensitivity (C2c), restock suggestion history/dismiss + nightly persistence with draft/sent status, PDF purchase orders & PDF report export, item/category-scoped + coded promotions, and the bigger infra bets pending product direction (offline mode, multi-outlet, delivery, customer display). Production Convex cutover is still pending (deploy currently targets the DEV deployment).
+
+---
+
+## Phase 2 · Marketing — Theme & Language Toggles · 2026-07-01
+
+The marketing site header gets a light/dark toggle and the language switcher moves to the footer. A new `ThemeToggle` reuses the existing preferences theme API (the `.dark` class, SSR-safe) and replaces the language switcher in the header; the switcher is extracted into a reusable `LanguageToggle` and relocated to the footer bottom bar.
+
+### Added
+- `ThemeToggle` (`src/components/theme-toggle.tsx`) — SSR-safe light/dark toggle for the marketing header, backed by the existing preferences theme API + `.dark` class.
+- `LanguageToggle` (`src/components/language-toggle.tsx`) — the language switcher extracted into a reusable component.
+
+### Changed
+- Marketing header (`src/components/marketing/marketing-header.tsx`) shows the theme toggle instead of the language switcher; the language toggle moves to the footer bottom bar (`src/components/marketing/marketing-footer.tsx`).
+
+---
+
+## Phase 2 · Auth — Passwordless Sign-In, Onboarding Profile & Platform-Admin · 2026-06-30 → 2026-07-01
+
+Registration is now passwordless-first — there is no signup page. The sign-in card defaults to an emailed one-time code (password moved behind a "Pakai sandi" link), `/signup` permanently redirects to `/signin`, and a cafe-less user signing in for the first time is routed into a new onboarding profile step (owner name + cafe profile + Terms acceptance) instead of a no-access screen. OTP entry is rebuilt on the shadcn `input-otp` primitive and the sign-in email is redesigned to a minimal code + naked magic-link. A platform-admin flag is added to the users table for the operator `/admin` surface.
+
+### Added
+- `users.setName` mutation + `users.myName` query (`convex/users.ts`) — capture/read the owner name for passwordless + Google users during onboarding.
+- `cafes.acceptOwnerTerms` mutation — record the owner's Terms/Privacy acceptance timestamp on the cafe.
+- Onboarding profile step (`src/components/onboarding/steps/profile-step.tsx`) — collects owner name + cafe profile + Terms, with a sign-out escape hatch.
+- OTP input rebuilt on the shadcn `input-otp` component (`src/components/ui/input-otp.tsx`, `src/components/auth/otp-input.tsx`) — numeric, paste-aware, keyboard-navigable, auto-focus with error-clear/refocus.
+- `users.isPlatformAdmin` (optional boolean) and `cafes.ownerTermsAcceptedAt` (optional number) fields (`convex/schema.ts`).
+- Server-side OTP issuance rate limiting (`convex/auth_rate.ts`, 10-minute window per provider identifier).
+
+### Changed
+- Sign-in card (`src/routes/_public/signin.tsx`) defaults to the passwordless code flow; password is behind a "Pakai sandi" link. The magic-link code is carried in the URL fragment (`#email=&code=`) to keep it out of server logs / Referer.
+- Cafe-less users route to `/onboarding/profile` (not the no-outlet screen); `OnboardingGate` (`src/routes/_pos.tsx`) handles the `noCafe` case.
+- `cafes.myCafe` returns validator, `updateProfile`, and `cafeFields` thread `ownerTermsAcceptedAt`.
+- `cafe-profile-form.tsx` gains `prepend` (inject owner name + Terms fields) and `disableSubmit` props for onboarding.
+- Minimal sign-in email: the brand-purple button is reduced to a naked text link (`convex/otp/ResendOTP.ts`).
+
+### Fixed
+- `staff.permissionsFor` returns `null` instead of throwing for a user with no reachable outlet, so cafe-less / cross-outlet users no longer crash the app.
+- Signup no longer orphans the account when a later step fails.
+- Onboarding polish: Terms label is clickable, Skip is guarded on name + Terms, skip errors are surfaced, and the slide clip no longer cuts input focus rings.
+
+### Removed
+- The dedicated signup page (`src/routes/_public/signup.tsx`) — `/signup` now permanently redirects to `/signin`.
+
+---
+
+## Phase 2 · UX — Cosmic Night Theme & Integration Logos · 2026-06-26
+
+The neutral theme is swapped for tweakcn "Cosmic Night": violet OKLCH tokens for light and dark, Inter + JetBrains Mono fonts, and softer shadows. The embossed button variants are re-tokenized so they tint with the theme, and the integrations settings page shows real brand logos.
+
+### Changed
+- Cosmic Night palette + fonts (`src/styles/globals.css`, Google Fonts link in `src/routes/__root.tsx`) — violet OKLCH tokens, Inter + JetBrains Mono, softer shadows.
+- Secondary/outline button variants driven from theme tokens (`--secondary` / `--card` / `--background` / `--accent` / `--border`) instead of hardcoded grays, with a neutral hairline ring in light mode.
+- Integrations settings page shows real brand logos (WhatsApp, Gojek/Grab/Shopee, GoPay, OVO, DANA, Accurate, Mekari Jurnal, QRIS) on uniform white plates; unknown keys fall back to a monogram.
+
+### Fixed
+- Forecast loading skeletons match the real layout (`ForecastSkeleton`); forecast driver weekday names are localized instead of hardcoded Indonesian.
+
+---
+
+## Phase 2 · Multi-Outlet v1 — Businesses, Managers & Consolidated Dashboard · 2026-06-23 → 2026-06-24
+
+Multiple outlets can now live under one owner. A `businesses` grouping with `businessMembers` (owner/manager roles), `businessInvites`, `memberOutletAccess`, and a per-user `activeOutlet` backs an outlet switcher, owner-only outlet creation, and email manager invites scoped to specific outlets. Managers get back-office access (integration config stays owner-only). An "All outlets" consolidated dashboard aggregates KPIs across accessible outlets with a URL-synced range picker, a by-outlet revenue bar chart, and a sortable table with top-outlet highlight and drill-in to switch outlet.
+
+### Added
+- Schema (`convex/schema.ts`): `businesses` (`by_owner`), `businessMembers` (`by_business`, `by_user`), `businessInvites` (`by_email`, `by_business`), `memberOutletAccess` (`by_member`, `by_cafe`), `activeOutlet` (`by_user`).
+- `convex/outlets.ts` — `myOutlets` query, `createOutlet` (owner-only) + `setActiveOutlet` mutations.
+- `convex/invites.ts` — `inviteManager`, `acceptPendingInvites`, `setManagerOutlets`, `revokeMember`, `cancelInvite` mutations and `listMembers` / `listPendingInvites` queries (owner-only).
+- `reports.businessOverview` query (`convex/reports.ts`) — consolidated revenue / refunds / orders / AOV / items-sold across accessible outlets.
+- Outlet-access helpers (`convex/lib/auth.ts`): `resolveOutletAccess`, `tryActiveOutlet`, `requireActiveOutlet`, `requireBusinessOwner`.
+- `/all-outlets` consolidated dashboard (`src/routes/_pos/all-outlets.tsx`) with KPI cards, `OutletsRevenueChart`, and a sortable `OutletsTable` (top-outlet highlight, drill-in) — `src/components/all-outlets/`.
+- `/settings/members` team management page (`src/routes/_pos/settings/members.tsx`, owner-only) — invite managers, assign/revoke outlet access, pending invites, revoke members.
+- `OutletSwitcher` (`src/components/outlet-switcher.tsx`) and `AddOutletDialog` (`src/components/add-outlet-dialog.tsx`).
+- URL-synced range picker for the all-outlets dashboard (`src/components/reports/use-report-range.ts`).
+- Default DiceBear "notionists" avatar (seeded by stable id) for the account menu + cashier picker; uploaded cafe logos still take precedence.
+
+### Changed
+- Managers get back-office access (`isAccountMember`); account ownership is determined by `businessMembers.role === 'owner'`, not mere cafe existence (`src/lib/permissions.ts`).
+- Integration config mutations require `requireBusinessOwner` (owner-only).
+- The members page is boundary-gated to owners so manager-only queries never throw.
+
+### Fixed
+- A stale cross-outlet active cashier no longer crashes the app: `staff.permissionsFor` returns `null` on a cashier/outlet mismatch and `usePermissions` clears it (re-PIN at the register).
+- Root error + not-found boundaries wrap in `I18nProvider` so `<Trans>` renders instead of crashing with "rendered without I18nProvider".
 
 ---
 
