@@ -19,6 +19,7 @@ const cafeFields = {
   taxRatePct: v.optional(v.number()),
   taxEnabled: v.optional(v.boolean()),
   setupCompletedAt: v.optional(v.number()),
+  ownerTermsAcceptedAt: v.optional(v.number()),
   businessType: v.optional(v.string()),
   whatsapp: v.optional(v.string()),
   email: v.optional(v.string()),

@@ -96,3 +96,23 @@ it('updateProfile records ownerTermsAcceptedAt when provided', async () => {
   const cafe = await t.run((ctx) => ctx.db.get(cafeId as Id<'cafes'>));
   expect(cafe!.ownerTermsAcceptedAt).toBe(1_700_000_000_000);
 });
+
+it('myCafe returns ownerTermsAcceptedAt without a validator error', async () => {
+  // Guards the returns validator: once a cafe has ownerTermsAcceptedAt set,
+  // myCafe must include it or convex rejects the return (ReturnsValidationError).
+  const t = convexTest(schema, modules);
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'mycafe@x.com' }));
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi MC' });
+  await asOwner.mutation(api.cafes.updateProfile, {
+    name: 'Kopi MC',
+    timezone: 'Asia/Jakarta',
+    taxRatePct: 11,
+    taxEnabled: true,
+    ownerTermsAcceptedAt: 1_700_000_000_000,
+  });
+
+  const cafe = await asOwner.query(api.cafes.myCafe, {});
+  expect(cafe).not.toBeNull();
+  expect(cafe!.ownerTermsAcceptedAt).toBe(1_700_000_000_000);
+});
