@@ -75,8 +75,10 @@ function OnboardingLayout() {
           <DecorIcon position="bottom-left" />
           <DecorIcon position="bottom-right" />
           {/* Clip the slide so the exiting/entering steps never overflow the
-              card; the decor marks sit outside this wrapper and stay unclipped. */}
-          <div className="relative overflow-hidden">
+              card; the decor marks sit outside this wrapper and stay unclipped.
+              The `-mx-1.5 px-1.5` gives focus rings on full-width inputs room so
+              overflow-hidden does not clip them, without shifting the content. */}
+          <div className="relative -mx-1.5 overflow-hidden px-1.5">
             <MotionConfig reducedMotion="user">
               <AnimatePresence mode="popLayout" custom={direction} initial={false}>
                 <motion.div
