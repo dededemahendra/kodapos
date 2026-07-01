@@ -52,7 +52,7 @@ export function CtaBand() {
                 </a>
               </Button>
               <Button asChild size="lg" className="bg-background text-foreground hover:bg-background/90">
-                <Link to="/signup">
+                <Link to="/signin">
                   <Trans>Mulai gratis</Trans>
                 </Link>
               </Button>

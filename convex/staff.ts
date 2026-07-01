@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireOwned, requireActiveOutlet, tryActiveOutlet } from './lib/auth';
 import { hashPin, verifyPin as verifyPinHash } from './lib/pin';
 
 const permissionsValidator = v.object({
@@ -204,9 +204,12 @@ export const permissionsFor = query({
     v.null()
   ),
   handler: async (ctx, { cashierId }) => {
-    const { cafeId } = await requireActiveOutlet(ctx);
+    // Non-throwing: a signed-in user with no outlet yet (e.g. mid-onboarding)
+    // resolves to null instead of crashing this app-wide hook.
+    const outlet = await tryActiveOutlet(ctx);
+    if (!outlet) return null;
     const staff = await ctx.db.get(cashierId);
-    if (!staff || staff.cafeId !== cafeId) return null;
+    if (!staff || staff.cafeId !== outlet.cafeId) return null;
     return {
       role: staff.role,
       permissions: staff.role === 'owner' ? ALL_TRUE : { ...ALL_FALSE, ...(staff.permissions ?? {}) },

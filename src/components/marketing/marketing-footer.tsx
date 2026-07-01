@@ -87,7 +87,7 @@ export function MarketingFooter() {
                     </Link>
                   </li>
                   <li>
-                    <Link to="/signup" className="hover:text-foreground">
+                    <Link to="/signin" className="hover:text-foreground">
                       <Trans>Daftar</Trans>
                     </Link>
                   </li>

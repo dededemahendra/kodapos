@@ -1231,8 +1231,8 @@ msgid "Belum masuk"
 msgstr "Belum masuk"
 
 #: src/routes/_public/signin.tsx
-msgid "Belum punya akun?"
-msgstr "Belum punya akun?"
+#~ msgid "Belum punya akun?"
+#~ msgstr "Belum punya akun?"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Belum terhubung"
@@ -1357,8 +1357,8 @@ msgstr "Buat 2-3 kategori (Kopi, Non-Kopi, Makanan)."
 #~ msgstr "Buat 2–3 kategori (Kopi, Non-Kopi, Makanan)."
 
 #: src/routes/_public/signup.tsx
-msgid "Buat akun"
-msgstr "Buat akun"
+#~ msgid "Buat akun"
+#~ msgstr "Buat akun"
 
 #: src/components/marketing/how-it-works.tsx
 msgid "Buat akun, lalu tambahkan menu, harga, dan stok dalam hitungan menit."
@@ -1515,6 +1515,10 @@ msgstr "Buka shift baru sebelum menerima penjualan."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Buka/tutup shift"
 msgstr "Buka/tutup shift"
+
+#: src/components/onboarding/steps/profile-step.tsx
+msgid "Bukan bisnis Anda? Keluar"
+msgstr "Bukan bisnis Anda? Keluar"
 
 #: src/components/marketing/why-indonesia.tsx
 msgid "Bukan sekadar terjemahan. kodapos paham cara kerja usaha lokal."
@@ -1731,6 +1735,7 @@ msgid "Coba kodapos gratis hari ini. Tanpa kartu kredit."
 msgstr "Coba kodapos gratis hari ini. Tanpa kartu kredit."
 
 #: src/routes/__root.tsx
+#: src/routes/_pos.tsx
 msgid "Coba lagi"
 msgstr "Coba lagi"
 
@@ -1780,8 +1785,6 @@ msgstr "Cukup tablet, HP, atau laptop yang sudah Anda punya."
 
 #: src/components/marketing/marketing-footer.tsx
 #: src/components/marketing/marketing-header.tsx
-#: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Daftar"
 msgstr "Daftar"
 
@@ -1899,7 +1902,6 @@ msgid "Dibuka pada"
 msgstr "Dibuka pada"
 
 #. placeholder {0}: idx + 1
-#: src/components/auth/otp-input.tsx
 #: src/components/staff/pin-entry.tsx
 msgid "Digit {0}"
 msgstr "Digit {0}"
@@ -2230,8 +2232,8 @@ msgid "Gagal mencetak."
 msgstr "Gagal mencetak."
 
 #: src/routes/_public/signup.tsx
-msgid "Gagal mendaftar."
-msgstr "Gagal mendaftar."
+#~ msgid "Gagal mendaftar."
+#~ msgstr "Gagal mendaftar."
 
 #: src/components/giftcard/gift-card-form-dialog.tsx
 msgid "Gagal menerbitkan kartu hadiah."
@@ -2861,6 +2863,10 @@ msgstr "Inventaris"
 #: src/components/dashboard-activity.tsx
 #~ msgid "Invoice #1045 marked paid"
 #~ msgstr "Invoice #1045 marked paid"
+
+#: src/components/onboarding/steps/profile-step.tsx
+msgid "Isi nama dan setujui syarat untuk lanjut atau lewati."
+msgstr "Isi nama dan setujui syarat untuk lanjut atau lewati."
 
 #: src/components/giftcard/gift-card-form-dialog.tsx
 #: src/routes/_pos/gift-cards.tsx
@@ -3887,7 +3893,6 @@ msgstr "Margin muncul setelah ada item terjual pada rentang ini."
 #: src/components/shift/cash-movement-dialog.tsx
 #: src/routes/_pos/shifts.tsx
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Masuk"
 msgstr "Masuk"
 
@@ -4008,7 +4013,6 @@ msgstr "Memproses tautan masuk..."
 #: src/components/sale/qris-static-payment-dialog.tsx
 #: src/components/sale/split-payment-dialog.tsx
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Memproses…"
 msgstr "Memproses…"
 
@@ -4166,7 +4170,6 @@ msgid "Minggu sebelumnya"
 msgstr "Minggu sebelumnya"
 
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Minimal 8 karakter"
 msgstr "Minimal 8 karakter"
 
@@ -4184,8 +4187,8 @@ msgstr "mis. Andi"
 #~ msgstr "mis. Kopi"
 
 #: src/routes/_public/signup.tsx
-msgid "mis. Kopi Senja"
-msgstr "mis. Kopi Senja"
+#~ msgid "mis. Kopi Senja"
+#~ msgstr "mis. Kopi Senja"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Mis. PB1 atau PPN."
@@ -4199,7 +4202,7 @@ msgstr "Mis. PB1 atau PPN."
 msgid "mis. tidak pedas"
 msgstr "mis. tidak pedas"
 
-#: src/routes/_public/signup.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "mis. Warren"
 msgstr "mis. Warren"
 
@@ -4303,7 +4306,7 @@ msgstr "Nama / Email"
 msgid "Nama / meja"
 msgstr "Nama / meja"
 
-#: src/routes/_public/signup.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "Nama Anda"
 msgstr "Nama Anda"
 
@@ -4318,7 +4321,6 @@ msgstr "Nama header otorisasi"
 #: src/components/menu/cafe-profile-form.tsx
 #: src/routes/_pos/settings/profile.tsx
 #: src/routes/_pos/settings/receipt.tsx
-#: src/routes/_public/signup.tsx
 msgid "Nama kafe"
 msgstr "Nama kafe"
 
@@ -5813,7 +5815,7 @@ msgstr "Satu aplikasi untuk kasir, stok, dan laporan. Jual lebih cepat, jaga mar
 msgid "Satuan"
 msgstr "Satuan"
 
-#: src/routes/_public/signup.tsx
+#: src/components/onboarding/steps/profile-step.tsx
 msgid "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 msgstr "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 
@@ -5938,7 +5940,6 @@ msgid "Seluruh sisa"
 msgstr "Seluruh sisa"
 
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Sembunyikan password"
 msgstr "Sembunyikan password"
 
@@ -6318,8 +6319,8 @@ msgid "Sudah direfund"
 msgstr "Sudah direfund"
 
 #: src/routes/_public/signup.tsx
-msgid "Sudah punya akun?"
-msgstr "Sudah punya akun?"
+#~ msgid "Sudah punya akun?"
+#~ msgstr "Sudah punya akun?"
 
 #: src/components/income/income-dialog.tsx
 #: src/routes/_pos/reports/other-income.tsx
@@ -6551,7 +6552,6 @@ msgid "Tampilkan nomor order"
 msgstr "Tampilkan nomor order"
 
 #: src/routes/_public/signin.tsx
-#: src/routes/_public/signup.tsx
 msgid "Tampilkan password"
 msgstr "Tampilkan password"
 
@@ -6847,6 +6847,10 @@ msgstr "Terima pesanan di kasir, meja, atau lewat QR. Bayar dengan QRIS atau tun
 msgid "Terjadi kesalahan"
 msgstr "Terjadi kesalahan"
 
+#: src/routes/_pos.tsx
+msgid "Terjadi kesalahan saat memverifikasi akses Anda."
+msgstr "Terjadi kesalahan saat memverifikasi akses Anda."
+
 #: src/routes/_pos/reports/margin.tsx
 msgid "Terjual"
 msgstr "Terjual"
@@ -7003,6 +7007,10 @@ msgstr "Tidak ada staf yang ditemukan."
 msgid "Tidak ada undangan tertunda."
 msgstr "Tidak ada undangan tertunda."
 
+#: src/components/onboarding/steps/profile-step.tsx
+msgid "Tidak dapat melewati penyiapan. Coba lagi."
+msgstr "Tidak dapat melewati penyiapan. Coba lagi."
+
 #: src/routes/_public/signin.tsx
 msgid "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi."
 msgstr "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi."
@@ -7010,6 +7018,11 @@ msgstr "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk
 #: src/routes/_public/signin.tsx
 msgid "Tidak dapat mengirim ulang kode."
 msgstr "Tidak dapat mengirim ulang kode."
+
+#: src/components/onboarding/steps/cashier-step.tsx
+#: src/components/onboarding/steps/menu-step.tsx
+msgid "Tidak dapat menyelesaikan penyiapan. Coba lagi."
+msgstr "Tidak dapat menyelesaikan penyiapan. Coba lagi."
 
 #: src/routes/_pos/reservations.tsx
 msgid "Tidak datang"

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
-import { requireActiveOutlet } from './lib/auth';
+import { tryActiveOutlet } from './lib/auth';
 
 export const global = query({
   args: { term: v.string() },
@@ -25,7 +25,12 @@ export const global = query({
     if (term.trim().length < 2) {
       return { menuItems: [], customers: [] };
     }
-    const { cafeId } = await requireActiveOutlet(ctx);
+    // Non-throwing: the command palette is mounted app-wide (outside the
+    // onboarding gate), so a cafe-less user searching mid-onboarding must get
+    // empty results, not a crash.
+    const outlet = await tryActiveOutlet(ctx);
+    if (!outlet) return { menuItems: [], customers: [] };
+    const { cafeId } = outlet;
     const q = term.trim().toLowerCase();
 
     // Menu items: scope to cafe's active (non-archived, isActive) items, filter by name
