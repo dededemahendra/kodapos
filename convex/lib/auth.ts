@@ -88,18 +88,20 @@ export async function resolveOutletAccess(
  * Throws 'not authenticated' with no identity and 'no outlet access' when the
  * user can reach no outlet.
  */
-export async function requireActiveOutlet(
+/**
+ * Non-throwing variant of {@link requireActiveOutlet}. Resolves the signed-in
+ * user's active outlet, or returns null when there is no identity or no
+ * accessible outlet (e.g. a brand-new user who has not created a cafe yet).
+ * Use in app-wide queries that must degrade gracefully instead of crashing.
+ */
+export async function tryActiveOutlet(
   ctx: QueryCtx | MutationCtx
-): Promise<ActiveOutlet> {
+): Promise<ActiveOutlet | null> {
   const userId = await getAuthUserId(ctx);
-  if (!userId) {
-    throw new Error('not authenticated');
-  }
+  if (!userId) return null;
 
   const access = await resolveOutletAccess(ctx, userId);
-  if (!access || access.accessibleCafeIds.length === 0) {
-    throw new Error('no outlet access');
-  }
+  if (!access || access.accessibleCafeIds.length === 0) return null;
 
   const active = await ctx.db
     .query('activeOutlet')
@@ -111,6 +113,18 @@ export async function requireActiveOutlet(
       : access.accessibleCafeIds[0]!;
 
   return { userId, cafeId, businessId: access.businessId, role: access.role };
+}
+
+export async function requireActiveOutlet(
+  ctx: QueryCtx | MutationCtx
+): Promise<ActiveOutlet> {
+  const resolved = await tryActiveOutlet(ctx);
+  if (!resolved) {
+    // Preserve the distinct messages: no identity vs. identity without access.
+    const userId = await getAuthUserId(ctx);
+    throw new Error(userId ? 'no outlet access' : 'not authenticated');
+  }
+  return resolved;
 }
 
 /**

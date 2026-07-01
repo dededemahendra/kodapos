@@ -208,4 +208,18 @@ describe('staff.permissionsFor', () => {
     const res = await ownerA.query(api.staff.permissionsFor, { cashierId: cashierBId });
     expect(res).toBeNull();
   });
+
+  it('returns null for a signed-in user with no outlet yet (no throw)', async () => {
+    // A brand-new user (e.g. just signed in via passwordless, no cafe yet) with
+    // a persisted active cashier must NOT crash: requireActiveOutlet would throw
+    // 'no outlet access', so permissionsFor resolves the outlet non-throwingly
+    // and degrades to null.
+    const t = convexTest(schema, modules);
+    const owner = await setupOwner(t, 'owner@x.com');
+    const cashierId = await owner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
+    const newUserId = await t.run((ctx) => ctx.db.insert('users', { email: 'new@x.com' }));
+    const asNewUser = t.withIdentity({ subject: `${newUserId}|test_session` });
+    const res = await asNewUser.query(api.staff.permissionsFor, { cashierId });
+    expect(res).toBeNull();
+  });
 });
