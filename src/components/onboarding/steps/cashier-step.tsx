@@ -5,6 +5,7 @@ import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react/macro';
 import { type FormEvent, useState } from 'react';
 import { KeyRound, Plus, Users } from 'lucide-react';
+import { toast } from 'sonner';
 import { PinEntry } from '~/components/staff/pin-entry';
 import { OnboardingStepHeader } from '~/components/onboarding/step-header';
 import { Button } from '~/components/ui/button';
@@ -66,8 +67,15 @@ export function CashierStep() {
   }
 
   async function finish(): Promise<void> {
-    await markComplete();
-    navigate({ to: '/menu' });
+    // markComplete requires an active outlet; guard against a transient failure
+    // so the "Selesai" button surfaces a toast instead of a silent rejection.
+    try {
+      await markComplete();
+      navigate({ to: '/menu' });
+    } catch (err) {
+      console.error('Onboarding finish failed', err);
+      toast.error(t`Tidak dapat menyelesaikan penyiapan. Coba lagi.`);
+    }
   }
 
   return (

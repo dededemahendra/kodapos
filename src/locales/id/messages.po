@@ -7019,6 +7019,7 @@ msgstr "Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk
 msgid "Tidak dapat mengirim ulang kode."
 msgstr "Tidak dapat mengirim ulang kode."
 
+#: src/components/onboarding/steps/cashier-step.tsx
 #: src/components/onboarding/steps/menu-step.tsx
 msgid "Tidak dapat menyelesaikan penyiapan. Coba lagi."
 msgstr "Tidak dapat menyelesaikan penyiapan. Coba lagi."
