@@ -151,6 +151,18 @@ describe('admin.setPlatformAdmin', () => {
   });
 });
 
+describe('cafes.createForOwner operator guard', () => {
+  it('rejects cafe creation for a platform-admin (operator) account', async () => {
+    const t = convexTest(schema, modules);
+    const operatorId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Op', email: 'operator@x.com', isPlatformAdmin: true })
+    );
+    await expect(
+      as(t, operatorId).mutation(api.cafes.createForOwner, { name: 'Operator Cafe' })
+    ).rejects.toThrow('operators cannot own cafes');
+  });
+});
+
 describe('deactivation lockout (requireActiveUser)', () => {
   it('blocks a deactivated user from businessOverview and createForOwner', async () => {
     const t = convexTest(schema, modules);

@@ -46,7 +46,12 @@ export const createForOwner = mutation({
   args: { name: v.string() },
   returns: v.id('cafes'),
   handler: async (ctx, { name }) => {
-    const { userId } = await requireActiveUser(ctx);
+    const { userId, user } = await requireActiveUser(ctx);
+    // Operators (platform admins) are a separate account class and must never
+    // own a cafe; the tenant->operator boundary is enforced here.
+    if (user.isPlatformAdmin === true) {
+      throw new Error('operators cannot own cafes');
+    }
     // Idempotent: if a cafe already exists for this owner, return it.
     // The signup flow retries this call against auth-token-propagation
     // races, so the mutation MUST be safe to invoke multiple times.
@@ -72,8 +77,7 @@ export const createForOwner = mutation({
       taxRatePct: 11,
       taxEnabled: true,
     });
-    const user = await ctx.db.get(userId);
-    const ownerName = (user as { name?: string } | null)?.name?.trim() || 'Pemilik';
+    const ownerName = user.name?.trim() || 'Pemilik';
     await ctx.db.insert('cafeStaff', {
       cafeId,
       name: ownerName,
