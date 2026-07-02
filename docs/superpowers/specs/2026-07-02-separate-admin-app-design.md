@@ -48,11 +48,16 @@ separate login, separate UI — on one deploy and one bundle.
 
 - New pathless layout group **`_admin`** (`src/routes/_admin.tsx`) with its own
   root chrome: an operator top bar + admin nav, **no** cafe POS sidebar.
-- Route moves / additions:
+- Route moves / additions (all under one TanStack router, so admin paths must
+  **not collide** with any tenant path — `/` and `/signin` are taken, hence the
+  admin-specific names below):
   - `src/routes/_pos/admin/users.tsx` → **`src/routes/_admin/users.tsx`**
-    (served as `/users` on the admin host).
-  - **`src/routes/_admin/index.tsx`** — admin landing (post-sign-in home).
-  - **`src/routes/_admin/signin.tsx`** — operator sign-in.
+    (served as `/users` on the admin host; `/users` is free tenant-side).
+  - **`src/routes/_admin/overview.tsx`** — admin landing (`/overview`).
+  - **`src/routes/_admin/login.tsx`** — operator sign-in (`/login`; tenant uses
+    `/signin`).
+  - On the admin host, the tenant home `/` (which the router matches to
+    `_public/index`) is redirected to `/overview` by the `_public` host gate.
 - **Host gate.** A pure helper `resolveHostApp(host: string): 'admin' | 'tenant'`
   (`src/lib/host.ts`) returns `'admin'` when the hostname's first label is
   `admin` (e.g. `admin.kodapos.app`, and `admin.localhost` for local dev, which
@@ -76,8 +81,8 @@ separate login, separate UI — on one deploy and one bundle.
   cafe/business. Operators are **provisioned, not self-signup**: seeded via the
   existing `admin.grantPlatformAdminByEmail` bootstrap mutation or an operator
   invite; the account must already be a platform admin to get in.
-- **Admin sign-in** (`_admin/signin`) uses emailed-code auth (reusing the
-  existing `ResendOTP` provider). After the code verifies, the app gates on
+- **Admin sign-in** (`_admin/login`, at `/login`) uses emailed-code auth
+  (reusing the existing `ResendOTP` provider). After the code verifies, gates on
   `isPlatformAdmin === true`; if false, it **immediately signs the user out** and
   shows "Not authorized." There is **no onboarding/cafe-creation path** on the
   admin host.
