@@ -11,6 +11,7 @@ import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { LoadingCounter } from '~/components/ui/loading-counter';
 import { Toaster } from '~/components/ui/sonner';
+import { currentHostApp } from '~/lib/host';
 import { useAutoLock } from '~/lib/use-auto-lock';
 
 export const Route = createFileRoute('/_pos')({
@@ -27,6 +28,11 @@ const WIZARD_PREFIXES = ['/onboarding', '/pin', '/shift'];
 const OPERATIONAL_PREFIXES = ['/sale', '/tables', '/kitchen', '/self-orders'];
 
 function PosLayout() {
+  useEffect(() => {
+    if (currentHostApp() === 'admin') window.location.replace('/overview');
+  }, []);
+  if (currentHostApp() === 'admin') return null;
+
   const path = useRouterState({ select: (s) => s.location.pathname });
   const cafe = useQuery(api.cafes.myCafe, {});
   // While the owner is still mid-onboarding (cafe exists but no
