@@ -36,6 +36,16 @@ describe('search.global', () => {
     expect(r2).toEqual({ menuItems: [], customers: [] });
   });
 
+  it('returns empty for a signed-in user with no outlet (no throw)', async () => {
+    // The command palette is mounted app-wide, so a cafe-less user searching
+    // mid-onboarding must get empty results, not a 'no outlet access' crash.
+    const t = convexTest(schema, modules);
+    const userId = await t.run((ctx) => ctx.db.insert('users', { email: 'noc@x.com' }));
+    const asNoCafe = t.withIdentity({ subject: `${userId}|test` });
+    const r = await asNoCafe.query(api.search.global, { term: 'kopi' });
+    expect(r).toEqual({ menuItems: [], customers: [] });
+  });
+
   it('finds menu items by name (case-insensitive)', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, cafeId, catId } = await setup(t);

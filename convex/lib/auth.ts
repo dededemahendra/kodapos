@@ -97,7 +97,11 @@ export async function requireActiveUser(
 }
 
 /**
- * Resolve the outlet (cafe) the signed-in user is currently operating.
+ * Resolve the outlet (cafe) the signed-in user is currently operating, or null
+ * when there is no identity, the account is deactivated, or the user can reach
+ * no outlet (e.g. a brand-new user who has not created a cafe yet). Non-throwing
+ * so app-wide queries (permissions, dashboards) degrade gracefully instead of
+ * crashing.
  *
  * Returns a superset of the legacy `{ userId, cafeId }` shape so the ~230
  * existing call sites keep working unchanged. Resolution:
@@ -106,19 +110,20 @@ export async function requireActiveUser(
  *   2. active outlet = the persisted choice when still accessible, else the
  *      first accessible outlet (an ephemeral default; this helper runs in
  *      queries and MUST NOT write; only setActiveOutlet persists a choice).
- *
- * Throws 'not authenticated' with no identity and 'no outlet access' when the
- * user can reach no outlet.
  */
-export async function requireActiveOutlet(
+export async function tryActiveOutlet(
   ctx: QueryCtx | MutationCtx
-): Promise<ActiveOutlet> {
-  const { userId } = await requireActiveUser(ctx);
+): Promise<ActiveOutlet | null> {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) return null;
+  // Deactivated users are locked out everywhere: deny access gracefully here so
+  // graceful callers degrade and the throwing gate can surface the distinct
+  // 'account deactivated' message.
+  const user = await ctx.db.get(userId);
+  if (user?.deactivatedAt != null) return null;
 
   const access = await resolveOutletAccess(ctx, userId);
-  if (!access || access.accessibleCafeIds.length === 0) {
-    throw new Error('no outlet access');
-  }
+  if (!access || access.accessibleCafeIds.length === 0) return null;
 
   const active = await ctx.db
     .query('activeOutlet')
@@ -130,6 +135,26 @@ export async function requireActiveOutlet(
       : access.accessibleCafeIds[0]!;
 
   return { userId, cafeId, businessId: access.businessId, role: access.role };
+}
+
+/**
+ * Throwing gate over {@link tryActiveOutlet} for the ~230 handlers that require
+ * an active outlet. Preserves distinct messages: 'not authenticated' (no
+ * identity), 'account deactivated' (locked out by a platform admin), and
+ * 'no outlet access' (identity but no reachable outlet).
+ */
+export async function requireActiveOutlet(
+  ctx: QueryCtx | MutationCtx
+): Promise<ActiveOutlet> {
+  const resolved = await tryActiveOutlet(ctx);
+  if (!resolved) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error('not authenticated');
+    const user = await ctx.db.get(userId);
+    if (user?.deactivatedAt != null) throw new Error('account deactivated');
+    throw new Error('no outlet access');
+  }
+  return resolved;
 }
 
 /**

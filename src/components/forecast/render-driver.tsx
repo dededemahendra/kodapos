@@ -1,4 +1,5 @@
 import { Trans } from '@lingui/react/macro';
+import { formatWeekday } from '~/lib/formater';
 
 // Structured driver shapes mirror convex/lib/forecast.ts (client copy — the
 // query returns plain objects; we render them localized here).
@@ -6,9 +7,6 @@ export type ForecastDriver =
   | { code: 'dow_busy' | 'dow_quiet'; pct: number; dow: number }
   | { code: 'holiday'; pct: number; key: string }
   | { code: 'weather'; pct: number; condition: 'hot' | 'rainy' | 'cool' | 'normal' };
-
-// 0=Mon..6=Sun
-const DAY_NAMES = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
 function HolidayText({ pct, hkey }: { pct: number; hkey: string }) {
   const label = hkey.startsWith('lebaran')
@@ -39,7 +37,7 @@ export function RenderDriver({ driver }: { driver: ForecastDriver }) {
       <Trans>Cuaca — perkiraan turun {Math.abs(driver.pct)}%</Trans>
     );
   }
-  const day = DAY_NAMES[driver.dow] ?? '';
+  const day = formatWeekday(driver.dow);
   return driver.code === 'dow_busy' ? (
     <Trans>+{driver.pct}% — biasanya ramai di hari {day}</Trans>
   ) : (

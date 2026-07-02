@@ -1,7 +1,7 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import type { MessageDescriptor } from '@lingui/core';
 import { Trans, useLingui } from '@lingui/react/macro';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import {
   type ChangeEvent,
@@ -20,6 +20,7 @@ import { Checkbox } from '~/components/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { sendResetOrSigninCode } from '~/lib/auth-reset';
 import { setRememberMe } from '~/lib/auth-storage';
 import {
   validateEmail,
@@ -70,7 +71,10 @@ function SigninPage() {
   if (magic) {
     return <MagicLinkHandler email={magic.email} code={magic.code} />;
   }
-  return <SigninCard initialMode={search.reset !== undefined ? 'reset' : 'password'} />;
+  // Passwordless-first: the sign-in card lands on the emailed-code (otp) flow by
+  // default; password stays one tap away behind the "Pakai sandi" link. The
+  // `?reset` search param still routes straight into the password-reset flow.
+  return <SigninCard initialMode={search.reset !== undefined ? 'reset' : 'otp'} />;
 }
 
 /**
@@ -259,20 +263,35 @@ function SigninCard({
     const emailErr = validateEmail(email.value);
     setEmail((prev) => ({ ...prev, touched: true, error: emailErr }));
     if (emailErr !== null) return;
+    const addr = email.value.trim();
     setSubmitting(true);
     setAuthError(null);
     setInfo(null);
     try {
       if (mode === 'otp') {
-        await signIn('resend-otp', { email: email.value.trim() });
+        await signIn('resend-otp', { email: addr });
+        setCodeSent(true);
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+        setInfo(t`Kode dikirim ke email Anda.`);
       } else {
-        await signIn('password', { flow: 'reset', email: email.value.trim() });
+        // Passwordless-first: most accounts have no password to reset, so the
+        // reset send throws before any email goes out. Fall back to a sign-in
+        // code (and switch to that flow) instead of a misleading email error.
+        const outcome = await sendResetOrSigninCode({
+          sendReset: () => signIn('password', { flow: 'reset', email: addr }),
+          sendSigninCode: () => signIn('resend-otp', { email: addr }),
+        });
+        setCodeSent(true);
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+        if (outcome === 'fallback') {
+          setMode('otp');
+          setInfo(t`Akun ini menggunakan kode masuk, bukan sandi. Kami mengirim kode ke email Anda.`);
+        } else {
+          setInfo(t`Kode reset dikirim ke email Anda.`);
+        }
       }
-      setCodeSent(true);
-      setCooldown(RESEND_COOLDOWN_SECONDS);
-      setInfo(t`Kode dikirim ke email Anda.`);
     } catch {
-      // Resend not configured (or send failed) surfaces as a masked server error.
+      // Both the reset and the sign-in code send failed: a genuine email outage.
       setAuthError(
         t`Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi.`,
       );
@@ -634,12 +653,6 @@ function SigninCard({
         </>
       )}
 
-      <div className="mt-6 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-        <Trans>Belum punya akun?</Trans>{' '}
-        <Link to="/signup" className="text-primary underline">
-          <Trans>Daftar</Trans>
-        </Link>
-      </div>
     </AuthCard>
   );
 }

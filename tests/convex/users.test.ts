@@ -30,3 +30,27 @@ describe('users.hello', () => {
     expect(greeting).toMatch(/Halo, Warren/);
   });
 });
+
+describe('setName / myName', () => {
+  it('sets and reads back the authed user name (trimmed)', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await t.run((ctx) => ctx.db.insert('users', { email: 'o@x.com' }));
+    const asUser = t.withIdentity({ subject: `${userId}|test_session` });
+
+    expect(await asUser.query(api.users.myName)).toBeNull();
+    await asUser.mutation(api.users.setName, { name: '  Warren  ' });
+    expect(await asUser.query(api.users.myName)).toBe('Warren');
+  });
+
+  it('rejects an empty name', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await t.run((ctx) => ctx.db.insert('users', { email: 'o2@x.com' }));
+    const asUser = t.withIdentity({ subject: `${userId}|test_session` });
+    await expect(asUser.mutation(api.users.setName, { name: '   ' })).rejects.toThrow('Nama wajib diisi.');
+  });
+
+  it('setName throws when unauthenticated', async () => {
+    const t = convexTest(schema, modules);
+    await expect(t.mutation(api.users.setName, { name: 'X' })).rejects.toThrow('Not authenticated');
+  });
+});

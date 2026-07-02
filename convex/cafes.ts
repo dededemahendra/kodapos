@@ -19,6 +19,7 @@ const cafeFields = {
   taxRatePct: v.optional(v.number()),
   taxEnabled: v.optional(v.boolean()),
   setupCompletedAt: v.optional(v.number()),
+  ownerTermsAcceptedAt: v.optional(v.number()),
   businessType: v.optional(v.string()),
   whatsapp: v.optional(v.string()),
   email: v.optional(v.string()),
@@ -158,6 +159,7 @@ export const updateProfile = mutation({
     timezone: v.string(),
     taxRatePct: v.number(),
     taxEnabled: v.boolean(),
+    ownerTermsAcceptedAt: v.optional(v.number()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -179,6 +181,9 @@ export const updateProfile = mutation({
       timezone: args.timezone,
       taxRatePct: args.taxRatePct,
       taxEnabled: args.taxEnabled,
+      ...(args.ownerTermsAcceptedAt !== undefined
+        ? { ownerTermsAcceptedAt: args.ownerTermsAcceptedAt }
+        : {}),
     });
     return null;
   },
@@ -371,6 +376,26 @@ export const markSetupComplete = mutation({
       return null;
     }
     await ctx.db.patch(cafeId, { setupCompletedAt: Date.now() });
+    return null;
+  },
+});
+
+/**
+ * Record owner Terms acceptance on the active cafe, without touching the cafe
+ * profile fields. Lets the onboarding "skip" path persist consent without
+ * writing a stale form snapshot (the cafe-profile inputs are uncontrolled, so
+ * only the primary submit reads their current values). Idempotent: keeps the
+ * first acceptance timestamp.
+ */
+export const acceptOwnerTerms = mutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    const cafe = await ctx.db.get(cafeId);
+    if (cafe && !cafe.ownerTermsAcceptedAt) {
+      await ctx.db.patch(cafeId, { ownerTermsAcceptedAt: Date.now() });
+    }
     return null;
   },
 });

@@ -94,7 +94,7 @@ export function Pricing() {
                 </CardContent>
                 <CardFooter>
                   <Button asChild className="w-full">
-                    <Link to="/signup">
+                    <Link to="/signin">
                       <Trans>Mulai gratis</Trans>
                     </Link>
                   </Button>
@@ -145,7 +145,7 @@ export function Pricing() {
                 </CardContent>
                 <CardFooter>
                   <Button asChild className="w-full">
-                    <Link to="/signup">
+                    <Link to="/signin">
                       <Trans>Mulai gratis</Trans>
                     </Link>
                   </Button>

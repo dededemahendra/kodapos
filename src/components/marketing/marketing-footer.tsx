@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { Globe, Heart, Mail, MessageCircle } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { BrandMark } from '~/components/brand-mark';
+import { LanguageToggle } from '~/components/language-toggle';
 
 const VP = { once: true, margin: '-80px' } as const;
 
@@ -74,6 +75,11 @@ export function MarketingFooter() {
                       FAQ
                     </a>
                   </li>
+                  <li>
+                    <Link to="/changelog" className="hover:text-foreground">
+                      <Trans>Pembaruan</Trans>
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
@@ -87,7 +93,7 @@ export function MarketingFooter() {
                     </Link>
                   </li>
                   <li>
-                    <Link to="/signup" className="hover:text-foreground">
+                    <Link to="/signin" className="hover:text-foreground">
                       <Trans>Daftar</Trans>
                     </Link>
                   </li>
@@ -114,13 +120,16 @@ export function MarketingFooter() {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-12 flex flex-col gap-3 border-t border-border pt-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+          <div className="mt-12 flex flex-col gap-4 border-t border-border pt-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
             <span>© 2026 kodapos. All rights reserved.</span>
-            <span className="inline-flex items-center gap-1.5">
-              Made with
-              <Heart className="size-3.5 fill-red-500 text-red-500" aria-hidden="true" />
-              by Dede Mahendra
-            </span>
+            <div className="flex items-center gap-4">
+              <span className="inline-flex items-center gap-1.5">
+                Made with
+                <Heart className="size-3.5 fill-red-500 text-red-500" aria-hidden="true" />
+                by Dede Mahendra
+              </span>
+              <LanguageToggle />
+            </div>
           </div>
         </motion.div>
       </MotionConfig>

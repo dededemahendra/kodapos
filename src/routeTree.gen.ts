@@ -17,6 +17,7 @@ import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PublicChangelogRouteImport } from './routes/_public/changelog'
 import { Route as PosTimeClockRouteImport } from './routes/_pos/time-clock'
 import { Route as PosTablesRouteImport } from './routes/_pos/tables'
 import { Route as PosSuppliersRouteImport } from './routes/_pos/suppliers'
@@ -36,7 +37,6 @@ import { Route as PosForecastRouteImport } from './routes/_pos/forecast'
 import { Route as PosDocsRouteImport } from './routes/_pos/docs'
 import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 import { Route as PosCustomersRouteImport } from './routes/_pos/customers'
-import { Route as PosChangelogRouteImport } from './routes/_pos/changelog'
 import { Route as PosAllOutletsRouteImport } from './routes/_pos/all-outlets'
 import { Route as PosAiRouteImport } from './routes/_pos/ai'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
@@ -120,6 +120,11 @@ const PublicSigninRoute = PublicSigninRouteImport.update({
 const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicChangelogRoute = PublicChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
   getParentRoute: () => PublicRoute,
 } as any)
 const PosTimeClockRoute = PosTimeClockRouteImport.update({
@@ -215,11 +220,6 @@ const PosDashboardRoute = PosDashboardRouteImport.update({
 const PosCustomersRoute = PosCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
-  getParentRoute: () => PosRoute,
-} as any)
-const PosChangelogRoute = PosChangelogRouteImport.update({
-  id: '/changelog',
-  path: '/changelog',
   getParentRoute: () => PosRoute,
 } as any)
 const PosAllOutletsRoute = PosAllOutletsRouteImport.update({
@@ -466,7 +466,6 @@ export interface FileRoutesByFullPath {
   '/shift': typeof PosShiftRouteRouteWithChildren
   '/ai': typeof PosAiRoute
   '/all-outlets': typeof PosAllOutletsRoute
-  '/changelog': typeof PosChangelogRoute
   '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
   '/docs': typeof PosDocsRoute
@@ -486,6 +485,7 @@ export interface FileRoutesByFullPath {
   '/suppliers': typeof PosSuppliersRoute
   '/tables': typeof PosTablesRoute
   '/time-clock': typeof PosTimeClockRoute
+  '/changelog': typeof PublicChangelogRoute
   '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
@@ -536,7 +536,6 @@ export interface FileRoutesByTo {
   '/shift': typeof PosShiftRouteRouteWithChildren
   '/ai': typeof PosAiRoute
   '/all-outlets': typeof PosAllOutletsRoute
-  '/changelog': typeof PosChangelogRoute
   '/customers': typeof PosCustomersRoute
   '/dashboard': typeof PosDashboardRoute
   '/docs': typeof PosDocsRoute
@@ -556,6 +555,7 @@ export interface FileRoutesByTo {
   '/suppliers': typeof PosSuppliersRoute
   '/tables': typeof PosTablesRoute
   '/time-clock': typeof PosTimeClockRoute
+  '/changelog': typeof PublicChangelogRoute
   '/privacy': typeof PublicPrivacyRoute
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
@@ -612,7 +612,6 @@ export interface FileRoutesById {
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
   '/_pos/ai': typeof PosAiRoute
   '/_pos/all-outlets': typeof PosAllOutletsRoute
-  '/_pos/changelog': typeof PosChangelogRoute
   '/_pos/customers': typeof PosCustomersRoute
   '/_pos/dashboard': typeof PosDashboardRoute
   '/_pos/docs': typeof PosDocsRoute
@@ -632,6 +631,7 @@ export interface FileRoutesById {
   '/_pos/suppliers': typeof PosSuppliersRoute
   '/_pos/tables': typeof PosTablesRoute
   '/_pos/time-clock': typeof PosTimeClockRoute
+  '/_public/changelog': typeof PublicChangelogRoute
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
@@ -689,7 +689,6 @@ export interface FileRouteTypes {
     | '/shift'
     | '/ai'
     | '/all-outlets'
-    | '/changelog'
     | '/customers'
     | '/dashboard'
     | '/docs'
@@ -709,6 +708,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/tables'
     | '/time-clock'
+    | '/changelog'
     | '/privacy'
     | '/signin'
     | '/signup'
@@ -759,7 +759,6 @@ export interface FileRouteTypes {
     | '/shift'
     | '/ai'
     | '/all-outlets'
-    | '/changelog'
     | '/customers'
     | '/dashboard'
     | '/docs'
@@ -779,6 +778,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/tables'
     | '/time-clock'
+    | '/changelog'
     | '/privacy'
     | '/signin'
     | '/signup'
@@ -834,7 +834,6 @@ export interface FileRouteTypes {
     | '/_pos/shift'
     | '/_pos/ai'
     | '/_pos/all-outlets'
-    | '/_pos/changelog'
     | '/_pos/customers'
     | '/_pos/dashboard'
     | '/_pos/docs'
@@ -854,6 +853,7 @@ export interface FileRouteTypes {
     | '/_pos/suppliers'
     | '/_pos/tables'
     | '/_pos/time-clock'
+    | '/_public/changelog'
     | '/_public/privacy'
     | '/_public/signin'
     | '/_public/signup'
@@ -960,6 +960,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PublicPrivacyRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/changelog': {
+      id: '/_public/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof PublicChangelogRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_pos/time-clock': {
@@ -1093,13 +1100,6 @@ declare module '@tanstack/react-router' {
       path: '/customers'
       fullPath: '/customers'
       preLoaderRoute: typeof PosCustomersRouteImport
-      parentRoute: typeof PosRoute
-    }
-    '/_pos/changelog': {
-      id: '/_pos/changelog'
-      path: '/changelog'
-      fullPath: '/changelog'
-      preLoaderRoute: typeof PosChangelogRouteImport
       parentRoute: typeof PosRoute
     }
     '/_pos/all-outlets': {
@@ -1583,7 +1583,6 @@ interface PosRouteChildren {
   PosShiftRouteRoute: typeof PosShiftRouteRouteWithChildren
   PosAiRoute: typeof PosAiRoute
   PosAllOutletsRoute: typeof PosAllOutletsRoute
-  PosChangelogRoute: typeof PosChangelogRoute
   PosCustomersRoute: typeof PosCustomersRoute
   PosDashboardRoute: typeof PosDashboardRoute
   PosDocsRoute: typeof PosDocsRoute
@@ -1616,7 +1615,6 @@ const PosRouteChildren: PosRouteChildren = {
   PosShiftRouteRoute: PosShiftRouteRouteWithChildren,
   PosAiRoute: PosAiRoute,
   PosAllOutletsRoute: PosAllOutletsRoute,
-  PosChangelogRoute: PosChangelogRoute,
   PosCustomersRoute: PosCustomersRoute,
   PosDashboardRoute: PosDashboardRoute,
   PosDocsRoute: PosDocsRoute,
@@ -1642,6 +1640,7 @@ const PosRouteChildren: PosRouteChildren = {
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
 
 interface PublicRouteChildren {
+  PublicChangelogRoute: typeof PublicChangelogRoute
   PublicPrivacyRoute: typeof PublicPrivacyRoute
   PublicSigninRoute: typeof PublicSigninRoute
   PublicSignupRoute: typeof PublicSignupRoute
@@ -1651,6 +1650,7 @@ interface PublicRouteChildren {
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
+  PublicChangelogRoute: PublicChangelogRoute,
   PublicPrivacyRoute: PublicPrivacyRoute,
   PublicSigninRoute: PublicSigninRoute,
   PublicSignupRoute: PublicSignupRoute,

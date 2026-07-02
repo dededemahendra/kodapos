@@ -3,11 +3,9 @@ import { Link } from '@tanstack/react-router';
 import { MotionConfig, motion } from 'motion/react';
 import { Button } from '~/components/ui/button';
 import { BrandMark } from '~/components/brand-mark';
-import { useLocale } from '~/components/locale-provider';
-import { LOCALES, type Locale } from '~/lib/locale';
+import { ThemeToggle } from '~/components/theme-toggle';
 
 export function MarketingHeader() {
-  const { locale, setLocale } = useLocale();
   return (
     <MotionConfig reducedMotion="user">
       <motion.header
@@ -28,25 +26,12 @@ export function MarketingHeader() {
           <a href="/#faq" className="transition-colors hover:text-foreground">FAQ</a>
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <div className="hidden items-center rounded-md border border-border p-0.5 sm:flex">
-            {LOCALES.map((l) => (
-              <button
-                key={l.value}
-                type="button"
-                onClick={() => setLocale(l.value as Locale)}
-                className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
-                  locale === l.value ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {l.value.toUpperCase()}
-              </button>
-            ))}
-          </div>
+          <ThemeToggle className="size-9" />
           <Button asChild variant="outline" size="sm">
             <Link to="/signin"><Trans>Masuk</Trans></Link>
           </Button>
           <Button asChild size="sm">
-            <Link to="/signup"><Trans>Daftar</Trans></Link>
+            <Link to="/signin"><Trans>Daftar</Trans></Link>
           </Button>
         </div>
       </div>

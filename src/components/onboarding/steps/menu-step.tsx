@@ -1,18 +1,27 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
-import { Trans } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { ListChecks, UtensilsCrossed } from 'lucide-react';
+import { toast } from 'sonner';
 import { OnboardingStepHeader } from '~/components/onboarding/step-header';
 import { Button } from '~/components/ui/button';
 
 export function MenuStep() {
+  const { t } = useLingui();
   const markComplete = useMutation(api.cafes.markSetupComplete);
   const navigate = useNavigate();
 
   async function finish(target: '/menu' | '/menu/categories') {
-    await markComplete();
-    navigate({ to: target });
+    // markComplete requires an active outlet; a cafe-less user who reached this
+    // step via a direct URL would otherwise hit an unhandled rejection.
+    try {
+      await markComplete();
+      navigate({ to: target });
+    } catch (err) {
+      console.error('Onboarding finish failed', err);
+      toast.error(t`Tidak dapat menyelesaikan penyiapan. Coba lagi.`);
+    }
   }
 
   return (

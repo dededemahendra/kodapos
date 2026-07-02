@@ -10,9 +10,11 @@ import { weatherConditionV, weatherSignalV } from './lib/weather';
 export default defineSchema({
   ...authTables,
 
-  // Override the Convex Auth users table to add platform-admin + deactivation.
-  // Default fields reproduced verbatim from @convex-dev/auth so auth flows keep
-  // working; only the last two fields are new.
+  // Override the Convex Auth `users` table to add platform-admin + deactivation
+  // flags (operator-only /admin surface). Mirrors the default authTables.users
+  // shape + indexes verbatim (email/phone are required by @convex-dev/auth) so
+  // auth flows keep working; only the last two fields are new. Must come AFTER
+  // `...authTables` to override it.
   users: defineTable({
     name: v.optional(v.string()),
     image: v.optional(v.string()),
@@ -53,6 +55,9 @@ export default defineSchema({
     taxRatePct: v.optional(v.number()),
     taxEnabled: v.optional(v.boolean()),
     setupCompletedAt: v.optional(v.number()),
+    // When the owner accepted Terms & Privacy during onboarding (passwordless
+    // flow). Optional for backward compatibility with pre-existing cafes.
+    ownerTermsAcceptedAt: v.optional(v.number()),
     businessType: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
     email: v.optional(v.string()),
