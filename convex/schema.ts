@@ -10,10 +10,11 @@ import { weatherConditionV, weatherSignalV } from './lib/weather';
 export default defineSchema({
   ...authTables,
 
-  // Override the Convex Auth `users` table to carry an extra `isPlatformAdmin`
-  // flag (operator-only /admin surface). Mirrors the default authTables.users
-  // shape + indexes exactly (email/phone are required by @convex-dev/auth),
-  // then adds the optional flag. Must come AFTER `...authTables` to override it.
+  // Override the Convex Auth `users` table to add platform-admin + deactivation
+  // flags (operator-only /admin surface). Mirrors the default authTables.users
+  // shape + indexes verbatim (email/phone are required by @convex-dev/auth) so
+  // auth flows keep working; only the last two fields are new. Must come AFTER
+  // `...authTables` to override it.
   users: defineTable({
     name: v.optional(v.string()),
     image: v.optional(v.string()),

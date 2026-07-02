@@ -1,7 +1,7 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireBusinessOwner, resolveOutletAccess } from './lib/auth';
+import { requireActiveUser, requireBusinessOwner, resolveOutletAccess } from './lib/auth';
 
 export const myOutlets = query({
   args: {},
@@ -88,10 +88,7 @@ export const setActiveOutlet = mutation({
   args: { cafeId: v.id('cafes') },
   returns: v.null(),
   handler: async (ctx, { cafeId }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error('not authenticated');
-    }
+    const { userId } = await requireActiveUser(ctx);
     const access = await resolveOutletAccess(ctx, userId);
     if (!access || !access.accessibleCafeIds.includes(cafeId)) {
       throw new Error('no outlet access');

@@ -80,6 +80,7 @@ import { Route as PosInventoryWasteRouteImport } from './routes/_pos/inventory/w
 import { Route as PosInventoryPurchasesRouteImport } from './routes/_pos/inventory/purchases'
 import { Route as PosInventoryPurchaseOrdersRouteImport } from './routes/_pos/inventory/purchase-orders'
 import { Route as PosInventoryAdjustmentsRouteImport } from './routes/_pos/inventory/adjustments'
+import { Route as PosAdminUsersRouteImport } from './routes/_pos/admin/users'
 import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
 import { Route as PosMenuItemsItemIdRouteImport } from './routes/_pos/menu/items.$itemId'
 
@@ -437,6 +438,11 @@ const PosInventoryAdjustmentsRoute = PosInventoryAdjustmentsRouteImport.update({
   path: '/adjustments',
   getParentRoute: () => PosInventoryRouteRoute,
 } as any)
+const PosAdminUsersRoute = PosAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => PosRoute,
+} as any)
 const PosMenuModifiersGroupIdRoute = PosMenuModifiersGroupIdRouteImport.update({
   id: '/$groupId',
   path: '/$groupId',
@@ -484,6 +490,7 @@ export interface FileRoutesByFullPath {
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
+  '/admin/users': typeof PosAdminUsersRoute
   '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
@@ -553,6 +560,7 @@ export interface FileRoutesByTo {
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
+  '/admin/users': typeof PosAdminUsersRoute
   '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
@@ -629,6 +637,7 @@ export interface FileRoutesById {
   '/_public/signup': typeof PublicSignupRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
+  '/_pos/admin/users': typeof PosAdminUsersRoute
   '/_pos/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/_pos/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/_pos/inventory/purchases': typeof PosInventoryPurchasesRoute
@@ -704,6 +713,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/terms'
+    | '/admin/users'
     | '/inventory/adjustments'
     | '/inventory/purchase-orders'
     | '/inventory/purchases'
@@ -773,6 +783,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/terms'
+    | '/admin/users'
     | '/inventory/adjustments'
     | '/inventory/purchase-orders'
     | '/inventory/purchases'
@@ -848,6 +859,7 @@ export interface FileRouteTypes {
     | '/_public/signup'
     | '/_public/terms'
     | '/_public/'
+    | '/_pos/admin/users'
     | '/_pos/inventory/adjustments'
     | '/_pos/inventory/purchase-orders'
     | '/_pos/inventory/purchases'
@@ -1391,6 +1403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosInventoryAdjustmentsRouteImport
       parentRoute: typeof PosInventoryRouteRoute
     }
+    '/_pos/admin/users': {
+      id: '/_pos/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof PosAdminUsersRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_pos/menu/modifiers/$groupId': {
       id: '/_pos/menu/modifiers/$groupId'
       path: '/$groupId'
@@ -1583,6 +1602,7 @@ interface PosRouteChildren {
   PosSuppliersRoute: typeof PosSuppliersRoute
   PosTablesRoute: typeof PosTablesRoute
   PosTimeClockRoute: typeof PosTimeClockRoute
+  PosAdminUsersRoute: typeof PosAdminUsersRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
@@ -1614,6 +1634,7 @@ const PosRouteChildren: PosRouteChildren = {
   PosSuppliersRoute: PosSuppliersRoute,
   PosTablesRoute: PosTablesRoute,
   PosTimeClockRoute: PosTimeClockRoute,
+  PosAdminUsersRoute: PosAdminUsersRoute,
 }
 
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)

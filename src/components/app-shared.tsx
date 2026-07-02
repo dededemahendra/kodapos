@@ -21,6 +21,7 @@ import {
 	NotebookText,
 	Package,
 	Settings,
+	ShieldCheck,
 	Sparkles,
 	TrendingUp,
 	UtensilsCrossed,
@@ -33,7 +34,7 @@ export type SidebarNavItem = {
 	icon?: ReactNode;
 	isActive?: boolean;
 	subItems?: SidebarNavItem[];
-	requires?: Permission | 'owner';
+	requires?: Permission | 'owner' | 'platformAdmin';
 };
 
 export type SidebarNavGroup = {
@@ -133,6 +134,12 @@ export const navGroups: SidebarNavGroup[] = [
 					{ title: msg`Integrasi`, path: "/settings/integrations", requires: 'owner' },
 				],
 			},
+		],
+	},
+	{
+		label: msg`Admin`,
+		items: [
+			{ title: msg`Users`, path: "/admin/users", icon: <ShieldCheck />, requires: 'platformAdmin' },
 		],
 	},
 ];

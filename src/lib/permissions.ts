@@ -3,11 +3,17 @@ import { useQuery } from 'convex/react';
 import { useEffect } from 'react';
 import { useActiveCashier } from './active-cashier';
 
-export type Permission = 'canVoid' | 'canDiscount' | 'canManageShift' | 'canViewReports' | 'canEditMenu';
+export type Permission =
+  | 'canVoid'
+  | 'canDiscount'
+  | 'canManageShift'
+  | 'canViewReports'
+  | 'canEditMenu';
 
 export function usePermissions(): {
   can: (p: Permission) => boolean;
   isOwner: boolean;
+  isPlatformAdmin: boolean;
   isLoading: boolean;
 } {
   const { cashierId, clearCashier } = useActiveCashier();
@@ -27,6 +33,8 @@ export function usePermissions(): {
   // non-null cafe, so ownership is the business-member ROLE (`myCafe.role`), not
   // merely "has a cafe". The active cashier's role/permissions still drive the
   // operational register UI (canVoid/canEditMenu/...) for an operating cashier.
+  const adminMe = useQuery(api.admin.me, {});
+  const isPlatformAdmin = adminMe?.isPlatformAdmin === true;
   const cafe = useQuery(api.cafes.myCafe, {});
   const isAccountOwner = cafe?.role === 'owner';
   // A signed-in business member (owner OR manager) has owner-like back-office
@@ -39,6 +47,8 @@ export function usePermissions(): {
   return {
     can: (p) => (hasCashier ? data.role === 'owner' || data.permissions[p] : isAccountMember),
     isOwner: isAccountOwner || (hasCashier && data.role === 'owner'),
-    isLoading: cafe === undefined || (cashierId !== null && data === undefined),
+    isPlatformAdmin,
+    isLoading:
+      cafe === undefined || adminMe === undefined || (cashierId !== null && data === undefined),
   };
 }

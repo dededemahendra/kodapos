@@ -22,11 +22,13 @@ import { usePermissions } from "~/lib/permissions";
 
 export function AppSidebar() {
 	const { i18n } = useLingui();
-	const { can, isOwner, isLoading } = usePermissions();
+	const { can, isOwner, isPlatformAdmin, isLoading } = usePermissions();
 	const { isMobile, setOpenMobile } = useSidebar();
 	const closeMobile = () => { if (isMobile) setTimeout(() => setOpenMobile(false), 0); };
 	const allowed = (req?: SidebarNavItem['requires']) =>
-		!req || isLoading || (req === 'owner' ? isOwner : can(req));
+		!req ||
+		isLoading ||
+		(req === 'owner' ? isOwner : req === 'platformAdmin' ? isPlatformAdmin : can(req));
 	const visibleGroups = navGroups
 		.map((g) => ({
 			...g,

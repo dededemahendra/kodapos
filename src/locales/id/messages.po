@@ -418,6 +418,7 @@ msgstr "Accurate"
 msgid "Ada"
 msgstr "Ada"
 
+#: src/components/app-shared.tsx
 #: src/components/sale/register-top-bar.tsx
 msgid "Admin"
 msgstr "Admin"
@@ -7442,6 +7443,10 @@ msgstr "URL yang kamu buka tidak ada di kodapos."
 #: src/routes/_pos/settings/receipt.tsx
 #~ msgid "USB"
 #~ msgstr "USB"
+
+#: src/components/app-shared.tsx
+msgid "Users"
+msgstr "Users"
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx

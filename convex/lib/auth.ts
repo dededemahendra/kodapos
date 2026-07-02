@@ -75,30 +75,52 @@ export async function resolveOutletAccess(
 }
 
 /**
- * Resolve the outlet (cafe) the signed-in user is currently operating.
+ * Resolve the signed-in, non-deactivated user. Throws 'not authenticated' with
+ * no identity and 'account deactivated' when the account has been deactivated
+ * by a platform admin. Use at the top of any handler that must be denied to a
+ * deactivated user but does not need full outlet resolution.
+ */
+export async function requireActiveUser(
+  ctx: QueryCtx | MutationCtx
+): Promise<{ userId: Id<'users'>; user: Doc<'users'> }> {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) {
+    throw new Error('not authenticated');
+  }
+  const user = await ctx.db.get(userId);
+  if (user?.deactivatedAt != null) {
+    throw new Error('account deactivated');
+  }
+  // user can be null only if the row was deleted mid-session; downstream
+  // resolution handles that (no outlet access), so return it as-is typed.
+  return { userId, user: user as Doc<'users'> };
+}
+
+/**
+ * Resolve the outlet (cafe) the signed-in user is currently operating, or null
+ * when there is no identity, the account is deactivated, or the user can reach
+ * no outlet (e.g. a brand-new user who has not created a cafe yet). Non-throwing
+ * so app-wide queries (permissions, dashboards) degrade gracefully instead of
+ * crashing.
  *
  * Returns a superset of the legacy `{ userId, cafeId }` shape so the ~230
  * existing call sites keep working unchanged. Resolution:
  *   1. owner  -> all cafes in their business
  *      manager-> the cafes granted via memberOutletAccess
  *   2. active outlet = the persisted choice when still accessible, else the
- *      first accessible outlet (an ephemeral default — this helper runs in
+ *      first accessible outlet (an ephemeral default; this helper runs in
  *      queries and MUST NOT write; only setActiveOutlet persists a choice).
- *
- * Throws 'not authenticated' with no identity and 'no outlet access' when the
- * user can reach no outlet.
- */
-/**
- * Non-throwing variant of {@link requireActiveOutlet}. Resolves the signed-in
- * user's active outlet, or returns null when there is no identity or no
- * accessible outlet (e.g. a brand-new user who has not created a cafe yet).
- * Use in app-wide queries that must degrade gracefully instead of crashing.
  */
 export async function tryActiveOutlet(
   ctx: QueryCtx | MutationCtx
 ): Promise<ActiveOutlet | null> {
   const userId = await getAuthUserId(ctx);
   if (!userId) return null;
+  // Deactivated users are locked out everywhere: deny access gracefully here so
+  // graceful callers degrade and the throwing gate can surface the distinct
+  // 'account deactivated' message.
+  const user = await ctx.db.get(userId);
+  if (user?.deactivatedAt != null) return null;
 
   const access = await resolveOutletAccess(ctx, userId);
   if (!access || access.accessibleCafeIds.length === 0) return null;
@@ -115,14 +137,22 @@ export async function tryActiveOutlet(
   return { userId, cafeId, businessId: access.businessId, role: access.role };
 }
 
+/**
+ * Throwing gate over {@link tryActiveOutlet} for the ~230 handlers that require
+ * an active outlet. Preserves distinct messages: 'not authenticated' (no
+ * identity), 'account deactivated' (locked out by a platform admin), and
+ * 'no outlet access' (identity but no reachable outlet).
+ */
 export async function requireActiveOutlet(
   ctx: QueryCtx | MutationCtx
 ): Promise<ActiveOutlet> {
   const resolved = await tryActiveOutlet(ctx);
   if (!resolved) {
-    // Preserve the distinct messages: no identity vs. identity without access.
     const userId = await getAuthUserId(ctx);
-    throw new Error(userId ? 'no outlet access' : 'not authenticated');
+    if (!userId) throw new Error('not authenticated');
+    const user = await ctx.db.get(userId);
+    if (user?.deactivatedAt != null) throw new Error('account deactivated');
+    throw new Error('no outlet access');
   }
   return resolved;
 }
@@ -163,4 +193,23 @@ export async function requireOwned<T extends TenantTable>(
     throw new Error(`${label} tidak ditemukan.`);
   }
   return row as Doc<T>;
+}
+
+/**
+ * Platform-operator gate. Resolves the signed-in user and asserts the
+ * isPlatformAdmin flag. Cross-tenant: not scoped to any cafe/business.
+ * Throws 'not authenticated' with no identity, 'not a platform admin' otherwise.
+ */
+export async function requirePlatformAdmin(
+  ctx: QueryCtx | MutationCtx
+): Promise<{ userId: Id<'users'>; user: Doc<'users'> }> {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) {
+    throw new Error('not authenticated');
+  }
+  const user = await ctx.db.get(userId);
+  if (!user || user.isPlatformAdmin !== true) {
+    throw new Error('not a platform admin');
+  }
+  return { userId, user };
 }

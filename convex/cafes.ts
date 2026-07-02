@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { action, internalMutation, internalQuery, mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireActiveUser } from './lib/auth';
 import { parseGeocode } from './lib/weather';
 
 const cafeFields = {
@@ -46,10 +46,7 @@ export const createForOwner = mutation({
   args: { name: v.string() },
   returns: v.id('cafes'),
   handler: async (ctx, { name }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error('not authenticated');
-    }
+    const { userId } = await requireActiveUser(ctx);
     // Idempotent: if a cafe already exists for this owner, return it.
     // The signup flow retries this call against auth-token-propagation
     // races, so the mutation MUST be safe to invoke multiple times.

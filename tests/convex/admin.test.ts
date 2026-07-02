@@ -1,0 +1,177 @@
+import { convexTest } from 'convex-test';
+import { describe, expect, it } from 'vitest';
+import { api } from '../../convex/_generated/api';
+import schema from '../../convex/schema';
+
+const modules = import.meta.glob('../../convex/**/*.*s');
+
+// Sign-in identity for a given inserted user id (mirrors the repo convention).
+const as = (t: ReturnType<typeof convexTest>, userId: string) =>
+  t.withIdentity({ subject: `${userId}|test_session` });
+
+describe('requirePlatformAdmin via admin.listUsers gate', () => {
+  it('rejects a non-admin caller', async () => {
+    const t = convexTest(schema, modules);
+    const uid = await t.run((ctx) => ctx.db.insert('users', { name: 'Reg', email: 'reg@x.com' }));
+    await expect(as(t, uid).query(api.admin.listUsers, {})).rejects.toThrow('not a platform admin');
+  });
+
+  it('rejects an unauthenticated caller', async () => {
+    const t = convexTest(schema, modules);
+    await expect(t.query(api.admin.listUsers, {})).rejects.toThrow('not authenticated');
+  });
+
+  it('allows a platform admin', async () => {
+    const t = convexTest(schema, modules);
+    const uid = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    const rows = await as(t, uid).query(api.admin.listUsers, {});
+    expect(Array.isArray(rows)).toBe(true);
+  });
+});
+
+describe('admin.listUsers joins', () => {
+  it('flags a pre-backfill owner as no_outlet and finds by search', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    // A legacy owner: owns a cafe with NO businessId / businessMembers row.
+    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Legacy', email: 'legacy@x.com' }));
+    await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Old Cafe', ownerUserId: ownerId, createdAt: 1 })
+    );
+
+    const all = await as(t, adminId).query(api.admin.listUsers, {});
+    const legacy = all.find((r) => r.email === 'legacy@x.com')!;
+    expect(legacy.accessHealth).toBe('no_outlet');
+    expect(legacy.cafeNames).toEqual(['Old Cafe']);
+
+    const filtered = await as(t, adminId).query(api.admin.listUsers, { search: 'legacy' });
+    expect(filtered.map((r) => r.email)).toEqual(['legacy@x.com']);
+  });
+
+  it('me() reports admin status and false when signed out', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    expect(await as(t, adminId).query(api.admin.me, {})).toEqual({ isPlatformAdmin: true });
+    expect(await t.query(api.admin.me, {})).toEqual({ isPlatformAdmin: false });
+  });
+});
+
+describe('admin.fixOutletAccess', () => {
+  it('repairs a pre-backfill owner and is idempotent', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Legacy', email: 'legacy@x.com' }));
+    await t.run((ctx) => ctx.db.insert('cafes', { name: 'Old Cafe', ownerUserId: ownerId, createdAt: 1 }));
+
+    const first = await as(t, adminId).mutation(api.admin.fixOutletAccess, { userId: ownerId });
+    expect(first).toEqual({ fixed: true });
+
+    const rows = await as(t, adminId).query(api.admin.listUsers, { search: 'legacy' });
+    expect(rows[0]!.accessHealth).toBe('ok');
+    expect(rows[0]!.role).toBe('owner');
+
+    const second = await as(t, adminId).mutation(api.admin.fixOutletAccess, { userId: ownerId });
+    expect(second).toEqual({ fixed: false });
+  });
+
+  it('rejects a non-admin caller', async () => {
+    const t = convexTest(schema, modules);
+    const uid = await t.run((ctx) => ctx.db.insert('users', { name: 'Reg', email: 'reg@x.com' }));
+    await expect(
+      as(t, uid).mutation(api.admin.fixOutletAccess, { userId: uid })
+    ).rejects.toThrow('not a platform admin');
+  });
+});
+
+describe('admin.setDeactivated', () => {
+  it('blocks self-deactivation', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    await expect(
+      as(t, adminId).mutation(api.admin.setDeactivated, { userId: adminId, deactivated: true })
+    ).rejects.toThrow('cannot deactivate yourself');
+  });
+
+  it('deactivated user can no longer reach an outlet', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    // A normal owner with a working cafe (created through the real flow).
+    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Op', email: 'op@x.com' }));
+    await as(t, ownerId).mutation(api.cafes.createForOwner, { name: 'Kopi' });
+    // Sanity: works before deactivation.
+    expect(await as(t, ownerId).query(api.cafes.myCafe, {})).not.toBeNull();
+
+    await as(t, adminId).mutation(api.admin.setDeactivated, { userId: ownerId, deactivated: true });
+    // myCafe swallows the throw and returns null; a hard gate throws.
+    await expect(as(t, ownerId).query(api.shifts.current, {})).rejects.toThrow('account deactivated');
+
+    await as(t, adminId).mutation(api.admin.setDeactivated, { userId: ownerId, deactivated: false });
+    await expect(as(t, ownerId).query(api.shifts.current, {})).resolves.toBeDefined();
+  });
+});
+
+describe('admin.setPlatformAdmin', () => {
+  it('grants admin to another user', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    const other = await t.run((ctx) => ctx.db.insert('users', { name: 'Op', email: 'op@x.com' }));
+    await as(t, adminId).mutation(api.admin.setPlatformAdmin, { userId: other, isAdmin: true });
+    expect(await as(t, other).query(api.admin.me, {})).toEqual({ isPlatformAdmin: true });
+  });
+
+  it('blocks changing your own status and removing the last admin', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    await expect(
+      as(t, adminId).mutation(api.admin.setPlatformAdmin, { userId: adminId, isAdmin: false })
+    ).rejects.toThrow('cannot change your own admin status');
+
+    const other = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Op', email: 'op@x.com', isPlatformAdmin: true })
+    );
+    // Demote the only OTHER admin while the caller stays admin -> allowed.
+    await as(t, adminId).mutation(api.admin.setPlatformAdmin, { userId: other, isAdmin: false });
+    expect(await as(t, other).query(api.admin.me, {})).toEqual({ isPlatformAdmin: false });
+  });
+});
+
+describe('deactivation lockout (requireActiveUser)', () => {
+  it('blocks a deactivated user from businessOverview and createForOwner', async () => {
+    const t = convexTest(schema, modules);
+    const adminId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
+    );
+    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Op', email: 'op2@x.com' }));
+    await as(t, ownerId).mutation(api.cafes.createForOwner, { name: 'Kopi' });
+
+    // Works before deactivation.
+    await expect(
+      as(t, ownerId).query(api.reports.businessOverview, { range: { preset: 'today' } })
+    ).resolves.toBeDefined();
+
+    await as(t, adminId).mutation(api.admin.setDeactivated, { userId: ownerId, deactivated: true });
+
+    await expect(
+      as(t, ownerId).query(api.reports.businessOverview, { range: { preset: 'today' } })
+    ).rejects.toThrow('account deactivated');
+    await expect(
+      as(t, ownerId).mutation(api.cafes.createForOwner, { name: 'Another' })
+    ).rejects.toThrow('account deactivated');
+  });
+});
