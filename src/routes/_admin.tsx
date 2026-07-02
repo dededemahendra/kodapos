@@ -1,6 +1,6 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import { Trans } from '@lingui/react/macro';
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from 'convex/react';
 import { useEffect } from 'react';
@@ -28,13 +28,25 @@ function AdminLayout() {
         <LoadingCounter />
       </AuthLoading>
       <Unauthenticated>
-        <Outlet />
+        <OperatorSignInGate />
       </Unauthenticated>
       <Authenticated>
         <OperatorGate />
       </Authenticated>
     </>
   );
+}
+
+// Unauthenticated on the admin host: route everything to the operator sign-in
+// so a signed-out visitor lands on /login rather than a bare route Outlet (or a
+// query that throws). The /login route itself renders through the Outlet.
+function OperatorSignInGate() {
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    if (path !== '/login') window.location.replace('/login');
+  }, [path]);
+  if (path !== '/login') return null;
+  return <Outlet />;
 }
 
 // Only platform admins may enter. A non-operator who somehow authenticates is
