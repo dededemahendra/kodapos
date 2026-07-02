@@ -31,10 +31,10 @@ function PosLayout() {
   useEffect(() => {
     if (currentHostApp() === 'admin') window.location.replace('/overview');
   }, []);
-  if (currentHostApp() === 'admin') return null;
-
   const path = useRouterState({ select: (s) => s.location.pathname });
   const cafe = useQuery(api.cafes.myCafe, {});
+  if (currentHostApp() === 'admin') return null;
+
   // While the owner is still mid-onboarding (cafe exists but no
   // setupCompletedAt) treat everything as a wizard so the stepper doesn't
   // overlap the sidebar when onboarding navigates into /menu/* or /settings/*.
