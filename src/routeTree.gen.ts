@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as DisplayRouteImport } from './routes/display'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as PosRouteImport } from './routes/_pos'
@@ -84,6 +86,16 @@ import { Route as PosAdminUsersRouteImport } from './routes/_pos/admin/users'
 import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
 import { Route as PosMenuItemsItemIdRouteImport } from './routes/_pos/menu/items.$itemId'
 
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverviewRoute = OverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DisplayRoute = DisplayRouteImport.update({
   id: '/display',
   path: '/display',
@@ -457,6 +469,8 @@ const PosMenuItemsItemIdRoute = PosMenuItemsItemIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/display': typeof DisplayRoute
+  '/overview': typeof OverviewRoute
+  '/users': typeof UsersRoute
   '/inventory': typeof PosInventoryRouteRouteWithChildren
   '/menu': typeof PosMenuRouteRouteWithChildren
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
@@ -531,6 +545,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/display': typeof DisplayRoute
+  '/overview': typeof OverviewRoute
+  '/users': typeof UsersRoute
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
@@ -603,6 +619,8 @@ export interface FileRoutesById {
   '/_pos': typeof PosRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/display': typeof DisplayRoute
+  '/overview': typeof OverviewRoute
+  '/users': typeof UsersRoute
   '/_pos/inventory': typeof PosInventoryRouteRouteWithChildren
   '/_pos/menu': typeof PosMenuRouteRouteWithChildren
   '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
@@ -680,6 +698,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/display'
+    | '/overview'
+    | '/users'
     | '/inventory'
     | '/menu'
     | '/onboarding'
@@ -754,6 +774,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/display'
+    | '/overview'
+    | '/users'
     | '/onboarding'
     | '/settings'
     | '/shift'
@@ -825,6 +847,8 @@ export interface FileRouteTypes {
     | '/_pos'
     | '/_public'
     | '/display'
+    | '/overview'
+    | '/users'
     | '/_pos/inventory'
     | '/_pos/menu'
     | '/_pos/onboarding'
@@ -902,10 +926,26 @@ export interface RootRouteChildren {
   PosRoute: typeof PosRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   DisplayRoute: typeof DisplayRoute
+  OverviewRoute: typeof OverviewRoute
+  UsersRoute: typeof UsersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview': {
+      id: '/overview'
+      path: '/overview'
+      fullPath: '/overview'
+      preLoaderRoute: typeof OverviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/display': {
       id: '/display'
       path: '/display'
@@ -1666,6 +1706,8 @@ const rootRouteChildren: RootRouteChildren = {
   PosRoute: PosRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   DisplayRoute: DisplayRoute,
+  OverviewRoute: OverviewRoute,
+  UsersRoute: UsersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
