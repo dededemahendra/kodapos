@@ -16,10 +16,9 @@ import {
 import { Input } from '~/components/ui/input';
 import { RowActions } from '~/components/ui/row-actions';
 import { Spinner } from '~/components/ui/spinner';
-import { usePermissions } from '~/lib/permissions';
 import { toast } from '~/lib/toast';
 
-export const Route = createFileRoute('/_pos/admin/users')({
+export const Route = createFileRoute('/_admin/users')({
   component: AdminUsersPage,
 });
 
@@ -29,35 +28,12 @@ type ConfirmState =
   | null;
 
 function AdminUsersPage() {
-  const { isPlatformAdmin, isLoading } = usePermissions();
   const [search, setSearch] = useState('');
-  const users = useQuery(api.admin.listUsers, isPlatformAdmin ? { search } : 'skip');
+  const users = useQuery(api.admin.listUsers, { search });
   const fixAccess = useMutation(api.admin.fixOutletAccess);
   const setDeactivated = useMutation(api.admin.setDeactivated);
   const setAdmin = useMutation(api.admin.setPlatformAdmin);
   const [confirm, setConfirm] = useState<ConfirmState>(null);
-
-  if (isLoading)
-    return (
-      <div className="p-6">
-        <Spinner />
-      </div>
-    );
-  if (!isPlatformAdmin) {
-    return (
-      <div className="p-6">
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ShieldCheck />
-            </EmptyMedia>
-            <EmptyTitle>Admins only</EmptyTitle>
-            <EmptyDescription>You do not have platform admin access.</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      </div>
-    );
-  }
 
   const onFix = async (userId: Id<'users'>) => {
     try {

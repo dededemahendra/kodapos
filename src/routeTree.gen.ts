@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DisplayRouteImport } from './routes/display'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as PosRouteImport } from './routes/_pos'
+import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
@@ -39,6 +40,9 @@ import { Route as PosDashboardRouteImport } from './routes/_pos/dashboard'
 import { Route as PosCustomersRouteImport } from './routes/_pos/customers'
 import { Route as PosAllOutletsRouteImport } from './routes/_pos/all-outlets'
 import { Route as PosAiRouteImport } from './routes/_pos/ai'
+import { Route as AdminUsersRouteImport } from './routes/_admin/users'
+import { Route as AdminOverviewRouteImport } from './routes/_admin/overview'
+import { Route as AdminLoginRouteImport } from './routes/_admin/login'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
 import { Route as PosSaleRouteRouteImport } from './routes/_pos/sale/route'
@@ -80,7 +84,6 @@ import { Route as PosInventoryWasteRouteImport } from './routes/_pos/inventory/w
 import { Route as PosInventoryPurchasesRouteImport } from './routes/_pos/inventory/purchases'
 import { Route as PosInventoryPurchaseOrdersRouteImport } from './routes/_pos/inventory/purchase-orders'
 import { Route as PosInventoryAdjustmentsRouteImport } from './routes/_pos/inventory/adjustments'
-import { Route as PosAdminUsersRouteImport } from './routes/_pos/admin/users'
 import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
 import { Route as PosMenuItemsItemIdRouteImport } from './routes/_pos/menu/items.$itemId'
 
@@ -95,6 +98,10 @@ const PublicRoute = PublicRouteImport.update({
 } as any)
 const PosRoute = PosRouteImport.update({
   id: '/_pos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
@@ -231,6 +238,21 @@ const PosAiRoute = PosAiRouteImport.update({
   id: '/ai',
   path: '/ai',
   getParentRoute: () => PosRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOverviewRoute = AdminOverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
 } as any)
 const PosShiftRouteRoute = PosShiftRouteRouteImport.update({
   id: '/shift',
@@ -438,11 +460,6 @@ const PosInventoryAdjustmentsRoute = PosInventoryAdjustmentsRouteImport.update({
   path: '/adjustments',
   getParentRoute: () => PosInventoryRouteRoute,
 } as any)
-const PosAdminUsersRoute = PosAdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
-  getParentRoute: () => PosRoute,
-} as any)
 const PosMenuModifiersGroupIdRoute = PosMenuModifiersGroupIdRouteImport.update({
   id: '/$groupId',
   path: '/$groupId',
@@ -464,6 +481,9 @@ export interface FileRoutesByFullPath {
   '/sale': typeof PosSaleRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/login': typeof AdminLoginRoute
+  '/overview': typeof AdminOverviewRoute
+  '/users': typeof AdminUsersRoute
   '/ai': typeof PosAiRoute
   '/all-outlets': typeof PosAllOutletsRoute
   '/customers': typeof PosCustomersRoute
@@ -490,7 +510,6 @@ export interface FileRoutesByFullPath {
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
-  '/admin/users': typeof PosAdminUsersRoute
   '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
@@ -534,6 +553,9 @@ export interface FileRoutesByTo {
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/login': typeof AdminLoginRoute
+  '/overview': typeof AdminOverviewRoute
+  '/users': typeof AdminUsersRoute
   '/ai': typeof PosAiRoute
   '/all-outlets': typeof PosAllOutletsRoute
   '/customers': typeof PosCustomersRoute
@@ -560,7 +582,6 @@ export interface FileRoutesByTo {
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
-  '/admin/users': typeof PosAdminUsersRoute
   '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
@@ -600,6 +621,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_admin': typeof AdminRouteWithChildren
   '/_pos': typeof PosRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/display': typeof DisplayRoute
@@ -610,6 +632,9 @@ export interface FileRoutesById {
   '/_pos/sale': typeof PosSaleRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
+  '/_admin/login': typeof AdminLoginRoute
+  '/_admin/overview': typeof AdminOverviewRoute
+  '/_admin/users': typeof AdminUsersRoute
   '/_pos/ai': typeof PosAiRoute
   '/_pos/all-outlets': typeof PosAllOutletsRoute
   '/_pos/customers': typeof PosCustomersRoute
@@ -637,7 +662,6 @@ export interface FileRoutesById {
   '/_public/signup': typeof PublicSignupRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
-  '/_pos/admin/users': typeof PosAdminUsersRoute
   '/_pos/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/_pos/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/_pos/inventory/purchases': typeof PosInventoryPurchasesRoute
@@ -687,6 +711,9 @@ export interface FileRouteTypes {
     | '/sale'
     | '/settings'
     | '/shift'
+    | '/login'
+    | '/overview'
+    | '/users'
     | '/ai'
     | '/all-outlets'
     | '/customers'
@@ -713,7 +740,6 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/terms'
-    | '/admin/users'
     | '/inventory/adjustments'
     | '/inventory/purchase-orders'
     | '/inventory/purchases'
@@ -757,6 +783,9 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/shift'
+    | '/login'
+    | '/overview'
+    | '/users'
     | '/ai'
     | '/all-outlets'
     | '/customers'
@@ -783,7 +812,6 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/terms'
-    | '/admin/users'
     | '/inventory/adjustments'
     | '/inventory/purchase-orders'
     | '/inventory/purchases'
@@ -822,6 +850,7 @@ export interface FileRouteTypes {
     | '/menu/modifiers/$groupId'
   id:
     | '__root__'
+    | '/_admin'
     | '/_pos'
     | '/_public'
     | '/display'
@@ -832,6 +861,9 @@ export interface FileRouteTypes {
     | '/_pos/sale'
     | '/_pos/settings'
     | '/_pos/shift'
+    | '/_admin/login'
+    | '/_admin/overview'
+    | '/_admin/users'
     | '/_pos/ai'
     | '/_pos/all-outlets'
     | '/_pos/customers'
@@ -859,7 +891,6 @@ export interface FileRouteTypes {
     | '/_public/signup'
     | '/_public/terms'
     | '/_public/'
-    | '/_pos/admin/users'
     | '/_pos/inventory/adjustments'
     | '/_pos/inventory/purchase-orders'
     | '/_pos/inventory/purchases'
@@ -899,6 +930,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AdminRoute: typeof AdminRouteWithChildren
   PosRoute: typeof PosRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   DisplayRoute: typeof DisplayRoute
@@ -925,6 +957,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof PosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/': {
@@ -1115,6 +1154,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/ai'
       preLoaderRoute: typeof PosAiRouteImport
       parentRoute: typeof PosRoute
+    }
+    '/_admin/users': {
+      id: '/_admin/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/overview': {
+      id: '/_admin/overview'
+      path: '/overview'
+      fullPath: '/overview'
+      preLoaderRoute: typeof AdminOverviewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/login': {
+      id: '/_admin/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_pos/shift': {
       id: '/_pos/shift'
@@ -1403,13 +1463,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosInventoryAdjustmentsRouteImport
       parentRoute: typeof PosInventoryRouteRoute
     }
-    '/_pos/admin/users': {
-      id: '/_pos/admin/users'
-      path: '/admin/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof PosAdminUsersRouteImport
-      parentRoute: typeof PosRoute
-    }
     '/_pos/menu/modifiers/$groupId': {
       id: '/_pos/menu/modifiers/$groupId'
       path: '/$groupId'
@@ -1426,6 +1479,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminOverviewRoute: typeof AdminOverviewRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+  AdminOverviewRoute: AdminOverviewRoute,
+  AdminUsersRoute: AdminUsersRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface PosInventoryRouteRouteChildren {
   PosInventoryAdjustmentsRoute: typeof PosInventoryAdjustmentsRoute
@@ -1602,7 +1669,6 @@ interface PosRouteChildren {
   PosSuppliersRoute: typeof PosSuppliersRoute
   PosTablesRoute: typeof PosTablesRoute
   PosTimeClockRoute: typeof PosTimeClockRoute
-  PosAdminUsersRoute: typeof PosAdminUsersRoute
 }
 
 const PosRouteChildren: PosRouteChildren = {
@@ -1634,7 +1700,6 @@ const PosRouteChildren: PosRouteChildren = {
   PosSuppliersRoute: PosSuppliersRoute,
   PosTablesRoute: PosTablesRoute,
   PosTimeClockRoute: PosTimeClockRoute,
-  PosAdminUsersRoute: PosAdminUsersRoute,
 }
 
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
@@ -1663,6 +1728,7 @@ const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  AdminRoute: AdminRouteWithChildren,
   PosRoute: PosRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   DisplayRoute: DisplayRoute,
