@@ -47,6 +47,12 @@ export const createForOwner = mutation({
   returns: v.id('cafes'),
   handler: async (ctx, { name }) => {
     const { userId, user } = await requireActiveUser(ctx);
+    // requireActiveUser returns the row as-is typed, but it can be null if the
+    // user was deleted mid-session; this handler dereferences it below, so
+    // fail cleanly instead of throwing an unguarded TypeError.
+    if (!user) {
+      throw new Error('not authenticated');
+    }
     // Operators (platform admins) are a separate account class and must never
     // own a cafe; the tenant->operator boundary is enforced here.
     if (user.isPlatformAdmin === true) {

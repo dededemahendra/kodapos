@@ -17,7 +17,7 @@ export const Route = createFileRoute('/_admin/login')({
 function OperatorLogin() {
   const { signIn } = useAuthActions();
   const navigate = useNavigate();
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -25,7 +25,11 @@ function OperatorLogin() {
 
   async function onSend(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (validateEmail(email) !== null) return;
+    const emailErr = validateEmail(email);
+    if (emailErr !== null) {
+      setError(i18n._(emailErr));
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {

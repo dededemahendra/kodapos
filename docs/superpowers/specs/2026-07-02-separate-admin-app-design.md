@@ -114,7 +114,7 @@ separate login, separate UI — on one deploy and one bundle.
 1. Browser → `admin.kodapos.app/...` → the single Worker (SSR).
 2. `__root` `beforeLoad` resolves `resolveHostApp(host) === 'admin'` and admits
    only `_admin/*`.
-3. Unauthenticated → `_admin/signin` (operator emailed-code sign-in).
+3. Unauthenticated → `_admin/login` (operator emailed-code sign-in).
 4. On verify → gate on `isPlatformAdmin`; pass → admin landing, fail → sign out
    + "Not authorized".
 5. Admin pages call the existing `admin.*` Convex functions on the shared
