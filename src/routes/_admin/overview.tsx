@@ -3,13 +3,7 @@ import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { Building2, Store, TriangleAlert, Users } from 'lucide-react';
 import type * as React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Skeleton } from '~/components/ui/skeleton';
 import { formatCount } from '~/lib/formater';
 
@@ -24,9 +18,7 @@ function AdminOverview() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-xl font-semibold">Operator console</h1>
-        <p className="text-muted-foreground text-sm">
-          Platform activity across every tenant.
-        </p>
+        <p className="text-muted-foreground text-sm">Platform activity across every tenant.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -94,9 +86,7 @@ function StatCard({
         ) : (
           <Skeleton className="h-8 w-16" />
         )}
-        {hint ? (
-          <CardDescription className="mt-1 text-xs">{hint}</CardDescription>
-        ) : null}
+        {hint ? <CardDescription className="mt-1 text-xs">{hint}</CardDescription> : null}
         {delta !== undefined && delta > 0 ? (
           <CardDescription className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
             +{formatCount(delta)} in last 7 days

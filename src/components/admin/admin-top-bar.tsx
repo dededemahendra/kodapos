@@ -15,6 +15,9 @@ export function AdminTopBar() {
           <Link to="/users" className="hover:text-foreground">
             <Trans>Users</Trans>
           </Link>
+          <Link to="/businesses" className="hover:text-foreground">
+            <Trans>Businesses</Trans>
+          </Link>
         </nav>
       </div>
       <Button variant="outline" size="sm" onClick={() => void signOut()}>

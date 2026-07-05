@@ -88,6 +88,11 @@ export default defineSchema({
     name: v.string(),
     ownerUserId: v.id('users'),
     createdAt: v.number(),
+    // Set by a platform operator (admin.setBusinessSuspended) to lock the whole
+    // tenant out of every outlet. Enforced in the runtime access gates
+    // (tryActiveOutlet / requireActiveOutlet), not in resolveOutletAccess, so
+    // admin inspection queries keep reporting true access health.
+    suspendedAt: v.optional(v.number()),
   }).index('by_owner', ['ownerUserId']),
 
   businessMembers: defineTable({
@@ -273,18 +278,10 @@ export default defineSchema({
         showItemModifiers: v.boolean(),
         showTaxBreakdown: v.boolean(),
         paperSize: v.union(v.literal('58mm'), v.literal('80mm')),
-        fontSize: v.union(
-          v.literal('small'),
-          v.literal('normal'),
-          v.literal('large')
-        ),
+        fontSize: v.union(v.literal('small'), v.literal('normal'), v.literal('large')),
         autoPrint: v.boolean(),
         printCopies: v.number(),
-        printerType: v.union(
-          v.literal('bluetooth'),
-          v.literal('usb'),
-          v.literal('network')
-        ),
+        printerType: v.union(v.literal('bluetooth'), v.literal('usb'), v.literal('network')),
         openDrawer: v.boolean(),
       })
     ),
@@ -504,9 +501,7 @@ export default defineSchema({
         value: v.number(),
         // Discount scope snapshot. Optional for back-compat with pre-scope
         // orders; buildOrder always writes it going forward ('order' default).
-        scope: v.optional(
-          v.union(v.literal('order'), v.literal('item'), v.literal('category'))
-        ),
+        scope: v.optional(v.union(v.literal('order'), v.literal('item'), v.literal('category'))),
         // Target snapshot so audit/refund can reconstruct the scoped subtotal.
         // Optional: present only for item/category-scoped promos.
         targetItemIds: v.optional(v.array(v.id('menuItems'))),
@@ -561,9 +556,7 @@ export default defineSchema({
     // Kitchen ticket lifecycle. Set to 'new' when the order settles to paid (in
     // settleSale); the kitchen advances it 'ready' → 'done'. Optional: legacy/
     // already-paid orders have no kitchenStatus and never appear on the board.
-    kitchenStatus: v.optional(
-      v.union(v.literal('new'), v.literal('ready'), v.literal('done'))
-    ),
+    kitchenStatus: v.optional(v.union(v.literal('new'), v.literal('ready'), v.literal('done'))),
     // 'pending' + 'void' reserved for Slice 5 (QRIS + voids); cash always inserts 'paid'.
     paymentStatus: v.union(v.literal('pending'), v.literal('paid'), v.literal('void')),
     voidedAt: v.optional(v.number()),
@@ -729,12 +722,7 @@ export default defineSchema({
     // audit ledger; the stored balanceIDR is the source of truth, this is the audit trail
     cafeId: v.id('cafes'),
     giftCardId: v.id('giftCards'),
-    type: v.union(
-      v.literal('issue'),
-      v.literal('topup'),
-      v.literal('redeem'),
-      v.literal('refund')
-    ),
+    type: v.union(v.literal('issue'), v.literal('topup'), v.literal('redeem'), v.literal('refund')),
     amountIDR: v.number(), // signed delta (+issue/+topup/+refund, −redeem)
     orderId: v.optional(v.id('orders')),
     at: v.number(),
@@ -829,9 +817,17 @@ export default defineSchema({
           confidence: v.union(v.literal('low'), v.literal('med'), v.literal('high')),
           drivers: v.array(
             v.union(
-              v.object({ code: v.union(v.literal('dow_busy'), v.literal('dow_quiet')), pct: v.number(), dow: v.number() }),
+              v.object({
+                code: v.union(v.literal('dow_busy'), v.literal('dow_quiet')),
+                pct: v.number(),
+                dow: v.number(),
+              }),
               v.object({ code: v.literal('holiday'), pct: v.number(), key: v.string() }),
-              v.object({ code: v.literal('weather'), pct: v.number(), condition: weatherConditionV })
+              v.object({
+                code: v.literal('weather'),
+                pct: v.number(),
+                condition: weatherConditionV,
+              })
             )
           ),
         })
@@ -855,7 +851,9 @@ export default defineSchema({
       })
     ),
     supplierId: v.optional(v.id('suppliers')),
-    sentLines: v.optional(v.array(v.object({ name: v.string(), qty: v.number(), unit: v.string() }))),
+    sentLines: v.optional(
+      v.array(v.object({ name: v.string(), qty: v.number(), unit: v.string() }))
+    ),
     exportedAt: v.optional(v.number()),
   }).index('by_cafe_generated', ['cafeId', 'generatedAt']),
 

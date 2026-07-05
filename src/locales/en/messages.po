@@ -1540,6 +1540,10 @@ msgstr "Not just a translation. kodapos understands how local businesses work."
 #~ msgid "Bulatkan total transaksi ke satuan terdekat."
 #~ msgstr "Round the transaction total to the nearest unit."
 
+#: src/components/admin/admin-top-bar.tsx
+msgid "Businesses"
+msgstr "Businesses"
+
 #: src/components/promo/promo-form-dialog.tsx
 msgid "Cakupan"
 msgstr "Scope"
@@ -3359,12 +3363,12 @@ msgid "Kelola pelanggan"
 msgstr "Manage customers"
 
 #: src/routes/_admin/overview.tsx
-msgid "Kelola pengguna"
-msgstr "Manage users"
+#~ msgid "Kelola pengguna"
+#~ msgstr "Manage users"
 
 #: src/routes/_admin/overview.tsx
-msgid "Kelola pengguna platform dan akses lintas outlet."
-msgstr "Manage platform users and cross-outlet access."
+#~ msgid "Kelola pengguna platform dan akses lintas outlet."
+#~ msgstr "Manage platform users and cross-outlet access."
 
 #: src/components/nav-user.tsx
 msgid "Kelola staf"
@@ -3584,8 +3588,8 @@ msgid "Konfirmasi sebelum kosongkan keranjang"
 msgstr "Confirm before clearing cart"
 
 #: src/routes/_admin/overview.tsx
-msgid "Konsol operator"
-msgstr "Operator console"
+#~ msgid "Konsol operator"
+#~ msgstr "Operator console"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kontak"

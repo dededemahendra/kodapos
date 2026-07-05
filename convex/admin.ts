@@ -1,7 +1,7 @@
-import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { internalMutation, mutation, query } from './_generated/server';
+import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
+import { internalMutation, mutation, query } from './_generated/server';
 import { requirePlatformAdmin, resolveOutletAccess } from './lib/auth';
 
 type UserRow = {
@@ -15,7 +15,10 @@ type UserRow = {
   accessHealth: 'ok' | 'no_outlet';
 };
 
-async function buildRow(ctx: Parameters<typeof requirePlatformAdmin>[0], user: Doc<'users'>): Promise<UserRow> {
+async function buildRow(
+  ctx: Parameters<typeof requirePlatformAdmin>[0],
+  user: Doc<'users'>
+): Promise<UserRow> {
   const ownedCafes = await ctx.db
     .query('cafes')
     .withIndex('by_owner', (q) => q.eq('ownerUserId', user._id))
@@ -111,6 +114,77 @@ export const platformStats = query({
   },
 });
 
+export const listBusinesses = query({
+  args: { search: v.optional(v.string()) },
+  handler: async (ctx, { search }) => {
+    await requirePlatformAdmin(ctx);
+    const [businesses, cafes, members, users] = await Promise.all([
+      ctx.db.query('businesses').collect(),
+      ctx.db.query('cafes').collect(),
+      ctx.db.query('businessMembers').collect(),
+      ctx.db.query('users').collect(),
+    ]);
+
+    const usersById = new Map(users.map((u) => [u._id, u]));
+    const cafesByBusiness = new Map<Id<'businesses'>, Doc<'cafes'>[]>();
+    for (const cafe of cafes) {
+      if (!cafe.businessId) continue;
+      const list = cafesByBusiness.get(cafe.businessId) ?? [];
+      list.push(cafe);
+      cafesByBusiness.set(cafe.businessId, list);
+    }
+    const memberCountByBusiness = new Map<Id<'businesses'>, number>();
+    for (const m of members) {
+      memberCountByBusiness.set(m.businessId, (memberCountByBusiness.get(m.businessId) ?? 0) + 1);
+    }
+
+    const rows = businesses.map((b) => {
+      const owner = usersById.get(b.ownerUserId);
+      const ownedCafes = cafesByBusiness.get(b._id) ?? [];
+      return {
+        _id: b._id,
+        name: b.name,
+        createdAt: b.createdAt,
+        suspended: b.suspendedAt != null,
+        ownerName: owner?.name ?? null,
+        ownerEmail: owner?.email ?? null,
+        memberCount: memberCountByBusiness.get(b._id) ?? 0,
+        cafes: ownedCafes.map((c) => ({
+          _id: c._id,
+          name: c.name,
+          city: c.city ?? null,
+          setupCompleted: c.setupCompletedAt != null,
+        })),
+      };
+    });
+
+    const term = (search ?? '').trim().toLowerCase();
+    const filtered = term
+      ? rows.filter(
+          (r) =>
+            r.name.toLowerCase().includes(term) ||
+            (r.ownerName ?? '').toLowerCase().includes(term) ||
+            (r.ownerEmail ?? '').toLowerCase().includes(term) ||
+            r.cafes.some((c) => c.name.toLowerCase().includes(term))
+        )
+      : rows;
+
+    // Suspended first, then newest.
+    return filtered.sort(
+      (a, b) => Number(b.suspended) - Number(a.suspended) || b.createdAt - a.createdAt
+    );
+  },
+});
+
+export const setBusinessSuspended = mutation({
+  args: { businessId: v.id('businesses'), suspended: v.boolean() },
+  handler: async (ctx, { businessId, suspended }) => {
+    await requirePlatformAdmin(ctx);
+    await ctx.db.patch(businessId, { suspendedAt: suspended ? Date.now() : undefined });
+    return null;
+  },
+});
+
 export const setDeactivated = mutation({
   args: { userId: v.id('users'), deactivated: v.boolean() },
   handler: async (ctx, { userId, deactivated }) => {
@@ -168,7 +242,12 @@ export const fixOutletAccess = mutation({
         .withIndex('by_user', (q) => q.eq('userId', userId))
         .first();
       if (!member) {
-        await ctx.db.insert('businessMembers', { businessId, userId, role: 'owner', createdAt: now });
+        await ctx.db.insert('businessMembers', {
+          businessId,
+          userId,
+          role: 'owner',
+          createdAt: now,
+        });
         fixed = true;
       }
       const active = await ctx.db

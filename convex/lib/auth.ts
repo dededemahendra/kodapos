@@ -111,9 +111,7 @@ export async function requireActiveUser(
  *      first accessible outlet (an ephemeral default; this helper runs in
  *      queries and MUST NOT write; only setActiveOutlet persists a choice).
  */
-export async function tryActiveOutlet(
-  ctx: QueryCtx | MutationCtx
-): Promise<ActiveOutlet | null> {
+export async function tryActiveOutlet(ctx: QueryCtx | MutationCtx): Promise<ActiveOutlet | null> {
   const userId = await getAuthUserId(ctx);
   if (!userId) return null;
   // Deactivated users are locked out everywhere: deny access gracefully here so
@@ -124,6 +122,14 @@ export async function tryActiveOutlet(
 
   const access = await resolveOutletAccess(ctx, userId);
   if (!access || access.accessibleCafeIds.length === 0) return null;
+
+  // A suspended business locks its whole tenant out of every outlet, mirroring
+  // a deactivated user. Checked here (not in resolveOutletAccess) so admin
+  // inspection queries still see the real access graph.
+  if (access.businessId) {
+    const business = await ctx.db.get(access.businessId);
+    if (business?.suspendedAt != null) return null;
+  }
 
   const active = await ctx.db
     .query('activeOutlet')
@@ -143,15 +149,18 @@ export async function tryActiveOutlet(
  * identity), 'account deactivated' (locked out by a platform admin), and
  * 'no outlet access' (identity but no reachable outlet).
  */
-export async function requireActiveOutlet(
-  ctx: QueryCtx | MutationCtx
-): Promise<ActiveOutlet> {
+export async function requireActiveOutlet(ctx: QueryCtx | MutationCtx): Promise<ActiveOutlet> {
   const resolved = await tryActiveOutlet(ctx);
   if (!resolved) {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error('not authenticated');
     const user = await ctx.db.get(userId);
     if (user?.deactivatedAt != null) throw new Error('account deactivated');
+    const access = await resolveOutletAccess(ctx, userId);
+    if (access?.businessId) {
+      const business = await ctx.db.get(access.businessId);
+      if (business?.suspendedAt != null) throw new Error('outlet suspended');
+    }
     throw new Error('no outlet access');
   }
   return resolved;
