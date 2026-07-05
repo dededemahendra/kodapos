@@ -44,6 +44,7 @@ import { Route as AdminUsersRouteImport } from './routes/_admin/users'
 import { Route as AdminOverviewRouteImport } from './routes/_admin/overview'
 import { Route as AdminLoginRouteImport } from './routes/_admin/login'
 import { Route as AdminBusinessesRouteImport } from './routes/_admin/businesses'
+import { Route as AdminAuditRouteImport } from './routes/_admin/audit'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
 import { Route as PosSaleRouteRouteImport } from './routes/_pos/sale/route'
@@ -258,6 +259,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
 const AdminBusinessesRoute = AdminBusinessesRouteImport.update({
   id: '/businesses',
   path: '/businesses',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => AdminRoute,
 } as any)
 const PosShiftRouteRoute = PosShiftRouteRouteImport.update({
@@ -487,6 +493,7 @@ export interface FileRoutesByFullPath {
   '/sale': typeof PosSaleRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/audit': typeof AdminAuditRoute
   '/businesses': typeof AdminBusinessesRoute
   '/login': typeof AdminLoginRoute
   '/overview': typeof AdminOverviewRoute
@@ -560,6 +567,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/audit': typeof AdminAuditRoute
   '/businesses': typeof AdminBusinessesRoute
   '/login': typeof AdminLoginRoute
   '/overview': typeof AdminOverviewRoute
@@ -640,6 +648,7 @@ export interface FileRoutesById {
   '/_pos/sale': typeof PosSaleRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
+  '/_admin/audit': typeof AdminAuditRoute
   '/_admin/businesses': typeof AdminBusinessesRoute
   '/_admin/login': typeof AdminLoginRoute
   '/_admin/overview': typeof AdminOverviewRoute
@@ -720,6 +729,7 @@ export interface FileRouteTypes {
     | '/sale'
     | '/settings'
     | '/shift'
+    | '/audit'
     | '/businesses'
     | '/login'
     | '/overview'
@@ -793,6 +803,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/shift'
+    | '/audit'
     | '/businesses'
     | '/login'
     | '/overview'
@@ -872,6 +883,7 @@ export interface FileRouteTypes {
     | '/_pos/sale'
     | '/_pos/settings'
     | '/_pos/shift'
+    | '/_admin/audit'
     | '/_admin/businesses'
     | '/_admin/login'
     | '/_admin/overview'
@@ -1195,6 +1207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBusinessesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/audit': {
+      id: '/_admin/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_pos/shift': {
       id: '/_pos/shift'
       path: '/shift'
@@ -1500,6 +1519,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminBusinessesRoute: typeof AdminBusinessesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminOverviewRoute: typeof AdminOverviewRoute
@@ -1507,6 +1527,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuditRoute: AdminAuditRoute,
   AdminBusinessesRoute: AdminBusinessesRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminOverviewRoute: AdminOverviewRoute,

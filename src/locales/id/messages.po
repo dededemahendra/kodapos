@@ -782,6 +782,10 @@ msgstr "Atur ulang sandi"
 msgid "Aturan"
 msgstr "Aturan"
 
+#: src/components/admin/admin-top-bar.tsx
+msgid "Audit"
+msgstr "Audit"
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Awalan nomor order"
 msgstr "Awalan nomor order"

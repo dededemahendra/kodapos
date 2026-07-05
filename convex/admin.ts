@@ -1,8 +1,38 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
-import { internalMutation, mutation, query } from './_generated/server';
+import { internalMutation, type MutationCtx, mutation, query } from './_generated/server';
 import { requirePlatformAdmin, resolveOutletAccess } from './lib/auth';
+
+/**
+ * Append one entry to the operator audit trail. Called at the end of every
+ * admin mutation, after its write succeeds, so the log only records applied
+ * changes. Target ids are spread in conditionally to satisfy
+ * exactOptionalPropertyTypes (never write an explicit `undefined`).
+ */
+async function logAdminAction(
+  ctx: MutationCtx,
+  actorUserId: Id<'users'>,
+  entry: {
+    action: string;
+    summary: string;
+    targetUserId?: Id<'users'>;
+    targetBusinessId?: Id<'businesses'>;
+  }
+): Promise<void> {
+  await ctx.db.insert('adminAuditLog', {
+    actorUserId,
+    action: entry.action,
+    summary: entry.summary,
+    createdAt: Date.now(),
+    ...(entry.targetUserId ? { targetUserId: entry.targetUserId } : {}),
+    ...(entry.targetBusinessId ? { targetBusinessId: entry.targetBusinessId } : {}),
+  });
+}
+
+function userLabel(user: Doc<'users'> | null): string {
+  return user?.name ?? user?.email ?? 'a user';
+}
 
 type UserRow = {
   _id: Id<'users'>;
@@ -176,11 +206,43 @@ export const listBusinesses = query({
   },
 });
 
+export const listAuditLog = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }) => {
+    await requirePlatformAdmin(ctx);
+    const entries = await ctx.db
+      .query('adminAuditLog')
+      .withIndex('by_created')
+      .order('desc')
+      .take(limit ?? 100);
+    const actorIds = [...new Set(entries.map((e) => e.actorUserId))];
+    const actors = await Promise.all(actorIds.map((id) => ctx.db.get(id)));
+    const actorById = new Map(
+      actors.filter((u): u is Doc<'users'> => u != null).map((u) => [u._id, u])
+    );
+    return entries.map((e) => ({
+      _id: e._id,
+      action: e.action,
+      summary: e.summary,
+      createdAt: e.createdAt,
+      actorName: actorById.has(e.actorUserId)
+        ? userLabel(actorById.get(e.actorUserId) ?? null)
+        : null,
+    }));
+  },
+});
+
 export const setBusinessSuspended = mutation({
   args: { businessId: v.id('businesses'), suspended: v.boolean() },
   handler: async (ctx, { businessId, suspended }) => {
-    await requirePlatformAdmin(ctx);
+    const { userId: actorId } = await requirePlatformAdmin(ctx);
+    const business = await ctx.db.get(businessId);
     await ctx.db.patch(businessId, { suspendedAt: suspended ? Date.now() : undefined });
+    await logAdminAction(ctx, actorId, {
+      action: suspended ? 'business.suspend' : 'business.reactivate',
+      summary: `${suspended ? 'Suspended' : 'Reactivated'} business ${business?.name ?? ''}`.trim(),
+      targetBusinessId: businessId,
+    });
     return null;
   },
 });
@@ -192,7 +254,13 @@ export const setDeactivated = mutation({
     if (userId === callerId) {
       throw new Error('cannot deactivate yourself');
     }
+    const target = await ctx.db.get(userId);
     await ctx.db.patch(userId, { deactivatedAt: deactivated ? Date.now() : undefined });
+    await logAdminAction(ctx, callerId, {
+      action: deactivated ? 'user.deactivate' : 'user.reactivate',
+      summary: `${deactivated ? 'Deactivated' : 'Reactivated'} ${userLabel(target)}`,
+      targetUserId: userId,
+    });
     return null;
   },
 });
@@ -211,7 +279,13 @@ export const setPlatformAdmin = mutation({
         throw new Error('cannot remove the last admin');
       }
     }
+    const target = await ctx.db.get(userId);
     await ctx.db.patch(userId, { isPlatformAdmin: isAdmin ? true : undefined });
+    await logAdminAction(ctx, callerId, {
+      action: isAdmin ? 'user.grant_admin' : 'user.revoke_admin',
+      summary: `${isAdmin ? 'Granted' : 'Removed'} platform admin ${isAdmin ? 'to' : 'from'} ${userLabel(target)}`,
+      targetUserId: userId,
+    });
     return null;
   },
 });
@@ -219,7 +293,7 @@ export const setPlatformAdmin = mutation({
 export const fixOutletAccess = mutation({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
-    await requirePlatformAdmin(ctx);
+    const { userId: actorId } = await requirePlatformAdmin(ctx);
     const cafes = await ctx.db
       .query('cafes')
       .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
@@ -258,6 +332,14 @@ export const fixOutletAccess = mutation({
         await ctx.db.insert('activeOutlet', { userId, cafeId: cafe._id, updatedAt: now });
         fixed = true;
       }
+    }
+    if (fixed) {
+      const target = await ctx.db.get(userId);
+      await logAdminAction(ctx, actorId, {
+        action: 'user.fix_access',
+        summary: `Repaired outlet access for ${userLabel(target)}`,
+        targetUserId: userId,
+      });
     }
     return { fixed };
   },

@@ -128,6 +128,20 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index('by_user', ['userId']),
 
+  // Append-only trail of platform-operator actions (deactivate/reactivate a
+  // user, grant/revoke admin, repair outlet access, suspend/reactivate a
+  // business). Written by the admin.* mutations, read by admin.listAuditLog.
+  // `action` is an open string (e.g. 'user.deactivate') kept append-friendly;
+  // `summary` is the English human-readable line rendered in the UI.
+  adminAuditLog: defineTable({
+    actorUserId: v.id('users'),
+    action: v.string(),
+    targetUserId: v.optional(v.id('users')),
+    targetBusinessId: v.optional(v.id('businesses')),
+    summary: v.string(),
+    createdAt: v.number(),
+  }).index('by_created', ['createdAt']),
+
   categories: defineTable({
     cafeId: v.id('cafes'),
     name: v.string(),
