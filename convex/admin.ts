@@ -65,6 +65,52 @@ export const me = query({
   },
 });
 
+export const platformStats = query({
+  args: {},
+  handler: async (ctx) => {
+    await requirePlatformAdmin(ctx);
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    const [users, cafes, businesses, members] = await Promise.all([
+      ctx.db.query('users').collect(),
+      ctx.db.query('cafes').collect(),
+      ctx.db.query('businesses').collect(),
+      ctx.db.query('businessMembers').collect(),
+    ]);
+
+    // An owner needs repair when they own at least one cafe but have no
+    // businessMembers row (the pre-backfill state fixOutletAccess repairs).
+    const memberUserIds = new Set(members.map((m) => m.userId));
+    const cafeOwnerIds = new Set(cafes.map((c) => c.ownerUserId));
+    let ownersNeedingRepair = 0;
+    for (const ownerId of cafeOwnerIds) {
+      if (!memberUserIds.has(ownerId)) ownersNeedingRepair += 1;
+    }
+
+    const newSince = (docs: { _creationTime: number }[]) =>
+      docs.filter((d) => d._creationTime >= weekAgo).length;
+
+    return {
+      users: {
+        total: users.length,
+        active: users.filter((u) => u.deactivatedAt == null).length,
+        deactivated: users.filter((u) => u.deactivatedAt != null).length,
+        admins: users.filter((u) => u.isPlatformAdmin === true).length,
+        newLast7d: newSince(users),
+      },
+      businesses: {
+        total: businesses.length,
+        newLast7d: newSince(businesses),
+      },
+      cafes: {
+        total: cafes.length,
+        newLast7d: newSince(cafes),
+      },
+      ownersNeedingRepair,
+    };
+  },
+});
+
 export const setDeactivated = mutation({
   args: { userId: v.id('users'), deactivated: v.boolean() },
   handler: async (ctx, { userId, deactivated }) => {
