@@ -1,7 +1,9 @@
 import { useAuthActions } from '@convex-dev/auth/react';
-import { Trans } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
 import { Button } from '~/components/ui/button';
+
+// The operator console is an internal, English-only surface (its page bodies are
+// plain English and it is excluded from the i18n catalog), so its chrome is too.
 
 export function AdminTopBar() {
   const { signOut } = useAuthActions();
@@ -13,12 +15,18 @@ export function AdminTopBar() {
         </Link>
         <nav className="flex items-center gap-4 text-sm text-muted-foreground">
           <Link to="/users" className="hover:text-foreground">
-            <Trans>Users</Trans>
+            Users
+          </Link>
+          <Link to="/businesses" className="hover:text-foreground">
+            Businesses
+          </Link>
+          <Link to="/audit" className="hover:text-foreground">
+            Audit
           </Link>
         </nav>
       </div>
       <Button variant="outline" size="sm" onClick={() => void signOut()}>
-        <Trans>Keluar</Trans>
+        Sign out
       </Button>
     </header>
   );

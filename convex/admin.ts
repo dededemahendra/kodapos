@@ -1,8 +1,38 @@
-import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { internalMutation, mutation, query } from './_generated/server';
+import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
+import { internalMutation, type MutationCtx, mutation, query } from './_generated/server';
 import { requirePlatformAdmin, resolveOutletAccess } from './lib/auth';
+
+/**
+ * Append one entry to the operator audit trail. Called at the end of every
+ * admin mutation, after its write succeeds, so the log only records applied
+ * changes. Target ids are spread in conditionally to satisfy
+ * exactOptionalPropertyTypes (never write an explicit `undefined`).
+ */
+async function logAdminAction(
+  ctx: MutationCtx,
+  actorUserId: Id<'users'>,
+  entry: {
+    action: string;
+    summary: string;
+    targetUserId?: Id<'users'>;
+    targetBusinessId?: Id<'businesses'>;
+  }
+): Promise<void> {
+  await ctx.db.insert('adminAuditLog', {
+    actorUserId,
+    action: entry.action,
+    summary: entry.summary,
+    createdAt: Date.now(),
+    ...(entry.targetUserId ? { targetUserId: entry.targetUserId } : {}),
+    ...(entry.targetBusinessId ? { targetBusinessId: entry.targetBusinessId } : {}),
+  });
+}
+
+function userLabel(user: Doc<'users'> | null): string {
+  return user?.name ?? user?.email ?? 'a user';
+}
 
 type UserRow = {
   _id: Id<'users'>;
@@ -15,12 +45,17 @@ type UserRow = {
   accessHealth: 'ok' | 'no_outlet';
 };
 
-async function buildRow(ctx: Parameters<typeof requirePlatformAdmin>[0], user: Doc<'users'>): Promise<UserRow> {
+async function buildRow(
+  ctx: Parameters<typeof requirePlatformAdmin>[0],
+  user: Doc<'users'>
+): Promise<UserRow> {
   const ownedCafes = await ctx.db
     .query('cafes')
     .withIndex('by_owner', (q) => q.eq('ownerUserId', user._id))
     .collect();
-  const access = await resolveOutletAccess(ctx, user._id);
+  // Admin inspection: see the TRUE access graph even for a suspended tenant, so
+  // accessHealth/role reflect reality rather than the suspension lockout.
+  const access = await resolveOutletAccess(ctx, user._id, { includeSuspended: true });
   const ownsCafes = ownedCafes.length > 0;
   // no_outlet: owns at least one cafe but has no businessMembers row
   // (the pre-backfill state the operator needs to repair).
@@ -61,7 +96,158 @@ export const me = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return { isPlatformAdmin: false };
     const user = await ctx.db.get(userId);
-    return { isPlatformAdmin: user?.isPlatformAdmin === true };
+    // Mirror requirePlatformAdmin: a deactivated admin keeps the flag but is
+    // locked out of the console, so the OperatorGate must treat them as non-admin.
+    return { isPlatformAdmin: user?.isPlatformAdmin === true && user.deactivatedAt == null };
+  },
+});
+
+export const platformStats = query({
+  args: {},
+  handler: async (ctx) => {
+    await requirePlatformAdmin(ctx);
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    const [users, cafes, businesses, members] = await Promise.all([
+      ctx.db.query('users').collect(),
+      ctx.db.query('cafes').collect(),
+      ctx.db.query('businesses').collect(),
+      ctx.db.query('businessMembers').collect(),
+    ]);
+
+    // An owner needs repair when they own at least one cafe but have no
+    // businessMembers row (the pre-backfill state fixOutletAccess repairs).
+    const memberUserIds = new Set(members.map((m) => m.userId));
+    const cafeOwnerIds = new Set(cafes.map((c) => c.ownerUserId));
+    let ownersNeedingRepair = 0;
+    for (const ownerId of cafeOwnerIds) {
+      if (!memberUserIds.has(ownerId)) ownersNeedingRepair += 1;
+    }
+
+    const newSince = (docs: { _creationTime: number }[]) =>
+      docs.filter((d) => d._creationTime >= weekAgo).length;
+
+    return {
+      users: {
+        total: users.length,
+        active: users.filter((u) => u.deactivatedAt == null).length,
+        deactivated: users.filter((u) => u.deactivatedAt != null).length,
+        admins: users.filter((u) => u.isPlatformAdmin === true).length,
+        newLast7d: newSince(users),
+      },
+      businesses: {
+        total: businesses.length,
+        newLast7d: newSince(businesses),
+      },
+      cafes: {
+        total: cafes.length,
+        newLast7d: newSince(cafes),
+      },
+      ownersNeedingRepair,
+    };
+  },
+});
+
+export const listBusinesses = query({
+  args: { search: v.optional(v.string()) },
+  handler: async (ctx, { search }) => {
+    await requirePlatformAdmin(ctx);
+    const [businesses, cafes, members, users] = await Promise.all([
+      ctx.db.query('businesses').collect(),
+      ctx.db.query('cafes').collect(),
+      ctx.db.query('businessMembers').collect(),
+      ctx.db.query('users').collect(),
+    ]);
+
+    const usersById = new Map(users.map((u) => [u._id, u]));
+    const cafesByBusiness = new Map<Id<'businesses'>, Doc<'cafes'>[]>();
+    for (const cafe of cafes) {
+      if (!cafe.businessId) continue;
+      const list = cafesByBusiness.get(cafe.businessId) ?? [];
+      list.push(cafe);
+      cafesByBusiness.set(cafe.businessId, list);
+    }
+    const memberCountByBusiness = new Map<Id<'businesses'>, number>();
+    for (const m of members) {
+      memberCountByBusiness.set(m.businessId, (memberCountByBusiness.get(m.businessId) ?? 0) + 1);
+    }
+
+    const rows = businesses.map((b) => {
+      const owner = usersById.get(b.ownerUserId);
+      const ownedCafes = cafesByBusiness.get(b._id) ?? [];
+      return {
+        _id: b._id,
+        name: b.name,
+        createdAt: b.createdAt,
+        suspended: b.suspendedAt != null,
+        ownerName: owner?.name ?? null,
+        ownerEmail: owner?.email ?? null,
+        memberCount: memberCountByBusiness.get(b._id) ?? 0,
+        cafes: ownedCafes.map((c) => ({
+          _id: c._id,
+          name: c.name,
+          city: c.city ?? null,
+          setupCompleted: c.setupCompletedAt != null,
+        })),
+      };
+    });
+
+    const term = (search ?? '').trim().toLowerCase();
+    const filtered = term
+      ? rows.filter(
+          (r) =>
+            r.name.toLowerCase().includes(term) ||
+            (r.ownerName ?? '').toLowerCase().includes(term) ||
+            (r.ownerEmail ?? '').toLowerCase().includes(term) ||
+            r.cafes.some((c) => c.name.toLowerCase().includes(term))
+        )
+      : rows;
+
+    // Suspended first, then newest.
+    return filtered.sort(
+      (a, b) => Number(b.suspended) - Number(a.suspended) || b.createdAt - a.createdAt
+    );
+  },
+});
+
+export const listAuditLog = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }) => {
+    await requirePlatformAdmin(ctx);
+    const entries = await ctx.db
+      .query('adminAuditLog')
+      .withIndex('by_created')
+      .order('desc')
+      .take(limit ?? 100);
+    const actorIds = [...new Set(entries.map((e) => e.actorUserId))];
+    const actors = await Promise.all(actorIds.map((id) => ctx.db.get(id)));
+    const actorById = new Map(
+      actors.filter((u): u is Doc<'users'> => u != null).map((u) => [u._id, u])
+    );
+    return entries.map((e) => ({
+      _id: e._id,
+      action: e.action,
+      summary: e.summary,
+      createdAt: e.createdAt,
+      actorName: actorById.has(e.actorUserId)
+        ? userLabel(actorById.get(e.actorUserId) ?? null)
+        : null,
+    }));
+  },
+});
+
+export const setBusinessSuspended = mutation({
+  args: { businessId: v.id('businesses'), suspended: v.boolean() },
+  handler: async (ctx, { businessId, suspended }) => {
+    const { userId: actorId } = await requirePlatformAdmin(ctx);
+    const business = await ctx.db.get(businessId);
+    await ctx.db.patch(businessId, { suspendedAt: suspended ? Date.now() : undefined });
+    await logAdminAction(ctx, actorId, {
+      action: suspended ? 'business.suspend' : 'business.reactivate',
+      summary: `${suspended ? 'Suspended' : 'Reactivated'} business ${business?.name ?? ''}`.trim(),
+      targetBusinessId: businessId,
+    });
+    return null;
   },
 });
 
@@ -72,7 +258,25 @@ export const setDeactivated = mutation({
     if (userId === callerId) {
       throw new Error('cannot deactivate yourself');
     }
+    const target = await ctx.db.get(userId);
+    // Deactivation now also revokes operator-console access (requirePlatformAdmin
+    // honors deactivatedAt), so deactivating the last active admin would lock the
+    // whole team out of the console. Refuse it, mirroring the setPlatformAdmin guard.
+    if (deactivated && target?.isPlatformAdmin === true) {
+      const allUsers = await ctx.db.query('users').collect();
+      const activeAdmins = allUsers.filter(
+        (u) => u.isPlatformAdmin === true && u.deactivatedAt == null
+      ).length;
+      if (activeAdmins <= 1) {
+        throw new Error('cannot deactivate the last admin');
+      }
+    }
     await ctx.db.patch(userId, { deactivatedAt: deactivated ? Date.now() : undefined });
+    await logAdminAction(ctx, callerId, {
+      action: deactivated ? 'user.deactivate' : 'user.reactivate',
+      summary: `${deactivated ? 'Deactivated' : 'Reactivated'} ${userLabel(target)}`,
+      targetUserId: userId,
+    });
     return null;
   },
 });
@@ -91,7 +295,13 @@ export const setPlatformAdmin = mutation({
         throw new Error('cannot remove the last admin');
       }
     }
+    const target = await ctx.db.get(userId);
     await ctx.db.patch(userId, { isPlatformAdmin: isAdmin ? true : undefined });
+    await logAdminAction(ctx, callerId, {
+      action: isAdmin ? 'user.grant_admin' : 'user.revoke_admin',
+      summary: `${isAdmin ? 'Granted' : 'Removed'} platform admin ${isAdmin ? 'to' : 'from'} ${userLabel(target)}`,
+      targetUserId: userId,
+    });
     return null;
   },
 });
@@ -99,7 +309,7 @@ export const setPlatformAdmin = mutation({
 export const fixOutletAccess = mutation({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
-    await requirePlatformAdmin(ctx);
+    const { userId: actorId } = await requirePlatformAdmin(ctx);
     const cafes = await ctx.db
       .query('cafes')
       .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
@@ -122,7 +332,12 @@ export const fixOutletAccess = mutation({
         .withIndex('by_user', (q) => q.eq('userId', userId))
         .first();
       if (!member) {
-        await ctx.db.insert('businessMembers', { businessId, userId, role: 'owner', createdAt: now });
+        await ctx.db.insert('businessMembers', {
+          businessId,
+          userId,
+          role: 'owner',
+          createdAt: now,
+        });
         fixed = true;
       }
       const active = await ctx.db
@@ -133,6 +348,14 @@ export const fixOutletAccess = mutation({
         await ctx.db.insert('activeOutlet', { userId, cafeId: cafe._id, updatedAt: now });
         fixed = true;
       }
+    }
+    if (fixed) {
+      const target = await ctx.db.get(userId);
+      await logAdminAction(ctx, actorId, {
+        action: 'user.fix_access',
+        summary: `Repaired outlet access for ${userLabel(target)}`,
+        targetUserId: userId,
+      });
     }
     return { fixed };
   },

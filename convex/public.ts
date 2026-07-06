@@ -33,6 +33,22 @@ import { resolveProvider } from './payments/providers';
 /** Per-cafe cap on outstanding `new` self-orders before submission is refused. */
 export const MAX_PENDING_SELF_ORDERS = 8;
 
+/**
+ * True when the cafe's owning business has been suspended by a platform operator.
+ * The public QR surface has no authenticated user (it never calls
+ * resolveOutletAccess), so it re-derives the suspension lockout straight from the
+ * cafe's business. Keeps a suspended tenant from taking new self-orders or QRIS
+ * payments, mirroring the staff lockout in the authenticated access gates.
+ */
+async function businessSuspendedForCafe(
+  ctx: QueryCtx | MutationCtx,
+  cafe: Doc<'cafes'>
+): Promise<boolean> {
+  if (!cafe.businessId) return false;
+  const business = await ctx.db.get(cafe.businessId);
+  return business?.suspendedAt != null;
+}
+
 // ---------------------------------------------------------------------------
 // menuForTable — public, sellable-only menu assembly
 // ---------------------------------------------------------------------------
@@ -97,6 +113,9 @@ export const menuForTable = query({
 
     const cafe = await ctx.db.get(table.cafeId);
     if (!cafe) return null;
+    // A suspended tenant is closed to customers too — show nothing (same as an
+    // unknown token) rather than a menu the customer can't actually order from.
+    if (await businessSuspendedForCafe(ctx, cafe)) return null;
     const cafeId = table.cafeId;
 
     // Sellable items only: active + not archived (mirrors menu.items.listForSale,
@@ -345,6 +364,12 @@ export const submitSelfOrder = mutation({
     if (!table || table.archived) throw new Error('QR tidak valid.');
     const cafeId = table.cafeId;
 
+    // 1b. A suspended tenant may not take new orders (mirrors the staff lockout).
+    const cafe = await ctx.db.get(cafeId);
+    if (cafe && (await businessSuspendedForCafe(ctx, cafe))) {
+      throw new Error('Outlet sedang tidak tersedia.');
+    }
+
     // 2. Idempotency — a replay of the same browser-minted clientId returns the
     // existing row instead of inserting a duplicate.
     const existing = await ctx.db
@@ -477,6 +502,12 @@ export const getSelfOrderForCharge = internalQuery({
 
     const cafe = await ctx.db.get(row.cafeId);
     if (!cafe) throw new Error('Pesanan tidak ditemukan.');
+    // A suspended tenant may not collect QRIS payments. This query is the sole
+    // chokepoint createSelfOrderCharge runs before claiming a charge slot or
+    // hitting the provider, so blocking here blocks the whole money path.
+    if (await businessSuspendedForCafe(ctx, cafe)) {
+      throw new Error('Outlet sedang tidak tersedia.');
+    }
     const settings = await ctx.db
       .query('cafeSettings')
       .withIndex('by_cafe', (q) => q.eq('cafeId', row.cafeId))

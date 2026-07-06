@@ -1,6 +1,6 @@
 import { Trans } from '@lingui/react/macro';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -32,6 +32,16 @@ export function ConfirmDialog({
 }) {
   const [pending, setPending] = useState(false);
 
+  // Callers derive title/description from state they clear on close, but Radix
+  // keeps the content mounted through the exit animation. Freeze the last copy
+  // shown while open so nothing flashes to "undefined" mid-close.
+  const shown = useRef<{ title: ReactNode; description?: ReactNode }>({ title, description });
+  if (open) {
+    shown.current = { title, description };
+  }
+  const displayTitle = open ? title : shown.current.title;
+  const displayDescription = open ? description : shown.current.description;
+
   async function handleConfirm() {
     if (pending) return;
     setPending(true);
@@ -49,9 +59,9 @@ export function ConfirmDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          {description ? (
-            <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogTitle>{displayTitle}</AlertDialogTitle>
+          {displayDescription ? (
+            <AlertDialogDescription>{displayDescription}</AlertDialogDescription>
           ) : null}
         </AlertDialogHeader>
         <AlertDialogFooter>

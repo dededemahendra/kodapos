@@ -22,11 +22,30 @@ export type OutletAccess = {
 
 /**
  * Resolve which outlets a user may operate, plus their membership context.
- * Returns null when the user can reach no outlet (no membership and no cafe).
- * Shared by requireActiveOutlet (active pick), outlets.myOutlets (switcher
- * list) and outlets.setActiveOutlet (access validation). Never writes.
+ * Returns null when the user can reach no outlet (no membership and no cafe),
+ * OR when the owning business is suspended (unless { includeSuspended: true }).
+ *
+ * Suspension is enforced HERE by default so every authenticated access path
+ * honors it without each re-checking: the POS gates (try/requireActiveOutlet),
+ * multi-outlet reports (reports.businessOverview), and the outlet switcher
+ * (outlets.myOutlets / setActiveOutlet). Platform-admin inspection queries pass
+ * { includeSuspended: true } to keep seeing the true access graph of a
+ * suspended tenant. Never writes.
  */
 export async function resolveOutletAccess(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<'users'>,
+  opts?: { includeSuspended?: boolean }
+): Promise<OutletAccess | null> {
+  const access = await computeOutletAccess(ctx, userId);
+  if (access && !opts?.includeSuspended && access.businessId) {
+    const business = await ctx.db.get(access.businessId);
+    if (business?.suspendedAt != null) return null;
+  }
+  return access;
+}
+
+async function computeOutletAccess(
   ctx: QueryCtx | MutationCtx,
   userId: Id<'users'>
 ): Promise<OutletAccess | null> {
@@ -111,9 +130,7 @@ export async function requireActiveUser(
  *      first accessible outlet (an ephemeral default; this helper runs in
  *      queries and MUST NOT write; only setActiveOutlet persists a choice).
  */
-export async function tryActiveOutlet(
-  ctx: QueryCtx | MutationCtx
-): Promise<ActiveOutlet | null> {
+export async function tryActiveOutlet(ctx: QueryCtx | MutationCtx): Promise<ActiveOutlet | null> {
   const userId = await getAuthUserId(ctx);
   if (!userId) return null;
   // Deactivated users are locked out everywhere: deny access gracefully here so
@@ -122,6 +139,9 @@ export async function tryActiveOutlet(
   const user = await ctx.db.get(userId);
   if (user?.deactivatedAt != null) return null;
 
+  // resolveOutletAccess enforces suspension by default, so a suspended tenant
+  // resolves to null here and degrades gracefully (the throwing gate surfaces
+  // the distinct 'outlet suspended' message).
   const access = await resolveOutletAccess(ctx, userId);
   if (!access || access.accessibleCafeIds.length === 0) return null;
 
@@ -140,18 +160,24 @@ export async function tryActiveOutlet(
 /**
  * Throwing gate over {@link tryActiveOutlet} for the ~230 handlers that require
  * an active outlet. Preserves distinct messages: 'not authenticated' (no
- * identity), 'account deactivated' (locked out by a platform admin), and
+ * identity), 'account deactivated' (locked out by a platform admin),
+ * 'outlet suspended' (the owning business was suspended by an operator), and
  * 'no outlet access' (identity but no reachable outlet).
  */
-export async function requireActiveOutlet(
-  ctx: QueryCtx | MutationCtx
-): Promise<ActiveOutlet> {
+export async function requireActiveOutlet(ctx: QueryCtx | MutationCtx): Promise<ActiveOutlet> {
   const resolved = await tryActiveOutlet(ctx);
   if (!resolved) {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error('not authenticated');
     const user = await ctx.db.get(userId);
     if (user?.deactivatedAt != null) throw new Error('account deactivated');
+    // Ask for the true graph (includeSuspended) so we can distinguish a
+    // suspended tenant from one with genuinely no reachable outlet.
+    const access = await resolveOutletAccess(ctx, userId, { includeSuspended: true });
+    if (access?.businessId) {
+      const business = await ctx.db.get(access.businessId);
+      if (business?.suspendedAt != null) throw new Error('outlet suspended');
+    }
     throw new Error('no outlet access');
   }
   return resolved;
@@ -198,7 +224,11 @@ export async function requireOwned<T extends TenantTable>(
 /**
  * Platform-operator gate. Resolves the signed-in user and asserts the
  * isPlatformAdmin flag. Cross-tenant: not scoped to any cafe/business.
- * Throws 'not authenticated' with no identity, 'not a platform admin' otherwise.
+ * Throws 'not authenticated' with no identity, 'not a platform admin' without
+ * the flag, and 'account deactivated' for a deactivated admin. Deactivation is
+ * a reversible lockout that must hold *everywhere* (see requireActiveUser /
+ * tryActiveOutlet); the operator console is no exception. The flag persists
+ * across deactivation so reactivation restores operator access.
  */
 export async function requirePlatformAdmin(
   ctx: QueryCtx | MutationCtx
@@ -210,6 +240,9 @@ export async function requirePlatformAdmin(
   const user = await ctx.db.get(userId);
   if (!user || user.isPlatformAdmin !== true) {
     throw new Error('not a platform admin');
+  }
+  if (user.deactivatedAt != null) {
+    throw new Error('account deactivated');
   }
   return { userId, user };
 }

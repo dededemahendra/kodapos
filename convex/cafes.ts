@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { action, internalMutation, internalQuery, mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { requireActiveOutlet, requireActiveUser } from './lib/auth';
+import { requireActiveOutlet, requireActiveUser, resolveOutletAccess } from './lib/auth';
 import { parseGeocode } from './lib/weather';
 
 const cafeFields = {
@@ -112,6 +112,13 @@ export const mine = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
+      return [];
+    }
+    // Honor suspension (and general access) like myCafe: resolveOutletAccess
+    // returns null for a suspended business by default, so a suspended tenant
+    // reads no cafe data through this legacy list query.
+    const access = await resolveOutletAccess(ctx, userId);
+    if (!access) {
       return [];
     }
     return await ctx.db
@@ -309,10 +316,10 @@ export const cleanupDuplicateCafes = mutation({
     skippedWithData: v.array(v.id('cafes')),
   }),
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error('not authenticated');
-    }
+    // Gate on an active, non-suspended outlet (not raw auth) so a suspended or
+    // deactivated tenant cannot mutate its cafes. Throws 'not authenticated' /
+    // 'account deactivated' / 'outlet suspended' / 'no outlet access' as apt.
+    const { userId } = await requireActiveOutlet(ctx);
     const all = await ctx.db
       .query('cafes')
       .withIndex('by_owner', (q) => q.eq('ownerUserId', userId))
