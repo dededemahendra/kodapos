@@ -783,8 +783,8 @@ msgid "Aturan"
 msgstr "Rule"
 
 #: src/components/admin/admin-top-bar.tsx
-msgid "Audit"
-msgstr "Audit"
+#~ msgid "Audit"
+#~ msgstr "Audit"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Awalan nomor order"
@@ -1545,8 +1545,8 @@ msgstr "Not just a translation. kodapos understands how local businesses work."
 #~ msgstr "Round the transaction total to the nearest unit."
 
 #: src/components/admin/admin-top-bar.tsx
-msgid "Businesses"
-msgstr "Businesses"
+#~ msgid "Businesses"
+#~ msgstr "Businesses"
 
 #: src/components/promo/promo-form-dialog.tsx
 msgid "Cakupan"
@@ -3378,7 +3378,6 @@ msgstr "Manage customers"
 msgid "Kelola staf"
 msgstr "Manage staff"
 
-#: src/components/admin/admin-top-bar.tsx
 #: src/components/nav-user.tsx
 #: src/components/no-access.tsx
 #: src/components/shift/cash-movement-dialog.tsx
@@ -7485,8 +7484,8 @@ msgstr "The URL you opened doesn't exist in kodapos."
 #~ msgstr "USB"
 
 #: src/components/admin/admin-top-bar.tsx
-msgid "Users"
-msgstr "Users"
+#~ msgid "Users"
+#~ msgstr "Users"
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx

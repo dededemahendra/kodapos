@@ -783,8 +783,8 @@ msgid "Aturan"
 msgstr "Aturan"
 
 #: src/components/admin/admin-top-bar.tsx
-msgid "Audit"
-msgstr "Audit"
+#~ msgid "Audit"
+#~ msgstr "Audit"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Awalan nomor order"
@@ -1545,8 +1545,8 @@ msgstr "Bukan sekadar terjemahan. kodapos paham cara kerja usaha lokal."
 #~ msgstr "Bulatkan total transaksi ke satuan terdekat."
 
 #: src/components/admin/admin-top-bar.tsx
-msgid "Businesses"
-msgstr "Businesses"
+#~ msgid "Businesses"
+#~ msgstr "Businesses"
 
 #: src/components/promo/promo-form-dialog.tsx
 msgid "Cakupan"
@@ -3378,7 +3378,6 @@ msgstr "Kelola pelanggan"
 msgid "Kelola staf"
 msgstr "Kelola staf"
 
-#: src/components/admin/admin-top-bar.tsx
 #: src/components/nav-user.tsx
 #: src/components/no-access.tsx
 #: src/components/shift/cash-movement-dialog.tsx
@@ -7485,8 +7484,8 @@ msgstr "URL yang kamu buka tidak ada di kodapos."
 #~ msgstr "USB"
 
 #: src/components/admin/admin-top-bar.tsx
-msgid "Users"
-msgstr "Users"
+#~ msgid "Users"
+#~ msgstr "Users"
 
 #: src/components/expenses/expense-categories.tsx
 #: src/routes/_pos/reports/expenses.tsx
