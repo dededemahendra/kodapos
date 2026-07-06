@@ -48,7 +48,7 @@ function AdminOverview() {
           icon={<TriangleAlert className="size-4" />}
           label="Owners needing repair"
           value={stats && formatCount(stats.ownersNeedingRepair)}
-          hint={stats?.ownersNeedingRepair ? 'Fix outlet access in Users' : 'All healthy'}
+          hint={stats && (stats.ownersNeedingRepair ? 'Fix outlet access in Users' : 'All healthy')}
         />
       </div>
 
