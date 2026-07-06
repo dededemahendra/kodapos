@@ -53,7 +53,9 @@ async function buildRow(
     .query('cafes')
     .withIndex('by_owner', (q) => q.eq('ownerUserId', user._id))
     .collect();
-  const access = await resolveOutletAccess(ctx, user._id);
+  // Admin inspection: see the TRUE access graph even for a suspended tenant, so
+  // accessHealth/role reflect reality rather than the suspension lockout.
+  const access = await resolveOutletAccess(ctx, user._id, { includeSuspended: true });
   const ownsCafes = ownedCafes.length > 0;
   // no_outlet: owns at least one cafe but has no businessMembers row
   // (the pre-backfill state the operator needs to repair).
@@ -94,7 +96,9 @@ export const me = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return { isPlatformAdmin: false };
     const user = await ctx.db.get(userId);
-    return { isPlatformAdmin: user?.isPlatformAdmin === true };
+    // Mirror requirePlatformAdmin: a deactivated admin keeps the flag but is
+    // locked out of the console, so the OperatorGate must treat them as non-admin.
+    return { isPlatformAdmin: user?.isPlatformAdmin === true && user.deactivatedAt == null };
   },
 });
 
@@ -255,6 +259,18 @@ export const setDeactivated = mutation({
       throw new Error('cannot deactivate yourself');
     }
     const target = await ctx.db.get(userId);
+    // Deactivation now also revokes operator-console access (requirePlatformAdmin
+    // honors deactivatedAt), so deactivating the last active admin would lock the
+    // whole team out of the console. Refuse it, mirroring the setPlatformAdmin guard.
+    if (deactivated && target?.isPlatformAdmin === true) {
+      const allUsers = await ctx.db.query('users').collect();
+      const activeAdmins = allUsers.filter(
+        (u) => u.isPlatformAdmin === true && u.deactivatedAt == null
+      ).length;
+      if (activeAdmins <= 1) {
+        throw new Error('cannot deactivate the last admin');
+      }
+    }
     await ctx.db.patch(userId, { deactivatedAt: deactivated ? Date.now() : undefined });
     await logAdminAction(ctx, callerId, {
       action: deactivated ? 'user.deactivate' : 'user.reactivate',

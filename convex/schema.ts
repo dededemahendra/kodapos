@@ -89,9 +89,10 @@ export default defineSchema({
     ownerUserId: v.id('users'),
     createdAt: v.number(),
     // Set by a platform operator (admin.setBusinessSuspended) to lock the whole
-    // tenant out of every outlet. Enforced in the runtime access gates
-    // (tryActiveOutlet / requireActiveOutlet), not in resolveOutletAccess, so
-    // admin inspection queries keep reporting true access health.
+    // tenant out of every outlet. Enforced by default in resolveOutletAccess
+    // (so every authenticated access path honors it) and, for the unauthenticated
+    // QR self-order surface, in convex/public.ts. Admin inspection queries pass
+    // { includeSuspended: true } to keep reporting true access health.
     suspendedAt: v.optional(v.number()),
   }).index('by_owner', ['ownerUserId']),
 
