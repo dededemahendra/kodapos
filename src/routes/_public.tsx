@@ -1,18 +1,20 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { currentHostApp } from '~/lib/host';
+import { currentHostApp, hostRoutingEnforced } from '~/lib/host';
 
 export const Route = createFileRoute('/_public')({
   component: PublicLayout,
 });
 
 function PublicLayout() {
-  // On the admin host, the tenant routes (incl. the marketing home at `/`) must
-  // not render; send the operator to the admin landing.
+  // In production, the admin host must not render tenant routes (incl. the
+  // marketing home at `/`); send the operator to the admin landing. Disabled in
+  // dev (hostRoutingEnforced) so localhost:5173 serves both apps by path.
+  const redirectToAdmin = hostRoutingEnforced() && currentHostApp() === 'admin';
   useEffect(() => {
-    if (currentHostApp() === 'admin') window.location.replace('/overview');
-  }, []);
-  if (currentHostApp() === 'admin') return null;
+    if (redirectToAdmin) window.location.replace('/overview');
+  }, [redirectToAdmin]);
+  if (redirectToAdmin) return null;
 
   return (
     <div data-density="comfortable">

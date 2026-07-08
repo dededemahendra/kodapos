@@ -18,3 +18,15 @@ export function currentHostApp(): HostApp {
   if (typeof window === 'undefined') return 'tenant';
   return resolveHostApp(window.location.host);
 }
+
+/**
+ * Whether the host -> app split is enforced (redirects between admin and tenant
+ * hosts). Enforced ONLY in production builds: prod serves the admin app from the
+ * `admin.*` subdomain and the tenant app from the apex. In local dev (`pnpm dev`)
+ * this is off, so a single origin (`localhost:5173`) serves BOTH apps by path
+ * (the admin routes /overview, /login, /businesses, /audit, /users are unique),
+ * and no `admin.localhost` host is needed.
+ */
+export function hostRoutingEnforced(): boolean {
+  return import.meta.env.PROD;
+}

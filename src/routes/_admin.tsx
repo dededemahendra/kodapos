@@ -7,20 +7,23 @@ import { useEffect } from 'react';
 import { AdminShell } from '~/components/admin/admin-shell';
 import { Button } from '~/components/ui/button';
 import { LoadingCounter } from '~/components/ui/loading-counter';
-import { currentHostApp } from '~/lib/host';
+import { currentHostApp, hostRoutingEnforced } from '~/lib/host';
 
 export const Route = createFileRoute('/_admin')({
   component: AdminLayout,
 });
 
 function AdminLayout() {
-  // Host gate: the admin app only serves the admin host. On any other host,
-  // bounce to the tenant root. Runs client-side (SSR has no window), matching
-  // the app's existing client-redirect pattern (see _pos.tsx SignedOutRedirect).
+  // Host gate: in production the admin app only serves the admin host; on any
+  // other host, bounce to the tenant root. Disabled in dev (hostRoutingEnforced)
+  // so a single origin (localhost:5173) serves both apps by path. Runs
+  // client-side (SSR has no window), matching the app's existing client-redirect
+  // pattern (see _pos.tsx SignedOutRedirect).
+  const gated = hostRoutingEnforced() && currentHostApp() !== 'admin';
   useEffect(() => {
-    if (currentHostApp() !== 'admin') window.location.replace('/');
-  }, []);
-  if (currentHostApp() !== 'admin') return null;
+    if (gated) window.location.replace('/');
+  }, [gated]);
+  if (gated) return null;
 
   return (
     <>
