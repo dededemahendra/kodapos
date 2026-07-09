@@ -2,12 +2,19 @@ import { httpRouter } from 'convex/server';
 import { httpAction } from './_generated/server';
 import { internal } from './_generated/api';
 import { auth } from './auth';
+import { handleMcpRequest } from './mcp';
 import { MockProvider } from './payments/providers/mock';
 import { XenditProvider } from './payments/providers/xendit';
 import { qrisWebhookSecret, resolveProvider } from './payments/providers';
 
 const http = httpRouter();
 auth.addHttpRoutes(http);
+
+http.route({
+  path: '/mcp',
+  method: 'POST',
+  handler: httpAction((ctx, req) => handleMcpRequest(ctx, req)),
+});
 
 // `/webhooks/qris` is the MOCK/dev + `simulateWebhook` route ONLY: it hardwires
 // MockProvider on purpose (real Xendit traffic uses `/webhooks/qris/xendit`

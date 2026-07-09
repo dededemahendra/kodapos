@@ -63,6 +63,7 @@ import type * as lib_weather from "../lib/weather.js";
 import type * as lib_whatsapp from "../lib/whatsapp.js";
 import type * as loyalty from "../loyalty.js";
 import type * as loyaltyRewards from "../loyaltyRewards.js";
+import type * as mcp from "../mcp.js";
 import type * as mcpRead from "../mcpRead.js";
 import type * as menu_categories from "../menu/categories.js";
 import type * as menu_itemGroups from "../menu/itemGroups.js";
@@ -167,6 +168,7 @@ declare const fullApi: ApiFromModules<{
   "lib/whatsapp": typeof lib_whatsapp;
   loyalty: typeof loyalty;
   loyaltyRewards: typeof loyaltyRewards;
+  mcp: typeof mcp;
   mcpRead: typeof mcpRead;
   "menu/categories": typeof menu_categories;
   "menu/itemGroups": typeof menu_itemGroups;
