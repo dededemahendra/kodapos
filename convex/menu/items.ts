@@ -585,3 +585,43 @@ export const getById = query({
     return { item, attachedGroups, variants, imageUrl: await imageUrlFor(ctx, item.imageStorageId) };
   },
 });
+
+const barcodeHit = v.union(
+  v.object({ kind: v.literal('item'), itemId: v.id('menuItems') }),
+  v.object({
+    kind: v.literal('variant'),
+    itemId: v.id('menuItems'),
+    variantId: v.id('menuItemVariants'),
+  }),
+  v.null()
+);
+
+export const getByBarcode = query({
+  args: { barcode: v.string() },
+  returns: barcodeHit,
+  handler: async (ctx, { barcode }) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    const code = barcode.trim();
+    if (!code) return null;
+    // Item first: a sellable item is active + not archived.
+    const items = await ctx.db
+      .query('menuItems')
+      .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', code))
+      .collect();
+    const item = items.find((i) => i.isActive && !i.archived);
+    if (item) return { kind: 'item' as const, itemId: item._id };
+    // Then variant: not archived, and its parent item must be sellable.
+    const variants = await ctx.db
+      .query('menuItemVariants')
+      .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', code))
+      .collect();
+    for (const variant of variants) {
+      if (variant.archived) continue;
+      const parent = await ctx.db.get(variant.menuItemId);
+      if (parent && parent.isActive && !parent.archived) {
+        return { kind: 'variant' as const, itemId: parent._id, variantId: variant._id };
+      }
+    }
+    return null;
+  },
+});

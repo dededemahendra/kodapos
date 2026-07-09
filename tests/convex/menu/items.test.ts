@@ -477,4 +477,44 @@ describe('menu.items.list — recipe/stock enrichment', () => {
       })
     ).rejects.toThrow('Barcode sudah dipakai');
   });
+
+  it('getByBarcode resolves an item, a variant, and null for unknown', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+      barcode: '111000111',
+    });
+    const variantId = await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'L',
+      priceIDR: 30000,
+      barcode: '222000222',
+    });
+    expect(await asOwner.query(api.menu.items.getByBarcode, { barcode: '111000111' })).toEqual({
+      kind: 'item',
+      itemId,
+    });
+    expect(await asOwner.query(api.menu.items.getByBarcode, { barcode: '222000222' })).toEqual({
+      kind: 'variant',
+      itemId,
+      variantId,
+    });
+    expect(await asOwner.query(api.menu.items.getByBarcode, { barcode: 'nope' })).toBeNull();
+  });
+
+  it('getByBarcode is tenant-isolated', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t, 'a@x.com');
+    await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+      barcode: '333000333',
+    });
+    const { asOwner: asOther } = await setupOwnerAndCategory(t, 'b@x.com');
+    expect(await asOther.query(api.menu.items.getByBarcode, { barcode: '333000333' })).toBeNull();
+  });
 });
