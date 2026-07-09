@@ -20,7 +20,7 @@ export type ItemForSale = {
     options: Doc<'modifierOptions'>[];
     position: number;
   }>;
-  variants: { _id: Id<'menuItemVariants'>; name: string; priceIDR: number }[];
+  variants: { _id: Id<'menuItemVariants'>; name: string; priceIDR: number; barcode?: string }[];
   lowStockIngredientNames: string[];
   imageUrl: string | null;
 };

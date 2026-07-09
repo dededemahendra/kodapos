@@ -517,4 +517,22 @@ describe('menu.items.list — recipe/stock enrichment', () => {
     const { asOwner: asOther } = await setupOwnerAndCategory(t, 'b@x.com');
     expect(await asOther.query(api.menu.items.getByBarcode, { barcode: '333000333' })).toBeNull();
   });
+
+  it('listForSale exposes variant barcodes', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'L',
+      priceIDR: 30000,
+      barcode: '444000444',
+    });
+    const rows = await asOwner.query(api.menu.items.listForSale, {});
+    expect(rows[0]?.variants[0]?.barcode).toBe('444000444');
+  });
 });

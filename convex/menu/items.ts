@@ -67,6 +67,7 @@ const variantForSale = v.object({
   _id: v.id('menuItemVariants'),
   name: v.string(),
   priceIDR: v.number(),
+  barcode: v.optional(v.string()),
 });
 
 const variantDetail = v.object({
@@ -560,6 +561,7 @@ export const listForSale = query({
         _id: vr._id,
         name: vr.name,
         priceIDR: vr.priceIDR,
+        ...(vr.barcode ? { barcode: vr.barcode } : {}),
       }));
       const { lowStockIngredientNames } = await itemRecipeStatus(ctx, cafeId, item._id);
       result.push({ item, attachedGroups, variants, lowStockIngredientNames, imageUrl: await imageUrlFor(ctx, item.imageStorageId) });
