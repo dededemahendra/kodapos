@@ -30,11 +30,13 @@ export function MenuPane({
   items,
   onItemTap,
   onScan,
+  scanFlash,
 }: {
   categories: Doc<'categories'>[];
   items: ItemForSale[];
   onItemTap: (item: ItemForSale) => void;
   onScan?: (code: string) => void;
+  scanFlash?: 'hit' | 'miss' | null;
 }) {
   const { t } = useLingui();
   const [activeCategoryId, setActiveCategoryId] = useState<Id<'categories'> | 'all'>('all');
@@ -64,7 +66,13 @@ export function MenuPane({
           placeholder={t`Scan / ketik barcode…`}
           inputMode="numeric"
           autoFocus
-          className="h-9"
+          className={`h-9 transition-colors ${
+            scanFlash === 'hit'
+              ? 'border-emerald-500 ring-1 ring-emerald-500'
+              : scanFlash === 'miss'
+                ? 'border-destructive ring-1 ring-destructive'
+                : ''
+          }`}
         />
       </form>
       <div className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-border">
