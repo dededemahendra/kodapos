@@ -42,6 +42,7 @@ import type * as lib_inventory from "../lib/inventory.js";
 import type * as lib_inviteEmail from "../lib/inviteEmail.js";
 import type * as lib_lowStockEmail from "../lib/lowStockEmail.js";
 import type * as lib_loyalty from "../lib/loyalty.js";
+import type * as lib_mcpTools from "../lib/mcpTools.js";
 import type * as lib_orderType from "../lib/orderType.js";
 import type * as lib_payment from "../lib/payment.js";
 import type * as lib_phone from "../lib/phone.js";
@@ -145,6 +146,7 @@ declare const fullApi: ApiFromModules<{
   "lib/inviteEmail": typeof lib_inviteEmail;
   "lib/lowStockEmail": typeof lib_lowStockEmail;
   "lib/loyalty": typeof lib_loyalty;
+  "lib/mcpTools": typeof lib_mcpTools;
   "lib/orderType": typeof lib_orderType;
   "lib/payment": typeof lib_payment;
   "lib/phone": typeof lib_phone;
