@@ -127,7 +127,7 @@ async function isBarcodeFree(
   return true;
 }
 
-async function assertBarcodeUnique(
+export async function assertBarcodeUnique(
   ctx: QueryCtx,
   cafeId: Id<'cafes'>,
   barcode: string,

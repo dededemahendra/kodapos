@@ -336,3 +336,41 @@ describe('buildOrder variant pricing', () => {
     ).rejects.toThrow(/varian tidak tersedia/i);
   });
 });
+
+describe('menu.variants barcodes', () => {
+  it('create stores a barcode and rejects a duplicate', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, itemId } = await setup(t);
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'S',
+      priceIDR: 20000,
+      barcode: '900900900',
+    });
+    const list = await asOwner.query(api.menu.variants.listForItem, { menuItemId: itemId });
+    expect(list[0]?.barcode).toBe('900900900');
+    await expect(
+      asOwner.mutation(api.menu.variants.create, {
+        menuItemId: itemId,
+        name: 'M',
+        priceIDR: 24000,
+        barcode: '900900900',
+      })
+    ).rejects.toThrow('Barcode sudah dipakai');
+  });
+
+  it('assignBarcode gives a variant a fresh code and refuses if it already has one', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, itemId } = await setup(t);
+    const variantId = await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'S',
+      priceIDR: 20000,
+    });
+    const code = await asOwner.mutation(api.menu.variants.assignBarcode, { id: variantId });
+    expect(code).toMatch(/^\d{12}$/);
+    await expect(
+      asOwner.mutation(api.menu.variants.assignBarcode, { id: variantId })
+    ).rejects.toThrow('sudah punya barcode');
+  });
+});

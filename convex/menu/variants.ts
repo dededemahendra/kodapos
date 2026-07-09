@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import { requireOwned, requireActiveOutlet } from '../lib/auth';
+import { assertBarcodeUnique } from './items';
 
 const variantDoc = v.object({
   _id: v.id('menuItemVariants'),
@@ -12,6 +13,7 @@ const variantDoc = v.object({
   position: v.number(),
   archived: v.boolean(),
   createdAt: v.number(),
+  barcode: v.optional(v.string()),
 });
 
 function assertVariant(name: string, priceIDR: number): string {
@@ -23,17 +25,28 @@ function assertVariant(name: string, priceIDR: number): string {
   return trimmed;
 }
 
+// 12 random digits (Web Crypto). Digits-only so Code128 + handheld scanners
+// handle it cleanly. Mirrors the item generator; kept local to avoid coupling.
+function genVariantBarcode(): string {
+  const a = new Uint8Array(12);
+  globalThis.crypto.getRandomValues(a);
+  return Array.from(a, (b) => String(b % 10)).join('');
+}
+
 export const create = mutation({
   args: {
     menuItemId: v.id('menuItems'),
     name: v.string(),
     priceIDR: v.number(),
+    barcode: v.optional(v.string()),
   },
   returns: v.id('menuItemVariants'),
   handler: async (ctx, args) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, args.menuItemId, 'Item');
     const cleanName = assertVariant(args.name, args.priceIDR);
+    const bc = args.barcode?.trim();
+    if (bc) await assertBarcodeUnique(ctx, cafeId, bc);
     const existing = await ctx.db
       .query('menuItemVariants')
       .withIndex('by_item_active', (q) =>
@@ -50,6 +63,7 @@ export const create = mutation({
       position,
       archived: false,
       createdAt: Date.now(),
+      ...(bc ? { barcode: bc } : {}),
     });
   },
 });
@@ -59,13 +73,20 @@ export const update = mutation({
     id: v.id('menuItemVariants'),
     name: v.string(),
     priceIDR: v.number(),
+    barcode: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, args.id, 'Varian');
     const cleanName = assertVariant(args.name, args.priceIDR);
-    await ctx.db.patch(args.id, { name: cleanName, priceIDR: args.priceIDR });
+    const bc = args.barcode?.trim();
+    if (bc) await assertBarcodeUnique(ctx, cafeId, bc, { variantId: args.id });
+    await ctx.db.patch(args.id, {
+      name: cleanName,
+      priceIDR: args.priceIDR,
+      barcode: bc || undefined,
+    });
     return null;
   },
 });
@@ -78,6 +99,27 @@ export const archive = mutation({
     await requireOwned(ctx, cafeId, id, 'Varian');
     await ctx.db.patch(id, { archived: true });
     return null;
+  },
+});
+
+export const assignBarcode = mutation({
+  args: { id: v.id('menuItemVariants') },
+  returns: v.string(),
+  handler: async (ctx, { id }) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    const variant = await requireOwned(ctx, cafeId, id, 'Varian');
+    if (variant.barcode) throw new Error('Varian sudah punya barcode.');
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const bc = genVariantBarcode();
+      try {
+        await assertBarcodeUnique(ctx, cafeId, bc);
+      } catch {
+        continue;
+      }
+      await ctx.db.patch(id, { barcode: bc });
+      return bc;
+    }
+    throw new Error('Gagal membuat barcode unik.');
   },
 });
 
