@@ -53,12 +53,11 @@ stale mid-session and does not scale to very large catalogs.
 ### `menuItemVariants` (`convex/schema.ts`)
 
 - Add `barcode: v.optional(v.string())`.
-- Denormalize `cafeId: v.id('cafes')` onto the table (variants currently hang off
-  `menuItemId` only). This keeps barcode lookup and uniqueness single-index,
-  per-cafe, and symmetric with `menuItems`.
 - Add index `by_cafe_barcode` on `['cafeId','barcode']`.
-- One-time backfill migration: set `cafeId` on every existing variant from its
-  parent `menuItem.cafeId`.
+- `cafeId` is **already** on the table (with a `by_cafe_item` index), so barcode
+  lookup and uniqueness are single-index, per-cafe, and symmetric with
+  `menuItems`. **No denormalization or backfill migration is needed** (a
+  simplification vs. the original brainstorm assumption).
 
 ### Uniqueness invariant
 
@@ -125,7 +124,6 @@ across **both** `menuItems.barcode` and `menuItemVariants.barcode` within a cafe
   - `assertBarcodeUnique` rejects a code already used by an **item** in the cafe,
     and one already used by a **variant** in the cafe (and allows re-saving the
     same row).
-  - Backfill migration sets `cafeId` on existing variants.
 - **Register:** variant-with-required-modifiers opens the picker pre-selected;
   variant-without-modifiers adds directly (covered where testable). Beep/flash
   are manual acceptance.
