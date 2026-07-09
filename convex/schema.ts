@@ -208,9 +208,11 @@ export default defineSchema({
     position: v.number(),
     archived: v.boolean(),
     createdAt: v.number(),
+    barcode: v.optional(v.string()),
   })
     .index('by_item_active', ['menuItemId', 'archived', 'position'])
-    .index('by_cafe_item', ['cafeId', 'menuItemId']),
+    .index('by_cafe_item', ['cafeId', 'menuItemId'])
+    .index('by_cafe_barcode', ['cafeId', 'barcode']),
 
   cafeStaff: defineTable({
     cafeId: v.id('cafes'),
