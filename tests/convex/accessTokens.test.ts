@@ -13,7 +13,28 @@ async function ownerWithCafe(t: ReturnType<typeof convexTest>, name = 'Owner', e
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   const cafe = await asOwner.query(api.cafes.myCafe, {});
   const cafeId = cafe!._id as Id<'cafes'>;
-  return { asOwner, userId, cafeId };
+  const businessId = cafe!.businessId as Id<'businesses'>;
+  return { asOwner, userId, cafeId, businessId };
+}
+
+// Signed-in NON-owner: a manager membership scoped to the given business,
+// granted access to the given cafe via memberOutletAccess (so
+// requireActiveOutlet resolves to 'no outlet access' never masks the
+// 'owner access required' check these tests assert on).
+async function managerWithAccess(
+  t: ReturnType<typeof convexTest>,
+  businessId: Id<'businesses'>,
+  cafeId: Id<'cafes'>,
+  email = 'mgr@x.com'
+) {
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email }));
+  const memberId = await t.run((ctx) =>
+    ctx.db.insert('businessMembers', { businessId, userId, role: 'manager', createdAt: 5 })
+  );
+  await t.run((ctx) =>
+    ctx.db.insert('memberOutletAccess', { businessMemberId: memberId, cafeId, createdAt: 5 })
+  );
+  return t.withIdentity({ subject: `${userId}|test_session` });
 }
 
 describe('accessTokens.resolve', () => {
@@ -174,6 +195,16 @@ describe('accessTokens.create', () => {
     ).rejects.toThrow(/not authenticated/i);
   });
 
+  it('rejects a signed-in manager (owner access required)', async () => {
+    const t = convexTest(schema, modules);
+    const { businessId, cafeId } = await ownerWithCafe(t);
+    const asManager = await managerWithAccess(t, businessId, cafeId);
+
+    await expect(
+      asManager.mutation(api.accessTokens.create, { name: 'x', cafeId })
+    ).rejects.toThrow(/owner access required/);
+  });
+
   it('rejects a cafeId the caller does not own', async () => {
     const t = convexTest(schema, modules);
     const { cafeId: cafeA } = await ownerWithCafe(t, 'Owner A', 'a@x.com');
@@ -204,6 +235,19 @@ describe('accessTokens.revoke', () => {
     const { id } = await asOwnerA.mutation(api.accessTokens.create, { name: 'x', cafeId: cafeA });
 
     await expect(asOwnerB.mutation(api.accessTokens.revoke, { id })).rejects.toThrow();
+  });
+
+  it('rejects a signed-in manager (owner access required)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, businessId, cafeId } = await ownerWithCafe(t);
+    const { id } = await asOwner.mutation(api.accessTokens.create, { name: 'x', cafeId });
+    const asManager = await managerWithAccess(t, businessId, cafeId);
+
+    // The owner gate runs before the token lookup, so any id is rejected the
+    // same way regardless of who it belongs to.
+    await expect(asManager.mutation(api.accessTokens.revoke, { id })).rejects.toThrow(
+      /owner access required/
+    );
   });
 });
 
@@ -241,5 +285,15 @@ describe('accessTokens.list', () => {
     expect(listA[0]?.name).toBe('A token');
     expect(listB).toHaveLength(1);
     expect(listB[0]?.name).toBe('B token');
+  });
+
+  it('rejects a signed-in manager (owner access required)', async () => {
+    const t = convexTest(schema, modules);
+    const { businessId, cafeId } = await ownerWithCafe(t);
+    const asManager = await managerWithAccess(t, businessId, cafeId);
+
+    await expect(asManager.query(api.accessTokens.list, {})).rejects.toThrow(
+      /owner access required/
+    );
   });
 });
