@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as accessTokens from "../accessTokens.js";
 import type * as accounting from "../accounting.js";
 import type * as admin from "../admin.js";
 import type * as ai from "../ai.js";
@@ -41,6 +42,7 @@ import type * as lib_inventory from "../lib/inventory.js";
 import type * as lib_inviteEmail from "../lib/inviteEmail.js";
 import type * as lib_lowStockEmail from "../lib/lowStockEmail.js";
 import type * as lib_loyalty from "../lib/loyalty.js";
+import type * as lib_mcpTools from "../lib/mcpTools.js";
 import type * as lib_orderType from "../lib/orderType.js";
 import type * as lib_payment from "../lib/payment.js";
 import type * as lib_phone from "../lib/phone.js";
@@ -56,10 +58,13 @@ import type * as lib_sale from "../lib/sale.js";
 import type * as lib_shiftSummary from "../lib/shiftSummary.js";
 import type * as lib_staff from "../lib/staff.js";
 import type * as lib_time from "../lib/time.js";
+import type * as lib_token from "../lib/token.js";
 import type * as lib_weather from "../lib/weather.js";
 import type * as lib_whatsapp from "../lib/whatsapp.js";
 import type * as loyalty from "../loyalty.js";
 import type * as loyaltyRewards from "../loyaltyRewards.js";
+import type * as mcp from "../mcp.js";
+import type * as mcpRead from "../mcpRead.js";
 import type * as menu_categories from "../menu/categories.js";
 import type * as menu_itemGroups from "../menu/itemGroups.js";
 import type * as menu_itemStock from "../menu/itemStock.js";
@@ -108,6 +113,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  accessTokens: typeof accessTokens;
   accounting: typeof accounting;
   admin: typeof admin;
   ai: typeof ai;
@@ -141,6 +147,7 @@ declare const fullApi: ApiFromModules<{
   "lib/inviteEmail": typeof lib_inviteEmail;
   "lib/lowStockEmail": typeof lib_lowStockEmail;
   "lib/loyalty": typeof lib_loyalty;
+  "lib/mcpTools": typeof lib_mcpTools;
   "lib/orderType": typeof lib_orderType;
   "lib/payment": typeof lib_payment;
   "lib/phone": typeof lib_phone;
@@ -156,10 +163,13 @@ declare const fullApi: ApiFromModules<{
   "lib/shiftSummary": typeof lib_shiftSummary;
   "lib/staff": typeof lib_staff;
   "lib/time": typeof lib_time;
+  "lib/token": typeof lib_token;
   "lib/weather": typeof lib_weather;
   "lib/whatsapp": typeof lib_whatsapp;
   loyalty: typeof loyalty;
   loyaltyRewards: typeof loyaltyRewards;
+  mcp: typeof mcp;
+  mcpRead: typeof mcpRead;
   "menu/categories": typeof menu_categories;
   "menu/itemGroups": typeof menu_itemGroups;
   "menu/itemStock": typeof menu_itemStock;

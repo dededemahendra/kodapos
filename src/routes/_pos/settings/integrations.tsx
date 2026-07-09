@@ -9,6 +9,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { SettingsPageHeader } from '~/components/settings/primitives';
 import { IntegrationLogo } from '~/components/settings/integration-logo';
+import { McpAccessCard } from '~/components/settings/mcp-access-card';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import {
@@ -385,6 +386,11 @@ function SettingsIntegrations() {
                 );
               })}
             </div>
+            {category === 'ai' && (
+              <div className="mt-4">
+                <McpAccessCard />
+              </div>
+            )}
           </div>
         );
       })}

@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
-import type { Doc } from './_generated/dataModel';
+import type { Doc, Id } from './_generated/dataModel';
 import { query } from './_generated/server';
+import type { QueryCtx } from './_generated/server';
 import { requireActiveOutlet } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
 import { methodTotals } from './lib/payment';
@@ -67,63 +68,80 @@ export const kpis = query({
   }),
   handler: async (ctx) => {
     const { cafeId } = await requireActiveOutlet(ctx);
-    const tz = await tzFor(ctx, cafeId);
-    const now = Date.now();
-    const todayStart = startOfLocalDay(tz, 0, now);
-    const yesterdayStart = startOfLocalDay(tz, 1, now);
-
-    const rows = await ctx.db
-      .query('orders')
-      .withIndex('by_cafe_created', (q) =>
-        q.eq('cafeId', cafeId).gte('createdAtClient', yesterdayStart)
-      )
-      .collect();
-    const paid = rows.filter((o) => o.paymentStatus === 'paid');
-    const today = paid.filter((o) => o.createdAtClient >= todayStart);
-    const yest = paid.filter(
-      (o) => o.createdAtClient >= yesterdayStart && o.createdAtClient < todayStart
-    );
-
-    const sum = (a: Doc<'orders'>[]) => a.reduce((s, o) => s + o.totalIDR, 0);
-    const items = (a: Doc<'orders'>[]) => a.reduce((s, o) => s + lineItemQty(o), 0);
-
-    // Net out refunds dated (by `refund.at`) in each day's window so revenue is
-    // a true money figure and the delta stays apples-to-apples.
-    const refunds = await ctx.db
-      .query('refunds')
-      .withIndex('by_cafe_at', (q) =>
-        q.eq('cafeId', cafeId).gte('at', yesterdayStart)
-      )
-      .collect();
-    const tRefunds = refunds
-      .filter((r) => r.at >= todayStart)
-      .reduce((s, r) => s + r.amountIDR, 0);
-    const yRefunds = refunds
-      .filter((r) => r.at >= yesterdayStart && r.at < todayStart)
-      .reduce((s, r) => s + r.amountIDR, 0);
-
-    const tRev = sum(today) - tRefunds;
-    const yRev = sum(yest) - yRefunds;
-    const tOrders = today.length;
-    const yOrders = yest.length;
-    const tAvg = tOrders ? tRev / tOrders : 0;
-    const yAvg = yOrders ? yRev / yOrders : 0;
-    const tItems = items(today);
-    const yItems = items(yest);
-
-    return {
-      revenueIDR: tRev,
-      refundsIDR: tRefunds,
-      revenueDeltaPct: pctDelta(tRev, yRev),
-      orders: tOrders,
-      ordersDeltaPct: pctDelta(tOrders, yOrders),
-      avgOrderIDR: Math.round(tAvg),
-      avgOrderDeltaPct: pctDelta(tAvg, yAvg),
-      itemsSold: tItems,
-      itemsSoldDeltaPct: pctDelta(tItems, yItems),
-    };
+    return computeKpis(ctx, cafeId);
   },
 });
+
+export async function computeKpis(
+  ctx: QueryCtx,
+  cafeId: Id<'cafes'>
+): Promise<{
+  revenueIDR: number;
+  refundsIDR: number;
+  revenueDeltaPct: number;
+  orders: number;
+  ordersDeltaPct: number;
+  avgOrderIDR: number;
+  avgOrderDeltaPct: number;
+  itemsSold: number;
+  itemsSoldDeltaPct: number;
+}> {
+  const tz = await tzFor(ctx, cafeId);
+  const now = Date.now();
+  const todayStart = startOfLocalDay(tz, 0, now);
+  const yesterdayStart = startOfLocalDay(tz, 1, now);
+
+  const rows = await ctx.db
+    .query('orders')
+    .withIndex('by_cafe_created', (q) =>
+      q.eq('cafeId', cafeId).gte('createdAtClient', yesterdayStart)
+    )
+    .collect();
+  const paid = rows.filter((o) => o.paymentStatus === 'paid');
+  const today = paid.filter((o) => o.createdAtClient >= todayStart);
+  const yest = paid.filter(
+    (o) => o.createdAtClient >= yesterdayStart && o.createdAtClient < todayStart
+  );
+
+  const sum = (a: Doc<'orders'>[]) => a.reduce((s, o) => s + o.totalIDR, 0);
+  const items = (a: Doc<'orders'>[]) => a.reduce((s, o) => s + lineItemQty(o), 0);
+
+  // Net out refunds dated (by `refund.at`) in each day's window so revenue is
+  // a true money figure and the delta stays apples-to-apples.
+  const refunds = await ctx.db
+    .query('refunds')
+    .withIndex('by_cafe_at', (q) =>
+      q.eq('cafeId', cafeId).gte('at', yesterdayStart)
+    )
+    .collect();
+  const tRefunds = refunds
+    .filter((r) => r.at >= todayStart)
+    .reduce((s, r) => s + r.amountIDR, 0);
+  const yRefunds = refunds
+    .filter((r) => r.at >= yesterdayStart && r.at < todayStart)
+    .reduce((s, r) => s + r.amountIDR, 0);
+
+  const tRev = sum(today) - tRefunds;
+  const yRev = sum(yest) - yRefunds;
+  const tOrders = today.length;
+  const yOrders = yest.length;
+  const tAvg = tOrders ? tRev / tOrders : 0;
+  const yAvg = yOrders ? yRev / yOrders : 0;
+  const tItems = items(today);
+  const yItems = items(yest);
+
+  return {
+    revenueIDR: tRev,
+    refundsIDR: tRefunds,
+    revenueDeltaPct: pctDelta(tRev, yRev),
+    orders: tOrders,
+    ordersDeltaPct: pctDelta(tOrders, yOrders),
+    avgOrderIDR: Math.round(tAvg),
+    avgOrderDeltaPct: pctDelta(tAvg, yAvg),
+    itemsSold: tItems,
+    itemsSoldDeltaPct: pctDelta(tItems, yItems),
+  };
+}
 
 /** Daily paid revenue for the last 7 days (oldest → newest). */
 export const revenueDaily = query({
@@ -252,29 +270,45 @@ export const lowStock = query({
   }),
   handler: async (ctx) => {
     const { cafeId } = await requireActiveOutlet(ctx);
-    const ingredients = await ctx.db
-      .query('ingredients')
-      .withIndex('by_cafe_active', (q) =>
-        q.eq('cafeId', cafeId).eq('archived', false)
-      )
-      .collect();
-    const low = [];
-    for (const ing of ingredients) {
-      const qty = await currentStockQty(ctx, cafeId, ing._id);
-      if (qty < ing.reorderThreshold) {
-        low.push({
-          id: ing._id,
-          name: ing.name,
-          currentStockQty: qty,
-          reorderThreshold: ing.reorderThreshold,
-          unit: ing.canonicalUnit,
-        });
-      }
-    }
-    low.sort((a, b) => a.currentStockQty - b.currentStockQty);
-    return { count: low.length, items: low.slice(0, 5) };
+    return computeLowStock(ctx, cafeId);
   },
 });
+
+export async function computeLowStock(
+  ctx: QueryCtx,
+  cafeId: Id<'cafes'>
+): Promise<{
+  count: number;
+  items: Array<{
+    id: Id<'ingredients'>;
+    name: string;
+    currentStockQty: number;
+    reorderThreshold: number;
+    unit: 'g' | 'ml' | 'piece';
+  }>;
+}> {
+  const ingredients = await ctx.db
+    .query('ingredients')
+    .withIndex('by_cafe_active', (q) =>
+      q.eq('cafeId', cafeId).eq('archived', false)
+    )
+    .collect();
+  const low = [];
+  for (const ing of ingredients) {
+    const qty = await currentStockQty(ctx, cafeId, ing._id);
+    if (qty < ing.reorderThreshold) {
+      low.push({
+        id: ing._id,
+        name: ing.name,
+        currentStockQty: qty,
+        reorderThreshold: ing.reorderThreshold,
+        unit: ing.canonicalUnit,
+      });
+    }
+  }
+  low.sort((a, b) => a.currentStockQty - b.currentStockQty);
+  return { count: low.length, items: low.slice(0, 5) };
+}
 
 /** Recent activity feed: latest paid sales + shift open/close events. */
 export const recentActivity = query({

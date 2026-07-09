@@ -2,6 +2,7 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { action, internalMutation, internalQuery, mutation, query } from './_generated/server';
+import type { QueryCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { requireActiveOutlet, requireActiveUser, resolveOutletAccess } from './lib/auth';
 import { parseGeocode } from './lib/weather';
@@ -41,6 +42,28 @@ const cafeFields = {
   ),
 };
 const cafeDoc = v.object(cafeFields);
+
+/** Per-cafe profile info for the v1 tools (e.g. the read-only MCP server). */
+export async function computeCafeInfo(
+  ctx: QueryCtx,
+  cafeId: Id<'cafes'>
+): Promise<{
+  name: string;
+  timezone: string;
+  taxRatePct: number;
+  taxEnabled: boolean;
+  currency: 'IDR';
+}> {
+  const cafe = await ctx.db.get(cafeId);
+  if (!cafe) throw new Error('outlet not found');
+  return {
+    name: cafe.name,
+    timezone: cafe.timezone ?? 'Asia/Jakarta',
+    taxRatePct: cafe.taxRatePct ?? 0,
+    taxEnabled: cafe.taxEnabled === true,
+    currency: 'IDR' as const,
+  };
+}
 
 export const createForOwner = mutation({
   args: { name: v.string() },

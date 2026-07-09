@@ -41,7 +41,7 @@ async function paidInRange(
  * accessible outlet. Net revenue = paid order totals minus refunds dated in
  * the window; AOV is off net revenue.
  */
-async function computeOverview(
+export async function computeOverview(
   ctx: QueryCtx,
   cafeId: Id<'cafes'>,
   range: RangeArgs
@@ -141,22 +141,43 @@ export const products = query({
     toKey: v.string(),
   }),
   handler: async (ctx, { range }) => {
-    const { fromKey, toKey, paid } = await paidInRange(ctx, range);
-    const byName = new Map<string, { qty: number; revenueIDR: number }>();
-    for (const o of paid) {
-      for (const l of o.lines) {
-        const cur = byName.get(l.nameSnapshot) ?? { qty: 0, revenueIDR: 0 };
-        cur.qty += l.qty;
-        cur.revenueIDR += l.lineTotalIDR;
-        byName.set(l.nameSnapshot, cur);
-      }
-    }
-    const items = Array.from(byName, ([name, agg]) => ({ name, ...agg })).sort(
-      (a, b) => b.revenueIDR - a.revenueIDR || b.qty - a.qty || a.name.localeCompare(b.name, 'id-ID')
-    );
-    return { items, fromKey, toKey };
+    const { cafeId } = await requireActiveOutlet(ctx);
+    return computeProducts(ctx, cafeId, range);
   },
 });
+
+export async function computeProducts(
+  ctx: QueryCtx,
+  cafeId: Id<'cafes'>,
+  range: RangeArgs
+): Promise<{
+  items: Array<{ name: string; qty: number; revenueIDR: number }>;
+  fromKey: string;
+  toKey: string;
+}> {
+  const tz = await tzFor(ctx, cafeId);
+  const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, Date.now());
+  const rows = await ctx.db
+    .query('orders')
+    .withIndex('by_cafe_created', (q) =>
+      q.eq('cafeId', cafeId).gte('createdAtClient', startMs).lte('createdAtClient', endMs)
+    )
+    .collect();
+  const paid = rows.filter((o) => o.paymentStatus === 'paid');
+  const byName = new Map<string, { qty: number; revenueIDR: number }>();
+  for (const o of paid) {
+    for (const l of o.lines) {
+      const cur = byName.get(l.nameSnapshot) ?? { qty: 0, revenueIDR: 0 };
+      cur.qty += l.qty;
+      cur.revenueIDR += l.lineTotalIDR;
+      byName.set(l.nameSnapshot, cur);
+    }
+  }
+  const items = Array.from(byName, ([name, agg]) => ({ name, ...agg })).sort(
+    (a, b) => b.revenueIDR - a.revenueIDR || b.qty - a.qty || a.name.localeCompare(b.name, 'id-ID')
+  );
+  return { items, fromKey, toKey };
+}
 
 export const margin = query({
   args: { range: rangeArg },

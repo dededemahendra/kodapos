@@ -923,4 +923,19 @@ export default defineSchema({
     .index('by_cafe_ingredient', ['cafeId', 'ingredientId'])
     .index('by_cafe_ingredient_at', ['cafeId', 'ingredientId', 'at'])
     .index('by_cafe_reason_at', ['cafeId', 'reason', 'at']),
+
+  // Read-only MCP server: opaque personal access tokens scoped to one cafe.
+  // Only the sha-256 hash is stored; the raw `kpat_...` value is shown once
+  // at creation and never persisted.
+  accessTokens: defineTable({
+    userId: v.id('users'),
+    cafeId: v.id('cafes'),
+    tokenHash: v.string(), // sha-256 hex of the raw token; raw is never stored
+    name: v.string(),
+    createdAt: v.number(),
+    lastUsedAt: v.optional(v.number()),
+    revokedAt: v.optional(v.number()),
+  })
+    .index('by_hash', ['tokenHash'])
+    .index('by_user', ['userId']),
 });
