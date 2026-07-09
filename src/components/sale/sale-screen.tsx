@@ -323,15 +323,20 @@ export function SaleScreen({
       }
     }
     // 3) Backend fallback for products not in the loaded set.
-    const hit = await convex.query(api.menu.items.getByBarcode, { barcode: code });
-    if (hit) {
-      const row = items?.find((r) => r.item._id === hit.itemId);
-      if (row) {
-        flash('hit');
-        if (hit.kind === 'variant') addVariantLine(row, hit.variantId);
-        else onItemTap(row);
-        return;
+    try {
+      const hit = await convex.query(api.menu.items.getByBarcode, { barcode: code });
+      if (hit) {
+        const row = items?.find((r) => r.item._id === hit.itemId);
+        if (row) {
+          flash('hit');
+          if (hit.kind === 'variant') addVariantLine(row, hit.variantId);
+          else onItemTap(row);
+          return;
+        }
       }
+    } catch {
+      // Query failed (e.g. no active outlet): fall through to the miss path
+      // so the operator still gets a clear signal.
     }
     // 4) Miss.
     flash('miss');
