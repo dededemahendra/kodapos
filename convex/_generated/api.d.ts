@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as accessTokens from "../accessTokens.js";
 import type * as accounting from "../accounting.js";
 import type * as admin from "../admin.js";
 import type * as ai from "../ai.js";
@@ -56,6 +57,7 @@ import type * as lib_sale from "../lib/sale.js";
 import type * as lib_shiftSummary from "../lib/shiftSummary.js";
 import type * as lib_staff from "../lib/staff.js";
 import type * as lib_time from "../lib/time.js";
+import type * as lib_token from "../lib/token.js";
 import type * as lib_weather from "../lib/weather.js";
 import type * as lib_whatsapp from "../lib/whatsapp.js";
 import type * as loyalty from "../loyalty.js";
@@ -108,6 +110,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  accessTokens: typeof accessTokens;
   accounting: typeof accounting;
   admin: typeof admin;
   ai: typeof ai;
@@ -156,6 +159,7 @@ declare const fullApi: ApiFromModules<{
   "lib/shiftSummary": typeof lib_shiftSummary;
   "lib/staff": typeof lib_staff;
   "lib/time": typeof lib_time;
+  "lib/token": typeof lib_token;
   "lib/weather": typeof lib_weather;
   "lib/whatsapp": typeof lib_whatsapp;
   loyalty: typeof loyalty;
