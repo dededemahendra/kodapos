@@ -1,10 +1,20 @@
 import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
-import { internal } from '../../convex/_generated/api';
+import { api, internal } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
 import { generateToken, hashToken } from '../../convex/lib/token';
 import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
+
+async function ownerWithCafe(t: ReturnType<typeof convexTest>, name = 'Owner', email = 'o@x.com') {
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name, email }));
+  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
+  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+  const cafe = await asOwner.query(api.cafes.myCafe, {});
+  const cafeId = cafe!._id as Id<'cafes'>;
+  return { asOwner, userId, cafeId };
+}
 
 describe('accessTokens.resolve', () => {
   it('returns userId+cafeId for a live token, null for revoked/missing', async () => {
@@ -128,5 +138,108 @@ describe('accessTokens.touchLastUsed', () => {
       return row?.lastUsedAt;
     });
     expect(revokedRow).toEqual(staleAt);
+  });
+});
+
+describe('accessTokens.create', () => {
+  it('owner can create a token: returns a kpat_ token and stores only the hash', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, userId, cafeId } = await ownerWithCafe(t);
+
+    const { token, id } = await asOwner.mutation(api.accessTokens.create, {
+      name: 'Reporting bot',
+      cafeId,
+    });
+
+    expect(token).toMatch(/^kpat_[A-Za-z0-9]{43}$/);
+
+    const row = await t.run((ctx) => ctx.db.get(id));
+    expect(row).toMatchObject({ userId, cafeId, name: 'Reporting bot' });
+    expect(row?.tokenHash).not.toEqual(token);
+    expect(row?.tokenHash).toEqual(await hashToken(token));
+
+    // The freshly created token resolves via the internal lookup.
+    expect(await t.query(internal.accessTokens.resolve, { tokenHash: row!.tokenHash })).toEqual({
+      userId,
+      cafeId,
+    });
+  });
+
+  it('rejects a non-owner (not authenticated)', async () => {
+    const t = convexTest(schema, modules);
+    const { cafeId } = await ownerWithCafe(t);
+
+    await expect(
+      t.mutation(api.accessTokens.create, { name: 'x', cafeId })
+    ).rejects.toThrow(/not authenticated/i);
+  });
+
+  it('rejects a cafeId the caller does not own', async () => {
+    const t = convexTest(schema, modules);
+    const { cafeId: cafeA } = await ownerWithCafe(t, 'Owner A', 'a@x.com');
+    const { asOwner: asOwnerB } = await ownerWithCafe(t, 'Owner B', 'b@x.com');
+
+    await expect(
+      asOwnerB.mutation(api.accessTokens.create, { name: 'x', cafeId: cafeA })
+    ).rejects.toThrow();
+  });
+});
+
+describe('accessTokens.revoke', () => {
+  it('revoking a token makes resolve fail', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await ownerWithCafe(t);
+    const { id } = await asOwner.mutation(api.accessTokens.create, { name: 'x', cafeId });
+    const row = await t.run((ctx) => ctx.db.get(id));
+
+    await asOwner.mutation(api.accessTokens.revoke, { id });
+
+    expect(await t.query(internal.accessTokens.resolve, { tokenHash: row!.tokenHash })).toBeNull();
+  });
+
+  it('rejects revoking a token not owned by the caller', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: asOwnerA, cafeId: cafeA } = await ownerWithCafe(t, 'Owner A', 'a@x.com');
+    const { asOwner: asOwnerB } = await ownerWithCafe(t, 'Owner B', 'b@x.com');
+    const { id } = await asOwnerA.mutation(api.accessTokens.create, { name: 'x', cafeId: cafeA });
+
+    await expect(asOwnerB.mutation(api.accessTokens.revoke, { id })).rejects.toThrow();
+  });
+});
+
+describe('accessTokens.list', () => {
+  it('excludes the hash and excludes revoked tokens', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, cafeId } = await ownerWithCafe(t);
+
+    const live = await asOwner.mutation(api.accessTokens.create, { name: 'Live token', cafeId });
+    const revoked = await asOwner.mutation(api.accessTokens.create, {
+      name: 'Revoked token',
+      cafeId,
+    });
+    await asOwner.mutation(api.accessTokens.revoke, { id: revoked.id });
+
+    const list = await asOwner.query(api.accessTokens.list, {});
+
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({ _id: live.id, name: 'Live token', cafeId });
+    expect(list[0]).not.toHaveProperty('tokenHash');
+  });
+
+  it('scopes to the caller (cross-user isolation)', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner: asOwnerA, cafeId: cafeA } = await ownerWithCafe(t, 'Owner A', 'a@x.com');
+    const { asOwner: asOwnerB, cafeId: cafeB } = await ownerWithCafe(t, 'Owner B', 'b@x.com');
+
+    await asOwnerA.mutation(api.accessTokens.create, { name: 'A token', cafeId: cafeA });
+    await asOwnerB.mutation(api.accessTokens.create, { name: 'B token', cafeId: cafeB });
+
+    const listA = await asOwnerA.query(api.accessTokens.list, {});
+    const listB = await asOwnerB.query(api.accessTokens.list, {});
+
+    expect(listA).toHaveLength(1);
+    expect(listA[0]?.name).toBe('A token');
+    expect(listB).toHaveLength(1);
+    expect(listB[0]?.name).toBe('B token');
   });
 });
