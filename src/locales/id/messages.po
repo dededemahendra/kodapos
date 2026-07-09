@@ -64,6 +64,11 @@ msgstr "\"{0}\" tidak akan bisa dipakai di kasir."
 msgid "\"{0}\" tidak akan bisa ditukar lagi."
 msgstr "\"{0}\" tidak akan bisa ditukar lagi."
 
+#. placeholder {0}: revokingToken.name
+#: src/components/settings/mcp-access-card.tsx
+msgid "\"{0}\" tidak akan bisa lagi dipakai untuk mengakses data."
+msgstr "\"{0}\" tidak akan bisa lagi dipakai untuk mengakses data."
+
 #. placeholder {0}: archiveTarget.name
 #: src/routes/_pos/customers.tsx
 msgid "\"{0}\" tidak akan muncul di daftar pelanggan."
@@ -455,7 +460,12 @@ msgstr "Akses awal"
 msgid "Akses ditolak"
 msgstr "Akses ditolak"
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "Akses hanya baca (read-only) ke data outlet Anda lewat Model Context Protocol (MCP)."
+msgstr "Akses hanya baca (read-only) ke data outlet Anda lewat Model Context Protocol (MCP)."
+
 #: src/components/menu/category-table.tsx
+#: src/components/settings/mcp-access-card.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
@@ -970,6 +980,7 @@ msgstr "Basi/Kedaluwarsa"
 #: src/components/sale/receipt-preview.tsx
 #: src/components/sale/sale-screen.tsx
 #: src/components/schedule/shift-form-dialog.tsx
+#: src/components/settings/mcp-access-card.tsx
 #: src/components/settings/save-bar.tsx
 #: src/components/supplier/supplier-form-dialog.tsx
 #: src/components/tables/table-manage-dialog.tsx
@@ -1221,6 +1232,10 @@ msgstr "Belum ada reward."
 msgid "Belum ada shift yang ditutup."
 msgstr "Belum ada shift yang ditutup."
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "Belum ada token MCP"
+msgstr "Belum ada token MCP"
+
 #: src/routes/_pos/reports/cashiers.tsx
 msgid "Belum ada transaksi kasir pada rentang ini."
 msgstr "Belum ada transaksi kasir pada rentang ini."
@@ -1245,6 +1260,10 @@ msgstr "Belum dipasangkan"
 #: src/routes/_pos/time-clock.tsx
 msgid "Belum masuk"
 msgstr "Belum masuk"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Belum pernah dipakai"
+msgstr "Belum pernah dipakai"
 
 #: src/routes/_public/signin.tsx
 #~ msgid "Belum punya akun?"
@@ -1462,6 +1481,18 @@ msgstr "Buat satu grup untuk dipakai ulang di banyak item."
 msgid "Buat semua"
 msgstr "Buat semua"
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "Buat token"
+msgstr "Buat token"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Buat token MCP"
+msgstr "Buat token MCP"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Buat token untuk menghubungkan asisten AI ke data outlet Anda. Aksesnya selalu hanya baca."
+msgstr "Buat token untuk menghubungkan asisten AI ke data outlet Anda. Aksesnya selalu hanya baca."
+
 #: src/components/public/qr-payment-view.tsx
 msgid "Buat ulang QR"
 msgstr "Buat ulang QR"
@@ -1547,6 +1578,14 @@ msgstr "Bukan sekadar terjemahan. kodapos paham cara kerja usaha lokal."
 #: src/components/admin/admin-top-bar.tsx
 #~ msgid "Businesses"
 #~ msgstr "Businesses"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Cabut"
+msgstr "Cabut"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Cabut token?"
+msgstr "Cabut token?"
 
 #: src/components/promo/promo-form-dialog.tsx
 msgid "Cakupan"
@@ -1905,6 +1944,10 @@ msgstr "Di halaman ini"
 msgid "Dibatalkan"
 msgstr "Dibatalkan"
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "Dibuat"
+msgstr "Dibuat"
+
 #: src/components/marketing/why-indonesia.tsx
 msgid "Dibuat untuk kafe dan resto di Indonesia"
 msgstr "Dibuat untuk kafe dan resto di Indonesia"
@@ -2171,6 +2214,10 @@ msgstr "Gagal membuat QR."
 msgid "Gagal membuat tagihan QRIS."
 msgstr "Gagal membuat tagihan QRIS."
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "Gagal membuat token."
+msgstr "Gagal membuat token."
+
 #: src/routes/_pos/shift/open.tsx
 msgid "Gagal membuka shift."
 msgstr "Gagal membuka shift."
@@ -2225,6 +2272,10 @@ msgstr "Gagal menambah staf."
 #: src/components/menu/item-edit-form.tsx
 msgid "Gagal menambah varian."
 msgstr "Gagal menambah varian."
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Gagal mencabut token."
+msgstr "Gagal mencabut token."
 
 #: src/components/shift/cash-movement-dialog.tsx
 msgid "Gagal mencatat kas."
@@ -2395,6 +2446,14 @@ msgstr "Gagal menolak pesanan."
 #: src/routes/_pos/shift/close.tsx
 msgid "Gagal menutup shift."
 msgstr "Gagal menutup shift."
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Gagal menyalin konfigurasi."
+msgstr "Gagal menyalin konfigurasi."
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Gagal menyalin token."
+msgstr "Gagal menyalin token."
 
 #: src/components/customer/customer-detail-sheet.tsx
 msgid "Gagal menyesuaikan poin."
@@ -2820,6 +2879,10 @@ msgstr "Hubungkan {dialogEntryName}"
 #: src/routes/_pos/ai.tsx
 msgid "Hubungkan asisten AI"
 msgstr "Hubungkan asisten AI"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Hubungkan asisten AI (MCP)"
+msgstr "Hubungkan asisten AI (MCP)"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Hubungkan kRestoran/POS Anda dengan layanan lain. (Penyetelan disimpan; aktivasi penuh menyusul.)"
@@ -3582,6 +3645,14 @@ msgstr "Kode tidak valid."
 msgid "Kolom wajib tidak ditemukan: {0}"
 msgstr "Kolom wajib tidak ditemukan: {0}"
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "Konfigurasi disalin."
+msgstr "Konfigurasi disalin."
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Konfigurasi klien MCP"
+msgstr "Konfigurasi klien MCP"
+
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Konfirmasi"
 msgstr "Konfirmasi"
@@ -4234,6 +4305,10 @@ msgstr "Minimal 8 karakter"
 msgid "mis. Andi"
 msgstr "mis. Andi"
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "mis. Claude Desktop"
+msgstr "mis. Claude Desktop"
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "mis. INV-"
 #~ msgstr "mis. INV-"
@@ -4342,6 +4417,7 @@ msgstr "Naikkan urutan"
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/components/onboarding/steps/cashier-step.tsx
+#: src/components/settings/mcp-access-card.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
@@ -4373,6 +4449,10 @@ msgstr "Nama grup"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Nama header otorisasi"
 msgstr "Nama header otorisasi"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Nama ini membantu Anda mengenali token saat meninjaunya nanti."
+msgstr "Nama ini membantu Anda mengenali token saat meninjaunya nanti."
 
 #: src/components/menu/cafe-profile-form.tsx
 #: src/routes/_pos/settings/profile.tsx
@@ -4463,6 +4543,10 @@ msgstr "Nama tamu wajib diisi."
 #: src/routes/_pos/loyalty.tsx
 msgid "Nama tier"
 msgstr "Nama tier"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Nama token"
+msgstr "Nama token"
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Nama varian"
@@ -5850,6 +5934,18 @@ msgstr "Saldo: {balance} poin"
 #~ msgid "Sales"
 #~ msgstr "Sales"
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "Salin konfigurasi"
+msgstr "Salin konfigurasi"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Salin token"
+msgstr "Salin token"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Salin token ini sekarang. Token tidak akan ditampilkan lagi setelah dialog ini ditutup."
+msgstr "Salin token ini sekarang. Token tidak akan ditampilkan lagi setelah dialog ini ditutup."
+
 #: src/routes/_public/signin.tsx
 msgid "Sandi baru"
 msgstr "Sandi baru"
@@ -5964,6 +6060,7 @@ msgstr "Selengkapnya"
 #: src/components/import/csv-import-dialog.tsx
 #: src/components/onboarding/steps/cashier-step.tsx
 #: src/components/sale/receipt-preview.tsx
+#: src/components/settings/mcp-access-card.tsx
 #: src/routes/_pos/kitchen.tsx
 #: src/routes/_pos/reservations.tsx
 msgid "Selesai"
@@ -6807,6 +6904,10 @@ msgstr "Tema"
 msgid "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
 msgstr "Tempel kunci dari dasbor Xendit Anda. Kunci disimpan aman di server."
 
+#: src/components/settings/mcp-access-card.tsx
+msgid "Tempel potongan ini di berkas konfigurasi klien MCP Anda."
+msgstr "Tempel potongan ini di berkas konfigurasi klien MCP Anda."
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Template body (JSON)"
 msgstr "Template body (JSON)"
@@ -6814,6 +6915,10 @@ msgstr "Template body (JSON)"
 #: src/routes/_pos/help.tsx
 msgid "Temukan jawaban dan pelajari cara memakai kodapos."
 msgstr "Temukan jawaban dan pelajari cara memakai kodapos."
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Terakhir dipakai"
+msgstr "Terakhir dipakai"
 
 #: src/components/legal/legal-page.tsx
 msgid "Terakhir diperbarui"
@@ -7134,6 +7239,22 @@ msgstr "Tipe"
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Token"
 msgstr "Token"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Token akses"
+msgstr "Token akses"
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Token dibuat."
+msgstr "Token dibuat."
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Token dicabut."
+msgstr "Token dicabut."
+
+#: src/components/settings/mcp-access-card.tsx
+msgid "Token disalin."
+msgstr "Token disalin."
 
 #: src/routes/_pos/self-orders.tsx
 msgid "Tolak"
