@@ -444,4 +444,37 @@ describe('menu.items.list — recipe/stock enrichment', () => {
     expect(rows[0]?.hasRecipe).toBe(true);
     expect(rows[0]?.lowStockIngredientNames).toEqual(['Susu']);
   });
+
+  it('rejects an item barcode already used by a variant in the same cafe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+    // Seed a variant carrying the barcode directly (Task 3 adds the mutation arg).
+    await t.run(async (ctx) => {
+      const item = await ctx.db.get(itemId);
+      if (!item) throw new Error('seed item missing');
+      await ctx.db.insert('menuItemVariants', {
+        cafeId: item.cafeId,
+        menuItemId: itemId,
+        name: 'L',
+        priceIDR: 30000,
+        position: 0,
+        archived: false,
+        createdAt: 0,
+        barcode: '111222333',
+      });
+    });
+    await expect(
+      asOwner.mutation(api.menu.items.create, {
+        categoryId,
+        name: 'Kopi Lain',
+        priceIDR: 20000,
+        barcode: '111222333',
+      })
+    ).rejects.toThrow('Barcode sudah dipakai');
+  });
 });

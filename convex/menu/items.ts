@@ -105,29 +105,35 @@ function assertItem(name: string, priceIDR: number): string {
   return trimmed;
 }
 
-// Mirror of a duplicate-name guard: query the by-cafe barcode index, collect
-// the matches, and reject if any non-archived item (other than the one being
-// edited) already owns the barcode.
+// A barcode must be unique across BOTH menuItems and menuItemVariants within a
+// cafe, so a scan resolves to exactly one target. Query each by_cafe_barcode
+// index, ignore archived rows and the row currently being edited.
 async function isBarcodeFree(
   ctx: QueryCtx,
   cafeId: Id<'cafes'>,
   barcode: string,
-  currentId?: Id<'menuItems'>
+  opts?: { itemId?: Id<'menuItems'>; variantId?: Id<'menuItemVariants'> }
 ): Promise<boolean> {
-  const matches = await ctx.db
+  const itemMatches = await ctx.db
     .query('menuItems')
     .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', barcode))
     .collect();
-  return !matches.some((m) => !m.archived && m._id !== currentId);
+  if (itemMatches.some((m) => !m.archived && m._id !== opts?.itemId)) return false;
+  const variantMatches = await ctx.db
+    .query('menuItemVariants')
+    .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', barcode))
+    .collect();
+  if (variantMatches.some((m) => !m.archived && m._id !== opts?.variantId)) return false;
+  return true;
 }
 
 async function assertBarcodeUnique(
   ctx: QueryCtx,
   cafeId: Id<'cafes'>,
   barcode: string,
-  currentId?: Id<'menuItems'>
+  opts?: { itemId?: Id<'menuItems'>; variantId?: Id<'menuItemVariants'> }
 ): Promise<void> {
-  if (!(await isBarcodeFree(ctx, cafeId, barcode, currentId)))
+  if (!(await isBarcodeFree(ctx, cafeId, barcode, opts)))
     throw new Error('Barcode sudah dipakai item lain.');
 }
 
@@ -257,7 +263,7 @@ export const update = mutation({
     await requireOwned(ctx, cafeId, args.categoryId, 'Kategori');
     const cleanName = assertItem(args.name, args.priceIDR);
     const bc = args.barcode?.trim();
-    if (bc) await assertBarcodeUnique(ctx, cafeId, bc, args.id);
+    if (bc) await assertBarcodeUnique(ctx, cafeId, bc, { itemId: args.id });
     // If the item is moving to a different category, give it a fresh
     // position at the bottom of the destination so it doesn't collide
     // with an existing sibling that already has the same position number.
