@@ -75,6 +75,7 @@ const variantDetail = v.object({
   name: v.string(),
   priceIDR: v.number(),
   position: v.number(),
+  barcode: v.optional(v.string()),
 });
 
 const itemDetail = v.object({
@@ -583,6 +584,7 @@ export const getById = query({
       name: vr.name,
       priceIDR: vr.priceIDR,
       position: vr.position,
+      ...(vr.barcode ? { barcode: vr.barcode } : {}),
     }));
     return { item, attachedGroups, variants, imageUrl: await imageUrlFor(ctx, item.imageStorageId) };
   },

@@ -926,6 +926,7 @@ msgstr "Goods already received stay in stock. The order cannot receive any more 
 msgid "Barcode"
 msgstr "Barcode"
 
+#: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/menu/labels.tsx
 msgid "Barcode dibuat."
 msgstr "Barcode generated."
@@ -933,6 +934,10 @@ msgstr "Barcode generated."
 #: src/components/sale/sale-screen.tsx
 msgid "Barcode tidak ditemukan."
 msgstr "Barcode not found."
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Barcode varian"
+msgstr "Variant barcode"
 
 #: src/components/ui/data-table.tsx
 msgid "Baris"
@@ -1382,6 +1387,10 @@ msgstr "Piece (pcs)"
 #: src/components/sale/held-orders-dialog.tsx
 msgid "Buang"
 msgstr "Discard"
+
+#: src/components/menu/item-edit-form.tsx
+msgid "Buat"
+msgstr "Generate"
 
 #: src/components/onboarding/steps/menu-step.tsx
 msgid "Buat 2-3 kategori (Kopi, Non-Kopi, Makanan)."
@@ -2186,6 +2195,7 @@ msgstr "Failed to cancel the purchase order."
 msgid "Gagal membatalkan pesanan."
 msgstr "Could not void the order."
 
+#: src/components/menu/item-edit-form.tsx
 #: src/routes/_pos/menu/labels.tsx
 msgid "Gagal membuat barcode."
 msgstr "Failed to generate barcode."

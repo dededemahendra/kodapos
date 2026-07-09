@@ -22,6 +22,7 @@ export interface VariantRow {
   name: string;
   priceIDR: number;
   position: number;
+  barcode?: string;
 }
 
 export interface ItemEditFormProps {
@@ -55,6 +56,7 @@ export function ItemEditForm(props: ItemEditFormProps) {
   const createVariant = useMutation(api.menu.variants.create);
   const updateVariant = useMutation(api.menu.variants.update);
   const archiveVariant = useMutation(api.menu.variants.archive);
+  const assignVariantBarcode = useMutation(api.menu.variants.assignBarcode);
 
   const [name, setName] = useState(props.initial.name);
   const [categoryId, setCategoryId] = useState<Id<'categories'> | ''>(props.initial.categoryId);
@@ -356,8 +358,11 @@ export function ItemEditForm(props: ItemEditFormProps) {
                 <VariantEditRow
                   key={variant._id}
                   variant={variant}
-                  onSave={async (name, priceIDR) => {
-                    await updateVariant({ id: variant._id, name, priceIDR });
+                  onSave={async (name, priceIDR, barcode) => {
+                    await updateVariant({ id: variant._id, name, priceIDR, barcode });
+                  }}
+                  onAssignBarcode={async () => {
+                    await assignVariantBarcode({ id: variant._id });
                   }}
                   onRemove={async () => {
                     await archiveVariant({ id: variant._id });
@@ -402,12 +407,14 @@ export function ItemEditForm(props: ItemEditFormProps) {
 
 function VariantEditRow(props: {
   variant: VariantRow;
-  onSave: (name: string, priceIDR: number) => Promise<void>;
+  onSave: (name: string, priceIDR: number, barcode: string) => Promise<void>;
+  onAssignBarcode: () => Promise<void>;
   onRemove: () => Promise<void>;
 }) {
   const { t } = useLingui();
   const [name, setName] = useState(props.variant.name);
   const [price, setPrice] = useState<number>(props.variant.priceIDR);
+  const [barcode, setBarcode] = useState(props.variant.barcode ?? '');
 
   // Keep local drafts in sync when the reactive query delivers fresh values.
   useEffect(() => {
@@ -416,18 +423,37 @@ function VariantEditRow(props: {
   useEffect(() => {
     setPrice(props.variant.priceIDR);
   }, [props.variant.priceIDR]);
+  useEffect(() => {
+    setBarcode(props.variant.barcode ?? '');
+  }, [props.variant.barcode]);
 
   async function commit() {
     const trimmed = name.trim();
-    if (trimmed === props.variant.name && price === props.variant.priceIDR) return;
+    const bc = barcode.trim();
+    if (
+      trimmed === props.variant.name &&
+      price === props.variant.priceIDR &&
+      bc === (props.variant.barcode ?? '')
+    )
+      return;
     try {
-      await props.onSave(trimmed, price);
+      await props.onSave(trimmed, price, bc);
       toast.success(t`Varian diperbarui.`);
     } catch (err) {
       // Revert to the server value and surface the validation error.
       setName(props.variant.name);
       setPrice(props.variant.priceIDR);
+      setBarcode(props.variant.barcode ?? '');
       toast.error(err instanceof Error ? err.message : t`Gagal menyimpan varian.`);
+    }
+  }
+
+  async function assign() {
+    try {
+      await props.onAssignBarcode();
+      toast.success(t`Barcode dibuat.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t`Gagal membuat barcode.`);
     }
   }
 
@@ -460,6 +486,25 @@ function VariantEditRow(props: {
         aria-label={t`Harga varian (Rp)`}
         className="w-32"
       />
+      <Input
+        value={barcode}
+        onChange={(e) => setBarcode(e.target.value)}
+        onBlur={() => void commit()}
+        inputMode="numeric"
+        maxLength={64}
+        placeholder={t`Barcode`}
+        aria-label={t`Barcode varian`}
+        className="w-40"
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => void assign()}
+        disabled={barcode.trim().length > 0}
+      >
+        <Trans>Buat</Trans>
+      </Button>
       <ConfirmArchive
         noun={t`varian`}
         name={props.variant.name}
