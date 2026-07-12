@@ -444,4 +444,95 @@ describe('menu.items.list — recipe/stock enrichment', () => {
     expect(rows[0]?.hasRecipe).toBe(true);
     expect(rows[0]?.lowStockIngredientNames).toEqual(['Susu']);
   });
+
+  it('rejects an item barcode already used by a variant in the same cafe', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+    // Seed a variant carrying the barcode directly (Task 3 adds the mutation arg).
+    await t.run(async (ctx) => {
+      const item = await ctx.db.get(itemId);
+      if (!item) throw new Error('seed item missing');
+      await ctx.db.insert('menuItemVariants', {
+        cafeId: item.cafeId,
+        menuItemId: itemId,
+        name: 'L',
+        priceIDR: 30000,
+        position: 0,
+        archived: false,
+        createdAt: 0,
+        barcode: '111222333',
+      });
+    });
+    await expect(
+      asOwner.mutation(api.menu.items.create, {
+        categoryId,
+        name: 'Kopi Lain',
+        priceIDR: 20000,
+        barcode: '111222333',
+      })
+    ).rejects.toThrow('Barcode sudah dipakai');
+  });
+
+  it('getByBarcode resolves an item, a variant, and null for unknown', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+      barcode: '111000111',
+    });
+    const variantId = await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'L',
+      priceIDR: 30000,
+      barcode: '222000222',
+    });
+    expect(await asOwner.query(api.menu.items.getByBarcode, { barcode: '111000111' })).toEqual({
+      kind: 'item',
+      itemId,
+    });
+    expect(await asOwner.query(api.menu.items.getByBarcode, { barcode: '222000222' })).toEqual({
+      kind: 'variant',
+      itemId,
+      variantId,
+    });
+    expect(await asOwner.query(api.menu.items.getByBarcode, { barcode: 'nope' })).toBeNull();
+  });
+
+  it('getByBarcode is tenant-isolated', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t, 'a@x.com');
+    await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+      barcode: '333000333',
+    });
+    const { asOwner: asOther } = await setupOwnerAndCategory(t, 'b@x.com');
+    expect(await asOther.query(api.menu.items.getByBarcode, { barcode: '333000333' })).toBeNull();
+  });
+
+  it('listForSale exposes variant barcodes', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, categoryId } = await setupOwnerAndCategory(t);
+    const itemId = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Latte',
+      priceIDR: 25000,
+    });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'L',
+      priceIDR: 30000,
+      barcode: '444000444',
+    });
+    const rows = await asOwner.query(api.menu.items.listForSale, {});
+    expect(rows[0]?.variants[0]?.barcode).toBe('444000444');
+  });
 });

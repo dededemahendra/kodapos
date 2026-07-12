@@ -67,6 +67,7 @@ const variantForSale = v.object({
   _id: v.id('menuItemVariants'),
   name: v.string(),
   priceIDR: v.number(),
+  barcode: v.optional(v.string()),
 });
 
 const variantDetail = v.object({
@@ -74,6 +75,7 @@ const variantDetail = v.object({
   name: v.string(),
   priceIDR: v.number(),
   position: v.number(),
+  barcode: v.optional(v.string()),
 });
 
 const itemDetail = v.object({
@@ -105,29 +107,35 @@ function assertItem(name: string, priceIDR: number): string {
   return trimmed;
 }
 
-// Mirror of a duplicate-name guard: query the by-cafe barcode index, collect
-// the matches, and reject if any non-archived item (other than the one being
-// edited) already owns the barcode.
+// A barcode must be unique across BOTH menuItems and menuItemVariants within a
+// cafe, so a scan resolves to exactly one target. Query each by_cafe_barcode
+// index, ignore archived rows and the row currently being edited.
 async function isBarcodeFree(
   ctx: QueryCtx,
   cafeId: Id<'cafes'>,
   barcode: string,
-  currentId?: Id<'menuItems'>
+  opts?: { itemId?: Id<'menuItems'>; variantId?: Id<'menuItemVariants'> }
 ): Promise<boolean> {
-  const matches = await ctx.db
+  const itemMatches = await ctx.db
     .query('menuItems')
     .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', barcode))
     .collect();
-  return !matches.some((m) => !m.archived && m._id !== currentId);
+  if (itemMatches.some((m) => !m.archived && m._id !== opts?.itemId)) return false;
+  const variantMatches = await ctx.db
+    .query('menuItemVariants')
+    .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', barcode))
+    .collect();
+  if (variantMatches.some((m) => !m.archived && m._id !== opts?.variantId)) return false;
+  return true;
 }
 
-async function assertBarcodeUnique(
+export async function assertBarcodeUnique(
   ctx: QueryCtx,
   cafeId: Id<'cafes'>,
   barcode: string,
-  currentId?: Id<'menuItems'>
+  opts?: { itemId?: Id<'menuItems'>; variantId?: Id<'menuItemVariants'> }
 ): Promise<void> {
-  if (!(await isBarcodeFree(ctx, cafeId, barcode, currentId)))
+  if (!(await isBarcodeFree(ctx, cafeId, barcode, opts)))
     throw new Error('Barcode sudah dipakai item lain.');
 }
 
@@ -257,7 +265,7 @@ export const update = mutation({
     await requireOwned(ctx, cafeId, args.categoryId, 'Kategori');
     const cleanName = assertItem(args.name, args.priceIDR);
     const bc = args.barcode?.trim();
-    if (bc) await assertBarcodeUnique(ctx, cafeId, bc, args.id);
+    if (bc) await assertBarcodeUnique(ctx, cafeId, bc, { itemId: args.id });
     // If the item is moving to a different category, give it a fresh
     // position at the bottom of the destination so it doesn't collide
     // with an existing sibling that already has the same position number.
@@ -554,6 +562,7 @@ export const listForSale = query({
         _id: vr._id,
         name: vr.name,
         priceIDR: vr.priceIDR,
+        ...(vr.barcode ? { barcode: vr.barcode } : {}),
       }));
       const { lowStockIngredientNames } = await itemRecipeStatus(ctx, cafeId, item._id);
       result.push({ item, attachedGroups, variants, lowStockIngredientNames, imageUrl: await imageUrlFor(ctx, item.imageStorageId) });
@@ -575,7 +584,48 @@ export const getById = query({
       name: vr.name,
       priceIDR: vr.priceIDR,
       position: vr.position,
+      ...(vr.barcode ? { barcode: vr.barcode } : {}),
     }));
     return { item, attachedGroups, variants, imageUrl: await imageUrlFor(ctx, item.imageStorageId) };
+  },
+});
+
+const barcodeHit = v.union(
+  v.object({ kind: v.literal('item'), itemId: v.id('menuItems') }),
+  v.object({
+    kind: v.literal('variant'),
+    itemId: v.id('menuItems'),
+    variantId: v.id('menuItemVariants'),
+  }),
+  v.null()
+);
+
+export const getByBarcode = query({
+  args: { barcode: v.string() },
+  returns: barcodeHit,
+  handler: async (ctx, { barcode }) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    const code = barcode.trim();
+    if (!code) return null;
+    // Item first: a sellable item is active + not archived.
+    const items = await ctx.db
+      .query('menuItems')
+      .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', code))
+      .collect();
+    const item = items.find((i) => i.isActive && !i.archived);
+    if (item) return { kind: 'item' as const, itemId: item._id };
+    // Then variant: not archived, and its parent item must be sellable.
+    const variants = await ctx.db
+      .query('menuItemVariants')
+      .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', code))
+      .collect();
+    for (const variant of variants) {
+      if (variant.archived) continue;
+      const parent = await ctx.db.get(variant.menuItemId);
+      if (parent && parent.isActive && !parent.archived) {
+        return { kind: 'variant' as const, itemId: parent._id, variantId: variant._id };
+      }
+    }
+    return null;
   },
 });

@@ -1,6 +1,6 @@
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { useMutation, useQuery } from 'convex/react';
+import { useConvex, useMutation, useQuery } from 'convex/react';
 import { useNavigate } from '@tanstack/react-router';
 import {
   DEFAULT_SERVICE_CHARGE_NAME,
@@ -15,6 +15,7 @@ import { toast } from '~/lib/toast';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { useBoolPreference } from '~/lib/preferences';
 import { playSaleChime } from '~/lib/sound';
+import { scanBeep } from '~/lib/scan-feedback';
 import { publishDisplay } from '~/lib/customer-display';
 import { GiftCardPaymentDialog } from '~/components/giftcard/gift-card-payment-dialog';
 import { CashPaymentDialog } from './cash-payment-dialog';
@@ -61,6 +62,7 @@ export function SaleScreen({
 } = {}) {
   const { t } = useLingui();
   const navigate = useNavigate();
+  const convex = useConvex();
   const removeHeld = useMutation(api.heldOrders.remove);
   const acceptSelfOrder = useMutation(api.selfOrders.accept);
   const categories = useQuery(api.menu.categories.list, {});
@@ -77,6 +79,7 @@ export function SaleScreen({
   const [mobileView, setMobileView] = useState<'menu' | 'order'>('menu');
   const [clearOpen, setClearOpen] = useState(false);
   const [pickerRow, setPickerRow] = useState<ItemForSale | null>(null);
+  const [scanFlash, setScanFlash] = useState<'hit' | 'miss' | null>(null);
   const [openMethod, setOpenMethod] = useState<PaymentMethod | null>(null);
   const [splitOpen, setSplitOpen] = useState(false);
   const [giftCardOpen, setGiftCardOpen] = useState(false);
@@ -270,10 +273,74 @@ export function SaleScreen({
     (a, b) => Number(b === defaultMethod) - Number(a === defaultMethod)
   );
 
-  function onScan(code: string) {
-    const row = items?.find((r) => r.item.barcode === code);
-    if (row) onItemTap(row);
-    else toast.error(t`Barcode tidak ditemukan.`);
+  // Add a specific variant straight to the cart, mirroring the picker's line
+  // shape. If the parent item has modifier groups that need a choice, defer to
+  // the picker (pre-selected variant) so required modifiers are never skipped.
+  function addVariantLine(row: ItemForSale, variantId: Id<'menuItemVariants'>) {
+    const variant = row.variants.find((vr) => vr._id === variantId);
+    if (!variant) return;
+    if (row.attachedGroups.length > 0) {
+      setPickerRow(row);
+      return;
+    }
+    dispatch({
+      type: 'addLine',
+      lineKey: genLineKey(),
+      line: {
+        menuItemId: row.item._id,
+        nameSnapshot: row.item.name,
+        variantId: variant._id,
+        variantName: variant.name,
+        qty: 1,
+        unitPriceIDR: variant.priceIDR,
+        modifierOptionIds: [],
+        modifierLabels: [],
+      },
+    });
+  }
+
+  function flash(kind: 'hit' | 'miss') {
+    scanBeep(kind);
+    setScanFlash(kind);
+    window.setTimeout(() => setScanFlash(null), 300);
+  }
+
+  async function onScan(code: string) {
+    // 1) In-memory: item barcode.
+    const itemRow = items?.find((r) => r.item.barcode === code);
+    if (itemRow) {
+      flash('hit');
+      onItemTap(itemRow);
+      return;
+    }
+    // 2) In-memory: variant barcode.
+    for (const r of items ?? []) {
+      const variant = r.variants.find((vr) => vr.barcode === code);
+      if (variant) {
+        flash('hit');
+        addVariantLine(r, variant._id);
+        return;
+      }
+    }
+    // 3) Backend fallback for products not in the loaded set.
+    try {
+      const hit = await convex.query(api.menu.items.getByBarcode, { barcode: code });
+      if (hit) {
+        const row = items?.find((r) => r.item._id === hit.itemId);
+        if (row) {
+          flash('hit');
+          if (hit.kind === 'variant') addVariantLine(row, hit.variantId);
+          else onItemTap(row);
+          return;
+        }
+      }
+    } catch {
+      // Query failed (e.g. no active outlet): fall through to the miss path
+      // so the operator still gets a clear signal.
+    }
+    // 4) Miss.
+    flash('miss');
+    toast.error(t`Barcode tidak ditemukan.`);
   }
 
   function onItemTap(row: ItemForSale) {
@@ -333,7 +400,13 @@ export function SaleScreen({
           mobileView === 'menu' ? 'flex' : 'hidden'
         }`}
       >
-        <MenuPane categories={categories} items={items} onItemTap={onItemTap} onScan={onScan} />
+        <MenuPane
+          categories={categories}
+          items={items}
+          onItemTap={onItemTap}
+          onScan={onScan}
+          scanFlash={scanFlash}
+        />
       </div>
       <div
         className={`min-w-0 min-h-0 flex-1 flex-col md:flex ${
