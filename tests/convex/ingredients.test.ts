@@ -461,3 +461,30 @@ describe('ingredients.upsert barcode', () => {
     expect(list[0]?.barcode).toBe('111');
   });
 });
+
+describe('ingredients.getByBarcode', () => {
+  it('resolves an active ingredient, null for unknown/archived', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const id = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      barcode: '900111',
+    });
+    expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: '900111' }))
+      .toEqual({ ingredientId: id });
+    expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: 'nope' })).toBeNull();
+    await asOwner.mutation(api.ingredients.archive, { id });
+    expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: '900111' })).toBeNull();
+  });
+
+  it('is tenant-isolated', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t, 'a@x.com');
+    await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      barcode: '900222',
+    });
+    const { asOwner: asOther } = await setupOwner(t, 'b@x.com');
+    expect(await asOther.query(api.ingredients.getByBarcode, { barcode: '900222' })).toBeNull();
+  });
+});

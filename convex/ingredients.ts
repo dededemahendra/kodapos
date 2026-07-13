@@ -110,6 +110,22 @@ export const get = query({
   },
 });
 
+export const getByBarcode = query({
+  args: { barcode: v.string() },
+  returns: v.union(v.object({ ingredientId: v.id('ingredients') }), v.null()),
+  handler: async (ctx, { barcode }) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    const code = barcode.trim();
+    if (!code) return null;
+    const matches = await ctx.db
+      .query('ingredients')
+      .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', code))
+      .collect();
+    const row = matches.find((m) => !m.archived);
+    return row ? { ingredientId: row._id } : null;
+  },
+});
+
 export const listMovements = query({
   args: { ingredientId: v.id('ingredients') },
   returns: v.object({ rows: v.array(movementRow), truncated: v.boolean() }),
