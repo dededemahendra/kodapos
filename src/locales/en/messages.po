@@ -922,6 +922,7 @@ msgid "Barang yang sudah diterima tetap berada di stok. Pesanan tidak bisa mener
 msgstr "Goods already received stay in stock. The order cannot receive any more goods after it is cancelled."
 
 #: src/components/import/csv-import-dialog.tsx
+#: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/item-edit-form.tsx
 msgid "Barcode"
 msgstr "Barcode"
@@ -5433,6 +5434,10 @@ msgstr "Incorrect PIN."
 #: src/routes/_pos/pin.tsx
 msgid "PIN untuk {0}"
 msgstr "PIN for {0}"
+
+#: src/components/inventory/ingredient-form.tsx
+msgid "Pindai atau ketik barcode bahan"
+msgstr "Scan or type the ingredient barcode"
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Pindai atau ketik barcode produk."

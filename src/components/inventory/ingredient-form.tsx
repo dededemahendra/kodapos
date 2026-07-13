@@ -48,6 +48,7 @@ export function IngredientForm({
   const [unit, setUnit] = useState<CanonicalUnit>('ml');
   const [reorderThreshold, setReorderThreshold] = useState<string>('0');
   const [lastCostPerUnitIDR, setLastCostPerUnitIDR] = useState<string>('0');
+  const [barcode, setBarcode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,11 +64,13 @@ export function IngredientForm({
       setUnit(existing.canonicalUnit);
       setReorderThreshold(String(existing.reorderThreshold));
       setLastCostPerUnitIDR(String(existing.lastCostPerUnitIDR));
+      setBarcode(existing.barcode ?? '');
     } else if (open && !isEdit) {
       setName('');
       setUnit('ml');
       setReorderThreshold('0');
       setLastCostPerUnitIDR('0');
+      setBarcode('');
     }
     setError(null);
   }, [open, isEdit, existing]);
@@ -84,6 +87,7 @@ export function IngredientForm({
         canonicalUnit: unit,
         reorderThreshold: Number.parseInt(reorderThreshold, 10) || 0,
         lastCostPerUnitIDR: Number.parseInt(lastCostPerUnitIDR, 10) || 0,
+        barcode: barcode.trim(),
       });
       toast.success(isEdit ? t`Bahan diperbarui.` : t`Bahan ditambahkan.`);
       onOpenChange(false);
@@ -153,6 +157,17 @@ export function IngredientForm({
                 value={lastCostPerUnitIDR}
                 onChange={(e) => setLastCostPerUnitIDR(e.target.value)}
                 required
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="ing-barcode"><Trans>Barcode</Trans></FieldLabel>
+              <Input
+                id="ing-barcode"
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
+                inputMode="numeric"
+                maxLength={64}
+                placeholder={t`Pindai atau ketik barcode bahan`}
               />
             </Field>
             {error && <FieldError>{error}</FieldError>}
