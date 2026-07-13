@@ -932,6 +932,7 @@ msgstr "Barcode"
 msgid "Barcode dibuat."
 msgstr "Barcode dibuat."
 
+#: src/components/inventory/stock-take-dialog.tsx
 #: src/components/sale/sale-screen.tsx
 msgid "Barcode tidak ditemukan."
 msgstr "Barcode tidak ditemukan."
