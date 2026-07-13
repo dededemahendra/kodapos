@@ -25,6 +25,9 @@ export function ScanBar({
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Stop the submit from bubbling to an outer <form> (e.g. the stock-take
+    // dialog), which would otherwise fire that form's onSubmit on every scan.
+    e.stopPropagation();
     const code = value.trim();
     if (code) onScan(code);
     setValue('');
