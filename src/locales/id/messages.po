@@ -5991,7 +5991,7 @@ msgstr "Satuan"
 msgid "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 msgstr "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 
-#: src/components/sale/menu-pane.tsx
+#: src/components/scan/scan-bar.tsx
 msgid "Scan / ketik barcode…"
 msgstr "Scan / ketik barcode…"
 
