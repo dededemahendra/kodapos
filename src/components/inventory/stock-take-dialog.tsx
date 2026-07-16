@@ -1,9 +1,9 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
-import { useMutation } from 'convex/react';
+import { useConvex, useMutation } from 'convex/react';
 import { ClipboardList } from 'lucide-react';
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
@@ -22,6 +22,8 @@ import {
 import { Field, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { ScanBar } from '~/components/scan/scan-bar';
+import { scanBeep } from '~/lib/scan-feedback';
 import { toast } from '~/lib/toast';
 
 type Ingredient = Doc<'ingredients'> & { currentStockQty: number };
@@ -36,10 +38,13 @@ export function StockTakeDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const { t } = useLingui();
+  const convex = useConvex();
   const performStockTake = useMutation(api.ingredients.performStockTake);
   const [counts, setCounts] = useState<Record<string, string>>({});
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [scanFlash, setScanFlash] = useState<'hit' | 'miss' | null>(null);
+  const rowRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     if (open && ingredients) {
@@ -60,6 +65,51 @@ export function StockTakeDialog({
     }
     return n;
   }, [ingredients, counts]);
+
+  function flash(kind: 'hit' | 'miss') {
+    scanBeep(kind);
+    setScanFlash(kind);
+    window.setTimeout(() => setScanFlash(null), 300);
+  }
+
+  // Focus (and, for piece units, +1) the scanned ingredient's count row.
+  function applyScanHit(ingredientId: string) {
+    const row = ingredients?.find((r) => r._id === ingredientId);
+    if (!row) return;
+    if (row.canonicalUnit === 'piece') {
+      setCounts((prev) => {
+        const parsed = Number.parseInt(prev[ingredientId] ?? '', 10);
+        const next = (Number.isNaN(parsed) ? 0 : parsed) + 1;
+        return { ...prev, [ingredientId]: String(next) };
+      });
+    }
+    const input = rowRefs.current[ingredientId];
+    input?.scrollIntoView({ block: 'center' });
+    input?.focus();
+    input?.select();
+  }
+
+  async function onScan(code: string) {
+    // In-memory first over the loaded rows, then backend fallback.
+    const local = ingredients?.find((r) => r.barcode === code);
+    if (local) {
+      flash('hit');
+      applyScanHit(local._id);
+      return;
+    }
+    try {
+      const hit = await convex.query(api.ingredients.getByBarcode, { barcode: code });
+      if (hit && ingredients?.some((r) => r._id === hit.ingredientId)) {
+        flash('hit');
+        applyScanHit(hit.ingredientId);
+        return;
+      }
+    } catch {
+      // Query failed: fall through to the miss path so the operator gets a signal.
+    }
+    flash('miss');
+    toast.error(t`Barcode tidak ditemukan.`);
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -115,6 +165,13 @@ export function StockTakeDialog({
           </Empty>
         ) : (
           <form onSubmit={onSubmit}>
+            <ScanBar
+              onScan={(code) => {
+                void onScan(code);
+              }}
+              flash={scanFlash}
+              className="mb-2 border-b border-border pb-2"
+            />
             <div className="max-h-[55vh] space-y-2 overflow-y-auto pr-1">
               <div className="grid grid-cols-[1fr_auto_6rem] items-center gap-2 px-1 text-muted-foreground text-xs">
                 <span><Trans>Bahan</Trans></span>
@@ -131,6 +188,9 @@ export function StockTakeDialog({
                     {r.currentStockQty} {r.canonicalUnit}
                   </span>
                   <Input
+                    ref={(el) => {
+                      rowRefs.current[r._id] = el;
+                    }}
                     type="number"
                     min="0"
                     step="1"

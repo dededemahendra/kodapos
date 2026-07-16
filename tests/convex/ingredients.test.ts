@@ -426,3 +426,65 @@ describe('ingredients.performStockTake', () => {
     ).rejects.toThrow();
   });
 });
+
+describe('ingredients.upsert barcode', () => {
+  it('stores a barcode and rejects a duplicate among ingredients', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      barcode: '8991234567890',
+    });
+    const list = await asOwner.query(api.ingredients.list, {});
+    expect(list[0]?.barcode).toBe('8991234567890');
+    await expect(
+      asOwner.mutation(api.ingredients.upsert, {
+        name: 'Susu Lain', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+        barcode: '8991234567890',
+      })
+    ).rejects.toThrow('Barcode sudah dipakai');
+  });
+
+  it('lets an ingredient keep its own barcode on edit', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const id = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Gula', canonicalUnit: 'g', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      barcode: '111',
+    });
+    await asOwner.mutation(api.ingredients.upsert, {
+      id, name: 'Gula Pasir', canonicalUnit: 'g', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      barcode: '111',
+    });
+    const list = await asOwner.query(api.ingredients.list, {});
+    expect(list[0]?.name).toBe('Gula Pasir');
+    expect(list[0]?.barcode).toBe('111');
+  });
+});
+
+describe('ingredients.getByBarcode', () => {
+  it('resolves an active ingredient, null for unknown/archived', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const id = await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      barcode: '900111',
+    });
+    expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: '900111' }))
+      .toEqual({ ingredientId: id });
+    expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: 'nope' })).toBeNull();
+    await asOwner.mutation(api.ingredients.archive, { id });
+    expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: '900111' })).toBeNull();
+  });
+
+  it('is tenant-isolated', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t, 'a@x.com');
+    await asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      barcode: '900222',
+    });
+    const { asOwner: asOther } = await setupOwner(t, 'b@x.com');
+    expect(await asOther.query(api.ingredients.getByBarcode, { barcode: '900222' })).toBeNull();
+  });
+});

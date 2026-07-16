@@ -922,6 +922,7 @@ msgid "Barang yang sudah diterima tetap berada di stok. Pesanan tidak bisa mener
 msgstr "Barang yang sudah diterima tetap berada di stok. Pesanan tidak bisa menerima barang lagi setelah dibatalkan."
 
 #: src/components/import/csv-import-dialog.tsx
+#: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/item-edit-form.tsx
 msgid "Barcode"
 msgstr "Barcode"
@@ -931,6 +932,7 @@ msgstr "Barcode"
 msgid "Barcode dibuat."
 msgstr "Barcode dibuat."
 
+#: src/components/inventory/stock-take-dialog.tsx
 #: src/components/sale/sale-screen.tsx
 msgid "Barcode tidak ditemukan."
 msgstr "Barcode tidak ditemukan."
@@ -5434,6 +5436,10 @@ msgstr "PIN salah."
 msgid "PIN untuk {0}"
 msgstr "PIN untuk {0}"
 
+#: src/components/inventory/ingredient-form.tsx
+msgid "Pindai atau ketik barcode bahan"
+msgstr "Pindai atau ketik barcode bahan"
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Pindai atau ketik barcode produk."
 msgstr "Pindai atau ketik barcode produk."
@@ -5986,7 +5992,7 @@ msgstr "Satuan"
 msgid "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 msgstr "Saya menyetujui <0>Syarat Layanan</0> dan <1>Kebijakan Privasi</1>."
 
-#: src/components/sale/menu-pane.tsx
+#: src/components/scan/scan-bar.tsx
 msgid "Scan / ketik barcode…"
 msgstr "Scan / ketik barcode…"
 

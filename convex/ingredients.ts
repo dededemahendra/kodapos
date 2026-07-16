@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { mutation, type MutationCtx, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
 
@@ -13,6 +14,7 @@ const ingredientDoc = v.object({
   lastCostPerUnitIDR: v.number(),
   archived: v.boolean(),
   createdAt: v.number(),
+  barcode: v.optional(v.string()),
 });
 
 const ingredientWithStock = v.object({
@@ -60,6 +62,23 @@ function assertIngredient(
   return trimmed;
 }
 
+// A barcode is unique among a cafe's ingredients (separate namespace from menu
+// items). Query the by_cafe_barcode index, ignore archived and the row being
+// edited, reject if any other ingredient owns the code.
+async function assertIngredientBarcodeUnique(
+  ctx: MutationCtx,
+  cafeId: Id<'cafes'>,
+  barcode: string,
+  currentId?: Id<'ingredients'>
+): Promise<void> {
+  const matches = await ctx.db
+    .query('ingredients')
+    .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', barcode))
+    .collect();
+  if (matches.some((m) => !m.archived && m._id !== currentId))
+    throw new Error('Barcode sudah dipakai bahan lain.');
+}
+
 export const list = query({
   args: { includeArchived: v.optional(v.boolean()) },
   returns: v.array(ingredientWithStock),
@@ -88,6 +107,22 @@ export const get = query({
     const row = await ctx.db.get(id);
     if (!row || row.cafeId !== cafeId) return null;
     return { ...row, currentStockQty: await currentStockQty(ctx, cafeId, row._id) };
+  },
+});
+
+export const getByBarcode = query({
+  args: { barcode: v.string() },
+  returns: v.union(v.object({ ingredientId: v.id('ingredients') }), v.null()),
+  handler: async (ctx, { barcode }) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    const code = barcode.trim();
+    if (!code) return null;
+    const matches = await ctx.db
+      .query('ingredients')
+      .withIndex('by_cafe_barcode', (q) => q.eq('cafeId', cafeId).eq('barcode', code))
+      .collect();
+    const row = matches.find((m) => !m.archived);
+    return row ? { ingredientId: row._id } : null;
   },
 });
 
@@ -133,6 +168,7 @@ export const upsert = mutation({
     canonicalUnit: v.union(v.literal('g'), v.literal('ml'), v.literal('piece')),
     reorderThreshold: v.number(),
     lastCostPerUnitIDR: v.number(),
+    barcode: v.optional(v.string()),
   },
   returns: v.id('ingredients'),
   handler: async (ctx, args) => {
@@ -154,6 +190,9 @@ export const upsert = mutation({
     );
     if (conflict) throw new Error('Bahan dengan nama yang sama sudah ada.');
 
+    const bc = args.barcode?.trim();
+    if (bc) await assertIngredientBarcodeUnique(ctx, cafeId, bc, args.id);
+
     if (args.id) {
       await requireOwned(ctx, cafeId, args.id, 'Bahan');
       await ctx.db.patch(args.id, {
@@ -161,6 +200,7 @@ export const upsert = mutation({
         canonicalUnit: args.canonicalUnit,
         reorderThreshold: args.reorderThreshold,
         lastCostPerUnitIDR: args.lastCostPerUnitIDR,
+        barcode: bc || undefined,
       });
       return args.id;
     }
@@ -173,6 +213,7 @@ export const upsert = mutation({
       lastCostPerUnitIDR: args.lastCostPerUnitIDR,
       archived: false,
       createdAt: Date.now(),
+      ...(bc ? { barcode: bc } : {}),
     });
   },
 });

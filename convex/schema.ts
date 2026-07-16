@@ -626,9 +626,11 @@ export default defineSchema({
     lastCostPerUnitIDR: v.number(),
     archived: v.boolean(),
     createdAt: v.number(),
+    barcode: v.optional(v.string()),
   })
     .index('by_cafe_active', ['cafeId', 'archived'])
-    .index('by_cafe_name', ['cafeId', 'name']),
+    .index('by_cafe_name', ['cafeId', 'name'])
+    .index('by_cafe_barcode', ['cafeId', 'barcode']),
 
   recipes: defineTable({
     cafeId: v.id('cafes'),
