@@ -308,6 +308,14 @@ git commit -m "feat(menu): board query for the customer menu display"
 
 ### Task 2: Pure paging helper `buildBoardPages`
 
+> **Amended after the final review (2026-07-23):** plain sequential chunking
+> leaves a sparse final page (9 items at 8 per page gives a page of 8 then a
+> page of 1), which CSS grid stretches across a quarter of the screen for a
+> full 12 second rotation and reads as a rendering bug on the wall. Approved
+> change: the last two pages of each category are balanced (9 becomes 5 + 4,
+> 17 becomes 8 + 5 + 4). The steps below describe the original sequential
+> version; the balancing landed as a follow-up commit with its own tests.
+
 **Files:**
 - Create: `src/components/menu-board/build-board-pages.ts`
 - Test: `src/components/menu-board/build-board-pages.test.ts`
