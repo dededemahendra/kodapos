@@ -170,9 +170,10 @@ export function ItemEditForm(props: ItemEditFormProps) {
           <Field>
             <FieldLabel htmlFor="categoryId"><Trans>Kategori</Trans></FieldLabel>
             {/* Radix Select can't represent the empty "unselected" state with an
-                item, so the placeholder covers it and handleSubmit guards required. */}
+                item, so the placeholder covers it (it renders for value '') and
+                handleSubmit guards required. */}
             <Select
-              value={categoryId || undefined}
+              value={categoryId}
               onValueChange={(v) => setCategoryId(v as Id<'categories'>)}
             >
               <SelectTrigger id="categoryId">
