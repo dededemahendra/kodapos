@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, Ban, CircleCheck, Plus, Power, Upload, UtensilsCrossed } from 'lucide-react';
+import { Archive, Ban, CircleCheck, Monitor, Plus, Power, Upload, UtensilsCrossed } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CsvImportDialog } from '~/components/import/csv-import-dialog';
 import { Button } from '~/components/ui/button';
@@ -310,6 +310,14 @@ function ItemsListPage() {
         }
         actions={
           <div className="flex gap-2">
+            <Button asChild variant="outline">
+              {/* Opens in a new tab so staff can drag it onto the TV and leave
+                  the POS session on this tab untouched. */}
+              <a href="/menu-board" target="_blank" rel="noreferrer">
+                <Monitor />
+                <Trans>Buka layar menu</Trans>
+              </a>
+            </Button>
             <Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
               <Upload />
               <Trans>Impor CSV</Trans>

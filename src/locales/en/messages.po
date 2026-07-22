@@ -1546,6 +1546,10 @@ msgstr "Open cashier"
 msgid "Buka laci kas saat tunai"
 msgstr "Open cash drawer on cash"
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Buka layar menu"
+msgstr "Open menu display"
+
 #: src/components/command-palette.tsx
 msgid "Buka shift"
 msgstr "Open shift"
@@ -2685,6 +2689,7 @@ msgstr "Use the city above for weather in demand predictions."
 msgid "Gunakan pencetak termal"
 msgstr "Use thermal printer"
 
+#: src/components/menu-board/menu-board.tsx
 #: src/components/public/public-menu.tsx
 #: src/components/sale/item-card.tsx
 #: src/routes/_pos/menu/index.tsx
@@ -4223,6 +4228,10 @@ msgstr "Menu"
 #: src/components/marketing/how-it-works.tsx
 msgid "Menu apa yang paling laris minggu ini?"
 msgstr "Which items sold best this week?"
+
+#: src/components/menu-board/menu-board.tsx
+msgid "Menu segera hadir"
+msgstr "Menu coming soon"
 
 #: src/components/dashboard-invoices.tsx
 msgid "Menunggu"
