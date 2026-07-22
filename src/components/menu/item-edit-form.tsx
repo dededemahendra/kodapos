@@ -10,6 +10,13 @@ import { toast } from '~/lib/toast';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 
 export interface AttachedGroupRow {
@@ -162,20 +169,24 @@ export function ItemEditForm(props: ItemEditFormProps) {
           </Field>
           <Field>
             <FieldLabel htmlFor="categoryId"><Trans>Kategori</Trans></FieldLabel>
-            <select
-              id="categoryId"
+            {/* Radix Select can't represent the empty "unselected" state with an
+                item, so the placeholder covers it (it renders for value '') and
+                handleSubmit guards required. */}
+            <Select
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value as Id<'categories'>)}
-              required
-              className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              onValueChange={(v) => setCategoryId(v as Id<'categories'>)}
             >
-              <option value="">{t`Pilih kategori`}</option>
-              {(categories ?? []).map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="categoryId">
+                <SelectValue placeholder={t`Pilih kategori`} />
+              </SelectTrigger>
+              <SelectContent>
+                {(categories ?? []).map((c) => (
+                  <SelectItem key={c._id} value={c._id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <Field>
             <FieldLabel htmlFor="priceIDR"><Trans>Harga (Rp)</Trans></FieldLabel>

@@ -1546,6 +1546,10 @@ msgstr "Buka kasir"
 msgid "Buka laci kas saat tunai"
 msgstr "Buka laci kas saat tunai"
 
+#: src/routes/_pos/menu/index.tsx
+msgid "Buka layar menu"
+msgstr "Buka layar menu"
+
 #: src/components/command-palette.tsx
 msgid "Buka shift"
 msgstr "Buka shift"
@@ -2685,6 +2689,7 @@ msgstr "Gunakan kota di atas untuk prakiraan cuaca pada prediksi permintaan."
 msgid "Gunakan pencetak termal"
 msgstr "Gunakan pencetak termal"
 
+#: src/components/menu-board/menu-board.tsx
 #: src/components/public/public-menu.tsx
 #: src/components/sale/item-card.tsx
 #: src/routes/_pos/menu/index.tsx
@@ -2939,12 +2944,12 @@ msgid "Impor item menu"
 msgstr "Impor item menu"
 
 #: src/routes/_public/signin.tsx
-msgid "Ingat saya"
-msgstr "Ingat saya"
+#~ msgid "Ingat saya"
+#~ msgstr "Ingat saya"
 
 #: src/routes/_public/signin.tsx
-msgid "Ingat saya di perangkat ini"
-msgstr "Ingat saya di perangkat ini"
+#~ msgid "Ingat saya di perangkat ini"
+#~ msgstr "Ingat saya di perangkat ini"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Instagram"
@@ -4223,6 +4228,10 @@ msgstr "Menu"
 #: src/components/marketing/how-it-works.tsx
 msgid "Menu apa yang paling laris minggu ini?"
 msgstr "Menu apa yang paling laris minggu ini?"
+
+#: src/components/menu-board/menu-board.tsx
+msgid "Menu segera hadir"
+msgstr "Menu segera hadir"
 
 #: src/components/dashboard-invoices.tsx
 msgid "Menunggu"

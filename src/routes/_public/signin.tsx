@@ -14,14 +14,13 @@ import {
 import { AuthCard } from '~/components/auth/auth-card';
 import { OrDivider } from '~/components/auth/or-divider';
 import { OtpInput } from '~/components/auth/otp-input';
+import { RedirectWhenAuthenticated } from '~/components/auth/redirect-when-authenticated';
 import { GoogleButton } from '~/components/auth/social-buttons';
 import { Button } from '~/components/ui/button';
-import { Checkbox } from '~/components/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 import { sendResetOrSigninCode } from '~/lib/auth-reset';
-import { setRememberMe } from '~/lib/auth-storage';
 import {
   validateEmail,
   validatePasswordRequired,
@@ -74,7 +73,13 @@ function SigninPage() {
   // Passwordless-first: the sign-in card lands on the emailed-code (otp) flow by
   // default; password stays one tap away behind the "Pakai sandi" link. The
   // `?reset` search param still routes straight into the password-reset flow.
-  return <SigninCard initialMode={search.reset !== undefined ? 'reset' : 'otp'} />;
+  // An already signed-in visitor is bounced to the dashboard.
+  return (
+    <>
+      <RedirectWhenAuthenticated />
+      <SigninCard initialMode={search.reset !== undefined ? 'reset' : 'otp'} />
+    </>
+  );
 }
 
 /**
@@ -138,9 +143,6 @@ function SigninCard({
   const { t, i18n } = useLingui();
 
   const [mode, setMode] = useState<Mode>(initialMode);
-  // Opt-in (Finding 6): default OFF so a shared register isn't remembered
-  // unless the operator explicitly ticks the box.
-  const [remember, setRemember] = useState(false);
   const [email, setEmail] = useState<FieldState>(
     prefillEmail ? { value: prefillEmail, touched: false, error: null } : initialField,
   );
@@ -161,10 +163,6 @@ function SigninCard({
     const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(id);
   }, [cooldown]);
-
-  function rememberThenSignIn(): void {
-    setRememberMe(remember);
-  }
 
   function switchMode(next: Mode): void {
     setMode(next);
@@ -221,7 +219,6 @@ function SigninCard({
   }
 
   function onGoogle(): void {
-    rememberThenSignIn();
     void signIn('google');
   }
 
@@ -242,7 +239,6 @@ function SigninCard({
     setSubmitting(true);
     setAuthError(null);
     try {
-      rememberThenSignIn();
       await signIn('password', {
         flow: 'signIn',
         email: email.value.trim(),
@@ -324,7 +320,6 @@ function SigninCard({
     setSubmitting(true);
     setAuthError(null);
     try {
-      rememberThenSignIn();
       await signIn('resend-otp', { email: email.value.trim(), code });
       navigate({ to: '/dashboard' });
     } catch {
@@ -347,7 +342,6 @@ function SigninCard({
     setSubmitting(true);
     setAuthError(null);
     try {
-      rememberThenSignIn();
       await signIn('password', {
         flow: 'reset-verification',
         email: email.value.trim(),
@@ -450,14 +444,7 @@ function SigninCard({
                 )}
               </Field>
 
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={remember}
-                    onCheckedChange={(c) => setRemember(c === true)}
-                  />
-                  <Trans>Ingat saya</Trans>
-                </label>
+              <div className="flex justify-end">
                 <Button
                   type="button"
                   variant="link"
@@ -497,10 +484,6 @@ function SigninCard({
             <form onSubmit={onSendCode}>
               <FieldGroup>
                 {emailField(true)}
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={remember} onCheckedChange={(c) => setRemember(c === true)} />
-                  <Trans>Ingat saya di perangkat ini</Trans>
-                </label>
                 {authError && <FieldError>{authError}</FieldError>}
                 <Button
                   type="submit"

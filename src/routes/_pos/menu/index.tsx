@@ -4,13 +4,28 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, Ban, CircleCheck, Plus, Power, Upload, UtensilsCrossed } from 'lucide-react';
+import {
+  Archive,
+  Ban,
+  CircleCheck,
+  Monitor,
+  Plus,
+  Power,
+  Upload,
+  UtensilsCrossed,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CsvImportDialog } from '~/components/import/csv-import-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
 import { RowActions } from '~/components/ui/row-actions';
 import {
@@ -106,16 +121,26 @@ function ItemsListPage() {
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             {row.original.imageUrl ? (
-              <img src={row.original.imageUrl} alt="" className="size-8 rounded object-cover border border-border shrink-0" />
+              <img
+                src={row.original.imageUrl}
+                alt=""
+                className="size-8 rounded object-cover border border-border shrink-0"
+              />
             ) : (
-              <div className="size-8 rounded bg-muted grid place-items-center text-[10px] text-muted-foreground shrink-0">{row.original.name.charAt(0)}</div>
+              <div className="size-8 rounded bg-muted grid place-items-center text-[10px] text-muted-foreground shrink-0">
+                {row.original.name.charAt(0)}
+              </div>
             )}
             <Link
               to="/menu/items/$itemId"
               params={{ itemId: row.original._id }}
               className="font-medium hover:underline"
             >
-              {isLow(row.original) ? <span aria-hidden="true" className="mr-1">⚠</span> : null}
+              {isLow(row.original) ? (
+                <span aria-hidden="true" className="mr-1">
+                  ⚠
+                </span>
+              ) : null}
               {row.original.name}
             </Link>
           </div>
@@ -134,9 +159,7 @@ function ItemsListPage() {
       {
         accessorKey: 'priceIDR',
         header: () => <Trans>Harga</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{formatIDR(row.original.priceIDR)}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{formatIDR(row.original.priceIDR)}</span>,
       },
       {
         id: 'recipe',
@@ -226,9 +249,7 @@ function ItemsListPage() {
                     onSelect: async () => {
                       try {
                         await setActive({ id: r._id, isActive: !r.isActive });
-                        toast.success(
-                          r.isActive ? t`Item dinonaktifkan.` : t`Item diaktifkan.`
-                        );
+                        toast.success(r.isActive ? t`Item dinonaktifkan.` : t`Item diaktifkan.`);
                       } catch (err) {
                         toast.error(
                           err instanceof Error ? err.message : t`Gagal memperbarui item.`
@@ -237,11 +258,7 @@ function ItemsListPage() {
                     },
                   },
                   {
-                    label: r.soldOut ? (
-                      <Trans>Tandai tersedia</Trans>
-                    ) : (
-                      <Trans>Tandai habis</Trans>
-                    ),
+                    label: r.soldOut ? <Trans>Tandai tersedia</Trans> : <Trans>Tandai habis</Trans>,
                     icon: r.soldOut ? <CircleCheck /> : <Ban />,
                     onSelect: async () => {
                       try {
@@ -310,6 +327,14 @@ function ItemsListPage() {
         }
         actions={
           <div className="flex gap-2">
+            <Button asChild variant="outline">
+              {/* Opens in a new tab so staff can drag it onto the TV and leave
+                  the POS session on this tab untouched. */}
+              <a href="/menu-board" target="_blank" rel="noreferrer">
+                <Monitor />
+                <Trans>Buka layar menu</Trans>
+              </a>
+            </Button>
             <Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
               <Upload />
               <Trans>Impor CSV</Trans>

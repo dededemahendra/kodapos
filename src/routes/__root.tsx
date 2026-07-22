@@ -16,6 +16,16 @@ import faviconUrl from '~/assets/kodapos-logo.svg?url';
 // imports, wrapped in try/catch so storage being unavailable never breaks paint.
 const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('kodapos.theme');var dark=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(dark)document.documentElement.classList.add('dark');}catch(e){}})();`;
 
+// Runs in <head> before React (and before the marketing page renders/hydrates):
+// if the visitor lands on the site root `/` while already signed in, jump
+// straight to the dashboard. Convex Auth is a client-side token (no SSR cookie),
+// so this is the earliest point we can know — redirecting here avoids rendering
+// and hydrating the whole marketing page just to bounce off it. We match any
+// `__convexAuthJWT_<namespace>` key (the namespace is the deployment URL) so we
+// don't hard-code it. `<RedirectWhenAuthenticated>` remains the fallback for
+// in-app (client-side) navigation, where this script does not re-run.
+const AUTH_REDIRECT_SCRIPT = `(function(){try{if(location.pathname!=='/')return;var s=window.localStorage;for(var i=0;i<s.length;i++){var k=s.key(i);if(k&&k.lastIndexOf('__convexAuthJWT_',0)===0&&s.getItem(k)){location.replace('/dashboard');return;}}}catch(e){}})();`;
+
 export const Route = createRootRoute({
   // The root route's errorComponent renders in place of RootComponent, so the
   // I18nProvider set up there is not in scope. Provide it here too, or every
@@ -106,6 +116,9 @@ function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
       <head>
+        {/* Auth redirect runs first: a signed-in visitor to `/` is sent to the
+            dashboard before the marketing page renders. */}
+        <script dangerouslySetInnerHTML={{ __html: AUTH_REDIRECT_SCRIPT }} />
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
