@@ -65,6 +65,7 @@ import type * as loyalty from "../loyalty.js";
 import type * as loyaltyRewards from "../loyaltyRewards.js";
 import type * as mcp from "../mcp.js";
 import type * as mcpRead from "../mcpRead.js";
+import type * as menu_board from "../menu/board.js";
 import type * as menu_categories from "../menu/categories.js";
 import type * as menu_itemGroups from "../menu/itemGroups.js";
 import type * as menu_itemStock from "../menu/itemStock.js";
@@ -170,6 +171,7 @@ declare const fullApi: ApiFromModules<{
   loyaltyRewards: typeof loyaltyRewards;
   mcp: typeof mcp;
   mcpRead: typeof mcpRead;
+  "menu/board": typeof menu_board;
   "menu/categories": typeof menu_categories;
   "menu/itemGroups": typeof menu_itemGroups;
   "menu/itemStock": typeof menu_itemStock;
