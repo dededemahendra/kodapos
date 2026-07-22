@@ -1,44 +1,26 @@
 import type { TokenStorage } from '@convex-dev/auth/react';
 
-const REMEMBER_ME_KEY = 'kodapos.rememberMe';
-
 /**
- * Persist the remember-me preference. When ON, Convex Auth tokens live in
- * `localStorage` (survive a browser restart); when OFF, in `sessionStorage`
- * (cleared when the tab/browser closes). Call this BEFORE `signIn`.
- */
-export function setRememberMe(remember: boolean): void {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(REMEMBER_ME_KEY, remember ? '1' : '0');
-}
-
-// Opt-in: defaults to FALSE when the flag is absent, so a fresh visitor on a
-// shared register is NOT remembered unless they explicitly tick the box.
-function remembering(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.localStorage.getItem(REMEMBER_ME_KEY) === '1';
-}
-
-/**
- * A `TokenStorage` adapter for `ConvexAuthProvider` that routes token writes to
- * `localStorage` (remember-me ON) or `sessionStorage` (OFF), and reads back
- * preferring a live session token over a remembered one. A token never lingers
- * in both stores. All operations are SSR-guarded.
+ * A `TokenStorage` adapter for `ConvexAuthProvider` that persists Convex Auth
+ * tokens in `localStorage`, so a signed-in session survives a tab or browser
+ * close (the user is not asked to sign in again on the next visit). An
+ * unattended shared register is protected by the idle PIN auto-lock
+ * (`useAutoLock`), not by dropping the session on close. All operations are
+ * SSR-guarded.
  */
 export const authStorage: TokenStorage = {
   getItem(key: string): string | null {
     if (typeof window === 'undefined') return null;
-    return window.sessionStorage.getItem(key) ?? window.localStorage.getItem(key);
+    // Prefer localStorage; fall back to sessionStorage so a session created
+    // before this change (when tokens lived in sessionStorage) is not force
+    // signed-out on first load after the update.
+    return window.localStorage.getItem(key) ?? window.sessionStorage.getItem(key);
   },
   setItem(key: string, value: string): void {
     if (typeof window === 'undefined') return;
-    if (remembering()) {
-      window.localStorage.setItem(key, value);
-      window.sessionStorage.removeItem(key);
-    } else {
-      window.sessionStorage.setItem(key, value);
-      window.localStorage.removeItem(key);
-    }
+    window.localStorage.setItem(key, value);
+    // Clear any legacy sessionStorage copy so a token never lingers in both.
+    window.sessionStorage.removeItem(key);
   },
   removeItem(key: string): void {
     if (typeof window === 'undefined') return;

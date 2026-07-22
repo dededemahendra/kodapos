@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { HOMEPAGE_JSON_LD, seo } from '~/lib/seo';
+import { RedirectWhenAuthenticated } from '~/components/auth/redirect-when-authenticated';
 import { AiSpotlight } from '~/components/marketing/ai-spotlight';
 import { CtaBand } from '~/components/marketing/cta-band';
 import { Faq } from '~/components/marketing/faq';
@@ -19,25 +20,30 @@ export const Route = createFileRoute('/_public/')({
 
 function PublicHome() {
   return (
-    <div id="top" className="min-h-screen bg-background text-foreground">
-      {/* Structured data: Organization + WebSite + SoftwareApplication. */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(HOMEPAGE_JSON_LD) }}
-      />
-      <MarketingHeader />
-      <main>
-        <Hero />
-        <FeatureSection />
-        <AiSpotlight />
-        <HowItWorks />
-        <WhyIndonesia />
-        <Testimonials />
-        <Pricing />
-        <Faq />
-        <CtaBand />
-      </main>
-      <MarketingFooter />
-    </div>
+    <>
+      {/* Signed-in visitors skip the marketing page and land on the dashboard.
+          Rendered here (not wrapping the markup) so the page still SSRs for SEO. */}
+      <RedirectWhenAuthenticated />
+      <div id="top" className="min-h-screen bg-background text-foreground">
+        {/* Structured data: Organization + WebSite + SoftwareApplication. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(HOMEPAGE_JSON_LD) }}
+        />
+        <MarketingHeader />
+        <main>
+          <Hero />
+          <FeatureSection />
+          <AiSpotlight />
+          <HowItWorks />
+          <WhyIndonesia />
+          <Testimonials />
+          <Pricing />
+          <Faq />
+          <CtaBand />
+        </main>
+        <MarketingFooter />
+      </div>
+    </>
   );
 }

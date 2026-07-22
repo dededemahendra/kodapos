@@ -2939,12 +2939,12 @@ msgid "Impor item menu"
 msgstr "Import menu items"
 
 #: src/routes/_public/signin.tsx
-msgid "Ingat saya"
-msgstr "Remember me"
+#~ msgid "Ingat saya"
+#~ msgstr "Remember me"
 
 #: src/routes/_public/signin.tsx
-msgid "Ingat saya di perangkat ini"
-msgstr "Remember me on this device"
+#~ msgid "Ingat saya di perangkat ini"
+#~ msgstr "Remember me on this device"
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Instagram"
