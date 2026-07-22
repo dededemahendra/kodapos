@@ -41,9 +41,7 @@ export const get = query({
       .query('menuItems')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
       .collect();
-    const activeItems = itemRows
-      .filter((i) => i.isActive)
-      .sort((a, b) => a.position - b.position);
+    const activeItems = itemRows.filter((i) => i.isActive).sort((a, b) => a.position - b.position);
 
     const categoryRows = (
       await ctx.db
@@ -61,9 +59,7 @@ export const get = query({
         items.push({
           name: item.name,
           priceIDR: item.priceIDR,
-          imageUrl: item.imageStorageId
-            ? await ctx.storage.getUrl(item.imageStorageId)
-            : null,
+          imageUrl: item.imageStorageId ? await ctx.storage.getUrl(item.imageStorageId) : null,
           soldOut: item.soldOut ?? false,
         });
       }

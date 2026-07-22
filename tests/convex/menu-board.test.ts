@@ -21,13 +21,19 @@ describe('menu.board.get', () => {
     const kopi = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
     const teh = await asOwner.mutation(api.menu.categories.create, { name: 'Teh' });
     await asOwner.mutation(api.menu.items.create, {
-      categoryId: kopi, name: 'Espresso', priceIDR: 18000,
+      categoryId: kopi,
+      name: 'Espresso',
+      priceIDR: 18000,
     });
     await asOwner.mutation(api.menu.items.create, {
-      categoryId: kopi, name: 'Latte', priceIDR: 25000,
+      categoryId: kopi,
+      name: 'Latte',
+      priceIDR: 25000,
     });
     await asOwner.mutation(api.menu.items.create, {
-      categoryId: teh, name: 'Teh Tarik', priceIDR: 15000,
+      categoryId: teh,
+      name: 'Teh Tarik',
+      priceIDR: 15000,
     });
 
     const board = await asOwner.query(api.menu.board.get, {});
@@ -49,14 +55,15 @@ describe('menu.board.get', () => {
     const { asOwner } = await setupOwner(t);
     const kopi = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
     await asOwner.mutation(api.menu.items.create, {
-      categoryId: kopi, name: 'Espresso', priceIDR: 18000, barcode: '8991234567890',
+      categoryId: kopi,
+      name: 'Espresso',
+      priceIDR: 18000,
+      barcode: '8991234567890',
     });
 
     const board = await asOwner.query(api.menu.board.get, {});
     const item = board.categories[0]?.items[0];
-    expect(Object.keys(item ?? {}).sort()).toEqual(
-      ['imageUrl', 'name', 'priceIDR', 'soldOut']
-    );
+    expect(Object.keys(item ?? {}).sort()).toEqual(['imageUrl', 'name', 'priceIDR', 'soldOut']);
   });
 
   it('omits inactive items, archived items, and archived categories', async () => {
@@ -65,16 +72,24 @@ describe('menu.board.get', () => {
     const kopi = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
     const teh = await asOwner.mutation(api.menu.categories.create, { name: 'Teh' });
     const keep = await asOwner.mutation(api.menu.items.create, {
-      categoryId: kopi, name: 'Espresso', priceIDR: 18000,
+      categoryId: kopi,
+      name: 'Espresso',
+      priceIDR: 18000,
     });
     const off = await asOwner.mutation(api.menu.items.create, {
-      categoryId: kopi, name: 'Nonaktif', priceIDR: 1000,
+      categoryId: kopi,
+      name: 'Nonaktif',
+      priceIDR: 1000,
     });
     const gone = await asOwner.mutation(api.menu.items.create, {
-      categoryId: kopi, name: 'Diarsip', priceIDR: 2000,
+      categoryId: kopi,
+      name: 'Diarsip',
+      priceIDR: 2000,
     });
     await asOwner.mutation(api.menu.items.create, {
-      categoryId: teh, name: 'Teh Tarik', priceIDR: 15000,
+      categoryId: teh,
+      name: 'Teh Tarik',
+      priceIDR: 15000,
     });
     await asOwner.mutation(api.menu.items.setActive, { id: off, isActive: false });
     await asOwner.mutation(api.menu.items.archive, { id: gone });
@@ -92,7 +107,9 @@ describe('menu.board.get', () => {
     const kopi = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
     await asOwner.mutation(api.menu.categories.create, { name: 'Kosong' });
     await asOwner.mutation(api.menu.items.create, {
-      categoryId: kopi, name: 'Espresso', priceIDR: 18000,
+      categoryId: kopi,
+      name: 'Espresso',
+      priceIDR: 18000,
     });
 
     const board = await asOwner.query(api.menu.board.get, {});
@@ -104,7 +121,9 @@ describe('menu.board.get', () => {
     const { asOwner } = await setupOwner(t);
     const kopi = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
     const id = await asOwner.mutation(api.menu.items.create, {
-      categoryId: kopi, name: 'Espresso', priceIDR: 18000,
+      categoryId: kopi,
+      name: 'Espresso',
+      priceIDR: 18000,
     });
     await asOwner.mutation(api.menu.items.setSoldOut, { id, soldOut: true });
 
@@ -118,7 +137,9 @@ describe('menu.board.get', () => {
     const { asOwner: ownerB } = await setupOwner(t, 'b@x.com');
     const catA = await ownerA.mutation(api.menu.categories.create, { name: 'Kopi A' });
     await ownerA.mutation(api.menu.items.create, {
-      categoryId: catA, name: 'Espresso A', priceIDR: 18000,
+      categoryId: catA,
+      name: 'Espresso A',
+      priceIDR: 18000,
     });
 
     const boardB = await ownerB.query(api.menu.board.get, {});
