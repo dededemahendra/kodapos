@@ -1,8 +1,14 @@
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from 'convex/react';
+import { useEffect } from 'react';
 import { MenuBoard } from '~/components/menu-board/menu-board';
 import { Skeleton } from '~/components/ui/skeleton';
+
+// How long to wait before reloading a failed board, to self-heal transient
+// errors (network blip, token refresh, brief outlet suspension).
+const RELOAD_AFTER_MS = 60000;
 
 // Standalone full-screen customer-facing menu board. Lives at the top level
 // (NOT under _pos) so it renders bare, with no app sidebar/chrome, while still
@@ -11,6 +17,12 @@ import { Skeleton } from '~/components/ui/skeleton';
 // restarts. Convex reactivity keeps it live when the menu changes.
 export const Route = createFileRoute('/menu-board')({
   component: MenuBoardPage,
+  // The board query can throw (auth/outlet errors, missing cafe). Without a
+  // route-level boundary those throws bubble to __root's errorComponent,
+  // which shows raw error text and "try again" / "dashboard" links: an app
+  // error screen on a customer-facing TV. This boundary catches that render
+  // error and shows a neutral fallback instead.
+  errorComponent: BoardUnavailable,
 });
 
 function MenuBoardPage() {
@@ -57,4 +69,24 @@ function SignedOutRedirect() {
     window.location.replace('/signin');
   }
   return null;
+}
+
+function BoardUnavailable() {
+  useEffect(() => {
+    // Nobody is standing at the TV to click "try again", so reload on our
+    // own after a wait, in case the failure was transient.
+    if (typeof window === 'undefined') return;
+    const timer = window.setTimeout(() => {
+      window.location.reload();
+    }, RELOAD_AFTER_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="flex h-screen flex-col items-center justify-center bg-background">
+      <p className="text-3xl font-semibold text-muted-foreground">
+        <Trans>Menu segera hadir</Trans>
+      </p>
+    </div>
+  );
 }

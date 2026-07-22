@@ -151,4 +151,22 @@ describe('menu.board.get', () => {
     await setupOwner(t);
     await expect(t.query(api.menu.board.get, {})).rejects.toThrow();
   });
+
+  it('resolves imageUrl for an item with a photo', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setupOwner(t);
+    const kopi = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
+    const storageId = await t.run((ctx) =>
+      ctx.storage.store(new Blob(['img'], { type: 'image/png' }))
+    );
+    await asOwner.mutation(api.menu.items.create, {
+      categoryId: kopi,
+      name: 'Espresso',
+      priceIDR: 18000,
+      imageStorageId: storageId,
+    });
+
+    const board = await asOwner.query(api.menu.board.get, {});
+    expect(board.categories[0]?.items[0]?.imageUrl).toEqual(expect.any(String));
+  });
 });
