@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MenuBoardRouteImport } from './routes/menu-board'
 import { Route as DisplayRouteImport } from './routes/display'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as PosRouteImport } from './routes/_pos'
@@ -89,6 +90,11 @@ import { Route as PosInventoryAdjustmentsRouteImport } from './routes/_pos/inven
 import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
 import { Route as PosMenuItemsItemIdRouteImport } from './routes/_pos/menu/items.$itemId'
 
+const MenuBoardRoute = MenuBoardRouteImport.update({
+  id: '/menu-board',
+  path: '/menu-board',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DisplayRoute = DisplayRouteImport.update({
   id: '/display',
   path: '/display',
@@ -486,6 +492,7 @@ const PosMenuItemsItemIdRoute = PosMenuItemsItemIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/display': typeof DisplayRoute
+  '/menu-board': typeof MenuBoardRoute
   '/inventory': typeof PosInventoryRouteRouteWithChildren
   '/menu': typeof PosMenuRouteRouteWithChildren
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
@@ -564,6 +571,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/display': typeof DisplayRoute
+  '/menu-board': typeof MenuBoardRoute
   '/onboarding': typeof PosOnboardingRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
@@ -641,6 +649,7 @@ export interface FileRoutesById {
   '/_pos': typeof PosRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/display': typeof DisplayRoute
+  '/menu-board': typeof MenuBoardRoute
   '/_pos/inventory': typeof PosInventoryRouteRouteWithChildren
   '/_pos/menu': typeof PosMenuRouteRouteWithChildren
   '/_pos/onboarding': typeof PosOnboardingRouteRouteWithChildren
@@ -722,6 +731,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/display'
+    | '/menu-board'
     | '/inventory'
     | '/menu'
     | '/onboarding'
@@ -800,6 +810,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/display'
+    | '/menu-board'
     | '/onboarding'
     | '/settings'
     | '/shift'
@@ -876,6 +887,7 @@ export interface FileRouteTypes {
     | '/_pos'
     | '/_public'
     | '/display'
+    | '/menu-board'
     | '/_pos/inventory'
     | '/_pos/menu'
     | '/_pos/onboarding'
@@ -958,10 +970,18 @@ export interface RootRouteChildren {
   PosRoute: typeof PosRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   DisplayRoute: typeof DisplayRoute
+  MenuBoardRoute: typeof MenuBoardRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/menu-board': {
+      id: '/menu-board'
+      path: '/menu-board'
+      fullPath: '/menu-board'
+      preLoaderRoute: typeof MenuBoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/display': {
       id: '/display'
       path: '/display'
@@ -1774,6 +1794,7 @@ const rootRouteChildren: RootRouteChildren = {
   PosRoute: PosRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   DisplayRoute: DisplayRoute,
+  MenuBoardRoute: MenuBoardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
