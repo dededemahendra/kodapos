@@ -42,12 +42,15 @@ const buttonVariants = cva(
         // 1px so its resting bottom edge stays put. The top inner highlight + 1px
         // ring keep the embossed definition; the lip/ring are neutral-black
         // overlays so they darken the --primary fill in any theme.
+        // Filled variants label in --btn-ink, not the theme's white
+        // *-foreground: both fills are mid-lightness in either mode, where
+        // white lands at 3.1–3.9:1. See globals.css for the measured figures.
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 " +
+          "bg-primary text-[var(--btn-ink)] hover:bg-primary/90 " +
           "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_0_0_1px_rgba(0,0,0,0.1),0_3px_0_0_rgba(0,0,0,0.22),0_5px_8px_-3px_rgba(0,0,0,0.28)] " +
           "active:translate-y-[2px] active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_0_0_1px_rgba(0,0,0,0.1),0_1px_0_0_rgba(0,0,0,0.22),0_2px_4px_-3px_rgba(0,0,0,0.28)]",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 " +
+          "bg-destructive text-[var(--btn-ink)] hover:bg-destructive/90 " +
           "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_2px_3px_-1px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.08)] " +
           "active:translate-y-px active:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_1px_2px_-1px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.08)]",
         outline: grayEmboss,

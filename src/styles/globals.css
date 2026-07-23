@@ -64,6 +64,17 @@
   --sidebar-accent-foreground: oklch(0.3250 0 0);
   --sidebar-border: oklch(0.9401 0 0);
   --sidebar-ring: oklch(0.7731 0 0);
+  /* Label color for filled buttons (default/destructive). Those variants used
+     the theme's white *-foreground, which fails AA on every fill in both
+     modes: 3.90:1 and 3.12:1 on light/dark primary, 3.11:1 and 3.76:1 on
+     light/dark destructive — all under the 4.5:1 threshold for text this size.
+     This is the theme's warm brown hue dropped in lightness, not a neutral
+     black: same hue and chroma, just darker. It clears AA on all four pairs
+     (4.64 / 5.79 / 5.81 / 4.80). Pinned as a literal rather than following
+     --foreground, because both fills are mid-lightness in BOTH modes, so a
+     label that flipped to the dark-mode cream would wash straight out.
+     Outline/secondary/ghost are unaffected — they use --foreground. */
+  --btn-ink: oklch(0.2000 0.0269 95.7226);
   /* Geist is the only typeface. Geist Mono is its monospace cut, kept for
      font-mono because receipts, cash-tendered amounts and barcodes need
      fixed-width digits to line up. */
