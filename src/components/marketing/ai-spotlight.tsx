@@ -2,7 +2,7 @@
 
 import { Trans } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
-import { ArrowUp, Check, Sparkles } from 'lucide-react';
+import { ArrowUp, Check, MessageCircle } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { Button } from '~/components/ui/button';
 
@@ -61,7 +61,7 @@ function AiChatPreview() {
           {/* Header */}
           <div className="flex items-center gap-2 border-b border-border px-4 py-3">
             <span className="flex size-7 items-center justify-center rounded-full bg-primary/10">
-              <Sparkles className="size-4 text-primary" />
+              <MessageCircle className="size-4 text-primary" />
             </span>
             <span className="text-sm font-medium">
               <Trans>Asisten AI</Trans>
@@ -150,7 +150,7 @@ export function AiSpotlight() {
             viewport={VP}
             variants={makeSlide(0)}
           >
-            <Sparkles className="size-3.5 text-primary" />
+            <MessageCircle className="size-3.5 text-primary" />
             <Trans>Asisten AI</Trans>
           </motion.span>
 
@@ -172,8 +172,8 @@ export function AiSpotlight() {
             variants={makeSlide(0.16)}
           >
             <Trans>
-              Asisten AI kodapos menjawab dari data kafe Anda sendiri. Tahu penjualan, stok, dan menu
-              terlaris tanpa membuka laporan.
+              Asisten AI kodapos menjawab dari data kafe Anda sendiri. Tahu penjualan, stok, dan
+              menu terlaris tanpa membuka laporan.
             </Trans>
           </motion.p>
 

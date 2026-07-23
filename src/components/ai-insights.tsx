@@ -2,15 +2,10 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useAction, useQuery } from 'convex/react';
-import { Sparkles } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 import { aiErrorMessage } from '~/lib/ai-error';
@@ -62,12 +57,16 @@ export function AiInsights() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Sparkles className="size-4 text-primary" />
+          <MessageCircle className="size-4 text-primary" />
           <Trans>Wawasan AI</Trans>
         </CardTitle>
         {connected ? (
           <Button type="button" size="sm" onClick={() => void generate()} disabled={loading}>
-            {loading ? <Spinner data-icon="inline-start" /> : <Sparkles data-icon="inline-start" />}
+            {loading ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <MessageCircle data-icon="inline-start" />
+            )}
             <Trans>Buat wawasan</Trans>
           </Button>
         ) : null}

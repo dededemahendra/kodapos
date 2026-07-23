@@ -1,15 +1,15 @@
-import { Sparkles } from 'lucide-react';
-import { cn } from '~/lib/utils';
-import whatsappLogo from '~/assets/integrations/whatsapp.svg?url';
-import gojekLogo from '~/assets/integrations/gojek.svg?url';
-import grabLogo from '~/assets/integrations/grab.svg?url';
-import shopeeLogo from '~/assets/integrations/shopee.svg?url';
-import gopayLogo from '~/assets/integrations/gopay.svg?url';
-import danaLogo from '~/assets/integrations/dana.svg?url';
-import ovoLogo from '~/assets/integrations/ovo.svg?url';
+import { MessageCircle } from 'lucide-react';
 import accurateLogo from '~/assets/integrations/accurate.svg?url';
-import qrisLogo from '~/assets/integrations/qris.svg?url';
+import danaLogo from '~/assets/integrations/dana.svg?url';
+import gojekLogo from '~/assets/integrations/gojek.svg?url';
+import gopayLogo from '~/assets/integrations/gopay.svg?url';
+import grabLogo from '~/assets/integrations/grab.svg?url';
 import mekariLogo from '~/assets/integrations/mekari.png?url';
+import ovoLogo from '~/assets/integrations/ovo.svg?url';
+import qrisLogo from '~/assets/integrations/qris.svg?url';
+import shopeeLogo from '~/assets/integrations/shopee.svg?url';
+import whatsappLogo from '~/assets/integrations/whatsapp.svg?url';
+import { cn } from '~/lib/utils';
 
 /**
  * Brand identity for an integration card. Every card uses the SAME fixed-size
@@ -57,7 +57,7 @@ export function IntegrationLogo({ entryKey, name }: { entryKey: string; name: st
         </span>
       ) : def?.type === 'ai' ? (
         <span className={cn(PLATE, 'bg-primary/10 text-primary')} aria-hidden>
-          <Sparkles className="size-4" />
+          <MessageCircle className="size-4" />
         </span>
       ) : (
         <span className={cn(PLATE, 'bg-muted text-base font-semibold')} aria-hidden>
