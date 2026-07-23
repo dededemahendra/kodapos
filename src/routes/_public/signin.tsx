@@ -20,6 +20,8 @@ import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { rememberAuthMethod } from '~/lib/analytics/auth-method';
+import { track } from '~/lib/analytics/track';
 import { sendResetOrSigninCode } from '~/lib/auth-reset';
 import {
   validateEmail,
@@ -219,6 +221,8 @@ function SigninCard({
   }
 
   function onGoogle(): void {
+    rememberAuthMethod('google');
+    track('auth_started', { method: 'google' });
     void signIn('google');
   }
 
@@ -236,6 +240,8 @@ function SigninCard({
     setEmail((prev) => ({ ...prev, touched: true, error: emailErr }));
     setPassword((prev) => ({ ...prev, touched: true, error: passwordErr }));
     if (emailErr !== null || passwordErr !== null) return;
+    rememberAuthMethod('password');
+    track('auth_started', { method: 'password' });
     setSubmitting(true);
     setAuthError(null);
     try {
@@ -248,6 +254,7 @@ function SigninCard({
     } catch {
       // Convex masks auth errors to a generic "Server Error"; show a friendly message.
       setAuthError(t`Email atau password salah.`);
+      track('auth_failed', { method: 'password', reason: 'invalid_password' });
     } finally {
       setSubmitting(false);
     }
@@ -260,6 +267,8 @@ function SigninCard({
     setEmail((prev) => ({ ...prev, touched: true, error: emailErr }));
     if (emailErr !== null) return;
     const addr = email.value.trim();
+    rememberAuthMethod('otp');
+    track('auth_started', { method: 'otp' });
     setSubmitting(true);
     setAuthError(null);
     setInfo(null);
@@ -269,6 +278,7 @@ function SigninCard({
         setCodeSent(true);
         setCooldown(RESEND_COOLDOWN_SECONDS);
         setInfo(t`Kode dikirim ke email Anda.`);
+        track('auth_code_sent', {});
       } else {
         // Passwordless-first: most accounts have no password to reset, so the
         // reset send throws before any email goes out. Fall back to a sign-in
@@ -291,6 +301,7 @@ function SigninCard({
       setAuthError(
         t`Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi.`,
       );
+      track('auth_failed', { method: 'otp', reason: 'send_failed' });
     } finally {
       setSubmitting(false);
     }
@@ -324,6 +335,7 @@ function SigninCard({
       navigate({ to: '/dashboard' });
     } catch {
       setAuthError(t`Kode salah atau sudah kedaluwarsa.`);
+      track('auth_failed', { method: 'otp', reason: 'invalid_code' });
     } finally {
       setSubmitting(false);
     }

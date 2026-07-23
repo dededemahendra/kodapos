@@ -9,6 +9,7 @@ import {
   CHANGE_EVENT as CASHIER_CHANGE_EVENT,
   STORAGE_KEY as CASHIER_STORAGE_KEY,
 } from '~/lib/active-cashier';
+import { takeAuthMethod } from '~/lib/analytics/auth-method';
 import {
   capturePageview,
   identifyUser,
@@ -17,7 +18,8 @@ import {
   resetAnalytics,
   setGroup,
 } from '~/lib/analytics/client';
-import { buildSuperProperties, shouldTrackPath } from '~/lib/analytics/policy';
+import { buildSuperProperties, isNewAccount, shouldTrackPath } from '~/lib/analytics/policy';
+import { track } from '~/lib/analytics/track';
 
 /**
  * Drives the analytics lifecycle. Renders nothing.
@@ -71,7 +73,9 @@ export function AnalyticsProvider(): null {
     capturePageview(pathname);
   }, [pathname, ready]);
 
-  // Identity. Opaque ids and counts only.
+  // Identity, plus the completion event. Firing here rather than in
+  // signin.tsx is what makes Google work: it returns by redirect, so no
+  // handler there ever sees its success. Opaque ids and counts only.
   useEffect(() => {
     if (!isAnalyticsEnabled() || !identity) return;
     if (identified.current === identity.userId) return;
@@ -79,6 +83,14 @@ export function AnalyticsProvider(): null {
     identifyUser(identity.userId, { role: identity.role });
     if (identity.businessId) {
       setGroup('business', identity.businessId, { outlet_count: identity.outletCount });
+    }
+
+    const method = takeAuthMethod();
+    if (method) {
+      track('auth_completed', {
+        method,
+        is_new_account: isNewAccount(identity.accountAgeMs),
+      });
     }
   }, [identity]);
 
