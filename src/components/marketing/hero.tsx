@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import type { Variants } from 'motion/react';
 import { Button } from '~/components/ui/button';
 import { Meteors } from '~/components/ui/meteors';
+import { track } from '~/lib/analytics/track';
 import { AnimatedGroup } from './animated-group';
 import { RegisterPreview } from './register-preview';
 
@@ -81,7 +82,12 @@ export function Hero() {
           className="mt-10 flex flex-col items-center justify-center gap-2 sm:flex-row"
         >
           <Button asChild size="lg">
-            <Link to="/signin">
+            <Link
+              to="/signin"
+              onClick={() =>
+                track('marketing_cta_clicked', { location: 'hero', label: 'start_free' })
+              }
+            >
               <Trans>Mulai gratis</Trans>
             </Link>
           </Button>
