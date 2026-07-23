@@ -101,6 +101,7 @@ function MagicLinkHandler({ email, code }: { email: string; code: string }) {
     ran.current = true;
     void (async () => {
       try {
+        rememberAuthMethod('otp');
         await signIn('resend-otp', { email, code });
         navigate({ to: '/dashboard' });
       } catch {
@@ -268,6 +269,10 @@ function SigninCard({
     if (emailErr !== null) return;
     const addr = email.value.trim();
     rememberAuthMethod('otp');
+    // This handler also serves the password-reset flow (mode === 'reset'),
+    // which has no AuthMethod of its own, so a reset send is knowingly
+    // counted as 'otp' here. Fixing that means widening AuthMethod, which we
+    // are deliberately not doing yet.
     track('auth_started', { method: 'otp' });
     setSubmitting(true);
     setAuthError(null);
