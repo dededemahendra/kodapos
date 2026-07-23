@@ -64,4 +64,44 @@ describe('users.analyticsIdentity', () => {
     const after = await asOwner.query(api.users.analyticsIdentity, {});
     expect(after?.outletCount).toBe(2);
   });
+
+  it('returns the businessMembers role, not cafeStaff.role, for a manager', async () => {
+    const t = convexTest(schema, modules);
+    const ownerId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' });
+    });
+    const asOwner = t.withIdentity({ subject: `${ownerId}|test_session` });
+    const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
+    await asOwner.mutation(api.invites.inviteManager, { email: 'mgr@x.com', cafeIds: [cafeId] });
+
+    const mgrUserId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' });
+    });
+    const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
+    await asMgr.mutation(api.invites.acceptPendingInvites, {});
+
+    // The outlet's cafeStaff row (created for the owner's PIN session by
+    // cafes.createForOwner) still says role: 'owner', and 'manager' is not
+    // even a legal cafeStaff.role value. If the handler ever reads
+    // cafeStaff.role instead of businessMembers.role for this manager, it
+    // would return 'owner' (or 'cashier', or null) here, never 'manager' —
+    // so this assertion catches a wrong-table regression that an owner-only
+    // fixture cannot.
+    const identity = await asMgr.query(api.users.analyticsIdentity, {});
+    expect(identity?.role).toBe('manager');
+  });
+
+  it('returns businessId null, role null, and outletCount 0 mid-onboarding (no businessMembers row)', async () => {
+    const t = convexTest(schema, modules);
+    const userId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { name: 'Newbie', email: 'n@x.com' });
+    });
+    const asUser = t.withIdentity({ subject: `${userId}|test_session` });
+
+    const identity = await asUser.query(api.users.analyticsIdentity, {});
+    expect(identity).not.toBeNull();
+    expect(identity?.businessId).toBeNull();
+    expect(identity?.role).toBeNull();
+    expect(identity?.outletCount).toBe(0);
+  });
 });
