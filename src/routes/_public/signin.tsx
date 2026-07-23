@@ -113,6 +113,10 @@ function MagicLinkHandler({ email, code }: { email: string; code: string }) {
         navigate({ to: '/dashboard' });
       } catch {
         setFailed(true);
+        // Expired or already-used magic links are a real drop-off cause and
+        // previously emitted nothing at all, making them invisible in the
+        // funnel.
+        track('auth_failed', { method: 'otp', reason: 'invalid_code' });
       }
     })();
   }, [email, code, signIn, navigate]);
@@ -290,7 +294,6 @@ function SigninCard({
         setCodeSent(true);
         setCooldown(RESEND_COOLDOWN_SECONDS);
         setInfo(t`Kode dikirim ke email Anda.`);
-        track('auth_code_sent', {});
       } else {
         // Passwordless-first: most accounts have no password to reset, so the
         // reset send throws before any email goes out. Fall back to a sign-in
@@ -308,6 +311,14 @@ function SigninCard({
           setInfo(t`Kode reset dikirim ke email Anda.`);
         }
       }
+      // Both branches reach here only when a code (or reset code) actually
+      // went out. The `else` branch sends a real code too (that is the whole
+      // point of the passwordless fallback), so this must not live inside
+      // the `if (mode === 'otp')` block: doing so made the fallback path
+      // emit auth_started then nothing then auth_completed, showing a false
+      // drop-off in the funnel for a user who genuinely got a code and
+      // signed in.
+      track('auth_code_sent', {});
     } catch {
       // Both the reset and the sign-in code send failed: a genuine email outage.
       setAuthError(
