@@ -3,6 +3,7 @@ import { I18nProvider } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import { createRootRoute, HeadContent, Link, Outlet, Scripts } from '@tanstack/react-router';
 import { useEffect, type ReactNode } from 'react';
+import { AnalyticsProvider } from '~/components/analytics-provider';
 import { LocaleProvider } from '~/components/locale-provider';
 import { authStorage } from '~/lib/auth-storage';
 import { convex } from '~/lib/convex';
@@ -104,6 +105,7 @@ function RootComponent() {
       <I18nProvider i18n={i18n}>
         <LocaleProvider>
           <ConvexAuthProvider client={convex} storage={authStorage}>
+            <AnalyticsProvider />
             <Outlet />
           </ConvexAuthProvider>
         </LocaleProvider>
