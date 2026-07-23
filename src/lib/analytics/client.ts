@@ -39,54 +39,58 @@ export function isAnalyticsEnabled(): boolean {
 export async function initAnalytics(superProps: Record<string, string>): Promise<boolean> {
   if (!isAnalyticsEnabled()) return false;
   if (client) return true;
-  let posthog: PostHog;
+  // The try wraps the dynamic import AND the init/register calls below, not
+  // just the import: a synchronous throw from posthog.init or
+  // posthog.register happens after the `await`, and the doc comment above
+  // (and the provider's bare `.then()`) depends on this function truly never
+  // rejecting.
   try {
-    ({ default: posthog } = await import('posthog-js'));
+    const { default: posthog } = await import('posthog-js');
+    posthog.init(key(), {
+      api_host: host(),
+      // Explicit events only. The POS shows customer names, phone numbers and
+      // order values; autocapture and session recording would scrape them.
+      autocapture: false,
+      disable_session_recording: true,
+      // Pageviews are emitted by hand from the provider so the exclusion list in
+      // policy.ts is enforced. PostHog's own automatic pageview would bypass it.
+      capture_pageview: false,
+      capture_pageleave: false,
+      // The magic-link sign-in URL carries the email and one-time code in the
+      // fragment (#email=&code=), and posthog-js captures URL fragments by
+      // default. Without this, that fragment ends up in `$current_url` and in
+      // `$initial_current_url` (a $set_once PERSON property set at identify()
+      // time), permanently attaching a live sign-in code and an email address
+      // to the person profile. This looks removable; it is load-bearing.
+      disable_capture_url_hashes: true,
+      // `autocapture: false` above only closes ONE automatic capture path. In
+      // this SDK version capture_performance, capture_exceptions,
+      // capture_heatmaps and capture_dead_clicks all default to `undefined`,
+      // meaning "defer to whatever is configured in the PostHog dashboard UI",
+      // and disable_surveys defaults to false. Left unset, the "explicit
+      // events only" guarantee this whole module exists for is a toggle
+      // someone can flip remotely, not a property of this repository.
+      // Exception autocapture ships error messages and stack traces;
+      // dead-click and heatmap payloads carry element text, which on the POS
+      // is customer names and order lines; surveys can pop up unprompted on
+      // an unattended in-cafe TV. Every one of these must stay pinned here.
+      capture_performance: false,
+      capture_exceptions: false,
+      capture_heatmaps: false,
+      capture_dead_clicks: false,
+      disable_surveys: true,
+      rageclick: false,
+      respect_dnt: true,
+      // localStorage rather than localStorage+cookie: the published privacy
+      // policy states we set no third-party tracking cookies.
+      persistence: 'localStorage',
+    });
+    posthog.register(superProps);
+    client = posthog;
+    return true;
   } catch {
     return false;
   }
-  posthog.init(key(), {
-    api_host: host(),
-    // Explicit events only. The POS shows customer names, phone numbers and
-    // order values; autocapture and session recording would scrape them.
-    autocapture: false,
-    disable_session_recording: true,
-    // Pageviews are emitted by hand from the provider so the exclusion list in
-    // policy.ts is enforced. PostHog's own automatic pageview would bypass it.
-    capture_pageview: false,
-    capture_pageleave: false,
-    // The magic-link sign-in URL carries the email and one-time code in the
-    // fragment (#email=&code=), and posthog-js captures URL fragments by
-    // default. Without this, that fragment ends up in `$current_url` and in
-    // `$initial_current_url` (a $set_once PERSON property set at identify()
-    // time), permanently attaching a live sign-in code and an email address
-    // to the person profile. This looks removable; it is load-bearing.
-    disable_capture_url_hashes: true,
-    // `autocapture: false` above only closes ONE automatic capture path. In
-    // this SDK version capture_performance, capture_exceptions,
-    // capture_heatmaps and capture_dead_clicks all default to `undefined`,
-    // meaning "defer to whatever is configured in the PostHog dashboard UI",
-    // and disable_surveys defaults to false. Left unset, the "explicit
-    // events only" guarantee this whole module exists for is a toggle
-    // someone can flip remotely, not a property of this repository.
-    // Exception autocapture ships error messages and stack traces;
-    // dead-click and heatmap payloads carry element text, which on the POS
-    // is customer names and order lines; surveys can pop up unprompted on
-    // an unattended in-cafe TV. Every one of these must stay pinned here.
-    capture_performance: false,
-    capture_exceptions: false,
-    capture_heatmaps: false,
-    capture_dead_clicks: false,
-    disable_surveys: true,
-    rageclick: false,
-    respect_dnt: true,
-    // localStorage rather than localStorage+cookie: the published privacy
-    // policy states we set no third-party tracking cookies.
-    persistence: 'localStorage',
-  });
-  posthog.register(superProps);
-  client = posthog;
-  return true;
 }
 
 /**
@@ -111,8 +115,13 @@ export function capture(name: string, props?: Record<string, unknown>): void {
   client?.capture(name, props);
 }
 
-export function capturePageview(path: string): void {
-  client?.capture('$pageview', { $current_url: path });
+export function capturePageview(): void {
+  // No $current_url override: that discarded origin and query string and
+  // made PostHog's URL breakdowns show a bare relative path. Now that
+  // disable_capture_url_hashes is set above, posthog-js recording
+  // window.location.href itself no longer leaks the magic-link fragment,
+  // so nothing here needs to mask it anymore.
+  client?.capture('$pageview');
 }
 
 export function identifyUser(distinctId: string, props: Record<string, unknown>): void {

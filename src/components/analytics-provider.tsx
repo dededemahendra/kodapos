@@ -89,7 +89,7 @@ export function AnalyticsProvider(): null {
   useEffect(() => {
     if (!ready || !isAnalyticsEnabled()) return;
     if (!shouldTrackPath(pathname)) return;
-    capturePageview(pathname);
+    capturePageview();
   }, [pathname, ready]);
 
   // Re-registers the super properties whenever `locale` changes. LocaleProvider
