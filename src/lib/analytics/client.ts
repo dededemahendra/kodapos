@@ -54,6 +54,13 @@ export async function initAnalytics(superProps: Record<string, string>): Promise
     // policy.ts is enforced. PostHog's own automatic pageview would bypass it.
     capture_pageview: false,
     capture_pageleave: false,
+    // The magic-link sign-in URL carries the email and one-time code in the
+    // fragment (#email=&code=), and posthog-js captures URL fragments by
+    // default. Without this, that fragment ends up in `$current_url` and in
+    // `$initial_current_url` (a $set_once PERSON property set at identify()
+    // time), permanently attaching a live sign-in code and an email address
+    // to the person profile. This looks removable; it is load-bearing.
+    disable_capture_url_hashes: true,
     // localStorage rather than localStorage+cookie: the published privacy
     // policy states we set no third-party tracking cookies.
     persistence: 'localStorage',

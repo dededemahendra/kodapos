@@ -101,6 +101,13 @@ function MagicLinkHandler({ email, code }: { email: string; code: string }) {
     ran.current = true;
     void (async () => {
       try {
+        // The magic link lands here as `#email=&code=`, and that fragment
+        // then sits in window.location.href (and browser/session history)
+        // for the life of the page, live one-time code included. Clear it
+        // before doing anything else, independent of the posthog fix above:
+        // this is a real code, not just an analytics leak. This looks
+        // removable; it is load-bearing.
+        window.history.replaceState(null, '', '/signin');
         rememberAuthMethod('otp');
         await signIn('resend-otp', { email, code });
         navigate({ to: '/dashboard' });
