@@ -438,16 +438,37 @@ Expected: adds `posthog-js` to `dependencies`.
 Create `tests/lib/analytics-client.test.ts`:
 
 ```typescript
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { isAnalyticsEnabled } from '../../src/lib/analytics/client';
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe('isAnalyticsEnabled', () => {
   // The whole integration is env-gated. With no key configured, posthog-js is
   // never imported and no request is made, which is what keeps CI and the
   // existing suite unaffected and what lets this slice ship to production inert.
+  //
+  // The env is stubbed rather than read: a developer following the manual
+  // verification checklist has a real key in .env.local, Vite loads that into
+  // the test run, and a test asserting the ambient value would fail on their
+  // machine while passing in CI.
   it('is disabled when no key is configured', () => {
-    expect(import.meta.env.VITE_POSTHOG_KEY ?? '').toBe('');
+    vi.stubEnv('VITE_POSTHOG_KEY', '');
     expect(isAnalyticsEnabled()).toBe(false);
+  });
+
+  it('is disabled during SSR even when a key is configured', () => {
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    const original = globalThis.window;
+    // biome-ignore lint/suspicious/noExplicitAny: deleting a global for an SSR simulation
+    delete (globalThis as any).window;
+    expect(isAnalyticsEnabled()).toBe(false);
+    if (original !== undefined) {
+      // biome-ignore lint/suspicious/noExplicitAny: restoring the deleted global
+      (globalThis as any).window = original;
+    }
   });
 });
 ```
@@ -560,7 +581,7 @@ export function track<K extends EventName>(name: K, props: EventMap[K]): void {
 - [ ] **Step 6: Run the test to verify it passes**
 
 Run: `./node_modules/.bin/vitest run tests/lib/analytics-client.test.ts`
-Expected: PASS, 1 test.
+Expected: PASS, 2 tests.
 
 - [ ] **Step 7: Update `.env.example`**
 
@@ -579,7 +600,7 @@ VITE_POSTHOG_HOST=https://us.i.posthog.com
 - [ ] **Step 8: Verify the whole suite still passes**
 
 Run: `pnpm test`
-Expected: 115 test files, 1059 tests passing (baseline 112/1044, plus 10 policy, 4 identity, 1 client). No new network activity.
+Expected: 115 test files, 1060 tests passing (baseline 112/1044, plus 10 policy, 4 identity, 2 client). No new network activity.
 
 - [ ] **Step 9: Commit**
 
@@ -736,7 +757,7 @@ Expected: no request to any PostHog host, and no `posthog-js` chunk fetched.
 - [ ] **Step 5: Run the full suite**
 
 Run: `pnpm test`
-Expected: 1059 tests passing, unchanged from Task 3. This task adds no tests, since .tsx files are not collected.
+Expected: 1060 tests passing, unchanged from Task 3. This task adds no tests, since .tsx files are not collected.
 
 - [ ] **Step 6: Commit**
 
@@ -1007,7 +1028,7 @@ Then replace the identity effect with one that also reports completion. `identit
 - [ ] **Step 7: Typecheck, lint and full suite**
 
 Run: `pnpm typecheck && ./node_modules/.bin/biome check src convex && pnpm test`
-Expected: no new errors; 116 test files, 1063 tests passing.
+Expected: no new errors; 116 test files, 1064 tests passing.
 
 - [ ] **Step 8: Commit**
 
