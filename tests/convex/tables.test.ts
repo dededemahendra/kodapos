@@ -96,6 +96,23 @@ describe('tables CRUD', () => {
     expect(await asOwner.query(api.tables.list, { includeArchived: true })).toHaveLength(1);
   });
 
+  it('lists tables that have a qrToken, without returning the token', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner } = await setup(t);
+    const id = await asOwner.mutation(api.tables.create, { name: 'Meja 1' });
+    const token = await asOwner.mutation(api.tables.ensureQrToken, { id });
+    expect(token).toMatch(/^[0-9a-f]{32}$/);
+
+    // Regression: once a table had a token, list() blew up on its own returns
+    // validator ("extra field `qrToken`"), taking down the reservations form
+    // and the table manager. The token is a capability for the public
+    // /order/{qrToken} page, so list projects it away rather than declaring it.
+    const list = await asOwner.query(api.tables.list, {});
+    expect(list).toHaveLength(1);
+    expect(list[0]?.name).toBe('Meja 1');
+    expect(list[0]).not.toHaveProperty('qrToken');
+  });
+
   it('validates name', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setup(t);

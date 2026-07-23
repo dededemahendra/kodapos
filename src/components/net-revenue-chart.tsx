@@ -68,7 +68,7 @@ export function NetRevenueChart() {
 	const chartConfig = {
 		revenue: {
 			label: t`Pendapatan`,
-			color: "var(--chart-2)",
+			color: "var(--chart-1)",
 		},
 	} satisfies ChartConfig;
 

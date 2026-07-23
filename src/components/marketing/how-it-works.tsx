@@ -1,5 +1,5 @@
 import { Trans } from '@lingui/react/macro';
-import { ArrowUp, ClipboardList, CreditCard, Globe, Plus, Sparkles } from 'lucide-react';
+import { ArrowUp, ClipboardList, CreditCard, Globe, MessageCircle, Plus } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -10,11 +10,7 @@ const VP = { once: true, margin: '-80px' } as const;
 
 // Card 1 illustration: menu setup mock
 function MenuSetupIllustration() {
-  const items = [
-    { w: 'w-20' },
-    { w: 'w-16' },
-    { w: 'w-24' },
-  ];
+  const items = [{ w: 'w-20' }, { w: 'w-16' }, { w: 'w-24' }];
   return (
     <motion.div
       className="rounded-lg border border-border bg-muted/40 p-3 space-y-2"
@@ -150,7 +146,11 @@ function ReportsAiIllustration() {
         viewport={VP}
         variants={{
           hidden: { opacity: 0, y: 4 },
-          visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut', delay: 0.35 } },
+          visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.4, ease: 'easeOut', delay: 0.35 },
+          },
         }}
       >
         <p className="line-clamp-1 px-0.5 text-[11px] leading-relaxed text-foreground/80">
@@ -188,12 +188,14 @@ const STEPS = [
     badge: '2',
     icon: CreditCard,
     title: <Trans>Mulai berjualan</Trans>,
-    desc: <Trans>Terima pesanan di kasir, meja, atau lewat QR. Bayar dengan QRIS atau tunai.</Trans>,
+    desc: (
+      <Trans>Terima pesanan di kasir, meja, atau lewat QR. Bayar dengan QRIS atau tunai.</Trans>
+    ),
     illustration: <OrderPaymentIllustration />,
   },
   {
     badge: '3',
-    icon: Sparkles,
+    icon: MessageCircle,
     title: <Trans>Pantau dan kembangkan</Trans>,
     desc: <Trans>Lihat laporan harian dan biarkan AI menyarankan stok serta menu terlaris.</Trans>,
     illustration: <ReportsAiIllustration />,
@@ -244,9 +246,7 @@ export function HowItWorks() {
                       </div>
 
                       {/* mini illustration */}
-                      <div className="mt-auto">
-                        {step.illustration}
-                      </div>
+                      <div className="mt-auto">{step.illustration}</div>
                     </CardContent>
                   </Card>
                 </motion.div>

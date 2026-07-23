@@ -2,7 +2,7 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useAction, useQuery } from 'convex/react';
-import { Sparkles } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { ChatInput } from '~/components/ui/chat-input';
@@ -67,7 +67,13 @@ function AiChatPage() {
 
   const hour = new Date().getHours();
   const greeting =
-    hour < 11 ? t`Selamat pagi` : hour < 15 ? t`Selamat siang` : hour < 18 ? t`Selamat sore` : t`Selamat malam`;
+    hour < 11
+      ? t`Selamat pagi`
+      : hour < 15
+        ? t`Selamat siang`
+        : hour < 18
+          ? t`Selamat sore`
+          : t`Selamat malam`;
   const suggestions = [
     t`Bagaimana penjualan 30 hari terakhir?`,
     t`Item apa yang paling laku?`,
@@ -81,15 +87,15 @@ function AiChatPage() {
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <Sparkles />
+              <MessageCircle />
             </EmptyMedia>
             <EmptyTitle>
               <Trans>Hubungkan asisten AI</Trans>
             </EmptyTitle>
             <EmptyDescription>
               <Trans>
-                Tambahkan kunci API AI Anda (OpenAI atau Anthropic) untuk bertanya tentang data
-                kafe Anda.
+                Tambahkan kunci API AI Anda (OpenAI atau Anthropic) untuk bertanya tentang data kafe
+                Anda.
               </Trans>
             </EmptyDescription>
           </EmptyHeader>
@@ -112,7 +118,7 @@ function AiChatPage() {
         <div className="m-auto w-full max-w-2xl">
           <div className="mb-8 text-center">
             <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Sparkles className="size-6" />
+              <MessageCircle className="size-6" />
             </span>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               {greeting}
@@ -164,7 +170,7 @@ function AiChatPage() {
             >
               {m.role === 'assistant' ? (
                 <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Sparkles className="size-4" />
+                  <MessageCircle className="size-4" />
                 </span>
               ) : null}
               <div
@@ -182,7 +188,7 @@ function AiChatPage() {
           {loading ? (
             <div className="flex gap-3">
               <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Sparkles className="size-4" />
+                <MessageCircle className="size-4" />
               </span>
               <div className="flex items-center gap-2 rounded-2xl bg-muted px-3.5 py-2 text-sm text-muted-foreground">
                 <Spinner className="size-4" />

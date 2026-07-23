@@ -35,7 +35,22 @@ export const list = query({
         if (a.archived !== b.archived) return a.archived ? 1 : -1;
         if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
         return a.name.localeCompare(b.name, 'id-ID');
-      });
+      })
+      // Project explicitly rather than returning the raw doc. `qrToken` is a
+      // capability granting access to the public /order/{qrToken} page, and no
+      // caller of this list needs it — the QR screen mints/reads its own via
+      // ensureQrToken. Spreading the doc would both leak the token to every
+      // client rendering a table picker and break this query's returns
+      // validator (which is what happened once tokens started being assigned).
+      .map((r) => ({
+        _id: r._id,
+        _creationTime: r._creationTime,
+        cafeId: r.cafeId,
+        name: r.name,
+        sortOrder: r.sortOrder,
+        archived: r.archived,
+        createdAt: r.createdAt,
+      }));
   },
 });
 

@@ -66,10 +66,11 @@ export function AppHeader() {
 					orientation="vertical"
 				/>
 				<AppBreadcrumbs page={activeItem ?? null} />
-				<Badge
-					variant="secondary"
-					className="hidden font-medium text-muted-foreground sm:inline-flex"
-				>
+				{/* No text-muted-foreground here: that token is tuned for the page
+				    background, and the secondary chip is a near-white surface in dark
+				    mode, which put the label at 1.96:1 (3.08:1 light). The variant's
+				    own text-secondary-foreground reads 12.55:1 / 6.39:1. */}
+				<Badge variant="secondary" className="hidden font-medium sm:inline-flex">
 					<Trans>Akses awal</Trans>
 				</Badge>
 			</div>
