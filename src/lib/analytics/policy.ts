@@ -34,6 +34,28 @@ export function shouldTrackPath(pathname: string): boolean {
 }
 
 /**
+ * The allowlist above only gates pageviews. `initAnalytics` itself runs on
+ * mount on every route, so with a key configured, opening `/order/<token>`,
+ * `/menu-board` or `/display` still loads posthog-js, writes a persistent
+ * distinct_id into that device's localStorage and sends a request to
+ * PostHog carrying its IP, even though no event is ever emitted. That
+ * satisfies the letter of "no PII" but not the reason these paths are
+ * excluded in the first place: cafe end-customers have no relationship
+ * with this company and never agreed to anything.
+ *
+ * This can't be folded back into an allowlist on the init effect, because
+ * Google sign-in returns to `/` and only reaches `/dashboard` after the
+ * router has already navigated there, so the "should analytics be running
+ * at all" decision has to be a deny-check independent of where the
+ * marketing allowlist happens to end.
+ */
+const CUSTOMER_SURFACES = ['/order', '/menu-board', '/display'];
+
+export function isCustomerSurface(pathname: string): boolean {
+  return CUSTOMER_SURFACES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+/**
  * Registration is implicit in the passwordless flow: the account is created on
  * the first successful verify, so the client cannot distinguish it from a
  * returning sign-in. Inferring it from the age of the user document is a

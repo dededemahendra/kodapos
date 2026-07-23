@@ -18,7 +18,12 @@ import {
   resetAnalytics,
   setGroup,
 } from '~/lib/analytics/client';
-import { buildSuperProperties, isNewAccount, shouldTrackPath } from '~/lib/analytics/policy';
+import {
+  buildSuperProperties,
+  isCustomerSurface,
+  isNewAccount,
+  shouldTrackPath,
+} from '~/lib/analytics/policy';
 import { track } from '~/lib/analytics/track';
 
 /**
@@ -54,16 +59,21 @@ export function AnalyticsProvider(): null {
   // guards, rather than an unhandled rejection.
   const [ready, setReady] = useState(false);
 
-  // Init once, on the client only.
+  // Init once, on the client only. Never on a cafe-customer surface: those
+  // people have no relationship with kodapos and never agreed to anything,
+  // and initAnalytics alone (no events required) already writes a
+  // persistent distinct_id and talks to PostHog. An allowlist can't cover
+  // this decision because Google sign-in returns to `/` and only reaches
+  // `/dashboard` after the router has already navigated away from it.
   useEffect(() => {
-    if (started.current || !isAnalyticsEnabled()) return;
+    if (started.current || !isAnalyticsEnabled() || isCustomerSurface(pathname)) return;
     started.current = true;
     void initAnalytics(buildSuperProperties({ locale, appVersion: __APP_VERSION__ })).then(
       (initialized) => {
         if (initialized) setReady(true);
       }
     );
-  }, [locale]);
+  }, [locale, pathname]);
 
   // Pageviews, filtered through the allowlist in policy.ts. Gated on `ready`
   // so the first pageview fires once init resolves rather than being dropped.

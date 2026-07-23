@@ -11,6 +11,7 @@
  * separately.
  */
 import type { PostHog } from 'posthog-js';
+import { isCustomerSurface } from './policy';
 
 let client: PostHog | null = null;
 
@@ -89,6 +90,10 @@ export async function initAnalytics(superProps: Record<string, string>): Promise
 }
 
 export function capture(name: string, props?: Record<string, unknown>): void {
+  // Belt and suspenders alongside the provider's init gate: even if
+  // something ever calls capture() from a cafe-customer surface, this
+  // still refuses to emit for a person who never agreed to anything.
+  if (typeof window !== 'undefined' && isCustomerSurface(window.location.pathname)) return;
   client?.capture(name, props);
 }
 

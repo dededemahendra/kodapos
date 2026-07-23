@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildSuperProperties,
+  isCustomerSurface,
   isNewAccount,
   NEW_ACCOUNT_WINDOW_MS,
   shouldTrackPath,
@@ -53,6 +54,27 @@ describe('isNewAccount', () => {
 
   it('treats clock skew as returning rather than new', () => {
     expect(isNewAccount(-5_000)).toBe(false);
+  });
+});
+
+describe('isCustomerSurface', () => {
+  // Gates whether the SDK even initialises, independent of shouldTrackPath's
+  // pageview allowlist: cafe end-customers must never load posthog-js at
+  // all, not just be excluded from pageview events.
+  it('flags the cafe customer self-order page, with or without a token', () => {
+    expect(isCustomerSurface('/order/477289968ce6e4948622c74c87048c94')).toBe(true);
+    expect(isCustomerSurface('/order')).toBe(true);
+  });
+
+  it('flags the unattended customer screens', () => {
+    expect(isCustomerSurface('/menu-board')).toBe(true);
+    expect(isCustomerSurface('/display')).toBe(true);
+  });
+
+  it('does not flag ordinary marketing or authenticated paths', () => {
+    for (const path of ['/', '/signin', '/signup', '/dashboard', '/cashier']) {
+      expect(isCustomerSurface(path)).toBe(false);
+    }
   });
 });
 
