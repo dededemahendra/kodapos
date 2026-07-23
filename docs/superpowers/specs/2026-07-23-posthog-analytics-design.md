@@ -149,13 +149,19 @@ This is a heuristic and is recorded as one. It will misclassify a user whose ver
 
 ## Testing
 
-| Area | Test |
-|---|---|
-| No-key path | With no key set, nothing is imported and no request is made. This is the test that keeps CI and the existing suite honest. |
-| Registry | Events serialise as expected; closed value sets are enforced by the type system. |
-| Identity lifecycle | identify and group fire on auth resolve with the right ids and no PII, and `role` comes from `businessMembers`, not `cafeStaff`. |
-| Reset | `reset()` fires on sign-out and on cashier switch. This is the correctness risk, so it gets a dedicated test. |
-| Exclusions | No pageview is emitted on `/order/$token`, `/menu-board` or `/display`. |
+**Constraint discovered during planning.** Vitest runs in the `edge-runtime` environment and collects only `tests/**/*.test.ts` and `src/**/*.test.ts`. `.tsx` files are not collected, and there is no testing-library, jsdom or happy-dom in the project. Component tests are therefore not possible without adding a second test environment, which is out of scope for this slice.
+
+The response is architectural rather than a compromise on coverage: every decision moves into pure `.ts` modules where it is unit-tested, and the React provider becomes a shell thin enough that little logic is left in it. Anything that genuinely cannot be reached from a `.ts` test is covered by the manual checklist in the plan.
+
+| Area | Test | How |
+|---|---|---|
+| No-key path | With no key set, nothing is imported and no request is made. This is the test that keeps CI and the existing suite honest. | Unit |
+| Registry | Closed value sets are enforced by the type system; a wrong event name or property is a compile error. | Type-level, plus `pnpm typecheck` |
+| Exclusions | `shouldTrackPath` refuses `/order/$token`, `/menu-board`, `/display`, every authenticated route, and any unknown route. Privacy-critical, so it is the most thoroughly tested function. | Unit |
+| New-account heuristic | The threshold and its clock-skew behaviour. | Unit |
+| Identity payload | `analyticsIdentity` returns opaque ids and counts only, with `role` from `businessMembers` rather than `cafeStaff`, and no name, email or cafe name in the response. | Unit, `convex-test` |
+| Auth-method handoff | The value round-trips across the Google redirect and is consumed once, so a later sign-in is not misattributed. | Unit |
+| Provider wiring | identify, group and reset fire at the right moments. | Manual checklist |
 
 ## Out of scope
 
