@@ -61,6 +61,24 @@ export async function initAnalytics(superProps: Record<string, string>): Promise
     // time), permanently attaching a live sign-in code and an email address
     // to the person profile. This looks removable; it is load-bearing.
     disable_capture_url_hashes: true,
+    // `autocapture: false` above only closes ONE automatic capture path. In
+    // this SDK version capture_performance, capture_exceptions,
+    // capture_heatmaps and capture_dead_clicks all default to `undefined`,
+    // meaning "defer to whatever is configured in the PostHog dashboard UI",
+    // and disable_surveys defaults to false. Left unset, the "explicit
+    // events only" guarantee this whole module exists for is a toggle
+    // someone can flip remotely, not a property of this repository.
+    // Exception autocapture ships error messages and stack traces;
+    // dead-click and heatmap payloads carry element text, which on the POS
+    // is customer names and order lines; surveys can pop up unprompted on
+    // an unattended in-cafe TV. Every one of these must stay pinned here.
+    capture_performance: false,
+    capture_exceptions: false,
+    capture_heatmaps: false,
+    capture_dead_clicks: false,
+    disable_surveys: true,
+    rageclick: false,
+    respect_dnt: true,
     // localStorage rather than localStorage+cookie: the published privacy
     // policy states we set no third-party tracking cookies.
     persistence: 'localStorage',
