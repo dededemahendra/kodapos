@@ -89,6 +89,20 @@ export async function initAnalytics(superProps: Record<string, string>): Promise
   return true;
 }
 
+/**
+ * Re-registers the super properties attached to every subsequent event.
+ * A thin wrapper over posthog.register, no-op when the client is null
+ * (analytics disabled, or the dynamic import hasn't resolved yet).
+ *
+ * Needed because `initAnalytics` only registers once, at init time, and
+ * some super properties (locale) are not yet known at that point: they
+ * come from a provider that mounts before its own effect has read the
+ * stored value.
+ */
+export function registerSuperProperties(props: Record<string, string>): void {
+  client?.register(props);
+}
+
 export function capture(name: string, props?: Record<string, unknown>): void {
   // Belt and suspenders alongside the provider's init gate: even if
   // something ever calls capture() from a cafe-customer surface, this

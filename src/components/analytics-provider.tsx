@@ -15,6 +15,7 @@ import {
   identifyUser,
   initAnalytics,
   isAnalyticsEnabled,
+  registerSuperProperties,
   resetAnalytics,
   setGroup,
 } from '~/lib/analytics/client';
@@ -40,7 +41,15 @@ export function AnalyticsProvider(): null {
   const { locale } = useLocale();
   const { isAuthenticated } = useConvexAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const identity = useQuery(api.users.analyticsIdentity, isAuthenticated ? {} : 'skip');
+  // Gated on isAnalyticsEnabled(), not just isAuthenticated: without a key
+  // configured this otherwise opened a live Convex subscription (reads
+  // users, scans businessMembers, collects every cafes row, re-running on
+  // any write in that read set) on every authenticated client, indefinitely,
+  // for a feature that is switched off.
+  const identity = useQuery(
+    api.users.analyticsIdentity,
+    isAuthenticated && isAnalyticsEnabled() ? {} : 'skip'
+  );
 
   const started = useRef(false);
   const wasAuthenticated = useRef(false);
@@ -83,11 +92,32 @@ export function AnalyticsProvider(): null {
     capturePageview(pathname);
   }, [pathname, ready]);
 
+  // Re-registers the super properties whenever `locale` changes. LocaleProvider
+  // deliberately mounts at DEFAULT_LOCALE ('en') and only reads the stored
+  // locale in an effect of its own; React runs child effects before parent
+  // effects, so the init effect above always registers with the wrong locale
+  // on first run. Without this, `started.current` is already true by the
+  // time the real locale is known, so the `[locale]` dependency on the init
+  // effect can never fire it again, and every event from every user reports
+  // locale: 'en' for the rest of the session.
+  useEffect(() => {
+    if (!ready) return;
+    registerSuperProperties(buildSuperProperties({ locale, appVersion: __APP_VERSION__ }));
+  }, [locale, ready]);
+
   // Identity, plus the completion event. Firing here rather than in
   // signin.tsx is what makes Google work: it returns by redirect, so no
   // handler there ever sees its success. Opaque ids and counts only.
+  //
+  // Gated on `ready`, not just isAnalyticsEnabled(): without it, if `identity`
+  // resolves before the dynamic import in initAnalytics does, this effect
+  // still marks `identified.current` and consumes takeAuthMethod() while
+  // identifyUser/setGroup/track silently no-op against a null client. The
+  // guard above then blocks re-entry forever and the auth method is already
+  // gone, so the session stays anonymous and the conversion is lost with no
+  // way to retry or observe it.
   useEffect(() => {
-    if (!isAnalyticsEnabled() || !identity) return;
+    if (!ready || !isAnalyticsEnabled() || !identity) return;
     if (identified.current === identity.userId) return;
     identified.current = identity.userId;
     identifyUser(identity.userId, { role: identity.role });
@@ -102,7 +132,7 @@ export function AnalyticsProvider(): null {
         is_new_account: isNewAccount(identity.accountAgeMs),
       });
     }
-  }, [identity]);
+  }, [identity, ready]);
 
   // Reset on sign-out. Watching the auth transition covers all three signOut
   // call sites without touching any of them.
