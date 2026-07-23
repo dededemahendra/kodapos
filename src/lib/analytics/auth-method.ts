@@ -59,7 +59,13 @@ export function takeAuthMethod(): AuthMethod | null {
   const { method, storedAt } = parsed as { method: unknown; storedAt: unknown };
   if (typeof storedAt !== 'number' || !Number.isFinite(storedAt)) return null;
   if (!VALID.includes(method as AuthMethod)) return null;
-  if (Date.now() - storedAt > TTL_MS) return null;
+  // Reject a future-dated entry as well as an expired one. Only this module
+  // writes storedAt, via Date.now(), so a negative age means the clock moved
+  // backwards or the value was corrupted into something finite but wrong.
+  // Checking only the upper bound would silently ACCEPT those, which is the
+  // failure direction this expiry exists to prevent.
+  const age = Date.now() - storedAt;
+  if (age < 0 || age > TTL_MS) return null;
 
   return method as AuthMethod;
 }

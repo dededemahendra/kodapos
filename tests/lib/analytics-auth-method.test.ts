@@ -72,6 +72,16 @@ describe('auth method handoff', () => {
       expect(store.has(KEY)).toBe(false);
     });
 
+    // Only this module writes storedAt, via Date.now(), so a future-dated
+    // entry means the clock moved backwards or the value was corrupted into
+    // something finite but wrong. Checking only the upper bound would accept
+    // it, which is the failure direction the expiry exists to prevent.
+    it('rejects a future-dated entry, and still consumes it', () => {
+      store.set(KEY, JSON.stringify({ method: 'otp', storedAt: Date.now() + 60_000 }));
+      expect(takeAuthMethod()).toBeNull();
+      expect(store.has(KEY)).toBe(false);
+    });
+
     it('rejects a malformed (unparseable) stored entry', () => {
       store.set(KEY, '{not valid json');
       expect(takeAuthMethod()).toBeNull();
