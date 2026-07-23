@@ -6,6 +6,10 @@ import { useConvexAuth, useQuery } from 'convex/react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale } from '~/components/locale-provider';
 import {
+  CHANGE_EVENT as CASHIER_CHANGE_EVENT,
+  STORAGE_KEY as CASHIER_STORAGE_KEY,
+} from '~/lib/active-cashier';
+import {
   capturePageview,
   identifyUser,
   initAnalytics,
@@ -14,9 +18,6 @@ import {
   setGroup,
 } from '~/lib/analytics/client';
 import { buildSuperProperties, shouldTrackPath } from '~/lib/analytics/policy';
-
-const CASHIER_STORAGE_KEY = 'kodapos.activeCashierId';
-const CASHIER_CHANGE_EVENT = 'kodapos:active-cashier-change';
 
 /**
  * Drives the analytics lifecycle. Renders nothing.
@@ -42,15 +43,24 @@ export function AnalyticsProvider(): null {
   // gate the very first pageview (the top of the marketing funnel) is
   // silently dropped. Flipping it true only after init resolves lets the
   // pageview effect wait instead of firing into the void.
+  //
+  // initAnalytics() never rejects, and it only resolves `true` once the SDK
+  // has actually initialized, so `ready` can never end up true with the
+  // client still absent. If the dynamic import fails (e.g. an ad blocker),
+  // it resolves `false` and `ready` simply stays false for the session,
+  // which is a harmless no-op via the other capture functions' `client?.`
+  // guards, rather than an unhandled rejection.
   const [ready, setReady] = useState(false);
 
   // Init once, on the client only.
   useEffect(() => {
     if (started.current || !isAnalyticsEnabled()) return;
     started.current = true;
-    void initAnalytics(buildSuperProperties({ locale, appVersion: __APP_VERSION__ })).then(() => {
-      setReady(true);
-    });
+    void initAnalytics(buildSuperProperties({ locale, appVersion: __APP_VERSION__ })).then(
+      (initialized) => {
+        if (initialized) setReady(true);
+      }
+    );
   }, [locale]);
 
   // Pageviews, filtered through the allowlist in policy.ts. Gated on `ready`

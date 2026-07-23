@@ -1,11 +1,11 @@
 import type { Id } from 'convex/_generated/dataModel';
 import { useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'kodapos.activeCashierId';
+export const STORAGE_KEY = 'kodapos.activeCashierId';
 // The `storage` event only fires in OTHER tabs, so a switch within THIS tab
 // must broadcast its own event for sibling hook instances (e.g. a permission
 // gate) to re-read and re-render immediately — without a full reload.
-const CHANGE_EVENT = 'kodapos:active-cashier-change';
+export const CHANGE_EVENT = 'kodapos:active-cashier-change';
 
 function readFromStorage(): Id<'cafeStaff'> | null {
   if (typeof window === 'undefined') return null;

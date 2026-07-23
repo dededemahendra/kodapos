@@ -26,9 +26,24 @@ export function isAnalyticsEnabled(): boolean {
   return typeof window !== 'undefined' && key().length > 0;
 }
 
-export async function initAnalytics(superProps: Record<string, string>): Promise<void> {
-  if (!isAnalyticsEnabled() || client) return;
-  const { default: posthog } = await import('posthog-js');
+/**
+ * Resolves `true` once the SDK is ready to capture and `false` if it never
+ * will be for this session. Never rejects: the dynamic import goes over the
+ * network with no reverse proxy in front of it, so an ad blocker or a flaky
+ * connection failing that chunk is expected, not exceptional. Swallowing the
+ * failure here means every caller gets a degrade-to-inert client for free
+ * instead of an unhandled rejection, and `client` is only ever assigned once
+ * `posthog.init` has actually run.
+ */
+export async function initAnalytics(superProps: Record<string, string>): Promise<boolean> {
+  if (!isAnalyticsEnabled()) return false;
+  if (client) return true;
+  let posthog: PostHog;
+  try {
+    ({ default: posthog } = await import('posthog-js'));
+  } catch {
+    return false;
+  }
   posthog.init(key(), {
     api_host: host(),
     // Explicit events only. The POS shows customer names, phone numbers and
@@ -45,6 +60,7 @@ export async function initAnalytics(superProps: Record<string, string>): Promise
   });
   posthog.register(superProps);
   client = posthog;
+  return true;
 }
 
 export function capture(name: string, props?: Record<string, unknown>): void {

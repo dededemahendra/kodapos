@@ -3,6 +3,8 @@ import { isAnalyticsEnabled } from '../../src/lib/analytics/client';
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.doUnmock('posthog-js');
+  vi.resetModules();
 });
 
 describe('isAnalyticsEnabled', () => {
@@ -29,5 +31,22 @@ describe('isAnalyticsEnabled', () => {
       // biome-ignore lint/suspicious/noExplicitAny: restoring the deleted global
       (globalThis as any).window = original;
     }
+  });
+});
+
+describe('initAnalytics', () => {
+  // Direct-to-PostHog with no reverse proxy in front of it means an ad
+  // blocker failing the posthog-js chunk is a realistic case. initAnalytics
+  // must degrade to inert (resolve false) instead of rejecting, so a caller
+  // that only handles the resolved value never sees an unhandled rejection
+  // and never mistakes a failed init for a ready client.
+  it('resolves false instead of rejecting when the posthog-js import fails', async () => {
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    vi.doMock('posthog-js', () => {
+      throw new Error('blocked');
+    });
+    vi.resetModules();
+    const { initAnalytics } = await import('../../src/lib/analytics/client');
+    await expect(initAnalytics({})).resolves.toBe(false);
   });
 });
