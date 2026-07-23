@@ -58,7 +58,7 @@ function SalesReport() {
   );
 
   const chartConfig = {
-    revenueIDR: { label: t`Pendapatan`, color: 'var(--chart-2)' },
+    revenueIDR: { label: t`Pendapatan`, color: 'var(--chart-1)' },
   } satisfies ChartConfig;
 
   if (data === undefined) {

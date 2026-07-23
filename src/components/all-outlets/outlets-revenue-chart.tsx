@@ -18,7 +18,7 @@ export function OutletsRevenueChart({
 }) {
   const { t } = useLingui();
   const chartConfig = {
-    revenue: { label: t`Pendapatan`, color: 'var(--chart-2)' },
+    revenue: { label: t`Pendapatan`, color: 'var(--chart-1)' },
   } satisfies ChartConfig;
 
   const rows = outlets.map((o) => ({ label: o.name, revenue: o.revenueIDR }));
