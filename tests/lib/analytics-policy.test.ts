@@ -3,9 +3,43 @@ import {
   buildSuperProperties,
   isCustomerSurface,
   isNewAccount,
+  isTrackedHost,
   NEW_ACCOUNT_WINDOW_MS,
   shouldTrackPath,
 } from '../../src/lib/analytics/policy';
+
+describe('isTrackedHost', () => {
+  // The key now lives in the Cloudflare dashboard, so every build that ships
+  // carries it: local dev, branch previews and production all become live
+  // trackers unless the host itself is checked. Real product data must not be
+  // polluted by developer sessions, and a preview URL must never write to the
+  // production project.
+  it('tracks the production domain', () => {
+    expect(isTrackedHost('kodapos.app')).toBe(true);
+    expect(isTrackedHost('www.kodapos.app')).toBe(true);
+  });
+
+  it('does not track local development', () => {
+    expect(isTrackedHost('localhost')).toBe(false);
+    expect(isTrackedHost('127.0.0.1')).toBe(false);
+    expect(isTrackedHost('0.0.0.0')).toBe(false);
+  });
+
+  it('does not track Cloudflare preview deployments', () => {
+    expect(isTrackedHost('kodapos.workers.dev')).toBe(false);
+    expect(isTrackedHost('a1b2c3-kodapos.dede.workers.dev')).toBe(false);
+  });
+
+  // Exact match, never a suffix or prefix test. `endsWith('kodapos.app')` would
+  // accept an attacker-controlled `kodapos.app.example.com`, and
+  // `includes('kodapos.app')` is worse still.
+  it('does not track lookalike hosts', () => {
+    expect(isTrackedHost('kodapos.app.example.com')).toBe(false);
+    expect(isTrackedHost('notkodapos.app')).toBe(false);
+    expect(isTrackedHost('staging.kodapos.app')).toBe(false);
+    expect(isTrackedHost('')).toBe(false);
+  });
+});
 
 describe('shouldTrackPath', () => {
   it('tracks the marketing pages', () => {

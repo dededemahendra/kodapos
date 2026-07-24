@@ -56,6 +56,27 @@ export function isCustomerSurface(pathname: string): boolean {
 }
 
 /**
+ * Analytics runs on the production domain and nowhere else.
+ *
+ * `VITE_POSTHOG_KEY` is set in the Cloudflare dashboard, and Vite inlines it at
+ * build time into every build produced from that environment. Without this
+ * check the key alone would decide, so a developer running `pnpm dev` with the
+ * key present, and every Cloudflare preview deployment of every branch, would
+ * emit into the production PostHog project. That corrupts the funnel this slice
+ * exists to measure with sessions that are not customers.
+ *
+ * Exact match against a Set, like MARKETING_PATHS above and for the same
+ * reason: a suffix test (`endsWith('kodapos.app')`) would accept
+ * `kodapos.app.attacker.example`, and default-deny means a new host is inert
+ * until someone deliberately adds it here.
+ */
+const TRACKED_HOSTS: ReadonlySet<string> = new Set(['kodapos.app', 'www.kodapos.app']);
+
+export function isTrackedHost(hostname: string): boolean {
+  return TRACKED_HOSTS.has(hostname.toLowerCase());
+}
+
+/**
  * Registration is implicit in the passwordless flow: the account is created on
  * the first successful verify, so the client cannot distinguish it from a
  * returning sign-in. Inferring it from the age of the user document is a
