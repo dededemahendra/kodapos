@@ -105,22 +105,12 @@ export function AnalyticsProvider(): null {
     lastViewUrl.current = window.location.href;
   }, [pathname, ready]);
 
-  // The final $pageleave of a session. The last tracked page (tab close, a
-  // navigation off-site, a mobile app switch) never reaches the route effect
-  // above, so without this its leave is lost, which is exactly the single-page
-  // bounce PostHog most needs to see. `pagehide` is the reliable unload signal
-  // across browsers and mobile Safari, where `beforeunload` does not fire.
-  // Cleared after firing so a bfcache restore cannot double-count it.
-  useEffect(() => {
-    if (!isAnalyticsEnabled()) return;
-    function onPageHide(): void {
-      if (!lastViewUrl.current) return;
-      capturePageleave(lastViewUrl.current);
-      lastViewUrl.current = null;
-    }
-    window.addEventListener('pagehide', onPageHide);
-    return () => window.removeEventListener('pagehide', onPageHide);
-  }, []);
+  // No manual pagehide handler for the session's final leave: posthog-js emits
+  // that $pageleave itself (capture_pageleave: true in client.ts) from its own
+  // unload handler, which beacons in the same tick. A listener we add here runs
+  // after posthog's flush and would be dropped, so delegating is what actually
+  // makes single-page bounces record. The manual leave above stays for the
+  // per-route leaves posthog does not emit mid-SPA-navigation.
 
   // Re-registers the super properties whenever `locale` changes. LocaleProvider
   // deliberately mounts at DEFAULT_LOCALE ('en') and only reads the stored

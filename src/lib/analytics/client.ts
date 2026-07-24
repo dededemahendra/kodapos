@@ -81,10 +81,22 @@ async function start(superProps: Record<string, string>): Promise<boolean> {
       // order values; autocapture and session recording would scrape them.
       autocapture: false,
       disable_session_recording: true,
-      // Pageviews are emitted by hand from the provider so the exclusion list in
-      // policy.ts is enforced. PostHog's own automatic pageview would bypass it.
+      // Pageviews are emitted by hand from the provider so the allowlist in
+      // policy.ts is enforced; PostHog's own automatic pageview would bypass it.
       capture_pageview: false,
-      capture_pageleave: false,
+      // Pageleave, by contrast, is delegated to posthog-js. It fires $pageleave
+      // from posthog's own unload handler, which flushes via sendBeacon in the
+      // same pagehide tick — the only reliable way to land the leave of a
+      // single-page (bounce) session before the tab dies. A hand-rolled
+      // pagehide capture cannot: posthog registers its unload flush at init, so
+      // it runs BEFORE any listener we add and beacons the queue without our
+      // late-queued event. posthog pairs this leave with our manual $pageview
+      // through its PageViewManager (updated on every capture, manual included)
+      // and honors disable_capture_url_hashes, so the sign-in fragment is still
+      // stripped. Per-route leaves are still emitted by hand (see the provider);
+      // posthog only auto-emits on unload + session rotation, never mid-SPA-nav,
+      // so the two never double up.
+      capture_pageleave: true,
       // The magic-link sign-in URL carries the email and one-time code in the
       // fragment (#email=&code=), and posthog-js captures URL fragments by
       // default. Without this, that fragment ends up in `$current_url` and in
@@ -102,8 +114,13 @@ async function start(superProps: Record<string, string>): Promise<boolean> {
       // Exception autocapture ships error messages and stack traces;
       // dead-click and heatmap payloads carry element text, which on the POS
       // is customer names and order lines; surveys can pop up unprompted on
-      // an unattended in-cafe TV. Every one of these must stay pinned here.
-      capture_performance: false,
+      // an unattended in-cafe TV. Every one of these must stay pinned off.
+      //
+      // capture_performance is the one signal we opt INTO, and narrowly:
+      // { web_vitals: true } emits $web_vitals (LCP/CLS/FCP/INP) — anonymous
+      // timing and layout numbers with no element text or customer data — while
+      // network_timing stays false because resource timing carries request URLs.
+      capture_performance: { web_vitals: true, network_timing: false },
       capture_exceptions: false,
       capture_heatmaps: false,
       capture_dead_clicks: false,

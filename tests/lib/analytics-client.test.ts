@@ -114,6 +114,30 @@ describe('initAnalytics', () => {
     expect(second).toBe(first);
     await expect(first).resolves.toBe(true);
   });
+
+  // Locks the privacy-critical + reliability-critical init flags. $pageview
+  // stays manual (allowlist enforcement), $pageleave is delegated to posthog so
+  // its unload beacon actually lands single-page bounces, and web vitals is the
+  // one performance signal opted into (network timing stays off — it carries
+  // request URLs).
+  it('initializes posthog with manual pageview, delegated pageleave, and web vitals', async () => {
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    stubHostname('kodapos.app');
+    const init = vi.fn();
+    vi.doMock('posthog-js', () => ({ default: { init, register: vi.fn() } }));
+    vi.resetModules();
+    const { initAnalytics } = await import('../../src/lib/analytics/client');
+    await initAnalytics({});
+
+    const call = init.mock.calls[0];
+    if (!call) throw new Error('posthog.init was not called');
+    const config = call[1];
+    expect(config.capture_pageview).toBe(false);
+    expect(config.capture_pageleave).toBe(true);
+    expect(config.capture_performance).toEqual({ web_vitals: true, network_timing: false });
+    expect(config.autocapture).toBe(false);
+    expect(config.disable_capture_url_hashes).toBe(true);
+  });
 });
 
 describe('capturePageleave', () => {
