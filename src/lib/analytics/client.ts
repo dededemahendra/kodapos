@@ -116,11 +116,14 @@ async function start(superProps: Record<string, string>): Promise<boolean> {
       // is customer names and order lines; surveys can pop up unprompted on
       // an unattended in-cafe TV. Every one of these must stay pinned off.
       //
-      // capture_performance is the one signal we opt INTO, and narrowly:
-      // { web_vitals: true } emits $web_vitals (LCP/CLS/FCP/INP) — anonymous
-      // timing and layout numbers with no element text or customer data — while
-      // network_timing stays false because resource timing carries request URLs.
-      capture_performance: { web_vitals: true, network_timing: false },
+      // capture_performance is the one signal we opt INTO: { web_vitals: true }
+      // emits $web_vitals (LCP/CLS/FCP/INP) — anonymous timing and layout numbers
+      // with no element text or customer data. That is the only sub-key this SDK
+      // version reads for enablement; network/resource timing is not captured
+      // here (its only source, session recording's network payloads, is already
+      // off via disable_session_recording above), so there is no extra flag to
+      // pin — an explicit `network_timing: false` would be a dead no-op key.
+      capture_performance: { web_vitals: true },
       capture_exceptions: false,
       capture_heatmaps: false,
       capture_dead_clicks: false,

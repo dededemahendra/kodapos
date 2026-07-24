@@ -134,7 +134,7 @@ describe('initAnalytics', () => {
     const config = call[1];
     expect(config.capture_pageview).toBe(false);
     expect(config.capture_pageleave).toBe(true);
-    expect(config.capture_performance).toEqual({ web_vitals: true, network_timing: false });
+    expect(config.capture_performance).toEqual({ web_vitals: true });
     expect(config.autocapture).toBe(false);
     expect(config.disable_capture_url_hashes).toBe(true);
   });
