@@ -4,16 +4,28 @@
  * Everything else goes through track.ts, so swapping providers or adding a
  * reverse proxy later changes this file alone.
  *
- * posthog-js is imported lazily and only when a key is configured. With the key
- * unset nothing is imported and no network request is made, so local dev, CI
- * and the existing test suite are completely unaffected. That is also what lets
- * this slice ship to production inert while the privacy policy is updated
- * separately.
+ * posthog-js is imported lazily and only when analytics is enabled, which takes
+ * BOTH a configured key and the production hostname. With either missing,
+ * nothing is imported and no network request is made, so CI and the existing
+ * test suite are completely unaffected.
+ *
+ * The hostname half is what keeps local dev and Cloudflare preview deployments
+ * out of the production project: the key is set in the Cloudflare dashboard, so
+ * Vite inlines it into every build made from that environment, and the key
+ * alone can no longer be the switch. See isTrackedHost in policy.ts.
  */
 import type { PostHog } from 'posthog-js';
-import { isCustomerSurface } from './policy';
+import { isCustomerSurface, isTrackedHost } from './policy';
 
 let client: PostHog | null = null;
+// Memoizes the in-flight init. `client` is only assigned once the dynamic
+// import has resolved, so the `if (client)` guard leaves a window in which a
+// second caller would import posthog-js and run init/register all over again,
+// double-initializing the SDK. No caller can hit that today — the provider's
+// `started` ref is set synchronously before the only call site — but this
+// module is the app's single gatekeeper for posthog-js and should not depend
+// on a ref held in another file for its own correctness.
+let pending: Promise<boolean> | null = null;
 
 function key(): string {
   return import.meta.env.VITE_POSTHOG_KEY ?? '';
@@ -23,8 +35,16 @@ function host(): string {
   return import.meta.env.VITE_POSTHOG_HOST ?? 'https://us.i.posthog.com';
 }
 
+/**
+ * The single gate every other export and the provider defer to. The host check
+ * lives here rather than at the call sites so that adding a new entry point
+ * cannot forget it: `initAnalytics` returns false, the provider never mounts
+ * the SDK, and the Convex identity subscription stays skipped.
+ */
 export function isAnalyticsEnabled(): boolean {
-  return typeof window !== 'undefined' && key().length > 0;
+  return (
+    typeof window !== 'undefined' && key().length > 0 && isTrackedHost(window.location.hostname)
+  );
 }
 
 /**
@@ -36,9 +56,18 @@ export function isAnalyticsEnabled(): boolean {
  * instead of an unhandled rejection, and `client` is only ever assigned once
  * `posthog.init` has actually run.
  */
-export async function initAnalytics(superProps: Record<string, string>): Promise<boolean> {
-  if (!isAnalyticsEnabled()) return false;
-  if (client) return true;
+export function initAnalytics(superProps: Record<string, string>): Promise<boolean> {
+  if (!isAnalyticsEnabled()) return Promise.resolve(false);
+  if (client) return Promise.resolve(true);
+  // A failed init stays memoized as `false` rather than being cleared for a
+  // retry. That matches the contract above: false means "never will be for
+  // this session", and the sole caller latches `started` anyway, so clearing
+  // it would create a retry path that nothing actually drives.
+  pending ??= start(superProps);
+  return pending;
+}
+
+async function start(superProps: Record<string, string>): Promise<boolean> {
   // The try wraps the dynamic import AND the init/register calls below, not
   // just the import: a synchronous throw from posthog.init or
   // posthog.register happens after the `await`, and the doc comment above
