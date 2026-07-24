@@ -151,7 +151,9 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
                   </div>
                   <div className="w-24">
                     <Field>
-                      <FieldLabel htmlFor={`recipe-wastage-${line.key}`}>Wastage</FieldLabel>
+                      <FieldLabel htmlFor={`recipe-wastage-${line.key}`}>
+                        <Trans>Susut</Trans>
+                      </FieldLabel>
                       <Input
                         id={`recipe-wastage-${line.key}`}
                         type="number"
