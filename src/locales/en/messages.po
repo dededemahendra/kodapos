@@ -6538,6 +6538,10 @@ msgstr "Edit ingredients and quantities for this item's recipe."
 msgid "Susun menu kafe"
 msgstr "Build your cafe menu"
 
+#: src/components/inventory/recipe-editor.tsx
+msgid "Susut"
+msgstr "Wastage"
+
 #: src/routes/_public/terms.tsx
 #~ msgid "Syarat Layanan"
 #~ msgstr "Terms of Service"
