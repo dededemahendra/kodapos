@@ -68,7 +68,7 @@ export function MarketingFooter() {
                   </li>
                   <li>
                     <a href="/#pricing" className="hover:text-foreground">
-                      <Trans>Harga</Trans>
+                      <Trans>Gratis</Trans>
                     </a>
                   </li>
                   <li>
