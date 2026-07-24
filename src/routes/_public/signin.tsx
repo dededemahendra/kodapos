@@ -20,6 +20,8 @@ import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { rememberAuthMethod } from '~/lib/analytics/auth-method';
+import { track } from '~/lib/analytics/track';
 import { sendResetOrSigninCode } from '~/lib/auth-reset';
 import {
   validateEmail,
@@ -99,10 +101,22 @@ function MagicLinkHandler({ email, code }: { email: string; code: string }) {
     ran.current = true;
     void (async () => {
       try {
+        // The magic link lands here as `#email=&code=`, and that fragment
+        // then sits in window.location.href (and browser/session history)
+        // for the life of the page, live one-time code included. Clear it
+        // before doing anything else, independent of the posthog fix above:
+        // this is a real code, not just an analytics leak. This looks
+        // removable; it is load-bearing.
+        window.history.replaceState(null, '', '/signin');
+        rememberAuthMethod('otp');
         await signIn('resend-otp', { email, code });
         navigate({ to: '/dashboard' });
       } catch {
         setFailed(true);
+        // Expired or already-used magic links are a real drop-off cause and
+        // previously emitted nothing at all, making them invisible in the
+        // funnel.
+        track('auth_failed', { method: 'otp', reason: 'invalid_code' });
       }
     })();
   }, [email, code, signIn, navigate]);
@@ -219,6 +233,8 @@ function SigninCard({
   }
 
   function onGoogle(): void {
+    rememberAuthMethod('google');
+    track('auth_started', { method: 'google' });
     void signIn('google');
   }
 
@@ -236,6 +252,8 @@ function SigninCard({
     setEmail((prev) => ({ ...prev, touched: true, error: emailErr }));
     setPassword((prev) => ({ ...prev, touched: true, error: passwordErr }));
     if (emailErr !== null || passwordErr !== null) return;
+    rememberAuthMethod('password');
+    track('auth_started', { method: 'password' });
     setSubmitting(true);
     setAuthError(null);
     try {
@@ -248,6 +266,7 @@ function SigninCard({
     } catch {
       // Convex masks auth errors to a generic "Server Error"; show a friendly message.
       setAuthError(t`Email atau password salah.`);
+      track('auth_failed', { method: 'password', reason: 'invalid_password' });
     } finally {
       setSubmitting(false);
     }
@@ -260,6 +279,12 @@ function SigninCard({
     setEmail((prev) => ({ ...prev, touched: true, error: emailErr }));
     if (emailErr !== null) return;
     const addr = email.value.trim();
+    rememberAuthMethod('otp');
+    // This handler also serves the password-reset flow (mode === 'reset'),
+    // which has no AuthMethod of its own, so a reset send is knowingly
+    // counted as 'otp' here. Fixing that means widening AuthMethod, which we
+    // are deliberately not doing yet.
+    track('auth_started', { method: 'otp' });
     setSubmitting(true);
     setAuthError(null);
     setInfo(null);
@@ -286,11 +311,20 @@ function SigninCard({
           setInfo(t`Kode reset dikirim ke email Anda.`);
         }
       }
+      // Both branches reach here only when a code (or reset code) actually
+      // went out. The `else` branch sends a real code too (that is the whole
+      // point of the passwordless fallback), so this must not live inside
+      // the `if (mode === 'otp')` block: doing so made the fallback path
+      // emit auth_started then nothing then auth_completed, showing a false
+      // drop-off in the funnel for a user who genuinely got a code and
+      // signed in.
+      track('auth_code_sent', {});
     } catch {
       // Both the reset and the sign-in code send failed: a genuine email outage.
       setAuthError(
         t`Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi.`,
       );
+      track('auth_failed', { method: 'otp', reason: 'send_failed' });
     } finally {
       setSubmitting(false);
     }
@@ -324,6 +358,7 @@ function SigninCard({
       navigate({ to: '/dashboard' });
     } catch {
       setAuthError(t`Kode salah atau sudah kedaluwarsa.`);
+      track('auth_failed', { method: 'otp', reason: 'invalid_code' });
     } finally {
       setSubmitting(false);
     }

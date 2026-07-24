@@ -6,6 +6,7 @@ import { Globe, Heart, Mail, MessageCircle } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { BrandMark } from '~/components/brand-mark';
 import { LanguageToggle } from '~/components/language-toggle';
+import { track } from '~/lib/analytics/track';
 
 const VP = { once: true, margin: '-80px' } as const;
 
@@ -88,12 +89,24 @@ export function MarketingFooter() {
                 </h4>
                 <ul className="space-y-3 text-sm text-muted-foreground">
                   <li>
-                    <Link to="/signin" className="hover:text-foreground">
+                    <Link
+                      to="/signin"
+                      className="hover:text-foreground"
+                      onClick={() =>
+                        track('marketing_cta_clicked', { location: 'footer', label: 'sign_in' })
+                      }
+                    >
                       <Trans>Masuk</Trans>
                     </Link>
                   </li>
                   <li>
-                    <Link to="/signin" className="hover:text-foreground">
+                    <Link
+                      to="/signin"
+                      className="hover:text-foreground"
+                      onClick={() =>
+                        track('marketing_cta_clicked', { location: 'footer', label: 'start_free' })
+                      }
+                    >
                       <Trans>Daftar</Trans>
                     </Link>
                   </li>

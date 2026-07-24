@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { MotionConfig, motion, type Variants } from 'motion/react';
 import { Button } from '~/components/ui/button';
 import { DotPattern } from '~/components/ui/dot-pattern';
+import { track } from '~/lib/analytics/track';
 
 /** Trigger once when 80px inside viewport */
 const VP = { once: true, margin: '-80px' } as const;
@@ -52,7 +53,12 @@ export function CtaBand() {
                 </a>
               </Button>
               <Button asChild size="lg" className="bg-background text-foreground hover:bg-background/90">
-                <Link to="/signin">
+                <Link
+                  to="/signin"
+                  onClick={() =>
+                    track('marketing_cta_clicked', { location: 'cta_band', label: 'start_free' })
+                  }
+                >
                   <Trans>Mulai gratis</Trans>
                 </Link>
               </Button>

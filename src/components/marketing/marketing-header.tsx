@@ -4,6 +4,7 @@ import { MotionConfig, motion } from 'motion/react';
 import { Button } from '~/components/ui/button';
 import { BrandMark } from '~/components/brand-mark';
 import { ThemeToggle } from '~/components/theme-toggle';
+import { track } from '~/lib/analytics/track';
 
 export function MarketingHeader() {
   return (
@@ -28,10 +29,20 @@ export function MarketingHeader() {
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle className="size-9" />
           <Button asChild variant="outline" size="sm">
-            <Link to="/signin"><Trans>Masuk</Trans></Link>
+            <Link
+              to="/signin"
+              onClick={() => track('marketing_cta_clicked', { location: 'header', label: 'sign_in' })}
+            >
+              <Trans>Masuk</Trans>
+            </Link>
           </Button>
           <Button asChild size="sm">
-            <Link to="/signin"><Trans>Daftar</Trans></Link>
+            <Link
+              to="/signin"
+              onClick={() => track('marketing_cta_clicked', { location: 'header', label: 'start_free' })}
+            >
+              <Trans>Daftar</Trans>
+            </Link>
           </Button>
         </div>
       </div>

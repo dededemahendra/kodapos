@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowUp, Check, MessageCircle } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { Button } from '~/components/ui/button';
+import { track } from '~/lib/analytics/track';
 
 /** Shared viewport settings: trigger once when the element is 80px inside the viewport */
 const VP = { once: true, margin: '-80px' } as const;
@@ -201,7 +202,12 @@ export function AiSpotlight() {
             variants={makeSlide(0.32)}
           >
             <Button asChild size="lg">
-              <Link to="/signin">
+              <Link
+                to="/signin"
+                onClick={() =>
+                  track('marketing_cta_clicked', { location: 'ai_spotlight', label: 'start_free' })
+                }
+              >
                 <Trans>Mulai gratis</Trans>
               </Link>
             </Button>

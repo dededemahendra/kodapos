@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card';
+import { track } from '~/lib/analytics/track';
 
 /** Shared viewport settings: trigger once when the element is 80px inside the viewport */
 const VP = { once: true, margin: '-80px' } as const;
@@ -94,7 +95,12 @@ export function Pricing() {
                 </CardContent>
                 <CardFooter>
                   <Button asChild className="w-full">
-                    <Link to="/signin">
+                    <Link
+                      to="/signin"
+                      onClick={() =>
+                        track('marketing_cta_clicked', { location: 'pricing', label: 'start_free' })
+                      }
+                    >
                       <Trans>Mulai gratis</Trans>
                     </Link>
                   </Button>
@@ -145,7 +151,12 @@ export function Pricing() {
                 </CardContent>
                 <CardFooter>
                   <Button asChild className="w-full">
-                    <Link to="/signin">
+                    <Link
+                      to="/signin"
+                      onClick={() =>
+                        track('marketing_cta_clicked', { location: 'pricing', label: 'start_free' })
+                      }
+                    >
                       <Trans>Mulai gratis</Trans>
                     </Link>
                   </Button>
