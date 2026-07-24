@@ -115,3 +115,39 @@ describe('initAnalytics', () => {
     await expect(first).resolves.toBe(true);
   });
 });
+
+describe('capturePageleave', () => {
+  // The magic-link sign-in URL carries the email and one-time code in the
+  // fragment. init() sets disable_capture_url_hashes to keep posthog-js from
+  // recording it, but capturePageleave overrides $current_url explicitly, so it
+  // has to strip the fragment itself or that protection is defeated for exactly
+  // the page it matters most on. Origin, path and query are preserved.
+  it('emits $pageleave for the given URL with the fragment stripped', async () => {
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    stubHostname('kodapos.app');
+    const capture = vi.fn();
+    vi.doMock('posthog-js', () => ({
+      default: { init: vi.fn(), register: vi.fn(), capture },
+    }));
+    vi.resetModules();
+    const { initAnalytics, capturePageleave } = await import('../../src/lib/analytics/client');
+    await initAnalytics({});
+
+    capturePageleave('https://kodapos.app/signin?ref=x#email=a@b.com&code=123456');
+
+    expect(capture).toHaveBeenCalledWith('$pageleave', {
+      $current_url: 'https://kodapos.app/signin?ref=x',
+      $host: 'kodapos.app',
+      $pathname: '/signin',
+    });
+  });
+
+  // No client until init resolves; a leave fired before that (or with analytics
+  // disabled) must be an inert no-op, never a throw.
+  it('is a no-op when analytics has not initialized', async () => {
+    vi.stubEnv('VITE_POSTHOG_KEY', '');
+    vi.resetModules();
+    const { capturePageleave } = await import('../../src/lib/analytics/client');
+    expect(() => capturePageleave('https://kodapos.app/')).not.toThrow();
+  });
+});

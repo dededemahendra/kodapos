@@ -11,6 +11,7 @@ import {
 } from '~/lib/active-cashier';
 import { takeAuthMethod } from '~/lib/analytics/auth-method';
 import {
+  capturePageleave,
   capturePageview,
   identifyUser,
   initAnalytics,
@@ -54,6 +55,13 @@ export function AnalyticsProvider(): null {
   const started = useRef(false);
   const wasAuthenticated = useRef(false);
   const identified = useRef<string | null>(null);
+  // Full href of the last page we recorded a $pageview for. The paired
+  // $pageleave has to be attributed to that page, but window.location has
+  // already advanced to the next route by the time we fire it, so we stash the
+  // URL here at pageview time rather than reading it back at leave time. Only
+  // ever holds a tracked, non-customer path: it is set solely by the pageview
+  // effect below, which the same gates already restrict.
+  const lastViewUrl = useRef<string | null>(null);
   // capturePageview() is a no-op until initAnalytics()'s dynamic import
   // resolves, because the module-level client is still null. Without this
   // gate the very first pageview (the top of the marketing funnel) is
@@ -89,8 +97,30 @@ export function AnalyticsProvider(): null {
   useEffect(() => {
     if (!ready || !isAnalyticsEnabled()) return;
     if (!shouldTrackPath(pathname)) return;
+    // Close out the previously tracked page before opening this one, so PostHog
+    // can pair leave with view and derive time-on-page and bounce rate. Skipped
+    // for the first tracked pageview of the session, which has no predecessor.
+    if (lastViewUrl.current) capturePageleave(lastViewUrl.current);
     capturePageview();
+    lastViewUrl.current = window.location.href;
   }, [pathname, ready]);
+
+  // The final $pageleave of a session. The last tracked page (tab close, a
+  // navigation off-site, a mobile app switch) never reaches the route effect
+  // above, so without this its leave is lost, which is exactly the single-page
+  // bounce PostHog most needs to see. `pagehide` is the reliable unload signal
+  // across browsers and mobile Safari, where `beforeunload` does not fire.
+  // Cleared after firing so a bfcache restore cannot double-count it.
+  useEffect(() => {
+    if (!isAnalyticsEnabled()) return;
+    function onPageHide(): void {
+      if (!lastViewUrl.current) return;
+      capturePageleave(lastViewUrl.current);
+      lastViewUrl.current = null;
+    }
+    window.addEventListener('pagehide', onPageHide);
+    return () => window.removeEventListener('pagehide', onPageHide);
+  }, []);
 
   // Re-registers the super properties whenever `locale` changes. LocaleProvider
   // deliberately mounts at DEFAULT_LOCALE ('en') and only reads the stored

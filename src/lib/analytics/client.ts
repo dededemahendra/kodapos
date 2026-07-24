@@ -153,6 +153,32 @@ export function capturePageview(): void {
   client?.capture('$pageview');
 }
 
+/**
+ * The leave half of a manual pageview. Emitted by hand, one per route change,
+ * for the page being LEFT, so PostHog can pair it with the matching $pageview
+ * and derive time-on-page and bounce rate.
+ *
+ * It takes the previous page's href explicitly instead of letting posthog-js
+ * read window.location, because by the time the provider fires this the router
+ * has already advanced the URL to the next page; a bare capture('$pageleave')
+ * would stamp the leave with the wrong page and break the pairing.
+ *
+ * The hash is stripped for the exact reason disable_capture_url_hashes is set
+ * in init(): the magic-link sign-in URL carries the email and one-time code in
+ * the fragment, and overriding $current_url here would smuggle that fragment
+ * straight back into the event that flag exists to keep out. Overriding all
+ * three page props (not just $current_url) keeps this event's URL breakdowns
+ * consistent with the $pageview posthog-js builds from window.location.
+ */
+export function capturePageleave(href: string): void {
+  const url = new URL(href);
+  client?.capture('$pageleave', {
+    $current_url: `${url.origin}${url.pathname}${url.search}`,
+    $host: url.host,
+    $pathname: url.pathname,
+  });
+}
+
 export function identifyUser(distinctId: string, props: Record<string, unknown>): void {
   client?.identify(distinctId, props);
 }
