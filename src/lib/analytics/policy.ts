@@ -89,6 +89,84 @@ export function isNewAccount(accountAgeMs: number): boolean {
   return accountAgeMs >= 0 && accountAgeMs < NEW_ACCOUNT_WINDOW_MS;
 }
 
+/**
+ * Exception autocapture (client.ts, `capture_exceptions`) is the only capture
+ * path in this app whose payload we do not author. A `$pageview` carries a URL
+ * we control and a `track()` call carries properties someone wrote by hand, but
+ * an Error's message is whatever threw it: a Convex validation failure quoting
+ * the offending field, a fetch error with a query string in it, a hand-written
+ * `throw new Error(\`no customer for ${phone}\`)`. On this POS those values are
+ * customer emails and phone numbers, and the published privacy policy commits
+ * to keeping exactly those out of PostHog.
+ *
+ * Names are NOT covered here and this is not pretending otherwise: no pattern
+ * separates a customer's name from an ordinary English word. What keeps names
+ * out is `capture_console_errors: false` in client.ts, which closes the one
+ * path that would ship a whole serialized order or customer record.
+ *
+ * Deliberately over-eager on digits: an 8+ digit run is redacted whether it is
+ * a phone number, an order total, or a millisecond timestamp. Losing a number
+ * from an error message costs some debugging context; leaking one costs the
+ * promise above, and only one of those is recoverable.
+ */
+const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+// Runs of 8 or more digits, tolerating the separators Indonesian numbers are
+// written with: +62 812-3456-7890, (0361) 123456, 081234567890. The optional
+// leading `(` is matched as part of the number rather than left behind, so an
+// area code in parentheses is redacted whole instead of becoming `([number]`.
+// Applied AFTER EMAIL_RE so an address containing digits is already gone and
+// cannot be half-matched into `[email]`-shaped debris.
+const LONG_NUMBER_RE = /\+?\(?\d[\d\s().-]{6,}\d/g;
+
+export function scrubExceptionText(text: string): string {
+  return text.replace(EMAIL_RE, '[email]').replace(LONG_NUMBER_RE, '[number]');
+}
+
+/** One entry of posthog-js's `$exception_list`; only `value` is of interest. */
+type ExceptionEntry = { value?: unknown };
+
+/**
+ * Returns a copy of a `$exception` event's properties with the free-form text
+ * redacted. Pure, so the privacy-critical half of error tracking stays testable
+ * (see the module header: the provider and the SDK wrapper are `.tsx`/untestable
+ * in this repo, this file is not).
+ *
+ * `$exception_list[].value` is the field that actually matters. posthog-js
+ * builds that list from the thrown value, and PostHog derives the issue title,
+ * the fingerprint and `$exception_message` from it server side, so scrubbing
+ * the list is what changes what gets stored and displayed.
+ *
+ * `$exception_message` is scrubbed too even though the native autocapture path
+ * never sets it: only the SDK's Sentry bridge does. Nothing here uses that
+ * bridge today, and covering it costs one branch rather than a silent bypass
+ * the day someone turns it on.
+ *
+ * Stack frames are left alone on purpose. They carry function names and bundle
+ * URLs, which are our own code, and they are the entire reason source maps get
+ * uploaded; redacting digits there would mangle line and column numbers.
+ */
+export function scrubExceptionProperties(
+  properties: Record<string, unknown>
+): Record<string, unknown> {
+  const scrubbed = { ...properties };
+  const list = scrubbed.$exception_list;
+
+  if (Array.isArray(list)) {
+    scrubbed.$exception_list = list.map((entry: unknown) => {
+      if (entry === null || typeof entry !== 'object') return entry;
+      const { value } = entry as ExceptionEntry;
+      if (typeof value !== 'string') return entry;
+      return { ...entry, value: scrubExceptionText(value) };
+    });
+  }
+
+  if (typeof scrubbed.$exception_message === 'string') {
+    scrubbed.$exception_message = scrubExceptionText(scrubbed.$exception_message);
+  }
+
+  return scrubbed;
+}
+
 export function buildSuperProperties(input: { locale: string; appVersion: string }): {
   locale: string;
   app_version: string;
