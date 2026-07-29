@@ -6,6 +6,7 @@ import { useEffect, type ReactNode } from 'react';
 import { AnalyticsProvider } from '~/components/analytics-provider';
 import { LocaleProvider } from '~/components/locale-provider';
 import { captureError } from '~/lib/analytics/client';
+import { isCustomerSurface } from '~/lib/analytics/policy';
 import { authStorage } from '~/lib/auth-storage';
 import { convex } from '~/lib/convex';
 import { i18n } from '~/lib/i18n';
@@ -66,6 +67,14 @@ export const Route = createRootRoute({
  * them. Reporting from the boundary is the only way the crashes a user actually
  * notices reach error tracking. captureError is inert until analytics has
  * initialized, so this is a no-op in dev, in previews and on customer surfaces.
+ *
+ * `error.message` is shown to staff but never to cafe customers. This is the
+ * only error boundary `/order/$token` and `/display` have (menu-board defines
+ * its own), and an error message on this POS can carry the very things the
+ * PostHog scrub in policy.ts exists to strip: `no customer for 0812...`
+ * rendered at full size on a screen a customer is looking at. Staff keep the
+ * real message, because a generic string on the register is a support call
+ * nobody can answer.
  */
 function RootErrorBoundary({ error, reset }: { error: unknown; reset: () => void }) {
   // Keyed on `error` rather than mount so a second, different crash after a
@@ -74,12 +83,20 @@ function RootErrorBoundary({ error, reset }: { error: unknown; reset: () => void
     captureError(error);
   }, [error]);
 
+  // isCustomerSurface is imported from the analytics policy rather than
+  // duplicated: it is already the single source of truth for which routes face
+  // a cafe customer, and a second copy of that list would drift from it.
+  // Fails closed during SSR, where there is no location to test: unknown means
+  // treat it as customer-facing and show the generic message.
+  const isStaffSurface =
+    typeof window !== 'undefined' && !isCustomerSurface(window.location.pathname);
+
   return (
     <I18nProvider i18n={i18n}>
       <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
         <h1 className="text-2xl font-bold"><Trans>Terjadi kesalahan</Trans></h1>
         <p className="text-muted-foreground text-sm max-w-md">
-          {error instanceof Error ? error.message : <Trans>Sesuatu yang tidak terduga terjadi.</Trans>}
+          {isStaffSurface && error instanceof Error ? error.message : <Trans>Sesuatu yang tidak terduga terjadi.</Trans>}
         </p>
         <div className="flex gap-3">
           <button onClick={reset} className="text-primary underline text-sm"><Trans>Coba lagi</Trans></button>
