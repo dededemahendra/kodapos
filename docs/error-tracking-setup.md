@@ -4,8 +4,10 @@ PostHog exception autocapture is enabled in `src/lib/analytics/client.ts`. The
 production bundle is minified, so without source maps every stack trace in Error
 Tracking reads as `t.a is not a function` at `chunk-abc.js:1:40213`.
 
-`vite.config.ts` builds with `sourcemap: true`, and the resulting `.map` files
-are **served publicly** from `kodapos.app` along with the rest of `dist/client`.
+`vite.config.ts` sets `sourcemap: true` on the **client environment only**
+(`environments.client.build`, not the top level, which would also emit maps for
+the workerd/SSR bundle that nothing ever reads). The resulting `.map` files are
+**served publicly** from `kodapos.app` along with the rest of `dist/client`.
 PostHog fetches each one over HTTP, following the `sourceMappingURL` comment
 Vite appends to every chunk.
 
