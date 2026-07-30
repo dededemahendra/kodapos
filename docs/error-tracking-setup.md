@@ -56,3 +56,29 @@ management endpoint, and returns 401 for a project key.
 Only `dist/client` is ever relevant either way. `dist/server` is the workerd
 bundle, and posthog-js only initializes in a browser, so nothing server-side
 emits `$exception`.
+
+## Ingestion goes through /relay
+
+PostHog is served first-party from `kodapos.app/relay/*`, not directly from
+`us.i.posthog.com`. `src/routes/relay.$.ts` forwards to two upstreams:
+
+| Path | Upstream | Why |
+|---|---|---|
+| `/relay/static/*` | `us-assets.i.posthog.com` | Versioned extension scripts |
+| everything else | `us.i.posthog.com` | Event ingestion, flags, remote config |
+
+Two upstreams are required. `capture_exceptions` does not live in the main
+bundle: posthog-js calls `loadExternalDependency('exception-autocapture')`,
+which fetches `/static/exception-autocapture.js` at runtime. A proxy forwarding
+everything to the ingestion host 404s that script and disables error tracking
+with no error in any console. `$web_vitals` loads the same way.
+
+The route forwards request headers by allowlist. This is load-bearing: `/relay`
+is same-origin, so the browser attaches kodapos.app session cookies to every
+ingestion request, and a denylist that forgot `cookie` would forward them to
+PostHog. It also forwards `cf-connecting-ip` as `x-forwarded-for`, without which
+every event geolocates to a Cloudflare datacenter.
+
+This is mitigation with a shelf life, not a fix. Blockers increasingly match on
+path patterns, and `/ingest/` and `/e/` are already on filter lists. `/relay`
+was chosen for being mundane rather than for being permanent.
