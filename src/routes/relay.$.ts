@@ -8,8 +8,13 @@ import { resolveRelayTarget } from '../lib/analytics/relay';
  * would hand our session cookies to a third party — a privacy regression this
  * proxy introduces and that direct ingestion never had. An allowlist cannot
  * forget.
+ *
+ * `user-agent` is here for the same reason `x-forwarded-for` is set below:
+ * without it PostHog would see the Worker's user-agent instead of the
+ * visitor's. Forwarding it preserves what direct ingestion already sent
+ * rather than collecting anything new.
  */
-const FORWARDED_REQUEST_HEADERS = ['content-type', 'content-encoding', 'accept'];
+const FORWARDED_REQUEST_HEADERS = ['content-type', 'content-encoding', 'accept', 'user-agent'];
 
 export const Route = createFileRoute('/relay/$')({
   server: {
@@ -50,6 +55,12 @@ export const Route = createFileRoute('/relay/$')({
         const responseHeaders = new Headers();
         const contentType = upstream.headers.get('content-type');
         if (contentType) responseHeaders.set('content-type', contentType);
+        // upstream's `content-encoding` is deliberately dropped, not merely
+        // forgotten. The Cloudflare Workers runtime already decompresses the
+        // body by the time `upstream.body` is read below, so the bytes we
+        // serve are plain even when PostHog sent gzip; re-adding the header
+        // would label plaintext as gzip-encoded and break the extension
+        // scripts (and any other response) for every reader that honors it.
         responseHeaders.set(
           'cache-control',
           // Extension scripts are version-stamped, so a long cache is safe and

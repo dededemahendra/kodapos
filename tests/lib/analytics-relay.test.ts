@@ -3,9 +3,13 @@ import { resolveRelayTarget } from '../../src/lib/analytics/relay';
 
 describe('resolveRelayTarget', () => {
   // The whole reason this proxy exists. posthog-js fetches
-  // /static/exception-autocapture.js at runtime to install capture_exceptions;
-  // if this resolves to the ingestion host it 404s and error tracking silently
-  // never runs, which is indistinguishable from "no crashes happened".
+  // /static/exception-autocapture.js at runtime to install capture_exceptions.
+  // us.i.posthog.com actually dual-serves this path today, so a one-upstream
+  // proxy would not 404 it; the assets host is still required because it is
+  // the CDN-backed host PostHog documents and intends for static assets, and
+  // matching PostHog's own topology is something this repo can keep relying
+  // on, unlike an undocumented dual-serving behavior that could stop at any
+  // time.
   it('routes extension scripts to the assets upstream', () => {
     expect(resolveRelayTarget('/relay/static/exception-autocapture.js')).toEqual({
       url: 'https://us-assets.i.posthog.com/static/exception-autocapture.js',
@@ -24,6 +28,20 @@ describe('resolveRelayTarget', () => {
     });
     expect(resolveRelayTarget('/relay/flags')).toEqual({
       url: 'https://us.i.posthog.com/flags',
+      cacheable: false,
+    });
+  });
+
+  // posthog-js's remote-config fetch (endpointFor('assets', '/array/<token>/config'
+  // or '/array/<token>/config.js')) is the one 'assets' path that does not
+  // begin with /static/. It is deliberately left on the API upstream rather
+  // than reclassified as cacheable: it is unverified that the assets host
+  // serves /array/, and getting that wrong would break remote config
+  // silently, so this pins the working fallback rather than leaving it as an
+  // unexamined oversight.
+  it('routes remote config to the api upstream, not the assets upstream', () => {
+    expect(resolveRelayTarget('/relay/array/phc_test/config.js')).toEqual({
+      url: 'https://us.i.posthog.com/array/phc_test/config.js',
       cacheable: false,
     });
   });
@@ -49,5 +67,9 @@ describe('resolveRelayTarget', () => {
     expect(resolveRelayTarget('/dashboard')).toBeNull();
     expect(resolveRelayTarget('/relay')).toBeNull();
     expect(resolveRelayTarget('')).toBeNull();
+    // '/relay/' (empty suffix) has no PostHog endpoint behind it and would
+    // otherwise resolve to the bare upstream origin. Rejection is meant to be
+    // the default, not just the outcome for inputs that look hostile.
+    expect(resolveRelayTarget('/relay/')).toBeNull();
   });
 });

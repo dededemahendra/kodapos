@@ -7,9 +7,12 @@
  * requestRouter whose `region` getter regex-tests api_host against the known
  * PostHog cloud hosts. A custom api_host fails that test, so the router stops
  * splitting hosts and resolves endpointFor('assets', ...) against our origin
- * too. Forwarding everything to the ingestion host would 404 the extension
- * scripts and disable capture_exceptions, which is the thing this proxy exists
- * to protect.
+ * too. us-assets.i.posthog.com is not chosen because the ingestion host would
+ * 404 those paths, it does not, us.i.posthog.com dual-serves /static/* today.
+ * It is chosen because it is the CDN-backed host PostHog documents and
+ * intends for static assets, and matching PostHog's own topology is a design
+ * this repo can keep relying on, rather than an undocumented dual-serving
+ * behavior that could stop working at any time with no warning here.
  */
 
 /** Events, flags, remote config. */
@@ -36,6 +39,10 @@ const SAFE_PATH = /^\/[A-Za-z0-9._~/-]*$/;
 
 function isSafeSuffix(suffix: string): boolean {
   if (!SAFE_PATH.test(suffix)) return false;
+  // `/relay/` (empty suffix, bare '/') has no PostHog endpoint behind it; it
+  // would otherwise resolve to the bare upstream origin. Rejection is meant to
+  // be the default here, not merely the outcome for inputs that look hostile.
+  if (suffix === '/') return false;
   // `//host` is protocol-relative; `..` escapes the prefix. Neither can reach
   // another host through the URL construction below, but both indicate a
   // caller probing for one, so refuse instead of silently normalizing.
@@ -51,6 +58,12 @@ export function resolveRelayTarget(pathname: string, search = ''): RelayTarget |
   const suffix = pathname.slice(RELAY_PREFIX.length);
   if (!isSafeSuffix(suffix)) return null;
 
+  // Not the whole assets surface: endpointFor('assets', '/array/<token>/config')
+  // and '/array/<token>/config.js' (posthog-js's remote-config fetch) also
+  // resolve through this same requestRouter path but are deliberately left
+  // routed to the API upstream below, because it is unverified that the
+  // assets host serves them and getting that wrong would break remote config
+  // silently. /static/* is the one assets path confirmed safe to move.
   const cacheable = suffix.startsWith('/static/');
 
   // Built through URL against a fixed base. The pathname setter cannot change

@@ -51,9 +51,13 @@ import { resolveRelayTarget } from '../../src/lib/analytics/relay';
 
 describe('resolveRelayTarget', () => {
   // The whole reason this proxy exists. posthog-js fetches
-  // /static/exception-autocapture.js at runtime to install capture_exceptions;
-  // if this resolves to the ingestion host it 404s and error tracking silently
-  // never runs, which is indistinguishable from "no crashes happened".
+  // /static/exception-autocapture.js at runtime to install capture_exceptions.
+  // us.i.posthog.com actually dual-serves this path today, so a one-upstream
+  // proxy would not 404 it; the assets host is still required because it is
+  // the CDN-backed host PostHog documents and intends for static assets, and
+  // matching PostHog's own topology is something this repo can keep relying
+  // on, unlike an undocumented dual-serving behavior that could stop at any
+  // time.
   it('routes extension scripts to the assets upstream', () => {
     expect(resolveRelayTarget('/relay/static/exception-autocapture.js')).toEqual({
       url: 'https://us-assets.i.posthog.com/static/exception-autocapture.js',
@@ -120,9 +124,12 @@ Create `src/lib/analytics/relay.ts`:
  * requestRouter whose `region` getter regex-tests api_host against the known
  * PostHog cloud hosts. A custom api_host fails that test, so the router stops
  * splitting hosts and resolves endpointFor('assets', ...) against our origin
- * too. Forwarding everything to the ingestion host would 404 the extension
- * scripts and disable capture_exceptions, which is the thing this proxy exists
- * to protect.
+ * too. us-assets.i.posthog.com is not chosen because the ingestion host would
+ * 404 those paths, it does not, us.i.posthog.com dual-serves /static/* today.
+ * It is chosen because it is the CDN-backed host PostHog documents and
+ * intends for static assets, and matching PostHog's own topology is a design
+ * this repo can keep relying on, rather than an undocumented dual-serving
+ * behavior that could stop working at any time with no warning here.
  */
 
 /** Events, flags, remote config. */
@@ -188,8 +195,12 @@ git add src/lib/analytics/relay.ts tests/lib/analytics-relay.test.ts
 git commit -m "feat(analytics): resolve relay paths to the right PostHog upstream
 
 posthog-js resolves endpointFor('assets') against api_host once api_host stops
-matching the PostHog cloud host regex, so a one-upstream proxy would 404
-/static/exception-autocapture.js and silently disable error tracking.
+matching the PostHog cloud host regex. us.i.posthog.com dual-serves
+/static/exception-autocapture.js today, so a one-upstream proxy would not 404
+it, but the assets host is used anyway: it is the CDN-backed host PostHog
+documents and intends for static assets, and matching PostHog's own topology
+is something this repo can keep relying on rather than undocumented
+dual-serving that could stop at any time.
 
 Kept pure and separate from the route for the same reason policy.ts is: this is
 the half that has to be right, and edge-runtime vitest can only test pure code.
@@ -427,11 +438,14 @@ PostHog is served first-party from `kodapos.app/relay/*`, not directly from
 | `/relay/static/*` | `us-assets.i.posthog.com` | Versioned extension scripts |
 | everything else | `us.i.posthog.com` | Event ingestion, flags, remote config |
 
-Two upstreams are required. `capture_exceptions` does not live in the main
-bundle: posthog-js calls `loadExternalDependency('exception-autocapture')`,
-which fetches `/static/exception-autocapture.js` at runtime. A proxy forwarding
-everything to the ingestion host 404s that script and disables error tracking
-with no error in any console. `$web_vitals` loads the same way.
+Two upstreams are required, not one, but not because the ingestion host 404s
+`/static/*`. It does not: `us.i.posthog.com` dual-serves those paths today, so
+routing everything through one upstream would still work right now. The split
+exists because `us-assets.i.posthog.com` is the CDN-backed host PostHog
+documents and intends for static assets, and matching PostHog's own topology
+is a design this repo can keep relying on, rather than depending on
+undocumented dual-serving behavior that could stop working at any time with no
+warning here.
 
 The route forwards request headers by allowlist. This is load-bearing: `/relay`
 is same-origin, so the browser attaches kodapos.app session cookies to every

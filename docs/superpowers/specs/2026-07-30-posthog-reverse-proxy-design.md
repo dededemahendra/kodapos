@@ -47,9 +47,13 @@ Two upstreams are required, not one. posthog-js resolves every endpoint through
 a `requestRouter` whose `region` getter regex-tests `api_host` against
 `https://(app|us|us-assets)(\.i)?\.posthog\.com`. A custom `api_host` fails that
 test, so the router stops splitting hosts and resolves `endpointFor('assets', …)`
-against our origin too. A proxy that forwards everything to `us.i.posthog.com`
-therefore 404s the extension scripts and disables exception capture, which is
-the exact failure this slice exists to prevent.
+against our origin too. This is not because a single-upstream proxy would 404
+the extension scripts: `us.i.posthog.com` dual-serves `/static/*` today, so
+forwarding everything there would still work right now. `us-assets.i.posthog.com`
+is used anyway because it is the CDN-backed host PostHog documents and intends
+for static assets, and matching PostHog's own topology is a design this repo
+can keep depending on, rather than an undocumented dual-serving behavior that
+could stop working at any time.
 
 ### Why not the alternatives
 
