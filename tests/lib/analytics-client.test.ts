@@ -6,10 +6,16 @@ import { isAnalyticsEnabled } from '../../src/lib/analytics/client';
  * exercising the enabled path has to look like production. Restored in
  * afterEach so a leaked hostname cannot make another test pass for the wrong
  * reason.
+ *
+ * `pathname` is set explicitly rather than inherited from the spread: happy-dom
+ * exposes location's fields as prototype getters, so `{ ...window.location }`
+ * copies no own properties and every field this doesn't name lands as
+ * undefined. before_send reads pathname, and a stub without one makes it throw
+ * on a value that is always a string in a real browser.
  */
-function stubHostname(hostname: string): void {
+function stubHostname(hostname: string, pathname = '/'): void {
   Object.defineProperty(window, 'location', {
-    value: { ...window.location, hostname },
+    value: { ...window.location, hostname, pathname },
     configurable: true,
     writable: true,
   });
@@ -137,6 +143,86 @@ describe('initAnalytics', () => {
     expect(config.capture_performance).toEqual({ web_vitals: true });
     expect(config.autocapture).toBe(false);
     expect(config.disable_capture_url_hashes).toBe(true);
+  });
+
+  // Error Tracking shows nothing at all unless $exception events are emitted,
+  // and the three sub-keys are not equally safe: console errors serialize whole
+  // documents (orders, customers) and no pattern-based scrub separates a name
+  // from a word. Asserted as an exact object so `true` — which would accept
+  // whatever the SDK defaults to next — cannot be substituted here.
+  it('captures unhandled errors and rejections but never console errors', async () => {
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    stubHostname('kodapos.app');
+    const init = vi.fn();
+    vi.doMock('posthog-js', () => ({ default: { init, register: vi.fn() } }));
+    vi.resetModules();
+    const { initAnalytics } = await import('../../src/lib/analytics/client');
+    await initAnalytics({});
+
+    const call = init.mock.calls[0];
+    if (!call) throw new Error('posthog.init was not called');
+    expect(call[1].capture_exceptions).toEqual({
+      capture_unhandled_errors: true,
+      capture_unhandled_rejections: true,
+      capture_console_errors: false,
+    });
+  });
+});
+
+describe('before_send', () => {
+  /** Returns the before_send hook posthog.init was configured with. */
+  async function getBeforeSend() {
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    stubHostname('kodapos.app');
+    const init = vi.fn();
+    vi.doMock('posthog-js', () => ({ default: { init, register: vi.fn() } }));
+    vi.resetModules();
+    const { initAnalytics } = await import('../../src/lib/analytics/client');
+    await initAnalytics({});
+    const call = init.mock.calls[0];
+    if (!call) throw new Error('posthog.init was not called');
+    const beforeSend = call[1].before_send;
+    if (typeof beforeSend !== 'function') throw new Error('before_send was not configured');
+    return beforeSend;
+  }
+
+  // The scrub itself is unit-tested in analytics-policy.test.ts. What this
+  // covers is that it is actually wired into the SDK's send path: without
+  // before_send, autocapture ships the raw message and every test over there
+  // still passes.
+  it('redacts a customer phone number out of an outgoing $exception', async () => {
+    const beforeSend = await getBeforeSend();
+
+    const result = beforeSend({
+      event: '$exception',
+      properties: { $exception_list: [{ type: 'Error', value: 'no customer for 081234567890' }] },
+    });
+
+    expect(result?.properties.$exception_list).toEqual([
+      { type: 'Error', value: 'no customer for [number]' },
+    ]);
+  });
+
+  // Init never runs on a customer surface, but init only happens once: a staff
+  // tablet that opened /dashboard and then navigated to /display is still
+  // running this client. An exception thrown there arrives through the SDK's
+  // own error handler, not through capture(), so before_send is the only gate
+  // left that can stop it.
+  it('drops an exception thrown on a cafe-customer surface', async () => {
+    const beforeSend = await getBeforeSend();
+    stubHostname('kodapos.app', '/display');
+
+    expect(beforeSend({ event: '$exception', properties: {} })).toBeNull();
+  });
+
+  // Every other event is built by hand here or in track.ts, so it must pass
+  // through untouched rather than being reshaped by an exception-only scrub.
+  it('passes non-exception events through unchanged', async () => {
+    const beforeSend = await getBeforeSend();
+    const event = { event: '$pageview', properties: { $current_url: 'https://kodapos.app/' } };
+
+    expect(beforeSend(event)).toBe(event);
+    expect(beforeSend(null)).toBeNull();
   });
 });
 

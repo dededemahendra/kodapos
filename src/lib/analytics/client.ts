@@ -14,8 +14,8 @@
  * Vite inlines it into every build made from that environment, and the key
  * alone can no longer be the switch. See isTrackedHost in policy.ts.
  */
-import type { PostHog } from 'posthog-js';
-import { isCustomerSurface, isTrackedHost } from './policy';
+import type { CaptureResult, PostHog } from 'posthog-js';
+import { isCustomerSurface, isTrackedHost, scrubExceptionProperties } from './policy';
 
 let client: PostHog | null = null;
 // Memoizes the in-flight init. `client` is only assigned once the dynamic
@@ -65,6 +65,31 @@ export function initAnalytics(superProps: Record<string, string>): Promise<boole
   // it would create a retry path that nothing actually drives.
   pending ??= start(superProps);
   return pending;
+}
+
+/**
+ * The last thing that runs before any event leaves the browser. Returning null
+ * drops the event.
+ *
+ * Scoped to `$exception` because that is the only event whose payload this app
+ * does not author — see scrubExceptionProperties in policy.ts for what is
+ * redacted and why. Every other event is built by hand here or in track.ts and
+ * needs no laundering on the way out.
+ *
+ * The customer-surface drop is not redundant with the identical check in
+ * capture() below, and not redundant with the provider refusing to init on
+ * those routes either. Init is what those two gates cover, and init only
+ * happens once: a staff tablet that opened /dashboard and then navigated to
+ * /display is still running this client, because it is one SPA session. An
+ * exception thrown on that route is the one event that could reach PostHog
+ * from a screen a cafe customer is looking at, and it arrives through the SDK's
+ * own error handler rather than through capture(), so this is the only place
+ * that can stop it.
+ */
+function scrubOutgoing(event: CaptureResult | null): CaptureResult | null {
+  if (!event || event.event !== '$exception') return event;
+  if (typeof window !== 'undefined' && isCustomerSurface(window.location.pathname)) return null;
+  return { ...event, properties: scrubExceptionProperties(event.properties ?? {}) };
 }
 
 async function start(superProps: Record<string, string>): Promise<boolean> {
@@ -124,7 +149,23 @@ async function start(superProps: Record<string, string>): Promise<boolean> {
       // off via disable_session_recording above), so there is no extra flag to
       // pin — an explicit `network_timing: false` would be a dead no-op key.
       capture_performance: { web_vitals: true },
-      capture_exceptions: false,
+      // The second signal opted into, and the reason `before_send` below exists.
+      // Left at `false`, PostHog's Error Tracking product has nothing to show:
+      // no $exception event is ever emitted, so every uncaught error and every
+      // unhandled rejection in production is invisible.
+      //
+      // Spelled out as an object rather than `true` because the three sub-keys
+      // are not equally safe and `true` would silently accept whatever the SDK
+      // defaults to next. Unhandled errors and rejections are the signal error
+      // tracking exists for and carry a stack we own. Console errors are the
+      // leak: `console.error(order)` serializes a whole document, and no
+      // pattern-based scrub separates a customer's name from a word. It stays
+      // pinned off for the same reason autocapture and heatmaps do above.
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
       capture_heatmaps: false,
       capture_dead_clicks: false,
       disable_surveys: true,
@@ -133,6 +174,7 @@ async function start(superProps: Record<string, string>): Promise<boolean> {
       // localStorage rather than localStorage+cookie: the published privacy
       // policy states we set no third-party tracking cookies.
       persistence: 'localStorage',
+      before_send: scrubOutgoing,
     });
     posthog.register(superProps);
     client = posthog;
@@ -162,6 +204,26 @@ export function capture(name: string, props?: Record<string, unknown>): void {
   // still refuses to emit for a person who never agreed to anything.
   if (typeof window !== 'undefined' && isCustomerSurface(window.location.pathname)) return;
   client?.capture(name, props);
+}
+
+/**
+ * Reports an error that autocapture structurally cannot see.
+ *
+ * `capture_exceptions` above hooks window.onerror and unhandledrejection, and
+ * neither fires for an error thrown during React rendering: React catches it,
+ * routes it to the nearest error boundary, and reports it via console.error,
+ * which is pinned off. So without this call every crash that renders the root
+ * errorComponent — the ones a user actually notices, because the screen is
+ * replaced by "Terjadi kesalahan" — is the exact class of error that never
+ * reaches PostHog.
+ *
+ * Goes through posthog.captureException rather than capture('$exception') so
+ * the SDK parses the stack into $exception_list the same way autocapture does,
+ * which is what makes these group with, and symbolicate like, everything else.
+ * before_send still scrubs the result.
+ */
+export function captureError(error: unknown): void {
+  client?.captureException(error);
 }
 
 export function capturePageview(): void {

@@ -5,6 +5,8 @@ import { createRootRoute, HeadContent, Link, Outlet, Scripts } from '@tanstack/r
 import { useEffect, type ReactNode } from 'react';
 import { AnalyticsProvider } from '~/components/analytics-provider';
 import { LocaleProvider } from '~/components/locale-provider';
+import { captureError } from '~/lib/analytics/client';
+import { isCustomerSurface } from '~/lib/analytics/policy';
 import { authStorage } from '~/lib/auth-storage';
 import { convex } from '~/lib/convex';
 import { i18n } from '~/lib/i18n';
@@ -28,23 +30,7 @@ const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('kodapos.theme'
 const AUTH_REDIRECT_SCRIPT = `(function(){try{if(location.pathname!=='/')return;var s=window.localStorage;for(var i=0;i<s.length;i++){var k=s.key(i);if(k&&k.lastIndexOf('__convexAuthJWT_',0)===0&&s.getItem(k)){location.replace('/dashboard');return;}}}catch(e){}})();`;
 
 export const Route = createRootRoute({
-  // The root route's errorComponent renders in place of RootComponent, so the
-  // I18nProvider set up there is not in scope. Provide it here too, or every
-  // <Trans> in this boundary crashes ("rendered without I18nProvider").
-  errorComponent: ({ error, reset }) => (
-    <I18nProvider i18n={i18n}>
-      <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
-        <h1 className="text-2xl font-bold"><Trans>Terjadi kesalahan</Trans></h1>
-        <p className="text-muted-foreground text-sm max-w-md">
-          {error instanceof Error ? error.message : <Trans>Sesuatu yang tidak terduga terjadi.</Trans>}
-        </p>
-        <div className="flex gap-3">
-          <button onClick={reset} className="text-primary underline text-sm"><Trans>Coba lagi</Trans></button>
-          <Link to="/dashboard" className="text-primary underline text-sm"><Trans>Ke dasbor</Trans></Link>
-        </div>
-      </main>
-    </I18nProvider>
-  ),
+  errorComponent: RootErrorBoundary,
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -69,6 +55,57 @@ export const Route = createRootRoute({
   component: RootComponent,
   notFoundComponent: NotFound,
 });
+
+/**
+ * The root route's errorComponent renders in place of RootComponent, so the
+ * I18nProvider set up there is not in scope. Provide it here too, or every
+ * <Trans> in this boundary crashes ("rendered without I18nProvider").
+ *
+ * A named component rather than the inline arrow this used to be, because it
+ * now needs an effect: React catches render-time throws and routes them here
+ * instead of to window.onerror, so PostHog's exception autocapture never sees
+ * them. Reporting from the boundary is the only way the crashes a user actually
+ * notices reach error tracking. captureError is inert until analytics has
+ * initialized, so this is a no-op in dev, in previews and on customer surfaces.
+ *
+ * `error.message` is shown to staff but never to cafe customers. This is the
+ * only error boundary `/order/$token` and `/display` have (menu-board defines
+ * its own), and an error message on this POS can carry the very things the
+ * PostHog scrub in policy.ts exists to strip: `no customer for 0812...`
+ * rendered at full size on a screen a customer is looking at. Staff keep the
+ * real message, because a generic string on the register is a support call
+ * nobody can answer.
+ */
+function RootErrorBoundary({ error, reset }: { error: unknown; reset: () => void }) {
+  // Keyed on `error` rather than mount so a second, different crash after a
+  // reset() is reported too, instead of being swallowed as a re-render.
+  useEffect(() => {
+    captureError(error);
+  }, [error]);
+
+  // isCustomerSurface is imported from the analytics policy rather than
+  // duplicated: it is already the single source of truth for which routes face
+  // a cafe customer, and a second copy of that list would drift from it.
+  // Fails closed during SSR, where there is no location to test: unknown means
+  // treat it as customer-facing and show the generic message.
+  const isStaffSurface =
+    typeof window !== 'undefined' && !isCustomerSurface(window.location.pathname);
+
+  return (
+    <I18nProvider i18n={i18n}>
+      <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
+        <h1 className="text-2xl font-bold"><Trans>Terjadi kesalahan</Trans></h1>
+        <p className="text-muted-foreground text-sm max-w-md">
+          {isStaffSurface && error instanceof Error ? error.message : <Trans>Sesuatu yang tidak terduga terjadi.</Trans>}
+        </p>
+        <div className="flex gap-3">
+          <button onClick={reset} className="text-primary underline text-sm"><Trans>Coba lagi</Trans></button>
+          <Link to="/dashboard" className="text-primary underline text-sm"><Trans>Ke dasbor</Trans></Link>
+        </div>
+      </main>
+    </I18nProvider>
+  );
+}
 
 function NotFound() {
   // Like errorComponent, notFoundComponent renders outside RootComponent's
