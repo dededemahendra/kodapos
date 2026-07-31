@@ -47,6 +47,26 @@ async function assertTargetOwned(
 ): Promise<void> {
   const label =
     targetKind === 'item' ? 'Menu' : targetKind === 'variant' ? 'Varian' : 'Modifier';
+
+  // targetKindValidator and targetIdValidator are independent union members,
+  // so nothing in the args validator stops a mismatched pair (targetKind:
+  // 'item' with a variant's id). The dedup key in set/clear is the compound
+  // (priceCategoryId, targetKind, targetId), so a mismatched pair would not
+  // collide with the real target's row: it would insert a second, distinct
+  // row for the same real target, and resolution would pick between the two
+  // nondeterministically. normalizeId proves the id actually belongs to the
+  // table targetKind claims, rather than just being valid for *some* table in
+  // the union.
+  const table =
+    targetKind === 'item'
+      ? 'menuItems'
+      : targetKind === 'variant'
+        ? 'menuItemVariants'
+        : 'modifierOptions';
+  if (!ctx.db.normalizeId(table, targetId)) {
+    throw new Error(`${label} tidak ditemukan.`);
+  }
+
   const doc = await ctx.db.get(targetId as never);
   const docCafeId = (doc as unknown as { cafeId?: string } | null)?.cafeId;
   if (!doc || docCafeId !== cafeId) {
@@ -70,6 +90,11 @@ export const set = mutation({
 
     // Upsert. Convex has no unique constraint, so a repeat set must find and
     // patch rather than insert, or resolution later picks between duplicates.
+    // targetKind is part of the compound key alongside targetId (not just
+    // priceCategoryId + targetId): do not simplify it away, or a call whose
+    // targetKind and targetId disagree (guarded above by assertTargetOwned)
+    // would no longer collide with the real target's row and would insert a
+    // second, distinct row for the same target.
     const existing = await ctx.db
       .query('priceOverrides')
       .withIndex('by_category_and_kind_and_target', (q) =>

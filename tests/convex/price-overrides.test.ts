@@ -107,4 +107,27 @@ describe('price overrides', () => {
       })
     ).rejects.toThrow();
   });
+
+  // targetKind and targetId are validated independently, so nothing but this
+  // check stops a mismatched pair. If it were allowed through, the dedup key
+  // (priceCategoryId, targetKind, targetId) would not collide with the real
+  // target's row, and the same variant could end up with two override rows
+  // that resolution picks between nondeterministically.
+  it('rejects a targetKind that does not match the targetId', async () => {
+    const t = convexTest(schema, modules);
+    const { asOwner, itemId, tierId } = await setup(t);
+    const variantId = await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'Large',
+      priceIDR: 22000,
+    });
+    await expect(
+      asOwner.mutation(api.menu.priceOverrides.set, {
+        priceCategoryId: tierId,
+        targetKind: 'item',
+        targetId: variantId,
+        priceIDR: 30000,
+      })
+    ).rejects.toThrow();
+  });
 });
