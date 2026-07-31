@@ -34,6 +34,13 @@ function MenuLayout() {
           <Trans>Grup Modifier</Trans>
         </Link>
         <Link
+          to="/menu/price-categories"
+          className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
+          activeProps={{ className: 'border-ring font-semibold' }}
+        >
+          <Trans>Kategori Harga</Trans>
+        </Link>
+        <Link
           to="/menu/labels"
           className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
           activeProps={{ className: 'border-ring font-semibold' }}
