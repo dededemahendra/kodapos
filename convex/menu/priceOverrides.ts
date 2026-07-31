@@ -210,6 +210,25 @@ export const grid = query({
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
       .collect();
 
+    // One cafe-wide fetch rather than one query per item: menuItemVariants has
+    // by_cafe_item, so every variant for the cafe comes back in a single
+    // round trip, grouped by item and filtered for archived in memory. This
+    // is NOT mirrored below for modifier options: modifierOptions only has
+    // by_group_active (no cafe-wide index), so fetching all of them in one
+    // shot would need a new index, which is out of scope here. Leave the
+    // modifier loop as a per-group fetch rather than "fixing" the asymmetry.
+    const allVariants = await ctx.db
+      .query('menuItemVariants')
+      .withIndex('by_cafe_item', (q) => q.eq('cafeId', cafeId))
+      .collect();
+    const variantsByItem = new Map<Id<'menuItems'>, typeof allVariants>();
+    for (const variant of allVariants) {
+      if (variant.archived) continue;
+      const list = variantsByItem.get(variant.menuItemId);
+      if (list) list.push(variant);
+      else variantsByItem.set(variant.menuItemId, [variant]);
+    }
+
     for (const item of items) {
       out.push({
         targetKind: 'item',
@@ -218,10 +237,9 @@ export const grid = query({
         standardPriceIDR: item.priceIDR,
         overrideIDR: overrides.get(item._id) ?? null,
       });
-      const variants = await ctx.db
-        .query('menuItemVariants')
-        .withIndex('by_item_active', (q) => q.eq('menuItemId', item._id).eq('archived', false))
-        .collect();
+      const variants = (variantsByItem.get(item._id) ?? []).sort(
+        (a, b) => a.position - b.position
+      );
       for (const variant of variants) {
         out.push({
           targetKind: 'variant',

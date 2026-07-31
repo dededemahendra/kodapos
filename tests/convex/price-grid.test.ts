@@ -63,6 +63,7 @@ describe('price grid', () => {
     const rows = await s.asOwner.query(api.menu.priceOverrides.grid, {
       priceCategoryId: s.tierId,
     });
+    expect(rows.length).toBe(3);
     expect(rows.every((r) => r.overrideIDR === null)).toBe(true);
   });
 
@@ -83,6 +84,18 @@ describe('price grid', () => {
     expect(item.standardPriceIDR).toBe(18000);
     const variant = rows.find((r) => r.targetKind === 'variant')!;
     expect(variant.overrideIDR).toBeNull();
+  });
+
+  it('excludes an archived item and its variants', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.items.archive, { id: s.itemId });
+    const rows = await s.asOwner.query(api.menu.priceOverrides.grid, {
+      priceCategoryId: s.tierId,
+    });
+    expect(rows.some((r) => r.targetKind === 'item')).toBe(false);
+    expect(rows.some((r) => r.targetKind === 'variant')).toBe(false);
+    expect(rows.some((r) => r.targetKind === 'modifier')).toBe(true);
   });
 
   it('rejects a category from another cafe', async () => {
