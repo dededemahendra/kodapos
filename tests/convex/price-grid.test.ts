@@ -128,6 +128,15 @@ describe('price grid', () => {
     ).rejects.toThrow(/diarsipkan/);
   });
 
+  it('rejects the grid query for an archived price category', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.priceCategories.archive, { id: s.tierId });
+    await expect(
+      s.asOwner.query(api.menu.priceOverrides.grid, { priceCategoryId: s.tierId })
+    ).rejects.toThrow(/diarsipkan/);
+  });
+
   it('rejects a category from another cafe', async () => {
     const t = convexTest(schema, modules);
     const s = await setup(t);
