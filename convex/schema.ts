@@ -67,6 +67,9 @@ export default defineSchema({
     latitude: v.optional(v.number()),
     longitude: v.optional(v.number()),
     logoStorageId: v.optional(v.id('_storage')),
+    // Renames the built-in "Standard" tier in the register picker. An owner who
+    // thinks of their menu prices as the local prices sets this to "Lokal".
+    standardPriceLabel: v.optional(v.string()),
     operatingHours: v.optional(
       v.array(
         v.object({
@@ -213,6 +216,39 @@ export default defineSchema({
     .index('by_item_active', ['menuItemId', 'archived', 'position'])
     .index('by_cafe_item', ['cafeId', 'menuItemId'])
     .index('by_cafe_barcode', ['cafeId', 'barcode']),
+
+  // Owner-named price tiers, e.g. "Turis" or "Member". Deliberately NOT seeded
+  // with a default row: "Standard" is the ABSENCE of a category, meaning the
+  // prices already on menuItems / menuItemVariants / modifierOptions. A default
+  // row would carry an invariant nothing can enforce, that it must never own
+  // override rows, because its prices live on the parent records instead.
+  priceCategories: defineTable({
+    cafeId: v.id('cafes'),
+    name: v.string(),
+    position: v.number(),
+    archived: v.boolean(),
+    createdAt: v.number(),
+  }).index('by_cafe_and_active', ['cafeId', 'archived', 'position']),
+
+  // Sparse: one row per thing a category actually reprices. No row means the
+  // target's own price applies, so adding a category never leaves a menu
+  // half-priced and a missing override charges the standard price rather than
+  // zero. priceIDR is ABSOLUTE and replaces the target's price, including for
+  // modifiers, where it replaces priceAdjustmentIDR.
+  priceOverrides: defineTable({
+    cafeId: v.id('cafes'),
+    priceCategoryId: v.id('priceCategories'),
+    targetKind: v.union(v.literal('item'), v.literal('variant'), v.literal('modifier')),
+    targetId: v.union(
+      v.id('menuItems'),
+      v.id('menuItemVariants'),
+      v.id('modifierOptions')
+    ),
+    priceIDR: v.number(),
+    createdAt: v.number(),
+  })
+    .index('by_cafe_and_category', ['cafeId', 'priceCategoryId'])
+    .index('by_category_and_kind_and_target', ['priceCategoryId', 'targetKind', 'targetId']),
 
   cafeStaff: defineTable({
     cafeId: v.id('cafes'),
