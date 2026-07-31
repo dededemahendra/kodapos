@@ -89,6 +89,7 @@ import { Route as PosInventoryWasteRouteImport } from './routes/_pos/inventory/w
 import { Route as PosInventoryPurchasesRouteImport } from './routes/_pos/inventory/purchases'
 import { Route as PosInventoryPurchaseOrdersRouteImport } from './routes/_pos/inventory/purchase-orders'
 import { Route as PosInventoryAdjustmentsRouteImport } from './routes/_pos/inventory/adjustments'
+import { Route as PosMenuPriceCategoriesIndexRouteImport } from './routes/_pos/menu/price-categories.index'
 import { Route as PosMenuPriceCategoriesCategoryIdRouteImport } from './routes/_pos/menu/price-categories.$categoryId'
 import { Route as PosMenuModifiersGroupIdRouteImport } from './routes/_pos/menu/modifiers.$groupId'
 import { Route as PosMenuItemsItemIdRouteImport } from './routes/_pos/menu/items.$itemId'
@@ -491,6 +492,12 @@ const PosInventoryAdjustmentsRoute = PosInventoryAdjustmentsRouteImport.update({
   path: '/adjustments',
   getParentRoute: () => PosInventoryRouteRoute,
 } as any)
+const PosMenuPriceCategoriesIndexRoute =
+  PosMenuPriceCategoriesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => PosMenuPriceCategoriesRoute,
+  } as any)
 const PosMenuPriceCategoriesCategoryIdRoute =
   PosMenuPriceCategoriesCategoryIdRouteImport.update({
     id: '/$categoryId',
@@ -589,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
   '/menu/price-categories/$categoryId': typeof PosMenuPriceCategoriesCategoryIdRoute
+  '/menu/price-categories/': typeof PosMenuPriceCategoriesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -636,7 +644,6 @@ export interface FileRoutesByTo {
   '/menu/categories': typeof PosMenuCategoriesRoute
   '/menu/labels': typeof PosMenuLabelsRoute
   '/menu/modifiers': typeof PosMenuModifiersRouteWithChildren
-  '/menu/price-categories': typeof PosMenuPriceCategoriesRouteWithChildren
   '/onboarding/cashier': typeof PosOnboardingCashierRoute
   '/onboarding/menu': typeof PosOnboardingMenuRoute
   '/onboarding/profile': typeof PosOnboardingProfileRoute
@@ -667,6 +674,7 @@ export interface FileRoutesByTo {
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
   '/menu/price-categories/$categoryId': typeof PosMenuPriceCategoriesCategoryIdRoute
+  '/menu/price-categories': typeof PosMenuPriceCategoriesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -753,6 +761,7 @@ export interface FileRoutesById {
   '/_pos/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/_pos/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
   '/_pos/menu/price-categories/$categoryId': typeof PosMenuPriceCategoriesCategoryIdRoute
+  '/_pos/menu/price-categories/': typeof PosMenuPriceCategoriesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -837,6 +846,7 @@ export interface FileRouteTypes {
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
     | '/menu/price-categories/$categoryId'
+    | '/menu/price-categories/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -884,7 +894,6 @@ export interface FileRouteTypes {
     | '/menu/categories'
     | '/menu/labels'
     | '/menu/modifiers'
-    | '/menu/price-categories'
     | '/onboarding/cashier'
     | '/onboarding/menu'
     | '/onboarding/profile'
@@ -915,6 +924,7 @@ export interface FileRouteTypes {
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
     | '/menu/price-categories/$categoryId'
+    | '/menu/price-categories'
   id:
     | '__root__'
     | '/_admin'
@@ -1000,6 +1010,7 @@ export interface FileRouteTypes {
     | '/_pos/menu/items/$itemId'
     | '/_pos/menu/modifiers/$groupId'
     | '/_pos/menu/price-categories/$categoryId'
+    | '/_pos/menu/price-categories/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1573,6 +1584,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosInventoryAdjustmentsRouteImport
       parentRoute: typeof PosInventoryRouteRoute
     }
+    '/_pos/menu/price-categories/': {
+      id: '/_pos/menu/price-categories/'
+      path: '/'
+      fullPath: '/menu/price-categories/'
+      preLoaderRoute: typeof PosMenuPriceCategoriesIndexRouteImport
+      parentRoute: typeof PosMenuPriceCategoriesRoute
+    }
     '/_pos/menu/price-categories/$categoryId': {
       id: '/_pos/menu/price-categories/$categoryId'
       path: '/$categoryId'
@@ -1647,12 +1665,14 @@ const PosMenuModifiersRouteWithChildren =
 
 interface PosMenuPriceCategoriesRouteChildren {
   PosMenuPriceCategoriesCategoryIdRoute: typeof PosMenuPriceCategoriesCategoryIdRoute
+  PosMenuPriceCategoriesIndexRoute: typeof PosMenuPriceCategoriesIndexRoute
 }
 
 const PosMenuPriceCategoriesRouteChildren: PosMenuPriceCategoriesRouteChildren =
   {
     PosMenuPriceCategoriesCategoryIdRoute:
       PosMenuPriceCategoriesCategoryIdRoute,
+    PosMenuPriceCategoriesIndexRoute: PosMenuPriceCategoriesIndexRoute,
   }
 
 const PosMenuPriceCategoriesRouteWithChildren =

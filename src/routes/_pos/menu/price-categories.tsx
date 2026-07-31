@@ -1,10 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { PriceCategoryTable } from '~/components/menu/price-category-table';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_pos/menu/price-categories')({
-  component: PriceCategoriesPage,
+  component: PriceCategoriesLayout,
 });
 
-function PriceCategoriesPage() {
-  return <PriceCategoryTable />;
+function PriceCategoriesLayout() {
+  return <Outlet />;
 }

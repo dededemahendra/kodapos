@@ -2,10 +2,18 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
+import { Search, UtensilsCrossed } from 'lucide-react';
 import { useRef, useState } from 'react';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
-import { formatIDR } from '~/lib/money';
+import { formatIDR, parseIDR } from '~/lib/money';
 import { toast } from '~/lib/toast';
 
 /**
@@ -44,11 +52,20 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
         });
       } catch {
         toast.error(t`Gagal menghapus harga.`);
+        // A failed write leaves the query's stored value unchanged, so the
+        // cell must revert itself too or it keeps showing text that was
+        // never actually saved.
+        return false;
       }
       return true;
     }
-    const parsed = Number(trimmed);
-    if (!Number.isInteger(parsed) || parsed < 0) {
+    // The standard price beside this cell renders with dot thousands
+    // separators (formatIDR), so a bare Number() would silently misread a
+    // pasted "45.000" as 45. parseIDR strips those separators first.
+    let parsed: number;
+    try {
+      parsed = parseIDR(trimmed);
+    } catch {
       toast.error(t`Harga harus bilangan bulat dan tidak boleh negatif.`);
       return false;
     }
@@ -62,6 +79,7 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
       });
     } catch {
       toast.error(t`Gagal menyimpan harga.`);
+      return false;
     }
     return true;
   }
@@ -71,6 +89,27 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
       <div className="flex justify-center py-8">
         <Spinner />
       </div>
+    );
+  }
+
+  if (rows.length === 0) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <UtensilsCrossed />
+          </EmptyMedia>
+          <EmptyTitle>
+            <Trans>Belum ada item menu.</Trans>
+          </EmptyTitle>
+          <EmptyDescription>
+            <Trans>
+              Tambah item, varian, atau modifier di menu terlebih dahulu untuk memberinya harga
+              di kategori ini.
+            </Trans>
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
@@ -94,42 +133,58 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
       <p className="text-sm text-muted-foreground">
         <Trans>Kosongkan kolom harga untuk memakai harga standar.</Trans>
       </p>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border text-left text-muted-foreground">
-            <th className="py-2 font-medium">
-              <Trans>Nama</Trans>
-            </th>
-            <th className="py-2 font-medium">
-              <Trans>Harga standar</Trans>
-            </th>
-            <th className="py-2 font-medium">
-              <Trans>Harga kategori</Trans>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {visible.map((r) => (
-            <tr key={r.targetId} className="border-b border-border">
-              <td className="py-2">
-                {r.groupLabel ? (
-                  <span className="text-muted-foreground">{r.groupLabel} / </span>
-                ) : null}
-                {r.label}
-              </td>
-              <td className="py-2 text-muted-foreground">{formatIDR(r.standardPriceIDR)}</td>
-              <td className="py-2">
-                <PriceCell
-                  key={`${r.targetId}:${r.overrideIDR ?? 'null'}`}
-                  initial={r.overrideIDR}
-                  placeholder={String(r.standardPriceIDR)}
-                  onCommit={(raw) => commit(r, raw)}
-                />
-              </td>
+      {visible.length === 0 ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Search />
+            </EmptyMedia>
+            <EmptyTitle>
+              <Trans>Tidak ada hasil untuk pencarian ini.</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Coba kata kunci lain atau kosongkan kolom pencarian.</Trans>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border text-left text-muted-foreground">
+              <th className="py-2 font-medium">
+                <Trans>Nama</Trans>
+              </th>
+              <th className="py-2 font-medium">
+                <Trans>Harga standar</Trans>
+              </th>
+              <th className="py-2 font-medium">
+                <Trans>Harga kategori</Trans>
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {visible.map((r) => (
+              <tr key={r.targetId} className="border-b border-border">
+                <td className="py-2">
+                  {r.groupLabel ? (
+                    <span className="text-muted-foreground">{r.groupLabel} / </span>
+                  ) : null}
+                  {r.label}
+                </td>
+                <td className="py-2 text-muted-foreground">{formatIDR(r.standardPriceIDR)}</td>
+                <td className="py-2">
+                  <PriceCell
+                    key={`${r.targetId}:${r.overrideIDR ?? 'null'}`}
+                    initial={r.overrideIDR}
+                    placeholder={String(r.standardPriceIDR)}
+                    onCommit={(raw) => commit(r, raw)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
@@ -152,6 +207,7 @@ function PriceCell({
   return (
     <Input
       value={value}
+      type="number"
       inputMode="numeric"
       placeholder={placeholder}
       className="max-w-32"

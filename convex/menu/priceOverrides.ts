@@ -85,7 +85,8 @@ export const set = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { cafeId } = await requireActiveOutlet(ctx);
-    await requireOwned(ctx, cafeId, args.priceCategoryId, 'Kategori harga');
+    const category = await requireOwned(ctx, cafeId, args.priceCategoryId, 'Kategori harga');
+    if (category.archived) throw new Error('Kategori harga sudah diarsipkan.');
     await assertTargetOwned(ctx, cafeId, args.targetKind, args.targetId);
     const priceIDR = assertPrice(args.priceIDR);
 
@@ -131,7 +132,8 @@ export const clear = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { cafeId } = await requireActiveOutlet(ctx);
-    await requireOwned(ctx, cafeId, args.priceCategoryId, 'Kategori harga');
+    const category = await requireOwned(ctx, cafeId, args.priceCategoryId, 'Kategori harga');
+    if (category.archived) throw new Error('Kategori harga sudah diarsipkan.');
     const existing = await ctx.db
       .query('priceOverrides')
       .withIndex('by_category_and_kind_and_target', (q) =>
@@ -182,7 +184,8 @@ export const grid = query({
   returns: v.array(gridRow),
   handler: async (ctx, args) => {
     const { cafeId } = await requireActiveOutlet(ctx);
-    await requireOwned(ctx, cafeId, args.priceCategoryId, 'Kategori harga');
+    const category = await requireOwned(ctx, cafeId, args.priceCategoryId, 'Kategori harga');
+    if (category.archived) throw new Error('Kategori harga sudah diarsipkan.');
 
     const overrides = new Map<string, number>();
     const rows = await ctx.db

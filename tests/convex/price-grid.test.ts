@@ -98,6 +98,36 @@ describe('price grid', () => {
     expect(rows.some((r) => r.targetKind === 'modifier')).toBe(true);
   });
 
+  // The item stays active here (unlike the case above), so the items query
+  // alone would still return it and its variants. Only the in-memory
+  // `variant.archived` filter added alongside the N+1 fix keeps an archived
+  // variant off the grid while its still-active item stays on.
+  it('excludes an archived variant but keeps its still-active item', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.variants.archive, { id: s.variantId });
+    const rows = await s.asOwner.query(api.menu.priceOverrides.grid, {
+      priceCategoryId: s.tierId,
+    });
+    expect(rows.some((r) => r.targetKind === 'variant')).toBe(false);
+    const item = rows.find((r) => r.targetKind === 'item');
+    expect(item?.label).toBe('Espresso');
+  });
+
+  it('rejects an archived price category', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.priceCategories.archive, { id: s.tierId });
+    await expect(
+      s.asOwner.mutation(api.menu.priceOverrides.set, {
+        priceCategoryId: s.tierId,
+        targetKind: 'item',
+        targetId: s.itemId,
+        priceIDR: 30000,
+      })
+    ).rejects.toThrow(/diarsipkan/);
+  });
+
   it('rejects a category from another cafe', async () => {
     const t = convexTest(schema, modules);
     const s = await setup(t);

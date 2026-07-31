@@ -1106,6 +1106,10 @@ msgstr "No modifier groups yet."
 msgid "Belum ada grup terpasang."
 msgstr "No groups attached."
 
+#: src/components/menu/price-grid.tsx
+msgid "Belum ada item menu."
+msgstr "No menu items yet."
+
 #: src/components/sale/cart-pane.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/labels.tsx
@@ -1812,6 +1816,10 @@ msgstr "Clock in"
 #: src/routes/_pos/time-clock.tsx
 msgid "Clock out"
 msgstr "Clock out"
+
+#: src/components/menu/price-grid.tsx
+msgid "Coba kata kunci lain atau kosongkan kolom pencarian."
+msgstr "Try a different keyword or clear the search field."
 
 #: src/routes/_pos/help.tsx
 msgid "Coba kata kunci lain atau pilih kategori berbeda."
@@ -3432,6 +3440,10 @@ msgstr "Category added."
 msgid "kategori harga"
 msgstr "price category"
 
+#: src/routes/_pos/menu/price-categories.$categoryId.tsx
+msgid "Kategori harga"
+msgstr "Price categories"
+
 #: src/routes/_pos/menu/route.tsx
 msgid "Kategori Harga"
 msgstr "Price Categories"
@@ -3440,6 +3452,10 @@ msgstr "Price Categories"
 #: src/components/menu/price-category-table.tsx
 msgid "Kategori harga baru"
 msgstr "New price category"
+
+#: src/routes/_pos/menu/price-categories.$categoryId.tsx
+msgid "Kategori harga tidak ditemukan."
+msgstr "Price category not found."
 
 #: src/components/menu/category-table.tsx
 msgid "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
@@ -6657,6 +6673,10 @@ msgstr "Add menu items to print barcode labels."
 msgid "Tambah item pertama untuk mulai berjualan."
 msgstr "Add your first item to start selling."
 
+#: src/components/menu/price-grid.tsx
+msgid "Tambah item, varian, atau modifier di menu terlebih dahulu untuk memberinya harga di kategori ini."
+msgstr "Add items, variants, or modifiers to the menu first so they can be priced in this category."
+
 #: src/components/schedule/shift-form-dialog.tsx
 #: src/routes/_pos/schedule.tsx
 msgid "Tambah jadwal"
@@ -7211,6 +7231,10 @@ msgstr "No results for \"{query}\""
 #: src/components/command-palette.tsx
 #~ msgid "Tidak ada hasil untuk «{query}»"
 #~ msgstr "No results for \"{query}\""
+
+#: src/components/menu/price-grid.tsx
+msgid "Tidak ada hasil untuk pencarian ini."
+msgstr "No results for this search."
 
 #: src/components/sale/menu-pane.tsx
 msgid "Tidak ada item di kategori ini."
