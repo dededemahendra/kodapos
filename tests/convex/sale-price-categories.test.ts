@@ -201,4 +201,62 @@ describe('price category resolution', () => {
       sell(s, 'pc-6', [{ menuItemId: s.itemId, qty: 1, modifierOptionIds: [] }], foreignTier)
     ).rejects.toThrow();
   });
+
+  // Regression guard: orders.getById + orders.listForShift have strict whole-
+  // document return validators. An order carrying priceCategoryId/priceCategoryName
+  // must not make them throw (they'd otherwise break every other order on the
+  // shift too, since listForShift returns the whole shift in one call).
+  it('getById and listForShift both succeed for an order with a price category', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.priceOverrides.set, {
+      priceCategoryId: s.tierId,
+      targetKind: 'item',
+      targetId: s.itemId,
+      priceIDR: 30000,
+    });
+    const res = await sell(
+      s,
+      'pc-8',
+      [{ menuItemId: s.itemId, qty: 1, modifierOptionIds: [] }],
+      s.tierId
+    );
+
+    const detail = await s.asOwner.query(api.orders.getById, { id: res.orderId });
+    expect(detail?._id).toBe(res.orderId);
+    expect(detail?.priceCategoryName).toBe('Turis');
+
+    const rows = await s.asOwner.query(api.orders.listForShift, { shiftId: s.shiftId });
+    expect(rows.map((r) => r._id)).toContain(res.orderId);
+    expect(rows.find((r) => r._id === res.orderId)?.priceCategoryName).toBe('Turis');
+  });
+
+  // Same failure mode, different pre-existing field: appliedPromo's scope/target
+  // snapshot (written by buildOrder for every promo) must also round-trip through
+  // both strict return validators.
+  it('getById and listForShift both succeed for an order with an applied promo', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const promoId = await s.asOwner.mutation(api.promotions.create, {
+      name: 'Diskon 25',
+      type: 'percent',
+      value: 25,
+    });
+    // sell() doesn't thread promoId; ring it up directly instead.
+    const withPromo = await s.asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'pc-9',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [{ menuItemId: s.itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 100000,
+      promoId,
+    });
+
+    const detail = await s.asOwner.query(api.orders.getById, { id: withPromo.orderId });
+    expect(detail?._id).toBe(withPromo.orderId);
+    expect(detail?.appliedPromo?.scope).toBe('order');
+
+    const rows = await s.asOwner.query(api.orders.listForShift, { shiftId: s.shiftId });
+    expect(rows.find((r) => r._id === withPromo.orderId)?.appliedPromo?.scope).toBe('order');
+  });
 });
