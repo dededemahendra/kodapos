@@ -15,6 +15,7 @@ import { Route as PublicRouteImport } from './routes/_public'
 import { Route as PosRouteImport } from './routes/_pos'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as RelaySplatRouteImport } from './routes/relay.$'
 import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicSignupRouteImport } from './routes/_public/signup'
 import { Route as PublicSigninRouteImport } from './routes/_public/signin'
@@ -116,6 +117,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRoute,
+} as any)
+const RelaySplatRoute = RelaySplatRouteImport.update({
+  id: '/relay/$',
+  path: '/relay/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PublicTermsRoute = PublicTermsRouteImport.update({
   id: '/terms',
@@ -531,6 +537,7 @@ export interface FileRoutesByFullPath {
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
+  '/relay/$': typeof RelaySplatRoute
   '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
@@ -606,6 +613,7 @@ export interface FileRoutesByTo {
   '/signin': typeof PublicSigninRoute
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
+  '/relay/$': typeof RelaySplatRoute
   '/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
   '/inventory/purchases': typeof PosInventoryPurchasesRoute
@@ -688,6 +696,7 @@ export interface FileRoutesById {
   '/_public/signin': typeof PublicSigninRoute
   '/_public/signup': typeof PublicSignupRoute
   '/_public/terms': typeof PublicTermsRoute
+  '/relay/$': typeof RelaySplatRoute
   '/_public/': typeof PublicIndexRoute
   '/_pos/inventory/adjustments': typeof PosInventoryAdjustmentsRoute
   '/_pos/inventory/purchase-orders': typeof PosInventoryPurchaseOrdersRoute
@@ -770,6 +779,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/terms'
+    | '/relay/$'
     | '/inventory/adjustments'
     | '/inventory/purchase-orders'
     | '/inventory/purchases'
@@ -845,6 +855,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/terms'
+    | '/relay/$'
     | '/inventory/adjustments'
     | '/inventory/purchase-orders'
     | '/inventory/purchases'
@@ -926,6 +937,7 @@ export interface FileRouteTypes {
     | '/_public/signin'
     | '/_public/signup'
     | '/_public/terms'
+    | '/relay/$'
     | '/_public/'
     | '/_pos/inventory/adjustments'
     | '/_pos/inventory/purchase-orders'
@@ -971,6 +983,7 @@ export interface RootRouteChildren {
   PublicRoute: typeof PublicRouteWithChildren
   DisplayRoute: typeof DisplayRoute
   MenuBoardRoute: typeof MenuBoardRoute
+  RelaySplatRoute: typeof RelaySplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1016,6 +1029,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/relay/$': {
+      id: '/relay/$'
+      path: '/relay/$'
+      fullPath: '/relay/$'
+      preLoaderRoute: typeof RelaySplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_public/terms': {
       id: '/_public/terms'
@@ -1795,6 +1815,7 @@ const rootRouteChildren: RootRouteChildren = {
   PublicRoute: PublicRouteWithChildren,
   DisplayRoute: DisplayRoute,
   MenuBoardRoute: MenuBoardRoute,
+  RelaySplatRoute: RelaySplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

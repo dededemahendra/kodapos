@@ -167,6 +167,31 @@ describe('initAnalytics', () => {
       capture_console_errors: false,
     });
   });
+
+  // Ingestion is first-party so blockers cannot silently disable it. This is
+  // asserted rather than left to the Cloudflare env var on purpose: the proxy
+  // is meant to be a property of this repo, the same argument the pinned
+  // capture_* flags above are making.
+  //
+  // ui_host is not cosmetic. Once api_host stops matching PostHog's cloud host
+  // regex, posthog-js resolves endpointFor('ui', ...) against api_host too, so
+  // without this the toolbar and the issue deep links in error-tracking alerts
+  // point at kodapos.app/relay and 404.
+  it('sends ingestion through the first-party relay', async () => {
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    vi.stubEnv('VITE_POSTHOG_HOST', '');
+    stubHostname('kodapos.app');
+    const init = vi.fn();
+    vi.doMock('posthog-js', () => ({ default: { init, register: vi.fn() } }));
+    vi.resetModules();
+    const { initAnalytics } = await import('../../src/lib/analytics/client');
+    await initAnalytics({});
+
+    const call = init.mock.calls[0];
+    if (!call) throw new Error('posthog.init was not called');
+    expect(call[1].api_host).toBe('/relay');
+    expect(call[1].ui_host).toBe('https://us.posthog.com');
+  });
 });
 
 describe('before_send', () => {

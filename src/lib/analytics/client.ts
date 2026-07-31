@@ -31,8 +31,20 @@ function key(): string {
   return import.meta.env.VITE_POSTHOG_KEY ?? '';
 }
 
+/**
+ * First-party by default. Ad blockers list us.i.posthog.com, and a blocked
+ * request does not merely cost a pageview: capture_exceptions installs by
+ * fetching /static/exception-autocapture.js at runtime, so a blocked assets
+ * request disables error tracking with no console error anywhere.
+ *
+ * The default lives here rather than only in the Cloudflare env var because the
+ * proxy should be a property of this repo, the same reason the capture_* flags
+ * below are pinned instead of deferring to remote config. VITE_POSTHOG_HOST
+ * remains an override for pointing a build somewhere else.
+ */
 function host(): string {
-  return import.meta.env.VITE_POSTHOG_HOST ?? 'https://us.i.posthog.com';
+  const configured = import.meta.env.VITE_POSTHOG_HOST;
+  return configured !== undefined && configured !== '' ? configured : '/relay';
 }
 
 /**
@@ -102,6 +114,13 @@ async function start(superProps: Record<string, string>): Promise<boolean> {
     const { default: posthog } = await import('posthog-js');
     posthog.init(key(), {
       api_host: host(),
+      // api_host is now a first-party path, which takes posthog-js off its
+      // cloud-host fast path: its requestRouter regex-tests api_host and, on a
+      // miss, resolves every endpoint (assets AND ui) against our origin. The
+      // relay route handles assets; ui has no server side to handle, so it is
+      // named explicitly here or the toolbar and the issue links embedded in
+      // error-tracking alerts resolve to kodapos.app/relay and 404.
+      ui_host: 'https://us.posthog.com',
       // Explicit events only. The POS shows customer names, phone numbers and
       // order values; autocapture and session recording would scrape them.
       autocapture: false,

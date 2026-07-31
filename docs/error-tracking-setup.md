@@ -56,3 +56,50 @@ management endpoint, and returns 401 for a project key.
 Only `dist/client` is ever relevant either way. `dist/server` is the workerd
 bundle, and posthog-js only initializes in a browser, so nothing server-side
 emits `$exception`.
+
+## Ingestion goes through /relay
+
+PostHog is served first-party from `kodapos.app/relay/*`, not directly from
+`us.i.posthog.com`. `src/routes/relay.$.ts` forwards to two upstreams:
+
+| Path | Upstream | Why |
+|---|---|---|
+| `/relay/static/*` | `us-assets.i.posthog.com` | Versioned extension scripts (`exception-autocapture`, `web-vitals`, toolbar) |
+| everything else, including `/relay/array/*` (remote config) | `us.i.posthog.com` | Event ingestion, flags, remote config |
+
+`/static/*` is not the entire set of paths posthog-js resolves through
+`endpointFor('assets', ...)`. Remote config (`/array/<token>/config` and
+`/array/<token>/config.js`) also resolves through `assets`, but is deliberately
+kept on the ingestion upstream: it is unverified that the CDN-backed assets
+host serves `/array/`, and getting that wrong would break remote config
+silently. `/static/*` is the one assets path confirmed to work there.
+
+**REQUIRED DEPLOY STEP:** `VITE_POSTHOG_HOST` must be unset (or removed
+entirely) in the Cloudflare Workers Builds dashboard for this project.
+`client.ts` only falls back to `/relay` when the variable is unset or empty; a
+value left over from before this proxy existed (`https://us.i.posthog.com`)
+silently overrides the default, and the deploy ships a live, unused `/relay`
+route while ingestion continues to go directly to PostHog, unprotected from ad
+blockers, exactly as if this proxy had never shipped.
+
+Two upstreams are required, not one, but not because the ingestion host 404s
+`/static/*`. It does not: `us.i.posthog.com` dual-serves those paths today, so
+routing everything through one upstream would still work right now. The split
+exists because `us-assets.i.posthog.com` is the CDN-backed host PostHog
+documents and intends for static assets, and matching PostHog's own topology
+is a design this repo can keep relying on, rather than depending on
+undocumented dual-serving behavior that could stop working at any time with no
+warning here.
+
+The route forwards request headers by allowlist. This is load-bearing: `/relay`
+is same-origin, so the browser attaches kodapos.app session cookies to every
+ingestion request, and a denylist that forgot `cookie` would forward them to
+PostHog. It also forwards `cf-connecting-ip` as `x-forwarded-for` and the
+visitor's `user-agent`, without which every event geolocates to a Cloudflare
+datacenter and carries the Worker's user-agent instead of the visitor's; both
+preserve what direct ingestion already sent rather than collecting anything
+new.
+
+This is mitigation with a shelf life, not a fix. Blockers increasingly match on
+path patterns, and `/ingest/` and `/e/` are already on filter lists. `/relay`
+was chosen for being mundane rather than for being permanent.
