@@ -623,6 +623,11 @@ export default defineSchema({
     createdAtClient: v.number(),
     // Set by server at insert time today; optional reserved for Phase 2 offline-first when the client may persist an order before the backend confirms sync.
     syncedAt: v.optional(v.number()),
+    // Snapshot, not just a reference: renaming "Turis" to "Tourist" next month
+    // must not change what last month's receipts say. Absent means the standard
+    // price was used. The id is kept alongside for reporting joins.
+    priceCategoryId: v.optional(v.id('priceCategories')),
+    priceCategoryName: v.optional(v.string()),
   })
     .index('by_cafe_clientId', ['cafeId', 'clientId'])
     .index('by_shift', ['shiftId'])
