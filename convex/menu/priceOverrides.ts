@@ -1,4 +1,5 @@
 import { v } from 'convex/values';
+import type { Id } from '../_generated/dataModel';
 import { mutation, query } from '../_generated/server';
 import { requireActiveOutlet, requireOwned } from '../lib/auth';
 
@@ -157,5 +158,103 @@ export const listForCategory = query({
         q.eq('cafeId', cafeId).eq('priceCategoryId', args.priceCategoryId)
       )
       .collect();
+  },
+});
+
+const gridRow = v.object({
+  targetKind: targetKindValidator,
+  targetId: targetIdValidator,
+  label: v.string(),
+  /** The item a variant belongs to, or the modifier group an option belongs to. */
+  groupLabel: v.optional(v.string()),
+  standardPriceIDR: v.number(),
+  /** null means this category does not reprice the target, so it inherits. */
+  overrideIDR: v.union(v.number(), v.null()),
+});
+
+/**
+ * Every priceable target for one category, with its standard price and current
+ * override. Assembled here rather than in the client so the grid does not issue
+ * a query per item for variants, and so "what is priceable" has one definition.
+ */
+export const grid = query({
+  args: { priceCategoryId: v.id('priceCategories') },
+  returns: v.array(gridRow),
+  handler: async (ctx, args) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    await requireOwned(ctx, cafeId, args.priceCategoryId, 'Kategori harga');
+
+    const overrides = new Map<string, number>();
+    const rows = await ctx.db
+      .query('priceOverrides')
+      .withIndex('by_cafe_and_category', (q) =>
+        q.eq('cafeId', cafeId).eq('priceCategoryId', args.priceCategoryId)
+      )
+      .collect();
+    for (const row of rows) overrides.set(row.targetId as string, row.priceIDR);
+
+    // targetId keeps its union id type rather than widening to string, so the
+    // returns validator and the client both see real ids and no cast is needed
+    // at either end.
+    const out: Array<{
+      targetKind: 'item' | 'variant' | 'modifier';
+      targetId: Id<'menuItems'> | Id<'menuItemVariants'> | Id<'modifierOptions'>;
+      label: string;
+      groupLabel?: string;
+      standardPriceIDR: number;
+      overrideIDR: number | null;
+    }> = [];
+
+    const items = await ctx.db
+      .query('menuItems')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
+      .collect();
+
+    for (const item of items) {
+      out.push({
+        targetKind: 'item',
+        targetId: item._id,
+        label: item.name,
+        standardPriceIDR: item.priceIDR,
+        overrideIDR: overrides.get(item._id) ?? null,
+      });
+      const variants = await ctx.db
+        .query('menuItemVariants')
+        .withIndex('by_item_active', (q) => q.eq('menuItemId', item._id).eq('archived', false))
+        .collect();
+      for (const variant of variants) {
+        out.push({
+          targetKind: 'variant',
+          targetId: variant._id,
+          label: variant.name,
+          groupLabel: item.name,
+          standardPriceIDR: variant.priceIDR,
+          overrideIDR: overrides.get(variant._id) ?? null,
+        });
+      }
+    }
+
+    const groups = await ctx.db
+      .query('modifierGroups')
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
+      .collect();
+    for (const group of groups) {
+      const options = await ctx.db
+        .query('modifierOptions')
+        .withIndex('by_group_active', (q) => q.eq('groupId', group._id).eq('archived', false))
+        .collect();
+      for (const option of options) {
+        out.push({
+          targetKind: 'modifier',
+          targetId: option._id,
+          label: option.name,
+          groupLabel: group.name,
+          standardPriceIDR: option.priceAdjustmentIDR,
+          overrideIDR: overrides.get(option._id) ?? null,
+        });
+      }
+    }
+
+    return out;
   },
 });
