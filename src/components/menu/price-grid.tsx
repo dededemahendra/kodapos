@@ -2,9 +2,10 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
+import { formatIDR } from '~/lib/money';
 import { toast } from '~/lib/toast';
 
 /**
@@ -26,11 +27,15 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
   /**
    * Writes fire on blur, never per keystroke. Typing "45000" would otherwise
    * send five mutations, four of them for prices nobody meant.
+   *
+   * Returns false when the input was rejected (invalid number), so the cell
+   * can reset itself back to the stored value. Otherwise a rejected cell
+   * keeps its invalid text and re-toasts on every subsequent blur.
    */
-  async function commit(row: GridRow, raw: string) {
+  async function commit(row: GridRow, raw: string): Promise<boolean> {
     const trimmed = raw.trim();
     if (trimmed === '') {
-      if (row.overrideIDR === null) return;
+      if (row.overrideIDR === null) return true;
       try {
         await clearOverride({
           priceCategoryId: categoryId,
@@ -40,14 +45,14 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
       } catch {
         toast.error(t`Gagal menghapus harga.`);
       }
-      return;
+      return true;
     }
     const parsed = Number(trimmed);
     if (!Number.isInteger(parsed) || parsed < 0) {
       toast.error(t`Harga harus bilangan bulat dan tidak boleh negatif.`);
-      return;
+      return false;
     }
-    if (parsed === row.overrideIDR) return;
+    if (parsed === row.overrideIDR) return true;
     try {
       await setOverride({
         priceCategoryId: categoryId,
@@ -58,6 +63,7 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
     } catch {
       toast.error(t`Gagal menyimpan harga.`);
     }
+    return true;
   }
 
   if (rows === undefined) {
@@ -111,7 +117,7 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
                 ) : null}
                 {r.label}
               </td>
-              <td className="py-2 text-muted-foreground">{r.standardPriceIDR}</td>
+              <td className="py-2 text-muted-foreground">{formatIDR(r.standardPriceIDR)}</td>
               <td className="py-2">
                 <PriceCell
                   key={`${r.targetId}:${r.overrideIDR ?? 'null'}`}
@@ -135,9 +141,14 @@ function PriceCell({
 }: {
   initial: number | null;
   placeholder: string;
-  onCommit: (raw: string) => void;
+  onCommit: (raw: string) => Promise<boolean>;
 }) {
   const [value, setValue] = useState(initial === null ? '' : String(initial));
+  // Escape sets this so the blur it triggers does not write. `.blur()` fires
+  // the native blur event synchronously, before React re-renders, so onBlur
+  // would otherwise read the stale `value` from this render's closure (the
+  // text the user typed, not the reset one) and commit it.
+  const skipCommit = useRef(false);
   return (
     <Input
       value={value}
@@ -145,11 +156,21 @@ function PriceCell({
       placeholder={placeholder}
       className="max-w-32"
       onChange={(e) => setValue(e.target.value)}
-      onBlur={() => onCommit(value)}
+      onBlur={async () => {
+        if (skipCommit.current) {
+          skipCommit.current = false;
+          return;
+        }
+        const ok = await onCommit(value);
+        // Rejected input keeps the stored value visible instead of the
+        // invalid text, so blurring again does not re-toast the same error.
+        if (!ok) setValue(initial === null ? '' : String(initial));
+      }}
       onKeyDown={(e) => {
         if (e.key === 'Enter') e.currentTarget.blur();
         // Escape reverts the cell to its stored value without writing.
         if (e.key === 'Escape') {
+          skipCommit.current = true;
           setValue(initial === null ? '' : String(initial));
           e.currentTarget.blur();
         }
