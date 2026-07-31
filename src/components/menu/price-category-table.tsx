@@ -1,4 +1,5 @@
 import { Trans, useLingui } from '@lingui/react/macro';
+import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
@@ -76,9 +77,13 @@ export function PriceCategoryTable() {
         <ul className="divide-y divide-border rounded-md border border-border">
           {categories.map((c) => (
             <li key={c._id} className="flex items-center justify-between px-4 py-3">
-              {/* TODO(Task 3): restore as a Link to /menu/price-categories/$categoryId
-                  once the grid route exists. */}
-              <span className="font-medium">{c.name}</span>
+              <Link
+                to="/menu/price-categories/$categoryId"
+                params={{ categoryId: c._id }}
+                className="font-medium hover:underline"
+              >
+                {c.name}
+              </Link>
               <div className="flex gap-2">
                 <Button
                   variant="outline"

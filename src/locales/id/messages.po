@@ -1652,6 +1652,10 @@ msgstr "Cari grup…"
 msgid "Cari item…"
 msgstr "Cari item…"
 
+#: src/components/menu/price-grid.tsx
+msgid "Cari menu, varian atau tambahan"
+msgstr "Cari menu, varian atau tambahan"
+
 #: src/routes/_pos/customers.tsx
 msgid "Cari nama atau telepon…"
 msgstr "Cari nama atau telepon…"
@@ -2395,6 +2399,10 @@ msgstr "Gagal mengatur PIN."
 msgid "Gagal mengganti PIN."
 msgstr "Gagal mengganti PIN."
 
+#: src/components/menu/price-grid.tsx
+msgid "Gagal menghapus harga."
+msgstr "Gagal menghapus harga."
+
 #: src/routes/_pos/schedule.tsx
 msgid "Gagal menghapus jadwal."
 msgstr "Gagal menghapus jadwal."
@@ -2495,6 +2503,10 @@ msgstr "Gagal menyimpan bahan."
 #: src/components/menu/modifier-group-form.tsx
 msgid "Gagal menyimpan grup."
 msgstr "Gagal menyimpan grup."
+
+#: src/components/menu/price-grid.tsx
+msgid "Gagal menyimpan harga."
+msgstr "Gagal menyimpan harga."
 
 #: src/components/menu/item-edit-form.tsx
 msgid "Gagal menyimpan item."
@@ -2851,9 +2863,21 @@ msgstr "Harga dasar {0}"
 #~ msgid "harga diumumkan nanti"
 #~ msgstr "harga diumumkan nanti"
 
+#: src/components/menu/price-grid.tsx
+msgid "Harga harus bilangan bulat dan tidak boleh negatif."
+msgstr "Harga harus bilangan bulat dan tidak boleh negatif."
+
+#: src/components/menu/price-grid.tsx
+msgid "Harga kategori"
+msgstr "Harga kategori"
+
 #: src/components/marketing/pricing.tsx
 #~ msgid "Harga sederhana"
 #~ msgstr "Harga sederhana"
+
+#: src/components/menu/price-grid.tsx
+msgid "Harga standar"
+msgstr "Harga standar"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Harga sudah termasuk pajak"
@@ -3749,6 +3773,10 @@ msgstr "Kosongkan"
 msgid "Kosongkan keranjang?"
 msgstr "Kosongkan keranjang?"
 
+#: src/components/menu/price-grid.tsx
+msgid "Kosongkan kolom harga untuk memakai harga standar."
+msgstr "Kosongkan kolom harga untuk memakai harga standar."
+
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kota"
 msgstr "Kota"
@@ -4484,6 +4512,7 @@ msgstr "Naikkan urutan"
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
 #: src/components/menu/price-category-form-dialog.tsx
+#: src/components/menu/price-grid.tsx
 #: src/components/onboarding/steps/cashier-step.tsx
 #: src/components/settings/mcp-access-card.tsx
 #: src/routes/_pos/customers.tsx
