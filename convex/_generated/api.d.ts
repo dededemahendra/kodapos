@@ -72,6 +72,7 @@ import type * as menu_itemStock from "../menu/itemStock.js";
 import type * as menu_items from "../menu/items.js";
 import type * as menu_modifierGroups from "../menu/modifierGroups.js";
 import type * as menu_priceCategories from "../menu/priceCategories.js";
+import type * as menu_priceOverrides from "../menu/priceOverrides.js";
 import type * as menu_variants from "../menu/variants.js";
 import type * as multiOutlet from "../multiOutlet.js";
 import type * as orders from "../orders.js";
@@ -179,6 +180,7 @@ declare const fullApi: ApiFromModules<{
   "menu/items": typeof menu_items;
   "menu/modifierGroups": typeof menu_modifierGroups;
   "menu/priceCategories": typeof menu_priceCategories;
+  "menu/priceOverrides": typeof menu_priceOverrides;
   "menu/variants": typeof menu_variants;
   multiOutlet: typeof multiOutlet;
   orders: typeof orders;
