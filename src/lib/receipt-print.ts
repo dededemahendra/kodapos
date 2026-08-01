@@ -54,6 +54,7 @@ export function buildReceiptBytes(
   p.line(`Cashier: ${order.cashierName}`);
   if (opts.orderNumber) p.line(`Order #${opts.orderNumber}`);
   if (order.orderType) p.line(`Order type: ${ORDER_TYPE_LABELS[order.orderType]}`);
+  if (order.priceCategoryName) p.line(`Price tier: ${order.priceCategoryName}`);
   if (opts.voided) p.bold(true).line('** VOID **').bold(false);
   if ((order.refundedIDR ?? 0) > 0) p.line(`REFUNDED ${formatIDR(order.refundedIDR ?? 0)}`);
 

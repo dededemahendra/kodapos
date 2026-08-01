@@ -40,6 +40,10 @@ export interface ReceiptOrder {
   createdAtClient: number;
   cashierName: string;
   orderType?: 'dine_in' | 'takeaway' | 'pickup';
+  /** Owner-named price tier the order was priced under, e.g. "Turis". Absent
+   * means the standard price was used. A snapshot at sale time, not a live
+   * lookup, so renaming the category later never changes an old receipt. */
+  priceCategoryName?: string;
 }
 
 export interface ReceiptCafe {
@@ -100,6 +104,7 @@ export function buildReceiptText(order: ReceiptOrder, cafe: ReceiptCafe | null):
   out.push(formatDate(order.createdAtClient));
   out.push(`Cashier: ${order.cashierName}`);
   if (order.orderType) out.push(`Order type: ${ORDER_TYPE_LABELS[order.orderType]}`);
+  if (order.priceCategoryName) out.push(`Price tier: ${order.priceCategoryName}`);
   if ((order.refundedIDR ?? 0) > 0) out.push(`REFUNDED ${formatIDR(order.refundedIDR ?? 0)}`);
   out.push('');
 
@@ -155,6 +160,9 @@ export function buildReceiptHtml(order: ReceiptOrder, cafe: ReceiptCafe | null):
   head.push(`<div>Cashier: ${escapeHtml(order.cashierName)}</div>`);
   if (order.orderType) {
     head.push(`<div>Order type: ${escapeHtml(ORDER_TYPE_LABELS[order.orderType])}</div>`);
+  }
+  if (order.priceCategoryName) {
+    head.push(`<div>Price tier: ${escapeHtml(order.priceCategoryName)}</div>`);
   }
   if ((order.refundedIDR ?? 0) > 0) {
     head.push(

@@ -98,6 +98,24 @@ describe('buildReceiptText', () => {
     expect(text).not.toContain('—');
     expect(text).not.toContain('--');
   });
+
+  it('prints the price tier when the order carries one', () => {
+    const text = buildReceiptText(sampleOrder({ priceCategoryName: 'Turis' }), cafe);
+    expect(text).toContain('Price tier: Turis');
+  });
+
+  // Regression guard: most orders have no price category, and an outlet that
+  // only sends digital (email/WhatsApp) receipts must see no change at all.
+  it('is unchanged when the order has no price category', () => {
+    const text = buildReceiptText(sampleOrder(), cafe);
+    expect(text).toBe(
+      'Kopi Senja\nJl. Merdeka 1\n0812000111\n15/11/2023, 06:13:20\nCashier: Andi\n' +
+        'Order type: Dine-in\n\n2x Latte (Large)   Rp 50.000\n  + Oat milk\n' +
+        '1x Croissant   Rp 20.000\n\nSubtotal   Rp 70.000\nService 5%   Rp 3.500\n' +
+        'Tax 11%   Rp 8.085\nTotal   Rp 81.585\n\nPaid: Cash   Rp 81.585\n' +
+        'Points earned: +81\n\nThank you'
+    );
+  });
 });
 
 describe('buildReceiptHtml', () => {
@@ -108,6 +126,11 @@ describe('buildReceiptHtml', () => {
     expect(html).toContain(formatIDR(81585));
     expect(html).not.toContain('—');
     expect(html).not.toContain('--');
+  });
+
+  it('prints the price tier when the order carries one', () => {
+    const html = buildReceiptHtml(sampleOrder({ priceCategoryName: 'Turis' }), cafe);
+    expect(html).toContain('Price tier: Turis');
   });
 });
 
