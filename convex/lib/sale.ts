@@ -34,6 +34,7 @@ export const saleArgs = {
   createdAtClient: v.optional(v.number()),
   orderType: v.optional(orderTypeValidator),
   tableId: v.optional(v.id('tables')),
+  priceCategoryId: v.optional(v.id('priceCategories')),
 };
 
 export const saleResult = v.object({
@@ -81,7 +82,8 @@ export async function buildOrder(
   const { cafeId } = await requireActiveOutlet(ctx);
 
   // Idempotency check FIRST — an existing order bypasses all further validation
-  // (including the payment-method guard) because the order is already committed.
+  // (including the payment-method guard and the price-category lookup below)
+  // because the order is already committed.
   const existing = await ctx.db
     .query('orders')
     .withIndex('by_cafe_clientId', (q) => q.eq('cafeId', cafeId).eq('clientId', args.clientId))
@@ -98,6 +100,29 @@ export async function buildOrder(
       totalIDR: existing.totalIDR,
       changeIDR: existingPayments.reduce((s, p) => s + (p.changeIDR ?? 0), 0),
     };
+  }
+
+  // One indexed query for the whole order. A lookup per line would add up to
+  // three reads per line once modifiers are involved. Sits AFTER the
+  // idempotency short-circuit above: a category archived between the original
+  // sale and a replay (fresh clientId aside — same clientId hits `existing`
+  // and returns above) must never make a REPLAY of an already-committed order
+  // throw, or a cashier retrying a paid sale would ring a duplicate order.
+  const priceOverrides = new Map<string, number>();
+  let priceCategoryName: string | undefined;
+  if (args.priceCategoryId) {
+    const priceCategory = await ctx.db.get(args.priceCategoryId);
+    if (!priceCategory || priceCategory.cafeId !== cafeId || priceCategory.archived) {
+      throw new Error('Kategori harga tidak ditemukan.');
+    }
+    priceCategoryName = priceCategory.name;
+    const rows = await ctx.db
+      .query('priceOverrides')
+      .withIndex('by_cafe_and_category', (q) =>
+        q.eq('cafeId', cafeId).eq('priceCategoryId', priceCategory._id)
+      )
+      .collect();
+    for (const row of rows) priceOverrides.set(row.targetId as string, row.priceIDR);
   }
 
   if (args.lines.length < 1) throw new Error('Keranjang kosong.');
@@ -160,12 +185,14 @@ export async function buildOrder(
         throw new Error('Modifier tidak tersedia.');
       }
       countByGroup.set(group._id, (countByGroup.get(group._id) ?? 0) + 1);
+      const adjustment =
+        priceOverrides.get(option._id as string) ?? option.priceAdjustmentIDR;
       modifiersSnapshot.push({
         groupName: group.name,
         optionName: option.name,
-        priceAdjustmentIDR: option.priceAdjustmentIDR,
+        priceAdjustmentIDR: adjustment,
       });
-      modifierAdjustments += option.priceAdjustmentIDR;
+      modifierAdjustments += adjustment;
     }
 
     for (const attachment of attachments) {
@@ -180,7 +207,18 @@ export async function buildOrder(
       }
     }
 
-    const basePrice = variant ? variant.priceIDR : item.priceIDR;
+    // Keyed on the VARIANT when one is selected. A variant's price already
+    // replaces the item's base price, so an item-level override must not leak
+    // into a line that picked a size.
+    //
+    // A stale priceOverrides row for an archived item/variant/option is inert
+    // only because the guards above (and the option/group checks below) reject
+    // an archived target before pricing ever consults this map. There is no
+    // cleanup path for priceOverrides today: un-archiving a target silently
+    // reactivates whatever old tier price was left on it.
+    const priceTargetId = (variant ? variant._id : item._id) as string;
+    const basePrice =
+      priceOverrides.get(priceTargetId) ?? (variant ? variant.priceIDR : item.priceIDR);
     const unitPriceIDR = basePrice + modifierAdjustments;
     const lineTotalIDR = line.qty * unitPriceIDR;
 
@@ -458,6 +496,9 @@ export async function buildOrder(
     paymentStatus: 'pending',
     createdAtClient: args.createdAtClient ?? now,
     syncedAt: now,
+    ...(priceCategoryName
+      ? { priceCategoryId: args.priceCategoryId, priceCategoryName }
+      : {}),
   });
 
   // Payment rows (order-first so they reference orderId). A split inserts one row

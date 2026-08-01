@@ -138,6 +138,11 @@ const orderSummary = v.object({
       name: v.string(),
       type: v.union(v.literal('percent'), v.literal('fixed')),
       value: v.number(),
+      scope: v.optional(
+        v.union(v.literal('order'), v.literal('item'), v.literal('category'))
+      ),
+      targetItemIds: v.optional(v.array(v.id('menuItems'))),
+      targetCategoryIds: v.optional(v.array(v.id('categories'))),
     })
   ),
   serviceChargeIDR: v.optional(v.number()),
@@ -182,6 +187,8 @@ const orderSummary = v.object({
   refundedIDR: v.optional(v.number()),
   createdAtClient: v.number(),
   syncedAt: v.optional(v.number()),
+  priceCategoryId: v.optional(v.id('priceCategories')),
+  priceCategoryName: v.optional(v.string()),
 });
 
 const orderDetail = v.object({

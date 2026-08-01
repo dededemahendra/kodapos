@@ -645,6 +645,7 @@ msgstr "Arsip"
 #: src/components/inventory/ingredient-form.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/confirm-archive.tsx
+#: src/components/menu/price-category-table.tsx
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/gift-cards.tsx
@@ -1105,6 +1106,10 @@ msgstr "Belum ada grup modifier."
 msgid "Belum ada grup terpasang."
 msgstr "Belum ada grup terpasang."
 
+#: src/components/menu/price-grid.tsx
+msgid "Belum ada item menu."
+msgstr "Belum ada item menu."
+
 #: src/components/sale/cart-pane.tsx
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/labels.tsx
@@ -1127,6 +1132,10 @@ msgstr "Belum ada kartu hadiah."
 #: src/components/onboarding/steps/cashier-step.tsx
 msgid "Belum ada kasir tambahan."
 msgstr "Belum ada kasir tambahan."
+
+#: src/components/menu/price-category-table.tsx
+msgid "Belum ada kategori harga."
+msgstr "Belum ada kategori harga."
 
 #: src/components/menu/category-table.tsx
 msgid "Belum ada kategori."
@@ -1430,6 +1439,10 @@ msgstr "Buat bisnis sendiri"
 msgid "Buat grup modifier (mis. Ukuran) dan pasang ke item."
 msgstr "Buat grup modifier (mis. Ukuran) dan pasang ke item."
 
+#: src/components/menu/price-category-table.tsx
+msgid "Buat kategori seperti Turis atau Member untuk memakai harga berbeda pada menu yang sama. Harga menu Anda sekarang tetap menjadi harga standar."
+msgstr "Buat kategori seperti Turis atau Member untuk memakai harga berbeda pada menu yang sama. Harga menu Anda sekarang tetap menjadi harga standar."
+
 #: src/components/onboarding/steps/menu-step.tsx
 msgid "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
 msgstr "Buat kategori, tambah item, dan kelompokkan modifier yang bisa dipakai ulang. Bisa diselesaikan sekarang atau dilanjutkan kapan pun lewat menu utama."
@@ -1643,6 +1656,10 @@ msgstr "Cari grup…"
 msgid "Cari item…"
 msgstr "Cari item…"
 
+#: src/components/menu/price-grid.tsx
+msgid "Cari menu, varian atau tambahan"
+msgstr "Cari menu, varian atau tambahan"
+
 #: src/routes/_pos/customers.tsx
 msgid "Cari nama atau telepon…"
 msgstr "Cari nama atau telepon…"
@@ -1799,6 +1816,10 @@ msgstr "Clock in"
 #: src/routes/_pos/time-clock.tsx
 msgid "Clock out"
 msgstr "Clock out"
+
+#: src/components/menu/price-grid.tsx
+msgid "Coba kata kunci lain atau kosongkan kolom pencarian."
+msgstr "Coba kata kunci lain atau kosongkan kolom pencarian."
 
 #: src/routes/_pos/help.tsx
 msgid "Coba kata kunci lain atau pilih kategori berbeda."
@@ -2354,6 +2375,10 @@ msgstr "Gagal mengarsipkan item."
 msgid "Gagal mengarsipkan kartu hadiah."
 msgstr "Gagal mengarsipkan kartu hadiah."
 
+#: src/components/menu/price-category-table.tsx
+msgid "Gagal mengarsipkan kategori harga."
+msgstr "Gagal mengarsipkan kategori harga."
+
 #: src/components/menu/category-table.tsx
 msgid "Gagal mengarsipkan kategori."
 msgstr "Gagal mengarsipkan kategori."
@@ -2381,6 +2406,10 @@ msgstr "Gagal mengatur PIN."
 #: src/routes/_pos/settings/staff.tsx
 msgid "Gagal mengganti PIN."
 msgstr "Gagal mengganti PIN."
+
+#: src/components/menu/price-grid.tsx
+msgid "Gagal menghapus harga."
+msgstr "Gagal menghapus harga."
 
 #: src/routes/_pos/schedule.tsx
 msgid "Gagal menghapus jadwal."
@@ -2483,6 +2512,10 @@ msgstr "Gagal menyimpan bahan."
 msgid "Gagal menyimpan grup."
 msgstr "Gagal menyimpan grup."
 
+#: src/components/menu/price-grid.tsx
+msgid "Gagal menyimpan harga."
+msgstr "Gagal menyimpan harga."
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Gagal menyimpan item."
 msgstr "Gagal menyimpan item."
@@ -2490,6 +2523,10 @@ msgstr "Gagal menyimpan item."
 #: src/components/schedule/shift-form-dialog.tsx
 msgid "Gagal menyimpan jadwal."
 msgstr "Gagal menyimpan jadwal."
+
+#: src/components/menu/price-category-form-dialog.tsx
+msgid "Gagal menyimpan kategori harga."
+msgstr "Gagal menyimpan kategori harga."
 
 #: src/components/menu/category-form-dialog.tsx
 msgid "Gagal menyimpan kategori."
@@ -2834,9 +2871,21 @@ msgstr "Harga dasar {0}"
 #~ msgid "harga diumumkan nanti"
 #~ msgstr "harga diumumkan nanti"
 
+#: src/components/menu/price-grid.tsx
+msgid "Harga harus bilangan bulat dan tidak boleh negatif."
+msgstr "Harga harus bilangan bulat dan tidak boleh negatif."
+
+#: src/components/menu/price-grid.tsx
+msgid "Harga kategori"
+msgstr "Harga kategori"
+
 #: src/components/marketing/pricing.tsx
 #~ msgid "Harga sederhana"
 #~ msgstr "Harga sederhana"
+
+#: src/components/menu/price-grid.tsx
+msgid "Harga standar"
+msgstr "Harga standar"
 
 #: src/routes/_pos/settings/tax.tsx
 msgid "Harga sudah termasuk pajak"
@@ -3069,6 +3118,10 @@ msgstr "Items"
 #: src/routes/_pos/settings/staff.tsx
 msgid "Izin akses"
 msgstr "Izin akses"
+
+#: src/components/menu/price-category-table.tsx
+msgid "Jadikan harga standar sebagai harga tertinggi, lalu buat kategori yang lebih murah (misalnya Lokal). Layar menu dan halaman pesan mandiri selalu menampilkan harga standar, jadi kalau harga standar lebih murah, tamu membaca satu harga dan membayar harga lain."
+msgstr "Jadikan harga standar sebagai harga tertinggi, lalu buat kategori yang lebih murah (misalnya Lokal). Layar menu dan halaman pesan mandiri selalu menampilkan harga standar, jadi kalau harga standar lebih murah, tamu membaca satu harga dan membayar harga lain."
 
 #: src/routes/_pos/schedule.tsx
 msgid "Jadwal"
@@ -3386,6 +3439,27 @@ msgstr "Kategori diperbarui."
 #: src/components/menu/category-form-dialog.tsx
 msgid "Kategori ditambahkan."
 msgstr "Kategori ditambahkan."
+
+#: src/components/menu/price-category-table.tsx
+msgid "kategori harga"
+msgstr "kategori harga"
+
+#: src/routes/_pos/menu/price-categories.$categoryId.tsx
+msgid "Kategori harga"
+msgstr "Kategori harga"
+
+#: src/routes/_pos/menu/route.tsx
+msgid "Kategori Harga"
+msgstr "Kategori Harga"
+
+#: src/components/menu/price-category-form-dialog.tsx
+#: src/components/menu/price-category-table.tsx
+msgid "Kategori harga baru"
+msgstr "Kategori harga baru"
+
+#: src/routes/_pos/menu/price-categories.$categoryId.tsx
+msgid "Kategori harga tidak ditemukan."
+msgstr "Kategori harga tidak ditemukan."
 
 #: src/components/menu/category-table.tsx
 msgid "Kategori muncul sebagai filter di daftar Items dan di layar kasir."
@@ -3718,6 +3792,10 @@ msgstr "Kosongkan"
 #: src/components/sale/sale-screen.tsx
 msgid "Kosongkan keranjang?"
 msgstr "Kosongkan keranjang?"
+
+#: src/components/menu/price-grid.tsx
+msgid "Kosongkan kolom harga untuk memakai harga standar."
+msgstr "Kosongkan kolom harga untuk memakai harga standar."
 
 #: src/routes/_pos/settings/profile.tsx
 msgid "Kota"
@@ -4453,6 +4531,8 @@ msgstr "Naikkan urutan"
 #: src/components/loyalty/reward-form-dialog.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
+#: src/components/menu/price-category-form-dialog.tsx
+#: src/components/menu/price-grid.tsx
 #: src/components/onboarding/steps/cashier-step.tsx
 #: src/components/settings/mcp-access-card.tsx
 #: src/routes/_pos/customers.tsx
@@ -4589,6 +4669,7 @@ msgstr "Nama token"
 msgid "Nama varian"
 msgstr "Nama varian"
 
+#: src/components/menu/price-category-form-dialog.tsx
 #: src/lib/auth-validation.ts
 msgid "Nama wajib diisi."
 msgstr "Nama wajib diisi."
@@ -6309,6 +6390,7 @@ msgstr "Siapa yang bertugas?"
 #: src/components/loyalty/reward-form-dialog.tsx
 #: src/components/menu/category-form-dialog.tsx
 #: src/components/menu/item-edit-form.tsx
+#: src/components/menu/price-category-form-dialog.tsx
 #: src/components/promo/promo-form-dialog.tsx
 #: src/components/reservations/reservation-form-dialog.tsx
 #: src/components/sale/customer-section.tsx
@@ -6594,6 +6676,10 @@ msgstr "Tambah item menu untuk mencetak label barcode."
 #: src/routes/_pos/menu/index.tsx
 msgid "Tambah item pertama untuk mulai berjualan."
 msgstr "Tambah item pertama untuk mulai berjualan."
+
+#: src/components/menu/price-grid.tsx
+msgid "Tambah item, varian, atau modifier di menu terlebih dahulu untuk memberinya harga di kategori ini."
+msgstr "Tambah item, varian, atau modifier di menu terlebih dahulu untuk memberinya harga di kategori ini."
 
 #: src/components/schedule/shift-form-dialog.tsx
 #: src/routes/_pos/schedule.tsx
@@ -7150,6 +7236,10 @@ msgstr "Tidak ada hasil untuk \"{query}\""
 #~ msgid "Tidak ada hasil untuk «{query}»"
 #~ msgstr "Tidak ada hasil untuk «{query}»"
 
+#: src/components/menu/price-grid.tsx
+msgid "Tidak ada hasil untuk pencarian ini."
+msgstr "Tidak ada hasil untuk pencarian ini."
+
 #: src/components/sale/menu-pane.tsx
 msgid "Tidak ada item di kategori ini."
 msgstr "Tidak ada item di kategori ini."
@@ -7407,6 +7497,10 @@ msgstr "Tunai"
 msgid "Tunjukkan QR ini untuk membayar"
 msgstr "Tunjukkan QR ini untuk membayar"
 
+#: src/components/menu/price-category-form-dialog.tsx
+msgid "Turis"
+msgstr "Turis"
+
 #: src/components/menu/item-edit-form.tsx
 msgid "Turunkan urutan"
 msgstr "Turunkan urutan"
@@ -7448,6 +7542,7 @@ msgid "Uang terhitung (Rp)"
 msgstr "Uang terhitung (Rp)"
 
 #: src/components/customer/customer-detail-sheet.tsx
+#: src/components/menu/price-category-table.tsx
 #: src/components/tables/table-manage-dialog.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/loyalty.tsx
@@ -7482,6 +7577,10 @@ msgstr "Ubah jadwal"
 #: src/components/menu/category-form-dialog.tsx
 msgid "Ubah kategori"
 msgstr "Ubah kategori"
+
+#: src/components/menu/price-category-form-dialog.tsx
+msgid "Ubah kategori harga"
+msgstr "Ubah kategori harga"
 
 #: src/components/menu/category-table.tsx
 msgid "Ubah nama"
