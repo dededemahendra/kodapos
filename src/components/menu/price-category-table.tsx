@@ -71,6 +71,25 @@ export function PriceCategoryTable() {
                 sama. Harga menu Anda sekarang tetap menjadi harga standar.
               </Trans>
             </EmptyDescription>
+            {/*
+              Which price is Standard decides whether the TV menu board and the QR
+              self-order page stay honest. Both surfaces show Standard prices and
+              know nothing about categories, so if Standard is the cheaper local
+              price, a tourist reads that number and is charged more at the till.
+              The sparse-override model nudges owners exactly the wrong way here,
+              because leaving existing prices alone and adding "Turis" on top is
+              the obvious move, and existing prices are usually the local ones.
+              Saying so at the moment someone creates their first category is the
+              only place this lands before the mistake is made.
+            */}
+            <EmptyDescription>
+              <Trans>
+                Jadikan harga standar sebagai harga tertinggi, lalu buat kategori yang lebih murah
+                (misalnya Lokal). Layar menu dan halaman pesan mandiri selalu menampilkan harga
+                standar, jadi kalau harga standar lebih murah, tamu membaca satu harga dan membayar
+                harga lain.
+              </Trans>
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (

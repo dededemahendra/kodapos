@@ -3119,6 +3119,10 @@ msgstr "Items"
 msgid "Izin akses"
 msgstr "Izin akses"
 
+#: src/components/menu/price-category-table.tsx
+msgid "Jadikan harga standar sebagai harga tertinggi, lalu buat kategori yang lebih murah (misalnya Lokal). Layar menu dan halaman pesan mandiri selalu menampilkan harga standar, jadi kalau harga standar lebih murah, tamu membaca satu harga dan membayar harga lain."
+msgstr "Jadikan harga standar sebagai harga tertinggi, lalu buat kategori yang lebih murah (misalnya Lokal). Layar menu dan halaman pesan mandiri selalu menampilkan harga standar, jadi kalau harga standar lebih murah, tamu membaca satu harga dan membayar harga lain."
+
 #: src/routes/_pos/schedule.tsx
 msgid "Jadwal"
 msgstr "Jadwal"
