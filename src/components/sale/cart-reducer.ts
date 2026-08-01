@@ -32,6 +32,12 @@ export type CartPromo = {
 
 export type ManualDiscount = { type: 'percent' | 'fixed'; value: number };
 
+export type RepriceMap = {
+  items: Record<string, number>;
+  variants: Record<string, number>;
+  modifiers: Record<string, number>;
+};
+
 export type CartState = {
   lines: CartLine[];
   promo: CartPromo | null;
@@ -48,7 +54,8 @@ export type CartAction =
   | { type: 'setPromo'; promo: CartPromo | null }
   | { type: 'setOrderType'; orderType: OrderType }
   | { type: 'setManualDiscount'; manualDiscount: ManualDiscount | null }
-  | { type: 'load'; state: CartState };
+  | { type: 'load'; state: CartState }
+  | { type: 'reprice'; prices: RepriceMap };
 
 export const initialCart: CartState = {
   lines: [],
@@ -121,6 +128,28 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     }
     case 'clearCart': {
       return { lines: [], promo: null, orderType: 'dine_in', manualDiscount: null };
+    }
+    case 'reprice': {
+      // The cart caches unitPriceIDR per line, so a tier change would otherwise
+      // leave stale prices on screen while the server charges the new ones.
+      // A line whose target is missing from the new data keeps its current
+      // price: dropping or zeroing it would lose part of a live order.
+      return {
+        ...state,
+        lines: state.lines.map((line) => {
+          const base = line.variantId
+            ? action.prices.variants[line.variantId]
+            : action.prices.items[line.menuItemId];
+          if (base === undefined) return line;
+          const modifierLabels = line.modifierLabels.map((m, i) => {
+            const optionId = line.modifierOptionIds[i];
+            const resolved = optionId ? action.prices.modifiers[optionId] : undefined;
+            return resolved === undefined ? m : { ...m, priceAdjustmentIDR: resolved };
+          });
+          const adjustments = modifierLabels.reduce((s, m) => s + m.priceAdjustmentIDR, 0);
+          return { ...line, unitPriceIDR: base + adjustments, modifierLabels };
+        }),
+      };
     }
   }
 }
