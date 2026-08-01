@@ -2860,6 +2860,11 @@ msgstr "Price (Rp)"
 #~ msgid "Harga akan diumumkan sebelum masa akses awal berakhir."
 #~ msgstr "Pricing will be announced before early access ends."
 
+#. placeholder {0}: activePriceCategory.name
+#: src/components/sale/sale-screen.tsx
+msgid "Harga aktif: {0}"
+msgstr "Active price: {0}"
+
 #. placeholder {0}: formatIDR(item.item.priceIDR)
 #. placeholder {0}: formatIDR(menuItem.priceIDR)
 #: src/components/public/item-picker-sheet.tsx
@@ -3444,6 +3449,7 @@ msgstr "Category added."
 msgid "kategori harga"
 msgstr "price category"
 
+#: src/components/sale/sale-screen.tsx
 #: src/routes/_pos/menu/price-categories.$categoryId.tsx
 msgid "Kategori harga"
 msgstr "Price categories"
@@ -6458,6 +6464,10 @@ msgstr "Staff"
 #: src/routes/_pos/settings/staff.tsx
 #~ msgid "Staff"
 #~ msgstr "Staff"
+
+#: src/components/sale/sale-screen.tsx
+msgid "Standar"
+msgstr "Standard"
 
 #: src/components/marketing/why-indonesia.tsx
 msgid "Statis dan dinamis, langsung dari kasir tanpa alat tambahan."

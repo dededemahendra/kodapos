@@ -34,8 +34,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { SaleScreenSkeleton } from './sale-screen-skeleton';
-import { cartReducer, initialCart, type CartState } from './cart-reducer';
+import { cartReducer, initialCart, type CartState, type RepriceMap } from './cart-reducer';
 import { CartPane } from './cart-pane';
 import { HoldOrderDialog } from './hold-order-dialog';
 import { HeldOrdersDialog } from './held-orders-dialog';
@@ -66,7 +73,16 @@ export function SaleScreen({
   const removeHeld = useMutation(api.heldOrders.remove);
   const acceptSelfOrder = useMutation(api.selfOrders.accept);
   const categories = useQuery(api.menu.categories.list, {});
-  const items = useQuery(api.menu.items.listForSale, {});
+  const priceCategories = useQuery(api.menu.priceCategories.list, {});
+  // The tier applies to one order only: it always starts (and, after a
+  // completed sale, returns to) Standard. Making it sticky across sales is an
+  // obvious future ask, but it would silently charge the NEXT customer the
+  // previous customer's tier, which is this feature's main operational risk.
+  const [priceCategoryId, setPriceCategoryId] = useState<Id<'priceCategories'> | null>(null);
+  const items = useQuery(
+    api.menu.items.listForSale,
+    priceCategoryId ? { priceCategoryId } : {}
+  );
   const cafe = useQuery(api.cafes.myCafe, {});
   const shift = useQuery(api.shifts.current, {});
   const settings = useQuery(api.settings.get, {});
@@ -108,6 +124,11 @@ export function SaleScreen({
     setReceiptOrderId(orderId);
     dispatch({ type: 'clearCart' });
     setCurrentTable(null);
+    // The price category applies to this one order only, so it resets to
+    // Standard right alongside the cart. Making it sticky would be one tap
+    // less per sale, but it would also silently charge the next customer
+    // whatever tier the last one was rung on.
+    setPriceCategoryId(null);
   }
   // Accept a QR self-order into the register: /sale?selfOrder=<selfOrderId>.
   // The payload is the SAME held-order recall shape, so it loads identically.
@@ -176,6 +197,23 @@ export function SaleScreen({
       await navigate({ to: '/sale', search: {}, replace: true });
     })();
   }, [selfOrder, selfOrderCart, navigate, acceptSelfOrder]);
+
+  // Reprice the cart whenever the selected tier (or the menu data itself)
+  // changes, built from the SAME listForSale result the tiles render from so
+  // the screen and the cart can never disagree. Never clears the cart: a tier
+  // switch usually happens with a customer already standing at the till.
+  useEffect(() => {
+    if (items === undefined) return;
+    const prices: RepriceMap = { items: {}, variants: {}, modifiers: {} };
+    for (const row of items) {
+      prices.items[row.item._id] = row.item.priceIDR;
+      for (const v of row.variants) prices.variants[v._id] = v.priceIDR;
+      for (const g of row.attachedGroups) {
+        for (const o of g.options) prices.modifiers[o._id] = o.priceAdjustmentIDR;
+      }
+    }
+    dispatch({ type: 'reprice', prices });
+  }, [items, priceCategoryId]);
 
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
   // Map each cart line to the scope-helper shape, resolving its category from the
@@ -366,8 +404,20 @@ export function SaleScreen({
     });
   }
 
+  // Hide the picker entirely when the cafe has never created a price
+  // category: a cafe that never opted in must see no new control at all.
+  const hasPriceCategories = priceCategories !== undefined && priceCategories.length > 0;
+  const activePriceCategory = priceCategoryId
+    ? priceCategories?.find((c) => c._id === priceCategoryId) ?? null
+    : null;
+  const standardLabel = cafe?.standardPriceLabel || t`Standar`;
+
   return (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden md:grid md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div
+      className={`flex flex-col h-full min-h-0 overflow-hidden md:grid md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_380px] ${
+        hasPriceCategories ? 'md:grid-rows-[auto_1fr]' : ''
+      }`}
+    >
       {/* Phone-only tab bar: the menu and cart can't sit side by side under md,
           so they swap full-width here. Hidden on tablet+ where the grid shows
           both. The count keeps the cart discoverable after adding items. */}
@@ -395,6 +445,40 @@ export function SaleScreen({
           <Trans>Pesanan ({cart.lines.length})</Trans>
         </button>
       </div>
+      {hasPriceCategories ? (
+        <div
+          className={`flex flex-wrap items-center gap-2 border-b px-3 py-2 md:col-span-2 ${
+            activePriceCategory
+              ? 'border-amber-300 bg-amber-100 text-amber-900'
+              : 'border-border bg-background'
+          }`}
+        >
+          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <Trans>Kategori harga</Trans>
+          </span>
+          <Select
+            value={priceCategoryId ?? 'standard'}
+            onValueChange={(v) => setPriceCategoryId(v === 'standard' ? null : (v as Id<'priceCategories'>))}
+          >
+            <SelectTrigger className="h-8 w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="standard">{standardLabel}</SelectItem>
+              {priceCategories?.map((c) => (
+                <SelectItem key={c._id} value={c._id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {activePriceCategory ? (
+            <span className="ml-auto text-sm font-semibold">
+              <Trans>Harga aktif: {activePriceCategory.name}</Trans>
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <div
         className={`min-w-0 min-h-0 flex-1 flex-col md:flex ${
           mobileView === 'menu' ? 'flex' : 'hidden'
@@ -583,6 +667,7 @@ export function SaleScreen({
             quickCashButtons={settings.payment.quickCashButtons}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
@@ -604,6 +689,7 @@ export function SaleScreen({
             {...('qrisNmid' in settings.payment && settings.payment.qrisNmid ? { qrisNmid: settings.payment.qrisNmid } : {})}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
@@ -622,6 +708,7 @@ export function SaleScreen({
             qrisStaticEnabled={splitQrisStaticEnabled}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
@@ -638,6 +725,7 @@ export function SaleScreen({
             taxRatePct={taxRatePct}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
@@ -656,6 +744,7 @@ export function SaleScreen({
             taxRatePct={taxRatePct}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
