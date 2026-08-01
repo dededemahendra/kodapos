@@ -346,4 +346,15 @@ describe('listForSale price resolution', () => {
       s.asOwner.query(api.menu.items.listForSale, { priceCategoryId: foreignTier })
     ).rejects.toThrow();
   });
+
+  // The register guards against this by clearing the selection client-side,
+  // but the server-side guard itself was never asserted directly.
+  it('rejects an archived category', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.priceCategories.archive, { id: s.tierId });
+    await expect(
+      s.asOwner.query(api.menu.items.listForSale, { priceCategoryId: s.tierId })
+    ).rejects.toThrow();
+  });
 });

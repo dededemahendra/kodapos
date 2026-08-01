@@ -190,6 +190,11 @@ export function ReceiptPreview({
                   Order type: {ORDER_TYPE_RECEIPT_LABEL[order.orderType]}
                 </div>
               ) : null}
+              {order.priceCategoryName ? (
+                <div className="text-xs text-muted-foreground">
+                  Price tier: {order.priceCategoryName}
+                </div>
+              ) : null}
             </div>
             {/* Printed receipt is always English, kept out of the i18n catalog. */}
             {order.paymentStatus === 'void' ? (

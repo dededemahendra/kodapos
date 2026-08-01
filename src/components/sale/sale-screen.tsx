@@ -238,6 +238,19 @@ export function SaleScreen({
     dispatch({ type: 'reprice', prices });
   }, [items, priceCategoryId]);
 
+  // If the selected tier gets archived mid-sale, `priceCategories.list` stops
+  // returning it while `priceCategoryId` still points at it, and `listForSale`
+  // throws for an archived id. Fall back to Standard rather than let that
+  // throw take the whole register to an error boundary. Guarded on
+  // `priceCategories !== undefined` so a normal refetch never wipes the
+  // selection while the list is momentarily loading.
+  useEffect(() => {
+    if (!priceCategoryId || priceCategories === undefined) return;
+    if (!priceCategories.some((c) => c._id === priceCategoryId)) {
+      setPriceCategoryId(null);
+    }
+  }, [priceCategoryId, priceCategories]);
+
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
   // Map each cart line to the scope-helper shape, resolving its category from the
   // loaded items so a scoped promo previews against only its matching lines. The
@@ -578,7 +591,12 @@ export function SaleScreen({
           : {})}
         onKosongkan={() => {
           if (confirmClearCart) setClearOpen(true);
-          else dispatch({ type: 'clearCart' });
+          else {
+            dispatch({ type: 'clearCart' });
+            // A tier applies to ONE order only: clearing the cart abandons
+            // that order, so the selected tier must not carry over to the next.
+            setPriceCategoryId(null);
+          }
         }}
         {...(shift && cashierId
           ? {
@@ -634,6 +652,7 @@ export function SaleScreen({
             <AlertDialogAction
               onClick={() => {
                 dispatch({ type: 'clearCart' });
+                setPriceCategoryId(null);
                 setClearOpen(false);
               }}
             >
@@ -689,6 +708,7 @@ export function SaleScreen({
             onOpenChange={setHoldOpen}
             onHeld={() => {
               dispatch({ type: 'clearCart' });
+              setPriceCategoryId(null);
               setHoldOpen(false);
             }}
           />
