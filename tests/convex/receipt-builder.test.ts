@@ -12,10 +12,14 @@ import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
 
+// A fixed IANA zone (rather than the machine's local zone) so the byte/text
+// fixtures below are identical whether this runs on a UTC+8 dev machine or a
+// UTC CI runner.
 const cafe: ReceiptCafe = {
   name: 'Kopi Senja',
   addressLine: 'Jl. Merdeka 1',
   phone: '0812000111',
+  timezone: 'Asia/Makassar',
 };
 
 function sampleOrder(overrides: Partial<ReceiptOrder> = {}): ReceiptOrder {
@@ -106,6 +110,9 @@ describe('buildReceiptText', () => {
 
   // Regression guard: most orders have no price category, and an outlet that
   // only sends digital (email/WhatsApp) receipts must see no change at all.
+  // The embedded "15/11/2023, 06:13:20" is `createdAtClient` rendered in the
+  // fixture cafe's `timezone` (Asia/Makassar, UTC+8), not the machine running
+  // the test; that's why this fixture is stable across dev machines and CI.
   it('is unchanged when the order has no price category', () => {
     const text = buildReceiptText(sampleOrder(), cafe);
     expect(text).toBe(

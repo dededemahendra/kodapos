@@ -50,6 +50,11 @@ export interface ReceiptCafe {
   name: string;
   addressLine?: string;
   phone?: string;
+  /** IANA zone, e.g. "Asia/Makassar". Set during onboarding; used so a
+   * receipt shows the cafe's local time, not wherever the code runs (this
+   * module's email/WhatsApp builders execute on Convex servers, which run in
+   * UTC). */
+  timezone?: string;
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -80,8 +85,20 @@ function paymentLabel(method: string): string {
   return PAYMENT_LABELS[method] ?? method;
 }
 
-function formatDate(ts: number): string {
-  return new Date(ts).toLocaleString('en-GB');
+// Fallback when a cafe has no timezone set (older rows predate onboarding
+// collecting it) or it holds a corrupt/non-IANA value: an invalid `timeZone`
+// makes `toLocaleString` throw a RangeError, which would otherwise break
+// receipt printing/emailing entirely. Most cafes are Indonesian, so this is
+// still usually correct even in that fallback case.
+const DEFAULT_RECEIPT_TZ = 'Asia/Jakarta';
+
+/** Formats an instant in the cafe's local timezone (falling back safely). */
+export function formatDate(ts: number, timeZone?: string): string {
+  try {
+    return new Date(ts).toLocaleString('en-GB', { timeZone: timeZone || DEFAULT_RECEIPT_TZ });
+  } catch {
+    return new Date(ts).toLocaleString('en-GB', { timeZone: DEFAULT_RECEIPT_TZ });
+  }
 }
 
 function escapeHtml(s: string): string {
@@ -101,7 +118,7 @@ export function buildReceiptText(order: ReceiptOrder, cafe: ReceiptCafe | null):
     if (cafe.addressLine) out.push(cafe.addressLine);
     if (cafe.phone) out.push(cafe.phone);
   }
-  out.push(formatDate(order.createdAtClient));
+  out.push(formatDate(order.createdAtClient, cafe?.timezone));
   out.push(`Cashier: ${order.cashierName}`);
   if (order.orderType) out.push(`Order type: ${ORDER_TYPE_LABELS[order.orderType]}`);
   if (order.priceCategoryName) out.push(`Price tier: ${order.priceCategoryName}`);
@@ -156,7 +173,7 @@ export function buildReceiptHtml(order: ReceiptOrder, cafe: ReceiptCafe | null):
     if (cafe.addressLine) head.push(`<div>${escapeHtml(cafe.addressLine)}</div>`);
     if (cafe.phone) head.push(`<div>${escapeHtml(cafe.phone)}</div>`);
   }
-  head.push(`<div>${escapeHtml(formatDate(order.createdAtClient))}</div>`);
+  head.push(`<div>${escapeHtml(formatDate(order.createdAtClient, cafe?.timezone))}</div>`);
   head.push(`<div>Cashier: ${escapeHtml(order.cashierName)}</div>`);
   if (order.orderType) {
     head.push(`<div>Order type: ${escapeHtml(ORDER_TYPE_LABELS[order.orderType])}</div>`);

@@ -2,7 +2,10 @@ import type { ReceiptCafe, ReceiptOrder } from 'convex/lib/receipt';
 import { describe, expect, it } from 'vitest';
 import { buildReceiptBytes } from './receipt-print';
 
-const cafe: ReceiptCafe = { name: 'Kopi Test' };
+// A fixed IANA zone (rather than the machine's local zone) so the byte
+// fixture below is identical whether this runs on a UTC+8 dev machine or a
+// UTC CI runner.
+const cafe: ReceiptCafe = { name: 'Kopi Test', timezone: 'Asia/Makassar' };
 
 const order: ReceiptOrder = {
   lines: [
@@ -80,6 +83,11 @@ describe('buildReceiptBytes', () => {
   // Regression guard: most receipts have no price category. This must print
   // byte-for-byte identical to the pre-price-categories output, captured here
   // as a fixed reference so an unrelated change can't silently add a blank line.
+  // The bytes 49,53,47,49,49,47,50,48,50,51,44,32,48,54,58,49,51,58,50,48 spell
+  // out "15/11/2023, 06:13:20": createdAtClient rendered in the fixture cafe's
+  // `timezone` (Asia/Makassar, UTC+8), not the machine running the test. If
+  // that timestamp handling ever changes, regenerate this fixture (don't
+  // hand-edit the byte array) and re-verify under TZ=UTC and another zone.
   it('is byte-identical to before when the order has no price category', () => {
     const bytes = buildReceiptBytes(order, cafe, { widthChars: 32, orderNumber: 'INV-1A2B' });
     // prettier-ignore
