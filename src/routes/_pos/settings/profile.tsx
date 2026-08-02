@@ -54,6 +54,7 @@ interface ProfileDraft {
   city: string;
   postalCode: string;
   timezone: string;
+  standardPriceLabel: string;
   operatingHours: OperatingHoursDraft[];
 }
 
@@ -122,6 +123,7 @@ function SettingsProfile() {
       city: cafe.city ?? '',
       postalCode: cafe.postalCode ?? '',
       timezone: cafe.timezone ?? 'Asia/Jakarta',
+      standardPriceLabel: cafe.standardPriceLabel ?? '',
       operatingHours: hours,
     };
   }, [cafe]);
@@ -173,6 +175,7 @@ function SettingsProfile() {
         ...(optional(d.city) ? { city: d.city } : {}),
         ...(optional(d.postalCode) ? { postalCode: d.postalCode } : {}),
         timezone: d.timezone,
+        ...(optional(d.standardPriceLabel) ? { standardPriceLabel: d.standardPriceLabel } : {}),
         operatingHours: d.operatingHours,
       });
     } catch (e) {
@@ -251,6 +254,24 @@ function SettingsProfile() {
                 required
                 maxLength={80}
                 className="w-64"
+              />
+            }
+          />
+
+          <RowSep />
+
+          <SettingRow
+            label={<Trans>Nama harga standar (opsional)</Trans>}
+            description={
+              <Trans>Mengganti nama pilihan Standar di kasir, misalnya jadi Lokal.</Trans>
+            }
+            control={
+              <Input
+                value={draft.standardPriceLabel}
+                onChange={(e) => updateField('standardPriceLabel', e.target.value)}
+                placeholder={t`Standar`}
+                maxLength={40}
+                className="w-48"
               />
             }
           />

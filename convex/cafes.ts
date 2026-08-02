@@ -243,6 +243,7 @@ export const updateProfileDetails = mutation({
     city: v.optional(v.string()),
     postalCode: v.optional(v.string()),
     timezone: v.string(),
+    standardPriceLabel: v.optional(v.string()),
     operatingHours: v.optional(
       v.array(
         v.object({
@@ -278,6 +279,7 @@ export const updateProfileDetails = mutation({
       city: newCity,
       postalCode: clean(args.postalCode),
       timezone: args.timezone,
+      standardPriceLabel: clean(args.standardPriceLabel),
       operatingHours: args.operatingHours,
       ...(cityChanged ? { latitude: undefined, longitude: undefined } : {}),
     });

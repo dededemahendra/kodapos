@@ -4314,6 +4314,7 @@ msgid "Menganalisis…"
 msgstr "Analyzing…"
 
 #: src/components/menu/cafe-profile-form.tsx
+#: src/routes/_pos/settings/profile.tsx
 msgid "Mengganti nama pilihan Standar di kasir, misalnya jadi Lokal."
 msgstr "Renames the Standard option on the register, for example to Local."
 
@@ -4574,6 +4575,7 @@ msgid "Nama grup"
 msgstr "Group name"
 
 #: src/components/menu/cafe-profile-form.tsx
+#: src/routes/_pos/settings/profile.tsx
 msgid "Nama harga standar (opsional)"
 msgstr "Standard price name (optional)"
 
@@ -6475,6 +6477,7 @@ msgstr "Staff"
 
 #: src/components/menu/cafe-profile-form.tsx
 #: src/components/sale/sale-screen.tsx
+#: src/routes/_pos/settings/profile.tsx
 msgid "Standar"
 msgstr "Standard"
 
