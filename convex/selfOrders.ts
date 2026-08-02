@@ -94,7 +94,21 @@ async function toRecallLine(
   }> = [];
   for (const optionId of line.modifierOptionIds) {
     const option = await ctx.db.get(optionId);
-    if (!option) continue;
+    if (!option) {
+      // modifierLabels and modifierOptionIds MUST stay index-aligned: the
+      // cart reducer's `reprice` action (src/components/sale/cart-reducer.ts)
+      // pairs the two arrays by position to look up each option's current
+      // price. Skipping this slot here would shift every later label onto the
+      // wrong option id and reprice the line against the wrong add-on with no
+      // error. Push a clearly-not-real placeholder instead, with a zero
+      // adjustment so it doesn't change the line's total.
+      modifierLabels.push({
+        groupName: 'Add-on',
+        optionName: 'tidak tersedia',
+        priceAdjustmentIDR: 0,
+      });
+      continue;
+    }
     const group = await ctx.db.get(option.groupId);
     modifierLabels.push({
       groupName: group?.name ?? '',

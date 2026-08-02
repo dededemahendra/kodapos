@@ -57,6 +57,7 @@ export function ProfileStep() {
   };
   if (cafe.phone) initial.phone = cafe.phone;
   if (cafe.addressLine) initial.addressLine = cafe.addressLine;
+  if (cafe.standardPriceLabel) initial.standardPriceLabel = cafe.standardPriceLabel;
 
   const ownerNameTrimmed = ownerName.trim();
   const gateBlocked = ownerNameTrimmed.length < 1 || !agreed;
