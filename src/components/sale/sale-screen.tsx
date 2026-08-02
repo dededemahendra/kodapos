@@ -34,8 +34,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { SaleScreenSkeleton } from './sale-screen-skeleton';
-import { cartReducer, initialCart, type CartState } from './cart-reducer';
+import { cartReducer, initialCart, type CartState, type RepriceMap } from './cart-reducer';
 import { CartPane } from './cart-pane';
 import { HoldOrderDialog } from './hold-order-dialog';
 import { HeldOrdersDialog } from './held-orders-dialog';
@@ -66,7 +73,24 @@ export function SaleScreen({
   const removeHeld = useMutation(api.heldOrders.remove);
   const acceptSelfOrder = useMutation(api.selfOrders.accept);
   const categories = useQuery(api.menu.categories.list, {});
-  const items = useQuery(api.menu.items.listForSale, {});
+  const priceCategories = useQuery(api.menu.priceCategories.list, {});
+  // The tier applies to one order only: it always starts (and, after a
+  // completed sale, returns to) Standard. Making it sticky across sales is an
+  // obvious future ask, but it would silently charge the NEXT customer the
+  // previous customer's tier, which is this feature's main operational risk.
+  const [priceCategoryId, setPriceCategoryId] = useState<Id<'priceCategories'> | null>(null);
+  const items = useQuery(
+    api.menu.items.listForSale,
+    priceCategoryId ? { priceCategoryId } : {}
+  );
+  // Switching tier changes this query's args, so Convex briefly resolves
+  // `items` to undefined mid-refetch. Cache the last resolved value so the
+  // tiles and cart the customer is looking at don't blank out while the new
+  // tier's prices load; `pricesReady` (below) still tracks the LIVE value so
+  // payment stays gated until the fresh prices are actually in.
+  const lastItemsRef = useRef<typeof items>(undefined);
+  if (items !== undefined) lastItemsRef.current = items;
+  const displayItems = items ?? lastItemsRef.current;
   const cafe = useQuery(api.cafes.myCafe, {});
   const shift = useQuery(api.shifts.current, {});
   const settings = useQuery(api.settings.get, {});
@@ -108,6 +132,11 @@ export function SaleScreen({
     setReceiptOrderId(orderId);
     dispatch({ type: 'clearCart' });
     setCurrentTable(null);
+    // The price category applies to this one order only, so it resets to
+    // Standard right alongside the cart. Making it sticky would be one tap
+    // less per sale, but it would also silently charge the next customer
+    // whatever tier the last one was rung on.
+    setPriceCategoryId(null);
   }
   // Accept a QR self-order into the register: /sale?selfOrder=<selfOrderId>.
   // The payload is the SAME held-order recall shape, so it loads identically.
@@ -146,6 +175,16 @@ export function SaleScreen({
           manualDiscount: null,
         };
         dispatch({ type: 'load', state });
+        // A held order's lines display the unitPriceIDR they were parked at,
+        // but buildOrder recomputes every line from scratch at checkout using
+        // whatever priceCategoryId the register currently has selected. If a
+        // leftover tier from the PREVIOUS customer were still active, this
+        // recalled cart would display the held prices while the till charges
+        // the leftover tier's prices instead: quoting one number and taking
+        // another, which is exactly the failure this feature exists to
+        // prevent. Reset to Standard so the reprice effect refetches Standard
+        // prices and the display matches the charge again.
+        setPriceCategoryId(null);
         // Re-tag the resumed order to its table so the next sale carries it.
         if (row.tableId) setCurrentTable(row.tableId);
         await removeHeld({ id: recall as Id<'heldOrders'> });
@@ -171,11 +210,46 @@ export function SaleScreen({
         manualDiscount: null,
       };
       dispatch({ type: 'load', state });
+      // Same reasoning as the held-order recall above: this cart's lines
+      // display the self-order's own prices, but the till charges from
+      // whatever priceCategoryId is currently selected, not what the cart is
+      // showing. Reset to Standard so the two agree again.
+      setPriceCategoryId(null);
       if (selfOrderCart.tableId) setCurrentTable(selfOrderCart.tableId);
       await acceptSelfOrder({ id: selfOrder as Id<'selfOrders'> });
       await navigate({ to: '/sale', search: {}, replace: true });
     })();
   }, [selfOrder, selfOrderCart, navigate, acceptSelfOrder]);
+
+  // Reprice the cart whenever the selected tier (or the menu data itself)
+  // changes, built from the SAME listForSale result the tiles render from so
+  // the screen and the cart can never disagree. Never clears the cart: a tier
+  // switch usually happens with a customer already standing at the till.
+  useEffect(() => {
+    if (items === undefined) return;
+    const prices: RepriceMap = { items: {}, variants: {}, modifiers: {} };
+    for (const row of items) {
+      prices.items[row.item._id] = row.item.priceIDR;
+      for (const v of row.variants) prices.variants[v._id] = v.priceIDR;
+      for (const g of row.attachedGroups) {
+        for (const o of g.options) prices.modifiers[o._id] = o.priceAdjustmentIDR;
+      }
+    }
+    dispatch({ type: 'reprice', prices });
+  }, [items, priceCategoryId]);
+
+  // If the selected tier gets archived mid-sale, `priceCategories.list` stops
+  // returning it while `priceCategoryId` still points at it, and `listForSale`
+  // throws for an archived id. Fall back to Standard rather than let that
+  // throw take the whole register to an error boundary. Guarded on
+  // `priceCategories !== undefined` so a normal refetch never wipes the
+  // selection while the list is momentarily loading.
+  useEffect(() => {
+    if (!priceCategoryId || priceCategories === undefined) return;
+    if (!priceCategories.some((c) => c._id === priceCategoryId)) {
+      setPriceCategoryId(null);
+    }
+  }, [priceCategoryId, priceCategories]);
 
   const subtotal = cart.lines.reduce((s, l) => s + l.qty * l.unitPriceIDR, 0);
   // Map each cart line to the scope-helper shape, resolving its category from the
@@ -183,7 +257,7 @@ export function SaleScreen({
   // server recomputes the discount authoritatively from the promo doc at checkout.
   const scopeLines = cart.lines.map((l) => ({
     menuItemId: l.menuItemId as string,
-    categoryId: (items?.find((r) => r.item._id === l.menuItemId)?.item.categoryId ?? '') as string,
+    categoryId: (displayItems?.find((r) => r.item._id === l.menuItemId)?.item.categoryId ?? '') as string,
     lineTotalIDR: l.qty * l.unitPriceIDR,
   }));
   const promoDisc = cart.promo
@@ -244,15 +318,32 @@ export function SaleScreen({
   // linger on the second monitor.
   useEffect(() => () => publishDisplay(null), []);
 
+  // The full-screen skeleton is only for the very first load. Once every gated
+  // query has resolved at least once, a later refetch (a tier switch re-runs
+  // listForSale with new args) must NOT blank the whole register out from under
+  // a cashier mid-sale: keep showing the last-known data (displayItems above)
+  // instead. `items` itself, not displayItems, still decides whether all the
+  // gates have been satisfied, so a tier switch after the first load never
+  // re-triggers this branch.
+  const hasLoadedOnce = useRef(false);
   if (
-    categories === undefined ||
-    items === undefined ||
-    cafe === undefined ||
-    shift === undefined ||
-    settings === undefined
+    categories !== undefined &&
+    items !== undefined &&
+    cafe !== undefined &&
+    shift !== undefined &&
+    settings !== undefined
   ) {
+    hasLoadedOnce.current = true;
+  }
+  if (!hasLoadedOnce.current || categories === undefined || displayItems === undefined || cafe === undefined || shift === undefined || settings === undefined) {
     return <SaleScreenSkeleton />;
   }
+  // The LIVE query, not the cached displayItems: a payment must never be
+  // confirmed against stale prices while the new tier's listForSale round trip
+  // is still in flight, since buildOrder always resolves the charge from the
+  // CURRENT priceCategoryId server-side. Gates opening a payment dialog (below)
+  // and forces one closed if a refetch starts while it's already open.
+  const pricesReady = items !== undefined;
 
   const defaultMethod = settings.payment.defaultMethod;
   const ready = PAYMENT_METHODS.filter((m) => m.isReady(settings)).map((m) => m.method);
@@ -307,14 +398,14 @@ export function SaleScreen({
 
   async function onScan(code: string) {
     // 1) In-memory: item barcode.
-    const itemRow = items?.find((r) => r.item.barcode === code);
+    const itemRow = displayItems?.find((r) => r.item.barcode === code);
     if (itemRow) {
       flash('hit');
       onItemTap(itemRow);
       return;
     }
     // 2) In-memory: variant barcode.
-    for (const r of items ?? []) {
+    for (const r of displayItems ?? []) {
       const variant = r.variants.find((vr) => vr.barcode === code);
       if (variant) {
         flash('hit');
@@ -326,7 +417,7 @@ export function SaleScreen({
     try {
       const hit = await convex.query(api.menu.items.getByBarcode, { barcode: code });
       if (hit) {
-        const row = items?.find((r) => r.item._id === hit.itemId);
+        const row = displayItems?.find((r) => r.item._id === hit.itemId);
         if (row) {
           flash('hit');
           if (hit.kind === 'variant') addVariantLine(row, hit.variantId);
@@ -366,8 +457,20 @@ export function SaleScreen({
     });
   }
 
+  // Hide the picker entirely when the cafe has never created a price
+  // category: a cafe that never opted in must see no new control at all.
+  const hasPriceCategories = priceCategories !== undefined && priceCategories.length > 0;
+  const activePriceCategory = priceCategoryId
+    ? priceCategories?.find((c) => c._id === priceCategoryId) ?? null
+    : null;
+  const standardLabel = cafe?.standardPriceLabel || t`Standar`;
+
   return (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden md:grid md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div
+      className={`flex flex-col h-full min-h-0 overflow-hidden md:grid md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_380px] ${
+        hasPriceCategories ? 'md:grid-rows-[auto_1fr]' : ''
+      }`}
+    >
       {/* Phone-only tab bar: the menu and cart can't sit side by side under md,
           so they swap full-width here. Hidden on tablet+ where the grid shows
           both. The count keeps the cart discoverable after adding items. */}
@@ -395,6 +498,40 @@ export function SaleScreen({
           <Trans>Pesanan ({cart.lines.length})</Trans>
         </button>
       </div>
+      {hasPriceCategories ? (
+        <div
+          className={`flex flex-wrap items-center gap-2 border-b px-3 py-2 md:col-span-2 ${
+            activePriceCategory
+              ? 'border-amber-300 bg-amber-100 text-amber-900'
+              : 'border-border bg-background'
+          }`}
+        >
+          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <Trans>Kategori harga</Trans>
+          </span>
+          <Select
+            value={priceCategoryId ?? 'standard'}
+            onValueChange={(v) => setPriceCategoryId(v === 'standard' ? null : (v as Id<'priceCategories'>))}
+          >
+            <SelectTrigger className="h-8 w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="standard">{standardLabel}</SelectItem>
+              {priceCategories?.map((c) => (
+                <SelectItem key={c._id} value={c._id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {activePriceCategory ? (
+            <span className="ml-auto text-sm font-semibold">
+              <Trans>Harga aktif: {activePriceCategory.name}</Trans>
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <div
         className={`min-w-0 min-h-0 flex-1 flex-col md:flex ${
           mobileView === 'menu' ? 'flex' : 'hidden'
@@ -402,7 +539,7 @@ export function SaleScreen({
       >
         <MenuPane
           categories={categories}
-          items={items}
+          items={displayItems}
           onItemTap={onItemTap}
           onScan={onScan}
           scanFlash={scanFlash}
@@ -433,25 +570,33 @@ export function SaleScreen({
         onRemoveManualDiscount={() => dispatch({ type: 'setManualDiscount', manualDiscount: null })}
         payMethods={payMethods}
         onPay={(method) => {
-          if (cart.lines.length > 0) setOpenMethod(method);
+          // pricesReady also gates the dialog's `open` prop below, but check it
+          // here too so a tap during a tier-switch refetch never opens a
+          // payment dialog against prices that are about to change under it.
+          if (cart.lines.length > 0 && pricesReady) setOpenMethod(method);
         }}
         {...(shift && cashierId && canSplit
           ? {
               onSplit: () => {
-                if (cart.lines.length > 0) setSplitOpen(true);
+                if (cart.lines.length > 0 && pricesReady) setSplitOpen(true);
               },
             }
           : {})}
         {...(shift && cashierId
           ? {
               onGiftCard: () => {
-                if (cart.lines.length > 0) setGiftCardOpen(true);
+                if (cart.lines.length > 0 && pricesReady) setGiftCardOpen(true);
               },
             }
           : {})}
         onKosongkan={() => {
           if (confirmClearCart) setClearOpen(true);
-          else dispatch({ type: 'clearCart' });
+          else {
+            dispatch({ type: 'clearCart' });
+            // A tier applies to ONE order only: clearing the cart abandons
+            // that order, so the selected tier must not carry over to the next.
+            setPriceCategoryId(null);
+          }
         }}
         {...(shift && cashierId
           ? {
@@ -507,6 +652,7 @@ export function SaleScreen({
             <AlertDialogAction
               onClick={() => {
                 dispatch({ type: 'clearCart' });
+                setPriceCategoryId(null);
                 setClearOpen(false);
               }}
             >
@@ -536,7 +682,13 @@ export function SaleScreen({
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (recallTarget) dispatch({ type: 'load', state: recallTarget });
+                if (recallTarget) {
+                  dispatch({ type: 'load', state: recallTarget });
+                  // See the held-order recall effect above: a recalled cart's
+                  // displayed prices and the till's charged prices only agree
+                  // when the tier is reset to Standard here too.
+                  setPriceCategoryId(null);
+                }
                 setRecallTarget(null);
               }}
             >
@@ -556,6 +708,7 @@ export function SaleScreen({
             onOpenChange={setHoldOpen}
             onHeld={() => {
               dispatch({ type: 'clearCart' });
+              setPriceCategoryId(null);
               setHoldOpen(false);
             }}
           />
@@ -565,12 +718,18 @@ export function SaleScreen({
             genLineKey={genLineKey}
             onOpenChange={setHeldOpen}
             onRecall={(state) => {
-              if (cart.lines.length > 0) setRecallTarget(state);
-              else dispatch({ type: 'load', state });
+              if (cart.lines.length > 0) {
+                setRecallTarget(state);
+              } else {
+                dispatch({ type: 'load', state });
+                // Same reset as the "Muat" confirmation below: without it, a
+                // leftover tier would silently charge this recalled order.
+                setPriceCategoryId(null);
+              }
             }}
           />
           <CashPaymentDialog
-            open={openMethod === 'cash'}
+            open={openMethod === 'cash' && pricesReady}
             onOpenChange={(o) => {
               if (!o) setOpenMethod(null);
             }}
@@ -583,13 +742,14 @@ export function SaleScreen({
             quickCashButtons={settings.payment.quickCashButtons}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
             onPaid={handlePaid}
           />
           <QrisStaticPaymentDialog
-            open={openMethod === 'qris_static'}
+            open={openMethod === 'qris_static' && pricesReady}
             onOpenChange={(o) => {
               if (!o) setOpenMethod(null);
             }}
@@ -604,13 +764,14 @@ export function SaleScreen({
             {...('qrisNmid' in settings.payment && settings.payment.qrisNmid ? { qrisNmid: settings.payment.qrisNmid } : {})}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
             onPaid={handlePaid}
           />
           <SplitPaymentDialog
-            open={splitOpen}
+            open={splitOpen && pricesReady}
             onOpenChange={setSplitOpen}
             subtotalIDR={subtotal}
             promoDiscountIDR={discount}
@@ -622,13 +783,14 @@ export function SaleScreen({
             qrisStaticEnabled={splitQrisStaticEnabled}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
             onPaid={handlePaid}
           />
           <GiftCardPaymentDialog
-            open={giftCardOpen}
+            open={giftCardOpen && pricesReady}
             onOpenChange={setGiftCardOpen}
             subtotalIDR={subtotal}
             promoDiscountIDR={discount}
@@ -638,13 +800,14 @@ export function SaleScreen({
             taxRatePct={taxRatePct}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
             onPaid={handlePaid}
           />
           <QrisDynamicPaymentDialog
-            open={openMethod === 'qris_dynamic'}
+            open={openMethod === 'qris_dynamic' && pricesReady}
             onOpenChange={(o) => {
               if (!o) setOpenMethod(null);
             }}
@@ -656,6 +819,7 @@ export function SaleScreen({
             taxRatePct={taxRatePct}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
+            {...(priceCategoryId ? { priceCategoryId } : {})}
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}

@@ -48,6 +48,7 @@ export function SplitPaymentDialog({
   cashierId,
   promoId,
   tableId,
+  priceCategoryId,
   onPaid,
 }: {
   open: boolean;
@@ -68,6 +69,7 @@ export function SplitPaymentDialog({
   cashierId: Id<'cafeStaff'>;
   promoId?: Id<'promotions'>;
   tableId?: Id<'tables'>;
+  priceCategoryId?: Id<'priceCategories'>;
   onPaid: (orderId: Id<'orders'>) => void;
 }) {
   const { t } = useLingui();
@@ -184,6 +186,7 @@ export function SplitPaymentDialog({
         tenders,
         ...(promoId ? { promoId } : {}),
         ...(tableId ? { tableId } : {}),
+        ...(priceCategoryId ? { priceCategoryId } : {}),
         ...(cart.manualDiscount ? { manualDiscount: cart.manualDiscount } : {}),
         ...(customer.customerId ? { customerId: customer.customerId } : {}),
         ...(customer.redeemPoints > 0 ? { redeemPoints: customer.redeemPoints } : {}),

@@ -51,7 +51,7 @@ function LabelsPage() {
 
 function LabelsContent() {
   const { t } = useLingui();
-  const items = useQuery(api.menu.items.listForSale);
+  const items = useQuery(api.menu.items.listForSale, {});
   const assignBarcode = useMutation(api.menu.items.assignBarcode);
   const assignMissing = useMutation(api.menu.items.assignMissingBarcodes);
 

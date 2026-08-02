@@ -2860,6 +2860,11 @@ msgstr "Price (Rp)"
 #~ msgid "Harga akan diumumkan sebelum masa akses awal berakhir."
 #~ msgstr "Pricing will be announced before early access ends."
 
+#. placeholder {0}: activePriceCategory.name
+#: src/components/sale/sale-screen.tsx
+msgid "Harga aktif: {0}"
+msgstr "Active price: {0}"
+
 #. placeholder {0}: formatIDR(item.item.priceIDR)
 #. placeholder {0}: formatIDR(menuItem.priceIDR)
 #: src/components/public/item-picker-sheet.tsx
@@ -3444,6 +3449,7 @@ msgstr "Category added."
 msgid "kategori harga"
 msgstr "price category"
 
+#: src/components/sale/sale-screen.tsx
 #: src/routes/_pos/menu/price-categories.$categoryId.tsx
 msgid "Kategori harga"
 msgstr "Price categories"
@@ -4307,6 +4313,11 @@ msgstr "Searching…"
 msgid "Menganalisis…"
 msgstr "Analyzing…"
 
+#: src/components/menu/cafe-profile-form.tsx
+#: src/routes/_pos/settings/profile.tsx
+msgid "Mengganti nama pilihan Standar di kasir, misalnya jadi Lokal."
+msgstr "Renames the Standard option on the register, for example to Local."
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Mengikuti sistem."
 #~ msgstr "Follows system."
@@ -4562,6 +4573,11 @@ msgstr "Your name"
 #: src/components/menu/modifier-group-form.tsx
 msgid "Nama grup"
 msgstr "Group name"
+
+#: src/components/menu/cafe-profile-form.tsx
+#: src/routes/_pos/settings/profile.tsx
+msgid "Nama harga standar (opsional)"
+msgstr "Standard price name (optional)"
 
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Nama header otorisasi"
@@ -6458,6 +6474,12 @@ msgstr "Staff"
 #: src/routes/_pos/settings/staff.tsx
 #~ msgid "Staff"
 #~ msgstr "Staff"
+
+#: src/components/menu/cafe-profile-form.tsx
+#: src/components/sale/sale-screen.tsx
+#: src/routes/_pos/settings/profile.tsx
+msgid "Standar"
+msgstr "Standard"
 
 #: src/components/marketing/why-indonesia.tsx
 msgid "Statis dan dinamis, langsung dari kasir tanpa alat tambahan."

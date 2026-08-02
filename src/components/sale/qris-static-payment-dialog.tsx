@@ -30,6 +30,7 @@ export function QrisStaticPaymentDialog({
   cashierId,
   promoId,
   tableId,
+  priceCategoryId,
   onPaid,
 }: {
   open: boolean;
@@ -49,6 +50,7 @@ export function QrisStaticPaymentDialog({
   cashierId: Id<'cafeStaff'>;
   promoId?: Id<'promotions'>;
   tableId?: Id<'tables'>;
+  priceCategoryId?: Id<'priceCategories'>;
   onPaid: (orderId: Id<'orders'>) => void;
 }) {
   const { t } = useLingui();
@@ -97,6 +99,7 @@ export function QrisStaticPaymentDialog({
         })),
         ...(promoId ? { promoId } : {}),
         ...(tableId ? { tableId } : {}),
+        ...(priceCategoryId ? { priceCategoryId } : {}),
         ...(cart.manualDiscount ? { manualDiscount: cart.manualDiscount } : {}),
         ...(customer.customerId ? { customerId: customer.customerId } : {}),
         ...(customer.redeemPoints > 0 ? { redeemPoints: customer.redeemPoints } : {}),

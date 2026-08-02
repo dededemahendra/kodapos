@@ -12,10 +12,14 @@ import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
 
+// A fixed IANA zone (rather than the machine's local zone) so the byte/text
+// fixtures below are identical whether this runs on a UTC+8 dev machine or a
+// UTC CI runner.
 const cafe: ReceiptCafe = {
   name: 'Kopi Senja',
   addressLine: 'Jl. Merdeka 1',
   phone: '0812000111',
+  timezone: 'Asia/Makassar',
 };
 
 function sampleOrder(overrides: Partial<ReceiptOrder> = {}): ReceiptOrder {
@@ -98,6 +102,27 @@ describe('buildReceiptText', () => {
     expect(text).not.toContain('—');
     expect(text).not.toContain('--');
   });
+
+  it('prints the price tier when the order carries one', () => {
+    const text = buildReceiptText(sampleOrder({ priceCategoryName: 'Turis' }), cafe);
+    expect(text).toContain('Price tier: Turis');
+  });
+
+  // Regression guard: most orders have no price category, and an outlet that
+  // only sends digital (email/WhatsApp) receipts must see no change at all.
+  // The embedded "15/11/2023, 06:13:20" is `createdAtClient` rendered in the
+  // fixture cafe's `timezone` (Asia/Makassar, UTC+8), not the machine running
+  // the test; that's why this fixture is stable across dev machines and CI.
+  it('is unchanged when the order has no price category', () => {
+    const text = buildReceiptText(sampleOrder(), cafe);
+    expect(text).toBe(
+      'Kopi Senja\nJl. Merdeka 1\n0812000111\n15/11/2023, 06:13:20\nCashier: Andi\n' +
+        'Order type: Dine-in\n\n2x Latte (Large)   Rp 50.000\n  + Oat milk\n' +
+        '1x Croissant   Rp 20.000\n\nSubtotal   Rp 70.000\nService 5%   Rp 3.500\n' +
+        'Tax 11%   Rp 8.085\nTotal   Rp 81.585\n\nPaid: Cash   Rp 81.585\n' +
+        'Points earned: +81\n\nThank you'
+    );
+  });
 });
 
 describe('buildReceiptHtml', () => {
@@ -108,6 +133,11 @@ describe('buildReceiptHtml', () => {
     expect(html).toContain(formatIDR(81585));
     expect(html).not.toContain('—');
     expect(html).not.toContain('--');
+  });
+
+  it('prints the price tier when the order carries one', () => {
+    const html = buildReceiptHtml(sampleOrder({ priceCategoryName: 'Turis' }), cafe);
+    expect(html).toContain('Price tier: Turis');
   });
 });
 

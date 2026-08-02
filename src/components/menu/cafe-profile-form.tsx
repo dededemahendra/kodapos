@@ -1,7 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { type FormEvent, type ReactNode, useState } from 'react';
 import { Button } from '~/components/ui/button';
-import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 
@@ -12,6 +12,7 @@ export interface CafeProfileFormValues {
   timezone: string;
   taxRatePct: number;
   taxEnabled: boolean;
+  standardPriceLabel?: string;
 }
 
 export interface CafeProfileFormProps {
@@ -42,6 +43,7 @@ export function CafeProfileForm({
     const fd = new FormData(e.currentTarget);
     const phone = String(fd.get('phone') ?? '').trim();
     const addressLine = String(fd.get('addressLine') ?? '').trim();
+    const standardPriceLabel = String(fd.get('standardPriceLabel') ?? '').trim();
     const values: CafeProfileFormValues = {
       name: String(fd.get('name') ?? ''),
       timezone: String(fd.get('timezone') ?? 'Asia/Jakarta'),
@@ -50,6 +52,7 @@ export function CafeProfileForm({
     };
     if (phone) values.phone = phone;
     if (addressLine) values.addressLine = addressLine;
+    if (standardPriceLabel) values.standardPriceLabel = standardPriceLabel;
     try {
       await onSubmit(values);
     } catch (err) {
@@ -92,6 +95,21 @@ export function CafeProfileForm({
             <Trans>Zona waktu</Trans>
           </FieldLabel>
           <Input id="timezone" name="timezone" defaultValue={initial.timezone} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="standardPriceLabel">
+            <Trans>Nama harga standar (opsional)</Trans>
+          </FieldLabel>
+          <Input
+            id="standardPriceLabel"
+            name="standardPriceLabel"
+            defaultValue={initial.standardPriceLabel ?? ''}
+            placeholder={t`Standar`}
+            maxLength={40}
+          />
+          <FieldDescription>
+            <Trans>Mengganti nama pilihan Standar di kasir, misalnya jadi Lokal.</Trans>
+          </FieldDescription>
         </Field>
         <Field>
           <FieldLabel htmlFor="taxRatePct">

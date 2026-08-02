@@ -260,3 +260,101 @@ describe('price category resolution', () => {
     expect(rows.find((r) => r._id === withPromo.orderId)?.appliedPromo?.scope).toBe('order');
   });
 });
+
+describe('listForSale price resolution', () => {
+  it('returns standard prices when no category is given', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const rows = await s.asOwner.query(api.menu.items.listForSale, {});
+    const row = rows.find((r) => r.item._id === s.itemId)!;
+    expect(row.item.priceIDR).toBe(18000);
+  });
+
+  it('returns the override price for the selected category', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.priceOverrides.set, {
+      priceCategoryId: s.tierId,
+      targetKind: 'item',
+      targetId: s.itemId,
+      priceIDR: 30000,
+    });
+    const rows = await s.asOwner.query(api.menu.items.listForSale, {
+      priceCategoryId: s.tierId,
+    });
+    const row = rows.find((r) => r.item._id === s.itemId)!;
+    expect(row.item.priceIDR).toBe(30000);
+  });
+
+  // The register must show exactly what buildOrder will charge. If these two
+  // ever disagree the cashier quotes one number and the till takes another.
+  it('agrees with what buildOrder charges for the same category', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.priceOverrides.set, {
+      priceCategoryId: s.tierId,
+      targetKind: 'item',
+      targetId: s.itemId,
+      priceIDR: 30000,
+    });
+    const rows = await s.asOwner.query(api.menu.items.listForSale, {
+      priceCategoryId: s.tierId,
+    });
+    const displayed = rows.find((r) => r.item._id === s.itemId)!.item.priceIDR;
+    const res = await sell(
+      s,
+      'lfs-1',
+      [{ menuItemId: s.itemId, qty: 1, modifierOptionIds: [] }],
+      s.tierId
+    );
+    expect(res.totalIDR).toBe(displayed);
+  });
+
+  it('resolves variant prices too', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const variantId = await s.asOwner.mutation(api.menu.variants.create, {
+      menuItemId: s.itemId,
+      name: 'L',
+      priceIDR: 25000,
+    });
+    await s.asOwner.mutation(api.menu.priceOverrides.set, {
+      priceCategoryId: s.tierId,
+      targetKind: 'variant',
+      targetId: variantId,
+      priceIDR: 40000,
+    });
+    const rows = await s.asOwner.query(api.menu.items.listForSale, {
+      priceCategoryId: s.tierId,
+    });
+    const row = rows.find((r) => r.item._id === s.itemId)!;
+    expect(row.variants.find((v) => v._id === variantId)!.priceIDR).toBe(40000);
+  });
+
+  it('rejects a category from another cafe', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const otherUser = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { name: 'Other', email: 'b@x.com' });
+    });
+    const asOther = t.withIdentity({ subject: `${otherUser}|test_session` });
+    await asOther.mutation(api.cafes.createForOwner, { name: 'Warung B' });
+    const foreignTier = await asOther.mutation(api.menu.priceCategories.create, {
+      name: 'Turis',
+    });
+    await expect(
+      s.asOwner.query(api.menu.items.listForSale, { priceCategoryId: foreignTier })
+    ).rejects.toThrow();
+  });
+
+  // The register guards against this by clearing the selection client-side,
+  // but the server-side guard itself was never asserted directly.
+  it('rejects an archived category', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.priceCategories.archive, { id: s.tierId });
+    await expect(
+      s.asOwner.query(api.menu.items.listForSale, { priceCategoryId: s.tierId })
+    ).rejects.toThrow();
+  });
+});

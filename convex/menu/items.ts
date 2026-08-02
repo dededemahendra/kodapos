@@ -546,10 +546,29 @@ const itemForSale = v.object({
 });
 
 export const listForSale = query({
-  args: {},
+  args: { priceCategoryId: v.optional(v.id('priceCategories')) },
   returns: v.array(itemForSale),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const { cafeId } = await requireActiveOutlet(ctx);
+
+    // Same shape as buildOrder's resolution, and deliberately so: the register
+    // must display exactly what the till will charge. One indexed query for the
+    // whole menu, then O(1) lookups.
+    const overrides = new Map<string, number>();
+    if (args.priceCategoryId) {
+      const category = await ctx.db.get(args.priceCategoryId);
+      if (!category || category.cafeId !== cafeId || category.archived) {
+        throw new Error('Kategori harga tidak ditemukan.');
+      }
+      const rows = await ctx.db
+        .query('priceOverrides')
+        .withIndex('by_cafe_and_category', (q) =>
+          q.eq('cafeId', cafeId).eq('priceCategoryId', category._id)
+        )
+        .collect();
+      for (const row of rows) overrides.set(row.targetId as string, row.priceIDR);
+    }
+
     const items = await ctx.db
       .query('menuItems')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
@@ -561,11 +580,23 @@ export const listForSale = query({
       const variants = (await resolveActiveVariants(ctx, item._id)).map((vr) => ({
         _id: vr._id,
         name: vr.name,
-        priceIDR: vr.priceIDR,
+        priceIDR: overrides.get(vr._id) ?? vr.priceIDR,
         ...(vr.barcode ? { barcode: vr.barcode } : {}),
       }));
       const { lowStockIngredientNames } = await itemRecipeStatus(ctx, cafeId, item._id);
-      result.push({ item, attachedGroups, variants, lowStockIngredientNames, imageUrl: await imageUrlFor(ctx, item.imageStorageId) });
+      result.push({
+        item: { ...item, priceIDR: overrides.get(item._id) ?? item.priceIDR },
+        attachedGroups: attachedGroups.map((g) => ({
+          ...g,
+          options: g.options.map((o) => ({
+            ...o,
+            priceAdjustmentIDR: overrides.get(o._id) ?? o.priceAdjustmentIDR,
+          })),
+        })),
+        variants,
+        lowStockIngredientNames,
+        imageUrl: await imageUrlFor(ctx, item.imageStorageId),
+      });
     }
     return result;
   },
