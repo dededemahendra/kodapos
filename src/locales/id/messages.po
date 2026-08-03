@@ -30,7 +30,7 @@ msgid "…"
 msgstr "…"
 
 #. placeholder {0}: archiveTarget.name
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "\"{0}\" akan dilepas dari item dan disembunyikan."
 msgstr "\"{0}\" akan dilepas dari item dan disembunyikan."
 
@@ -471,7 +471,7 @@ msgstr "Akses hanya baca (read-only) ke data outlet Anda lewat Model Context Pro
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/reservations.tsx
 #: src/routes/_pos/settings/members.tsx
@@ -484,7 +484,7 @@ msgstr "Aksi baris"
 #: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Aktif"
@@ -635,7 +635,7 @@ msgstr "API key"
 #: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/suppliers.tsx
@@ -652,7 +652,7 @@ msgstr "Arsip"
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/suppliers.tsx
@@ -667,7 +667,7 @@ msgstr "Arsipkan {noun}?"
 msgid "Arsipkan bahan?"
 msgstr "Arsipkan bahan?"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Arsipkan grup?"
 msgstr "Arsipkan grup?"
 
@@ -789,7 +789,7 @@ msgstr "Atur tarif per jam staf dan catat jam kerja."
 msgid "Atur ulang sandi"
 msgstr "Atur ulang sandi"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Aturan"
 msgstr "Aturan"
 
@@ -1094,7 +1094,7 @@ msgstr "Belum ada bahan."
 msgid "Belum ada data pada rentang ini."
 msgstr "Belum ada data pada rentang ini."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Belum ada grup modifier."
 msgstr "Belum ada grup modifier."
 
@@ -1497,7 +1497,7 @@ msgstr "Buat ringkasan AI tentang apa yang perlu dipesan dan alasannya."
 msgid "Buat saran"
 msgstr "Buat saran"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Buat satu grup untuk dipakai ulang di banyak item."
 msgstr "Buat satu grup untuk dipakai ulang di banyak item."
 
@@ -1647,7 +1647,7 @@ msgstr "Cari bantuan"
 msgid "Cari bantuan, mis. QRIS, shift, stok"
 msgstr "Cari bantuan, mis. QRIS, shift, stok"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Cari grup…"
 msgstr "Cari grup…"
 
@@ -2013,7 +2013,7 @@ msgstr "Dipakai pemilik kafe seperti Anda"
 #~ msgid "Dipakai ulang di banyak item — ubah di satu tempat."
 #~ msgstr "Dipakai ulang di banyak item — ubah di satu tempat."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Dipakai ulang di banyak item, ubah di satu tempat."
 msgstr "Dipakai ulang di banyak item, ubah di satu tempat."
 
@@ -2363,7 +2363,7 @@ msgstr "Gagal menerima pesanan."
 msgid "Gagal mengarsipkan bahan."
 msgstr "Gagal mengarsipkan bahan."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Gagal mengarsipkan grup."
 msgstr "Gagal mengarsipkan grup."
 
@@ -2686,15 +2686,15 @@ msgstr "Gratis selama akses awal. Tanpa kartu kredit."
 msgid "Gratis sepenuhnya"
 msgstr "Gratis sepenuhnya"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Grup baru"
 msgstr "Grup baru"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Grup diarsipkan."
 msgstr "Grup diarsipkan."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/menu/route.tsx
 msgid "Grup Modifier"
 msgstr "Grup Modifier"
@@ -2708,7 +2708,7 @@ msgstr "Grup modifier ({0})"
 msgid "Grup modifier baru"
 msgstr "Grup modifier baru"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Grup modifier yang diarsipkan akan muncul di sini."
 msgstr "Grup modifier yang diarsipkan akan muncul di sini."
 
@@ -4549,7 +4549,7 @@ msgstr "Naikkan urutan"
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/settings/tax.tsx
@@ -4801,7 +4801,7 @@ msgstr "Operasional"
 #~ msgid "opsi"
 #~ msgstr "opsi"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Opsi"
 msgstr "Opsi"
 
@@ -4815,7 +4815,7 @@ msgid "opsional"
 msgstr "opsional"
 
 #: src/components/promo/promo-form-dialog.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Opsional"
 msgstr "Opsional"
 
@@ -6490,7 +6490,7 @@ msgstr "Statis dan dinamis, langsung dari kasir tanpa alat tambahan."
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/recipes.tsx
 #: src/routes/_pos/reservations.tsx
@@ -7242,7 +7242,7 @@ msgstr "Tidak ada bahan diarsipkan."
 msgid "Tidak ada baris untuk diimpor."
 msgstr "Tidak ada baris untuk diimpor."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Tidak ada grup diarsipkan."
 msgstr "Tidak ada grup diarsipkan."
 
@@ -7391,7 +7391,7 @@ msgstr "Tinjau inventaris"
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/components/promo/promo-form-dialog.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/reports/export.tsx
 msgid "Tipe"
@@ -7584,7 +7584,7 @@ msgstr "Ubah bahan"
 #~ msgid "Ubah di Profil kafe."
 #~ msgstr "Ubah di Profil kafe."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Ubah grup"
 msgstr "Ubah grup"
 
@@ -7829,7 +7829,7 @@ msgstr "vs kemarin"
 msgid "wajib"
 msgstr "wajib"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Wajib"
 msgstr "Wajib"
 
