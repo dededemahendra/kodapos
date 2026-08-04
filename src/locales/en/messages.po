@@ -30,7 +30,7 @@ msgid "…"
 msgstr "…"
 
 #. placeholder {0}: archiveTarget.name
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "\"{0}\" akan dilepas dari item dan disembunyikan."
 msgstr "\"{0}\" will be detached from items and hidden."
 
@@ -471,7 +471,7 @@ msgstr "Read-only access to your outlet's data via the Model Context Protocol (M
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/reservations.tsx
 #: src/routes/_pos/settings/members.tsx
@@ -484,7 +484,7 @@ msgstr "Row actions"
 #: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/suppliers.tsx
 msgid "Aktif"
@@ -635,7 +635,7 @@ msgstr "API key"
 #: src/routes/_pos/gift-cards.tsx
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/suppliers.tsx
@@ -652,7 +652,7 @@ msgstr "Archive"
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/suppliers.tsx
@@ -667,7 +667,7 @@ msgstr "Archive {noun}?"
 msgid "Arsipkan bahan?"
 msgstr "Archive ingredient?"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Arsipkan grup?"
 msgstr "Archive group?"
 
@@ -789,7 +789,7 @@ msgstr "Set staff hourly rates and track worked hours."
 msgid "Atur ulang sandi"
 msgstr "Reset password"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Aturan"
 msgstr "Rule"
 
@@ -1094,7 +1094,7 @@ msgstr "No ingredients yet."
 msgid "Belum ada data pada rentang ini."
 msgstr "No data in this range yet."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Belum ada grup modifier."
 msgstr "No modifier groups yet."
 
@@ -1497,7 +1497,7 @@ msgstr "Generate an AI summary of what to order and why."
 msgid "Buat saran"
 msgstr "Generate advice"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Buat satu grup untuk dipakai ulang di banyak item."
 msgstr "Create a group to reuse across many items."
 
@@ -1647,7 +1647,7 @@ msgstr "Search help"
 msgid "Cari bantuan, mis. QRIS, shift, stok"
 msgstr "Search help, e.g. QRIS, shift, stock"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Cari grup…"
 msgstr "Search groups…"
 
@@ -2013,7 +2013,7 @@ msgstr "Used by cafe owners like you"
 #~ msgid "Dipakai ulang di banyak item — ubah di satu tempat."
 #~ msgstr "Reused across many items — change in one place."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Dipakai ulang di banyak item, ubah di satu tempat."
 msgstr "Reused across many items, change in one place."
 
@@ -2363,7 +2363,7 @@ msgstr "Failed to accept the order."
 msgid "Gagal mengarsipkan bahan."
 msgstr "Failed to archive ingredient."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Gagal mengarsipkan grup."
 msgstr "Failed to archive group."
 
@@ -2686,15 +2686,15 @@ msgstr "Free during early access. No credit card."
 msgid "Gratis sepenuhnya"
 msgstr "Completely free"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Grup baru"
 msgstr "New group"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Grup diarsipkan."
 msgstr "Group archived."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/menu/route.tsx
 msgid "Grup Modifier"
 msgstr "Modifier Groups"
@@ -2708,7 +2708,7 @@ msgstr "Modifier groups ({0})"
 msgid "Grup modifier baru"
 msgstr "New modifier group"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Grup modifier yang diarsipkan akan muncul di sini."
 msgstr "Archived modifier groups will appear here."
 
@@ -4549,7 +4549,7 @@ msgstr "Move up"
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/settings/staff.tsx
 #: src/routes/_pos/settings/tax.tsx
@@ -4801,7 +4801,7 @@ msgstr "Operations"
 #~ msgid "opsi"
 #~ msgstr "options"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Opsi"
 msgstr "Options"
 
@@ -4815,7 +4815,7 @@ msgid "opsional"
 msgstr "optional"
 
 #: src/components/promo/promo-form-dialog.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Opsional"
 msgstr "Optional"
 
@@ -6490,7 +6490,7 @@ msgstr "Static and dynamic, straight from the register with no extra device."
 #: src/routes/_pos/inventory/index.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
 #: src/routes/_pos/menu/index.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/recipes.tsx
 #: src/routes/_pos/reservations.tsx
@@ -7242,7 +7242,7 @@ msgstr "No archived ingredients."
 msgid "Tidak ada baris untuk diimpor."
 msgstr "No rows to import."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Tidak ada grup diarsipkan."
 msgstr "No archived groups."
 
@@ -7391,7 +7391,7 @@ msgstr "Review inventory"
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/components/promo/promo-form-dialog.tsx
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 #: src/routes/_pos/promos.tsx
 #: src/routes/_pos/reports/export.tsx
 msgid "Tipe"
@@ -7584,7 +7584,7 @@ msgstr "Edit ingredient"
 #~ msgid "Ubah di Profil kafe."
 #~ msgstr "Change in Cafe profile."
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Ubah grup"
 msgstr "Edit group"
 
@@ -7829,7 +7829,7 @@ msgstr "vs yesterday"
 msgid "wajib"
 msgstr "required"
 
-#: src/routes/_pos/menu/modifiers.tsx
+#: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Wajib"
 msgstr "Required"
 
