@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
-import { internalMutation } from './_generated/server';
+import { internalMutation, internalQuery } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1462,5 +1462,31 @@ export const closeExtraShifts = internalMutation({
       await ctx.db.patch(s._id, { status: 'closed', closedAt: s.closedAt ?? now });
     }
     return { closed: extra.length, remainingOpen: 1 };
+  },
+});
+
+// ─── Screenshot pipeline helpers (scripts/capture-shots.mjs) ────────────────
+// Look up the seeded demo cafe by name and find a table's public QR token so
+// the capture script can drive the unauthenticated `/order/{qrToken}` page
+// without hardcoding an id that changes on every re-seed.
+
+export const cafeIdByName = internalQuery({
+  args: { name: v.string() },
+  returns: v.union(v.id('cafes'), v.null()),
+  handler: async (ctx, args) => {
+    const all = await ctx.db.query('cafes').collect();
+    return all.find((c) => c.name === args.name)?._id ?? null;
+  },
+});
+
+export const qrTokenForCafe = internalQuery({
+  args: { cafeId: v.id('cafes') },
+  returns: v.union(v.string(), v.null()),
+  handler: async (ctx, args) => {
+    const tables = await ctx.db
+      .query('tables')
+      .withIndex('by_cafe', (q) => q.eq('cafeId', args.cafeId))
+      .collect();
+    return tables.find((t) => typeof t.qrToken === 'string' && t.qrToken)?.qrToken ?? null;
   },
 });
