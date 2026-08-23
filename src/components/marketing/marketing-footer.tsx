@@ -62,9 +62,14 @@ export function MarketingFooter() {
                 </h4>
                 <ul className="space-y-3 text-sm text-muted-foreground">
                   <li>
-                    <a href="/#features" className="hover:text-foreground">
+                    <Link to="/fitur" className="hover:text-foreground">
                       <Trans>Fitur</Trans>
-                    </a>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/fitur/pesanan" className="hover:text-foreground">
+                      <Trans>Pesanan & meja</Trans>
+                    </Link>
                   </li>
                   <li>
                     <a href="/#pricing" className="hover:text-foreground">

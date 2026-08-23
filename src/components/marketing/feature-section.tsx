@@ -1,7 +1,9 @@
 import { Trans } from '@lingui/react/macro';
+import { Link } from '@tanstack/react-router';
 import { ShieldCheck } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
 import { LoyaltyAvatars } from './loyalty-avatars';
+import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { SectionHeading } from './section-heading';
 
@@ -270,6 +272,14 @@ export function FeatureSection() {
                 </p>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mt-10 text-center">
+            <Button asChild variant="link">
+              <Link to="/fitur">
+                <Trans>Lihat semua fitur</Trans>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
