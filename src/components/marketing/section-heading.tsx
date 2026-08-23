@@ -14,12 +14,21 @@ const item: Variants = {
 };
 
 /** Centered section title (+ optional subtitle). Reveals on scroll, the title
- *  then the subtitle, matching the staggered entrance the section bodies use. */
-export function SectionHeading({ children, sub }: { children: ReactNode; sub?: ReactNode }) {
+ *  then the subtitle, matching the staggered entrance the section bodies use.
+ *  Pass `align="left"` to drop the centring for a left-aligned heading. */
+export function SectionHeading({
+  children,
+  sub,
+  align = 'center',
+}: {
+  children: ReactNode;
+  sub?: ReactNode;
+  align?: 'center' | 'left';
+}) {
   return (
     <MotionConfig reducedMotion="user">
       <motion.div
-        className="mx-auto mb-11 max-w-2xl text-center"
+        className={`mb-11 max-w-2xl ${align === 'left' ? '' : 'mx-auto text-center'}`}
         initial="hidden"
         whileInView="visible"
         viewport={VP}
