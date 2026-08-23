@@ -202,7 +202,7 @@ export function FeaturePage({ content }: { content: FeaturePageContent }) {
               );
 
             case 'cta':
-              return <CtaBand key={i} />;
+              return <CtaBand key={i} heading={L(section.heading)} body={L(section.body)} />;
 
             default:
               return null;
