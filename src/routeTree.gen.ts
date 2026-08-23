@@ -47,6 +47,7 @@ import { Route as AdminOverviewRouteImport } from './routes/_admin/overview'
 import { Route as AdminLoginRouteImport } from './routes/_admin/login'
 import { Route as AdminBusinessesRouteImport } from './routes/_admin/businesses'
 import { Route as AdminAuditRouteImport } from './routes/_admin/audit'
+import { Route as PublicFiturRouteRouteImport } from './routes/_public/fitur/route'
 import { Route as PosShiftRouteRouteImport } from './routes/_pos/shift/route'
 import { Route as PosSettingsRouteRouteImport } from './routes/_pos/settings/route'
 import { Route as PosSaleRouteRouteImport } from './routes/_pos/sale/route'
@@ -54,11 +55,13 @@ import { Route as PosReportsRouteRouteImport } from './routes/_pos/reports/route
 import { Route as PosOnboardingRouteRouteImport } from './routes/_pos/onboarding/route'
 import { Route as PosMenuRouteRouteImport } from './routes/_pos/menu/route'
 import { Route as PosInventoryRouteRouteImport } from './routes/_pos/inventory/route'
+import { Route as PublicFiturIndexRouteImport } from './routes/_public/fitur/index'
 import { Route as PosSaleIndexRouteImport } from './routes/_pos/sale/index'
 import { Route as PosReportsIndexRouteImport } from './routes/_pos/reports/index'
 import { Route as PosMenuIndexRouteImport } from './routes/_pos/menu/index'
 import { Route as PosInventoryIndexRouteImport } from './routes/_pos/inventory/index'
 import { Route as PublicOrderTokenRouteImport } from './routes/_public/order.$token'
+import { Route as PublicFiturPesananRouteImport } from './routes/_public/fitur/pesanan'
 import { Route as PosShiftOpenRouteImport } from './routes/_pos/shift/open'
 import { Route as PosShiftCloseRouteImport } from './routes/_pos/shift/close'
 import { Route as PosSettingsTaxRouteImport } from './routes/_pos/settings/tax'
@@ -282,6 +285,11 @@ const AdminAuditRoute = AdminAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AdminRoute,
 } as any)
+const PublicFiturRouteRoute = PublicFiturRouteRouteImport.update({
+  id: '/fitur',
+  path: '/fitur',
+  getParentRoute: () => PublicRoute,
+} as any)
 const PosShiftRouteRoute = PosShiftRouteRouteImport.update({
   id: '/shift',
   path: '/shift',
@@ -317,6 +325,11 @@ const PosInventoryRouteRoute = PosInventoryRouteRouteImport.update({
   path: '/inventory',
   getParentRoute: () => PosRoute,
 } as any)
+const PublicFiturIndexRoute = PublicFiturIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PublicFiturRouteRoute,
+} as any)
 const PosSaleIndexRoute = PosSaleIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -341,6 +354,11 @@ const PublicOrderTokenRoute = PublicOrderTokenRouteImport.update({
   id: '/order/$token',
   path: '/order/$token',
   getParentRoute: () => PublicRoute,
+} as any)
+const PublicFiturPesananRoute = PublicFiturPesananRouteImport.update({
+  id: '/pesanan',
+  path: '/pesanan',
+  getParentRoute: () => PublicFiturRouteRoute,
 } as any)
 const PosShiftOpenRoute = PosShiftOpenRouteImport.update({
   id: '/open',
@@ -532,6 +550,7 @@ export interface FileRoutesByFullPath {
   '/sale': typeof PosSaleRouteRouteWithChildren
   '/settings': typeof PosSettingsRouteRouteWithChildren
   '/shift': typeof PosShiftRouteRouteWithChildren
+  '/fitur': typeof PublicFiturRouteRouteWithChildren
   '/audit': typeof AdminAuditRoute
   '/businesses': typeof AdminBusinessesRoute
   '/login': typeof AdminLoginRoute
@@ -594,11 +613,13 @@ export interface FileRoutesByFullPath {
   '/settings/tax': typeof PosSettingsTaxRoute
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
+  '/fitur/pesanan': typeof PublicFiturPesananRoute
   '/order/$token': typeof PublicOrderTokenRoute
   '/inventory/': typeof PosInventoryIndexRoute
   '/menu/': typeof PosMenuIndexRoute
   '/reports/': typeof PosReportsIndexRoute
   '/sale/': typeof PosSaleIndexRoute
+  '/fitur/': typeof PublicFiturIndexRoute
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
   '/menu/price-categories/$categoryId': typeof PosMenuPriceCategoriesCategoryIdRoute
@@ -672,11 +693,13 @@ export interface FileRoutesByTo {
   '/settings/tax': typeof PosSettingsTaxRoute
   '/shift/close': typeof PosShiftCloseRoute
   '/shift/open': typeof PosShiftOpenRoute
+  '/fitur/pesanan': typeof PublicFiturPesananRoute
   '/order/$token': typeof PublicOrderTokenRoute
   '/inventory': typeof PosInventoryIndexRoute
   '/menu': typeof PosMenuIndexRoute
   '/reports': typeof PosReportsIndexRoute
   '/sale': typeof PosSaleIndexRoute
+  '/fitur': typeof PublicFiturIndexRoute
   '/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
   '/menu/price-categories/$categoryId': typeof PosMenuPriceCategoriesCategoryIdRoute
@@ -697,6 +720,7 @@ export interface FileRoutesById {
   '/_pos/sale': typeof PosSaleRouteRouteWithChildren
   '/_pos/settings': typeof PosSettingsRouteRouteWithChildren
   '/_pos/shift': typeof PosShiftRouteRouteWithChildren
+  '/_public/fitur': typeof PublicFiturRouteRouteWithChildren
   '/_admin/audit': typeof AdminAuditRoute
   '/_admin/businesses': typeof AdminBusinessesRoute
   '/_admin/login': typeof AdminLoginRoute
@@ -760,11 +784,13 @@ export interface FileRoutesById {
   '/_pos/settings/tax': typeof PosSettingsTaxRoute
   '/_pos/shift/close': typeof PosShiftCloseRoute
   '/_pos/shift/open': typeof PosShiftOpenRoute
+  '/_public/fitur/pesanan': typeof PublicFiturPesananRoute
   '/_public/order/$token': typeof PublicOrderTokenRoute
   '/_pos/inventory/': typeof PosInventoryIndexRoute
   '/_pos/menu/': typeof PosMenuIndexRoute
   '/_pos/reports/': typeof PosReportsIndexRoute
   '/_pos/sale/': typeof PosSaleIndexRoute
+  '/_public/fitur/': typeof PublicFiturIndexRoute
   '/_pos/menu/items/$itemId': typeof PosMenuItemsItemIdRoute
   '/_pos/menu/modifiers/$groupId': typeof PosMenuModifiersGroupIdRoute
   '/_pos/menu/price-categories/$categoryId': typeof PosMenuPriceCategoriesCategoryIdRoute
@@ -784,6 +810,7 @@ export interface FileRouteTypes {
     | '/sale'
     | '/settings'
     | '/shift'
+    | '/fitur'
     | '/audit'
     | '/businesses'
     | '/login'
@@ -846,11 +873,13 @@ export interface FileRouteTypes {
     | '/settings/tax'
     | '/shift/close'
     | '/shift/open'
+    | '/fitur/pesanan'
     | '/order/$token'
     | '/inventory/'
     | '/menu/'
     | '/reports/'
     | '/sale/'
+    | '/fitur/'
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
     | '/menu/price-categories/$categoryId'
@@ -924,11 +953,13 @@ export interface FileRouteTypes {
     | '/settings/tax'
     | '/shift/close'
     | '/shift/open'
+    | '/fitur/pesanan'
     | '/order/$token'
     | '/inventory'
     | '/menu'
     | '/reports'
     | '/sale'
+    | '/fitur'
     | '/menu/items/$itemId'
     | '/menu/modifiers/$groupId'
     | '/menu/price-categories/$categoryId'
@@ -948,6 +979,7 @@ export interface FileRouteTypes {
     | '/_pos/sale'
     | '/_pos/settings'
     | '/_pos/shift'
+    | '/_public/fitur'
     | '/_admin/audit'
     | '/_admin/businesses'
     | '/_admin/login'
@@ -1011,11 +1043,13 @@ export interface FileRouteTypes {
     | '/_pos/settings/tax'
     | '/_pos/shift/close'
     | '/_pos/shift/open'
+    | '/_public/fitur/pesanan'
     | '/_public/order/$token'
     | '/_pos/inventory/'
     | '/_pos/menu/'
     | '/_pos/reports/'
     | '/_pos/sale/'
+    | '/_public/fitur/'
     | '/_pos/menu/items/$itemId'
     | '/_pos/menu/modifiers/$groupId'
     | '/_pos/menu/price-categories/$categoryId'
@@ -1300,6 +1334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuditRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_public/fitur': {
+      id: '/_public/fitur'
+      path: '/fitur'
+      fullPath: '/fitur'
+      preLoaderRoute: typeof PublicFiturRouteRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_pos/shift': {
       id: '/_pos/shift'
       path: '/shift'
@@ -1349,6 +1390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosInventoryRouteRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_public/fitur/': {
+      id: '/_public/fitur/'
+      path: '/'
+      fullPath: '/fitur/'
+      preLoaderRoute: typeof PublicFiturIndexRouteImport
+      parentRoute: typeof PublicFiturRouteRoute
+    }
     '/_pos/sale/': {
       id: '/_pos/sale/'
       path: '/'
@@ -1383,6 +1431,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/order/$token'
       preLoaderRoute: typeof PublicOrderTokenRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/_public/fitur/pesanan': {
+      id: '/_public/fitur/pesanan'
+      path: '/pesanan'
+      fullPath: '/fitur/pesanan'
+      preLoaderRoute: typeof PublicFiturPesananRouteImport
+      parentRoute: typeof PublicFiturRouteRoute
     }
     '/_pos/shift/open': {
       id: '/_pos/shift/open'
@@ -1881,7 +1936,21 @@ const PosRouteChildren: PosRouteChildren = {
 
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
 
+interface PublicFiturRouteRouteChildren {
+  PublicFiturPesananRoute: typeof PublicFiturPesananRoute
+  PublicFiturIndexRoute: typeof PublicFiturIndexRoute
+}
+
+const PublicFiturRouteRouteChildren: PublicFiturRouteRouteChildren = {
+  PublicFiturPesananRoute: PublicFiturPesananRoute,
+  PublicFiturIndexRoute: PublicFiturIndexRoute,
+}
+
+const PublicFiturRouteRouteWithChildren =
+  PublicFiturRouteRoute._addFileChildren(PublicFiturRouteRouteChildren)
+
 interface PublicRouteChildren {
+  PublicFiturRouteRoute: typeof PublicFiturRouteRouteWithChildren
   PublicChangelogRoute: typeof PublicChangelogRoute
   PublicPrivacyRoute: typeof PublicPrivacyRoute
   PublicSigninRoute: typeof PublicSigninRoute
@@ -1892,6 +1961,7 @@ interface PublicRouteChildren {
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
+  PublicFiturRouteRoute: PublicFiturRouteRouteWithChildren,
   PublicChangelogRoute: PublicChangelogRoute,
   PublicPrivacyRoute: PublicPrivacyRoute,
   PublicSigninRoute: PublicSigninRoute,
