@@ -45,7 +45,16 @@ describe('isTrackedHost', () => {
 
 describe('shouldTrackPath', () => {
   it('tracks the marketing pages', () => {
-    for (const path of ['/', '/signin', '/signup', '/changelog', '/privacy', '/terms']) {
+    for (const path of [
+      '/',
+      '/signin',
+      '/signup',
+      '/changelog',
+      '/privacy',
+      '/terms',
+      '/fitur',
+      '/fitur/pesanan',
+    ]) {
       expect(shouldTrackPath(path)).toBe(true);
     }
   });
@@ -74,6 +83,12 @@ describe('shouldTrackPath', () => {
 
   it('default-denies an unknown route', () => {
     expect(shouldTrackPath('/some-route-added-next-week')).toBe(false);
+  });
+
+  it('tracks the feature pages', () => {
+    expect(shouldTrackPath('/fitur')).toBe(true);
+    expect(shouldTrackPath('/fitur/pesanan')).toBe(true);
+    expect(shouldTrackPath('/fitur/pesanan/')).toBe(true); // trailing slash normalised
   });
 });
 

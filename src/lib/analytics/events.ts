@@ -11,8 +11,25 @@
  * user typed, including their email address.
  */
 
-/** The six marketing components that actually link to /signin. */
-export type CtaLocation = 'header' | 'hero' | 'ai_spotlight' | 'pricing' | 'cta_band' | 'footer';
+/**
+ * The six marketing components that actually link to /signin, plus
+ * `feature_page`, shared by all `/fitur/*` feature pages rather than minting
+ * a permanent per-page literal for each — pageview events already carry the
+ * pathname, so that's what separates them in analytics.
+ *
+ * These string literals are permanent once shipped: PostHog has no concept of
+ * renaming a value, so changing one splits the funnel into "everything before"
+ * and "everything after" instead of one continuous series. Add new members;
+ * never rename or repurpose an existing one.
+ */
+export type CtaLocation =
+  | 'header'
+  | 'hero'
+  | 'ai_spotlight'
+  | 'pricing'
+  | 'cta_band'
+  | 'footer'
+  | 'feature_page';
 
 /**
  * A stable identifier, NOT the rendered button text. The rendered text is
