@@ -15,3 +15,19 @@ test('signup URL redirects to signin, which defaults to the code flow', async ({
   await expect(page.getByRole('button', { name: /Kirim kode/ })).toBeVisible();
   await expect(page.getByLabel('Password')).toHaveCount(0);
 });
+
+test('feature page renders and offers a sign-up path', async ({ page }) => {
+  await gotoHydrated(page, '/fitur/pesanan');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  // DEFAULT_LOCALE is 'en' (src/lib/locale.ts), so a fresh browser context
+  // renders English; match both locales rather than assume one.
+  await expect(
+    page.getByRole('link', { name: /Mulai gratis|Daftar|Start free|Sign up/ }).first()
+  ).toBeVisible();
+});
+
+test('feature hub links to the pesanan page', async ({ page }) => {
+  await gotoHydrated(page, '/fitur');
+  await page.getByRole('link', { name: /Pesanan/ }).first().click();
+  await expect(page).toHaveURL(/\/fitur\/pesanan$/);
+});
