@@ -21,6 +21,64 @@ async function seededCafe() {
   return { t, cafeId };
 }
 
+/**
+ * A stable projection of the rng-determined values seed:run produces, used to
+ * verify determinism across two independent runs of the same seed. Deliberately
+ * excludes anything derived from wall-clock `now` (createdAt/openedAt etc. shift
+ * between two calendar-time-separated runs even when every rng draw matches
+ * exactly) and sorts every level so Convex's unordered `collect()` can't
+ * introduce false mismatches.
+ */
+async function projectSeedValues(t: Awaited<ReturnType<typeof seededCafe>>['t']) {
+  return t.run(async (ctx) => {
+    const heldRows = await ctx.db.query('heldOrders').collect();
+    const held = (
+      await Promise.all(
+        heldRows.map(async (h) => {
+          const table = h.tableId ? await ctx.db.get(h.tableId) : null;
+          const lines = h.lines
+            .map((l) => ({
+              nameSnapshot: l.nameSnapshot,
+              qty: l.qty,
+              unitPriceIDR: l.unitPriceIDR,
+              variantName: l.variantName ?? null,
+            }))
+            .sort((a, b) =>
+              `${a.nameSnapshot}|${a.variantName}`.localeCompare(`${b.nameSnapshot}|${b.variantName}`)
+            );
+          return { tableName: table?.name ?? null, lines };
+        })
+      )
+    ).sort((a, b) => (a.tableName ?? '').localeCompare(b.tableName ?? ''));
+
+    const selfRows = await ctx.db.query('selfOrders').collect();
+    const self = selfRows
+      .map((r) => ({
+        tableName: r.tableName ?? null,
+        subtotalIDR: r.subtotalIDR,
+        hasNote: typeof r.customerNote === 'string' && r.customerNote.length > 0,
+        paymentStatus: r.paymentStatus ?? null,
+        lines: r.lines
+          .map((l) => ({
+            nameSnapshot: l.nameSnapshot,
+            qty: l.qty,
+            unitPriceIDR: l.unitPriceIDR,
+            variantName: l.variantName ?? null,
+            modifierLabels: [...l.modifierLabels].sort(),
+          }))
+          .sort((a, b) => `${a.nameSnapshot}|${a.variantName}`.localeCompare(`${b.nameSnapshot}|${b.variantName}`)),
+      }))
+      .sort(
+        (a, b) =>
+          a.subtotalIDR - b.subtotalIDR ||
+          (a.tableName ?? '').localeCompare(b.tableName ?? '') ||
+          a.lines.length - b.lines.length
+      );
+
+    return { held, self };
+  });
+}
+
 describe('seed:run — pesanan demo state', () => {
   it('parks held orders on at least three tables in the open shift', async () => {
     const { t } = await seededCafe();
@@ -53,9 +111,15 @@ describe('seed:run — pesanan demo state', () => {
     expect(rows.some((r) => r.paymentStatus === 'paid')).toBe(true);
     expect(rows.some((r) => typeof r.customerNote === 'string' && r.customerNote.length > 0)).toBe(true);
     expect(rows.some((r) => r.lines.some((l) => l.variantName && l.modifierLabels.length > 0))).toBe(true);
+    // The real app (convex/public.ts buildSelfOrderLine, convex/selfOrders.ts
+    // toRecallLine) always derives modifierLabels from modifierOptionIds 1:1 —
+    // a label with no matching id is a state the app can never produce.
     for (const r of rows) {
       expect(r.subtotalIDR).toBeGreaterThan(0);
       expect(r.tableName).toBeTruthy();
+      for (const l of r.lines) {
+        expect(l.modifierLabels.length).toBe(l.modifierOptionIds.length);
+      }
     }
   });
 
@@ -97,10 +161,19 @@ describe('seed:run — pesanan demo state', () => {
   });
 
   it('is deterministic for a fixed seed', async () => {
+    // A row-count comparison would pass even if every `rng` draw in the block
+    // were replaced with Math.random() (the block always inserts exactly 5
+    // self-orders regardless of what values it draws), so this compares the
+    // actual rng-determined VALUES — table picks, item picks, qty, prices,
+    // variant/modifier resolution — between two independently seeded runs.
     const a = await seededCafe();
     const b = await seededCafe();
-    const countA = await a.t.run(async (ctx) => (await ctx.db.query('selfOrders').collect()).length);
-    const countB = await b.t.run(async (ctx) => (await ctx.db.query('selfOrders').collect()).length);
-    expect(countA).toBe(countB);
+    const projectedA = await projectSeedValues(a.t);
+    const projectedB = await projectSeedValues(b.t);
+    expect(projectedA).toEqual(projectedB);
+    // Sanity check the projection actually has teeth: it's not vacuously
+    // comparing two empty structures.
+    expect(projectedA.held.length).toBeGreaterThanOrEqual(3);
+    expect(projectedA.self.length).toBeGreaterThanOrEqual(4);
   });
 });

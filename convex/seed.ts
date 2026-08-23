@@ -1339,11 +1339,45 @@ export const run = internalMutation({
         const doc = await ctx.db.get(id);
         if (doc) tableDocs.push(doc);
       }
+      // Index 2's item is drawn from a pool that structurally has BOTH a variant
+      // and an attached modifier group — not luck of rng.pick(sellable) against
+      // whatever `days`/seed happens to draw. This mirrors convex/public.ts's
+      // buildSelfOrderLine and convex/selfOrders.ts's toRecallLine, which both
+      // derive modifierLabels solely from modifierOptionIds (1:1, by position) —
+      // so modifierOptionIds and modifierLabels below are always resolved from
+      // the SAME option, never independently, and both stay empty if none can
+      // be resolved. A row with a label but no id is a state the real app can
+      // never produce (the label would silently vanish on recall).
+      const variantModifierPool = sellable.filter(
+        (it) => it.variants.length > 0 && it.modifierGroupIds.length > 0
+      );
       for (let i = 0; i < 5; i++) {
         const table = tableDocs[i % tableDocs.length]!;
-        const it = rng.pick(sellable);
-        const withVariant = i === 2 && it.variants.length > 0;
-        const variant = withVariant ? rng.pick(it.variants) : null;
+        const withVariantAndModifier = i === 2;
+        const it =
+          withVariantAndModifier && variantModifierPool.length > 0
+            ? rng.pick(variantModifierPool)
+            : rng.pick(sellable);
+        const variant = withVariantAndModifier && it.variants.length > 0 ? rng.pick(it.variants) : null;
+
+        // Resolve one real modifier option for this item, and derive the label
+        // from that SAME option — never fabricate a label with no matching id.
+        let modifierOptionId: Id<'modifierOptions'> | null = null;
+        let modifierLabel: string | null = null;
+        if (withVariantAndModifier && it.modifierGroupIds.length > 0) {
+          const gid = rng.pick(it.modifierGroupIds);
+          const gIdx = groupIds.indexOf(gid);
+          const opts = optionsByGroup[gIdx] ?? [];
+          if (opts.length > 0) {
+            const oid = rng.pick(opts);
+            const od = optionDocs.get(oid);
+            if (od) {
+              modifierOptionId = oid;
+              modifierLabel = od.name;
+            }
+          }
+        }
+
         const qty = rng.i(1, 2);
         const unitPriceIDR = variant ? variant.priceIDR : it.priceIDR;
         const subtotalIDR = unitPriceIDR * qty;
@@ -1361,8 +1395,8 @@ export const run = internalMutation({
               qty,
               unitPriceIDR,
               ...(variant ? { variantId: variant.id, variantName: variant.name } : {}),
-              modifierOptionIds: [],
-              modifierLabels: withVariant ? ['Es batu sedikit'] : [],
+              modifierOptionIds: modifierOptionId ? [modifierOptionId] : [],
+              modifierLabels: modifierLabel ? [modifierLabel] : [],
             },
           ],
           subtotalIDR,
