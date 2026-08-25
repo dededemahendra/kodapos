@@ -55,7 +55,7 @@ export function DashboardStats() {
 							<Skeleton className="h-8 w-24" />
 						)}
 					</CardContent>
-					<CardFooter className="gap-1 rounded-none bg-background text-xs">
+					<CardFooter className="gap-1 rounded-b-xl bg-background text-xs">
 						{tile.delta !== undefined ? (
 							<Delta value={tile.delta}>
 								<DeltaIcon />

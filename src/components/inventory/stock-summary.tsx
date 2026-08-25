@@ -13,7 +13,7 @@ export function StockSummary({
 }) {
   const low = lowCount > 0;
   return (
-    <div className="grid grid-cols-1 gap-px sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <DashboardCard>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="font-normal text-xs tracking-wide">

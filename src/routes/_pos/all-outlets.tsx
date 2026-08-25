@@ -92,7 +92,7 @@ function AllOutlets() {
     <div className="p-4">
       {header}
 
-      <div className="mb-6 grid grid-cols-2 gap-px bg-border lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {tiles.map((tile, i) => (
           <DashboardCard key={i}>
             <div className="p-4">

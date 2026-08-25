@@ -61,7 +61,7 @@ export function DashboardInvoices() {
 	const data = useQuery(api.dashboard.recentOrders, {});
 
 	return (
-		<DashboardCard className="relative gap-0 md:col-span-2">
+		<DashboardCard className="relative gap-0 overflow-hidden md:col-span-2">
 			<CardHeader className="border-b">
 				<CardTitle className="text-base">
 					<Trans>Transaksi terbaru</Trans>

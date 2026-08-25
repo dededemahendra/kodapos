@@ -42,9 +42,9 @@ function OverviewReport() {
     { label: <Trans>Item terjual</Trans>, value: String(data.itemsSold) },
   ];
   return (
-    <div className="grid grid-cols-2 gap-px bg-border lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {cards.map((c, i) => (
-        <div key={i} className="bg-background p-4">
+        <div key={i} className="rounded-xl border bg-card p-4">
           <div className="text-xs uppercase tracking-wide text-muted-foreground">{c.label}</div>
           <div className="mt-1 text-2xl font-semibold tabular-nums">{c.value}</div>
         </div>
