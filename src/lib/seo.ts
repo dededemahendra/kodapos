@@ -53,6 +53,18 @@ export function seo({
   };
 }
 
+/**
+ * Head for a page that is not a search destination: the customer order page, the
+ * secondary screens, the admin app. Title + `noindex` only — no canonical or
+ * Open Graph, because there is no public URL worth pointing them at (the order
+ * page's URL carries a per-order token, and the screens are cafe hardware).
+ */
+export function privatePage(title: string, suffix: string = SITE_NAME) {
+  return {
+    meta: [{ title: `${title}, ${suffix}` }, { name: 'robots', content: 'noindex, nofollow' }],
+  };
+}
+
 /** Structured data for the homepage (Organization + WebSite + the product). */
 export const HOMEPAGE_JSON_LD = {
   '@context': 'https://schema.org',

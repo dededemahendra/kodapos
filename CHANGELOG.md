@@ -8,6 +8,25 @@ QRIS payments (static, dynamic, Xendit BYO + reconciliation), loyalty + tiers, g
 
 ---
 
+## Phase 2 · UX — Page Titles · 2026-08-22
+
+Every authenticated page shared one browser-tab title, `kodapos`, because only the six public routes ever defined a `head()`. Tabs, bookmarks, and history entries were indistinguishable.
+
+### Added
+- `src/lib/document-title.ts` + `use-document-title.ts`. The hook resolves the active route against the existing sidebar `navLinks` and writes `document.title`, so a page's tab title and its sidebar label share one source and cannot drift. `EXTRA_TITLES` covers the routes with no sidebar entry (wizard steps, the report tabs defined in `reports/route.tsx`, the menu sub-editors). Called from the `_pos` layout rather than `AppHeader`, because only the sidebar shell renders that header — the register and the onboarding wizard would otherwise have kept the bare brand title.
+- Titles resolve through the i18n catalog, so the tab follows the language toggle. A static per-route `head()` string cannot do that, which is the main reason the hook exists rather than ~70 `head()` blocks.
+- `privatePage()` in `src/lib/seo.ts` — title + `noindex`, no canonical or Open Graph, for pages with no public URL worth pointing at. Applied to `/order/$token`, `/display`, `/menu-board`, and the five `_admin` routes (suffixed `kodapos admin`).
+
+### Fixed
+- Route resolution now takes the **longest** matching prefix. `navLinks` lists a parent before its children, so first-match labelled `/menu/categories` as "Item Menu" and would have labelled every report tab "Ringkasan". `AppBreadcrumbs` still resolves via `navLinks.find()` in `app-header.tsx` and has the same off-by-a-parent behaviour; not changed here.
+- Filled the three missing English catalog entries the new titles introduced (`Pengaturan awal`, `Pilih kasir`, `Tutup shift`); `en` is back to 0 missing.
+
+### Notes
+- `/signup` deliberately has no title: it is a permanent redirect to `/signin`, not a rendered page.
+- App titles are set client-side, so the SSR payload still carries the root title. These pages are authenticated and `noindex`, so there is nothing for a crawler to miss.
+
+---
+
 ## Phase 2 · Auth — Email-Only Sign-In · 2026-08-22
 
 "Continue with Google" is hidden; the sign-in card now offers email only (password and the emailed code).

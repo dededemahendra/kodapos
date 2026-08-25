@@ -6,8 +6,10 @@ import type * as React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Skeleton } from '~/components/ui/skeleton';
 import { formatCount } from '~/lib/formater';
+import { privatePage } from '~/lib/seo';
 
 export const Route = createFileRoute('/_admin/overview')({
+  head: () => privatePage('Overview', 'kodapos admin'),
   component: AdminOverview,
 });
 

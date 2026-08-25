@@ -1,18 +1,19 @@
-import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { Trans } from '@lingui/react/macro';
+import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Authenticated, AuthLoading, Unauthenticated, useMutation, useQuery } from 'convex/react';
 import { type ReactNode, useEffect, useState } from 'react';
 import { AppHeader } from '~/components/app-header';
-import { CommandPalette } from '~/components/command-palette';
 import { AppSidebar } from '~/components/app-sidebar';
+import { CommandPalette } from '~/components/command-palette';
 import { RegisterTopBar } from '~/components/sale/register-top-bar';
 import { Button } from '~/components/ui/button';
-import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { LoadingCounter } from '~/components/ui/loading-counter';
+import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
 import { currentHostApp } from '~/lib/host';
 import { useAutoLock } from '~/lib/use-auto-lock';
+import { useAppDocumentTitle } from '~/lib/use-document-title';
 
 export const Route = createFileRoute('/_pos')({
   component: PosLayout,
@@ -28,6 +29,9 @@ const WIZARD_PREFIXES = ['/onboarding', '/pin', '/shift'];
 const OPERATIONAL_PREFIXES = ['/sale', '/tables', '/kitchen', '/self-orders'];
 
 function PosLayout() {
+  // Here rather than in AppHeader: only the sidebar shell renders that, so the
+  // register and the onboarding wizard would keep the bare root title.
+  useAppDocumentTitle();
   useEffect(() => {
     if (currentHostApp() === 'admin') window.location.replace('/overview');
   }, []);

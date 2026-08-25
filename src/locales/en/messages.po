@@ -1564,6 +1564,7 @@ msgid "Buka layar menu"
 msgstr "Open menu display"
 
 #: src/components/command-palette.tsx
+#: src/lib/document-title.ts
 msgid "Buka shift"
 msgstr "Open shift"
 
@@ -1931,6 +1932,7 @@ msgid "Dasar"
 msgstr "Base"
 
 #: src/components/app-shared.tsx
+#: src/lib/document-title.test.ts
 msgid "Dasbor"
 msgstr "Dashboard"
 
@@ -2130,6 +2132,7 @@ msgstr "Edit outlets"
 msgid "Edit outlet untuk {memberName}"
 msgstr "Edit outlets for {memberName}"
 
+#: src/lib/document-title.ts
 #: src/routes/_pos/reports/route.tsx
 msgid "Ekspor Akuntansi"
 msgstr "Accounting export"
@@ -3085,6 +3088,7 @@ msgstr "Item marked available."
 
 #: src/components/app-shared.tsx
 #: src/components/command-palette.tsx
+#: src/lib/document-title.test.ts
 #: src/routes/_pos/menu/index.tsx
 msgid "Item Menu"
 msgstr "Menu Items"
@@ -3128,6 +3132,7 @@ msgstr "Access permissions"
 msgid "Jadikan harga standar sebagai harga tertinggi, lalu buat kategori yang lebih murah (misalnya Lokal). Layar menu dan halaman pesan mandiri selalu menampilkan harga standar, jadi kalau harga standar lebih murah, tamu membaca satu harga dan membayar harga lain."
 msgstr "Make the standard price your highest price, then create a cheaper category (for example Local). The menu board and the self order page always show standard prices, so if the standard price is the cheaper one, a guest reads one price and pays another."
 
+#: src/lib/document-title.ts
 #: src/routes/_pos/schedule.tsx
 msgid "Jadwal"
 msgstr "Schedule"
@@ -3426,6 +3431,7 @@ msgstr "Catalog"
 #: src/components/import/csv-import-dialog.tsx
 #: src/components/menu/category-table.tsx
 #: src/components/menu/item-edit-form.tsx
+#: src/lib/document-title.test.ts
 #: src/routes/_pos/menu/index.tsx
 #: src/routes/_pos/menu/route.tsx
 #: src/routes/_pos/promos.tsx
@@ -3450,6 +3456,7 @@ msgid "kategori harga"
 msgstr "price category"
 
 #: src/components/sale/sale-screen.tsx
+#: src/lib/document-title.ts
 #: src/routes/_pos/menu/price-categories.$categoryId.tsx
 msgid "Kategori harga"
 msgstr "Price categories"
@@ -3856,10 +3863,12 @@ msgstr "Net profit"
 msgid "Laba kotor"
 msgstr "Gross profit"
 
+#: src/lib/document-title.ts
 #: src/routes/_pos/reports/route.tsx
 msgid "Laba/Rugi"
 msgstr "Profit/Loss"
 
+#: src/lib/document-title.ts
 #: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/menu/route.tsx
 msgid "Label Barcode"
@@ -4100,6 +4109,7 @@ msgstr "Manager"
 #~ msgid "Manajer akun khusus"
 #~ msgstr "Dedicated account manager"
 
+#: src/lib/document-title.ts
 #: src/routes/_pos/recipes.tsx
 #: src/routes/_pos/reports/margin.tsx
 #: src/routes/_pos/reports/route.tsx
@@ -5111,6 +5121,7 @@ msgstr "Daily revenue, last 7 days."
 msgid "Pendapatan lain"
 msgstr "Other income"
 
+#: src/lib/document-title.ts
 #: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Pendapatan Lain"
@@ -5133,6 +5144,10 @@ msgstr "Point multiplier must be at least 1."
 msgid "Pengaturan"
 msgstr "Settings"
 
+#: src/lib/document-title.ts
+msgid "Pengaturan awal"
+msgstr "Setup"
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Pengaturan loyalitas disimpan."
 msgstr "Loyalty settings saved."
@@ -5141,6 +5156,7 @@ msgstr "Loyalty settings saved."
 #~ msgid "Pengaturan struk & pembayaran kini ada di halaman Struk & Printer dan Pajak & Pembayaran."
 #~ msgstr "Receipt & payment settings are now on the Receipt & Printer and Tax & Payment pages."
 
+#: src/lib/document-title.ts
 #: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/profit-loss.tsx
 #: src/routes/_pos/reports/route.tsx
@@ -5167,6 +5183,7 @@ msgstr "Incoming delivery"
 
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
+#: src/lib/document-title.test.ts
 #: src/routes/_pos/reports/export.tsx
 #: src/routes/_pos/reports/route.tsx
 msgid "Penjualan"
@@ -5309,6 +5326,7 @@ msgstr "Order again"
 msgid "Pesan-antar"
 msgstr "Delivery"
 
+#: src/lib/document-title.ts
 #: src/routes/_pos/reports/route.tsx
 #: src/routes/_pos/settings/general.tsx
 msgid "Pesanan"
@@ -5465,6 +5483,10 @@ msgstr "Choose items"
 #: src/routes/_pos/settings/profile.tsx
 msgid "Pilih jenis usaha"
 msgstr "Select business type"
+
+#: src/lib/document-title.ts
+msgid "Pilih kasir"
+msgstr "Choose cashier"
 
 #: src/components/menu/item-edit-form.tsx
 #: src/components/promo/promo-form-dialog.tsx
@@ -5954,6 +5976,7 @@ msgid "Ringkas"
 msgstr "Compact"
 
 #: src/components/app-shared.tsx
+#: src/lib/document-title.test.ts
 #: src/routes/_pos/reports/route.tsx
 msgid "Ringkasan"
 msgstr "Summary"
@@ -6296,6 +6319,7 @@ msgid "Semua metode"
 msgstr "All methods"
 
 #: src/components/outlet-switcher.tsx
+#: src/lib/document-title.ts
 #: src/routes/_pos/all-outlets.tsx
 #: src/routes/_pos/settings/members.tsx
 msgid "Semua outlet"
@@ -7534,6 +7558,10 @@ msgstr "Close details"
 #: src/components/notifications-menu.tsx
 msgid "Tutup notifikasi"
 msgstr "Dismiss notification"
+
+#: src/lib/document-title.ts
+msgid "Tutup shift"
+msgstr "Close shift"
 
 #: src/routes/_pos/shift/close.tsx
 msgid "Tutup Shift"

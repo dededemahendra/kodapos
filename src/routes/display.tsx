@@ -7,17 +7,19 @@ import { useEffect, useState } from 'react';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Skeleton } from '~/components/ui/skeleton';
 import {
+  type DisplayPayload,
   readDisplay,
   subscribeDisplay,
-  type DisplayPayload,
 } from '~/lib/customer-display';
 import { formatIDR } from '~/lib/money';
+import { privatePage } from '~/lib/seo';
 
 // Standalone full-screen customer-facing view. Lives at the top level (NOT
 // under _pos) so it renders bare, with no app sidebar/chrome, while still
 // inheriting Convex/auth context from __root. The cashier drags this window to
 // the till's second monitor; it mirrors the live cart via localStorage.
 export const Route = createFileRoute('/display')({
+  head: () => privatePage('Layar Pelanggan'),
   component: CustomerDisplay,
 });
 
