@@ -95,7 +95,7 @@ export interface TextRun {
  * "IDR" as well as "Rp": models replying in English tend to write IDR even
  * when the prompt asks for Rp.
  */
-const FIGURE = /((?:Rp|IDR)\s?[\d.,]+\d|\d[\d.,]*%)/g;
+const FIGURE = /((?:Rp|IDR)\s?[\d.,]*\d|\d[\d.,]*%)/g;
 
 /** Splits a line into plain and emphasized runs so the UI can weight figures. */
 export function highlightNumbers(text: string): TextRun[] {

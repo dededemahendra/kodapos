@@ -105,6 +105,15 @@ describe('highlightNumbers', () => {
     ]);
   });
 
+  it('marks single-digit amounts, including the Rp 0 this app shows all day', () => {
+    expect(highlightNumbers('Revenue is Rp 0 today')).toEqual([
+      { text: 'Revenue is ', emphasis: false },
+      { text: 'Rp 0', emphasis: true },
+      { text: ' today', emphasis: false },
+    ]);
+    expect(highlightNumbers('IDR 5')).toEqual([{ text: 'IDR 5', emphasis: true }]);
+  });
+
   it('returns a single unemphasized run when there is nothing to mark', () => {
     expect(highlightNumbers('no numbers here')).toEqual([
       { text: 'no numbers here', emphasis: false },

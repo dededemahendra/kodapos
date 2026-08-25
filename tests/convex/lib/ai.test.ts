@@ -5,6 +5,7 @@ import {
   parseLLMResponse,
   parseProvider,
   languageInstruction,
+  INSIGHTS_SYSTEM_PROMPT,
 } from '../../../convex/lib/ai';
 
 describe('buildLLMRequest', () => {
@@ -147,5 +148,16 @@ describe('languageInstruction', () => {
       expect(out).toMatch(/same language/i);
       expect(out).toMatch(locale === 'en' ? /English/ : /Indonesian/);
     }
+  });
+});
+
+
+describe('INSIGHTS_SYSTEM_PROMPT', () => {
+  it('asks for a plain-text heading without also forbidding headings', () => {
+    // The renderer keys on that heading. Saying "do not use headings" in the
+    // same breath licenses a model to drop it, which reads as an unstructured
+    // paragraph. Ban markdown syntax, not the heading itself.
+    expect(INSIGHTS_SYSTEM_PROMPT).toMatch(/heading line ending in a colon/);
+    expect(INSIGHTS_SYSTEM_PROMPT).not.toMatch(/(?:not use|avoid)[^.]*headings/i);
   });
 });

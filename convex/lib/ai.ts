@@ -154,7 +154,8 @@ export const INSIGHTS_SYSTEM_PROMPT =
   'under a single short heading line ending in a colon. Write that heading in ' +
   'the same language as the rest of your reply. Write money as "Rp" followed ' +
   'by the amount (for example Rp 250.000), never "IDR". Be specific and use ' +
-  'the numbers; do not invent data. Do not use markdown, headings, or bold.';
+  'the numbers; do not invent data. Do not use markdown syntax such as #, ' +
+  '##, **bold**, or bullet characters other than "- ".';
 
 export const ASK_SYSTEM_PROMPT =
   'You are a helpful analytics assistant for a small Indonesian cafe POS. ' +
