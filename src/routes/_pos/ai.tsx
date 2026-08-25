@@ -4,6 +4,7 @@ import { api } from 'convex/_generated/api';
 import { useAction, useQuery } from 'convex/react';
 import { MessageCircle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { AiResponse } from '~/components/ai-response';
 import { Button } from '~/components/ui/button';
 import { ChatInput } from '~/components/ui/chat-input';
 import {
@@ -25,7 +26,9 @@ export const Route = createFileRoute('/_pos/ai')({
 type ChatMsg = { role: 'user' | 'assistant'; content: string };
 
 function AiChatPage() {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
+  // In chat the owner's own wording wins; this only breaks a tie.
+  const locale = i18n.locale === 'en' ? 'en' : 'id';
   const settings = useQuery(api.settings.get);
   const cafe = useQuery(api.cafes.myCafe, {});
   const chat = useAction(api.ai.chat);
@@ -52,7 +55,7 @@ function AiChatPage() {
     setInput('');
     setLoading(true);
     try {
-      const reply = await chat({ messages: next });
+      const reply = await chat({ messages: next, locale });
       setMessages([...next, { role: 'assistant', content: reply }]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t`Gagal menjawab.`);
@@ -175,13 +178,13 @@ function AiChatPage() {
               ) : null}
               <div
                 className={cn(
-                  'max-w-[80%] whitespace-pre-line rounded-2xl px-3.5 py-2 text-sm leading-relaxed',
+                  'max-w-[80%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed',
                   m.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'whitespace-pre-line bg-primary text-primary-foreground'
                     : 'bg-muted text-foreground'
                 )}
               >
-                {m.content}
+                {m.role === 'assistant' ? <AiResponse text={m.content} /> : m.content}
               </div>
             </div>
           ))}
