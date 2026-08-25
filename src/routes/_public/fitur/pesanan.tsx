@@ -16,6 +16,9 @@ export const Route = createFileRoute('/_public/fitur/pesanan')({
       title: PESANAN.seoTitle.id,
       description: PESANAN.seoDescription.id,
       path: '/fitur/pesanan',
+      // Unpublished until public/shots/ is captured: the page's screenshots
+      // do not exist yet. Drop `noindex` when they land.
+      noindex: true,
     }),
   component: PesananPage,
 });

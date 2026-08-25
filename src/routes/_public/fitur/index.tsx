@@ -13,6 +13,9 @@ export const Route = createFileRoute('/_public/fitur/')({
       description:
         'Kasir, pesanan, stok, laporan, pelanggan, dan tim. Lihat apa saja yang bisa kodapos lakukan untuk kafe dan resto Anda.',
       path: '/fitur',
+      // Unpublished until public/shots/ is captured: the page's screenshots
+      // do not exist yet. Drop `noindex` when they land.
+      noindex: true,
     }),
   component: FiturIndex,
 });
