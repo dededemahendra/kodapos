@@ -13,7 +13,9 @@ export async function signMockBody(secret: string, body: string): Promise<string
 }
 
 export class MockProvider implements PaymentProvider {
-  constructor(private readonly secret: string) {}
+  /** A null secret means QRIS_WEBHOOK_SECRET was never seeded — charges still
+   *  mint, but no webhook can verify, so nothing can be marked paid. */
+  constructor(private readonly secret: string | null) {}
 
   async createCharge(input: { amountIDR: number; referenceId: string }) {
     const providerRef = `mock_${input.referenceId}`;
@@ -27,6 +29,7 @@ export class MockProvider implements PaymentProvider {
   }
 
   async verifyWebhook(req: { body: string; headers: Headers }): Promise<WebhookEvent | null> {
+    if (this.secret === null) return null;
     const signature = req.headers.get('x-signature');
     if (!signature) return null;
     const expected = await signMockBody(this.secret, req.body);

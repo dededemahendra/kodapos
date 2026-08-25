@@ -147,9 +147,9 @@ function ForecastSkeleton({ count = 6 }: { count?: number }) {
         <Skeleton className="h-9 w-20 rounded-md" />
         <Skeleton className="h-9 w-20 rounded-md" />
       </div>
-      <ul className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: count }).map((_, i) => (
-          <li key={i} className="bg-background p-4">
+          <li key={i} className="rounded-xl border bg-card p-4">
             <div className="flex items-center justify-between gap-2">
               <Skeleton className="h-4 w-28" />
               <Skeleton className="h-5 w-14 rounded-full" />
@@ -202,9 +202,9 @@ function ForecastInner() {
               <Trans>Data cuaca tidak tersedia.</Trans>
             </p>
           ) : null}
-          <ul className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.lines.map((line) => (
-              <li key={line.menuItemId} className="bg-background p-4">
+              <li key={line.menuItemId} className="rounded-xl border bg-card p-4">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium">{line.name}</span>
                   <ConfidenceBadge level={line.confidence} />

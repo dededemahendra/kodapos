@@ -5,6 +5,7 @@ import { Authenticated, AuthLoading, Unauthenticated, useQuery } from 'convex/re
 import { useEffect } from 'react';
 import { MenuBoard } from '~/components/menu-board/menu-board';
 import { Skeleton } from '~/components/ui/skeleton';
+import { privatePage } from '~/lib/seo';
 
 // How long to wait before reloading a failed board, to self-heal transient
 // errors (network blip, token refresh, brief outlet suspension).
@@ -16,6 +17,7 @@ const RELOAD_AFTER_MS = 60000;
 // driving the TV, go fullscreen, and leave it; the session persists across
 // restarts. Convex reactivity keeps it live when the menu changes.
 export const Route = createFileRoute('/menu-board')({
+  head: () => privatePage('Papan Menu'),
   component: MenuBoardPage,
   // The board query can throw (auth/outlet errors, missing cafe). Without a
   // route-level boundary those throws bubble to __root's errorComponent,

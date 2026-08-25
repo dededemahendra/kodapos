@@ -397,10 +397,19 @@ test.describe('sale (auth-gated)', () => {
         `VITE_CONVEX_URL=${convexCloudUrl}`
       );
     } else {
-      // Compute HMAC-SHA256 signature (Node.js crypto).
+      // Compute HMAC-SHA256 signature (Node.js crypto). The secret must match
+      // QRIS_WEBHOOK_SECRET on the target deployment — there is no default, so
+      // an unseeded deployment rejects every signature by design.
+      const secret = process.env.QRIS_WEBHOOK_SECRET;
+      if (!secret) {
+        throw new Error(
+          'QRIS_WEBHOOK_SECRET must be set to the value seeded on the target Convex deployment ' +
+            '(npx convex env get QRIS_WEBHOOK_SECRET).'
+        );
+      }
       const { createHmac } = await import('node:crypto');
       const body = JSON.stringify({ providerRef, status: 'paid' });
-      const sig = createHmac('sha256', 'dev-qris-secret').update(body).digest('hex');
+      const sig = createHmac('sha256', secret).update(body).digest('hex');
 
       const webhookResp = await request.post(`${convexSiteUrl}/webhooks/qris`, {
         headers: {

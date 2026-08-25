@@ -25,7 +25,7 @@ export function BillingHealth() {
 	const data = useQuery(api.dashboard.lowStock, {});
 
 	return (
-		<DashboardCard className="gap-0 self-start">
+		<DashboardCard className="gap-0">
 			<CardHeader className="border-b">
 				<CardTitle className="text-balance text-base">
 					<Trans>Kesehatan stok</Trans>
@@ -35,7 +35,7 @@ export function BillingHealth() {
 				</CardDescription>
 			</CardHeader>
 
-			<CardContent className="px-0">
+			<CardContent className="flex flex-1 flex-col px-0">
 				{data === undefined ? (
 					<div className="flex w-full flex-col gap-3 px-6 py-4">
 						<div className="flex items-center justify-between">

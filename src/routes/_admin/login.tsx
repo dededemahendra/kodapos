@@ -9,8 +9,10 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 import { validateEmail } from '~/lib/auth-validation';
+import { privatePage } from '~/lib/seo';
 
 export const Route = createFileRoute('/_admin/login')({
+  head: () => privatePage('Sign in', 'kodapos admin'),
   component: OperatorLogin,
 });
 

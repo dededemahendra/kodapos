@@ -12,10 +12,8 @@ import {
   useState,
 } from 'react';
 import { AuthCard } from '~/components/auth/auth-card';
-import { OrDivider } from '~/components/auth/or-divider';
 import { OtpInput } from '~/components/auth/otp-input';
 import { RedirectWhenAuthenticated } from '~/components/auth/redirect-when-authenticated';
-import { GoogleButton } from '~/components/auth/social-buttons';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -232,12 +230,6 @@ function SigninCard({
     }));
   }
 
-  function onGoogle(): void {
-    rememberAuthMethod('google');
-    track('auth_started', { method: 'google' });
-    void signIn('google');
-  }
-
   // password sign-in
   const passwordInvalid =
     email.error !== null ||
@@ -430,9 +422,6 @@ function SigninCard({
 
   return (
     <AuthCard title={title}>
-      <GoogleButton onClick={onGoogle} disabled={submitting} />
-      <OrDivider />
-
       {info && (
         <p className="mb-4 rounded-md bg-muted px-3 py-2 text-center text-sm text-muted-foreground">
           {info}

@@ -16,9 +16,11 @@ import {
 import { Input } from '~/components/ui/input';
 import { RowActions } from '~/components/ui/row-actions';
 import { Spinner } from '~/components/ui/spinner';
+import { privatePage } from '~/lib/seo';
 import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_admin/businesses')({
+  head: () => privatePage('Businesses', 'kodapos admin'),
   component: AdminBusinessesPage,
 });
 

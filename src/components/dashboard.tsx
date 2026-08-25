@@ -8,11 +8,9 @@ import { DashboardStats } from "~/components/stats";
 
 export function Dashboard() {
 	return (
-		<div>
-			<div className="p-4">
-				<AiInsights />
-			</div>
-			<div className="grid grid-cols-1 gap-px bg-border p-px md:grid-cols-2 lg:grid-cols-4">
+		<div className="space-y-4 p-4">
+			<AiInsights />
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<DashboardStats />
 				<NetRevenueChart />
 				<ChannelSalesChart />

@@ -8,10 +8,10 @@ export function DashboardCard({
 }: React.ComponentProps<typeof Card>) {
 	return (
 		<Card
-			className={cn(
-				"rounded-none border-0 bg-background shadow-none ring-0",
-				className
-			)}
+			// Deliberately NOT overflow-hidden: the dashboard charts render
+			// Recharts tooltips inside the card, and clipping would cut them off
+			// near the edges. Cards that pin content to their own edge opt in.
+			className={cn("flex flex-col rounded-xl", className)}
 			{...props}
 		/>
 	);

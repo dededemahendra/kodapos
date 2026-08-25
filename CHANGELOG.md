@@ -8,6 +8,55 @@ QRIS payments (static, dynamic, Xendit BYO + reconciliation), loyalty + tiers, g
 
 ---
 
+## Phase 2 · UX — Page Titles · 2026-08-22
+
+Every authenticated page shared one browser-tab title, `kodapos`, because only the six public routes ever defined a `head()`. Tabs, bookmarks, and history entries were indistinguishable.
+
+### Added
+- `src/lib/document-title.ts` + `use-document-title.ts`. The hook resolves the active route against the existing sidebar `navLinks` and writes `document.title`, so a page's tab title and its sidebar label share one source and cannot drift. `EXTRA_TITLES` covers the routes with no sidebar entry (wizard steps, the report tabs defined in `reports/route.tsx`, the menu sub-editors). Called from the `_pos` layout rather than `AppHeader`, because only the sidebar shell renders that header — the register and the onboarding wizard would otherwise have kept the bare brand title.
+- Titles resolve through the i18n catalog, so the tab follows the language toggle. A static per-route `head()` string cannot do that, which is the main reason the hook exists rather than ~70 `head()` blocks.
+- `privatePage()` in `src/lib/seo.ts` — title + `noindex`, no canonical or Open Graph, for pages with no public URL worth pointing at. Applied to `/order/$token`, `/display`, `/menu-board`, and the five `_admin` routes (suffixed `kodapos admin`).
+
+### Fixed
+- Route resolution now takes the **longest** matching prefix. `navLinks` lists a parent before its children, so first-match labelled `/menu/categories` as "Item Menu" and would have labelled every report tab "Ringkasan". `AppBreadcrumbs` still resolves via `navLinks.find()` in `app-header.tsx` and has the same off-by-a-parent behaviour; not changed here.
+- Filled the three missing English catalog entries the new titles introduced (`Pengaturan awal`, `Pilih kasir`, `Tutup shift`); `en` is back to 0 missing.
+
+### Notes
+- `/signup` deliberately has no title: it is a permanent redirect to `/signin`, not a rendered page.
+- App titles are set client-side, so the SSR payload still carries the root title. These pages are authenticated and `noindex`, so there is nothing for a crawler to miss.
+
+---
+
+## Phase 2 · Auth — Email-Only Sign-In · 2026-08-22
+
+"Continue with Google" is hidden; the sign-in card now offers email only (password and the emailed code).
+
+### Changed
+- `src/routes/_public/signin.tsx` drops the `GoogleButton`, the `OrDivider` beneath it, the `onGoogle` handler, and their imports. `src/components/auth/social-buttons.tsx` and `or-divider.tsx` are left in place but unreferenced, so Vite tree-shakes them out and re-enabling is a three-line change. `/signup` never offered Google.
+- This is a UI change only. The `Google` provider stays registered in `convex/auth.ts`, so `auth.addHttpRoutes` still serves `/api/auth/callback/google` — hiding the button does not turn Google auth off.
+- `docs/auth-setup.md` and `docs/deploy-production.md` record the email-only posture: `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` are no longer part of the production cutover, and the runbook verifies the absence of the button rather than a Google round-trip.
+
+### Fixed
+- `docs/auth-setup.md` claimed Convex Auth links a Google sign-in and a password account on matching email, full stop. Linking is directional: it only auto-links **trusted** providers (verified email), and our `Password` provider is configured with `reset` but no `verify`, so it is untrusted. Google-over-password links; password-signup-over-Google does **not**, and silently creates a second, empty user document. With Google hidden this is the path a returning Google owner is most likely to take, so the doc now names the emailed code as the way back into an existing account.
+
+---
+
+## Phase 2 · Deploy — Production Cutover Prep · 2026-08-15
+
+Groundwork for pointing the Cloudflare Workers build at a production Convex deployment. The mechanism already existed (`scripts/cf-deploy.mjs` runs `convex deploy` only on `main`); what was missing was a written runbook and one environment variable that failed open instead of closed.
+
+### Security
+- `QRIS_WEBHOOK_SECRET` no longer falls back to the built-in `'dev-qris-secret'` (`convex/payments/providers/index.ts`). The default is a constant readable from the source, so on any deployment where the variable was never seeded — production included — anyone could sign a `paid` event for a known `providerRef` and settle a QRIS charge. `qrisWebhookSecret()` now returns `null` when unset or empty, and `MockProvider.verifyWebhook` rejects every signature in that state, so `/webhooks/qris` fails closed with a 401.
+
+### Added
+- `docs/deploy-production.md` — the cutover runbook: which env var belongs to the Convex deployment vs. the Cloudflare build, the post-deploy verification walk, and the fact that a production deployment starts as an empty database (export/import with `--include-file-storage` if dev data must come along).
+
+### Changed
+- `docs/auth-setup.md` and `docs/email-receipt-setup.md` no longer describe the DEV deployment as the place secrets live; both point at the cutover runbook. The `RESEND_FROM` note now says the default only delivers to the Resend account owner.
+- `tests/e2e/sale.spec.ts` signs its QRIS webhook with `process.env.QRIS_WEBHOOK_SECRET` and fails with a clear message when unset, instead of hardcoding the removed default.
+
+---
+
 ## Phase 2 · Marketing — Theme & Language Toggles · 2026-07-01
 
 The marketing site header gets a light/dark toggle and the language switcher moves to the footer. A new `ThemeToggle` reuses the existing preferences theme API (the `.dark` class, SSR-safe) and replaces the language switcher in the header; the switcher is extracted into a reusable `LanguageToggle` and relocated to the footer bottom bar.
