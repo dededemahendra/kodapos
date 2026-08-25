@@ -271,6 +271,8 @@ export function FeatureSection() {
               </CardContent>
             </Card>
           </div>
+
+          {/* /fitur is built but unpublished until public/shots/ is captured — see public/robots.txt */}
         </div>
       </section>
     </MotionConfig>

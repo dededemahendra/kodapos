@@ -23,12 +23,7 @@ export interface SeoOptions {
   noindex?: boolean;
 }
 
-export function seo({
-  title,
-  description = DEFAULT_DESCRIPTION,
-  path = '/',
-  noindex,
-}: SeoOptions) {
+export function seo({ title, description = DEFAULT_DESCRIPTION, path = '/', noindex }: SeoOptions) {
   const url = `${SITE_URL}${path}`;
   return {
     meta: [
@@ -62,6 +57,68 @@ export function seo({
 export function privatePage(title: string, suffix: string = SITE_NAME) {
   return {
     meta: [{ title: `${title}, ${suffix}` }, { name: 'robots', content: 'noindex, nofollow' }],
+  };
+}
+
+/** One crumb in a breadcrumb trail: display name and path (leading slash). */
+export interface BreadcrumbItem {
+  name: string;
+  path: string;
+}
+
+/** Structured data for a breadcrumb trail. Positions are 1-indexed per the
+ * schema.org convention; `item` URLs are built absolute from SITE_URL. */
+export function breadcrumbJsonLd(trail: BreadcrumbItem[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: trail.map((crumb, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: crumb.name,
+      item: `${SITE_URL}${crumb.path}`,
+    })),
+  };
+}
+
+/** One question/answer pair for FAQ structured data. */
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+export interface FaqJsonLd {
+  '@context': 'https://schema.org';
+  '@type': 'FAQPage';
+  mainEntity: {
+    '@type': 'Question';
+    name: string;
+    acceptedAnswer: { '@type': 'Answer'; text: string };
+  }[];
+}
+
+/**
+ * Structured data for an FAQPage. Returns null for an empty list so callers
+ * render no script tag rather than an empty FAQPage (search engines treat
+ * FAQ markup that doesn't match visible page text as a policy violation, so
+ * callers must build `items` from the same content the page renders).
+ *
+ * Overloaded so a statically non-empty array (the common case — items built
+ * from a page's own content block) narrows to a non-null return, while a
+ * plain `FaqItem[]` (length unknown until runtime) keeps the `| null`.
+ */
+export function faqJsonLd(items: [FaqItem, ...FaqItem[]]): FaqJsonLd;
+export function faqJsonLd(items: FaqItem[]): FaqJsonLd | null;
+export function faqJsonLd(items: FaqItem[]): FaqJsonLd | null {
+  if (items.length === 0) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
   };
 }
 

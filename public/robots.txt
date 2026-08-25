@@ -3,5 +3,9 @@ Allow: /
 # Customer-facing, per-token, and auth surfaces should not be indexed.
 Disallow: /order/
 Disallow: /display
+# Built but not published: /fitur embeds screenshots that have not been
+# captured yet (public/shots/ is empty). Drop this line, restore the sitemap
+# entries, the nav links, and the noindex in the two route heads once they are.
+Disallow: /fitur
 
 Sitemap: https://kodapos.app/sitemap.xml

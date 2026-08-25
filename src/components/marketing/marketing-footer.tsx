@@ -61,11 +61,7 @@ export function MarketingFooter() {
                   <Trans>Produk</Trans>
                 </h4>
                 <ul className="space-y-3 text-sm text-muted-foreground">
-                  <li>
-                    <a href="/#features" className="hover:text-foreground">
-                      <Trans>Fitur</Trans>
-                    </a>
-                  </li>
+                  {/* /fitur is built but unpublished until public/shots/ is captured — see public/robots.txt */}
                   <li>
                     <a href="/#pricing" className="hover:text-foreground">
                       <Trans>Gratis</Trans>

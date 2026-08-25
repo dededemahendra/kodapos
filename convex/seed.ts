@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
-import { internalMutation } from './_generated/server';
+import { internalMutation, internalQuery } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1281,6 +1281,151 @@ export const run = internalMutation({
       bump('restockSuggestions');
     }
 
+    // ── Pesanan demo state (tables occupied, QR queue, kitchen board) ───────────
+    // The floor/queue/kitchen screens read live state, not history: /tables needs
+    // held orders on the OPEN shift, /self-orders needs status:'new' rows, and
+    // /kitchen needs paid open-shift orders in new/ready. Without this block all
+    // three render their empty states no matter how much history exists.
+    const openShift = shifts.find((s) => !s.closed);
+    if (openShift) {
+      const sellable = items.filter((it) => !it.archived && !it.soldOut);
+
+      // Three parked tabs on distinct tables (heldOrders.hold enforces one per table).
+      const parkedTables = rng.shuffle(tableIds).slice(0, 3);
+      for (let i = 0; i < parkedTables.length; i++) {
+        const tableId = parkedTables[i]!;
+        const lineCount = rng.i(1, 3);
+        const lines = [];
+        for (let l = 0; l < lineCount; l++) {
+          const it = rng.pick(sellable);
+          const variant = it.variants.length > 0 && rng.chance(0.5) ? rng.pick(it.variants) : null;
+          lines.push({
+            menuItemId: it.id,
+            nameSnapshot: it.name,
+            qty: rng.i(1, 2),
+            unitPriceIDR: variant ? variant.priceIDR : it.priceIDR,
+            ...(variant ? { variantId: variant.id, variantName: variant.name } : {}),
+            modifierOptionIds: [],
+            modifierLabels: [],
+          });
+        }
+        await ctx.db.insert('heldOrders', {
+          cafeId,
+          shiftId: openShift.id,
+          cashierId: openShift.cashierId,
+          tableId,
+          label: `Meja ${i + 1}`,
+          orderType: 'dine_in' as const,
+          lines,
+          createdAt: now - rng.i(5, 90) * 60_000,
+        });
+        bump('heldOrders');
+      }
+
+      // A minted QR token so /order/{token} is reachable. Fixed-length hex from the
+      // seeded rng — never crypto randomness, which would break determinism.
+      const qrTable = tableIds[0];
+      if (qrTable) {
+        let token = '';
+        for (let i = 0; i < 32; i++) token += rng.i(0, 15).toString(16);
+        await ctx.db.patch(qrTable, { qrToken: token });
+      }
+
+      // Pending QR self-orders: 5 rows, under the MAX_PENDING_SELF_ORDERS=8 cap.
+      // Index 0 is pre-paid (QRIS), index 1 carries a note, index 2 carries a
+      // variant + modifier labels — the three cases the queue screenshot must show.
+      const tableDocs = [];
+      for (const id of tableIds.slice(0, 5)) {
+        const doc = await ctx.db.get(id);
+        if (doc) tableDocs.push(doc);
+      }
+      // Index 2's item is drawn from a pool that structurally has BOTH a variant
+      // and an attached modifier group — not luck of rng.pick(sellable) against
+      // whatever `days`/seed happens to draw. This mirrors convex/public.ts's
+      // buildSelfOrderLine and convex/selfOrders.ts's toRecallLine, which both
+      // derive modifierLabels solely from modifierOptionIds (1:1, by position) —
+      // so modifierOptionIds and modifierLabels below are always resolved from
+      // the SAME option, never independently, and both stay empty if none can
+      // be resolved. A row with a label but no id is a state the real app can
+      // never produce (the label would silently vanish on recall).
+      const variantModifierPool = sellable.filter(
+        (it) => it.variants.length > 0 && it.modifierGroupIds.length > 0
+      );
+      for (let i = 0; i < 5; i++) {
+        const table = tableDocs[i % tableDocs.length]!;
+        const withVariantAndModifier = i === 2;
+        const it =
+          withVariantAndModifier && variantModifierPool.length > 0
+            ? rng.pick(variantModifierPool)
+            : rng.pick(sellable);
+        const variant = withVariantAndModifier && it.variants.length > 0 ? rng.pick(it.variants) : null;
+
+        // Resolve one real modifier option for this item, and derive the label
+        // from that SAME option — never fabricate a label with no matching id.
+        let modifierOptionId: Id<'modifierOptions'> | null = null;
+        let modifierLabel: string | null = null;
+        if (withVariantAndModifier && it.modifierGroupIds.length > 0) {
+          const gid = rng.pick(it.modifierGroupIds);
+          const gIdx = groupIds.indexOf(gid);
+          const opts = optionsByGroup[gIdx] ?? [];
+          if (opts.length > 0) {
+            const oid = rng.pick(opts);
+            const od = optionDocs.get(oid);
+            if (od) {
+              modifierOptionId = oid;
+              modifierLabel = od.name;
+            }
+          }
+        }
+
+        const qty = rng.i(1, 2);
+        const unitPriceIDR = variant ? variant.priceIDR : it.priceIDR;
+        const subtotalIDR = unitPriceIDR * qty;
+        await ctx.db.insert('selfOrders', {
+          cafeId,
+          tableId: table._id,
+          tableName: table.name,
+          status: 'new' as const,
+          clientId: `seed-self-${args.seed ?? 12345}-${i}`,
+          ...(i === 1 ? { customerNote: 'Tolong jangan terlalu manis.' } : {}),
+          lines: [
+            {
+              menuItemId: it.id,
+              nameSnapshot: it.name,
+              qty,
+              unitPriceIDR,
+              ...(variant ? { variantId: variant.id, variantName: variant.name } : {}),
+              modifierOptionIds: modifierOptionId ? [modifierOptionId] : [],
+              modifierLabels: modifierLabel ? [modifierLabel] : [],
+            },
+          ],
+          subtotalIDR,
+          createdAt: now - rng.i(2, 25) * 60_000,
+          ...(i === 0
+            ? {
+                paymentMode: 'qris' as const,
+                paymentStatus: 'paid' as const,
+                totalIDR: subtotalIDR,
+              }
+            : { paymentMode: 'counter' as const, paymentStatus: 'unpaid' as const }),
+        });
+        bump('selfOrders');
+      }
+
+      // Force a populated kitchen board. The orders loop assigns kitchenStatus at
+      // random across all 60 days, so the OPEN shift can end up with zero visible
+      // tickets. Overwrite the newest open-shift paid orders deterministically.
+      const openPaid = [];
+      for (const id of paidOrderIds) {
+        const o = await ctx.db.get(id);
+        if (o && o.shiftId === openShift.id && o.paymentStatus === 'paid') openPaid.push(o);
+      }
+      openPaid.sort((a, b) => b.createdAtClient - a.createdAtClient);
+      for (let i = 0; i < Math.min(4, openPaid.length); i++) {
+        await ctx.db.patch(openPaid[i]!._id, { kitchenStatus: i === 3 ? 'ready' : 'new' });
+      }
+    }
+
     return {
       cafeId,
       days,
@@ -1317,5 +1462,31 @@ export const closeExtraShifts = internalMutation({
       await ctx.db.patch(s._id, { status: 'closed', closedAt: s.closedAt ?? now });
     }
     return { closed: extra.length, remainingOpen: 1 };
+  },
+});
+
+// ─── Screenshot pipeline helpers (scripts/capture-shots.mjs) ────────────────
+// Look up the seeded demo cafe by name and find a table's public QR token so
+// the capture script can drive the unauthenticated `/order/{qrToken}` page
+// without hardcoding an id that changes on every re-seed.
+
+export const cafeIdByName = internalQuery({
+  args: { name: v.string() },
+  returns: v.union(v.id('cafes'), v.null()),
+  handler: async (ctx, args) => {
+    const all = await ctx.db.query('cafes').collect();
+    return all.find((c) => c.name === args.name)?._id ?? null;
+  },
+});
+
+export const qrTokenForCafe = internalQuery({
+  args: { cafeId: v.id('cafes') },
+  returns: v.union(v.string(), v.null()),
+  handler: async (ctx, args) => {
+    const tables = await ctx.db
+      .query('tables')
+      .withIndex('by_cafe', (q) => q.eq('cafeId', args.cafeId))
+      .collect();
+    return tables.find((t) => typeof t.qrToken === 'string' && t.qrToken)?.qrToken ?? null;
   },
 });

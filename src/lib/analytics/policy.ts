@@ -26,6 +26,8 @@ const MARKETING_PATHS: ReadonlySet<string> = new Set([
   '/changelog',
   '/privacy',
   '/terms',
+  '/fitur',
+  '/fitur/pesanan',
 ]);
 
 export function shouldTrackPath(pathname: string): boolean {

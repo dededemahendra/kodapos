@@ -21,7 +21,13 @@ const item: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
 };
 
-export function CtaBand() {
+/**
+ * `heading`/`body` are optional, already-localized overrides for feature-page
+ * usage (see FeaturePage's `cta` case). Left unset — as the home page does —
+ * they fall back to the band's own copy via <Trans>, unchanged from before
+ * these props existed.
+ */
+export function CtaBand({ heading, body }: { heading?: string; body?: string }) {
   return (
     <MotionConfig reducedMotion="user">
       <section className="px-6 py-20">
@@ -41,10 +47,10 @@ export function CtaBand() {
               className="text-3xl font-extrabold tracking-tight sm:text-4xl"
               variants={item}
             >
-              <Trans>Siap mempercepat kafe Anda?</Trans>
+              {heading ?? <Trans>Siap mempercepat kafe Anda?</Trans>}
             </motion.h2>
             <motion.p className="mx-auto mt-3.5 max-w-md text-primary-foreground/75" variants={item}>
-              <Trans>Coba kodapos gratis hari ini. Tanpa kartu kredit.</Trans>
+              {body ?? <Trans>Coba kodapos gratis hari ini. Tanpa kartu kredit.</Trans>}
             </motion.p>
             <motion.div className="mt-6 flex flex-wrap justify-center gap-3" variants={item}>
               <Button asChild size="lg" variant="secondary">
