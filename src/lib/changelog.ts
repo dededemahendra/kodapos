@@ -28,8 +28,8 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: '2026-08-22',
     title: { id: 'Masuk cukup dengan email', en: 'Email-only sign-in' },
     summary: {
-      id: 'Masuk dan daftar cukup dengan kode yang dikirim ke email, tanpa perlu akun Google. Setiap halaman kini juga punya judul tabnya sendiri.',
-      en: 'Sign in and register with just a code sent to your email, no Google account needed. Every page now carries its own browser-tab title, too.',
+      id: 'Masuk dengan kode yang dikirim ke email kini jadi cara utama, dan sandi tetap tersedia. Setiap halaman kini juga punya judul tabnya sendiri.',
+      en: 'An emailed code is now the default way in, with a password still one tap away. Every page also carries its own browser-tab title.',
     },
   },
   {
@@ -116,10 +116,17 @@ export const CHANGELOG: ChangelogEntry[] = [
 ];
 
 /**
+ * Picks the entry with the newest date. Exported so the selection rule can be
+ * tested against an out-of-order list: asserting on `LATEST_CHANGE` alone
+ * cannot distinguish this from `CHANGELOG[0]` while CHANGELOG stays sorted.
+ */
+export function latestOf(entries: ChangelogEntry[]): ChangelogEntry {
+  return entries.reduce((newest, entry) => (entry.date > newest.date ? entry : newest));
+}
+
+/**
  * The entry the sidebar card shows. Derived by date rather than array position
  * so that appending an entry to the end of `CHANGELOG` — the natural instinct —
  * still surfaces it instead of silently leaving the card on the old release.
  */
-export const LATEST_CHANGE: ChangelogEntry = CHANGELOG.reduce((newest, entry) =>
-  entry.date > newest.date ? entry : newest
-);
+export const LATEST_CHANGE: ChangelogEntry = latestOf(CHANGELOG);

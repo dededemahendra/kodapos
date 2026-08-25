@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { CHANGELOG, LATEST_CHANGE } from './changelog';
+import type { ChangelogEntry } from './changelog';
+import { CHANGELOG, LATEST_CHANGE, latestOf } from './changelog';
 
 const parse = (v: string) => v.split('.').map(Number);
 
@@ -21,9 +22,42 @@ describe('CHANGELOG', () => {
     expect(LATEST_CHANGE.date >= '2026-08-22').toBe(true);
   });
 
+  it('picks the newest entry even when the list is not sorted', () => {
+    // The point of the fix. Asserting against CHANGELOG itself proves nothing
+    // here: it is already newest-first, so CHANGELOG[0] would satisfy it too.
+    const entry = (version: string, date: string): ChangelogEntry => ({
+      version,
+      date,
+      title: { id: version, en: version },
+      summary: { id: version, en: version },
+    });
+    const unsorted = [
+      entry('1.0', '2026-01-01'),
+      entry('1.2', '2026-03-01'), // newest, deliberately not at index 0
+      entry('1.1', '2026-02-01'),
+    ];
+
+    expect(latestOf(unsorted).version).toBe('1.2');
+  });
+
+  it('surfaces an entry appended to the end of the list', () => {
+    // The failure mode the old CHANGELOG[0] had: appending is the natural
+    // instinct, and it silently left the card on the previous release.
+    const appended = [
+      ...CHANGELOG,
+      {
+        version: '99.0',
+        date: '2099-01-01',
+        title: { id: 'baru', en: 'new' },
+        summary: { id: 'baru', en: 'new' },
+      },
+    ];
+
+    expect(latestOf(appended).version).toBe('99.0');
+  });
+
   it('exposes the entry with the newest date as LATEST_CHANGE', () => {
-    const newest = [...CHANGELOG].sort((a, b) => b.date.localeCompare(a.date))[0];
-    expect(LATEST_CHANGE).toBe(newest);
+    expect(LATEST_CHANGE).toBe(latestOf(CHANGELOG));
   });
 
   it('stays ordered newest-first, so /changelog renders a correct timeline', () => {
