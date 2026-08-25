@@ -8,6 +8,20 @@ QRIS payments (static, dynamic, Xendit BYO + reconciliation), loyalty + tiers, g
 
 ---
 
+## Phase 2 · Auth — Email-Only Sign-In · 2026-08-22
+
+"Continue with Google" is hidden; the sign-in card now offers email only (password and the emailed code).
+
+### Changed
+- `src/routes/_public/signin.tsx` drops the `GoogleButton`, the `OrDivider` beneath it, the `onGoogle` handler, and their imports. `src/components/auth/social-buttons.tsx` and `or-divider.tsx` are left in place but unreferenced, so Vite tree-shakes them out and re-enabling is a three-line change. `/signup` never offered Google.
+- This is a UI change only. The `Google` provider stays registered in `convex/auth.ts`, so `auth.addHttpRoutes` still serves `/api/auth/callback/google` — hiding the button does not turn Google auth off.
+- `docs/auth-setup.md` and `docs/deploy-production.md` record the email-only posture: `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` are no longer part of the production cutover, and the runbook verifies the absence of the button rather than a Google round-trip.
+
+### Fixed
+- `docs/auth-setup.md` claimed Convex Auth links a Google sign-in and a password account on matching email, full stop. Linking is directional: it only auto-links **trusted** providers (verified email), and our `Password` provider is configured with `reset` but no `verify`, so it is untrusted. Google-over-password links; password-signup-over-Google does **not**, and silently creates a second, empty user document. With Google hidden this is the path a returning Google owner is most likely to take, so the doc now names the emailed code as the way back into an existing account.
+
+---
+
 ## Phase 2 · Deploy — Production Cutover Prep · 2026-08-15
 
 Groundwork for pointing the Cloudflare Workers build at a production Convex deployment. The mechanism already existed (`scripts/cf-deploy.mjs` runs `convex deploy` only on `main`); what was missing was a written runbook and one environment variable that failed open instead of closed.
