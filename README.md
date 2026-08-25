@@ -78,6 +78,9 @@ pnpm lingui:compile    # for production builds (Vite plugin compiles on-the-fly 
 Continuous deploy to **Cloudflare Workers** via Cloudflare Workers Builds
 (dashboard Git integration) on push to `main`. It currently targets the dev
 Convex deployment; runtime env vars are configured in the Cloudflare dashboard.
+The one-time move to a production Convex deployment — which env var goes where,
+and what does not migrate — is in
+[`docs/deploy-production.md`](docs/deploy-production.md).
 
 Manual deploy:
 
@@ -88,6 +91,7 @@ pnpm deploy          # vite build + wrangler deploy
 
 ## Documentation
 
+- Production cutover: `docs/deploy-production.md`
 - Design spec: `docs/superpowers/specs/2026-05-14-kodapos-v1-design.md`
 - Pro-POS roadmap: `docs/superpowers/ROADMAP-pro-pos.md`
 - Plans & specs: `docs/superpowers/`

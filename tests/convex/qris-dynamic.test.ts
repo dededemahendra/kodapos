@@ -1,11 +1,13 @@
 import { convexTest } from 'convex-test';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
 import { signMockBody } from '../../convex/payments/providers/mock';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
+
+const WEBHOOK_SECRET = 'test-qris-secret';
 
 type Setup = {
   asOwner: ReturnType<ReturnType<typeof convexTest>['withIdentity']>;
@@ -221,6 +223,11 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
 });
 
 describe('POST /webhooks/qris', () => {
+  // The route has no built-in secret: every case here seeds one explicitly, and
+  // the last case covers the deployment where it was never seeded at all.
+  beforeEach(() => vi.stubEnv('QRIS_WEBHOOK_SECRET', WEBHOOK_SECRET));
+  afterEach(() => vi.unstubAllEnvs());
+
   it('returns 401 for an invalid signature', async () => {
     const t = convexTest(schema, modules);
     const s = await setup(t);
@@ -264,7 +271,7 @@ describe('POST /webhooks/qris', () => {
     );
     const providerRef = payment!.providerRef!;
     const body = JSON.stringify({ providerRef, status: 'paid' });
-    const sig = await signMockBody('dev-qris-secret', body);
+    const sig = await signMockBody(WEBHOOK_SECRET, body);
     const response = await t.fetch('/webhooks/qris', {
       method: 'POST',
       headers: { 'x-signature': sig, 'content-type': 'application/json' },
@@ -273,5 +280,36 @@ describe('POST /webhooks/qris', () => {
     expect(response.status).toBe(200);
     const order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
     expect(order?.paymentStatus).toBe('paid');
+  });
+
+  it('rejects every signature when QRIS_WEBHOOK_SECRET is unset', async () => {
+    // A deployment that was never seeded must fail closed: the secret that used
+    // to be the built-in default gets no further than any other guess.
+    vi.stubEnv('QRIS_WEBHOOK_SECRET', '');
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await connectQris(s.asOwner);
+    const res = await s.asOwner.action(
+      api.payments.qrisDynamic.createQrisDynamicSale,
+      saleArgs(s, 'wh-3')
+    );
+    const payment = await t.run(async (ctx) =>
+      await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+        .unique()
+    );
+    const body = JSON.stringify({ providerRef: payment!.providerRef!, status: 'paid' });
+    const response = await t.fetch('/webhooks/qris', {
+      method: 'POST',
+      headers: {
+        'x-signature': await signMockBody('dev-qris-secret', body),
+        'content-type': 'application/json',
+      },
+      body,
+    });
+    expect(response.status).toBe(401);
+    const order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
+    expect(order?.paymentStatus).toBe('pending');
   });
 });

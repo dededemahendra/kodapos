@@ -12,13 +12,15 @@ committed to the repository.
 ## Optional environment variable
 
 - `RESEND_FROM` is the sender address. This must be a verified sender in your
-  Resend account. When unset, it defaults to `kodapos <onboarding@resend.dev>`.
+  Resend account. When unset, it defaults to `kodapos <onboarding@resend.dev>`,
+  which in test mode only delivers to the Resend account owner — set it for real
+  users.
 
 ## Where to set these
 
 Set both variables in the Convex dashboard, under the deployment's environment
-variables. For now they live on the DEV deployment; move them to the production
-deployment when you ship to production.
+variables. Each deployment carries its own: seeding dev does not seed
+production. See [Production Convex cutover](./deploy-production.md).
 
 ## Behavior without a key
 

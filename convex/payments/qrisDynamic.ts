@@ -349,7 +349,9 @@ export const simulateWebhook = internalAction({
   returns: v.number(),
   handler: async (_ctx, { providerRef, status }) => {
     const body = JSON.stringify({ providerRef, status });
-    const sig = await signMockBody(qrisWebhookSecret(), body);
+    const secret = qrisWebhookSecret();
+    if (!secret) throw new Error('QRIS_WEBHOOK_SECRET is not set in the Convex environment.');
+    const sig = await signMockBody(secret, body);
     const res = await fetch(`${process.env.CONVEX_SITE_URL}/webhooks/qris`, {
       method: 'POST', headers: { 'x-signature': sig, 'content-type': 'application/json' }, body,
     });

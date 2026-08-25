@@ -8,6 +8,22 @@ QRIS payments (static, dynamic, Xendit BYO + reconciliation), loyalty + tiers, g
 
 ---
 
+## Phase 2 · Deploy — Production Cutover Prep · 2026-08-15
+
+Groundwork for pointing the Cloudflare Workers build at a production Convex deployment. The mechanism already existed (`scripts/cf-deploy.mjs` runs `convex deploy` only on `main`); what was missing was a written runbook and one environment variable that failed open instead of closed.
+
+### Security
+- `QRIS_WEBHOOK_SECRET` no longer falls back to the built-in `'dev-qris-secret'` (`convex/payments/providers/index.ts`). The default is a constant readable from the source, so on any deployment where the variable was never seeded — production included — anyone could sign a `paid` event for a known `providerRef` and settle a QRIS charge. `qrisWebhookSecret()` now returns `null` when unset or empty, and `MockProvider.verifyWebhook` rejects every signature in that state, so `/webhooks/qris` fails closed with a 401.
+
+### Added
+- `docs/deploy-production.md` — the cutover runbook: which env var belongs to the Convex deployment vs. the Cloudflare build, the post-deploy verification walk, and the fact that a production deployment starts as an empty database (export/import with `--include-file-storage` if dev data must come along).
+
+### Changed
+- `docs/auth-setup.md` and `docs/email-receipt-setup.md` no longer describe the DEV deployment as the place secrets live; both point at the cutover runbook. The `RESEND_FROM` note now says the default only delivers to the Resend account owner.
+- `tests/e2e/sale.spec.ts` signs its QRIS webhook with `process.env.QRIS_WEBHOOK_SECRET` and fails with a clear message when unset, instead of hardcoding the removed default.
+
+---
+
 ## Phase 2 · Marketing — Theme & Language Toggles · 2026-07-01
 
 The marketing site header gets a light/dark toggle and the language switcher moves to the footer. A new `ThemeToggle` reuses the existing preferences theme API (the `.dark` class, SSR-safe) and replaces the language switcher in the header; the switcher is extracted into a reusable `LanguageToggle` and relocated to the footer bottom bar.
