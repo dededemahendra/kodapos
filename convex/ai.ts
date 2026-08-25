@@ -1,19 +1,22 @@
 import { v } from 'convex/values';
 import { api, internal } from './_generated/api';
-import { action, internalMutation, internalQuery } from './_generated/server';
 import type { ActionCtx } from './_generated/server';
-import { requireActiveOutlet } from './lib/auth';
-import { enforceRateLimit } from './lib/rateLimit';
+import { action, internalMutation, internalQuery } from './_generated/server';
 import {
+  type AiLocale,
   type AiProvider,
   ASK_SYSTEM_PROMPT,
   buildLLMRequest,
   type ChatMsg,
   INSIGHTS_SYSTEM_PROMPT,
+  languageInstruction,
   normalizeHistory,
   parseLLMResponse,
+  parseProvider,
   RESTOCK_SYSTEM_PROMPT,
 } from './lib/ai';
+import { requireActiveOutlet } from './lib/auth';
+import { enforceRateLimit } from './lib/rateLimit';
 
 /**
  * Server-only read of the connected AI integration config, including the secret
@@ -25,7 +28,7 @@ export const config = internalQuery({
   returns: v.union(
     v.null(),
     v.object({
-      provider: v.union(v.literal('openai'), v.literal('anthropic')),
+      provider: v.union(v.literal('openai'), v.literal('anthropic'), v.literal('openrouter')),
       apiKey: v.string(),
       model: v.string(),
     })
@@ -39,7 +42,11 @@ export const config = internalQuery({
     const ai = row?.integrations?.find((i) => i.key === 'ai' && i.connected);
     const c = ai?.config as { provider?: string; apiKey?: string; model?: string } | undefined;
     if (!c?.apiKey || !c.model) return null;
-    const provider: AiProvider = c.provider === 'anthropic' ? 'anthropic' : 'openai';
+    // Unrecognized provider resolves to null rather than OpenAI, so a key saved
+    // for some other vendor is never sent to api.openai.com. Reads as
+    // not-configured, which the callers already surface as "connect a key".
+    const provider = parseProvider(c.provider);
+    if (!provider) return null;
     return { provider, apiKey: c.apiKey, model: c.model };
   },
 });
@@ -142,14 +149,16 @@ async function callAi(cfg: AiConfig, system: string, messages: ChatMsg[]): Promi
 
 /** Generate a plain-language briefing of the cafe's recent performance. */
 export const insights = action({
-  args: {},
+  // Optional so a client from before this shipped still validates; the default
+  // reproduces the previous behaviour exactly.
+  args: { locale: v.optional(v.union(v.literal('id'), v.literal('en'))) },
   returns: v.string(),
-  handler: async (ctx): Promise<string> => {
+  handler: async (ctx, { locale = 'id' }: { locale?: AiLocale }): Promise<string> => {
     const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
     if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
     await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
-    return callAi(cfg, INSIGHTS_SYSTEM_PROMPT, [
+    return callAi(cfg, `${INSIGHTS_SYSTEM_PROMPT} ${languageInstruction(locale, 'fixed')}`, [
       { role: 'user', content: `Cafe data (JSON):\n${data}` },
     ]);
   },
@@ -157,16 +166,16 @@ export const insights = action({
 
 /** Answer an owner question grounded in the cafe's recent data. */
 export const ask = action({
-  args: { question: v.string() },
+  args: { question: v.string(), locale: v.optional(v.union(v.literal('id'), v.literal('en'))) },
   returns: v.string(),
-  handler: async (ctx, { question }): Promise<string> => {
+  handler: async (ctx, { question, locale = 'id' }): Promise<string> => {
     const q = question.trim().slice(0, 4000);
     if (!q) throw new Error('Pertanyaan kosong.');
     const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
     if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
     await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
-    return callAi(cfg, ASK_SYSTEM_PROMPT, [
+    return callAi(cfg, `${ASK_SYSTEM_PROMPT} ${languageInstruction(locale, 'mirror')}`, [
       { role: 'user', content: `Cafe data (JSON):\n${data}\n\nQuestion: ${q}` },
     ]);
   },
@@ -181,9 +190,10 @@ export const chat = action({
         content: v.string(),
       })
     ),
+    locale: v.optional(v.union(v.literal('id'), v.literal('en'))),
   },
   returns: v.string(),
-  handler: async (ctx, { messages }): Promise<string> => {
+  handler: async (ctx, { messages, locale = 'id' }): Promise<string> => {
     // Bound the history (last 12 turns) and per-message length to cap token
     // cost, then normalize to alternating roles (required by Anthropic).
     const history = normalizeHistory(
@@ -196,7 +206,7 @@ export const chat = action({
     if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
     await ctx.runMutation(internal.ai.rateLimit, {});
     const data = await gatherSummary(ctx);
-    const system = `${ASK_SYSTEM_PROMPT}\n\nCafe data (JSON):\n${data}`;
+    const system = `${ASK_SYSTEM_PROMPT} ${languageInstruction(locale, 'mirror')}\n\nCafe data (JSON):\n${data}`;
     return callAi(cfg, system, history);
   },
 });
@@ -221,14 +231,12 @@ async function gatherRestock(
   }
   const demandLines =
     demand?.status === 'ready'
-      ? demand.lines
-          .slice(0, 12)
-          .map((l) => ({
-            name: l.name,
-            tomorrowQty: l.tomorrowQty,
-            sevenDayQty: l.sevenDayQty,
-            drivers: l.drivers,
-          }))
+      ? demand.lines.slice(0, 12).map((l) => ({
+          name: l.name,
+          tomorrowQty: l.tomorrowQty,
+          sevenDayQty: l.sevenDayQty,
+          drivers: l.drivers,
+        }))
       : [];
   const summary = {
     cafe: cafe?.name ?? 'Cafe',
@@ -250,9 +258,9 @@ async function gatherRestock(
  * to order, returning a fixed off-catalog message instead.
  */
 export const restock = action({
-  args: {},
+  args: { locale: v.optional(v.union(v.literal('id'), v.literal('en'))) },
   returns: v.string(),
-  handler: async (ctx): Promise<string> => {
+  handler: async (ctx, { locale = 'id' }: { locale?: AiLocale }): Promise<string> => {
     const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
     if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
     // Rate-limit before gathering, not just before the LLM call: gatherRestock
@@ -263,12 +271,16 @@ export const restock = action({
     await ctx.runMutation(internal.ai.rateLimit, {});
     const { json, lineCount, learning } = await gatherRestock(ctx);
     if (learning) {
-      return 'Perkiraan permintaan masih belajar, jadi saran restock AI belum tersedia. Coba lagi setelah perkiraan aktif.';
+      return locale === 'en'
+        ? 'The demand forecast is still learning, so AI restock advice is not available yet. Try again once the forecast is active.'
+        : 'Perkiraan permintaan masih belajar, jadi saran restock AI belum tersedia. Coba lagi setelah perkiraan aktif.';
     }
     if (lineCount === 0) {
-      return 'Stok Anda cukup untuk minggu ini. Tidak ada bahan yang perlu dipesan sekarang.';
+      return locale === 'en'
+        ? 'Your stock is sufficient for this week. Nothing needs ordering right now.'
+        : 'Stok Anda cukup untuk minggu ini. Tidak ada bahan yang perlu dipesan sekarang.';
     }
-    return callAi(cfg, RESTOCK_SYSTEM_PROMPT, [
+    return callAi(cfg, `${RESTOCK_SYSTEM_PROMPT} ${languageInstruction(locale, 'fixed')}`, [
       { role: 'user', content: `Cafe restock data (JSON):\n${json}` },
     ]);
   },
