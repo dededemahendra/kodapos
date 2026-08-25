@@ -5,6 +5,7 @@ import { Trans, useLingui as useLinguiMacro } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { RequirePermission } from '~/components/permission/require-permission';
 import { api } from 'convex/_generated/api';
+import { AI_PROVIDERS, type AiProvider, parseProvider } from 'convex/lib/ai';
 import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
 import { SettingsPageHeader } from '~/components/settings/primitives';
@@ -167,9 +168,25 @@ function SettingsIntegrations() {
   const [xnditToken, setXnditToken] = useState('');
   const [waEndpoint, setWaEndpoint] = useState('');
   const [waHeader, setWaHeader] = useState('Authorization');
+const AI_PROVIDER_META = {
+  openai: { label: 'OpenAI', keyHint: 'sk-...', defaultModel: 'gpt-4o-mini' },
+  anthropic: {
+    label: 'Anthropic',
+    keyHint: 'sk-ant-...',
+    defaultModel: 'claude-3-5-haiku-20241022',
+  },
+  // OpenRouter routes to many vendors, so its models are `vendor/model` slugs
+  // and its catalog shifts; this default is a starting point the owner edits.
+  openrouter: {
+    label: 'OpenRouter',
+    keyHint: 'sk-or-v1-...',
+    defaultModel: 'openai/gpt-4o-mini',
+  },
+} as const satisfies Record<AiProvider, { label: string; keyHint: string; defaultModel: string }>;
+
   const [waToken, setWaToken] = useState('');
   const [waTemplate, setWaTemplate] = useState(DEFAULT_WHATSAPP_TEMPLATE);
-  const [aiProvider, setAiProvider] = useState<'openai' | 'anthropic'>('openai');
+  const [aiProvider, setAiProvider] = useState<AiProvider>('openai');
   const [aiKey, setAiKey] = useState('');
   const [aiModel, setAiModel] = useState('gpt-4o-mini');
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -224,11 +241,11 @@ function SettingsIntegrations() {
     if (key === 'ai') {
       const ai = s?.integrations.find((i) => i.key === 'ai');
       const c = (ai?.config ?? {}) as { provider?: string; model?: string };
-      const provider = c.provider === 'anthropic' ? 'anthropic' : 'openai';
+      const provider = parseProvider(c.provider) ?? 'openai';
       setAiProvider(provider);
       // Ignore the previously-shipped invalid alias so the valid default fills in.
       const stored = c.model && c.model !== 'claude-3-5-haiku-latest' ? c.model : '';
-      setAiModel(stored || (provider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini'));
+      setAiModel(stored || AI_PROVIDER_META[provider].defaultModel);
     }
     if (key === 'whatsapp') {
       // Prefill the non-secret fields from any saved config (token re-entered).
@@ -494,7 +511,7 @@ function SettingsIntegrations() {
                   <Trans>Penyedia</Trans>
                 </span>
                 <div className="flex gap-2">
-                  {(['openai', 'anthropic'] as const).map((p) => (
+                  {AI_PROVIDERS.map((p) => (
                     <Button
                       key={p}
                       type="button"
@@ -502,10 +519,10 @@ function SettingsIntegrations() {
                       variant={aiProvider === p ? 'default' : 'outline'}
                       onClick={() => {
                         setAiProvider(p);
-                        setAiModel(p === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini');
+                        setAiModel(AI_PROVIDER_META[p].defaultModel);
                       }}
                     >
-                      {p === 'openai' ? 'OpenAI' : 'Anthropic'}
+                      {AI_PROVIDER_META[p].label}
                     </Button>
                   ))}
                 </div>
@@ -518,7 +535,7 @@ function SettingsIntegrations() {
                   id="aiKey"
                   value={aiKey}
                   onChange={(e) => setAiKey(e.target.value)}
-                  placeholder={aiProvider === 'anthropic' ? 'sk-ant-...' : 'sk-...'}
+                  placeholder={AI_PROVIDER_META[aiProvider].keyHint}
                   autoFocus
                 />
               </div>
@@ -530,7 +547,7 @@ function SettingsIntegrations() {
                   id="aiModel"
                   value={aiModel}
                   onChange={(e) => setAiModel(e.target.value)}
-                  placeholder={aiProvider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini'}
+                  placeholder={AI_PROVIDER_META[aiProvider].defaultModel}
                 />
               </div>
               <p className="text-xs text-muted-foreground">

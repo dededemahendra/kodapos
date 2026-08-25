@@ -4,6 +4,7 @@ import { api } from 'convex/_generated/api';
 import { useAction, useQuery } from 'convex/react';
 import { MessageCircle } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
+import { AiResponse } from '~/components/ai-response';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
@@ -20,6 +21,9 @@ import { toast } from '~/lib/toast';
 export function AiInsights() {
   const { t, i18n } = useLingui();
   const settings = useQuery(api.settings.get);
+  // The insights/restock surfaces send no question, so the app's language
+  // toggle is the only signal the model gets.
+  const locale = i18n.locale === 'en' ? 'en' : 'id';
   const runInsights = useAction(api.ai.insights);
   const runAsk = useAction(api.ai.ask);
   const [result, setResult] = useState<string | null>(null);
@@ -31,7 +35,7 @@ export function AiInsights() {
   async function generate() {
     setLoading(true);
     try {
-      setResult(await runInsights({}));
+      setResult(await runInsights({ locale }));
     } catch (err) {
       toast.error(i18n._(aiErrorMessage(err)));
     } finally {
@@ -45,7 +49,7 @@ export function AiInsights() {
     if (!q || loading) return;
     setLoading(true);
     try {
-      setResult(await runAsk({ question: q }));
+      setResult(await runAsk({ question: q, locale }));
     } catch (err) {
       toast.error(i18n._(aiErrorMessage(err)));
     } finally {
@@ -103,7 +107,7 @@ export function AiInsights() {
                 <Trans>Menganalisis…</Trans>
               </div>
             ) : result ? (
-              <p className="whitespace-pre-line text-sm leading-relaxed">{result}</p>
+              <AiResponse text={result} />
             ) : (
               <p className="text-sm text-muted-foreground">
                 <Trans>Buat wawasan atau ajukan pertanyaan tentang penjualan dan stok Anda.</Trans>

@@ -393,7 +393,7 @@ export const connectWhatsapp = mutation({
 
 export const connectAi = mutation({
   args: {
-    provider: v.union(v.literal('openai'), v.literal('anthropic')),
+    provider: v.union(v.literal('openai'), v.literal('anthropic'), v.literal('openrouter')),
     apiKey: v.string(),
     model: v.string(),
   },

@@ -4,6 +4,7 @@ import { api } from 'convex/_generated/api';
 import { useAction, useQuery } from 'convex/react';
 import { MessageCircle } from 'lucide-react';
 import { useState } from 'react';
+import { AiResponse } from '~/components/ai-response';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
@@ -20,6 +21,9 @@ import { toast } from '~/lib/toast';
 export function AiRestockAdvice() {
   const { i18n } = useLingui();
   const settings = useQuery(api.settings.get);
+  // The insights/restock surfaces send no question, so the app's language
+  // toggle is the only signal the model gets.
+  const locale = i18n.locale === 'en' ? 'en' : 'id';
   const runRestock = useAction(api.ai.restock);
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,7 +34,7 @@ export function AiRestockAdvice() {
     setResult(null);
     setLoading(true);
     try {
-      setResult(await runRestock({}));
+      setResult(await runRestock({ locale }));
     } catch (err) {
       toast.error(i18n._(aiErrorMessage(err)));
     } finally {
@@ -79,7 +83,7 @@ export function AiRestockAdvice() {
             <Trans>Menganalisis…</Trans>
           </div>
         ) : result ? (
-          <p className="whitespace-pre-line text-sm leading-relaxed">{result}</p>
+          <AiResponse text={result} />
         ) : (
           <p className="text-sm text-muted-foreground">
             <Trans>Buat ringkasan AI tentang apa yang perlu dipesan dan alasannya.</Trans>
