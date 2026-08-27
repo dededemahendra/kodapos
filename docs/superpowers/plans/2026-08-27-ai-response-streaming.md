@@ -1480,6 +1480,17 @@ Expected: PASS, 10 tests.
 
 - [ ] **Step 5: Write the hook**
 
+> Three defects were found in this hook's code during review and corrected in
+> the implementation: (a) the `finally` block cleared `abortRef`/`streaming`
+> without checking the invocation was still current, so a second `send()` while
+> one was in flight left `streaming` stuck and `stop()` inert; (b) `handle()`
+> never branched on `t === 'done'`, so a stream that ended without a terminal
+> event resolved as success with truncated text; (c) the `TextDecoder` was never
+> flushed and the reader was not cancelled on the in-band error path. The shipped
+> hook guards the `finally` on `abortRef.current === controller`, tracks a
+> `terminated` flag and fails closed with `'network'` when it is unset, flushes
+> the decoder, and cancels the reader in a `finally`.
+
 Create `src/hooks/use-ai-stream.ts`. Not unit tested — this project has no React testing library, so it is verified by typecheck and by the manual checks in Task 10.
 
 ```ts
