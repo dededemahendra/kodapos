@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildLLMRequest,
+  INSIGHTS_SYSTEM_PROMPT,
+  languageInstruction,
   normalizeHistory,
   parseLLMResponse,
   parseProvider,
-  languageInstruction,
-  INSIGHTS_SYSTEM_PROMPT,
+  parseStreamBody,
 } from '../../../convex/lib/ai';
 
 describe('buildLLMRequest', () => {
@@ -68,12 +69,16 @@ describe('parseLLMResponse', () => {
   });
 
   it('concatenates Anthropic text blocks and skips non-text leading blocks', () => {
-    const json = { content: [{ type: 'thinking' }, { type: 'text', text: 'a' }, { type: 'text', text: 'b' }] };
+    const json = {
+      content: [{ type: 'thinking' }, { type: 'text', text: 'a' }, { type: 'text', text: 'b' }],
+    };
     expect(parseLLMResponse('anthropic', json)).toBe('ab');
   });
 
   it('reads OpenRouter through the OpenAI choices shape', () => {
-    expect(parseLLMResponse('openrouter', { choices: [{ message: { content: ' ok ' } }] })).toBe('ok');
+    expect(parseLLMResponse('openrouter', { choices: [{ message: { content: ' ok ' } }] })).toBe(
+      'ok'
+    );
   });
 
   it('throws on an empty response', () => {
@@ -109,7 +114,6 @@ describe('normalizeHistory', () => {
   });
 });
 
-
 describe('parseProvider', () => {
   it('recognizes each supported provider', () => {
     expect(parseProvider('openai')).toBe('openai');
@@ -117,7 +121,7 @@ describe('parseProvider', () => {
     expect(parseProvider('openrouter')).toBe('openrouter');
   });
 
-  it("defaults a missing provider to openai, for configs saved before the field existed", () => {
+  it('defaults a missing provider to openai, for configs saved before the field existed', () => {
     expect(parseProvider(undefined)).toBe('openai');
     expect(parseProvider(null)).toBe('openai');
   });
@@ -131,9 +135,8 @@ describe('parseProvider', () => {
   });
 });
 
-
 describe('languageInstruction', () => {
-  it("pins the reply language when there is no question to infer from", () => {
+  it('pins the reply language when there is no question to infer from', () => {
     // The insights card and restock advisor send no question, so the app's
     // language toggle is the only signal. Before this, they always answered
     // in Indonesian even with the UI in English.
@@ -151,7 +154,6 @@ describe('languageInstruction', () => {
   });
 });
 
-
 describe('INSIGHTS_SYSTEM_PROMPT', () => {
   it('asks for a plain-text heading without also forbidding headings', () => {
     // The renderer keys on that heading. Saying "do not use headings" in the
@@ -159,5 +161,99 @@ describe('INSIGHTS_SYSTEM_PROMPT', () => {
     // paragraph. Ban markdown syntax, not the heading itself.
     expect(INSIGHTS_SYSTEM_PROMPT).toMatch(/heading line ending in a colon/);
     expect(INSIGHTS_SYSTEM_PROMPT).not.toMatch(/(?:not use|avoid)[^.]*headings/i);
+  });
+});
+
+describe('buildLLMRequest — stream flag', () => {
+  it('sets stream on the OpenAI-compatible body', () => {
+    const req = buildLLMRequest(
+      'openai',
+      'gpt-4o-mini',
+      'k',
+      'sys',
+      [{ role: 'user', content: 'hi' }],
+      { stream: true }
+    );
+    expect(JSON.parse(req.body).stream).toBe(true);
+  });
+
+  it('sets stream on the Anthropic body', () => {
+    const req = buildLLMRequest(
+      'anthropic',
+      'claude-3-5-haiku-20241022',
+      'k',
+      'sys',
+      [{ role: 'user', content: 'hi' }],
+      { stream: true }
+    );
+    expect(JSON.parse(req.body).stream).toBe(true);
+  });
+
+  it('omits stream when not requested, so non-streaming callers are unchanged', () => {
+    const req = buildLLMRequest('openai', 'gpt-4o-mini', 'k', 'sys', [
+      { role: 'user', content: 'hi' },
+    ]);
+    expect(JSON.parse(req.body).stream).toBeUndefined();
+  });
+});
+
+describe('parseStreamBody', () => {
+  it('accepts insights with a locale', () => {
+    expect(parseStreamBody({ kind: 'insights', locale: 'en' })).toEqual({
+      kind: 'insights',
+      locale: 'en',
+    });
+  });
+
+  it('defaults a missing locale to id', () => {
+    expect(parseStreamBody({ kind: 'restock' })).toEqual({ kind: 'restock', locale: 'id' });
+  });
+
+  it('rejects an unknown kind', () => {
+    expect(parseStreamBody({ kind: 'summarise' })).toBeNull();
+  });
+
+  it('rejects a non-object body', () => {
+    expect(parseStreamBody('hello')).toBeNull();
+    expect(parseStreamBody(null)).toBeNull();
+  });
+
+  it('normalizes chat history and keeps only the last 12 turns', () => {
+    // 21, not 20: an even count ends on an assistant turn, which the parser
+    // rejects outright — it would test the wrong thing.
+    const messages = Array.from({ length: 21 }, (_, i) => ({
+      role: i % 2 === 0 ? ('user' as const) : ('assistant' as const),
+      content: `m${i}`,
+    }));
+    const parsed = parseStreamBody({ kind: 'chat', locale: 'id', messages });
+    expect(parsed).not.toBeNull();
+    if (parsed?.kind !== 'chat') throw new Error('expected chat');
+    expect(parsed.messages.length).toBeLessThanOrEqual(12);
+    expect(parsed.messages[0]!.role).toBe('user');
+    expect(parsed.messages[parsed.messages.length - 1]!.role).toBe('user');
+  });
+
+  it('truncates an overlong message to 4000 characters', () => {
+    const parsed = parseStreamBody({
+      kind: 'chat',
+      locale: 'id',
+      messages: [{ role: 'user', content: 'x'.repeat(5000) }],
+    });
+    if (parsed?.kind !== 'chat') throw new Error('expected chat');
+    expect(parsed.messages[0]!.content).toHaveLength(4000);
+  });
+
+  it('rejects chat whose last turn is not from the user', () => {
+    expect(
+      parseStreamBody({
+        kind: 'chat',
+        locale: 'id',
+        messages: [{ role: 'assistant', content: 'hi' }],
+      })
+    ).toBeNull();
+  });
+
+  it('rejects chat with an empty history', () => {
+    expect(parseStreamBody({ kind: 'chat', locale: 'id', messages: [] })).toBeNull();
   });
 });
