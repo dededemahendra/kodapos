@@ -21,8 +21,10 @@ export function useAiStream() {
   const abortRef = useRef<AbortController | null>(null);
 
   const stop = useCallback(() => {
+    // Abort only. The in-flight invocation's `finally` owns clearing `abortRef`
+    // and `streaming`, and identifies itself by controller identity — nulling
+    // the ref here would make that check fail and strand `streaming` at true.
     abortRef.current?.abort();
-    abortRef.current = null;
   }, []);
 
   const send = useCallback(
