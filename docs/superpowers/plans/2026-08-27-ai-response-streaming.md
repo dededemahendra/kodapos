@@ -668,6 +668,7 @@ The handler lives in `convex/ai.ts` and is routed from `convex/http.ts`, mirrori
 **Files:**
 - Modify: `convex/ai.ts` (add `handleAiStream`; leave the four actions in place for now — Task 6 deletes them)
 - Modify: `convex/http.ts` (route `POST` and `OPTIONS` on `/ai/stream`)
+- Create: `tests/convex/helpers/ai-stream.ts` (shared with Task 6)
 - Test: `tests/convex/ai-stream.test.ts`
 
 **Interfaces:**
@@ -676,11 +677,17 @@ The handler lives in `convex/ai.ts` and is routed from `convex/http.ts`, mirrori
 
 - [ ] **Step 1: Write the failing tests**
 
-Create `tests/convex/ai-stream.test.ts`. It reuses the fixture style of `tests/convex/ai-restock.test.ts` — read that file first and copy its `setup`, `seedSales`, and `connectAi` helpers verbatim, then add:
+Create `tests/convex/ai-stream.test.ts`. It reuses the fixture style of `tests/convex/ai-restock.test.ts` — read that file first and copy its `setup`, `seedSales`, and `connectAi` helpers verbatim.
+
+The three stream-specific helpers below go in a **shared module**, not in the
+test file, because Task 6 needs them too: create
+`tests/convex/helpers/ai-stream.ts` and export them from there. Vitest only
+collects `tests/**/*.test.ts`, so a plain `.ts` module under `tests/` is not
+picked up as a suite.
 
 ```ts
 /** Reads an NDJSON response body into the list of events it carried. */
-async function readEvents(res: Response): Promise<Array<Record<string, unknown>>> {
+export async function readEvents(res: Response): Promise<Array<Record<string, unknown>>> {
   const text = await res.text();
   return text
     .split('\n')
@@ -689,7 +696,7 @@ async function readEvents(res: Response): Promise<Array<Record<string, unknown>>
 }
 
 /** Mocks the provider with an SSE body, capturing the outgoing request. */
-function mockStreamingProvider(sse: string) {
+export function mockStreamingProvider(sse: string) {
   const captured: { url: string; body: string } = { url: '', body: '' };
   const spy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
     captured.url = String(url);
@@ -699,12 +706,12 @@ function mockStreamingProvider(sse: string) {
   return { spy, captured };
 }
 
-const OPENAI_SSE =
+export const OPENAI_SSE =
   'data: {"choices":[{"delta":{"content":"Beli 5000 ml "}}]}\n' +
   'data: {"choices":[{"delta":{"content":"Susu."}}]}\n' +
   'data: [DONE]\n';
 
-function post(
+export function post(
   who: { fetch: (path: string, init?: RequestInit) => Promise<Response> },
   body: unknown
 ) {
@@ -714,6 +721,9 @@ function post(
     body: JSON.stringify(body),
   });
 }
+
+// In `tests/convex/ai-stream.test.ts`, import them:
+//   import { mockStreamingProvider, OPENAI_SSE, post, readEvents } from './helpers/ai-stream';
 
 describe('POST /ai/stream', () => {
   afterEach(() => vi.restoreAllMocks());
@@ -1124,7 +1134,9 @@ The route now covers everything the actions did. Two pipelines is one too many.
 
 - [ ] **Step 1: Move the restock coverage onto the route**
 
-In `tests/convex/ai-restock.test.ts`, add the `post` and `readEvents` helpers from `tests/convex/ai-stream.test.ts` (copy them; the two files stay independent), then rewrite the four assertions:
+In `tests/convex/ai-restock.test.ts`, import the shared helpers Task 5 created —
+`import { mockStreamingProvider, post, readEvents } from './helpers/ai-stream';`
+— then rewrite the assertions:
 
 ```ts
 it('returns not_configured when the AI integration is not connected', async () => {
@@ -1204,7 +1216,7 @@ it('returns the stock-is-sufficient message (no LLM call) when nothing needs ord
 });
 ```
 
-Also add the `mockStreamingProvider` helper (copy from `ai-stream.test.ts`) and delete the old non-streaming `mockProvider` if nothing else in the file uses it. Rename the `describe` block from `'ai.restock'` to `'/ai/stream — restock'`.
+Delete the old non-streaming `mockProvider` helper from this file — nothing uses it once these assertions are rewritten. Rename the `describe` block from `'ai.restock'` to `'/ai/stream — restock'`.
 
 - [ ] **Step 2: Run the tests to verify they pass against the route**
 
@@ -1323,7 +1335,6 @@ describe('createNdjsonParser', () => {
 Create `src/lib/ai-error.test.ts`:
 
 ```ts
-import { i18n } from '@lingui/core';
 import { describe, expect, it } from 'vitest';
 import { aiErrorMessage } from './ai-error';
 
@@ -1344,9 +1355,10 @@ describe('aiErrorMessage', () => {
   });
 
   it('points an unconfigured owner at Integrations', () => {
-    i18n.load('id', {});
-    i18n.activate('id');
-    expect(i18n._(aiErrorMessage('not_configured'))).toMatch(/Integrasi/);
+    // Assert on `message`, not `i18n._(...)`: the macro generates hash ids, so
+    // resolving through an empty catalog depends on Lingui's fallback rather
+    // than on anything this function decides.
+    expect(aiErrorMessage('not_configured').message).toMatch(/Integrasi/);
   });
 
   it('falls back to the generic message for null', () => {
