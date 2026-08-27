@@ -228,7 +228,7 @@ describe('parseStreamBody', () => {
     const parsed = parseStreamBody({ kind: 'chat', locale: 'id', messages });
     expect(parsed).not.toBeNull();
     if (parsed?.kind !== 'chat') throw new Error('expected chat');
-    expect(parsed.messages.length).toBeLessThanOrEqual(12);
+    expect(parsed.messages).toHaveLength(11);
     expect(parsed.messages[0]!.role).toBe('user');
     expect(parsed.messages[parsed.messages.length - 1]!.role).toBe('user');
   });
@@ -243,12 +243,43 @@ describe('parseStreamBody', () => {
     expect(parsed.messages[0]!.content).toHaveLength(4000);
   });
 
-  it('rejects chat whose last turn is not from the user', () => {
+  it('rejects a message with an unknown role', () => {
+    expect(
+      parseStreamBody({ kind: 'chat', locale: 'id', messages: [{ role: 'system', content: 'x' }] })
+    ).toBeNull();
+  });
+
+  it('rejects a message whose content is not a string', () => {
+    expect(
+      parseStreamBody({ kind: 'chat', locale: 'id', messages: [{ role: 'user', content: 42 }] })
+    ).toBeNull();
+  });
+
+  it('rejects a non-object entry in the messages array', () => {
+    expect(parseStreamBody({ kind: 'chat', locale: 'id', messages: ['halo'] })).toBeNull();
+  });
+
+  it('rejects chat whose history normalizes to nothing', () => {
     expect(
       parseStreamBody({
         kind: 'chat',
         locale: 'id',
         messages: [{ role: 'assistant', content: 'hi' }],
+      })
+    ).toBeNull();
+  });
+
+  it('rejects chat whose last turn is from the assistant', () => {
+    // Two alternating turns survive normalizeHistory intact, so this is the
+    // case that actually exercises the trailing-role guard.
+    expect(
+      parseStreamBody({
+        kind: 'chat',
+        locale: 'id',
+        messages: [
+          { role: 'user', content: 'halo' },
+          { role: 'assistant', content: 'hai' },
+        ],
       })
     ).toBeNull();
   });
