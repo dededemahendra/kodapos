@@ -369,7 +369,9 @@ describe('parseStreamBody', () => {
     // 21, not 20: an even count ends on an assistant turn, which the parser
     // rejects outright — it would test the wrong thing.
     const messages = Array.from({ length: 21 }, (_, i) => ({
-      role: (i % 2 === 0 ? 'user' : 'assistant') as const,
+      // `as const` cannot target a conditional expression (TS1355) — it goes
+      // on each branch.
+      role: i % 2 === 0 ? ('user' as const) : ('assistant' as const),
       content: `m${i}`,
     }));
     const parsed = parseStreamBody({ kind: 'chat', locale: 'id', messages });
