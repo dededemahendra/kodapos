@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - Package manager is **pnpm**. Verification commands: `pnpm test`, `pnpm typecheck`, `pnpm lint`.
-- Biome style: single quotes, 2-space indent, line width 100. Run `pnpm lint:fix` before committing.
+- Biome style: single quotes, 2-space indent, line width 100. Lint **only the files you touched**: `pnpm exec biome check --write <paths>`. Do NOT run `pnpm lint:fix` — it is `biome check --write .`, repo-wide, and rewrites 347 pre-existing files (the repo has 559 pre-existing Biome errors at HEAD from config drift; fixing that is a separate change).
 - Vitest only picks up `tests/**/*.test.ts` and `src/**/*.test.ts` — **`.ts` only, never `.tsx`**. There is no `@testing-library/react` in this project, so React components and hooks are **not** unit tested. Anything that must be tested has to live in a plain `.ts` module.
 - `convex/lib/ai.ts` is pure and side-effect free by design — no `fetch`, no `ctx`. Keep it that way; that property is what makes it testable.
 - Path aliases: `~/*` → `./src/*`, `convex/*` → `./convex/*`. `src` may import types from `convex/lib/*`.
@@ -296,7 +296,7 @@ Expected: PASS, 11 tests.
 - [ ] **Step 5: Lint, typecheck, commit**
 
 ```bash
-pnpm lint:fix && pnpm typecheck
+pnpm exec biome check --write <the files this task touched> && pnpm typecheck
 git add convex/lib/aiSse.ts tests/convex/lib/aiSse.test.ts
 git commit -m "feat(ai): SSE decoder for streaming provider responses"
 ```
@@ -530,7 +530,7 @@ Expected: PASS, including every pre-existing test in the file.
 - [ ] **Step 5: Lint, typecheck, commit**
 
 ```bash
-pnpm lint:fix && pnpm typecheck
+pnpm exec biome check --write <the files this task touched> && pnpm typecheck
 git add convex/lib/ai.ts tests/convex/lib/ai.test.ts
 git commit -m "feat(ai): stream flag, error codes, and stream request parsing"
 ```
@@ -654,7 +654,7 @@ Expected: PASS, 7 tests.
 - [ ] **Step 5: Lint, typecheck, commit**
 
 ```bash
-pnpm lint:fix && pnpm typecheck
+pnpm exec biome check --write <the files this task touched> && pnpm typecheck
 git add convex/lib/cors.ts tests/convex/lib/cors.test.ts
 git commit -m "feat(ai): CORS helper for the browser-facing AI route"
 ```
@@ -1117,7 +1117,7 @@ If the rate-limit test is slow, it is doing 41 full round trips against the in-m
 - [ ] **Step 6: Full suite, lint, typecheck, commit**
 
 ```bash
-pnpm test && pnpm lint:fix && pnpm typecheck
+pnpm test && pnpm exec biome check --write <the files this task touched> && pnpm typecheck
 git add convex/ai.ts convex/http.ts tests/convex/ai-stream.test.ts
 git commit -m "feat(ai): streaming /ai/stream HTTP route for all AI surfaces"
 ```
@@ -1242,7 +1242,7 @@ Expected: PASS for every Convex test. `pnpm typecheck` will still fail on the th
 - [ ] **Step 5: Commit**
 
 ```bash
-pnpm lint:fix
+pnpm exec biome check --write convex/ai.ts tests/convex/ai-restock.test.ts
 git add convex/ai.ts tests/convex/ai-restock.test.ts
 git commit -m "refactor(ai): retire the four AI actions in favour of the streaming route"
 ```
@@ -1594,7 +1594,7 @@ Then add English translations for the new ids in `src/locales/en` (the Indonesia
 
 - [ ] **Step 8: Verify and commit**
 
-Run: `pnpm test && pnpm lint:fix`
+Run: `pnpm test && pnpm exec biome check --write <the files this task touched>`
 Expected: all tests PASS. `pnpm typecheck` still fails on the three unrewired surfaces — expected until Task 10.
 
 ```bash
@@ -1676,7 +1676,7 @@ Text-first ordering matters: once the first delta lands the spinner must give wa
 
 - [ ] **Step 4: Verify**
 
-Run: `pnpm typecheck && pnpm lint`
+Run: `pnpm typecheck && pnpm exec biome check <the files this task touched>`
 Expected: no errors in `src/components/ai-insights.tsx`. Other surfaces may still fail; that is expected until Task 10.
 
 - [ ] **Step 5: Commit**
@@ -1741,7 +1741,7 @@ rather than the one above if they differ — only the structure matters here.
 
 - [ ] **Step 3: Verify**
 
-Run: `pnpm typecheck && pnpm lint`
+Run: `pnpm typecheck && pnpm exec biome check <the files this task touched>`
 Expected: no errors in `src/components/ai-restock-advice.tsx`.
 
 - [ ] **Step 4: Commit**
@@ -1890,7 +1890,7 @@ Add the English translation for `Hentikan` (→ "Stop") in `src/locales/en`.
 - [ ] **Step 6: Verify the whole project**
 
 ```bash
-pnpm test && pnpm typecheck && pnpm lint
+pnpm test && pnpm typecheck && pnpm exec biome check <the files this branch touched>
 ```
 
 Expected: all PASS. This is the first point at which `typecheck` is clean since Task 6 — confirm there are no remaining references to the deleted actions.
@@ -1921,7 +1921,7 @@ Before opening a PR:
 
 - [ ] `pnpm test` — all suites pass
 - [ ] `pnpm typecheck` — clean
-- [ ] `pnpm lint` — clean
+- [ ] `pnpm exec biome check <the files this branch touches>` — clean (repo-wide `pnpm lint` is pre-existing dirty; not this branch's job)
 - [ ] `grep -rn "api\.ai\." --include='*.tsx' --include='*.ts' src | grep -v _generated` returns nothing
 - [ ] The temporary `/ai/probe` route from Task 1 is gone
 - [ ] All six manual checks in Task 10 Step 7 confirmed against a real provider key
