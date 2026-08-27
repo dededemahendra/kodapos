@@ -1,8 +1,11 @@
 import { useAuthToken } from '@convex-dev/auth/react';
+import { useLingui } from '@lingui/react/macro';
 import type { AiErrorCode, AiStreamRequest } from 'convex/lib/ai';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { aiErrorMessage } from '~/lib/ai-error';
 import { convexSiteUrl } from '~/lib/convex-site';
 import { createNdjsonParser } from '~/lib/ndjson';
+import { toast } from '~/lib/toast';
 
 type StreamEvent = { t: 'delta'; v: string } | { t: 'done' } | { t: 'error'; code: AiErrorCode };
 
@@ -12,13 +15,22 @@ type StreamEvent = { t: 'delta'; v: string } | { t: 'done' } | { t: 'error'; cod
  * `send` resolves with the finished text (or null if it failed or was
  * stopped) so a caller that needs to commit the answer somewhere — the chat
  * page, to its history — does not have to watch `text` settle.
+ *
+ * Also owns the failure toast: every consumer gets one localized `toast.error`
+ * per failed `send`, without each surface repeating the effect itself. `error`
+ * is still returned for surfaces that also want to render it inline.
  */
 export function useAiStream() {
+  const { i18n } = useLingui();
   const token = useAuthToken();
   const [text, setText] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<AiErrorCode | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (error) toast.error(i18n._(aiErrorMessage(error)));
+  }, [error, i18n]);
 
   const stop = useCallback(() => {
     // Abort only. The in-flight invocation's `finally` owns clearing `abortRef`

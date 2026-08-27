@@ -3,14 +3,11 @@ import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { MessageCircle } from 'lucide-react';
-import { useEffect } from 'react';
 import { AiResponse } from '~/components/ai-response';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
 import { useAiStream } from '~/hooks/use-ai-stream';
-import { aiErrorMessage } from '~/lib/ai-error';
-import { toast } from '~/lib/toast';
 
 /**
  * AI restock advisor card on the forecast page. Uses the owner's
@@ -25,17 +22,13 @@ export function AiRestockAdvice() {
   // The insights/restock surfaces send no question, so the app's language
   // toggle is the only signal the model gets.
   const locale = i18n.locale === 'en' ? 'en' : 'id';
-  const { text, streaming, error, send } = useAiStream();
+  const { text, streaming, send } = useAiStream();
 
   const connected = settings?.integrations.some((i) => i.key === 'ai' && i.connected) ?? false;
 
   async function generate() {
     await send({ kind: 'restock', locale });
   }
-
-  useEffect(() => {
-    if (error) toast.error(i18n._(aiErrorMessage(error)));
-  }, [error, i18n]);
 
   return (
     <Card>

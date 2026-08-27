@@ -3,15 +3,13 @@ import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { MessageCircle } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { AiResponse } from '~/components/ai-response';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 import { useAiStream } from '~/hooks/use-ai-stream';
-import { aiErrorMessage } from '~/lib/ai-error';
-import { toast } from '~/lib/toast';
 
 /**
  * Dashboard AI card. Uses the owner's bring-your-own-key AI integration to
@@ -25,7 +23,7 @@ export function AiInsights() {
   // The insights/restock surfaces send no question, so the app's language
   // toggle is the only signal the model gets.
   const locale = i18n.locale === 'en' ? 'en' : 'id';
-  const { text, streaming, error, send } = useAiStream();
+  const { text, streaming, send } = useAiStream();
   const [question, setQuestion] = useState('');
 
   const connected = settings?.integrations.some((i) => i.key === 'ai' && i.connected) ?? false;
@@ -42,10 +40,6 @@ export function AiInsights() {
     // we want it.
     await send({ kind: 'chat', locale, messages: [{ role: 'user', content: q }] });
   }
-
-  useEffect(() => {
-    if (error) toast.error(i18n._(aiErrorMessage(error)));
-  }, [error, i18n]);
 
   return (
     <Card>
