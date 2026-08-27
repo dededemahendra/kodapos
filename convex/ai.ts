@@ -1,10 +1,9 @@
 import { v } from 'convex/values';
 import { api, internal } from './_generated/api';
 import type { ActionCtx } from './_generated/server';
-import { action, internalMutation, internalQuery } from './_generated/server';
+import { internalMutation, internalQuery } from './_generated/server';
 import {
   type AiErrorCode,
-  type AiLocale,
   type AiProvider,
   type AiStreamRequest,
   ASK_SYSTEM_PROMPT,
@@ -12,8 +11,6 @@ import {
   type ChatMsg,
   INSIGHTS_SYSTEM_PROMPT,
   languageInstruction,
-  normalizeHistory,
-  parseLLMResponse,
   parseProvider,
   parseStreamBody,
   RESTOCK_SYSTEM_PROMPT,
@@ -120,102 +117,6 @@ async function gatherSummary(ctx: ActionCtx): Promise<string> {
   return JSON.stringify(summary);
 }
 
-async function callAi(cfg: AiConfig, system: string, messages: ChatMsg[]): Promise<string> {
-  const req = buildLLMRequest(cfg.provider, cfg.model, cfg.apiKey, system, messages);
-
-  // Bound a hung upstream connection so it fails cleanly instead of running to
-  // the Convex action time limit.
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 60_000);
-  let res: Response;
-  try {
-    res = await fetch(req.url, {
-      method: 'POST',
-      headers: req.headers,
-      body: req.body,
-      signal: controller.signal,
-    });
-  } catch {
-    throw new Error('Gagal memanggil AI (waktu habis atau jaringan bermasalah).');
-  } finally {
-    clearTimeout(timer);
-  }
-
-  if (!res.ok) {
-    // Keep the raw provider body server-side only (it can carry account/quota
-    // metadata); surface just the status to the client.
-    const detail = await res.text().catch(() => '');
-    console.error(`AI provider error ${res.status}: ${detail.slice(0, 500)}`);
-    throw new Error(`Gagal memanggil AI (${res.status}).`);
-  }
-  const json = await res.json();
-  return parseLLMResponse(cfg.provider, json);
-}
-
-/** Generate a plain-language briefing of the cafe's recent performance. */
-export const insights = action({
-  // Optional so a client from before this shipped still validates; the default
-  // reproduces the previous behaviour exactly.
-  args: { locale: v.optional(v.union(v.literal('id'), v.literal('en'))) },
-  returns: v.string(),
-  handler: async (ctx, { locale = 'id' }: { locale?: AiLocale }): Promise<string> => {
-    const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
-    if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
-    await ctx.runMutation(internal.ai.rateLimit, {});
-    const data = await gatherSummary(ctx);
-    return callAi(cfg, `${INSIGHTS_SYSTEM_PROMPT} ${languageInstruction(locale, 'fixed')}`, [
-      { role: 'user', content: `Cafe data (JSON):\n${data}` },
-    ]);
-  },
-});
-
-/** Answer an owner question grounded in the cafe's recent data. */
-export const ask = action({
-  args: { question: v.string(), locale: v.optional(v.union(v.literal('id'), v.literal('en'))) },
-  returns: v.string(),
-  handler: async (ctx, { question, locale = 'id' }): Promise<string> => {
-    const q = question.trim().slice(0, 4000);
-    if (!q) throw new Error('Pertanyaan kosong.');
-    const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
-    if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
-    await ctx.runMutation(internal.ai.rateLimit, {});
-    const data = await gatherSummary(ctx);
-    return callAi(cfg, `${ASK_SYSTEM_PROMPT} ${languageInstruction(locale, 'mirror')}`, [
-      { role: 'user', content: `Cafe data (JSON):\n${data}\n\nQuestion: ${q}` },
-    ]);
-  },
-});
-
-/** Multi-turn chat grounded in the cafe's recent data (the dedicated AI page). */
-export const chat = action({
-  args: {
-    messages: v.array(
-      v.object({
-        role: v.union(v.literal('user'), v.literal('assistant')),
-        content: v.string(),
-      })
-    ),
-    locale: v.optional(v.union(v.literal('id'), v.literal('en'))),
-  },
-  returns: v.string(),
-  handler: async (ctx, { messages, locale = 'id' }): Promise<string> => {
-    // Bound the history (last 12 turns) and per-message length to cap token
-    // cost, then normalize to alternating roles (required by Anthropic).
-    const history = normalizeHistory(
-      messages.slice(-12).map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }))
-    );
-    if (history.length === 0 || history[history.length - 1]!.role !== 'user') {
-      throw new Error('Pertanyaan kosong.');
-    }
-    const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
-    if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
-    await ctx.runMutation(internal.ai.rateLimit, {});
-    const data = await gatherSummary(ctx);
-    const system = `${ASK_SYSTEM_PROMPT} ${languageInstruction(locale, 'mirror')}\n\nCafe data (JSON):\n${data}`;
-    return callAi(cfg, system, history);
-  },
-});
-
 /**
  * Compact JSON snapshot for the restock advisor: the heuristic shopping list
  * (ingredients to buy with suggested qty + current stock) plus the demand
@@ -255,41 +156,6 @@ async function gatherRestock(
   };
   return { json: JSON.stringify(summary), lineCount: restock.lines.length, learning: false };
 }
-
-/**
- * Turn the heuristic shopping list + demand forecast into a plain-language
- * restock briefing (what to order, how much, and why). Skips the LLM call (and
- * the rate-limit budget) when the forecast is still learning or there's nothing
- * to order, returning a fixed off-catalog message instead.
- */
-export const restock = action({
-  args: { locale: v.optional(v.union(v.literal('id'), v.literal('en'))) },
-  returns: v.string(),
-  handler: async (ctx, { locale = 'id' }: { locale?: AiLocale }): Promise<string> => {
-    const cfg: AiConfig | null = await ctx.runQuery(internal.ai.config, {});
-    if (!cfg) throw new Error('AI belum dikonfigurasi. Hubungkan di Pengaturan, Integrasi.');
-    // Rate-limit before gathering, not just before the LLM call: gatherRestock
-    // runs computeDemand twice (each scans the trailing order window), so the cap
-    // has to cover that work too — otherwise the learning / nothing-to-order
-    // paths would be uncapped heavy reads. Config is checked first, so an
-    // unconfigured caller throws without ever consuming the budget.
-    await ctx.runMutation(internal.ai.rateLimit, {});
-    const { json, lineCount, learning } = await gatherRestock(ctx);
-    if (learning) {
-      return locale === 'en'
-        ? 'The demand forecast is still learning, so AI restock advice is not available yet. Try again once the forecast is active.'
-        : 'Perkiraan permintaan masih belajar, jadi saran restock AI belum tersedia. Coba lagi setelah perkiraan aktif.';
-    }
-    if (lineCount === 0) {
-      return locale === 'en'
-        ? 'Your stock is sufficient for this week. Nothing needs ordering right now.'
-        : 'Stok Anda cukup untuk minggu ini. Tidak ada bahan yang perlu dipesan sekarang.';
-    }
-    return callAi(cfg, `${RESTOCK_SYSTEM_PROMPT} ${languageInstruction(locale, 'fixed')}`, [
-      { role: 'user', content: `Cafe restock data (JSON):\n${json}` },
-    ]);
-  },
-});
 
 /** One NDJSON line: `{"t":…}\n`. */
 function ndjson(encoder: TextEncoder, event: Record<string, unknown>): Uint8Array {
