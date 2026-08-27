@@ -2493,8 +2493,8 @@ msgid "Gagal mengunggah QRIS."
 msgstr "Gagal mengunggah QRIS."
 
 #: src/routes/_pos/ai.tsx
-msgid "Gagal menjawab."
-msgstr "Gagal menjawab."
+#~ msgid "Gagal menjawab."
+#~ msgstr "Gagal menjawab."
 
 #: src/routes/_pos/self-orders.tsx
 msgid "Gagal menolak pesanan."
@@ -2924,6 +2924,10 @@ msgstr "Hari ini"
 #: src/routes/_pos/help.tsx
 msgid "Hasil pencarian"
 msgstr "Hasil pencarian"
+
+#: src/routes/_pos/ai.tsx
+msgid "Hentikan"
+msgstr "Hentikan"
 
 #: src/components/inventory/stock-take-dialog.tsx
 msgid "Hitung fisik"

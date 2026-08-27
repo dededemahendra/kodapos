@@ -1,7 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import { useAction, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { MessageCircle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { AiResponse } from '~/components/ai-response';
@@ -16,7 +16,7 @@ import {
   EmptyTitle,
 } from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
-import { toast } from '~/lib/toast';
+import { useAiStream } from '~/hooks/use-ai-stream';
 import { cn } from '~/lib/utils';
 
 export const Route = createFileRoute('/_pos/ai')({
@@ -31,10 +31,9 @@ function AiChatPage() {
   const locale = i18n.locale === 'en' ? 'en' : 'id';
   const settings = useQuery(api.settings.get);
   const cafe = useQuery(api.cafes.myCafe, {});
-  const chat = useAction(api.ai.chat);
+  const { text, streaming, send, stop } = useAiStream();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const sendingRef = useRef(false);
 
@@ -43,27 +42,39 @@ function AiChatPage() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on new turns
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [messages.length, loading]);
+  }, [messages.length, streaming]);
 
-  async function send(text: string) {
-    const q = text.trim();
-    // Single-flight via a ref (loading state lags behind rapid clicks).
+  async function submit(value: string) {
+    const q = value.trim();
+    // Single-flight via a ref (streaming state lags behind rapid clicks).
     if (!q || sendingRef.current) return;
     sendingRef.current = true;
     const next: ChatMsg[] = [...messages, { role: 'user', content: q }];
     setMessages(next);
     setInput('');
-    setLoading(true);
-    try {
-      const reply = await chat({ messages: next, locale });
+    const reply = await send({ kind: 'chat', locale, messages: next });
+    if (reply) {
       setMessages([...next, { role: 'assistant', content: reply }]);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t`Gagal menjawab.`);
-      // Roll back the optimistic user turn so history stays valid (otherwise the
-      // next send would post two consecutive user turns, which Anthropic rejects).
-      setMessages(messages);
-    } finally {
-      setLoading(false);
+    } else {
+      // Failed or stopped. `stopAndKeep` has already committed any partial answer,
+      // so roll back only if the history still ends on our optimistic user turn —
+      // two consecutive user turns are rejected upstream.
+      setMessages((prev) => (prev[prev.length - 1]?.role === 'user' ? messages : prev));
+    }
+    sendingRef.current = false;
+  }
+
+  // `stop()` aborts, so `send` resolves null and the rollback in `submit` would
+  // discard text the owner already read. Keep it instead.
+  function stopAndKeep() {
+    const partial = text;
+    stop();
+    if (partial.trim()) {
+      setMessages((prev) =>
+        prev[prev.length - 1]?.role === 'user'
+          ? [...prev, { role: 'assistant', content: partial }]
+          : prev
+      );
       sendingRef.current = false;
     }
   }
@@ -134,8 +145,11 @@ function AiChatPage() {
           <ChatInput
             value={input}
             onChange={setInput}
-            onSend={() => void send(input)}
-            disabled={loading}
+            onSend={() => void submit(input)}
+            disabled={streaming}
+            streaming={streaming}
+            onStop={stopAndKeep}
+            stopLabel={t`Hentikan`}
             placeholder={t`Tanya tentang penjualan, stok, pelanggan…`}
             sendLabel={t`Kirim`}
             autoFocus
@@ -145,7 +159,7 @@ function AiChatPage() {
               <button
                 key={s}
                 type="button"
-                onClick={() => void send(s)}
+                onClick={() => void submit(s)}
                 className="rounded-full border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 {s}
@@ -188,14 +202,20 @@ function AiChatPage() {
               </div>
             </div>
           ))}
-          {loading ? (
+          {streaming ? (
             <div className="flex gap-3">
               <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <MessageCircle className="size-4" />
               </span>
-              <div className="flex items-center gap-2 rounded-2xl bg-muted px-3.5 py-2 text-sm text-muted-foreground">
-                <Spinner className="size-4" />
-                <Trans>Menganalisis…</Trans>
+              <div className="max-w-[80%] rounded-2xl bg-muted px-3.5 py-2 text-sm leading-relaxed text-foreground">
+                {text ? (
+                  <AiResponse text={text} />
+                ) : (
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Spinner className="size-4" />
+                    <Trans>Menganalisis…</Trans>
+                  </span>
+                )}
               </div>
             </div>
           ) : null}
@@ -207,8 +227,11 @@ function AiChatPage() {
           <ChatInput
             value={input}
             onChange={setInput}
-            onSend={() => void send(input)}
-            disabled={loading}
+            onSend={() => void submit(input)}
+            disabled={streaming}
+            streaming={streaming}
+            onStop={stopAndKeep}
+            stopLabel={t`Hentikan`}
             placeholder={t`Tanya tentang penjualan, stok, pelanggan…`}
             sendLabel={t`Kirim`}
           />
