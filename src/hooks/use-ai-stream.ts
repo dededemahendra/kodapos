@@ -57,6 +57,7 @@ export function useAiStream() {
         const decoder = new TextDecoder();
         const parser = createNdjsonParser();
         let failure: AiErrorCode | null = null;
+        let terminated = false;
 
         const handle = (events: unknown[]) => {
           for (const raw of events) {
@@ -66,20 +67,36 @@ export function useAiStream() {
               setText(accumulated);
             } else if (event.t === 'error') {
               failure = event.code;
+              terminated = true;
+            } else if (event.t === 'done') {
+              terminated = true;
             }
           }
         };
 
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          handle(parser.push(decoder.decode(value, { stream: true })));
-          if (failure) break;
+        try {
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            handle(parser.push(decoder.decode(value, { stream: true })));
+            if (terminated) break;
+          }
+          // Flush a multi-byte character straddling the last chunk, then any
+          // buffered final line that never got its newline.
+          handle(parser.push(decoder.decode()));
+          handle(parser.flush());
+        } finally {
+          await reader.cancel().catch(() => {});
         }
-        handle(parser.flush());
 
         if (failure) {
           setError(failure);
+          return null;
+        }
+        if (!terminated) {
+          // The body ended without `done` or `error` — a dropped connection.
+          // Truncated text must never read as a finished answer.
+          setError('network');
           return null;
         }
         return accumulated;
@@ -89,8 +106,12 @@ export function useAiStream() {
         setError('network');
         return null;
       } finally {
-        setStreaming(false);
-        abortRef.current = null;
+        // Only the current invocation may clear shared state — a later send()
+        // has already installed its own controller and is still running.
+        if (abortRef.current === controller) {
+          abortRef.current = null;
+          setStreaming(false);
+        }
       }
     },
     [token]

@@ -2,19 +2,23 @@ import { describe, expect, it } from 'vitest';
 import { aiErrorMessage } from './ai-error';
 
 describe('aiErrorMessage', () => {
-  it('returns a distinct message per code', () => {
-    const codes = [
-      'unauthorized',
-      'bad_request',
+  it('maps each code to its intended message', () => {
+    const generic = aiErrorMessage('provider').id;
+    // Codes that give the owner something specific to do.
+    const actionable = [
       'not_configured',
       'rate_limited',
-      'provider',
       'network',
+      'unauthorized',
       'empty',
     ] as const;
-    const ids = codes.map((c) => aiErrorMessage(c).id);
-    expect(new Set(ids).size).toBeGreaterThan(1);
-    for (const id of ids) expect(typeof id).toBe('string');
+    const ids = actionable.map((c) => aiErrorMessage(c).id);
+    expect(new Set(ids).size).toBe(actionable.length);
+    expect(ids).not.toContain(generic);
+    // `bad_request` means the client sent something malformed — nothing the
+    // owner can act on, so it deliberately shares the generic message.
+    expect(aiErrorMessage('bad_request').id).toBe(generic);
+    expect(aiErrorMessage(null).id).toBe(generic);
   });
 
   it('points an unconfigured owner at Integrations', () => {
@@ -22,9 +26,5 @@ describe('aiErrorMessage', () => {
     // resolving through an empty catalog depends on Lingui's fallback rather
     // than on anything this function decides.
     expect(aiErrorMessage('not_configured').message).toMatch(/Integrasi/);
-  });
-
-  it('falls back to the generic message for null', () => {
-    expect(aiErrorMessage(null).id).toBe(aiErrorMessage('provider').id);
   });
 });
