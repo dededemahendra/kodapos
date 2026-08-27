@@ -444,6 +444,14 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
   const decoder = createSSEDecoder(cfg.provider);
   const body = upstream.body;
 
+  // Set by `cancel()` when the consumer goes away (the owner pressed stop, or
+  // navigated) while `start()`'s loop is still running. `start()`'s promise
+  // keeps executing after cancellation — ReadableStream does not interrupt
+  // it — so without this guard the `finally` block below would call
+  // `enqueue`/`close` on a controller the runtime already closed, which
+  // throws `TypeError: Invalid state: Controller is already closed`.
+  let cancelled = false;
+
   const stream = new ReadableStream<Uint8Array>({
     async start(c) {
       const reader = body.getReader();
@@ -478,17 +486,24 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
         // An upstream drop or the 60s abort landing mid-generation.
         failure = 'network';
       } finally {
+        // The loop above always finishes its last `reader.read()` before
+        // reaching here (via `break` or the catch), so no read is pending —
+        // safe to release unconditionally, cancelled or not.
+        reader.releaseLock();
         clearTimeout(timer);
-        const final = failure ?? (produced ? null : 'empty');
-        c.enqueue(
-          final ? ndjson(encoder, { t: 'error', code: final }) : ndjson(encoder, { t: 'done' })
-        );
-        c.close();
+        // The consumer may have gone away mid-generation; its controller is
+        // already closed, so emitting a terminal event here would throw.
+        if (!cancelled) {
+          const final = failure ?? (produced ? null : 'empty');
+          c.enqueue(
+            final ? ndjson(encoder, { t: 'error', code: final }) : ndjson(encoder, { t: 'done' })
+          );
+          c.close();
+        }
       }
     },
     cancel() {
-      // The reader went away (the owner pressed stop, or navigated); stop
-      // paying for tokens nobody will see.
+      cancelled = true;
       clearTimeout(timer);
       controller.abort();
     },

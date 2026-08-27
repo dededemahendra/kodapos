@@ -1,105 +1,17 @@
 import { convexTest } from 'convex-test';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
 import schema from '../../convex/schema';
-import { mockStreamingProvider, OPENAI_SSE, post, readEvents } from './helpers/ai-stream';
+import {
+  connectAi,
+  mockStreamingProvider,
+  OPENAI_SSE,
+  post,
+  readEvents,
+  seedSales,
+  setup,
+} from './helpers/ai-stream';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
-const TZ = 'Asia/Jakarta';
-const DAY = 86_400_000;
-
-type Refs = {
-  asOwner: ReturnType<ReturnType<typeof convexTest>['withIdentity']>;
-  cafeId: Id<'cafes'>;
-  cashierId: Id<'cafeStaff'>;
-  shiftId: Id<'shifts'>;
-  itemKopi: Id<'menuItems'>;
-  ingSusu: Id<'ingredients'>;
-};
-
-async function setup(t: ReturnType<typeof convexTest>): Promise<Refs> {
-  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' }));
-  const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
-  await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
-  await asOwner.mutation(api.cafes.updateProfile, {
-    name: 'Kopi Senja',
-    timezone: TZ,
-    taxRatePct: 0,
-    taxEnabled: false,
-  });
-  const cafe = await asOwner.query(api.cafes.myCafe, {});
-  const cafeId = cafe!._id as Id<'cafes'>;
-  const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
-  const shiftId = await asOwner.mutation(api.shifts.open, { cashierId, openingFloatIDR: 100000 });
-  const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Minuman' });
-  const itemKopi = await asOwner.mutation(api.menu.items.create, {
-    categoryId,
-    name: 'Kopi',
-    priceIDR: 15000,
-  });
-  const ingSusu = await asOwner.mutation(api.ingredients.upsert, {
-    name: 'Susu',
-    canonicalUnit: 'ml',
-    reorderThreshold: 0,
-    lastCostPerUnitIDR: 100,
-  });
-  await asOwner.mutation(api.recipes.upsert, {
-    menuItemId: itemKopi,
-    lines: [{ ingredientId: ingSusu, qty: 50, wastageFactor: 1 }],
-  });
-  return { asOwner, cafeId, cashierId, shiftId, itemKopi, ingSusu };
-}
-
-async function seedSales(
-  t: ReturnType<typeof convexTest>,
-  refs: Refs,
-  days: number,
-  nowMs: number
-) {
-  for (let d = 1; d <= days; d++) {
-    const at = nowMs - d * DAY;
-    await t.run((ctx) =>
-      ctx.db.insert('orders', {
-        cafeId: refs.cafeId,
-        shiftId: refs.shiftId,
-        cashierId: refs.cashierId,
-        clientId: `c-${d}`,
-        lines: [
-          {
-            menuItemId: refs.itemKopi,
-            nameSnapshot: 'Kopi',
-            qty: 10,
-            unitPriceIDR: 15000,
-            modifiersSnapshot: [],
-            lineTotalIDR: 150000,
-          },
-        ],
-        subtotalIDR: 150000,
-        taxRatePct: 0,
-        taxIDR: 0,
-        discountIDR: 0,
-        totalIDR: 150000,
-        paymentMethod: 'cash',
-        paymentStatus: 'paid',
-        createdAtClient: at,
-        syncedAt: at,
-      })
-    );
-  }
-}
-
-async function connectAi(
-  refs: Refs,
-  provider: 'openai' | 'anthropic' = 'openai',
-  model = 'gpt-4o-mini'
-) {
-  await refs.asOwner.mutation(api.settings.connectAi, {
-    provider,
-    apiKey: provider === 'anthropic' ? 'sk-ant-test-key' : 'sk-test-key',
-    model,
-  });
-}
 
 describe('POST /ai/stream', () => {
   afterEach(() => vi.restoreAllMocks());
@@ -186,6 +98,90 @@ describe('POST /ai/stream', () => {
     expect(await readEvents(res)).toEqual([{ t: 'error', code: 'empty' }]);
   });
 
+  it('emits a delta then a bare provider code for a mid-stream error, never the raw message', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await connectAi(refs);
+    await seedSales(t, refs, 20, Date.now());
+    // OpenAI-shaped: a good delta, then an in-band error carrying account/quota
+    // detail that must never reach the client.
+    mockStreamingProvider(
+      'data: {"choices":[{"delta":{"content":"Beli 5000 ml "}}]}\n' +
+        'data: {"error":{"message":"insufficient_quota: account acct_12345 suspended"}}\n'
+    );
+    const res = await post(refs.asOwner, { kind: 'insights', locale: 'id' });
+    expect(res.status).toBe(200);
+    const raw = await res.clone().text();
+    expect(raw).not.toContain('insufficient_quota');
+    expect(raw).not.toContain('acct_12345');
+    expect(await readEvents(res)).toEqual([
+      { t: 'delta', v: 'Beli 5000 ml ' },
+      { t: 'error', code: 'provider' },
+    ]);
+  });
+
+  it('cancelling the response stream does not throw, and aborts the upstream fetch', async () => {
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await connectAi(refs);
+    await seedSales(t, refs, 20, Date.now());
+
+    // A controlled upstream body: the first chunk is available immediately,
+    // but the stream is held open until the test releases it. That opens a
+    // window — matching a real network stream — where the client cancels
+    // while `start()`'s loop is still mid-generation: the exact race Task
+    // 10's "stop generating" button hits on every use.
+    let finishUpstream!: () => void;
+    const held = new Promise<void>((resolve) => {
+      finishUpstream = resolve;
+    });
+    const captured: { signal: AbortSignal | undefined } = { signal: undefined };
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+      captured.signal = init?.signal as AbortSignal | undefined;
+      const encoder = new TextEncoder();
+      const upstreamBody = new ReadableStream<Uint8Array>({
+        async start(c) {
+          c.enqueue(encoder.encode('data: {"choices":[{"delta":{"content":"Halo"}}]}\n'));
+          await held;
+          c.enqueue(encoder.encode('data: [DONE]\n'));
+          c.close();
+        },
+      });
+      return new Response(upstreamBody, {
+        status: 200,
+        headers: { 'content-type': 'text/event-stream' },
+      });
+    });
+
+    // Cancelling settles the stream to "closed" before our `cancel()` callback
+    // even runs, and once `start()`'s background loop later reaches `finally`,
+    // calling `enqueue`/`close` on that already-closed controller throws
+    // `TypeError: Invalid state: Controller is already closed` deep inside the
+    // stream engine. Nothing above observes that throw (the engine treats a
+    // startAlgorithm rejection as a no-op once the stream is no longer
+    // "readable", so it never becomes an unhandled rejection or a rejected
+    // `await`) — so this spy is the only way to detect it.
+    const enqueueSpy = vi.spyOn(ReadableStreamDefaultController.prototype, 'enqueue');
+    const closeSpy = vi.spyOn(ReadableStreamDefaultController.prototype, 'close');
+
+    const res = await post(refs.asOwner, { kind: 'insights', locale: 'id' });
+    if (!res.body) throw new Error('expected a streamed body');
+    const reader = res.body.getReader();
+    await reader.read(); // the first NDJSON delta line — generation is now mid-flight
+    await expect(reader.cancel()).resolves.toBeUndefined();
+    expect(captured.signal?.aborted).toBe(true);
+
+    // Let the upstream finish so `start()`'s loop reaches its `finally` block —
+    // pre-fix, this is exactly where the already-closed controller throws.
+    finishUpstream();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    const threw = [...enqueueSpy.mock.results, ...closeSpy.mock.results].some(
+      (r) => r.type === 'throw'
+    );
+    expect(threw).toBe(false);
+  });
+
   it('returns 429 once the per-cafe window is exhausted', async () => {
     const t = convexTest(schema, modules);
     const refs = await setup(t);
@@ -201,6 +197,40 @@ describe('POST /ai/stream', () => {
     const res = await post(refs.asOwner, { kind: 'insights', locale: 'id' });
     expect(res.status).toBe(429);
     expect(await res.json()).toEqual({ code: 'rate_limited' });
+  });
+
+  it('does not consume rate-limit budget when the AI key is not connected', async () => {
+    // config must be checked BEFORE the limiter, or an unconfigured owner could
+    // exhaust their own window without a single provider call.
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    for (let i = 0; i < 5; i++) {
+      expect((await post(refs.asOwner, { kind: 'insights', locale: 'id' })).status).toBe(400);
+    }
+    await connectAi(refs);
+    await seedSales(t, refs, 20, Date.now());
+    mockStreamingProvider(OPENAI_SSE);
+    // The full window must still be available.
+    for (let i = 0; i < 40; i++) {
+      const ok = await post(refs.asOwner, { kind: 'insights', locale: 'id' });
+      expect(ok.status).toBe(200);
+      await ok.text();
+    }
+  });
+
+  it('rate-limits before gathering, so a learning-forecast restock still costs budget', async () => {
+    // The limiter must run BEFORE gatherRestock: that gather runs computeDemand
+    // twice over the trailing order window. If gathering came first, this call
+    // would return the 200 "still learning" message instead of 429.
+    const t = convexTest(schema, modules);
+    const refs = await setup(t);
+    await connectAi(refs);
+    await seedSales(t, refs, 5, Date.now()); // too little history — forecast is 'learning'
+    for (let i = 0; i < 40; i++) {
+      await (await post(refs.asOwner, { kind: 'restock', locale: 'id' })).text();
+    }
+    const res = await post(refs.asOwner, { kind: 'restock', locale: 'id' });
+    expect(res.status).toBe(429);
   });
 
   it('sends chat history with the cafe data in the system prompt', async () => {
