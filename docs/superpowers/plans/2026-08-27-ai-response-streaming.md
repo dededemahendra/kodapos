@@ -1027,6 +1027,7 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
   const encoder = new TextEncoder();
   const decoder = createSSEDecoder(cfg.provider);
   const body = upstream.body;
+  let cancelled = false;
 
   const stream = new ReadableStream<Uint8Array>({
     async start(c) {
@@ -1063,14 +1064,21 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
         failure = 'network';
       } finally {
         clearTimeout(timer);
-        const final = failure ?? (produced ? null : 'empty');
-        c.enqueue(final ? ndjson(encoder, { t: 'error', code: final }) : ndjson(encoder, { t: 'done' }));
-        c.close();
+        // Skip the terminal event if the consumer cancelled: its controller is
+        // already closed and enqueuing would throw.
+        if (!cancelled) {
+          const final = failure ?? (produced ? null : 'empty');
+          c.enqueue(final ? ndjson(encoder, { t: 'error', code: final }) : ndjson(encoder, { t: 'done' }));
+          c.close();
+        }
       }
     },
     cancel() {
       // The reader went away (the owner pressed stop, or navigated); stop
-      // paying for tokens nobody will see.
+      // paying for tokens nobody will see. The flag stops the still-running
+      // `start` continuation from enqueuing onto a closed controller, which
+      // throws `Invalid state: Controller is already closed`.
+      cancelled = true;
       clearTimeout(timer);
       controller.abort();
     },
@@ -1120,7 +1128,7 @@ If the rate-limit test is slow, it is doing 41 full round trips against the in-m
 
 ```bash
 pnpm test && pnpm exec biome check --write <the files this task touched> && pnpm typecheck
-git add convex/ai.ts convex/http.ts tests/convex/ai-stream.test.ts
+git add convex/ai.ts convex/http.ts tests/convex/helpers/ai-stream.ts tests/convex/ai-stream.test.ts
 git commit -m "feat(ai): streaming /ai/stream HTTP route for all AI surfaces"
 ```
 
