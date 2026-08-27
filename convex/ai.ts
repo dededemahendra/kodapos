@@ -3,8 +3,10 @@ import { api, internal } from './_generated/api';
 import type { ActionCtx } from './_generated/server';
 import { action, internalMutation, internalQuery } from './_generated/server';
 import {
+  type AiErrorCode,
   type AiLocale,
   type AiProvider,
+  type AiStreamRequest,
   ASK_SYSTEM_PROMPT,
   buildLLMRequest,
   type ChatMsg,
@@ -13,9 +15,12 @@ import {
   normalizeHistory,
   parseLLMResponse,
   parseProvider,
+  parseStreamBody,
   RESTOCK_SYSTEM_PROMPT,
 } from './lib/ai';
+import { createSSEDecoder } from './lib/aiSse';
 import { requireActiveOutlet } from './lib/auth';
+import { corsHeaders } from './lib/cors';
 import { enforceRateLimit } from './lib/rateLimit';
 
 /**
@@ -285,3 +290,209 @@ export const restock = action({
     ]);
   },
 });
+
+/** One NDJSON line: `{"t":…}\n`. */
+function ndjson(encoder: TextEncoder, event: Record<string, unknown>): Uint8Array {
+  return encoder.encode(`${JSON.stringify(event)}\n`);
+}
+
+/**
+ * A one-shot stream carrying a fixed message. The restock advisor has three
+ * answers that never reach a model (not configured, forecast still learning,
+ * nothing to order); emitting them through the same channel as a real
+ * generation means the client has exactly one code path.
+ */
+function fixedStream(text: string, headers: Record<string, string>): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    start(c) {
+      c.enqueue(ndjson(encoder, { t: 'delta', v: text }));
+      c.enqueue(ndjson(encoder, { t: 'done' }));
+      c.close();
+    },
+  });
+  return new Response(stream, { headers });
+}
+
+/** Resolves a validated request into the system prompt and turns to send. */
+async function buildTurns(
+  ctx: ActionCtx,
+  req: AiStreamRequest
+): Promise<{ system: string; messages: ChatMsg[] } | { fixed: string }> {
+  if (req.kind === 'restock') {
+    const { json, lineCount, learning } = await gatherRestock(ctx);
+    if (learning) {
+      return {
+        fixed:
+          req.locale === 'en'
+            ? 'The demand forecast is still learning, so AI restock advice is not available yet. Try again once the forecast is active.'
+            : 'Perkiraan permintaan masih belajar, jadi saran restock AI belum tersedia. Coba lagi setelah perkiraan aktif.',
+      };
+    }
+    if (lineCount === 0) {
+      return {
+        fixed:
+          req.locale === 'en'
+            ? 'Your stock is sufficient for this week. Nothing needs ordering right now.'
+            : 'Stok Anda cukup untuk minggu ini. Tidak ada bahan yang perlu dipesan sekarang.',
+      };
+    }
+    return {
+      system: `${RESTOCK_SYSTEM_PROMPT} ${languageInstruction(req.locale, 'fixed')}`,
+      messages: [{ role: 'user', content: `Cafe restock data (JSON):\n${json}` }],
+    };
+  }
+
+  const data = await gatherSummary(ctx);
+  if (req.kind === 'insights') {
+    return {
+      system: `${INSIGHTS_SYSTEM_PROMPT} ${languageInstruction(req.locale, 'fixed')}`,
+      messages: [{ role: 'user', content: `Cafe data (JSON):\n${data}` }],
+    };
+  }
+  // chat — the cafe data rides in the system prompt so it is stated once
+  // regardless of how many turns the history carries.
+  return {
+    system: `${ASK_SYSTEM_PROMPT} ${languageInstruction(req.locale, 'mirror')}\n\nCafe data (JSON):\n${data}`,
+    messages: req.messages,
+  };
+}
+
+/**
+ * `POST /ai/stream` — the single streaming endpoint behind every AI surface.
+ *
+ * Ordering is deliberate and matches what the actions did: config first (an
+ * unconfigured caller never spends budget), then the rate limit (so the heavy
+ * `gatherRestock` reads are capped too), then data gathering, and only then the
+ * provider. Everything up to the provider's response headers can still answer
+ * with a real HTTP status; after that the status is committed and failures have
+ * to travel in-band as an `error` event.
+ */
+export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Response> {
+  const cors = corsHeaders(req.headers.get('Origin'));
+  const fail = (status: number, code: AiErrorCode) =>
+    new Response(JSON.stringify({ code }), {
+      status,
+      headers: { ...cors, 'content-type': 'application/json' },
+    });
+
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return fail(400, 'bad_request');
+  }
+  const parsed = parseStreamBody(raw);
+  if (!parsed) return fail(400, 'bad_request');
+
+  let cfg: AiConfig | null;
+  try {
+    cfg = await ctx.runQuery(internal.ai.config, {});
+  } catch {
+    // `requireActiveOutlet` throws for a caller with no identity or no outlet.
+    return fail(401, 'unauthorized');
+  }
+  if (!cfg) return fail(400, 'not_configured');
+
+  try {
+    await ctx.runMutation(internal.ai.rateLimit, {});
+  } catch {
+    return fail(429, 'rate_limited');
+  }
+
+  const streamHeaders = {
+    ...cors,
+    'content-type': 'application/x-ndjson; charset=utf-8',
+    'cache-control': 'no-store',
+    // A hint to any intermediary not to buffer; harmless where unrecognized.
+    'x-accel-buffering': 'no',
+  };
+
+  const turns = await buildTurns(ctx, parsed);
+  if ('fixed' in turns) return fixedStream(turns.fixed, streamHeaders);
+
+  const llm = buildLLMRequest(cfg.provider, cfg.model, cfg.apiKey, turns.system, turns.messages, {
+    stream: true,
+  });
+
+  // Bounds the whole generation, not just the connect, so a provider that
+  // opens a stream and then stalls still fails cleanly.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 60_000);
+
+  let upstream: Response;
+  try {
+    upstream = await fetch(llm.url, {
+      method: 'POST',
+      headers: llm.headers,
+      body: llm.body,
+      signal: controller.signal,
+    });
+  } catch {
+    clearTimeout(timer);
+    return fail(504, 'network');
+  }
+  if (!upstream.ok || !upstream.body) {
+    // Provider bodies can carry account and quota metadata — log, never send.
+    const detail = await upstream.text().catch(() => '');
+    console.error(`AI provider error ${upstream.status}: ${detail.slice(0, 500)}`);
+    clearTimeout(timer);
+    return fail(502, 'provider');
+  }
+
+  const encoder = new TextEncoder();
+  const decoder = createSSEDecoder(cfg.provider);
+  const body = upstream.body;
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(c) {
+      const reader = body.getReader();
+      const text = new TextDecoder();
+      let produced = false;
+      let failure: AiErrorCode | null = null;
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          for (const event of decoder.push(text.decode(value, { stream: true }))) {
+            if (event.type === 'delta') {
+              produced = true;
+              c.enqueue(ndjson(encoder, { t: 'delta', v: event.text }));
+            } else if (event.type === 'error') {
+              console.error(`AI provider stream error: ${event.message.slice(0, 500)}`);
+              failure = 'provider';
+              break;
+            }
+          }
+          if (failure) break;
+        }
+        if (!failure) {
+          for (const event of decoder.flush()) {
+            if (event.type === 'delta') {
+              produced = true;
+              c.enqueue(ndjson(encoder, { t: 'delta', v: event.text }));
+            }
+          }
+        }
+      } catch {
+        // An upstream drop or the 60s abort landing mid-generation.
+        failure = 'network';
+      } finally {
+        clearTimeout(timer);
+        const final = failure ?? (produced ? null : 'empty');
+        c.enqueue(
+          final ? ndjson(encoder, { t: 'error', code: final }) : ndjson(encoder, { t: 'done' })
+        );
+        c.close();
+      }
+    },
+    cancel() {
+      // The reader went away (the owner pressed stop, or navigated); stop
+      // paying for tokens nobody will see.
+      clearTimeout(timer);
+      controller.abort();
+    },
+  });
+
+  return new Response(stream, { headers: streamHeaders });
+}
