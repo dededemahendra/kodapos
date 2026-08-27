@@ -244,8 +244,17 @@ describe('parseStreamBody', () => {
   });
 
   it('rejects a message with an unknown role', () => {
+    // The bad role must not be the LAST turn: a trailing non-user role is
+    // rejected by a different guard, which would mask this one's removal.
     expect(
-      parseStreamBody({ kind: 'chat', locale: 'id', messages: [{ role: 'system', content: 'x' }] })
+      parseStreamBody({
+        kind: 'chat',
+        locale: 'id',
+        messages: [
+          { role: 'system', content: 'x' },
+          { role: 'user', content: 'halo' },
+        ],
+      })
     ).toBeNull();
   });
 
