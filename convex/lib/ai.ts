@@ -122,6 +122,8 @@ export function buildLLMRequest(
       body: JSON.stringify({ model, max_tokens: MAX_TOKENS, system, messages, ...stream }),
     };
   }
+  // openai and OpenAI-compatible: same wire format, different host. OpenRouter
+  // additionally reads two attribution headers it ranks listed apps by.
   return {
     url:
       provider === 'openrouter'
