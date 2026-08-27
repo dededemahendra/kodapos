@@ -1,13 +1,14 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import { useAction, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { AiResponse } from '~/components/ai-response';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
+import { useAiStream } from '~/hooks/use-ai-stream';
 import { aiErrorMessage } from '~/lib/ai-error';
 import { toast } from '~/lib/toast';
 
@@ -24,23 +25,17 @@ export function AiRestockAdvice() {
   // The insights/restock surfaces send no question, so the app's language
   // toggle is the only signal the model gets.
   const locale = i18n.locale === 'en' ? 'en' : 'id';
-  const runRestock = useAction(api.ai.restock);
-  const [result, setResult] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { text, streaming, error, send } = useAiStream();
 
   const connected = settings?.integrations.some((i) => i.key === 'ai' && i.connected) ?? false;
 
   async function generate() {
-    setResult(null);
-    setLoading(true);
-    try {
-      setResult(await runRestock({ locale }));
-    } catch (err) {
-      toast.error(i18n._(aiErrorMessage(err)));
-    } finally {
-      setLoading(false);
-    }
+    await send({ kind: 'restock', locale });
   }
+
+  useEffect(() => {
+    if (error) toast.error(i18n._(aiErrorMessage(error)));
+  }, [error, i18n]);
 
   return (
     <Card>
@@ -50,8 +45,8 @@ export function AiRestockAdvice() {
           <Trans>Saran Restock AI</Trans>
         </CardTitle>
         {connected ? (
-          <Button type="button" size="sm" onClick={() => void generate()} disabled={loading}>
-            {loading ? (
+          <Button type="button" size="sm" onClick={() => void generate()} disabled={streaming}>
+            {streaming ? (
               <Spinner data-icon="inline-start" />
             ) : (
               <MessageCircle data-icon="inline-start" />
@@ -77,13 +72,13 @@ export function AiRestockAdvice() {
               </Link>
             </Button>
           </p>
-        ) : loading ? (
+        ) : text ? (
+          <AiResponse text={text} />
+        ) : streaming ? (
           <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
             <Spinner />
             <Trans>Menganalisis…</Trans>
           </div>
-        ) : result ? (
-          <AiResponse text={result} />
         ) : (
           <p className="text-sm text-muted-foreground">
             <Trans>Buat ringkasan AI tentang apa yang perlu dipesan dan alasannya.</Trans>
