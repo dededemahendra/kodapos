@@ -448,6 +448,10 @@ msgstr "AI membaca pola cuaca lokal untuk memperkirakan permintaan harian."
 msgid "AI memperkirakan permintaan harian dari pola penjualan dan cuaca lokal."
 msgstr "AI memperkirakan permintaan harian dari pola penjualan dan cuaca lokal."
 
+#: src/lib/ai-error.ts
+msgid "AI tidak memberi jawaban. Coba lagi."
+msgstr "AI tidak memberi jawaban. Coba lagi."
+
 #: src/routes/_public/index.tsx
 #~ msgid "AI-native POS untuk kafe & QSR Indonesia."
 #~ msgstr "AI-native POS untuk kafe & QSR Indonesia."
@@ -1036,6 +1040,10 @@ msgstr "Batalkan undangan"
 #: src/routes/_pos/settings/members.tsx
 msgid "Batalkan undangan?"
 msgstr "Batalkan undangan?"
+
+#: src/lib/ai-error.ts
+msgid "Batas penggunaan AI tercapai. Coba lagi sebentar."
+msgstr "Batas penggunaan AI tercapai. Coba lagi sebentar."
 
 #: src/components/sale/order-types.tsx
 msgid "Bawa pulang"
@@ -1924,6 +1932,7 @@ msgid "dari {0}"
 msgstr "dari {0}"
 
 #: src/components/marketing/feature-section.tsx
+#: src/routes/_public/fitur/index.tsx
 msgid "Dari pesanan pertama sampai laporan akhir bulan."
 msgstr "Dari pesanan pertama sampai laporan akhir bulan."
 
@@ -2174,8 +2183,8 @@ msgstr "File kosong atau hanya berisi baris header. Periksa lalu coba lagi."
 
 #: src/components/marketing/marketing-footer.tsx
 #: src/components/marketing/marketing-header.tsx
-msgid "Fitur"
-msgstr "Fitur"
+#~ msgid "Fitur"
+#~ msgstr "Fitur"
 
 #: src/lib/ai-error.ts
 msgid "Fitur AI sedang tidak tersedia. Periksa pengaturan AI Anda atau coba lagi nanti."
@@ -3028,6 +3037,10 @@ msgstr "Integrasi"
 msgid "Inventaris"
 msgstr "Inventaris"
 
+#: src/routes/_public/fitur/index.tsx
+msgid "Inventaris, resep dan HPP, limbah, pembelian, dan pemasok."
+msgstr "Inventaris, resep dan HPP, limbah, pembelian, dan pemasok."
+
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Invoice"
 #~ msgstr "Invoice"
@@ -3388,6 +3401,14 @@ msgstr "Kasir"
 #: src/components/marketing/feature-section.tsx
 #~ msgid "Kasir cepat"
 #~ msgstr "Kasir cepat"
+
+#: src/routes/_public/fitur/index.tsx
+msgid "Kasir cepat, QRIS, struk, printer, dan shift kas."
+msgstr "Kasir cepat, QRIS, struk, printer, dan shift kas."
+
+#: src/routes/_public/fitur/index.tsx
+msgid "Kasir dan pembayaran"
+msgstr "Kasir dan pembayaran"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
@@ -3918,6 +3939,10 @@ msgstr "Lanjutkan dengan Google"
 msgid "Laporan"
 msgstr "Laporan"
 
+#: src/routes/_public/fitur/index.tsx
+msgid "Laporan dan AI"
+msgstr "Laporan dan AI"
+
 #: src/components/marketing/feature-section.tsx
 #~ msgid "Laporan dan laba rugi"
 #~ msgstr "Laporan dan laba rugi"
@@ -3953,6 +3978,10 @@ msgstr "Laporan harian bikin saya tahu menu mana yang harus didorong dan mana ya
 #: src/components/marketing/feature-section.tsx
 msgid "Laporan waktu nyata"
 msgstr "Laporan waktu nyata"
+
+#: src/routes/_public/fitur/index.tsx
+msgid "Laporan waktu nyata, asisten AI, dan prakiraan permintaan."
+msgstr "Laporan waktu nyata, asisten AI, dan prakiraan permintaan."
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Latest updates in your workspace."
@@ -4224,6 +4253,10 @@ msgstr "Meja {0}"
 #: src/components/tables/table-manage-dialog.tsx
 msgid "Meja disimpan."
 msgstr "Meja disimpan."
+
+#: src/routes/_public/fitur/index.tsx
+msgid "Meja, pesan mandiri lewat QR, reservasi, dan layar dapur."
+msgstr "Meja, pesan mandiri lewat QR, reservasi, dan layar dapur."
 
 #: src/components/marketing/pricing.tsx
 msgid "Meja, reservasi, dan pesan mandiri (QR)"
@@ -4529,6 +4562,7 @@ msgstr "Mulai dengan kategori →"
 
 #: src/components/marketing/ai-spotlight.tsx
 #: src/components/marketing/cta-band.tsx
+#: src/components/marketing/feature-page.tsx
 #: src/components/marketing/hero.tsx
 #: src/components/marketing/pricing.tsx
 msgid "Mulai gratis"
@@ -4929,6 +4963,10 @@ msgstr "Pelanggan"
 msgid "Pelanggan baru"
 msgstr "Pelanggan baru"
 
+#: src/routes/_public/fitur/index.tsx
+msgid "Pelanggan dan loyalitas"
+msgstr "Pelanggan dan loyalitas"
+
 #: src/routes/_pos/loyalty.tsx
 msgid "Pelanggan dengan belanja lebih tinggi memperoleh pengali poin."
 msgstr "Pelanggan dengan belanja lebih tinggi memperoleh pengali poin."
@@ -4964,6 +5002,10 @@ msgstr "Pelanggan teratas"
 #: src/components/customer/customer-detail-sheet.tsx
 msgid "Pelanggan tidak ditemukan."
 msgstr "Pelanggan tidak ditemukan."
+
+#: src/routes/_public/fitur/index.tsx
+msgid "Pelanggan, poin dan hadiah, promo, dan kartu hadiah."
+msgstr "Pelanggan, poin dan hadiah, promo, dan kartu hadiah."
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
@@ -5449,6 +5491,10 @@ msgstr "Pesanan yang dibuat akan muncul di sini."
 #: src/components/shift/shift-order-list.tsx
 msgid "Pesanan yang diselesaikan selama shift ini akan muncul di sini."
 msgstr "Pesanan yang diselesaikan selama shift ini akan muncul di sini."
+
+#: src/routes/_public/fitur/index.tsx
+msgid "Pesanan, meja, dan dapur"
+msgstr "Pesanan, meja, dan dapur"
 
 #. placeholder {0}: item.name
 #: src/routes/_pos/menu/labels.tsx
@@ -6337,6 +6383,10 @@ msgstr "Semua tipe pesanan"
 msgid "Semua transaksi dalam Rupiah."
 msgstr "Semua transaksi dalam Rupiah."
 
+#: src/routes/_public/fitur/index.tsx
+msgid "Semua yang dibutuhkan kafe Anda"
+msgstr "Semua yang dibutuhkan kafe Anda"
+
 #: src/components/marketing/feature-section.tsx
 msgid "Semua yang dibutuhkan kafe Anda, dalam satu tempat"
 msgstr "Semua yang dibutuhkan kafe Anda, dalam satu tempat"
@@ -6356,6 +6406,10 @@ msgstr "Sering berkunjung"
 #: src/routes/_pos/time-clock.tsx
 msgid "Sesi"
 msgstr "Sesi"
+
+#: src/lib/ai-error.ts
+msgid "Sesi Anda berakhir. Masuk lagi untuk memakai AI."
+msgstr "Sesi Anda berakhir. Masuk lagi untuk memakai AI."
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Sesuaikan dengan lebar gulungan printer Anda."
@@ -6495,6 +6549,10 @@ msgstr "Sistem"
 msgid "Staf"
 msgstr "Staf"
 
+#: src/routes/_public/fitur/index.tsx
+msgid "Staf, peran, jam kerja, shift, dan banyak outlet."
+msgstr "Staf, peran, jam kerja, shift, dan banyak outlet."
+
 #: src/routes/_pos/settings/staff.tsx
 #~ msgid "Staff"
 #~ msgstr "Staff"
@@ -6559,9 +6617,9 @@ msgstr "Stok baru"
 msgid "Stok cukup untuk minggu ini."
 msgstr "Stok cukup untuk minggu ini."
 
-#: src/components/marketing/feature-section.tsx
-#~ msgid "Stok dan resep"
-#~ msgstr "Stok dan resep"
+#: src/routes/_public/fitur/index.tsx
+msgid "Stok dan resep"
+msgstr "Stok dan resep"
 
 #: src/components/inventory/stock-adjust-dialog.tsx
 msgid "Stok dicatat."
@@ -7400,6 +7458,10 @@ msgstr "Tier"
 msgid "Tim"
 msgstr "Tim"
 
+#: src/routes/_public/fitur/index.tsx
+msgid "Tim dan outlet"
+msgstr "Tim dan outlet"
+
 #: src/components/command-palette.tsx
 msgid "Tindakan Cepat"
 msgstr "Tindakan Cepat"
@@ -7947,6 +8009,14 @@ msgstr "WITA (Makassar)"
 #: src/components/marketing/faq.tsx
 msgid "Ya. kodapos mendukung QRIS statis dan dinamis, plus tunai, split, dan kartu hadiah."
 msgstr "Ya. kodapos mendukung QRIS statis dan dinamis, plus tunai, split, dan kartu hadiah."
+
+#: src/components/marketing/feature-page.tsx
+msgid "Yang belum"
+msgstr "Yang belum"
+
+#: src/components/marketing/feature-page.tsx
+msgid "Yang sudah bisa"
+msgstr "Yang sudah bisa"
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Yesterday"
