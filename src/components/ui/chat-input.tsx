@@ -1,4 +1,4 @@
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Square } from 'lucide-react';
 import { type KeyboardEvent, useEffect, useRef } from 'react';
 import { Button } from '~/components/ui/button';
 
@@ -6,6 +6,10 @@ import { Button } from '~/components/ui/button';
  * A Claude-style chat composer: a rounded, shadowed card with an auto-resizing
  * textarea and a send button. Enter sends, Shift+Enter inserts a newline.
  * Controlled (value/onChange) so the page owns the input state.
+ *
+ * While `streaming`, the send button becomes a stop button: it stays
+ * clickable even though the rest of the composer is disabled, since it is the
+ * only way out of a long generation.
  */
 export function ChatInput({
   value,
@@ -15,6 +19,9 @@ export function ChatInput({
   placeholder,
   autoFocus = false,
   sendLabel = 'Send',
+  streaming = false,
+  onStop = () => {},
+  stopLabel = 'Stop',
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -24,6 +31,11 @@ export function ChatInput({
   autoFocus?: boolean;
   /** Localized accessible label for the send button. */
   sendLabel?: string;
+  /** Swaps the send button for a stop button while a reply is streaming in. */
+  streaming?: boolean;
+  onStop?: () => void;
+  /** Localized accessible label for the stop button. */
+  stopLabel?: string;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -60,12 +72,14 @@ export function ChatInput({
       <Button
         type="button"
         size="icon"
-        onClick={onSend}
-        disabled={disabled || !hasText}
-        aria-label={sendLabel}
+        onClick={streaming ? onStop : onSend}
+        // While streaming, stop must stay clickable even though the composer is
+        // disabled — it is the only way out of a long generation.
+        disabled={streaming ? false : disabled || !hasText}
+        aria-label={streaming ? stopLabel : sendLabel}
         className="absolute bottom-2.5 right-2.5 size-9 rounded-xl"
       >
-        <ArrowUp className="size-4" />
+        {streaming ? <Square className="size-3.5 fill-current" /> : <ArrowUp className="size-4" />}
       </Button>
     </div>
   );

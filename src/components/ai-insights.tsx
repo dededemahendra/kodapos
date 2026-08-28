@@ -1,7 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import { useAction, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { MessageCircle } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { AiResponse } from '~/components/ai-response';
@@ -9,8 +9,7 @@ import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
-import { aiErrorMessage } from '~/lib/ai-error';
-import { toast } from '~/lib/toast';
+import { useAiStream } from '~/hooks/use-ai-stream';
 
 /**
  * Dashboard AI card. Uses the owner's bring-your-own-key AI integration to
@@ -24,37 +23,22 @@ export function AiInsights() {
   // The insights/restock surfaces send no question, so the app's language
   // toggle is the only signal the model gets.
   const locale = i18n.locale === 'en' ? 'en' : 'id';
-  const runInsights = useAction(api.ai.insights);
-  const runAsk = useAction(api.ai.ask);
-  const [result, setResult] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { text, streaming, send } = useAiStream();
   const [question, setQuestion] = useState('');
 
   const connected = settings?.integrations.some((i) => i.key === 'ai' && i.connected) ?? false;
 
   async function generate() {
-    setLoading(true);
-    try {
-      setResult(await runInsights({ locale }));
-    } catch (err) {
-      toast.error(i18n._(aiErrorMessage(err)));
-    } finally {
-      setLoading(false);
-    }
+    await send({ kind: 'insights', locale });
   }
 
   async function onAsk(e: FormEvent) {
     e.preventDefault();
     const q = question.trim();
-    if (!q || loading) return;
-    setLoading(true);
-    try {
-      setResult(await runAsk({ question: q, locale }));
-    } catch (err) {
-      toast.error(i18n._(aiErrorMessage(err)));
-    } finally {
-      setLoading(false);
-    }
+    if (!q || streaming) return;
+    // The ask box is a one-message chat: same prompt, and multi-turn later if
+    // we want it.
+    await send({ kind: 'chat', locale, messages: [{ role: 'user', content: q }] });
   }
 
   return (
@@ -65,8 +49,8 @@ export function AiInsights() {
           <Trans>Wawasan AI</Trans>
         </CardTitle>
         {connected ? (
-          <Button type="button" size="sm" onClick={() => void generate()} disabled={loading}>
-            {loading ? (
+          <Button type="button" size="sm" onClick={() => void generate()} disabled={streaming}>
+            {streaming ? (
               <Spinner data-icon="inline-start" />
             ) : (
               <MessageCircle data-icon="inline-start" />
@@ -97,17 +81,17 @@ export function AiInsights() {
                 aria-label={t`Tanya AI`}
                 maxLength={2000}
               />
-              <Button type="submit" variant="outline" disabled={loading || !question.trim()}>
+              <Button type="submit" variant="outline" disabled={streaming || !question.trim()}>
                 <Trans>Tanya</Trans>
               </Button>
             </form>
-            {loading ? (
+            {text ? (
+              <AiResponse text={text} />
+            ) : streaming ? (
               <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
                 <Spinner />
                 <Trans>Menganalisis…</Trans>
               </div>
-            ) : result ? (
-              <AiResponse text={result} />
             ) : (
               <p className="text-sm text-muted-foreground">
                 <Trans>Buat wawasan atau ajukan pertanyaan tentang penjualan dan stok Anda.</Trans>

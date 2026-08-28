@@ -32,6 +32,7 @@ import { Input } from '~/components/ui/input';
 import { RowActions } from '~/components/ui/row-actions';
 import { Spinner } from '~/components/ui/spinner';
 import { Textarea } from '~/components/ui/textarea';
+import { convexSiteUrl } from '~/lib/convex-site';
 import { formatDate } from '~/lib/formater';
 import { toast } from '~/lib/toast';
 
@@ -42,12 +43,6 @@ type TokenRow = {
   createdAt: number;
   lastUsedAt: number | null;
 };
-
-/** `https://<deployment>.convex.cloud` → `https://<deployment>.convex.site/mcp`. */
-function mcpUrl(): string {
-  const convexUrl = import.meta.env.VITE_CONVEX_URL ?? '';
-  return `${convexUrl.replace('.convex.cloud', '.convex.site')}/mcp`;
-}
 
 async function copyToClipboard(text: string, copiedMessage: string, failMessage: string) {
   try {
@@ -107,7 +102,7 @@ function CreateTokenDialog({
         {
           mcpServers: {
             kodapos: {
-              url: mcpUrl(),
+              url: `${convexSiteUrl()}/mcp`,
               headers: { Authorization: `Bearer ${issued.token}` },
             },
           },

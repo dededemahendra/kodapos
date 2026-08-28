@@ -26,6 +26,21 @@ const OPENROUTER_APP_NAME = 'kodapos';
 /** The app's two UI languages. */
 export type AiLocale = 'id' | 'en';
 
+/**
+ * The machine-readable failure codes `/ai/stream` returns — as an HTTP status
+ * body before the provider's response headers, and as an in-band `error` event
+ * after. The client maps these to localized copy, so no user-facing prose
+ * crosses the wire.
+ */
+export type AiErrorCode =
+  | 'unauthorized'
+  | 'bad_request'
+  | 'not_configured'
+  | 'rate_limited'
+  | 'provider'
+  | 'network'
+  | 'empty';
+
 const LANGUAGE_NAME: Record<AiLocale, string> = { id: 'Indonesian', en: 'English' };
 
 /**
@@ -90,8 +105,12 @@ export function buildLLMRequest(
   model: string,
   apiKey: string,
   system: string,
-  messages: ChatMsg[]
+  messages: ChatMsg[],
+  opts: { stream?: boolean } = {}
 ): LLMRequest {
+  // Spread rather than `stream: opts.stream` so a non-streaming request is
+  // byte-identical to what this built before streaming existed.
+  const stream = opts.stream ? { stream: true } : {};
   if (provider === 'anthropic') {
     return {
       url: 'https://api.anthropic.com/v1/messages',
@@ -100,7 +119,7 @@ export function buildLLMRequest(
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({ model, max_tokens: MAX_TOKENS, system, messages }),
+      body: JSON.stringify({ model, max_tokens: MAX_TOKENS, system, messages, ...stream }),
     };
   }
   // openai and OpenAI-compatible: same wire format, different host. OpenRouter
@@ -122,29 +141,52 @@ export function buildLLMRequest(
       max_tokens: MAX_TOKENS,
       temperature: 0.3,
       messages: [{ role: 'system', content: system }, ...messages],
+      ...stream,
     }),
   };
 }
 
-/** Extracts the assistant text from a provider's JSON response. Throws if absent. */
-export function parseLLMResponse(provider: AiProvider, json: unknown): string {
-  if (provider === 'anthropic') {
-    // content is an array of typed blocks; concatenate every text block (skips
-    // non-text blocks like thinking/tool_use that some models emit first).
-    const blocks = (json as { content?: Array<{ text?: string }> })?.content;
-    const text = Array.isArray(blocks)
-      ? blocks
-          .map((b) => (typeof b.text === 'string' ? b.text : ''))
-          .join('')
-          .trim()
-      : '';
-    if (!text) throw new Error('Respons AI kosong.');
-    return text;
+/** A validated `/ai/stream` request body. */
+export type AiStreamRequest =
+  | { kind: 'insights'; locale: AiLocale }
+  | { kind: 'restock'; locale: AiLocale }
+  | { kind: 'chat'; locale: AiLocale; messages: ChatMsg[] };
+
+/** Longest history and per-message length sent to the model, capping token cost. */
+const MAX_HISTORY_TURNS = 12;
+const MAX_MESSAGE_CHARS = 4000;
+
+/**
+ * Validates and bounds an untrusted `/ai/stream` body. Returns null for
+ * anything the route should answer with 400 — the route never inspects the raw
+ * body itself, so every bound lives here where it can be tested without a
+ * network or a database.
+ */
+export function parseStreamBody(body: unknown): AiStreamRequest | null {
+  if (typeof body !== 'object' || body === null) return null;
+  const b = body as { kind?: unknown; locale?: unknown; messages?: unknown };
+  // Deliberately permissive: anything other than exactly 'en' (missing, 'id',
+  // or an unrecognized value) coerces to 'id' rather than rejecting the
+  // request. The four now-deleted actions used a Convex validator that
+  // REJECTED any locale outside 'id'/'en' with a 400 — this loosening is
+  // intentional, not an oversight.
+  const locale: AiLocale = b.locale === 'en' ? 'en' : 'id';
+
+  if (b.kind === 'insights' || b.kind === 'restock') return { kind: b.kind, locale };
+  if (b.kind !== 'chat' || !Array.isArray(b.messages)) return null;
+
+  const raw: ChatMsg[] = [];
+  for (const m of b.messages as unknown[]) {
+    if (typeof m !== 'object' || m === null) return null;
+    const { role, content } = m as { role?: unknown; content?: unknown };
+    if ((role !== 'user' && role !== 'assistant') || typeof content !== 'string') return null;
+    raw.push({ role, content: content.slice(0, MAX_MESSAGE_CHARS) });
   }
-  const text = (json as { choices?: Array<{ message?: { content?: string } }> })?.choices?.[0]
-    ?.message?.content;
-  if (!text) throw new Error('Respons AI kosong.');
-  return text.trim();
+  const messages = normalizeHistory(raw.slice(-MAX_HISTORY_TURNS));
+  // The model needs a question to answer, and Anthropic rejects a history that
+  // does not end on a user turn.
+  if (messages.length === 0 || messages[messages.length - 1]!.role !== 'user') return null;
+  return { kind: 'chat', locale, messages };
 }
 
 export const INSIGHTS_SYSTEM_PROMPT =
