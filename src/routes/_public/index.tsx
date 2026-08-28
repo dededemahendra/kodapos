@@ -1,3 +1,4 @@
+// biome-ignore-all lint/security/noDangerouslySetInnerHtml: JSON.stringify of a static, app-controlled JSON-LD object for SEO
 import { createFileRoute } from '@tanstack/react-router';
 import { RedirectWhenAuthenticated } from '~/components/auth/redirect-when-authenticated';
 import { AiSpotlight } from '~/components/marketing/ai-spotlight';

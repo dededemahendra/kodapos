@@ -1,3 +1,4 @@
+// biome-ignore-all lint/security/noDangerouslySetInnerHtml: two static build-time script constants (theme + auth redirect), never user input
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { I18nProvider } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';

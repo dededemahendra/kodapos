@@ -1,3 +1,4 @@
+// biome-ignore-all lint/security/noDangerouslySetInnerHtml: injects CSS custom properties built from a typed chart config, never user input
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
 

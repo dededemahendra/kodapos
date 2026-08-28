@@ -36,7 +36,7 @@ export const inviteManager = mutation({
       .withIndex('by_email', (q) => q.eq('email', normalized))
       .filter((q) => q.eq(q.field('businessId'), businessId))
       .first();
-    let inviteId;
+    let inviteId: Id<'businessInvites'>;
     if (existing) {
       await ctx.db.patch(existing._id, { cafeIds });
       inviteId = existing._id;

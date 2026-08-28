@@ -1,3 +1,4 @@
+// biome-ignore-all lint/correctness/useJsxKeyInIterable: the flagged elements are single locals inside the map callback; the returned <div> carries key={table._id}
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';

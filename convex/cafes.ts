@@ -170,7 +170,7 @@ export const myCafe = query({
     // Resolve the active outlet (not the oldest cafe) so the client re-scopes
     // when the user switches outlets. Returns null on no-access rather than
     // throwing, preserving the query's null-on-signed-out contract.
-    let resolved;
+    let resolved: Awaited<ReturnType<typeof requireActiveOutlet>>;
     try {
       resolved = await requireActiveOutlet(ctx);
     } catch (e) {

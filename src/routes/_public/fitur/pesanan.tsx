@@ -1,3 +1,4 @@
+// biome-ignore-all lint/security/noDangerouslySetInnerHtml: JSON.stringify of static, app-controlled JSON-LD objects for SEO
 import { createFileRoute } from '@tanstack/react-router';
 import { useLocale } from '~/components/locale-provider';
 import { FeaturePage } from '~/components/marketing/feature-page';

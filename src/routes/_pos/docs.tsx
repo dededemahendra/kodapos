@@ -328,7 +328,9 @@ function useScrollSpy(ids: string[]): string | null {
       },
       { rootMargin: '-80px 0px -70% 0px', threshold: 0 }
     );
-    els.forEach((el) => observer.observe(el));
+    els.forEach((el) => {
+      observer.observe(el);
+    });
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
