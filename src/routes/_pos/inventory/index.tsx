@@ -4,7 +4,16 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Archive, ClipboardList, History, Package, PackagePlus, Pencil, Plus, Upload } from 'lucide-react';
+import {
+  Archive,
+  ClipboardList,
+  History,
+  Package,
+  PackagePlus,
+  Pencil,
+  Plus,
+  Upload,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CsvImportDialog } from '~/components/import/csv-import-dialog';
 import { IngredientForm } from '~/components/inventory/ingredient-form';
@@ -71,10 +80,7 @@ function InventoryIndex() {
     };
   }, [ingredients]);
 
-  const activeIngredients = useMemo(
-    () => ingredients?.filter((r) => !r.archived),
-    [ingredients]
-  );
+  const activeIngredients = useMemo(() => ingredients?.filter((r) => !r.archived), [ingredients]);
 
   // The rows passed to DataTable: undefined while loading (so DataTable shows
   // skeletons), otherwise filtered + searched.
@@ -104,7 +110,11 @@ function InventoryIndex() {
           const low = isLow(row.original);
           return (
             <span className="font-medium">
-              {low ? <span aria-hidden="true" className="mr-1">⚠</span> : null}
+              {low ? (
+                <span aria-hidden="true" className="mr-1">
+                  ⚠
+                </span>
+              ) : null}
               {row.original.name}
             </span>
           );
@@ -243,19 +253,11 @@ function InventoryIndex() {
         }
         actions={
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setImportOpen(true)}
-            >
+            <Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
               <Upload />
               <Trans>Impor CSV</Trans>
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setTakeOpen(true)}
-            >
+            <Button type="button" variant="outline" onClick={() => setTakeOpen(true)}>
               <ClipboardList />
               <Trans>Stok opname</Trans>
             </Button>
@@ -274,18 +276,25 @@ function InventoryIndex() {
         active={filter}
         onFilter={(v) => setFilter(v as Filter)}
         filters={[
-          { label: <Trans>Semua</Trans>, value: 'all', ...(counts !== undefined && { count: counts.all }) },
-          { label: <Trans>Stok rendah</Trans>, value: 'low', ...(counts !== undefined && { count: counts.low }) },
-          { label: <Trans>Arsip</Trans>, value: 'archived', ...(counts !== undefined && { count: counts.archived }) },
+          {
+            label: <Trans>Semua</Trans>,
+            value: 'all',
+            ...(counts !== undefined && { count: counts.all }),
+          },
+          {
+            label: <Trans>Stok rendah</Trans>,
+            value: 'low',
+            ...(counts !== undefined && { count: counts.low }),
+          },
+          {
+            label: <Trans>Arsip</Trans>,
+            value: 'archived',
+            ...(counts !== undefined && { count: counts.archived }),
+          },
         ]}
       />
 
-      {counts ? (
-        <StockSummary
-          lowCount={counts.low}
-          stockValueIDR={counts.stockValueIDR}
-        />
-      ) : null}
+      {counts ? <StockSummary lowCount={counts.low} stockValueIDR={counts.stockValueIDR} /> : null}
 
       <DataTable
         columns={columns}
@@ -312,11 +321,7 @@ function InventoryIndex() {
           if (!open) setAdjustId(null);
         }}
       />
-      <StockTakeDialog
-        open={takeOpen}
-        ingredients={activeIngredients}
-        onOpenChange={setTakeOpen}
-      />
+      <StockTakeDialog open={takeOpen} ingredients={activeIngredients} onOpenChange={setTakeOpen} />
       <CsvImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}
@@ -341,8 +346,8 @@ function InventoryIndex() {
         description={
           archiveRow ? (
             <Trans>
-              "{archiveRow.name}" akan disembunyikan dari daftar aktif. Bisa
-              dipulihkan dari tampilan arsip.
+              "{archiveRow.name}" akan disembunyikan dari daftar aktif. Bisa dipulihkan dari
+              tampilan arsip.
             </Trans>
           ) : undefined
         }
@@ -354,8 +359,7 @@ function InventoryIndex() {
             await archive({ id: archiveRow._id });
             toast.success(t`Bahan diarsipkan.`);
           } catch (err) {
-            const message =
-              err instanceof Error ? err.message : t`Gagal mengarsipkan bahan.`;
+            const message = err instanceof Error ? err.message : t`Gagal mengarsipkan bahan.`;
             toast.error(message);
             throw err; // keep the ConfirmDialog open for retry
           }

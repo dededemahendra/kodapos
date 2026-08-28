@@ -1,8 +1,7 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
 import { Clock } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { type ShiftSummary, ShiftSummaryPanel } from '~/components/shift/shift-summary-panel';
@@ -40,12 +39,18 @@ function ShiftClosePage() {
   if (closedShift) {
     return (
       <main className="max-w-xl mx-auto p-6 space-y-4">
-        <h1 className="text-2xl font-bold"><Trans>Shift ditutup</Trans></h1>
+        <h1 className="text-2xl font-bold">
+          <Trans>Shift ditutup</Trans>
+        </h1>
         <ShiftSummaryPanel shift={closedShift} />
         <div className="flex gap-2">
-          <Button onClick={() => window.print()}><Trans>Cetak ringkasan</Trans></Button>
+          <Button onClick={() => window.print()}>
+            <Trans>Cetak ringkasan</Trans>
+          </Button>
           <Button variant="outline" asChild>
-            <Link to="/menu"><Trans>Kembali ke menu</Trans></Link>
+            <Link to="/menu">
+              <Trans>Kembali ke menu</Trans>
+            </Link>
           </Button>
         </div>
       </main>
@@ -53,7 +58,11 @@ function ShiftClosePage() {
   }
 
   if (current === undefined) {
-    return <div className="p-6"><SummaryRowsSkeleton rows={6} /></div>;
+    return (
+      <div className="p-6">
+        <SummaryRowsSkeleton rows={6} />
+      </div>
+    );
   }
 
   if (current === null) {
@@ -64,11 +73,17 @@ function ShiftClosePage() {
             <EmptyMedia variant="icon">
               <Clock />
             </EmptyMedia>
-            <EmptyTitle><Trans>Tidak ada shift terbuka.</Trans></EmptyTitle>
-            <EmptyDescription><Trans>Buka shift baru sebelum menerima penjualan.</Trans></EmptyDescription>
+            <EmptyTitle>
+              <Trans>Tidak ada shift terbuka.</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Buka shift baru sebelum menerima penjualan.</Trans>
+            </EmptyDescription>
           </EmptyHeader>
           <Button asChild>
-            <Link to="/shift/open"><Trans>Buka Shift Baru</Trans></Link>
+            <Link to="/shift/open">
+              <Trans>Buka Shift Baru</Trans>
+            </Link>
           </Button>
         </Empty>
       </main>
@@ -89,13 +104,15 @@ function ShiftClosePage() {
         cashierName: summary?.cashierName ?? '—',
         countedCashIDR: counted,
         closedAt: Date.now(),
-        ...(summary ? {
-          cashSalesIDR: summary.cashSalesIDR,
-          cashInIDR: summary.cashInIDR,
-          cashOutIDR: summary.cashOutIDR,
-          expectedCashIDR: summary.expectedCashIDR,
-          varianceIDR: counted - summary.expectedCashIDR,
-        } : {}),
+        ...(summary
+          ? {
+              cashSalesIDR: summary.cashSalesIDR,
+              cashInIDR: summary.cashInIDR,
+              cashOutIDR: summary.cashOutIDR,
+              expectedCashIDR: summary.expectedCashIDR,
+              varianceIDR: counted - summary.expectedCashIDR,
+            }
+          : {}),
       });
       clearCashier();
     } catch (err) {
@@ -105,29 +122,36 @@ function ShiftClosePage() {
     }
   }
 
-  const panelShift = summary && current ? {
-    _id: current._id,
-    cashierId: current.cashierId,
-    cashierName: summary.cashierName,
-    openedAt: current.openedAt,
-    openingFloatIDR: summary.openingFloatIDR,
-    cashSalesIDR: summary.cashSalesIDR,
-    cashInIDR: summary.cashInIDR,
-    cashOutIDR: summary.cashOutIDR,
-    expectedCashIDR: summary.expectedCashIDR,
-  } : null;
+  const panelShift =
+    summary && current
+      ? {
+          _id: current._id,
+          cashierId: current.cashierId,
+          cashierName: summary.cashierName,
+          openedAt: current.openedAt,
+          openingFloatIDR: summary.openingFloatIDR,
+          cashSalesIDR: summary.cashSalesIDR,
+          cashInIDR: summary.cashInIDR,
+          cashOutIDR: summary.cashOutIDR,
+          expectedCashIDR: summary.expectedCashIDR,
+        }
+      : null;
 
   return (
     <main className="max-w-3xl mx-auto p-6 grid grid-cols-2 gap-8">
       <section>
-        <h1 className="text-2xl font-bold mb-3"><Trans>Tutup Shift</Trans></h1>
+        <h1 className="text-2xl font-bold mb-3">
+          <Trans>Tutup Shift</Trans>
+        </h1>
         {panelShift ? <ShiftSummaryPanel shift={panelShift} /> : <SummaryRowsSkeleton rows={6} />}
       </section>
       <section>
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="countedCashIDR"><Trans>Uang terhitung (Rp)</Trans></FieldLabel>
+              <FieldLabel htmlFor="countedCashIDR">
+                <Trans>Uang terhitung (Rp)</Trans>
+              </FieldLabel>
               <Input
                 id="countedCashIDR"
                 name="countedCashIDR"
@@ -139,15 +163,24 @@ function ShiftClosePage() {
                 onChange={(e) => setCountedStr(e.target.value)}
               />
             </Field>
-            {summary && countedStr ? (() => {
-              const variance = Number.parseInt(countedStr, 10) - summary.expectedCashIDR;
-              return Number.isFinite(variance) ? (
-                <p className={`text-sm ${variance === 0 ? 'text-muted-foreground' : variance > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                  <Trans>Selisih</Trans>: {variance > 0 ? `+${formatIDR(variance)}` : formatIDR(variance)}
-                  {' '}{variance > 0 ? <Trans>(Lebih)</Trans> : variance < 0 ? <Trans>(Kurang)</Trans> : null}
-                </p>
-              ) : null;
-            })() : null}
+            {summary && countedStr
+              ? (() => {
+                  const variance = Number.parseInt(countedStr, 10) - summary.expectedCashIDR;
+                  return Number.isFinite(variance) ? (
+                    <p
+                      className={`text-sm ${variance === 0 ? 'text-muted-foreground' : variance > 0 ? 'text-emerald-600' : 'text-red-600'}`}
+                    >
+                      <Trans>Selisih</Trans>:{' '}
+                      {variance > 0 ? `+${formatIDR(variance)}` : formatIDR(variance)}{' '}
+                      {variance > 0 ? (
+                        <Trans>(Lebih)</Trans>
+                      ) : variance < 0 ? (
+                        <Trans>(Kurang)</Trans>
+                      ) : null}
+                    </p>
+                  ) : null;
+                })()
+              : null}
             {error && <FieldError>{error}</FieldError>}
             <Button type="submit" disabled={submitting}>
               {submitting && <Spinner data-icon="inline-start" />}

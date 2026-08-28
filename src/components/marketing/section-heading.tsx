@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { MotionConfig, motion, type Variants } from 'motion/react';
+import type { ReactNode } from 'react';
 
 /** Trigger once when 80px inside viewport */
 const VP = { once: true, margin: '-80px' } as const;

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
-import { mutation, type MutationCtx, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { type MutationCtx, mutation, query } from './_generated/server';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
 
 const ingredientDoc = v.object({
@@ -173,11 +173,7 @@ export const upsert = mutation({
   returns: v.id('ingredients'),
   handler: async (ctx, args) => {
     const { cafeId } = await requireActiveOutlet(ctx);
-    const cleanName = assertIngredient(
-      args.name,
-      args.reorderThreshold,
-      args.lastCostPerUnitIDR
-    );
+    const cleanName = assertIngredient(args.name, args.reorderThreshold, args.lastCostPerUnitIDR);
 
     // Duplicate-name guard, case-insensitive, scoped to the cafe.
     const sameName = await ctx.db
@@ -185,9 +181,7 @@ export const upsert = mutation({
       .withIndex('by_cafe_name', (q) => q.eq('cafeId', cafeId))
       .collect();
     const lower = cleanName.toLowerCase();
-    const conflict = sameName.find(
-      (r) => r.name.toLowerCase() === lower && r._id !== args.id
-    );
+    const conflict = sameName.find((r) => r.name.toLowerCase() === lower && r._id !== args.id);
     if (conflict) throw new Error('Bahan dengan nama yang sama sudah ada.');
 
     const bc = args.barcode?.trim();
@@ -221,9 +215,7 @@ export const upsert = mutation({
 const importResult = v.object({
   created: v.number(),
   skipped: v.number(),
-  errors: v.array(
-    v.object({ row: v.number(), name: v.string(), reason: v.string() })
-  ),
+  errors: v.array(v.object({ row: v.number(), name: v.string(), reason: v.string() })),
 });
 
 export const bulkImport = mutation({
@@ -378,9 +370,7 @@ export const adjustStock = mutation({
 
 export const performStockTake = mutation({
   args: {
-    counts: v.array(
-      v.object({ ingredientId: v.id('ingredients'), countedQty: v.number() })
-    ),
+    counts: v.array(v.object({ ingredientId: v.id('ingredients'), countedQty: v.number() })),
     note: v.optional(v.string()),
   },
   returns: v.object({ adjusted: v.number() }),

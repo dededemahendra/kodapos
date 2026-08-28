@@ -1,6 +1,5 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
-import { RequirePermission } from '~/components/permission/require-permission';
 import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
@@ -8,6 +7,7 @@ import { useQuery } from 'convex/react';
 import { NotebookText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { RecipeEditor } from '~/components/inventory/recipe-editor';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
@@ -103,9 +103,7 @@ function RecipesInner() {
       {
         accessorKey: 'priceIDR',
         header: () => <Trans>Harga</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{formatIDR(row.original.priceIDR)}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{formatIDR(row.original.priceIDR)}</span>,
       },
       {
         accessorKey: 'costPerCupIDR',
@@ -190,9 +188,21 @@ function RecipesInner() {
         active={filter}
         onFilter={(v) => setFilter(v as Filter)}
         filters={[
-          { label: <Trans>Semua</Trans>, value: 'all', ...(counts !== undefined ? { count: counts.all } : {}) },
-          { label: <Trans>Lengkap</Trans>, value: 'complete', ...(counts !== undefined ? { count: counts.complete } : {}) },
-          { label: <Trans>Belum</Trans>, value: 'missing', ...(counts !== undefined ? { count: counts.missing } : {}) },
+          {
+            label: <Trans>Semua</Trans>,
+            value: 'all',
+            ...(counts !== undefined ? { count: counts.all } : {}),
+          },
+          {
+            label: <Trans>Lengkap</Trans>,
+            value: 'complete',
+            ...(counts !== undefined ? { count: counts.complete } : {}),
+          },
+          {
+            label: <Trans>Belum</Trans>,
+            value: 'missing',
+            ...(counts !== undefined ? { count: counts.missing } : {}),
+          },
         ]}
       />
 

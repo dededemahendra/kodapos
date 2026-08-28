@@ -1,8 +1,7 @@
-import { useLingui } from '@lingui/react/macro';
-import { Trans } from '@lingui/react/macro';
-import type { CartLine } from './cart-reducer';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { formatIDR } from '~/lib/money';
+import type { CartLine } from './cart-reducer';
 
 export function CartLineRow({
   line,

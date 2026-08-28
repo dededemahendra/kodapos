@@ -17,6 +17,7 @@ import {
   EmptyTitle,
 } from '~/components/ui/empty';
 import { Input } from '~/components/ui/input';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import {
   Select,
   SelectContent,
@@ -24,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { formatIDR } from '~/lib/money';
 import { toast } from '~/lib/toast';
 
@@ -158,11 +158,7 @@ function LabelsContent() {
               <SelectItem value="besar">{t`Besar`}</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            type="button"
-            onClick={() => window.print()}
-            disabled={printItems.length === 0}
-          >
+          <Button type="button" onClick={() => window.print()} disabled={printItems.length === 0}>
             <Printer />
             <Trans>Cetak label</Trans>
           </Button>

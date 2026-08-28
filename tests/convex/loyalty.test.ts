@@ -35,9 +35,17 @@ describe('loyalty config', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const cfg = await asOwner.query(api.loyalty.getConfig, {});
-    expect(cfg).toEqual({ enabled: false, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000 });
+    expect(cfg).toEqual({
+      enabled: false,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 10000,
+    });
     await asOwner.mutation(api.loyalty.updateConfig, {
-      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 5000,
+      enabled: true,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 5000,
     });
     expect((await asOwner.query(api.loyalty.getConfig, {})).redeemBlockIDR).toBe(5000);
   });
@@ -47,7 +55,10 @@ describe('loyalty config', () => {
     const { asOwner } = await setupOwner(t);
     await expect(
       asOwner.mutation(api.loyalty.updateConfig, {
-        enabled: true, earnRatePerIDR: 0, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+        enabled: true,
+        earnRatePerIDR: 0,
+        redeemBlockPoints: 100,
+        redeemBlockIDR: 10000,
       })
     ).rejects.toThrow();
   });
@@ -57,12 +68,18 @@ describe('loyalty config', () => {
     const { asOwner } = await setupOwner(t);
     await expect(
       asOwner.mutation(api.loyalty.updateConfig, {
-        enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 0, redeemBlockIDR: 10000,
+        enabled: true,
+        earnRatePerIDR: 1000,
+        redeemBlockPoints: 0,
+        redeemBlockIDR: 10000,
       })
     ).rejects.toThrow();
     await expect(
       asOwner.mutation(api.loyalty.updateConfig, {
-        enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 0,
+        enabled: true,
+        earnRatePerIDR: 1000,
+        redeemBlockPoints: 100,
+        redeemBlockIDR: 0,
       })
     ).rejects.toThrow();
   });
@@ -122,7 +139,12 @@ describe('loyalty tier helpers', () => {
 });
 
 describe('loyalty tier config persistence + validation', () => {
-  const base = { enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000 };
+  const base = {
+    enabled: true,
+    earnRatePerIDR: 1000,
+    redeemBlockPoints: 100,
+    redeemBlockIDR: 10000,
+  };
 
   it('persists tiers, stored sorted by minSpendIDR asc', async () => {
     const t = convexTest(schema, modules);

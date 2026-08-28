@@ -108,11 +108,12 @@ describe('orders.createCashSale', () => {
     expect(order?.lines?.[0]?.lineTotalIDR).toBe(18000);
     expect(order?.lines?.[0]?.modifiersSnapshot).toEqual([]);
 
-    const payments = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', result.orderId))
-        .collect()
+    const payments = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', result.orderId))
+          .collect()
     );
     expect(payments).toHaveLength(1);
     expect(payments?.[0]?.method).toBe('cash');
@@ -245,18 +246,20 @@ describe('orders.createCashSale', () => {
     expect(second.totalIDR).toBe(first.totalIDR);
     expect(second.changeIDR).toBe(first.changeIDR);
 
-    const allOrders = await t.run(async (ctx) =>
-      await ctx.db
-        .query('orders')
-        .withIndex('by_cafe_clientId', (q) => q.eq('cafeId', cafeId).eq('clientId', 'dup-1'))
-        .collect()
+    const allOrders = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('orders')
+          .withIndex('by_cafe_clientId', (q) => q.eq('cafeId', cafeId).eq('clientId', 'dup-1'))
+          .collect()
     );
     expect(allOrders).toHaveLength(1);
-    const allPayments = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', first.orderId))
-        .collect()
+    const allPayments = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', first.orderId))
+          .collect()
     );
     expect(allPayments).toHaveLength(1);
   });
@@ -422,7 +425,11 @@ describe('orders.createCashSale', () => {
 
   it('rejects cashier from another cafe', async () => {
     const t = convexTest(schema, modules);
-    const { asOwner: ownerA, shiftId: shiftA, itemId: itemA } = await setup(t, { email: 'a@x.com' });
+    const {
+      asOwner: ownerA,
+      shiftId: shiftA,
+      itemId: itemA,
+    } = await setup(t, { email: 'a@x.com' });
     const { cashierId: cashierB } = await setup(t, { email: 'b@x.com' });
     await expect(
       ownerA.mutation(api.orders.createCashSale, {
@@ -438,7 +445,11 @@ describe('orders.createCashSale', () => {
 
   it('rejects shift from another cafe', async () => {
     const t = convexTest(schema, modules);
-    const { asOwner: ownerA, cashierId: cashierA, itemId: itemA } = await setup(t, { email: 'a@x.com' });
+    const {
+      asOwner: ownerA,
+      cashierId: cashierA,
+      itemId: itemA,
+    } = await setup(t, { email: 'a@x.com' });
     const { shiftId: shiftB } = await setup(t, { email: 'b@x.com' });
     await expect(
       ownerA.mutation(api.orders.createCashSale, {
@@ -481,9 +492,7 @@ describe('orders.createCashSale', () => {
       required: true,
       minSelect: 1,
       maxSelect: 1,
-      options: [
-        { name: 'Reguler', priceAdjustmentIDR: 0, position: 0 },
-      ],
+      options: [{ name: 'Reguler', priceAdjustmentIDR: 0, position: 0 }],
     });
     await asOwner.mutation(api.menu.itemGroups.attach, {
       menuItemId: itemId,
@@ -542,9 +551,7 @@ describe('orders.createCashSale', () => {
       required: false,
       minSelect: 0,
       maxSelect: 1,
-      options: [
-        { name: 'Oat', priceAdjustmentIDR: 5000, position: 0 },
-      ],
+      options: [{ name: 'Oat', priceAdjustmentIDR: 5000, position: 0 }],
     });
     await asOwner.mutation(api.menu.itemGroups.attach, {
       menuItemId: itemId,
@@ -650,7 +657,7 @@ describe('orders.createCashSale', () => {
     ).rejects.toThrow(/tidak tersedia/i);
   });
 
-  it("rejects a promo owned by another cafe", async () => {
+  it('rejects a promo owned by another cafe', async () => {
     const t = convexTest(schema, modules);
     const a = await setup(t, { email: 'a@x.com' });
     const b = await setup(t, { email: 'b@x.com' });
@@ -695,7 +702,9 @@ describe('orders.createCashSale', () => {
     const s = await setup(t); // itemId = A (Espresso 18000) in categoryId X
     const catY = await s.asOwner.mutation(api.menu.categories.create, { name: 'Pastry' });
     const itemB = await s.asOwner.mutation(api.menu.items.create, {
-      categoryId: catY, name: 'Croissant', priceIDR: 12000,
+      categoryId: catY,
+      name: 'Croissant',
+      priceIDR: 12000,
     });
     return { ...s, catX: s.categoryId, catY, itemA: s.itemId, itemB };
   }
@@ -704,15 +713,23 @@ describe('orders.createCashSale', () => {
     const t = convexTest(schema, modules);
     const s = await setupScoped(t);
     const promoId = await s.asOwner.mutation(api.promotions.create, {
-      name: 'A 10%', type: 'percent', value: 10, scope: 'item', targetItemIds: [s.itemA],
+      name: 'A 10%',
+      type: 'percent',
+      value: 10,
+      scope: 'item',
+      targetItemIds: [s.itemA],
     });
     const result = await s.asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'scope-item', shiftId: s.shiftId, cashierId: s.cashierId,
+      clientId: 'scope-item',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
       lines: [
         { menuItemId: s.itemA, qty: 1, modifierOptionIds: [] },
         { menuItemId: s.itemB, qty: 1, modifierOptionIds: [] },
       ],
-      cashTenderedIDR: 30000, promoId, createdAtClient: 1700000000000,
+      cashTenderedIDR: 30000,
+      promoId,
+      createdAtClient: 1700000000000,
     });
     const order = await t.run((ctx) => ctx.db.get(result.orderId));
     // 10% of A's line (18000) = 1800; NOT 10% of subtotal 30000 (= 3000)
@@ -727,15 +744,23 @@ describe('orders.createCashSale', () => {
     const t = convexTest(schema, modules);
     const s = await setupScoped(t);
     const promoId = await s.asOwner.mutation(api.promotions.create, {
-      name: 'X 10%', type: 'percent', value: 10, scope: 'category', targetCategoryIds: [s.catX],
+      name: 'X 10%',
+      type: 'percent',
+      value: 10,
+      scope: 'category',
+      targetCategoryIds: [s.catX],
     });
     const result = await s.asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'scope-cat', shiftId: s.shiftId, cashierId: s.cashierId,
+      clientId: 'scope-cat',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
       lines: [
         { menuItemId: s.itemA, qty: 1, modifierOptionIds: [] },
         { menuItemId: s.itemB, qty: 1, modifierOptionIds: [] },
       ],
-      cashTenderedIDR: 30000, promoId, createdAtClient: 1700000000000,
+      cashTenderedIDR: 30000,
+      promoId,
+      createdAtClient: 1700000000000,
     });
     const order = await t.run((ctx) => ctx.db.get(result.orderId));
     expect(order?.discountIDR).toBe(1800); // 10% of A (cat X) only
@@ -747,15 +772,22 @@ describe('orders.createCashSale', () => {
     const t = convexTest(schema, modules);
     const s = await setupScoped(t);
     const promoId = await s.asOwner.mutation(api.promotions.create, {
-      name: 'All 10%', type: 'percent', value: 10, scope: 'order',
+      name: 'All 10%',
+      type: 'percent',
+      value: 10,
+      scope: 'order',
     });
     const result = await s.asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'scope-order', shiftId: s.shiftId, cashierId: s.cashierId,
+      clientId: 'scope-order',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
       lines: [
         { menuItemId: s.itemA, qty: 1, modifierOptionIds: [] },
         { menuItemId: s.itemB, qty: 1, modifierOptionIds: [] },
       ],
-      cashTenderedIDR: 30000, promoId, createdAtClient: 1700000000000,
+      cashTenderedIDR: 30000,
+      promoId,
+      createdAtClient: 1700000000000,
     });
     const order = await t.run((ctx) => ctx.db.get(result.orderId));
     expect(order?.discountIDR).toBe(3000); // 10% of full 30000
@@ -766,12 +798,18 @@ describe('orders.createCashSale', () => {
     const t = convexTest(schema, modules);
     const s = await setupScoped(t);
     const promoId = await s.asOwner.mutation(api.promotions.create, {
-      name: 'Legacy', type: 'percent', value: 10,
+      name: 'Legacy',
+      type: 'percent',
+      value: 10,
     });
     const result = await s.asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'scope-default', shiftId: s.shiftId, cashierId: s.cashierId,
+      clientId: 'scope-default',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
       lines: [{ menuItemId: s.itemA, qty: 1, modifierOptionIds: [] }],
-      cashTenderedIDR: 20000, promoId, createdAtClient: 1700000000000,
+      cashTenderedIDR: 20000,
+      promoId,
+      createdAtClient: 1700000000000,
     });
     const order = await t.run((ctx) => ctx.db.get(result.orderId));
     expect(order?.appliedPromo?.scope).toBe('order');
@@ -782,12 +820,20 @@ describe('orders.createCashSale', () => {
     const t = convexTest(schema, modules);
     const s = await setupScoped(t);
     const promoId = await s.asOwner.mutation(api.promotions.create, {
-      name: 'B 10%', type: 'percent', value: 10, scope: 'item', targetItemIds: [s.itemB],
+      name: 'B 10%',
+      type: 'percent',
+      value: 10,
+      scope: 'item',
+      targetItemIds: [s.itemB],
     });
     const result = await s.asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'scope-nomatch', shiftId: s.shiftId, cashierId: s.cashierId,
+      clientId: 'scope-nomatch',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
       lines: [{ menuItemId: s.itemA, qty: 1, modifierOptionIds: [] }], // only A in cart
-      cashTenderedIDR: 20000, promoId, createdAtClient: 1700000000000,
+      cashTenderedIDR: 20000,
+      promoId,
+      createdAtClient: 1700000000000,
     });
     const order = await t.run((ctx) => ctx.db.get(result.orderId));
     expect(order?.discountIDR).toBe(0);
@@ -799,13 +845,23 @@ describe('orders.createCashSale', () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     await asOwner.mutation(api.loyalty.updateConfig, {
-      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+      enabled: true,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 10000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111111',
+    });
     const res = await asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'order-loyal-1', shiftId, cashierId,
+      clientId: 'order-loyal-1',
+      shiftId,
+      cashierId,
       lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }], // Espresso 18000
-      cashTenderedIDR: 20000, customerId, createdAtClient: 1700000000000,
+      cashTenderedIDR: 20000,
+      customerId,
+      createdAtClient: 1700000000000,
     });
     const order = await t.run((ctx) => ctx.db.get(res.orderId));
     expect(order?.customerId).toBe(customerId);
@@ -821,13 +877,23 @@ describe('orders.createCashSale', () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     await asOwner.mutation(api.loyalty.updateConfig, {
-      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+      enabled: true,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 10000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111111',
+    });
     const args = {
-      clientId: 'order-loyal-2', shiftId, cashierId,
+      clientId: 'order-loyal-2',
+      shiftId,
+      cashierId,
       lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
-      cashTenderedIDR: 20000, customerId, createdAtClient: 1700000000000,
+      cashTenderedIDR: 20000,
+      customerId,
+      createdAtClient: 1700000000000,
     };
     await asOwner.mutation(api.orders.createCashSale, args);
     await asOwner.mutation(api.orders.createCashSale, args); // replay
@@ -876,7 +942,10 @@ describe('orders read queries', () => {
       createdAtClient: 1700000000000,
     });
     // A pending dynamic order — should NOT appear.
-    await asOwner.mutation(api.settings.connectIntegration, { key: 'qris', config: { apiKey: 'k' } });
+    await asOwner.mutation(api.settings.connectIntegration, {
+      key: 'qris',
+      config: { apiKey: 'k' },
+    });
     const pending = await asOwner.action(api.payments.qrisDynamic.createQrisDynamicSale, {
       clientId: 'pending-1',
       shiftId,
@@ -903,7 +972,12 @@ describe('orders read queries', () => {
   it('getById returns null for an order in another cafe', async () => {
     const t = convexTest(schema, modules);
     const { asOwner: ownerA } = await setup(t, { email: 'a@x.com' });
-    const { asOwner: ownerB, shiftId: shiftB, cashierId: cashierB, itemId: itemB } = await setup(t, {
+    const {
+      asOwner: ownerB,
+      shiftId: shiftB,
+      cashierId: cashierB,
+      itemId: itemB,
+    } = await setup(t, {
       email: 'b@x.com',
     });
     const created = await ownerB.mutation(api.orders.createCashSale, {
@@ -922,10 +996,7 @@ describe('orders read queries', () => {
   });
 });
 
-async function enableServiceCharge(
-  asOwner: Setup['asOwner'],
-  pct: number
-): Promise<void> {
+async function enableServiceCharge(asOwner: Setup['asOwner'], pct: number): Promise<void> {
   await asOwner.mutation(api.settings.updatePayment, {
     payment: {
       methods: {
@@ -1036,9 +1107,7 @@ describe('orders.createCashSale — inventory deduction', () => {
       async (ctx) =>
         await ctx.db
           .query('inventoryMovements')
-          .withIndex('by_cafe_ingredient', (q) =>
-            q.eq('cafeId', cafeId).eq('ingredientId', susuId)
-          )
+          .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', cafeId).eq('ingredientId', susuId))
           .collect()
     );
     expect(movements).toHaveLength(1);
@@ -1051,9 +1120,7 @@ describe('orders.createCashSale — inventory deduction', () => {
       async (ctx) =>
         await ctx.db
           .query('inventoryMovements')
-          .withIndex('by_cafe_ingredient', (q) =>
-            q.eq('cafeId', cafeId).eq('ingredientId', beanId)
-          )
+          .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', cafeId).eq('ingredientId', beanId))
           .collect()
     );
     expect(beanMovements).toHaveLength(1);
@@ -1085,9 +1152,7 @@ describe('orders.createCashSale — inventory deduction', () => {
       async (ctx) =>
         await ctx.db
           .query('inventoryMovements')
-          .withIndex('by_cafe_ingredient', (q) =>
-            q.eq('cafeId', cafeId).eq('ingredientId', susuId)
-          )
+          .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', cafeId).eq('ingredientId', susuId))
           .collect()
     );
     expect(movements[0]?.delta).toBe(-600);
@@ -1181,9 +1246,7 @@ describe('orders.createCashSale — inventory deduction', () => {
       async (ctx) =>
         await ctx.db
           .query('inventoryMovements')
-          .withIndex('by_cafe_ingredient', (q) =>
-            q.eq('cafeId', cafeId).eq('ingredientId', susuId)
-          )
+          .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', cafeId).eq('ingredientId', susuId))
           .collect()
     );
     expect(susuMovements).toHaveLength(0);
@@ -1191,9 +1254,7 @@ describe('orders.createCashSale — inventory deduction', () => {
       async (ctx) =>
         await ctx.db
           .query('inventoryMovements')
-          .withIndex('by_cafe_ingredient', (q) =>
-            q.eq('cafeId', cafeId).eq('ingredientId', beanId)
-          )
+          .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', cafeId).eq('ingredientId', beanId))
           .collect()
     );
     expect(beanMovements[0]?.delta).toBe(-18);
@@ -1229,9 +1290,7 @@ describe('orders.createCashSale — inventory deduction', () => {
       async (ctx) =>
         await ctx.db
           .query('inventoryMovements')
-          .withIndex('by_cafe_ingredient', (q) =>
-            q.eq('cafeId', cafeId).eq('ingredientId', susuId)
-          )
+          .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', cafeId).eq('ingredientId', susuId))
           .collect()
     );
     expect(movements).toHaveLength(1);
@@ -1241,17 +1300,36 @@ describe('orders.createCashSale — inventory deduction', () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, categoryId } = await setup(t);
     await asOwner.mutation(api.loyalty.updateConfig, {
-      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+      enabled: true,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 10000,
     });
-    const big = await asOwner.mutation(api.menu.items.create, { categoryId, name: 'Beans 1kg', priceIDR: 100000 });
-    const promoId = await asOwner.mutation(api.promotions.create, { name: 'Disc10', type: 'percent', value: 10 });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const big = await asOwner.mutation(api.menu.items.create, {
+      categoryId,
+      name: 'Beans 1kg',
+      priceIDR: 100000,
+    });
+    const promoId = await asOwner.mutation(api.promotions.create, {
+      name: 'Disc10',
+      type: 'percent',
+      value: 10,
+    });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111111',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 100 });
 
     const res = await asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'order-redeem-1', shiftId, cashierId,
+      clientId: 'order-redeem-1',
+      shiftId,
+      cashierId,
       lines: [{ menuItemId: big, qty: 1, modifierOptionIds: [] }],
-      cashTenderedIDR: 100000, promoId, customerId, redeemPoints: 100,
+      cashTenderedIDR: 100000,
+      promoId,
+      customerId,
+      redeemPoints: 100,
       createdAtClient: 1700000000000,
     });
     const order = await t.run((ctx) => ctx.db.get(res.orderId));
@@ -1276,14 +1354,24 @@ describe('orders.createCashSale — inventory deduction', () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     await asOwner.mutation(api.loyalty.updateConfig, {
-      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+      enabled: true,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 10000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111111',
+    });
     await expect(
       asOwner.mutation(api.orders.createCashSale, {
-        clientId: 'order-redeem-2', shiftId, cashierId,
+        clientId: 'order-redeem-2',
+        shiftId,
+        cashierId,
         lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
-        cashTenderedIDR: 20000, customerId, redeemPoints: 100,
+        cashTenderedIDR: 20000,
+        customerId,
+        redeemPoints: 100,
       })
     ).rejects.toThrow(/poin/i);
   });
@@ -1292,13 +1380,19 @@ describe('orders.createCashSale — inventory deduction', () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     await asOwner.mutation(api.loyalty.updateConfig, {
-      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+      enabled: true,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 10000,
     });
     await expect(
       asOwner.mutation(api.orders.createCashSale, {
-        clientId: 'order-redeem-nocust', shiftId, cashierId,
+        clientId: 'order-redeem-nocust',
+        shiftId,
+        cashierId,
         lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
-        cashTenderedIDR: 20000, redeemPoints: 100,
+        cashTenderedIDR: 20000,
+        redeemPoints: 100,
       })
     ).rejects.toThrow(/pelanggan/i);
   });
@@ -1324,11 +1418,12 @@ describe('orders.createQrisStaticSale', () => {
     expect(order?.paymentStatus).toBe('paid');
     expect(order?.totalIDR).toBe(36000);
 
-    const payments = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', result.orderId))
-        .collect()
+    const payments = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', result.orderId))
+          .collect()
     );
     expect(payments).toHaveLength(1);
     expect(payments?.[0]?.method).toBe('qris_static');
@@ -1352,9 +1447,7 @@ describe('orders.createQrisStaticSale', () => {
     const a = await asOwner.mutation(api.orders.createQrisStaticSale, args);
     const b = await asOwner.mutation(api.orders.createQrisStaticSale, args);
     expect(b.orderId).toBe(a.orderId);
-    const orders = await t.run(async (ctx) =>
-      await ctx.db.query('orders').collect()
-    );
+    const orders = await t.run(async (ctx) => await ctx.db.query('orders').collect());
     expect(orders).toHaveLength(1);
   });
 
@@ -1363,7 +1456,14 @@ describe('orders.createQrisStaticSale', () => {
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     await asOwner.mutation(api.settings.updatePayment, {
       payment: {
-        methods: { cash: true, qrisStatic: false, qrisDynamic: false, card: false, ewallet: false, transfer: false },
+        methods: {
+          cash: true,
+          qrisStatic: false,
+          qrisDynamic: false,
+          card: false,
+          ewallet: false,
+          transfer: false,
+        },
         defaultMethod: 'cash',
         cashRounding: 'none',
         quickCashButtons: [20000, 50000, 100000],
@@ -1414,14 +1514,26 @@ describe('orders.createQrisStaticSale', () => {
 
   it('produces the same totals as a cash sale for the same cart', async () => {
     const t = convexTest(schema, modules);
-    const { asOwner, shiftId, cashierId, itemId } = await setup(t, { taxEnabled: true, taxRatePct: 11 });
+    const { asOwner, shiftId, cashierId, itemId } = await setup(t, {
+      taxEnabled: true,
+      taxRatePct: 11,
+    });
     await configureQrisImage(t, asOwner);
     const lines = [{ menuItemId: itemId, qty: 3, modifierOptionIds: [] }];
     const cash = await asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'parity-cash', shiftId, cashierId, lines, cashTenderedIDR: 100000, createdAtClient: 1700000000000,
+      clientId: 'parity-cash',
+      shiftId,
+      cashierId,
+      lines,
+      cashTenderedIDR: 100000,
+      createdAtClient: 1700000000000,
     });
     const qris = await asOwner.mutation(api.orders.createQrisStaticSale, {
-      clientId: 'parity-qris', shiftId, cashierId, lines, createdAtClient: 1700000000000,
+      clientId: 'parity-qris',
+      shiftId,
+      cashierId,
+      lines,
+      createdAtClient: 1700000000000,
     });
     expect(qris.totalIDR).toBe(cash.totalIDR);
   });
@@ -1554,13 +1666,23 @@ describe('voidSale', () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     await asOwner.mutation(api.loyalty.updateConfig, {
-      enabled: true, earnRatePerIDR: 1000, redeemBlockPoints: 100, redeemBlockIDR: 10000,
+      enabled: true,
+      earnRatePerIDR: 1000,
+      redeemBlockPoints: 100,
+      redeemBlockIDR: 10000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111111',
+    });
     const res = await asOwner.mutation(api.orders.createCashSale, {
-      clientId: 'void-loyal-1', shiftId, cashierId,
+      clientId: 'void-loyal-1',
+      shiftId,
+      cashierId,
       lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }], // Espresso 18000, earns 18
-      cashTenderedIDR: 20000, customerId, createdAtClient: 1700000000000,
+      cashTenderedIDR: 20000,
+      customerId,
+      createdAtClient: 1700000000000,
     });
     const afterSale = await asOwner.query(api.customers.getDetail, { id: customerId });
     expect(afterSale?.pointsBalance).toBe(18);
@@ -1593,15 +1715,20 @@ describe('voidSale', () => {
       createdAtClient: 1700000000000,
     });
     await asOwner.mutation(api.orders.voidSale, { orderId: res.orderId });
-    await expect(
-      asOwner.mutation(api.orders.voidSale, { orderId: res.orderId })
-    ).rejects.toThrow(/lunas/i);
+    await expect(asOwner.mutation(api.orders.voidSale, { orderId: res.orderId })).rejects.toThrow(
+      /lunas/i
+    );
   });
 
   it('is owner-scoped', async () => {
     const t = convexTest(schema, modules);
     const { asOwner: ownerA } = await setup(t, { email: 'a@x.com' });
-    const { asOwner: ownerB, shiftId: shiftB, cashierId: cashierB, itemId: itemB } = await setup(t, {
+    const {
+      asOwner: ownerB,
+      shiftId: shiftB,
+      cashierId: cashierB,
+      itemId: itemB,
+    } = await setup(t, {
       email: 'b@x.com',
     });
     const created = await ownerB.mutation(api.orders.createCashSale, {

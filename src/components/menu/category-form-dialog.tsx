@@ -75,7 +75,9 @@ export function CategoryFormDialog({
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="cat-name"><Trans>Nama kategori</Trans></FieldLabel>
+              <FieldLabel htmlFor="cat-name">
+                <Trans>Nama kategori</Trans>
+              </FieldLabel>
               <Input
                 id="cat-name"
                 value={name}

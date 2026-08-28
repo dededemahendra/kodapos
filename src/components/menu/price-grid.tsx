@@ -104,8 +104,8 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
           </EmptyTitle>
           <EmptyDescription>
             <Trans>
-              Tambah item, varian, atau modifier di menu terlebih dahulu untuk memberinya harga
-              di kategori ini.
+              Tambah item, varian, atau modifier di menu terlebih dahulu untuk memberinya harga di
+              kategori ini.
             </Trans>
           </EmptyDescription>
         </EmptyHeader>
@@ -117,8 +117,7 @@ export function PriceGrid({ categoryId }: { categoryId: Id<'priceCategories'> })
   const visible = term
     ? rows.filter(
         (r) =>
-          r.label.toLowerCase().includes(term) ||
-          (r.groupLabel ?? '').toLowerCase().includes(term)
+          r.label.toLowerCase().includes(term) || (r.groupLabel ?? '').toLowerCase().includes(term)
       )
     : rows;
 

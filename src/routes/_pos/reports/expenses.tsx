@@ -69,34 +69,26 @@ function ExpensesReport() {
         accessorKey: 'at',
         header: () => <Trans>Tanggal</Trans>,
         cell: ({ row }) => (
-          <span className="text-sm">
-            {new Date(row.original.at).toLocaleDateString('id-ID')}
-          </span>
+          <span className="text-sm">{new Date(row.original.at).toLocaleDateString('id-ID')}</span>
         ),
       },
       {
         accessorKey: 'category',
         header: () => <Trans>Kategori</Trans>,
-        cell: ({ row }) => (
-          <Badge variant="secondary">{catLabel(row.original.category)}</Badge>
-        ),
+        cell: ({ row }) => <Badge variant="secondary">{catLabel(row.original.category)}</Badge>,
       },
       {
         accessorKey: 'amountIDR',
         header: () => <Trans>Jumlah (Rp)</Trans>,
         cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatIDR(row.original.amountIDR)}
-          </span>
+          <span className="tabular-nums">{formatIDR(row.original.amountIDR)}</span>
         ),
       },
       {
         accessorKey: 'note',
         header: () => <Trans>Catatan</Trans>,
         cell: ({ row }) => (
-          <span className="text-muted-foreground text-sm">
-            {row.original.note ?? '—'}
-          </span>
+          <span className="text-muted-foreground text-sm">{row.original.note ?? '—'}</span>
         ),
       },
       {
@@ -155,8 +147,7 @@ function ExpensesReport() {
       await exportTablePdf({
         filename: 'pengeluaran.pdf',
         title: 'Expenses',
-        subtitle:
-          'from' in range ? `${range.from} to ${range.to}` : range.preset,
+        subtitle: 'from' in range ? `${range.from} to ${range.to}` : range.preset,
         columns: [
           { key: 'at', header: 'Date' },
           { key: 'category', header: 'Category' },
@@ -215,12 +206,8 @@ function ExpensesReport() {
       {data && data.byCategory.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {data.byCategory.map((c) => (
-            <div
-              key={c.category}
-              className="rounded-md border border-border px-2 py-1 text-xs"
-            >
-              {catLabel(c.category)}:{' '}
-              <span className="tabular-nums">{formatIDR(c.amountIDR)}</span>
+            <div key={c.category} className="rounded-md border border-border px-2 py-1 text-xs">
+              {catLabel(c.category)}: <span className="tabular-nums">{formatIDR(c.amountIDR)}</span>
             </div>
           ))}
         </div>

@@ -1,8 +1,9 @@
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import { useConvex, useQuery } from 'convex/react';
+import { BadgePercent } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import {
   Empty,
@@ -11,12 +12,10 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
-import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
-import type { CartPromo } from './cart-reducer';
-import { BadgePercent } from 'lucide-react';
 import { formatPromoValue } from '~/lib/promo';
+import type { CartPromo } from './cart-reducer';
 
 /** Map a promo doc (from list/resolveByCode) to the cart's promo shape, carrying
  *  the scope + targets so the on-screen preview discounts only matching lines. */

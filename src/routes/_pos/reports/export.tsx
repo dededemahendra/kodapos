@@ -78,41 +78,31 @@ function AccountingExport() {
         accessorKey: 'at',
         header: () => <Trans>Tanggal</Trans>,
         cell: ({ row }) => (
-          <span className="text-sm">
-            {new Date(row.original.at).toLocaleDateString('id-ID')}
-          </span>
+          <span className="text-sm">{new Date(row.original.at).toLocaleDateString('id-ID')}</span>
         ),
       },
       {
         accessorKey: 'type',
         header: () => <Trans>Tipe</Trans>,
-        cell: ({ row }) => (
-          <Badge variant="secondary">{typeLabel(row.original.type)}</Badge>
-        ),
+        cell: ({ row }) => <Badge variant="secondary">{typeLabel(row.original.type)}</Badge>,
       },
       {
         accessorKey: 'description',
         header: () => <Trans>Keterangan</Trans>,
-        cell: ({ row }) => (
-          <span className="text-sm">{row.original.description}</span>
-        ),
+        cell: ({ row }) => <span className="text-sm">{row.original.description}</span>,
       },
       {
         accessorKey: 'account',
         header: () => <Trans>Akun</Trans>,
         cell: ({ row }) => (
-          <span className="text-muted-foreground text-sm">
-            {row.original.account}
-          </span>
+          <span className="text-muted-foreground text-sm">{row.original.account}</span>
         ),
       },
       {
         accessorKey: 'method',
         header: () => <Trans>Metode</Trans>,
         cell: ({ row }) => (
-          <span className="text-muted-foreground text-sm">
-            {row.original.method ?? '—'}
-          </span>
+          <span className="text-muted-foreground text-sm">{row.original.method ?? '—'}</span>
         ),
       },
       {
@@ -227,10 +217,7 @@ function AccountingExport() {
     }
   }
 
-  const reversed = useMemo(
-    () => (data ? [...data.entries].reverse() : []),
-    [data]
-  );
+  const reversed = useMemo(() => (data ? [...data.entries].reverse() : []), [data]);
 
   return (
     <div className="space-y-4">
@@ -262,27 +249,19 @@ function AccountingExport() {
               <dt>
                 <Trans>Arus Masuk</Trans>
               </dt>
-              <dd className="tabular-nums">
-                {formatIDR(data.summary.inflowIDR)}
-              </dd>
+              <dd className="tabular-nums">{formatIDR(data.summary.inflowIDR)}</dd>
             </div>
             <div className="flex items-baseline justify-between gap-4">
               <dt>
                 <Trans>Arus Keluar</Trans>
               </dt>
-              <dd className="tabular-nums">
-                {formatIDR(data.summary.outflowIDR)}
-              </dd>
+              <dd className="tabular-nums">{formatIDR(data.summary.outflowIDR)}</dd>
             </div>
             <div className="flex items-baseline justify-between gap-4 font-semibold sm:col-span-2 border-t border-border pt-2">
               <dt>
                 <Trans>Bersih</Trans>
               </dt>
-              <dd
-                className={`tabular-nums${
-                  data.summary.netIDR < 0 ? ' text-destructive' : ''
-                }`}
-              >
+              <dd className={`tabular-nums${data.summary.netIDR < 0 ? ' text-destructive' : ''}`}>
                 {formatIDR(data.summary.netIDR)}
               </dd>
             </div>
@@ -291,41 +270,31 @@ function AccountingExport() {
               <dt>
                 <Trans>Penjualan</Trans>
               </dt>
-              <dd className="tabular-nums">
-                {formatIDR(data.summary.salesIDR)}
-              </dd>
+              <dd className="tabular-nums">{formatIDR(data.summary.salesIDR)}</dd>
             </div>
             <div className="flex items-baseline justify-between gap-4 text-muted-foreground text-sm">
               <dt>
                 <Trans>Pendapatan Lain</Trans>
               </dt>
-              <dd className="tabular-nums">
-                {formatIDR(data.summary.otherIncomeIDR)}
-              </dd>
+              <dd className="tabular-nums">{formatIDR(data.summary.otherIncomeIDR)}</dd>
             </div>
             <div className="flex items-baseline justify-between gap-4 text-muted-foreground text-sm">
               <dt>
                 <Trans>Pengembalian</Trans>
               </dt>
-              <dd className="tabular-nums">
-                {formatIDR(data.summary.refundsIDR)}
-              </dd>
+              <dd className="tabular-nums">{formatIDR(data.summary.refundsIDR)}</dd>
             </div>
             <div className="flex items-baseline justify-between gap-4 text-muted-foreground text-sm">
               <dt>
                 <Trans>Pengeluaran</Trans>
               </dt>
-              <dd className="tabular-nums">
-                {formatIDR(data.summary.expensesIDR)}
-              </dd>
+              <dd className="tabular-nums">{formatIDR(data.summary.expensesIDR)}</dd>
             </div>
             <div className="flex items-baseline justify-between gap-4 text-muted-foreground text-sm">
               <dt>
                 <Trans>Pembelian</Trans>
               </dt>
-              <dd className="tabular-nums">
-                {formatIDR(data.summary.purchasesIDR)}
-              </dd>
+              <dd className="tabular-nums">{formatIDR(data.summary.purchasesIDR)}</dd>
             </div>
           </dl>
         </Card>

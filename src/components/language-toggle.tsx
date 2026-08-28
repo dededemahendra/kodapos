@@ -1,8 +1,8 @@
 'use client';
 
 import { useLocale } from '~/components/locale-provider';
-import { cn } from '~/lib/utils';
 import { LOCALES, type Locale } from '~/lib/locale';
+import { cn } from '~/lib/utils';
 
 /**
  * ID / EN segmented language switcher. Reused across the marketing chrome

@@ -271,7 +271,10 @@ describe('refunds.create — over-refund rejected, nothing applied', () => {
     const order = await t.run((ctx) => ctx.db.get(sale.orderId));
     expect(order?.refundedIDR).toBeUndefined();
     const refundRows = await t.run((ctx) =>
-      ctx.db.query('refunds').withIndex('by_order', (q) => q.eq('orderId', sale.orderId)).collect()
+      ctx.db
+        .query('refunds')
+        .withIndex('by_order', (q) => q.eq('orderId', sale.orderId))
+        .collect()
     );
     expect(refundRows).toHaveLength(0);
   });
@@ -330,7 +333,10 @@ describe('refunds.create — idempotency', () => {
     expect(b).toBe(a);
 
     const refundRows = await t.run((ctx) =>
-      ctx.db.query('refunds').withIndex('by_order', (q) => q.eq('orderId', sale.orderId)).collect()
+      ctx.db
+        .query('refunds')
+        .withIndex('by_order', (q) => q.eq('orderId', sale.orderId))
+        .collect()
     );
     expect(refundRows).toHaveLength(1);
     expect(await stockOf(t, cafeId, susuId)).toBe(-400); // -600 sale + 200 refund once
@@ -452,7 +458,10 @@ describe('refunds.create — guards', () => {
   it('throws when refunding a non-paid (pending) order', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, cashierId, shiftId, itemId } = await setup(t);
-    await asOwner.mutation(api.settings.connectIntegration, { key: 'qris', config: { apiKey: 'k' } });
+    await asOwner.mutation(api.settings.connectIntegration, {
+      key: 'qris',
+      config: { apiKey: 'k' },
+    });
     const pending = await asOwner.action(api.payments.qrisDynamic.createQrisDynamicSale, {
       clientId: 'pending-refund',
       shiftId,
@@ -895,7 +904,10 @@ describe('refunds.create — per-tender cap on split orders (Finding 4)', () => 
     const after = await s.asOwner.query(api.giftCards.getByCode, { code: 'SPLITGC' });
     expect(after?.balanceIDR).toBe(70000);
     const refundRows = await t.run((ctx) =>
-      ctx.db.query('refunds').withIndex('by_order', (q) => q.eq('orderId', sale.orderId)).collect()
+      ctx.db
+        .query('refunds')
+        .withIndex('by_order', (q) => q.eq('orderId', sale.orderId))
+        .collect()
     );
     expect(refundRows).toHaveLength(0);
     const order = await t.run((ctx) => ctx.db.get(sale.orderId));

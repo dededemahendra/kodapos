@@ -73,16 +73,17 @@ export function validateRefundLines(
   // bypassed by splitting one line across two request rows.
   const requestedQtyByIndex = new Map<number, number>();
   for (const req of requested) {
-    if (!Number.isInteger(req.lineIndex) || req.lineIndex < 0 || req.lineIndex >= orderLines.length) {
+    if (
+      !Number.isInteger(req.lineIndex) ||
+      req.lineIndex < 0 ||
+      req.lineIndex >= orderLines.length
+    ) {
       throw new Error('Pilih item untuk direfund.');
     }
     if (!Number.isInteger(req.qty) || req.qty <= 0) {
       throw new Error('Pilih item untuk direfund.');
     }
-    requestedQtyByIndex.set(
-      req.lineIndex,
-      (requestedQtyByIndex.get(req.lineIndex) ?? 0) + req.qty
-    );
+    requestedQtyByIndex.set(req.lineIndex, (requestedQtyByIndex.get(req.lineIndex) ?? 0) + req.qty);
   }
 
   for (const [lineIndex, qty] of requestedQtyByIndex) {

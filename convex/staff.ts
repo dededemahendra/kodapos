@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet, tryActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned, tryActiveOutlet } from './lib/auth';
 import { hashPin, verifyPin as verifyPinHash } from './lib/pin';
 
 const permissionsValidator = v.object({
@@ -11,8 +11,20 @@ const permissionsValidator = v.object({
   canEditMenu: v.boolean(),
 });
 
-const ALL_TRUE = { canVoid: true, canDiscount: true, canManageShift: true, canViewReports: true, canEditMenu: true };
-const ALL_FALSE = { canVoid: false, canDiscount: false, canManageShift: false, canViewReports: false, canEditMenu: false };
+const ALL_TRUE = {
+  canVoid: true,
+  canDiscount: true,
+  canManageShift: true,
+  canViewReports: true,
+  canEditMenu: true,
+};
+const ALL_FALSE = {
+  canVoid: false,
+  canDiscount: false,
+  canManageShift: false,
+  canViewReports: false,
+  canEditMenu: false,
+};
 
 const cafeStaffDoc = v.object({
   _id: v.id('cafeStaff'),
@@ -212,7 +224,8 @@ export const permissionsFor = query({
     if (!staff || staff.cafeId !== outlet.cafeId) return null;
     return {
       role: staff.role,
-      permissions: staff.role === 'owner' ? ALL_TRUE : { ...ALL_FALSE, ...(staff.permissions ?? {}) },
+      permissions:
+        staff.role === 'owner' ? ALL_TRUE : { ...ALL_FALSE, ...(staff.permissions ?? {}) },
     };
   },
 });

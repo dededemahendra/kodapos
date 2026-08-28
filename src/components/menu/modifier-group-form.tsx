@@ -1,9 +1,8 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { type FormEvent, useState } from 'react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -80,7 +79,9 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
     <form onSubmit={handleSubmit} className="max-w-xl">
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="groupName"><Trans>Nama grup</Trans></FieldLabel>
+          <FieldLabel htmlFor="groupName">
+            <Trans>Nama grup</Trans>
+          </FieldLabel>
           <Input
             id="groupName"
             value={name}
@@ -91,7 +92,9 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
         </Field>
         <div className="grid grid-cols-3 gap-3">
           <Field>
-            <FieldLabel htmlFor="required"><Trans>Wajib?</Trans></FieldLabel>
+            <FieldLabel htmlFor="required">
+              <Trans>Wajib?</Trans>
+            </FieldLabel>
             <label className="flex items-center gap-2 text-sm">
               <input
                 id="required"
@@ -104,7 +107,9 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
             </label>
           </Field>
           <Field>
-            <FieldLabel htmlFor="minSelect"><Trans>Min</Trans></FieldLabel>
+            <FieldLabel htmlFor="minSelect">
+              <Trans>Min</Trans>
+            </FieldLabel>
             <Input
               id="minSelect"
               type="number"
@@ -115,7 +120,9 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="maxSelect"><Trans>Max</Trans></FieldLabel>
+            <FieldLabel htmlFor="maxSelect">
+              <Trans>Max</Trans>
+            </FieldLabel>
             <Input
               id="maxSelect"
               type="number"
@@ -138,7 +145,9 @@ export function ModifierGroupForm(props: ModifierGroupFormProps) {
           </div>
           <div className="space-y-2">
             {options.length === 0 && (
-              <p className="text-sm text-muted-foreground"><Trans>Belum ada opsi. Tambahkan minimal satu.</Trans></p>
+              <p className="text-sm text-muted-foreground">
+                <Trans>Belum ada opsi. Tambahkan minimal satu.</Trans>
+              </p>
             )}
             {options.map((o, idx) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: new rows have no persisted id yet; index is the pragmatic key.

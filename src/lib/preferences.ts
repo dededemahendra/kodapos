@@ -75,8 +75,7 @@ export function applyTheme(theme: Theme): void {
   if (typeof document === 'undefined') return;
   const dark =
     theme === 'dark' ||
-    (theme === 'system' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches);
+    (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.classList.toggle('dark', dark);
 }
 
@@ -171,10 +170,7 @@ export function getAutoLockMinutes(): number {
  * Small typed localStorage hook. Key is namespaced as `kodapos.<key>`.
  * Falls back to `fallback` when the key is absent or localStorage is unavailable.
  */
-export function usePreference<T extends string>(
-  key: string,
-  fallback: T,
-): [T, (v: T) => void] {
+export function usePreference<T extends string>(key: string, fallback: T): [T, (v: T) => void] {
   const [value, setValue] = useState<T>(() => {
     if (typeof window === 'undefined') return fallback;
     try {
@@ -201,14 +197,8 @@ export function usePreference<T extends string>(
 /**
  * Boolean variant of `usePreference`. Stores the string `'true'` or `'false'`.
  */
-export function useBoolPreference(
-  key: string,
-  fallback: boolean,
-): [boolean, (v: boolean) => void] {
-  const [raw, setRaw] = usePreference<'true' | 'false'>(
-    key,
-    fallback ? 'true' : 'false',
-  );
+export function useBoolPreference(key: string, fallback: boolean): [boolean, (v: boolean) => void] {
+  const [raw, setRaw] = usePreference<'true' | 'false'>(key, fallback ? 'true' : 'false');
 
   const set = (v: boolean) => setRaw(v ? 'true' : 'false');
 

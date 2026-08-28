@@ -9,10 +9,21 @@ import { CartReviewSheet } from '~/components/public/cart-review-sheet';
 import { ItemPickerSheet } from '~/components/public/item-picker-sheet';
 import { PublicMenuView } from '~/components/public/public-menu';
 import { QrPaymentView } from '~/components/public/qr-payment-view';
-import { type CartLine, cartLineKey, type MenuItem, type PickResult } from '~/components/public/types';
+import {
+  type CartLine,
+  cartLineKey,
+  type MenuItem,
+  type PickResult,
+} from '~/components/public/types';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { privatePage } from '~/lib/seo';
 
@@ -68,9 +79,7 @@ function OrderPage() {
     setCart((prev) => {
       const existing = prev.find((l) => l.key === key);
       if (existing) {
-        return prev.map((l) =>
-          l.key === key ? { ...l, qty: Math.min(99, l.qty + pick.qty) } : l
-        );
+        return prev.map((l) => (l.key === key ? { ...l, qty: Math.min(99, l.qty + pick.qty) } : l));
       }
       return [
         ...prev,

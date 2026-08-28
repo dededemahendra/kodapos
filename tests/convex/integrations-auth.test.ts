@@ -11,17 +11,13 @@ const modules = import.meta.glob('../../convex/**/*.*s');
  * who has outlet access to the same cafe.
  */
 async function seedOwnerWithManager(t: ReturnType<typeof convexTest>) {
-  const ownerId = await t.run((ctx) =>
-    ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' })
-  );
+  const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' }));
   const asOwner = t.withIdentity({ subject: `${ownerId}|test_session` });
   const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   const businessId = (await t.run((ctx) => ctx.db.get(cafeId as Id<'cafes'>)))!
     .businessId as Id<'businesses'>;
 
-  const mgrUserId = await t.run((ctx) =>
-    ctx.db.insert('users', { name: 'Mgr', email: 'm@x.com' })
-  );
+  const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'm@x.com' }));
   const mgrMemberId = await t.run((ctx) =>
     ctx.db.insert('businessMembers', {
       businessId,

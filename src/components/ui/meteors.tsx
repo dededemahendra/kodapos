@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type CSSProperties } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
 import { cn } from '~/lib/utils';
 
 interface MeteorsProps {
@@ -49,7 +49,7 @@ export function Meteors({
           style={style}
           className={cn(
             'pointer-events-none absolute size-1 rotate-[var(--angle)] animate-meteor rounded-full bg-foreground/80 shadow-[0_0_6px_1px_var(--color-foreground)]',
-            className,
+            className
           )}
         >
           <div className="pointer-events-none absolute top-1/2 h-0.5 w-[80px] -translate-y-1/2 bg-gradient-to-r from-foreground/70 to-transparent" />

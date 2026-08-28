@@ -33,9 +33,7 @@ describe('cafes.updateProfileDetails', () => {
       city: 'Jakarta',
       postalCode: '12345',
       timezone: 'Asia/Jakarta',
-      operatingHours: [
-        { day: 0, open: true, openTime: '08:00', closeTime: '22:00' },
-      ],
+      operatingHours: [{ day: 0, open: true, openTime: '08:00', closeTime: '22:00' }],
     });
 
     const cafe = await asOwner.query(api.cafes.myCafe);
@@ -81,7 +79,9 @@ describe('cafes.updateProfileDetails', () => {
 
 it('updateProfile records ownerTermsAcceptedAt when provided', async () => {
   const t = convexTest(schema, modules);
-  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'terms@x.com' }));
+  const userId = await t.run((ctx) =>
+    ctx.db.insert('users', { name: 'Owner', email: 'terms@x.com' })
+  );
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Terms' });
 
@@ -101,7 +101,9 @@ it('myCafe returns ownerTermsAcceptedAt without a validator error', async () => 
   // Guards the returns validator: once a cafe has ownerTermsAcceptedAt set,
   // myCafe must include it or convex rejects the return (ReturnsValidationError).
   const t = convexTest(schema, modules);
-  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'mycafe@x.com' }));
+  const userId = await t.run((ctx) =>
+    ctx.db.insert('users', { name: 'Owner', email: 'mycafe@x.com' })
+  );
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi MC' });
   await asOwner.mutation(api.cafes.updateProfile, {
@@ -119,7 +121,9 @@ it('myCafe returns ownerTermsAcceptedAt without a validator error', async () => 
 
 it('acceptOwnerTerms sets ownerTermsAcceptedAt once (idempotent)', async () => {
   const t = convexTest(schema, modules);
-  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'aot@x.com' }));
+  const userId = await t.run((ctx) =>
+    ctx.db.insert('users', { name: 'Owner', email: 'aot@x.com' })
+  );
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi AOT' });
 

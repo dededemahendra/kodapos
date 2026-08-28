@@ -9,7 +9,9 @@ const modules = import.meta.glob('../../convex/**/*.*s');
 
 /** Owner seeded via the real bootstrap; returns helpers + the owner's first cafe/business. */
 async function seedOwner(t: ReturnType<typeof convexTest>, name = 'Kopi Senja') {
-  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: `${name}@x.com` }));
+  const userId = await t.run((ctx) =>
+    ctx.db.insert('users', { name: 'Owner', email: `${name}@x.com` })
+  );
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name });
   const cafe = await t.run((ctx) => ctx.db.get(cafeId as Id<'cafes'>));
@@ -32,7 +34,10 @@ describe('myOutlets', () => {
       ctx.db.insert('cafes', { name: 'Cabang 2', ownerUserId: userId, businessId, createdAt: 2 })
     );
     await t.run(async (ctx) => {
-      const active = await ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId)).first();
+      const active = await ctx.db
+        .query('activeOutlet')
+        .withIndex('by_user', (q) => q.eq('userId', userId))
+        .first();
       await ctx.db.patch(active!._id, { cafeId: second, updatedAt: 3 });
     });
 
@@ -47,14 +52,30 @@ describe('myOutlets', () => {
     const t = convexTest(schema, modules);
     const { userId: ownerId, businessId } = await seedOwner(t);
     const granted = await t.run((ctx) =>
-      ctx.db.insert('cafes', { name: 'Cabang Manajer', ownerUserId: ownerId, businessId, createdAt: 2 })
+      ctx.db.insert('cafes', {
+        name: 'Cabang Manajer',
+        ownerUserId: ownerId,
+        businessId,
+        createdAt: 2,
+      })
     );
-    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'm@x.com' }));
+    const mgrUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Mgr', email: 'm@x.com' })
+    );
     const mgrMemberId = await t.run((ctx) =>
-      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+      ctx.db.insert('businessMembers', {
+        businessId,
+        userId: mgrUserId,
+        role: 'manager',
+        createdAt: 5,
+      })
     );
     await t.run((ctx) =>
-      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: granted, createdAt: 5 })
+      ctx.db.insert('memberOutletAccess', {
+        businessMemberId: mgrMemberId,
+        cafeId: granted,
+        createdAt: 5,
+      })
     );
     const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
 
@@ -78,7 +99,10 @@ describe('myCafe resolves the active outlet', () => {
       ctx.db.insert('cafes', { name: 'Cabang 2', ownerUserId: userId, businessId, createdAt: 2 })
     );
     await t.run(async (ctx) => {
-      const active = await ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId)).first();
+      const active = await ctx.db
+        .query('activeOutlet')
+        .withIndex('by_user', (q) => q.eq('userId', userId))
+        .first();
       await ctx.db.patch(active!._id, { cafeId: second, updatedAt: 3 });
     });
 
@@ -103,14 +127,30 @@ describe('myCafe resolves the active outlet', () => {
     const t = convexTest(schema, modules);
     const { userId: ownerId, businessId } = await seedOwner(t);
     const granted = await t.run((ctx) =>
-      ctx.db.insert('cafes', { name: 'Cabang Manajer', ownerUserId: ownerId, businessId, createdAt: 2 })
+      ctx.db.insert('cafes', {
+        name: 'Cabang Manajer',
+        ownerUserId: ownerId,
+        businessId,
+        createdAt: 2,
+      })
     );
-    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'role-mgr@x.com' }));
+    const mgrUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Mgr', email: 'role-mgr@x.com' })
+    );
     const mgrMemberId = await t.run((ctx) =>
-      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+      ctx.db.insert('businessMembers', {
+        businessId,
+        userId: mgrUserId,
+        role: 'manager',
+        createdAt: 5,
+      })
     );
     await t.run((ctx) =>
-      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: granted, createdAt: 5 })
+      ctx.db.insert('memberOutletAccess', {
+        businessMemberId: mgrMemberId,
+        cafeId: granted,
+        createdAt: 5,
+      })
     );
     const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
     const cafe = await asMgr.query(api.cafes.myCafe, {});
@@ -132,12 +172,18 @@ describe('createOutlet', () => {
     expect(cafe?.taxEnabled).toBe(true);
 
     const staff = await t.run((ctx) =>
-      ctx.db.query('cafeStaff').withIndex('by_cafe_active', (q) => q.eq('cafeId', newId as Id<'cafes'>)).collect()
+      ctx.db
+        .query('cafeStaff')
+        .withIndex('by_cafe_active', (q) => q.eq('cafeId', newId as Id<'cafes'>))
+        .collect()
     );
     expect(staff.some((s) => s.role === 'owner')).toBe(true);
 
     const active = await t.run((ctx) =>
-      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId)).first()
+      ctx.db
+        .query('activeOutlet')
+        .withIndex('by_user', (q) => q.eq('userId', userId))
+        .first()
     );
     expect(active?.cafeId).toBe(newId);
 
@@ -149,7 +195,9 @@ describe('createOutlet', () => {
   it('rejects an empty name', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await seedOwner(t);
-    await expect(asOwner.mutation(api.outlets.createOutlet, { name: '   ' })).rejects.toThrow('wajib diisi');
+    await expect(asOwner.mutation(api.outlets.createOutlet, { name: '   ' })).rejects.toThrow(
+      'wajib diisi'
+    );
   });
 
   it('rejects a name longer than 80 characters', async () => {
@@ -166,16 +214,29 @@ describe('createOutlet', () => {
     const granted = await t.run((ctx) =>
       ctx.db.insert('cafes', { name: 'Cabang', ownerUserId: ownerId, businessId, createdAt: 2 })
     );
-    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'm3@x.com' }));
+    const mgrUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Mgr', email: 'm3@x.com' })
+    );
     const mgrMemberId = await t.run((ctx) =>
-      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+      ctx.db.insert('businessMembers', {
+        businessId,
+        userId: mgrUserId,
+        role: 'manager',
+        createdAt: 5,
+      })
     );
     await t.run((ctx) =>
-      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: granted, createdAt: 5 })
+      ctx.db.insert('memberOutletAccess', {
+        businessMemberId: mgrMemberId,
+        cafeId: granted,
+        createdAt: 5,
+      })
     );
     const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
 
-    await expect(asMgr.mutation(api.outlets.createOutlet, { name: 'Nakal' })).rejects.toThrow('owner access required');
+    await expect(asMgr.mutation(api.outlets.createOutlet, { name: 'Nakal' })).rejects.toThrow(
+      'owner access required'
+    );
   });
 });
 
@@ -189,15 +250,30 @@ describe('manager-access hardening', () => {
     const ghost = await t.run((ctx) =>
       ctx.db.insert('cafes', { name: 'Hantu', ownerUserId: ownerId, businessId, createdAt: 3 })
     );
-    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' }));
+    const mgrUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' })
+    );
     const mgrMemberId = await t.run((ctx) =>
-      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+      ctx.db.insert('businessMembers', {
+        businessId,
+        userId: mgrUserId,
+        role: 'manager',
+        createdAt: 5,
+      })
     );
     await t.run((ctx) =>
-      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: live, createdAt: 5 })
+      ctx.db.insert('memberOutletAccess', {
+        businessMemberId: mgrMemberId,
+        cafeId: live,
+        createdAt: 5,
+      })
     );
     await t.run((ctx) =>
-      ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId: ghost, createdAt: 5 })
+      ctx.db.insert('memberOutletAccess', {
+        businessMemberId: mgrMemberId,
+        cafeId: ghost,
+        createdAt: 5,
+      })
     );
     await t.run((ctx) => ctx.db.delete(ghost)); // dangling grant
 
@@ -215,8 +291,12 @@ describe('manager-access hardening', () => {
   it('myOutlets returns outlets sorted by name', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, userId, businessId } = await seedOwner(t, 'Zeta');
-    await t.run((ctx) => ctx.db.insert('cafes', { name: 'Alpha', ownerUserId: userId, businessId, createdAt: 2 }));
-    await t.run((ctx) => ctx.db.insert('cafes', { name: 'Mid', ownerUserId: userId, businessId, createdAt: 3 }));
+    await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Alpha', ownerUserId: userId, businessId, createdAt: 2 })
+    );
+    await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Mid', ownerUserId: userId, businessId, createdAt: 3 })
+    );
     const outlets = await asOwner.query(api.outlets.myOutlets, {});
     expect(outlets.map((o) => o.name)).toEqual(['Alpha', 'Mid', 'Zeta']);
   });
@@ -233,7 +313,10 @@ describe('setActiveOutlet', () => {
     await asOwner.mutation(api.outlets.setActiveOutlet, { cafeId: second });
 
     const active = await t.run((ctx) =>
-      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId)).first()
+      ctx.db
+        .query('activeOutlet')
+        .withIndex('by_user', (q) => q.eq('userId', userId))
+        .first()
     );
     expect(active?.cafeId).toBe(second);
     const cafe = await asOwner.query(api.cafes.myCafe, {});
@@ -244,13 +327,24 @@ describe('setActiveOutlet', () => {
   it('rejects switching to an outlet the user cannot access', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await seedOwner(t);
-    const otherUser = await t.run((ctx) => ctx.db.insert('users', { name: 'X', email: 'x2@x.com' }));
-    const otherBiz = await t.run((ctx) => ctx.db.insert('businesses', { name: 'B', ownerUserId: otherUser, createdAt: 1 }));
+    const otherUser = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'X', email: 'x2@x.com' })
+    );
+    const otherBiz = await t.run((ctx) =>
+      ctx.db.insert('businesses', { name: 'B', ownerUserId: otherUser, createdAt: 1 })
+    );
     const foreign = await t.run((ctx) =>
-      ctx.db.insert('cafes', { name: 'Foreign', ownerUserId: otherUser, businessId: otherBiz, createdAt: 1 })
+      ctx.db.insert('cafes', {
+        name: 'Foreign',
+        ownerUserId: otherUser,
+        businessId: otherBiz,
+        createdAt: 1,
+      })
     );
 
-    await expect(asOwner.mutation(api.outlets.setActiveOutlet, { cafeId: foreign })).rejects.toThrow('no outlet access');
+    await expect(
+      asOwner.mutation(api.outlets.setActiveOutlet, { cafeId: foreign })
+    ).rejects.toThrow('no outlet access');
   });
 
   it('upserts (does not duplicate) the activeOutlet row', async () => {
@@ -261,7 +355,10 @@ describe('setActiveOutlet', () => {
     );
     await asOwner.mutation(api.outlets.setActiveOutlet, { cafeId: second });
     const rows = await t.run((ctx) =>
-      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId)).collect()
+      ctx.db
+        .query('activeOutlet')
+        .withIndex('by_user', (q) => q.eq('userId', userId))
+        .collect()
     );
     expect(rows).toHaveLength(1);
   });

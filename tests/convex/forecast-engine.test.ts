@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
-  type DaySample,
   baseEstimate,
   coeffOfVariation,
   confidence,
+  type DaySample,
+  type Driver,
   dayOfWeekMultiplier,
+  driversFor,
+  holidayMultiplier,
   predictedQty,
   weatherMultiplier,
 } from '../../convex/lib/forecast';
-import { holidayMultiplier, driversFor, type Driver } from '../../convex/lib/forecast';
 
 const sample = (daysAgo: number, dow: number, qty: number): DaySample => ({ daysAgo, dow, qty });
 
@@ -27,10 +29,7 @@ describe('baseEstimate', () => {
     expect(est).toBeGreaterThan(simpleMean);
   });
   it('trims extremes when n >= 14', () => {
-    const s = [
-      ...Array.from({ length: 18 }, (_, i) => sample(i, 0, 10)),
-      sample(18, 0, 1000),
-    ];
+    const s = [...Array.from({ length: 18 }, (_, i) => sample(i, 0, 10)), sample(18, 0, 1000)];
     expect(baseEstimate(s)).toBeLessThan(50);
   });
   it('does NOT trim when n < 14 (recency signal preserved)', () => {
@@ -48,8 +47,12 @@ describe('dayOfWeekMultiplier', () => {
   });
   it('busier weekday → >1, clamped to 2', () => {
     const s = [
-      sample(0, 5, 20), sample(1, 4, 5), sample(7, 5, 20), sample(8, 4, 5),
-      sample(14, 5, 20), sample(15, 4, 5),
+      sample(0, 5, 20),
+      sample(1, 4, 5),
+      sample(7, 5, 20),
+      sample(8, 4, 5),
+      sample(14, 5, 20),
+      sample(15, 4, 5),
     ];
     const m = dayOfWeekMultiplier(s, 5);
     expect(m).toBeGreaterThan(1);
@@ -116,12 +119,20 @@ describe('holidayMultiplier', () => {
     expect(holidayMultiplier('2026-03-19').mult).toBe(0.5);
     expect(holidayMultiplier('2026-03-20').mult).toBe(0.2);
     expect(holidayMultiplier('2026-03-21').mult).toBe(1.2);
-    expect(holidayMultiplier('2026-03-20').driver).toEqual({ code: 'holiday', pct: -80, key: 'lebaran_day' });
+    expect(holidayMultiplier('2026-03-20').driver).toEqual({
+      code: 'holiday',
+      pct: -80,
+      key: 'lebaran_day',
+    });
   });
   it('fixed-date nationals by MM-DD across years', () => {
     expect(holidayMultiplier('2026-08-17').mult).toBe(0.7);
     expect(holidayMultiplier('2027-12-25').mult).toBe(0.8);
-    expect(holidayMultiplier('2026-01-01').driver).toEqual({ code: 'holiday', pct: -20, key: 'new_year' });
+    expect(holidayMultiplier('2026-01-01').driver).toEqual({
+      code: 'holiday',
+      pct: -20,
+      key: 'new_year',
+    });
   });
   it('ordinary weekday → 1, no driver', () => {
     expect(holidayMultiplier('2026-06-03')).toEqual({ mult: 1 });

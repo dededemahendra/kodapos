@@ -10,7 +10,10 @@ async function seededCafe() {
   // `cafes` requires ownerUserId, and seed:run never creates a cafe itself
   // ("Seed never creates cafes") — so both rows must exist before seeding.
   const cafeId = await t.run(async (ctx) => {
-    const ownerUserId = await ctx.db.insert('users', { name: 'Owner', email: 'shots@kodapos.test' });
+    const ownerUserId = await ctx.db.insert('users', {
+      name: 'Owner',
+      email: 'shots@kodapos.test',
+    });
     return ctx.db.insert('cafes', {
       name: 'Kopi Shots',
       ownerUserId,
@@ -44,7 +47,9 @@ async function projectSeedValues(t: Awaited<ReturnType<typeof seededCafe>>['t'])
               variantName: l.variantName ?? null,
             }))
             .sort((a, b) =>
-              `${a.nameSnapshot}|${a.variantName}`.localeCompare(`${b.nameSnapshot}|${b.variantName}`)
+              `${a.nameSnapshot}|${a.variantName}`.localeCompare(
+                `${b.nameSnapshot}|${b.variantName}`
+              )
             );
           return { tableName: table?.name ?? null, lines };
         })
@@ -66,7 +71,9 @@ async function projectSeedValues(t: Awaited<ReturnType<typeof seededCafe>>['t'])
             variantName: l.variantName ?? null,
             modifierLabels: [...l.modifierLabels].sort(),
           }))
-          .sort((a, b) => `${a.nameSnapshot}|${a.variantName}`.localeCompare(`${b.nameSnapshot}|${b.variantName}`)),
+          .sort((a, b) =>
+            `${a.nameSnapshot}|${a.variantName}`.localeCompare(`${b.nameSnapshot}|${b.variantName}`)
+          ),
       }))
       .sort(
         (a, b) =>
@@ -109,8 +116,12 @@ describe('seed:run — pesanan demo state', () => {
     );
     expect(rows.length).toBeGreaterThanOrEqual(4);
     expect(rows.some((r) => r.paymentStatus === 'paid')).toBe(true);
-    expect(rows.some((r) => typeof r.customerNote === 'string' && r.customerNote.length > 0)).toBe(true);
-    expect(rows.some((r) => r.lines.some((l) => l.variantName && l.modifierLabels.length > 0))).toBe(true);
+    expect(rows.some((r) => typeof r.customerNote === 'string' && r.customerNote.length > 0)).toBe(
+      true
+    );
+    expect(
+      rows.some((r) => r.lines.some((l) => l.variantName && l.modifierLabels.length > 0))
+    ).toBe(true);
     // The real app (convex/public.ts buildSelfOrderLine, convex/selfOrders.ts
     // toRecallLine) always derives modifierLabels from modifierOptionIds 1:1 —
     // a label with no matching id is a state the app can never produce.
@@ -137,8 +148,9 @@ describe('seed:run — pesanan demo state', () => {
   it('mints a qrToken on at least one table so the public order page is reachable', async () => {
     const { t } = await seededCafe();
     const tables = await t.run(async (ctx) => ctx.db.query('tables').collect());
-    expect(tables.filter((tb) => typeof tb.qrToken === 'string' && tb.qrToken.length > 0).length)
-      .toBeGreaterThanOrEqual(1);
+    expect(
+      tables.filter((tb) => typeof tb.qrToken === 'string' && tb.qrToken.length > 0).length
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it('guarantees a populated kitchen board in the open shift', async () => {

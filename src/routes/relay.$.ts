@@ -45,7 +45,11 @@ export const Route = createFileRoute('/relay/$')({
 
         let upstream: Response;
         try {
-          upstream = await fetch(target.url, { method: request.method, headers, body: body ?? null });
+          upstream = await fetch(target.url, {
+            method: request.method,
+            headers,
+            body: body ?? null,
+          });
         } catch {
           // Never rethrow. An analytics outage must not surface as an error
           // page over a register mid-sale.
@@ -66,7 +70,7 @@ export const Route = createFileRoute('/relay/$')({
           // Extension scripts are version-stamped, so a long cache is safe and
           // means most loads never reach PostHog at all. Caching an ingestion
           // response would silently drop events.
-          target.cacheable ? 'public, max-age=86400, immutable' : 'no-store',
+          target.cacheable ? 'public, max-age=86400, immutable' : 'no-store'
         );
 
         return new Response(upstream.body, {

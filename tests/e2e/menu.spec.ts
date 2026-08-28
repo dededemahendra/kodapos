@@ -130,7 +130,10 @@ test.describe('menu (auth-gated)', () => {
     await expect(page.getByText(/Belum/).first()).toBeVisible();
 
     // Toggle active via the ⋯ menu → toast.
-    await page.getByRole('button', { name: /Aksi baris/ }).first().click();
+    await page
+      .getByRole('button', { name: /Aksi baris/ })
+      .first()
+      .click();
     await page.getByRole('menuitem', { name: /Nonaktifkan/ }).click();
     await expect(page.getByText(/Item dinonaktifkan/)).toBeVisible();
 

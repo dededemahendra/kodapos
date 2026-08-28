@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro';
 import {
   type ColumnDef,
   flexRender,
@@ -8,7 +9,6 @@ import {
   type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { Trans } from '@lingui/react/macro';
 import {
   ChevronDown,
   ChevronLeft,
@@ -115,10 +115,7 @@ export function DataTable<T>({
                         className="inline-flex items-center gap-1 hover:text-foreground"
                         onClick={header.column.getToggleSortingHandler()}
                       >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        {flexRender(header.column.columnDef.header, header.getContext())}
                         {sorted === 'asc' ? (
                           <ChevronUp className="size-3.5" />
                         ) : sorted === 'desc' ? (
@@ -128,10 +125,7 @@ export function DataTable<T>({
                         )}
                       </button>
                     ) : (
-                      flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )
+                      flexRender(header.column.columnDef.header, header.getContext())
                     )}
                   </TableHead>
                 );
@@ -160,10 +154,7 @@ export function DataTable<T>({
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row: Row<T>) => (
-              <TableRow
-                key={row.id}
-                className={cn(getRowClassName?.(row.original))}
-              >
+              <TableRow key={row.id} className={cn(getRowClassName?.(row.original))}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

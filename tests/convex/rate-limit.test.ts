@@ -14,9 +14,9 @@ describe('rate limit (enforceRateLimit)', () => {
     for (let i = 0; i < 5; i++) {
       await t.mutation(internal.auth_rate.checkAndBump, { identifier: id });
     }
-    await expect(
-      t.mutation(internal.auth_rate.checkAndBump, { identifier: id })
-    ).rejects.toThrow(/Terlalu banyak/);
+    await expect(t.mutation(internal.auth_rate.checkAndBump, { identifier: id })).rejects.toThrow(
+      /Terlalu banyak/
+    );
   });
 
   it('keeps separate identifiers in independent buckets', async () => {

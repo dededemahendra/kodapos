@@ -47,7 +47,9 @@ test.describe('inventory + recipes (auth-gated)', () => {
   test.skip(!process.env.RUN_AUTH_E2E, 'set RUN_AUTH_E2E=1 to run');
   test.setTimeout(180_000);
 
-  test('signup → add ingredient → add recipe → open shift → cash sale → stock decreased', async ({ page }) => {
+  test('signup → add ingredient → add recipe → open shift → cash sale → stock decreased', async ({
+    page,
+  }) => {
     const email = `e2e+${Date.now()}@kodapos.test`;
     const password = 'Sa{ngat-Aman-123';
 
@@ -167,7 +169,10 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await page.getByRole('button', { name: 'Bahan', exact: true }).click();
 
     // Open the ⋯ row menu for Susu.
-    await page.getByRole('button', { name: /Aksi baris/ }).first().click();
+    await page
+      .getByRole('button', { name: /Aksi baris/ })
+      .first()
+      .click();
     await expect(page.getByRole('menuitem', { name: /Arsipkan/ })).toBeVisible();
 
     // Open the archive confirm, then cancel it — row stays.
@@ -178,14 +183,20 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await expect(page.getByRole('cell', { name: /Susu/ }).first()).toBeVisible();
 
     // Adjust stock from the ⋯ menu → success toast.
-    await page.getByRole('button', { name: /Aksi baris/ }).first().click();
+    await page
+      .getByRole('button', { name: /Aksi baris/ })
+      .first()
+      .click();
     await page.getByRole('menuitem', { name: /Catat stok masuk/ }).click();
     await page.getByLabel(/Stok baru/).fill('1000');
     await page.getByRole('button', { name: /^Simpan$/ }).click();
     await expect(page.getByText(/Stok dicatat/)).toBeVisible();
 
     // Open the movement history from the ⋯ menu → the sheet shows a balance.
-    await page.getByRole('button', { name: /Aksi baris/ }).first().click();
+    await page
+      .getByRole('button', { name: /Aksi baris/ })
+      .first()
+      .click();
     await page.getByRole('menuitem', { name: /Lihat riwayat/ }).click();
     const sheet = page.getByRole('dialog');
     await expect(sheet).toBeVisible();
@@ -257,7 +268,9 @@ test.describe('inventory + recipes (auth-gated)', () => {
     await expect(page.getByRole('cell', { name: /5000 g/ })).toBeVisible();
   });
 
-  test('Recipes page: add a recipe via the edit sheet flips status to Lengkap', async ({ page }) => {
+  test('Recipes page: add a recipe via the edit sheet flips status to Lengkap', async ({
+    page,
+  }) => {
     const email = `e2e+${Date.now()}@kodapos.test`;
     const password = 'Sa{ngat-Aman-123';
 

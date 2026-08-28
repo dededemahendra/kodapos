@@ -1,7 +1,7 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Trans, useLingui } from '@lingui/react/macro';
 import { type FormEvent, useEffect, useState } from 'react';
 import { ADJUST_REASONS as REASONS } from '~/components/inventory/adjust-reasons';
 import { Button } from '~/components/ui/button';
@@ -34,17 +34,14 @@ export function StockAdjustDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const { t } = useLingui();
-  const ingredient = useQuery(
-    api.ingredients.get,
-    ingredientId ? { id: ingredientId } : 'skip'
-  );
+  const ingredient = useQuery(api.ingredients.get, ingredientId ? { id: ingredientId } : 'skip');
   const adjustStock = useMutation(api.ingredients.adjustStock);
 
   // Reason labels keyed by the raw DB value so the value prop stays untranslated.
-  const reasonLabels: Record<typeof REASONS[number], string> = {
+  const reasonLabels: Record<(typeof REASONS)[number], string> = {
     'Pengiriman masuk': t`Pengiriman masuk`,
     'Stok opname': t`Stok opname`,
-    'Koreksi': t`Koreksi`,
+    Koreksi: t`Koreksi`,
   };
 
   const [newQty, setNewQty] = useState('');
@@ -89,7 +86,9 @@ export function StockAdjustDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
-          <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>
+          <p className="text-muted-foreground">
+            <Trans>Memuat…</Trans>
+          </p>
         </DialogContent>
       </Dialog>
     );
@@ -127,7 +126,9 @@ export function StockAdjustDialog({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="adj-reason"><Trans>Alasan</Trans></FieldLabel>
+              <FieldLabel htmlFor="adj-reason">
+                <Trans>Alasan</Trans>
+              </FieldLabel>
               <Select value={reason} onValueChange={setReason}>
                 <SelectTrigger id="adj-reason">
                   <SelectValue />
@@ -142,7 +143,9 @@ export function StockAdjustDialog({
               </Select>
             </Field>
             <Field>
-              <FieldLabel htmlFor="adj-note"><Trans>Catatan (opsional)</Trans></FieldLabel>
+              <FieldLabel htmlFor="adj-note">
+                <Trans>Catatan (opsional)</Trans>
+              </FieldLabel>
               <Input
                 id="adj-note"
                 value={note}

@@ -57,7 +57,7 @@ export function ItemPickerSheet({
 
   const hasVariants = menuItem.variants.length > 0;
   const selectedVariant = hasVariants
-    ? menuItem.variants.find((v) => v.id === variantId) ?? null
+    ? (menuItem.variants.find((v) => v.id === variantId) ?? null)
     : null;
 
   let adjustments = 0;
@@ -212,9 +212,7 @@ export function ItemPickerSheet({
           <div className="text-sm">
             <Trans>
               Total{' '}
-              <span className="font-semibold tabular-nums">
-                {formatIDR(qty * unitPriceIDR)}
-              </span>
+              <span className="font-semibold tabular-nums">{formatIDR(qty * unitPriceIDR)}</span>
             </Trans>
           </div>
           <Button

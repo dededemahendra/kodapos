@@ -1,21 +1,21 @@
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useAction, useMutation, useQuery } from 'convex/react';
-import { useRef, useState, useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { SaveBar } from '~/components/settings/save-bar';
 import {
   RowSep,
   SettingRow,
   SettingsPageHeader,
   SettingsSection,
 } from '~/components/settings/primitives';
+import { SaveBar } from '~/components/settings/save-bar';
 import { useEditableState } from '~/components/settings/use-editable-state';
 import { Button } from '~/components/ui/button';
-import { FormSkeleton } from '~/components/ui/loading-skeletons';
+import { FieldGroup } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
 import {
   Select,
   SelectContent,
@@ -25,7 +25,6 @@ import {
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { Switch } from '~/components/ui/switch';
-import { FieldGroup } from '~/components/ui/field';
 import { uploadToStorage } from '~/lib/upload';
 
 export const Route = createFileRoute('/_pos/settings/profile')({
@@ -61,15 +60,7 @@ interface ProfileDraft {
 /** Day labels indexed 0=Senin..6=Minggu, localized via the active catalog. */
 function useDayLabels(): string[] {
   const { t } = useLingui();
-  return [
-    t`Senin`,
-    t`Selasa`,
-    t`Rabu`,
-    t`Kamis`,
-    t`Jumat`,
-    t`Sabtu`,
-    t`Minggu`,
-  ];
+  return [t`Senin`, t`Selasa`, t`Rabu`, t`Kamis`, t`Jumat`, t`Sabtu`, t`Minggu`];
 }
 
 function defaultHours(): OperatingHoursDraft[] {
@@ -151,9 +142,7 @@ function SettingsProfile() {
   }
 
   function updateHour(dayIndex: number, patch: Partial<OperatingHoursDraft>) {
-    const hours = draft!.operatingHours.map((h, i) =>
-      i === dayIndex ? { ...h, ...patch } : h
-    );
+    const hours = draft!.operatingHours.map((h, i) => (i === dayIndex ? { ...h, ...patch } : h));
     setDraft({ ...draft!, operatingHours: hours });
   }
 

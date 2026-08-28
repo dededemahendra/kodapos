@@ -21,12 +21,7 @@ export function StockSummary({
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-row items-center gap-2">
-          <p
-            className={cn(
-              'font-semibold text-2xl tabular-nums',
-              low && 'text-destructive'
-            )}
-          >
+          <p className={cn('font-semibold text-2xl tabular-nums', low && 'text-destructive')}>
             {low ? (
               <span aria-hidden="true" className="mr-1">
                 ⚠
@@ -44,9 +39,7 @@ export function StockSummary({
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-row items-center gap-2">
-          <p className="font-semibold text-2xl tabular-nums">
-            {formatIDR(stockValueIDR)}
-          </p>
+          <p className="font-semibold text-2xl tabular-nums">{formatIDR(stockValueIDR)}</p>
         </CardContent>
       </DashboardCard>
     </div>

@@ -1,20 +1,20 @@
 import { v } from 'convex/values';
 import { api, internal } from './_generated/api';
-import { action, internalAction } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { action, internalAction } from './_generated/server';
+import { buildInviteEmail } from './lib/inviteEmail';
 import {
   buildReceiptHtml,
   buildReceiptText,
   type ReceiptCafe,
   type ReceiptOrder,
 } from './lib/receipt';
+import { sendEmail } from './lib/resend';
 import {
   buildShiftSummaryHtml,
   buildShiftSummaryText,
   type ShiftSummaryData,
 } from './lib/shiftSummary';
-import { sendEmail } from './lib/resend';
-import { buildInviteEmail } from './lib/inviteEmail';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

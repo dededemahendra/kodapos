@@ -1,19 +1,23 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import { internalAction, internalMutation, internalQuery, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { internalAction, internalMutation, internalQuery, query } from './_generated/server';
 import { requireActiveOutlet } from './lib/auth';
 import { computeDemand } from './lib/demand';
 import { computeRestock } from './lib/restockCompute';
 import { DAY_MS, DEFAULT_TZ, dayKeyFn } from './lib/time';
-import { type WeatherDay, parseForecast, weatherConditionV, weatherSignalV } from './lib/weather';
+import { parseForecast, type WeatherDay, weatherConditionV, weatherSignalV } from './lib/weather';
 
 const confidenceV = v.union(v.literal('low'), v.literal('med'), v.literal('high'));
 // The weather arm matches the persisted forecasts.lines[].drivers schema: the
 // nightly job can store weather drivers, so this query's return validator must
 // accept them. (weatherAvailable on the result is wired separately.)
 const driverV = v.union(
-  v.object({ code: v.union(v.literal('dow_busy'), v.literal('dow_quiet')), pct: v.number(), dow: v.number() }),
+  v.object({
+    code: v.union(v.literal('dow_busy'), v.literal('dow_quiet')),
+    pct: v.number(),
+    dow: v.number(),
+  }),
   v.object({ code: v.literal('holiday'), pct: v.number(), key: v.string() }),
   v.object({ code: v.literal('weather'), pct: v.number(), condition: weatherConditionV })
 );
@@ -21,7 +25,12 @@ const driverV = v.union(
 export const demand = query({
   args: {},
   returns: v.union(
-    v.object({ status: v.literal('learning'), daysCollected: v.number(), daysNeeded: v.number(), etaDateKey: v.string() }),
+    v.object({
+      status: v.literal('learning'),
+      daysCollected: v.number(),
+      daysNeeded: v.number(),
+      etaDateKey: v.string(),
+    }),
     v.object({
       status: v.literal('ready'),
       forDateKey: v.string(),
@@ -81,21 +90,33 @@ export const persistForecast = internalMutation({
     const demand = await computeDemand(ctx, cafeId, weatherSignal);
     if (demand.status === 'ready') {
       const forecastId = await ctx.db.insert('forecasts', {
-        cafeId, generatedAt: now, method: 'rule_v1', status: 'ready',
-        forDateKey: demand.forDateKey, lines: demand.lines,
+        cafeId,
+        generatedAt: now,
+        method: 'rule_v1',
+        status: 'ready',
+        forDateKey: demand.forDateKey,
+        lines: demand.lines,
         ...(weatherSignal ? { weatherSignal } : {}),
       });
       const lines = await computeRestock(ctx, cafeId, demand.lines);
       if (lines.length > 0) {
         await ctx.db.insert('restockSuggestions', {
-          cafeId, forecastId, generatedAt: now, status: 'draft', lines,
+          cafeId,
+          forecastId,
+          generatedAt: now,
+          status: 'draft',
+          lines,
         });
       }
       return null;
     }
     await ctx.db.insert('forecasts', {
-      cafeId, generatedAt: now, method: 'rule_v1', status: 'learning',
-      daysCollected: demand.daysCollected, etaDateKey: demand.etaDateKey,
+      cafeId,
+      generatedAt: now,
+      method: 'rule_v1',
+      status: 'learning',
+      daysCollected: demand.daysCollected,
+      etaDateKey: demand.etaDateKey,
     });
     return null;
   },

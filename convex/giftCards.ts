@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 
 const giftCardDoc = v.object({
   _id: v.id('giftCards'),
@@ -24,12 +24,7 @@ const txnDoc = v.object({
   _creationTime: v.number(),
   cafeId: v.id('cafes'),
   giftCardId: v.id('giftCards'),
-  type: v.union(
-    v.literal('issue'),
-    v.literal('topup'),
-    v.literal('redeem'),
-    v.literal('refund')
-  ),
+  type: v.union(v.literal('issue'), v.literal('topup'), v.literal('redeem'), v.literal('refund')),
   amountIDR: v.number(),
   orderId: v.optional(v.id('orders')),
   at: v.number(),

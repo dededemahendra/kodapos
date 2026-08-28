@@ -1,7 +1,7 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
-import { Trans, useLingui } from '@lingui/react/macro';
 import { useMemo, useRef, useState } from 'react';
 import { Input } from '~/components/ui/input';
 

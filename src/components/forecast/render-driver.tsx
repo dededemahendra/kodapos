@@ -19,9 +19,13 @@ function HolidayText({ pct, hkey }: { pct: number; hkey: string }) {
           ? 'Tahun Baru'
           : hkey;
   return pct >= 0 ? (
-    <Trans>Libur {label} — perkiraan naik {pct}%</Trans>
+    <Trans>
+      Libur {label} — perkiraan naik {pct}%
+    </Trans>
   ) : (
-    <Trans>Libur {label} — perkiraan turun {Math.abs(pct)}%</Trans>
+    <Trans>
+      Libur {label} — perkiraan turun {Math.abs(pct)}%
+    </Trans>
   );
 }
 
@@ -29,7 +33,8 @@ function HolidayText({ pct, hkey }: { pct: number; hkey: string }) {
 export function RenderDriver({ driver }: { driver: ForecastDriver }) {
   if (driver.code === 'holiday') return <HolidayText pct={driver.pct} hkey={driver.key} />;
   if (driver.code === 'weather') {
-    if (driver.condition === 'rainy') return <Trans>Hujan — perkiraan turun {Math.abs(driver.pct)}%</Trans>;
+    if (driver.condition === 'rainy')
+      return <Trans>Hujan — perkiraan turun {Math.abs(driver.pct)}%</Trans>;
     // Defensive: only 'rainy' is emitted in C2b; the C2c taxonomy may add hot/cool.
     return driver.pct >= 0 ? (
       <Trans>Cuaca — perkiraan naik {Math.abs(driver.pct)}%</Trans>
@@ -39,8 +44,12 @@ export function RenderDriver({ driver }: { driver: ForecastDriver }) {
   }
   const day = formatWeekday(driver.dow);
   return driver.code === 'dow_busy' ? (
-    <Trans>+{driver.pct}% — biasanya ramai di hari {day}</Trans>
+    <Trans>
+      +{driver.pct}% — biasanya ramai di hari {day}
+    </Trans>
   ) : (
-    <Trans>{driver.pct}% — biasanya sepi di hari {day}</Trans>
+    <Trans>
+      {driver.pct}% — biasanya sepi di hari {day}
+    </Trans>
   );
 }

@@ -31,7 +31,7 @@ describe('sendResetOrSigninCode', () => {
     const sendSigninCode = vi.fn().mockRejectedValue(new Error('Gagal mengirim email.'));
 
     await expect(sendResetOrSigninCode({ sendReset, sendSigninCode })).rejects.toThrow(
-      'Gagal mengirim email.',
+      'Gagal mengirim email.'
     );
     expect(sendSigninCode).toHaveBeenCalledTimes(1);
   });

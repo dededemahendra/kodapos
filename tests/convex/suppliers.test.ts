@@ -37,8 +37,12 @@ describe('suppliers CRUD', () => {
   it('validates name + phone', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
-    await expect(asOwner.mutation(api.suppliers.create, { name: '  ', phone: '0812000000' })).rejects.toThrow(/nama/i);
-    await expect(asOwner.mutation(api.suppliers.create, { name: 'OK', phone: '12' })).rejects.toThrow(/telepon/i);
+    await expect(
+      asOwner.mutation(api.suppliers.create, { name: '  ', phone: '0812000000' })
+    ).rejects.toThrow(/nama/i);
+    await expect(
+      asOwner.mutation(api.suppliers.create, { name: 'OK', phone: '12' })
+    ).rejects.toThrow(/telepon/i);
   });
 
   it('tenant isolation: cafe B cannot archive cafe A supplier', async () => {

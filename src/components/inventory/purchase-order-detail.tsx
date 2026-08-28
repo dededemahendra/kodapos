@@ -64,8 +64,7 @@ export function PurchaseOrderDetail({
   const [submitting, setSubmitting] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
 
-  const editable =
-    detail != null && detail.status !== 'received' && detail.status !== 'cancelled';
+  const editable = detail != null && detail.status !== 'received' && detail.status !== 'cancelled';
 
   // Pre-fill each line's receive qty to its remaining amount whenever the PO
   // changes or its received/remaining values shift (e.g. after a partial
@@ -76,9 +75,7 @@ export function PurchaseOrderDetail({
       return;
     }
     setDrafts(
-      Object.fromEntries(
-        detail.lines.map((l) => [l.ingredientId, String(l.remainingQty)])
-      )
+      Object.fromEntries(detail.lines.map((l) => [l.ingredientId, String(l.remainingQty)]))
     );
   }, [detail]);
 
@@ -102,8 +99,9 @@ export function PurchaseOrderDetail({
           ingredientId: l.ingredientId,
           qty: Number.parseInt(drafts[l.ingredientId] ?? '', 10),
         }))
-        .filter((r): r is { ingredientId: Id<'ingredients'>; qty: number } =>
-          Number.isInteger(r.qty) && r.qty > 0
+        .filter(
+          (r): r is { ingredientId: Id<'ingredients'>; qty: number } =>
+            Number.isInteger(r.qty) && r.qty > 0
         )
     : [];
 
@@ -170,9 +168,7 @@ export function PurchaseOrderDetail({
             '',
             'Total',
             formatIDR(
-              Math.round(
-                detail.lines.reduce((s, l) => s + l.orderedQty * l.unitCostIDR, 0)
-              )
+              Math.round(detail.lines.reduce((s, l) => s + l.orderedQty * l.unitCostIDR, 0))
             ),
           ],
         ],
@@ -193,9 +189,7 @@ export function PurchaseOrderDetail({
     <Sheet open={id !== null} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>
-            {detail?.supplierName ?? <Trans>Tanpa pemasok</Trans>}
-          </SheetTitle>
+          <SheetTitle>{detail?.supplierName ?? <Trans>Tanpa pemasok</Trans>}</SheetTitle>
           <SheetDescription className="sr-only">
             <Trans>Detail pesanan beli dan penerimaan barang.</Trans>
           </SheetDescription>
@@ -231,16 +225,11 @@ export function PurchaseOrderDetail({
                 </Button>
               </div>
 
-              {detail.note ? (
-                <p className="mt-3 text-muted-foreground">{detail.note}</p>
-              ) : null}
+              {detail.note ? <p className="mt-3 text-muted-foreground">{detail.note}</p> : null}
 
               <div className="mt-4 space-y-3">
                 {detail.lines.map((line) => (
-                  <div
-                    key={line.ingredientId}
-                    className="rounded-md border border-border p-3"
-                  >
+                  <div key={line.ingredientId} className="rounded-md border border-border p-3">
                     <div className="flex items-start justify-between gap-2">
                       <span className="font-medium">{line.ingredientName}</span>
                       <span className="text-muted-foreground tabular-nums">
@@ -248,9 +237,8 @@ export function PurchaseOrderDetail({
                       </span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground tabular-nums">
-                      <Trans>Dipesan</Trans> {line.orderedQty} {line.unit} ·{' '}
-                      <Trans>Diterima</Trans> {line.receivedQty} ·{' '}
-                      <Trans>Sisa</Trans> {line.remainingQty}
+                      <Trans>Dipesan</Trans> {line.orderedQty} {line.unit} · <Trans>Diterima</Trans>{' '}
+                      {line.receivedQty} · <Trans>Sisa</Trans> {line.remainingQty}
                     </div>
                     {editable && line.remainingQty > 0 ? (
                       <div className="mt-2 flex items-center gap-2">
@@ -263,16 +251,10 @@ export function PurchaseOrderDetail({
                           aria-label={t`Terima ${line.ingredientName}`}
                           value={drafts[line.ingredientId] ?? ''}
                           onChange={(e) =>
-                            setDraft(
-                              line.ingredientId,
-                              e.target.value,
-                              line.remainingQty
-                            )
+                            setDraft(line.ingredientId, e.target.value, line.remainingQty)
                           }
                         />
-                        <span className="text-xs text-muted-foreground">
-                          {line.unit}
-                        </span>
+                        <span className="text-xs text-muted-foreground">{line.unit}</span>
                       </div>
                     ) : null}
                   </div>
@@ -281,11 +263,7 @@ export function PurchaseOrderDetail({
 
               {editable ? (
                 <div className="mt-4 flex items-center justify-between gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setConfirmCancel(true)}
-                  >
+                  <Button type="button" variant="ghost" onClick={() => setConfirmCancel(true)}>
                     <Trans>Batalkan PO</Trans>
                   </Button>
                   <Button
@@ -308,8 +286,8 @@ export function PurchaseOrderDetail({
           title={<Trans>Batalkan PO?</Trans>}
           description={
             <Trans>
-              Barang yang sudah diterima tetap berada di stok. Pesanan tidak bisa
-              menerima barang lagi setelah dibatalkan.
+              Barang yang sudah diterima tetap berada di stok. Pesanan tidak bisa menerima barang
+              lagi setelah dibatalkan.
             </Trans>
           }
           confirmLabel={<Trans>Batalkan PO</Trans>}

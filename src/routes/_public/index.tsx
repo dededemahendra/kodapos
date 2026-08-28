@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { HOMEPAGE_JSON_LD, seo } from '~/lib/seo';
 import { RedirectWhenAuthenticated } from '~/components/auth/redirect-when-authenticated';
 import { AiSpotlight } from '~/components/marketing/ai-spotlight';
 import { CtaBand } from '~/components/marketing/cta-band';
@@ -7,11 +6,12 @@ import { Faq } from '~/components/marketing/faq';
 import { FeatureSection } from '~/components/marketing/feature-section';
 import { Hero } from '~/components/marketing/hero';
 import { HowItWorks } from '~/components/marketing/how-it-works';
-import { MarketingHeader } from '~/components/marketing/marketing-header';
 import { MarketingFooter } from '~/components/marketing/marketing-footer';
+import { MarketingHeader } from '~/components/marketing/marketing-header';
 import { Pricing } from '~/components/marketing/pricing';
 import { Testimonials } from '~/components/marketing/testimonials';
 import { WhyIndonesia } from '~/components/marketing/why-indonesia';
+import { HOMEPAGE_JSON_LD, seo } from '~/lib/seo';
 
 export const Route = createFileRoute('/_public/')({
   head: () => seo({ title: 'kodapos, POS pintar untuk kafe dan resto', path: '/' }),

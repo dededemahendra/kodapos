@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
-import { requireOwned, requireActiveOutlet } from '../lib/auth';
+import { requireActiveOutlet, requireOwned } from '../lib/auth';
 import { assertBarcodeUnique } from './items';
 
 const variantDoc = v.object({
@@ -20,7 +20,8 @@ function assertVariant(name: string, priceIDR: number): string {
   const trimmed = name.trim();
   if (trimmed.length < 1) throw new Error('Nama varian wajib diisi.');
   if (trimmed.length > 24) throw new Error('Nama varian maksimal 24 karakter.');
-  if (!Number.isInteger(priceIDR)) throw new Error('Harga varian harus berupa angka bulat (rupiah).');
+  if (!Number.isInteger(priceIDR))
+    throw new Error('Harga varian harus berupa angka bulat (rupiah).');
   if (priceIDR < 0) throw new Error('Harga varian tidak boleh negatif.');
   return trimmed;
 }
@@ -49,12 +50,9 @@ export const create = mutation({
     if (bc) await assertBarcodeUnique(ctx, cafeId, bc);
     const existing = await ctx.db
       .query('menuItemVariants')
-      .withIndex('by_item_active', (q) =>
-        q.eq('menuItemId', args.menuItemId).eq('archived', false)
-      )
+      .withIndex('by_item_active', (q) => q.eq('menuItemId', args.menuItemId).eq('archived', false))
       .collect();
-    const position =
-      existing.length === 0 ? 0 : Math.max(...existing.map((x) => x.position)) + 1;
+    const position = existing.length === 0 ? 0 : Math.max(...existing.map((x) => x.position)) + 1;
     return await ctx.db.insert('menuItemVariants', {
       cafeId,
       menuItemId: args.menuItemId,

@@ -8,15 +8,13 @@ import { useMutation, useQuery } from 'convex/react';
 import { Archive, Award, Gift, Pencil, Plus, X } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { RewardFormDialog } from '~/components/loyalty/reward-form-dialog';
-import { Button } from '~/components/ui/button';
-import { ConfirmDialog } from '~/components/ui/confirm-dialog';
-import { DataTable } from '~/components/ui/data-table';
-import { FormSkeleton, ListSkeleton } from '~/components/ui/loading-skeletons';
-import { RowActions } from '~/components/ui/row-actions';
 import { RowSep, SettingRow, SettingsSection } from '~/components/settings/primitives';
 import { SaveBar } from '~/components/settings/save-bar';
 import { useEditableState } from '~/components/settings/use-editable-state';
+import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { ConfirmDialog } from '~/components/ui/confirm-dialog';
+import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
   EmptyDescription,
@@ -26,7 +24,9 @@ import {
 } from '~/components/ui/empty';
 import { FieldError, FieldGroup } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
+import { FormSkeleton, ListSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
+import { RowActions } from '~/components/ui/row-actions';
 import { Switch } from '~/components/ui/switch';
 import {
   Table,

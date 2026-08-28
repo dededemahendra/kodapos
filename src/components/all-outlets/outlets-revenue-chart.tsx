@@ -1,6 +1,6 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { Bar, BarChart, XAxis } from 'recharts';
-import { useLingui } from '@lingui/react/macro';
-import { Trans } from '@lingui/react/macro';
+import { DashboardCard } from '~/components/dashboard-card';
 import { CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import {
   type ChartConfig,
@@ -8,7 +8,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart';
-import { DashboardCard } from '~/components/dashboard-card';
 import { formatIDR } from '~/lib/formater';
 
 export function OutletsRevenueChart({

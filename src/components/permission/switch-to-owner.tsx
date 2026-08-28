@@ -5,12 +5,7 @@ import { ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { PinEntry } from '~/components/staff/pin-entry';
 import { Button } from '~/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { useActiveCashier } from '~/lib/active-cashier';
 
 /**

@@ -55,12 +55,7 @@ export function SaveBar({
           <Trans>Tersimpan ✓</Trans>
         </span>
       )}
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={onReset}
-        disabled={!dirty || saving}
-      >
+      <Button type="button" variant="ghost" onClick={onReset} disabled={!dirty || saving}>
         <Trans>Batal</Trans>
       </Button>
       <Button type="button" onClick={handleSave} disabled={!dirty || saving}>

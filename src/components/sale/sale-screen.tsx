@@ -1,28 +1,16 @@
+import { Trans, useLingui } from '@lingui/react/macro';
+import { useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
-import { useConvex, useMutation, useQuery } from 'convex/react';
-import { useNavigate } from '@tanstack/react-router';
 import {
-  DEFAULT_SERVICE_CHARGE_NAME,
   computeOrderTotals,
+  DEFAULT_SERVICE_CHARGE_NAME,
   promoDiscountIDR,
   scopedSubtotalIDR,
 } from 'convex/lib/pricing';
+import { useConvex, useMutation, useQuery } from 'convex/react';
 import { useEffect, useReducer, useRef, useState } from 'react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
-import { toast } from '~/lib/toast';
-import { useActiveCashier } from '~/lib/active-cashier';
-import { useBoolPreference } from '~/lib/preferences';
-import { playSaleChime } from '~/lib/sound';
-import { scanBeep } from '~/lib/scan-feedback';
-import { publishDisplay } from '~/lib/customer-display';
 import { GiftCardPaymentDialog } from '~/components/giftcard/gift-card-payment-dialog';
-import { CashPaymentDialog } from './cash-payment-dialog';
-import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
-import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
-import { SplitPaymentDialog } from './split-payment-dialog';
-import { ReceiptPreview } from './receipt-preview';
 import { CashMovementDialog } from '~/components/shift/cash-movement-dialog';
 import {
   AlertDialog,
@@ -41,16 +29,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import { SaleScreenSkeleton } from './sale-screen-skeleton';
-import { cartReducer, initialCart, type CartState, type RepriceMap } from './cart-reducer';
+import { useActiveCashier } from '~/lib/active-cashier';
+import { publishDisplay } from '~/lib/customer-display';
+import { useBoolPreference } from '~/lib/preferences';
+import { scanBeep } from '~/lib/scan-feedback';
+import { playSaleChime } from '~/lib/sound';
+import { toast } from '~/lib/toast';
 import { CartPane } from './cart-pane';
-import { HoldOrderDialog } from './hold-order-dialog';
+import { type CartState, cartReducer, initialCart, type RepriceMap } from './cart-reducer';
+import { CashPaymentDialog } from './cash-payment-dialog';
 import { HeldOrdersDialog } from './held-orders-dialog';
-import { MenuPane, type ItemForSale } from './menu-pane';
-import { ModifierPickerDialog } from './modifier-picker-dialog';
-import { PromoPickerDialog } from './promo-picker-dialog';
+import { HoldOrderDialog } from './hold-order-dialog';
 import { ManualDiscountDialog } from './manual-discount-dialog';
+import { type ItemForSale, MenuPane } from './menu-pane';
+import { ModifierPickerDialog } from './modifier-picker-dialog';
 import { PAYMENT_METHODS, type PaymentMethod } from './payment-methods';
+import { PromoPickerDialog } from './promo-picker-dialog';
+import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
+import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
+import { ReceiptPreview } from './receipt-preview';
+import { SaleScreenSkeleton } from './sale-screen-skeleton';
+import { SplitPaymentDialog } from './split-payment-dialog';
 
 function genLineKey(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -79,10 +78,7 @@ export function SaleScreen({
   // obvious future ask, but it would silently charge the NEXT customer the
   // previous customer's tier, which is this feature's main operational risk.
   const [priceCategoryId, setPriceCategoryId] = useState<Id<'priceCategories'> | null>(null);
-  const items = useQuery(
-    api.menu.items.listForSale,
-    priceCategoryId ? { priceCategoryId } : {}
-  );
+  const items = useQuery(api.menu.items.listForSale, priceCategoryId ? { priceCategoryId } : {});
   // Switching tier changes this query's args, so Convex briefly resolves
   // `items` to undefined mid-refetch. Cache the last resolved value so the
   // tiles and cart the customer is looking at don't blank out while the new
@@ -119,10 +115,7 @@ export function SaleScreen({
   const [currentTable, setCurrentTable] = useState<Id<'tables'> | null>(
     table ? (table as Id<'tables'>) : null
   );
-  const held = useQuery(
-    api.heldOrders.listForShift,
-    shift ? { shiftId: shift._id } : 'skip'
-  );
+  const held = useQuery(api.heldOrders.listForShift, shift ? { shiftId: shift._id } : 'skip');
 
   // Every payment dialog settles the same way: show the receipt, empty the cart,
   // and untag the table. Centralised so the success chime (opt-in via Settings →
@@ -257,7 +250,8 @@ export function SaleScreen({
   // server recomputes the discount authoritatively from the promo doc at checkout.
   const scopeLines = cart.lines.map((l) => ({
     menuItemId: l.menuItemId as string,
-    categoryId: (displayItems?.find((r) => r.item._id === l.menuItemId)?.item.categoryId ?? '') as string,
+    categoryId: (displayItems?.find((r) => r.item._id === l.menuItemId)?.item.categoryId ??
+      '') as string,
     lineTotalIDR: l.qty * l.unitPriceIDR,
   }));
   const promoDisc = cart.promo
@@ -277,11 +271,15 @@ export function SaleScreen({
     : 0;
   const discount = promoDisc + manualDisc;
   const taxEnabled = cafe?.taxEnabled === true;
-  const taxRatePct = taxEnabled ? cafe?.taxRatePct ?? 0 : 0;
+  const taxRatePct = taxEnabled ? (cafe?.taxRatePct ?? 0) : 0;
   const scEnabled = settings?.payment.serviceChargeEnabled === true;
-  const scPct = scEnabled ? settings?.payment.serviceChargePct ?? 0 : 0;
+  const scPct = scEnabled ? (settings?.payment.serviceChargePct ?? 0) : 0;
   const scName = settings?.payment.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME;
-  const { serviceChargeIDR, taxIDR: tax, totalIDR: total } = computeOrderTotals({
+  const {
+    serviceChargeIDR,
+    taxIDR: tax,
+    totalIDR: total,
+  } = computeOrderTotals({
     subtotalIDR: subtotal,
     discountIDR: discount,
     serviceChargeEnabled: scEnabled,
@@ -335,7 +333,14 @@ export function SaleScreen({
   ) {
     hasLoadedOnce.current = true;
   }
-  if (!hasLoadedOnce.current || categories === undefined || displayItems === undefined || cafe === undefined || shift === undefined || settings === undefined) {
+  if (
+    !hasLoadedOnce.current ||
+    categories === undefined ||
+    displayItems === undefined ||
+    cafe === undefined ||
+    shift === undefined ||
+    settings === undefined
+  ) {
     return <SaleScreenSkeleton />;
   }
   // The LIVE query, not the cached displayItems: a payment must never be
@@ -461,7 +466,7 @@ export function SaleScreen({
   // category: a cafe that never opted in must see no new control at all.
   const hasPriceCategories = priceCategories !== undefined && priceCategories.length > 0;
   const activePriceCategory = priceCategoryId
-    ? priceCategories?.find((c) => c._id === priceCategoryId) ?? null
+    ? (priceCategories?.find((c) => c._id === priceCategoryId) ?? null)
     : null;
   const standardLabel = cafe?.standardPriceLabel || t`Standar`;
 
@@ -511,7 +516,9 @@ export function SaleScreen({
           </span>
           <Select
             value={priceCategoryId ?? 'standard'}
-            onValueChange={(v) => setPriceCategoryId(v === 'standard' ? null : (v as Id<'priceCategories'>))}
+            onValueChange={(v) =>
+              setPriceCategoryId(v === 'standard' ? null : (v as Id<'priceCategories'>))
+            }
           >
             <SelectTrigger className="h-8 w-48">
               <SelectValue />
@@ -550,64 +557,66 @@ export function SaleScreen({
           mobileView === 'order' ? 'flex' : 'hidden'
         }`}
       >
-      <CartPane
-        cart={cart}
-        dispatch={dispatch}
-        subtotalIDR={subtotal}
-        serviceChargeIDR={serviceChargeIDR}
-        serviceChargeName={scName}
-        serviceChargePct={scPct}
-        taxEnabled={taxEnabled}
-        taxRatePct={taxRatePct}
-        taxIDR={tax}
-        totalIDR={total}
-        promo={cart.promo}
-        discountIDR={discount}
-        onAddPromo={() => setPromoPickerOpen(true)}
-        onRemovePromo={() => dispatch({ type: 'setPromo', promo: null })}
-        manualDiscount={cart.manualDiscount}
-        onAddManualDiscount={() => setManualDiscountOpen(true)}
-        onRemoveManualDiscount={() => dispatch({ type: 'setManualDiscount', manualDiscount: null })}
-        payMethods={payMethods}
-        onPay={(method) => {
-          // pricesReady also gates the dialog's `open` prop below, but check it
-          // here too so a tap during a tier-switch refetch never opens a
-          // payment dialog against prices that are about to change under it.
-          if (cart.lines.length > 0 && pricesReady) setOpenMethod(method);
-        }}
-        {...(shift && cashierId && canSplit
-          ? {
-              onSplit: () => {
-                if (cart.lines.length > 0 && pricesReady) setSplitOpen(true);
-              },
-            }
-          : {})}
-        {...(shift && cashierId
-          ? {
-              onGiftCard: () => {
-                if (cart.lines.length > 0 && pricesReady) setGiftCardOpen(true);
-              },
-            }
-          : {})}
-        onKosongkan={() => {
-          if (confirmClearCart) setClearOpen(true);
-          else {
-            dispatch({ type: 'clearCart' });
-            // A tier applies to ONE order only: clearing the cart abandons
-            // that order, so the selected tier must not carry over to the next.
-            setPriceCategoryId(null);
+        <CartPane
+          cart={cart}
+          dispatch={dispatch}
+          subtotalIDR={subtotal}
+          serviceChargeIDR={serviceChargeIDR}
+          serviceChargeName={scName}
+          serviceChargePct={scPct}
+          taxEnabled={taxEnabled}
+          taxRatePct={taxRatePct}
+          taxIDR={tax}
+          totalIDR={total}
+          promo={cart.promo}
+          discountIDR={discount}
+          onAddPromo={() => setPromoPickerOpen(true)}
+          onRemovePromo={() => dispatch({ type: 'setPromo', promo: null })}
+          manualDiscount={cart.manualDiscount}
+          onAddManualDiscount={() => setManualDiscountOpen(true)}
+          onRemoveManualDiscount={() =>
+            dispatch({ type: 'setManualDiscount', manualDiscount: null })
           }
-        }}
-        {...(shift && cashierId
-          ? {
-              onKas: () => setKasOpen(true),
-              onSwitch: true,
-              onHold: () => setHoldOpen(true),
-              onShowHeld: () => setHeldOpen(true),
-              heldCount: held?.length ?? 0,
+          payMethods={payMethods}
+          onPay={(method) => {
+            // pricesReady also gates the dialog's `open` prop below, but check it
+            // here too so a tap during a tier-switch refetch never opens a
+            // payment dialog against prices that are about to change under it.
+            if (cart.lines.length > 0 && pricesReady) setOpenMethod(method);
+          }}
+          {...(shift && cashierId && canSplit
+            ? {
+                onSplit: () => {
+                  if (cart.lines.length > 0 && pricesReady) setSplitOpen(true);
+                },
+              }
+            : {})}
+          {...(shift && cashierId
+            ? {
+                onGiftCard: () => {
+                  if (cart.lines.length > 0 && pricesReady) setGiftCardOpen(true);
+                },
+              }
+            : {})}
+          onKosongkan={() => {
+            if (confirmClearCart) setClearOpen(true);
+            else {
+              dispatch({ type: 'clearCart' });
+              // A tier applies to ONE order only: clearing the cart abandons
+              // that order, so the selected tier must not carry over to the next.
+              setPriceCategoryId(null);
             }
-          : {})}
-      />
+          }}
+          {...(shift && cashierId
+            ? {
+                onKas: () => setKasOpen(true),
+                onSwitch: true,
+                onHold: () => setHoldOpen(true),
+                onShowHeld: () => setHeldOpen(true),
+                heldCount: held?.length ?? 0,
+              }
+            : {})}
+        />
       </div>
       <ModifierPickerDialog
         open={pickerRow !== null}
@@ -760,8 +769,12 @@ export function SaleScreen({
             taxEnabled={taxEnabled}
             taxRatePct={taxRatePct}
             {...(settings.qrisImageUrl ? { qrisImageUrl: settings.qrisImageUrl } : {})}
-            {...('qrisMerchantName' in settings.payment && settings.payment.qrisMerchantName ? { qrisMerchantName: settings.payment.qrisMerchantName } : {})}
-            {...('qrisNmid' in settings.payment && settings.payment.qrisNmid ? { qrisNmid: settings.payment.qrisNmid } : {})}
+            {...('qrisMerchantName' in settings.payment && settings.payment.qrisMerchantName
+              ? { qrisMerchantName: settings.payment.qrisMerchantName }
+              : {})}
+            {...('qrisNmid' in settings.payment && settings.payment.qrisNmid
+              ? { qrisNmid: settings.payment.qrisNmid }
+              : {})}
             {...(cart.promo?._id ? { promoId: cart.promo._id } : {})}
             {...(currentTable ? { tableId: currentTable } : {})}
             {...(priceCategoryId ? { priceCategoryId } : {})}

@@ -65,7 +65,11 @@ export function parseForecast(json: unknown): WeatherDay[] {
     const dateKey = time[i];
     const tempMaxC = temps[i];
     const precipMm = precs[i];
-    if (typeof dateKey !== 'string' || typeof tempMaxC !== 'number' || typeof precipMm !== 'number') {
+    if (
+      typeof dateKey !== 'string' ||
+      typeof tempMaxC !== 'number' ||
+      typeof precipMm !== 'number'
+    ) {
       continue; // skip a single bad day (e.g. Open-Meteo nulls the last day's precip), keep the rest
     }
     days.push({ dateKey, condition: conditionOf(tempMaxC, precipMm), tempMaxC, precipMm });

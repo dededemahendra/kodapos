@@ -7,9 +7,7 @@ import schema from '../../convex/schema';
 const modules = import.meta.glob('../../convex/**/*.*s');
 
 async function setup(t: ReturnType<typeof convexTest>) {
-  const userId = await t.run((ctx) =>
-    ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' })
-  );
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' }));
   const asOwner = t.withIdentity({ subject: `${userId}|test` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   const cafe = await asOwner.query(api.cafes.myCafe, {});

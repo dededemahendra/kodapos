@@ -22,14 +22,21 @@ async function setup(t: ReturnType<typeof convexTest>, email = 'o@x.com'): Promi
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   await asOwner.mutation(api.cafes.updateProfile, {
-    name: 'Kopi Senja', timezone: TZ, taxRatePct: 0, taxEnabled: false,
+    name: 'Kopi Senja',
+    timezone: TZ,
+    taxRatePct: 0,
+    taxEnabled: false,
   });
   const cafe = await asOwner.query(api.cafes.myCafe, {});
   const cafeId = cafe!._id as Id<'cafes'>;
   const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
   const shiftId = await asOwner.mutation(api.shifts.open, { cashierId, openingFloatIDR: 100000 });
   const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Kopi' });
-  const itemId = await asOwner.mutation(api.menu.items.create, { categoryId, name: 'Espresso', priceIDR: 18000 });
+  const itemId = await asOwner.mutation(api.menu.items.create, {
+    categoryId,
+    name: 'Espresso',
+    priceIDR: 18000,
+  });
   return { asOwner, cafeId, cashierId, shiftId, itemId };
 }
 
@@ -133,7 +140,10 @@ describe('otherIncome', () => {
     expect(data.rows).toHaveLength(0);
 
     const { asOwner: asOther } = await setup(t, 'other@x.com');
-    const id2 = await asOwner.mutation(api.otherIncome.record, { source: 'Bunga', amountIDR: 9000 });
+    const id2 = await asOwner.mutation(api.otherIncome.record, {
+      source: 'Bunga',
+      amountIDR: 9000,
+    });
     await expect(asOther.mutation(api.otherIncome.remove, { id: id2 })).rejects.toThrow();
   });
 });
@@ -189,9 +199,7 @@ describe('reports.profitLoss + otherIncome', () => {
     expect(data.otherIncomeIDR).toBe(4000);
     // net = grossProfit − expenses + otherIncome = 24000 − 10000 + 4000 = 18000
     expect(data.netProfitIDR).toBe(18000);
-    expect(data.netProfitIDR).toBe(
-      data.grossProfitIDR - data.expensesIDR + data.otherIncomeIDR
-    );
+    expect(data.netProfitIDR).toBe(data.grossProfitIDR - data.expensesIDR + data.otherIncomeIDR);
     expect(data.netMarginPct).toBe(60); // Math.round(18000/30000*100)
   });
 });

@@ -178,8 +178,7 @@ export function RefundDialog({
                         </div>
                       ) : (
                         <div className="text-xs text-muted-foreground tabular-nums">
-                          {formatIDR(l.unitRefundIDR)} ·{' '}
-                          <Trans>sisa {l.remainingQty}</Trans>
+                          {formatIDR(l.unitRefundIDR)} · <Trans>sisa {l.remainingQty}</Trans>
                         </div>
                       )}
                     </div>

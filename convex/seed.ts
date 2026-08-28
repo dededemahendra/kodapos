@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
-import { internalMutation, internalQuery } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
+import { internalMutation, internalQuery } from './_generated/server';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Dev demo seed. Populates an existing cafe with a large, internally-consistent
@@ -24,7 +24,7 @@ const DAY_MS = 86_400_000;
 
 // ─── Seeded PRNG (LCG, glibc constants) ──────────────────────────────────────
 function makeRng(seed: number) {
-  let state = (seed >>> 0) || 1;
+  let state = seed >>> 0 || 1;
   const next = () => {
     // Numerical Recipes LCG; take high bits for a 0..1 float.
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
@@ -160,13 +160,54 @@ const SUPPLIERS: ReadonlyArray<readonly [string, string]> = [
 ] as const;
 
 const FIRST_NAMES = [
-  'Adi', 'Budi', 'Citra', 'Dewi', 'Eka', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko',
-  'Kartika', 'Lina', 'Mira', 'Nanda', 'Oka', 'Putri', 'Rizki', 'Sari', 'Tono', 'Umar',
-  'Vina', 'Wahyu', 'Yanti', 'Zaki', 'Bayu', 'Cinta', 'Dian', 'Erik', 'Fitri', 'Gilang',
+  'Adi',
+  'Budi',
+  'Citra',
+  'Dewi',
+  'Eka',
+  'Fajar',
+  'Gita',
+  'Hadi',
+  'Indah',
+  'Joko',
+  'Kartika',
+  'Lina',
+  'Mira',
+  'Nanda',
+  'Oka',
+  'Putri',
+  'Rizki',
+  'Sari',
+  'Tono',
+  'Umar',
+  'Vina',
+  'Wahyu',
+  'Yanti',
+  'Zaki',
+  'Bayu',
+  'Cinta',
+  'Dian',
+  'Erik',
+  'Fitri',
+  'Gilang',
 ] as const;
 const LAST_NAMES = [
-  'Santoso', 'Wijaya', 'Pratama', 'Lestari', 'Halim', 'Nugroho', 'Putra', 'Saputra',
-  'Anggraini', 'Kusuma', 'Hidayat', 'Permata', 'Wibowo', 'Maharani', 'Suryadi', 'Gunawan',
+  'Santoso',
+  'Wijaya',
+  'Pratama',
+  'Lestari',
+  'Halim',
+  'Nugroho',
+  'Putra',
+  'Saputra',
+  'Anggraini',
+  'Kusuma',
+  'Hidayat',
+  'Permata',
+  'Wibowo',
+  'Maharani',
+  'Suryadi',
+  'Gunawan',
 ] as const;
 
 const STAFF_NAMES = [
@@ -213,12 +254,37 @@ function genCode(rng: Rng, prefix: string, len: number): string {
 
 // Tables we own + purge between (everything except `cafes` itself and auth/users).
 const SEED_TABLES = [
-  'categories', 'menuItems', 'modifierGroups', 'modifierOptions', 'menuItemModifierGroups',
-  'menuItemVariants', 'cafeStaff', 'scheduledShifts', 'shifts', 'cashMovements', 'timeClock',
-  'tables', 'orders', 'payments', 'ingredients', 'recipes', 'promotions', 'suppliers',
-  'customers', 'reservations', 'loyaltyRewards', 'loyaltyTransactions', 'giftCards',
-  'giftCardTransactions', 'purchases', 'purchaseOrders', 'forecasts', 'restockSuggestions',
-  'expenses', 'otherIncome', 'inventoryMovements',
+  'categories',
+  'menuItems',
+  'modifierGroups',
+  'modifierOptions',
+  'menuItemModifierGroups',
+  'menuItemVariants',
+  'cafeStaff',
+  'scheduledShifts',
+  'shifts',
+  'cashMovements',
+  'timeClock',
+  'tables',
+  'orders',
+  'payments',
+  'ingredients',
+  'recipes',
+  'promotions',
+  'suppliers',
+  'customers',
+  'reservations',
+  'loyaltyRewards',
+  'loyaltyTransactions',
+  'giftCards',
+  'giftCardTransactions',
+  'purchases',
+  'purchaseOrders',
+  'forecasts',
+  'restockSuggestions',
+  'expenses',
+  'otherIncome',
+  'inventoryMovements',
 ] as const;
 
 async function purgeForCafe(ctx: MutationCtx, cafeId: Id<'cafes'>): Promise<void> {
@@ -273,7 +339,7 @@ export const run = internalMutation({
 
     // Cafe tax config drives order math (mirrors buildOrder).
     const taxEnabled = cafe.taxEnabled === true;
-    const taxRatePct = taxEnabled ? cafe.taxRatePct ?? 0 : 0;
+    const taxRatePct = taxEnabled ? (cafe.taxRatePct ?? 0) : 0;
 
     // ── cafeSettings (loyalty + payment) ──────────────────────────────────────
     // Ensure a settings row exists with loyalty enabled + tiers so loyalty
@@ -355,28 +421,46 @@ export const run = internalMutation({
         required: true,
         minSelect: 1,
         maxSelect: 1,
-        options: [['Normal', 0], ['Sedikit Gula', 0], ['Tanpa Gula', 0], ['Extra Manis', 0]],
+        options: [
+          ['Normal', 0],
+          ['Sedikit Gula', 0],
+          ['Tanpa Gula', 0],
+          ['Extra Manis', 0],
+        ],
       },
       {
         name: 'Suhu',
         required: true,
         minSelect: 1,
         maxSelect: 1,
-        options: [['Panas', 0], ['Dingin', 2000]],
+        options: [
+          ['Panas', 0],
+          ['Dingin', 2000],
+        ],
       },
       {
         name: 'Topping',
         required: false,
         minSelect: 0,
         maxSelect: 3,
-        options: [['Extra Shot', 6000], ['Whipped Cream', 4000], ['Boba', 5000], ['Keju', 5000]],
+        options: [
+          ['Extra Shot', 6000],
+          ['Whipped Cream', 4000],
+          ['Boba', 5000],
+          ['Keju', 5000],
+        ],
       },
       {
         name: 'Level Pedas',
         required: false,
         minSelect: 0,
         maxSelect: 1,
-        options: [['Tidak Pedas', 0], ['Sedang', 0], ['Pedas', 0], ['Extra Pedas', 2000]],
+        options: [
+          ['Tidak Pedas', 0],
+          ['Sedang', 0],
+          ['Pedas', 0],
+          ['Extra Pedas', 2000],
+        ],
       },
     ];
     const groupIds: Id<'modifierGroups'>[] = [];
@@ -610,12 +694,13 @@ export const run = internalMutation({
       const lines = chosen.map((ingId) => {
         const ordered = rng.i(500, 4000);
         const received =
-          status === 'received'
-            ? ordered
-            : status === 'partial'
-              ? Math.floor(ordered / 2)
-              : 0;
-        return { ingredientId: ingId, orderedQty: ordered, receivedQty: received, unitCostIDR: rng.money(10, 400, 5) };
+          status === 'received' ? ordered : status === 'partial' ? Math.floor(ordered / 2) : 0;
+        return {
+          ingredientId: ingId,
+          orderedQty: ordered,
+          receivedQty: received,
+          unitCostIDR: rng.money(10, 400, 5),
+        };
       });
       const supplier = rng.pick(supplierIds);
       const supplierDoc = await ctx.db.get(supplier);
@@ -768,7 +853,8 @@ export const run = internalMutation({
         cafeId,
         giftCardId: gc,
         type,
-        amountIDR: type === 'topup' ? rng.money(50000, 200000, 5000) : -rng.money(10000, 80000, 5000),
+        amountIDR:
+          type === 'topup' ? rng.money(50000, 200000, 5000) : -rng.money(10000, 80000, 5000),
         at: dateInRange(rng, now, rng.i(0, days)),
       });
       bump('giftCardTransactions');
@@ -797,7 +883,8 @@ export const run = internalMutation({
     for (const p of promoSpecs) {
       const target: Record<string, unknown> = {};
       if (p.scope === 'item') target.targetItemIds = [items[0]!.id];
-      if (p.scope === 'category') target.targetCategoryIds = [categoryIds[rng.i(0, categoryIds.length - 1)]!];
+      if (p.scope === 'category')
+        target.targetCategoryIds = [categoryIds[rng.i(0, categoryIds.length - 1)]!];
       await ctx.db.insert('promotions', {
         cafeId,
         name: p.name,
@@ -866,7 +953,13 @@ export const run = internalMutation({
 
     // ── Shifts (~30, spread across days; closed with opening/closing cash) ──────
     // We tie orders + cash movements to these shifts. The last one is left open.
-    type ShiftMeta = { id: Id<'shifts'>; cashierId: Id<'cafeStaff'>; openedAt: number; dayIndex: number; closed: boolean };
+    type ShiftMeta = {
+      id: Id<'shifts'>;
+      cashierId: Id<'cafeStaff'>;
+      openedAt: number;
+      dayIndex: number;
+      closed: boolean;
+    };
     const shiftCount = 30;
     const shifts: ShiftMeta[] = [];
     for (let i = 0; i < shiftCount; i++) {
@@ -1018,7 +1111,10 @@ export const run = internalMutation({
       }
 
       // Payment method mix: mostly cash + qris_static, a few split.
-      type Breakdown = { method: 'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard'; amountIDR: number };
+      type Breakdown = {
+        method: 'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard';
+        amountIDR: number;
+      };
       let orderMethod: 'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard' | 'split';
       let paymentBreakdown: Breakdown[];
       // payment-row plans mirror buildOrder: cash carries tendered/change.
@@ -1036,7 +1132,14 @@ export const run = internalMutation({
         orderMethod = 'cash';
         const tendered = Math.ceil(totalIDR / 5000) * 5000 + (rng.chance(0.4) ? 5000 : 0);
         paymentBreakdown = [{ method: 'cash', amountIDR: totalIDR }];
-        payRows = [{ method: 'cash', amountIDR: totalIDR, cashTenderedIDR: tendered, changeIDR: tendered - totalIDR }];
+        payRows = [
+          {
+            method: 'cash',
+            amountIDR: totalIDR,
+            cashTenderedIDR: tendered,
+            changeIDR: tendered - totalIDR,
+          },
+        ];
       } else if (roll < 0.9) {
         // qris_static
         orderMethod = 'qris_static';
@@ -1052,7 +1155,14 @@ export const run = internalMutation({
           orderMethod = 'cash';
           const tendered = Math.ceil(totalIDR / 5000) * 5000;
           paymentBreakdown = [{ method: 'cash', amountIDR: totalIDR }];
-          payRows = [{ method: 'cash', amountIDR: totalIDR, cashTenderedIDR: tendered, changeIDR: tendered - totalIDR }];
+          payRows = [
+            {
+              method: 'cash',
+              amountIDR: totalIDR,
+              cashTenderedIDR: tendered,
+              changeIDR: tendered - totalIDR,
+            },
+          ];
         } else {
           paymentBreakdown = [
             { method: 'cash', amountIDR: cashPart },
@@ -1187,10 +1297,13 @@ export const run = internalMutation({
     for (let i = 0; i < 40; i++) {
       const cat = rng.pick(expenseCats);
       const amount =
-        cat === 'rent' ? rng.money(3000000, 6000000, 100000)
-        : cat === 'salary' ? rng.money(1500000, 4000000, 100000)
-        : cat === 'utilities' ? rng.money(200000, 1200000, 50000)
-        : rng.money(50000, 800000, 10000);
+        cat === 'rent'
+          ? rng.money(3000000, 6000000, 100000)
+          : cat === 'salary'
+            ? rng.money(1500000, 4000000, 100000)
+            : cat === 'utilities'
+              ? rng.money(200000, 1200000, 50000)
+              : rng.money(50000, 800000, 10000);
       await ctx.db.insert('expenses', {
         cafeId,
         category: cat,
@@ -1202,7 +1315,13 @@ export const run = internalMutation({
     }
 
     // ── Other income (~15) ──────────────────────────────────────────────────────
-    const incomeSources = ['Sewa ruang acara', 'Penjualan merchandise', 'Jasa katering', 'Komisi rekanan', 'Penjualan biji kopi'];
+    const incomeSources = [
+      'Sewa ruang acara',
+      'Penjualan merchandise',
+      'Jasa katering',
+      'Komisi rekanan',
+      'Penjualan biji kopi',
+    ];
     for (let i = 0; i < 15; i++) {
       await ctx.db.insert('otherIncome', {
         cafeId,
@@ -1226,7 +1345,11 @@ export const run = internalMutation({
         sevenDayQty: rng.i(40, 250),
         confidence: rng.pick(['low', 'med', 'high'] as const),
         drivers: [
-          { code: rng.pick(['dow_busy', 'dow_quiet'] as const), pct: rng.i(-20, 30), dow: rng.i(0, 6) },
+          {
+            code: rng.pick(['dow_busy', 'dow_quiet'] as const),
+            pct: rng.i(-20, 30),
+            dow: rng.i(0, 6),
+          },
         ],
       }));
       const id = await ctx.db.insert('forecasts', {
@@ -1358,7 +1481,8 @@ export const run = internalMutation({
           withVariantAndModifier && variantModifierPool.length > 0
             ? rng.pick(variantModifierPool)
             : rng.pick(sellable);
-        const variant = withVariantAndModifier && it.variants.length > 0 ? rng.pick(it.variants) : null;
+        const variant =
+          withVariantAndModifier && it.variants.length > 0 ? rng.pick(it.variants) : null;
 
         // Resolve one real modifier option for this item, and derive the label
         // from that SAME option — never fabricate a label with no matching id.
@@ -1446,9 +1570,7 @@ export const closeExtraShifts = internalMutation({
   args: { cafeId: v.optional(v.id('cafes')) },
   returns: v.any(),
   handler: async (ctx, args) => {
-    const cafe = args.cafeId
-      ? await ctx.db.get(args.cafeId)
-      : await ctx.db.query('cafes').first();
+    const cafe = args.cafeId ? await ctx.db.get(args.cafeId) : await ctx.db.query('cafes').first();
     if (!cafe) throw new Error('No cafe found.');
     const open = await ctx.db
       .query('shifts')

@@ -27,7 +27,12 @@ function ModifierGroupEditor() {
         <FormSkeleton rows={5} />
       </div>
     );
-  if (!isNew && existing === null) return <p className="text-muted-foreground"><Trans>Grup tidak ditemukan.</Trans></p>;
+  if (!isNew && existing === null)
+    return (
+      <p className="text-muted-foreground">
+        <Trans>Grup tidak ditemukan.</Trans>
+      </p>
+    );
 
   return (
     <div>

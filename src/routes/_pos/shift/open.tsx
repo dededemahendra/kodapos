@@ -1,8 +1,7 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
 import { type FormEvent, useState } from 'react';
 import { ShiftSummaryPanel } from '~/components/shift/shift-summary-panel';
 import { Button } from '~/components/ui/button';
@@ -26,16 +25,24 @@ function ShiftOpenPage() {
   const [submitting, setSubmitting] = useState(false);
 
   if (current === undefined || staff === undefined) {
-    return <p className="text-muted-foreground p-6"><Trans>Memuat…</Trans></p>;
+    return (
+      <p className="text-muted-foreground p-6">
+        <Trans>Memuat…</Trans>
+      </p>
+    );
   }
 
   if (current) {
     return (
       <main className="max-w-xl mx-auto p-6 space-y-4">
-        <h1 className="text-2xl font-bold"><Trans>Sudah ada shift terbuka</Trans></h1>
+        <h1 className="text-2xl font-bold">
+          <Trans>Sudah ada shift terbuka</Trans>
+        </h1>
         <ShiftSummaryPanel shift={current} />
         <Button asChild>
-          <Link to="/shift/close"><Trans>Lanjut ke Tutup Shift</Trans></Link>
+          <Link to="/shift/close">
+            <Trans>Lanjut ke Tutup Shift</Trans>
+          </Link>
         </Button>
       </main>
     );
@@ -75,12 +82,18 @@ function ShiftOpenPage() {
 
   return (
     <main className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-1"><Trans>Buka Shift</Trans></h1>
-      <p className="text-muted-foreground text-sm mb-6"><Trans>Sebagai: {me.name}</Trans></p>
+      <h1 className="text-2xl font-bold mb-1">
+        <Trans>Buka Shift</Trans>
+      </h1>
+      <p className="text-muted-foreground text-sm mb-6">
+        <Trans>Sebagai: {me.name}</Trans>
+      </p>
       <form onSubmit={onSubmit}>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="openingFloatIDR"><Trans>Modal awal (Rp)</Trans></FieldLabel>
+            <FieldLabel htmlFor="openingFloatIDR">
+              <Trans>Modal awal (Rp)</Trans>
+            </FieldLabel>
             <Input
               id="openingFloatIDR"
               name="openingFloatIDR"

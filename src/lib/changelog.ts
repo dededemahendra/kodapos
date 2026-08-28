@@ -1,7 +1,7 @@
 import { type Localized, localized } from './localized';
 
-export { localized };
 export type { Localized };
+export { localized };
 
 /**
  * User-facing "what's new" feed shown in the sidebar card and the /changelog

@@ -103,12 +103,19 @@ describe('settings.get', () => {
     const t = convexTest(schema, modules);
     const userId = await seedOwner(t);
     const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
-    const storageId = await t.run(async (ctx) =>
-      await ctx.storage.store(new Blob(['fake-qr'], { type: 'image/png' }))
+    const storageId = await t.run(
+      async (ctx) => await ctx.storage.store(new Blob(['fake-qr'], { type: 'image/png' }))
     );
     await asOwner.mutation(api.settings.updatePayment, {
       payment: {
-        methods: { cash: true, qrisStatic: true, qrisDynamic: false, card: false, ewallet: false, transfer: false },
+        methods: {
+          cash: true,
+          qrisStatic: true,
+          qrisDynamic: false,
+          card: false,
+          ewallet: false,
+          transfer: false,
+        },
         defaultMethod: 'cash',
         cashRounding: 'none',
         quickCashButtons: [20000, 50000, 100000],
@@ -144,7 +151,10 @@ describe('settings.get', () => {
     const userId = await seedOwner(t);
     const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
     await expect(
-      asOwner.mutation(api.settings.connectQrisProvider, { secretApiKey: 'bogus', callbackToken: 't' })
+      asOwner.mutation(api.settings.connectQrisProvider, {
+        secretApiKey: 'bogus',
+        callbackToken: 't',
+      })
     ).rejects.toThrow(/tidak valid/i);
   });
 

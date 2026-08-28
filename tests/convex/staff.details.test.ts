@@ -70,13 +70,13 @@ describe('staff.updateDetails', () => {
     const asOwner = await setupOwner(t);
     const id = await asOwner.mutation(api.staff.create, { name: 'Citra', pin: '5678' });
 
-    await expect(
-      asOwner.mutation(api.staff.updateDetails, { id, name: '   ' })
-    ).rejects.toThrow(/nama/i);
+    await expect(asOwner.mutation(api.staff.updateDetails, { id, name: '   ' })).rejects.toThrow(
+      /nama/i
+    );
 
-    await expect(
-      asOwner.mutation(api.staff.updateDetails, { id, name: '' })
-    ).rejects.toThrow(/nama/i);
+    await expect(asOwner.mutation(api.staff.updateDetails, { id, name: '' })).rejects.toThrow(
+      /nama/i
+    );
   });
 });
 

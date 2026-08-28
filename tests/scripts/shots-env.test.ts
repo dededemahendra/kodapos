@@ -4,9 +4,9 @@ import { assertShotsDeployment } from '../../scripts/lib/shots-env.mjs';
 
 describe('assertShotsDeployment', () => {
   it('throws when no screenshot deployment is allowlisted', () => {
-    expect(() => assertShotsDeployment({ configured: 'dev:kodapos-123', allowed: undefined })).toThrow(
-      /SHOTS_CONVEX_DEPLOYMENT/
-    );
+    expect(() =>
+      assertShotsDeployment({ configured: 'dev:kodapos-123', allowed: undefined })
+    ).toThrow(/SHOTS_CONVEX_DEPLOYMENT/);
   });
 
   it('throws when the allowlist is an empty string', () => {
@@ -35,7 +35,10 @@ describe('assertShotsDeployment', () => {
 
   it('passes when the configured deployment matches the allowlist exactly', () => {
     expect(() =>
-      assertShotsDeployment({ configured: 'dev:kodapos-shots-999', allowed: 'dev:kodapos-shots-999' })
+      assertShotsDeployment({
+        configured: 'dev:kodapos-shots-999',
+        allowed: 'dev:kodapos-shots-999',
+      })
     ).not.toThrow();
   });
 });

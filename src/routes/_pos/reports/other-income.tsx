@@ -50,25 +50,19 @@ function OtherIncomeReport() {
         accessorKey: 'at',
         header: () => <Trans>Tanggal</Trans>,
         cell: ({ row }) => (
-          <span className="text-sm">
-            {new Date(row.original.at).toLocaleDateString('id-ID')}
-          </span>
+          <span className="text-sm">{new Date(row.original.at).toLocaleDateString('id-ID')}</span>
         ),
       },
       {
         accessorKey: 'source',
         header: () => <Trans>Sumber</Trans>,
-        cell: ({ row }) => (
-          <span className="text-sm">{row.original.source}</span>
-        ),
+        cell: ({ row }) => <span className="text-sm">{row.original.source}</span>,
       },
       {
         accessorKey: 'note',
         header: () => <Trans>Catatan</Trans>,
         cell: ({ row }) => (
-          <span className="text-muted-foreground text-sm">
-            {row.original.note ?? '—'}
-          </span>
+          <span className="text-muted-foreground text-sm">{row.original.note ?? '—'}</span>
         ),
       },
       {
@@ -76,9 +70,7 @@ function OtherIncomeReport() {
         header: () => <Trans>Jumlah (Rp)</Trans>,
         cell: ({ row }) => (
           <div className="text-right">
-            <span className="tabular-nums">
-              {formatIDR(row.original.amountIDR)}
-            </span>
+            <span className="tabular-nums">{formatIDR(row.original.amountIDR)}</span>
           </div>
         ),
       },
@@ -129,8 +121,7 @@ function OtherIncomeReport() {
       await exportTablePdf({
         filename: 'pendapatan-lain.pdf',
         title: 'Other income',
-        subtitle:
-          'from' in range ? `${range.from} to ${range.to}` : range.preset,
+        subtitle: 'from' in range ? `${range.from} to ${range.to}` : range.preset,
         columns: [
           { key: 'at', header: 'Date' },
           { key: 'source', header: 'Source' },

@@ -1,13 +1,10 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import {
-  type ShiftRow,
-  ShiftFormDialog,
-} from '~/components/schedule/shift-form-dialog';
+import { ShiftFormDialog, type ShiftRow } from '~/components/schedule/shift-form-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import {
@@ -20,7 +17,6 @@ import {
 import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
 import { Skeleton } from '~/components/ui/skeleton';
-import { useMutation } from 'convex/react';
 import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_pos/schedule')({
@@ -173,9 +169,7 @@ function SchedulePage() {
                 <Trans>Belum ada jadwal minggu ini.</Trans>
               </EmptyTitle>
               <EmptyDescription>
-                <Trans>
-                  Tambahkan jadwal kerja staf untuk minggu yang dipilih.
-                </Trans>
+                <Trans>Tambahkan jadwal kerja staf untuk minggu yang dipilih.</Trans>
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -187,9 +181,7 @@ function SchedulePage() {
               return (
                 <div key={key} className="space-y-2">
                   <div className="flex items-center justify-between gap-2 border-b border-border pb-1">
-                    <h2 className="text-sm font-semibold">
-                      {dateFmt.format(day)}
-                    </h2>
+                    <h2 className="text-sm font-semibold">{dateFmt.format(day)}</h2>
                     <Button
                       type="button"
                       variant="ghost"
@@ -215,9 +207,7 @@ function SchedulePage() {
                             {shift.startTime} s/d {shift.endTime}
                           </span>
                           {shift.note && (
-                            <p className="truncate text-xs text-muted-foreground">
-                              {shift.note}
-                            </p>
+                            <p className="truncate text-xs text-muted-foreground">{shift.note}</p>
                           )}
                         </div>
                         <div className="flex items-center gap-1">

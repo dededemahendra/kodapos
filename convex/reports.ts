@@ -1,10 +1,10 @@
 import { v } from 'convex/values';
-import { query } from './_generated/server';
-import type { QueryCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import type { QueryCtx } from './_generated/server';
+import { query } from './_generated/server';
 import { requireActiveOutlet, requireActiveUser, resolveOutletAccess } from './lib/auth';
 import { methodTotals } from './lib/payment';
-import { type RangeArgs, dayKeyFn, eachDayKey, resolveRange, tzFor } from './lib/time';
+import { dayKeyFn, eachDayKey, type RangeArgs, resolveRange, tzFor } from './lib/time';
 
 const rangeArg = v.union(
   v.object({
@@ -19,10 +19,7 @@ const rangeArg = v.union(
 );
 
 // Resolves the cafe + tz + window, then returns paid orders in range.
-async function paidInRange(
-  ctx: QueryCtx,
-  range: RangeArgs
-) {
+async function paidInRange(ctx: QueryCtx, range: RangeArgs) {
   const { cafeId } = await requireActiveOutlet(ctx);
   const tz = await tzFor(ctx, cafeId);
   const { startMs, endMs, fromKey, toKey } = resolveRange(tz, range, Date.now());
@@ -96,9 +93,7 @@ export const overview = query({
 export const salesDaily = query({
   args: { range: rangeArg },
   returns: v.object({
-    days: v.array(
-      v.object({ day: v.string(), revenueIDR: v.number(), orders: v.number() })
-    ),
+    days: v.array(v.object({ day: v.string(), revenueIDR: v.number(), orders: v.number() })),
     fromKey: v.string(),
     toKey: v.string(),
   }),
@@ -134,9 +129,7 @@ export const salesDaily = query({
 export const products = query({
   args: { range: rangeArg },
   returns: v.object({
-    items: v.array(
-      v.object({ name: v.string(), qty: v.number(), revenueIDR: v.number() })
-    ),
+    items: v.array(v.object({ name: v.string(), qty: v.number(), revenueIDR: v.number() })),
     fromKey: v.string(),
     toKey: v.string(),
   }),
@@ -307,9 +300,7 @@ export const profitLoss = query({
     // recipeSnapshot so it matches what the sale deducted.
     const refunds = await ctx.db
       .query('refunds')
-      .withIndex('by_cafe_at', (q) =>
-        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
-      )
+      .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs))
       .collect();
     let refundsIDR = 0;
     let refundCogsIDR = 0;
@@ -334,9 +325,7 @@ export const profitLoss = query({
     const cogsIDR = Math.round(grossCogsIDR - refundCogsIDR);
     const expenses = await ctx.db
       .query('expenses')
-      .withIndex('by_cafe_at', (q) =>
-        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
-      )
+      .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs))
       .collect();
     const byCat = new Map<string, number>();
     let expensesIDR = 0;
@@ -347,9 +336,7 @@ export const profitLoss = query({
     // Non-sales income in the same range (the otherIncome ledger).
     const incomes = await ctx.db
       .query('otherIncome')
-      .withIndex('by_cafe_at', (q) =>
-        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
-      )
+      .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs))
       .collect();
     let otherIncomeIDR = 0;
     for (const i of incomes) {
@@ -401,7 +388,12 @@ export const payments = query({
   }),
   handler: async (ctx, { range }) => {
     const { fromKey, toKey, paid } = await paidInRange(ctx, range);
-    const order: Array<'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard'> = ['cash', 'qris_static', 'qris_dynamic', 'giftcard'];
+    const order: Array<'cash' | 'qris_static' | 'qris_dynamic' | 'giftcard'> = [
+      'cash',
+      'qris_static',
+      'qris_dynamic',
+      'giftcard',
+    ];
     const byMethod = new Map<string, { count: number; amountIDR: number }>();
     for (const o of paid) {
       // Each order contributes to every method it used (a split touches 2+).
@@ -437,7 +429,10 @@ export const cashiers = query({
   }),
   handler: async (ctx, { range }) => {
     const { fromKey, toKey, paid } = await paidInRange(ctx, range);
-    const agg = new Map<string, { cashierId: typeof paid[number]['cashierId']; orders: number; revenueIDR: number }>();
+    const agg = new Map<
+      string,
+      { cashierId: (typeof paid)[number]['cashierId']; orders: number; revenueIDR: number }
+    >();
     for (const o of paid) {
       const cur = agg.get(o.cashierId) ?? { cashierId: o.cashierId, orders: 0, revenueIDR: 0 };
       cur.orders += 1;
@@ -447,7 +442,12 @@ export const cashiers = query({
     const rows = [];
     for (const a of agg.values()) {
       const staff = await ctx.db.get(a.cashierId);
-      rows.push({ cashierId: a.cashierId, name: staff?.name ?? '—', orders: a.orders, revenueIDR: a.revenueIDR });
+      rows.push({
+        cashierId: a.cashierId,
+        name: staff?.name ?? '—',
+        orders: a.orders,
+        revenueIDR: a.revenueIDR,
+      });
     }
     rows.sort((x, y) => y.revenueIDR - x.revenueIDR || x.name.localeCompare(y.name, 'id-ID'));
     return { rows, fromKey, toKey };

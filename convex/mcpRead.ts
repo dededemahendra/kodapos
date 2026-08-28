@@ -61,9 +61,7 @@ export const salesSummary = internalQuery({
 export const topProducts = internalQuery({
   args: { cafeId: v.id('cafes'), range: rangeArg, limit: v.optional(v.number()) },
   returns: v.object({
-    items: v.array(
-      v.object({ name: v.string(), qty: v.number(), revenueIDR: v.number() })
-    ),
+    items: v.array(v.object({ name: v.string(), qty: v.number(), revenueIDR: v.number() })),
     fromKey: v.string(),
     toKey: v.string(),
   }),

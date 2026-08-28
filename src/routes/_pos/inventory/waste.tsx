@@ -117,11 +117,7 @@ function WastePage() {
     <main className="p-6">
       <PageHeader
         title={<Trans>Limbah</Trans>}
-        meta={
-          rows ? (
-            <Trans>Kerugian 30 hari · {formatIDR(totalLoss)}</Trans>
-          ) : null
-        }
+        meta={rows ? <Trans>Kerugian 30 hari · {formatIDR(totalLoss)}</Trans> : null}
         actions={
           <Button type="button" onClick={() => setOpen(true)}>
             <Trash2 />

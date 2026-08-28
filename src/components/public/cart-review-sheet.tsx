@@ -3,12 +3,7 @@ import { computeOrderTotals } from 'convex/lib/pricing';
 import { Trash2 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '~/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '~/components/ui/sheet';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
 import type { CartLine, MenuPricing } from './types';
@@ -72,16 +67,12 @@ export function CartReviewSheet({
 
         <div className="mt-2 space-y-3">
           {cart.map((line) => {
-            const summary = [line.variantName, ...line.modifierLabels]
-              .filter(Boolean)
-              .join(' · ');
+            const summary = [line.variantName, ...line.modifierLabels].filter(Boolean).join(' · ');
             return (
               <div key={line.key} className="flex gap-3 border-b border-border pb-3">
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium">{line.name}</div>
-                  {summary ? (
-                    <div className="text-xs text-muted-foreground">{summary}</div>
-                  ) : null}
+                  {summary ? <div className="text-xs text-muted-foreground">{summary}</div> : null}
                   <div className="mt-0.5 text-xs tabular-nums text-muted-foreground">
                     {formatIDR(line.unitPriceIDR)}
                   </div>

@@ -21,10 +21,7 @@ export function WizardStepper({ steps, currentIndex, className }: WizardStepperP
         const isEnabled = step.enabled;
         const isLast = i === steps.length - 1;
         return (
-          <li
-            key={step.label}
-            className={cn('flex items-center', !isLast && 'flex-1')}
-          >
+          <li key={step.label} className={cn('flex items-center', !isLast && 'flex-1')}>
             <div className="flex items-center gap-2">
               <span
                 className={cn(
@@ -32,7 +29,10 @@ export function WizardStepper({ steps, currentIndex, className }: WizardStepperP
                   isDone && 'border-primary bg-primary text-primary-foreground',
                   isCurrent &&
                     'border-primary bg-primary text-primary-foreground ring-4 ring-primary/10',
-                  !isCurrent && !isDone && isEnabled && 'border-border bg-background text-muted-foreground',
+                  !isCurrent &&
+                    !isDone &&
+                    isEnabled &&
+                    'border-border bg-background text-muted-foreground',
                   !isEnabled && 'border-dashed border-border bg-muted text-muted-foreground/50'
                 )}
                 aria-current={isCurrent ? 'step' : undefined}

@@ -6,16 +6,20 @@ import schema from '../../convex/schema';
 const modules = import.meta.glob('../../convex/**/*.*s');
 
 async function setup(t: ReturnType<typeof convexTest>, email = 'o@x.com') {
-  const userId = await t.run(async (ctx) =>
-    ctx.db.insert('users', { name: 'Owner', email })
-  );
+  const userId = await t.run(async (ctx) => ctx.db.insert('users', { name: 'Owner', email }));
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   const biji = await asOwner.mutation(api.ingredients.upsert, {
-    name: 'Biji', canonicalUnit: 'g', reorderThreshold: 0, lastCostPerUnitIDR: 40,
+    name: 'Biji',
+    canonicalUnit: 'g',
+    reorderThreshold: 0,
+    lastCostPerUnitIDR: 40,
   });
   const susu = await asOwner.mutation(api.ingredients.upsert, {
-    name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 20,
+    name: 'Susu',
+    canonicalUnit: 'ml',
+    reorderThreshold: 0,
+    lastCostPerUnitIDR: 20,
   });
   return { asOwner, biji, susu };
 }
@@ -65,18 +69,24 @@ describe('purchases.record', () => {
   it('rejects empty lines / bad qty / negative cost / foreign ingredient', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, biji } = await setup(t);
+    await expect(asOwner.mutation(api.purchases.record, { lines: [] })).rejects.toThrow(
+      /minimal satu/i
+    );
     await expect(
-      asOwner.mutation(api.purchases.record, { lines: [] })
-    ).rejects.toThrow(/minimal satu/i);
-    await expect(
-      asOwner.mutation(api.purchases.record, { lines: [{ ingredientId: biji, qty: 0, unitCostIDR: 10 }] })
+      asOwner.mutation(api.purchases.record, {
+        lines: [{ ingredientId: biji, qty: 0, unitCostIDR: 10 }],
+      })
     ).rejects.toThrow(/jumlah/i);
     await expect(
-      asOwner.mutation(api.purchases.record, { lines: [{ ingredientId: biji, qty: 5, unitCostIDR: -1 }] })
+      asOwner.mutation(api.purchases.record, {
+        lines: [{ ingredientId: biji, qty: 5, unitCostIDR: -1 }],
+      })
     ).rejects.toThrow(/biaya/i);
     const { biji: otherBiji } = await setup(t, 'b@x.com');
     await expect(
-      asOwner.mutation(api.purchases.record, { lines: [{ ingredientId: otherBiji, qty: 5, unitCostIDR: 10 }] })
+      asOwner.mutation(api.purchases.record, {
+        lines: [{ ingredientId: otherBiji, qty: 5, unitCostIDR: 10 }],
+      })
     ).rejects.toThrow(/tidak ditemukan/i);
   });
 });

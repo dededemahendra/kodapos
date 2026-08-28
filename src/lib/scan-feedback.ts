@@ -16,7 +16,9 @@ export function setScanMuted(next: boolean): void {
 
 function audioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
-  const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  const Ctor =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!Ctor) return null;
   if (!ctx) ctx = new Ctor();
   return ctx;

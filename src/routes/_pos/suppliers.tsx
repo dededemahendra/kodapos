@@ -1,17 +1,23 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
-import { RequirePermission } from '~/components/permission/require-permission';
 import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { Archive, Pencil, Plus, Truck } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { SupplierFormDialog } from '~/components/supplier/supplier-form-dialog';
 import { Button } from '~/components/ui/button';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { DataTable } from '~/components/ui/data-table';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
 import { RowActions } from '~/components/ui/row-actions';
 import { StatusBadge } from '~/components/ui/status-badge';
@@ -72,7 +78,11 @@ function SuppliersInner() {
           row.original.archived ? (
             <span className="font-medium">{row.original.name}</span>
           ) : (
-            <button type="button" className="text-left font-medium hover:underline" onClick={() => openEdit(row.original)}>
+            <button
+              type="button"
+              className="text-left font-medium hover:underline"
+              onClick={() => openEdit(row.original)}
+            >
               {row.original.name}
             </button>
           ),
@@ -89,9 +99,13 @@ function SuppliersInner() {
         header: () => <Trans>Status</Trans>,
         cell: ({ row }) =>
           row.original.archived ? (
-            <StatusBadge variant="muted"><Trans>Arsip</Trans></StatusBadge>
+            <StatusBadge variant="muted">
+              <Trans>Arsip</Trans>
+            </StatusBadge>
           ) : (
-            <StatusBadge variant="success"><Trans>Aktif</Trans></StatusBadge>
+            <StatusBadge variant="success">
+              <Trans>Aktif</Trans>
+            </StatusBadge>
           ),
       },
       {
@@ -104,8 +118,18 @@ function SuppliersInner() {
               <RowActions
                 label={t`Aksi baris`}
                 items={[
-                  { label: <Trans>Ubah</Trans>, icon: <Pencil />, onSelect: () => openEdit(row.original) },
-                  { label: <Trans>Arsipkan</Trans>, icon: <Archive />, destructive: true, separatorBefore: true, onSelect: () => setArchiveTarget(row.original) },
+                  {
+                    label: <Trans>Ubah</Trans>,
+                    icon: <Pencil />,
+                    onSelect: () => openEdit(row.original),
+                  },
+                  {
+                    label: <Trans>Arsipkan</Trans>,
+                    icon: <Archive />,
+                    destructive: true,
+                    separatorBefore: true,
+                    onSelect: () => setArchiveTarget(row.original),
+                  },
                 ]}
               />
             </div>
@@ -118,9 +142,21 @@ function SuppliersInner() {
   const emptyState = (
     <Empty>
       <EmptyHeader>
-        <EmptyMedia variant="icon"><Truck /></EmptyMedia>
-        <EmptyTitle>{filter === 'archived' ? <Trans>Tidak ada pemasok diarsipkan.</Trans> : <Trans>Belum ada pemasok.</Trans>}</EmptyTitle>
-        {filter === 'active' ? <EmptyDescription><Trans>Tambah pemasok untuk mengirim daftar belanja.</Trans></EmptyDescription> : null}
+        <EmptyMedia variant="icon">
+          <Truck />
+        </EmptyMedia>
+        <EmptyTitle>
+          {filter === 'archived' ? (
+            <Trans>Tidak ada pemasok diarsipkan.</Trans>
+          ) : (
+            <Trans>Belum ada pemasok.</Trans>
+          )}
+        </EmptyTitle>
+        {filter === 'active' ? (
+          <EmptyDescription>
+            <Trans>Tambah pemasok untuk mengirim daftar belanja.</Trans>
+          </EmptyDescription>
+        ) : null}
       </EmptyHeader>
     </Empty>
   );
@@ -130,17 +166,35 @@ function SuppliersInner() {
       <PageHeader
         title={<Trans>Pemasok</Trans>}
         meta={counts ? <Trans>{counts.active} pemasok aktif</Trans> : null}
-        actions={<Button type="button" onClick={openCreate}><Plus /><Trans>Tambah Pemasok</Trans></Button>}
+        actions={
+          <Button type="button" onClick={openCreate}>
+            <Plus />
+            <Trans>Tambah Pemasok</Trans>
+          </Button>
+        }
       />
       <Toolbar
         active={filter}
         onFilter={(v) => setFilter(v as Filter)}
         filters={[
-          { label: <Trans>Aktif</Trans>, value: 'active', ...(counts !== undefined ? { count: counts.active } : {}) },
-          { label: <Trans>Arsip</Trans>, value: 'archived', ...(counts !== undefined ? { count: counts.archived } : {}) },
+          {
+            label: <Trans>Aktif</Trans>,
+            value: 'active',
+            ...(counts !== undefined ? { count: counts.active } : {}),
+          },
+          {
+            label: <Trans>Arsip</Trans>,
+            value: 'archived',
+            ...(counts !== undefined ? { count: counts.archived } : {}),
+          },
         ]}
       />
-      <DataTable columns={columns} data={visible} emptyState={emptyState} initialSort={[{ id: 'name', desc: false }]} />
+      <DataTable
+        columns={columns}
+        data={visible}
+        emptyState={emptyState}
+        initialSort={[{ id: 'name', desc: false }]}
+      />
       <SupplierFormDialog
         open={formOpen}
         supplier={formSupplier}
@@ -155,7 +209,11 @@ function SuppliersInner() {
           if (!o) setArchiveTarget(null);
         }}
         title={<Trans>Arsipkan pemasok?</Trans>}
-        description={archiveTarget ? <Trans>"{archiveTarget.name}" tidak akan muncul di pilihan pemasok.</Trans> : undefined}
+        description={
+          archiveTarget ? (
+            <Trans>"{archiveTarget.name}" tidak akan muncul di pilihan pemasok.</Trans>
+          ) : undefined
+        }
         confirmLabel={<Trans>Arsipkan</Trans>}
         destructive
         onConfirm={async () => {

@@ -589,7 +589,10 @@ export const DOCS_PART_2: DocTopic[] = [
         ],
       },
       {
-        heading: { id: 'Promo berkode dan menerapkan di kasir', en: 'Coded promos and applying at checkout' },
+        heading: {
+          id: 'Promo berkode dan menerapkan di kasir',
+          en: 'Coded promos and applying at checkout',
+        },
         blocks: [
           {
             type: 'p',

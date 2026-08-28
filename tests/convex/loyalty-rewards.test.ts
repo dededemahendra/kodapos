@@ -81,7 +81,11 @@ describe('loyaltyRewards CRUD', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     await expect(
-      asOwner.mutation(api.loyaltyRewards.create, { name: '  ', pointsCost: 100, discountIDR: 10000 })
+      asOwner.mutation(api.loyaltyRewards.create, {
+        name: '  ',
+        pointsCost: 100,
+        discountIDR: 10000,
+      })
     ).rejects.toThrow(/nama reward/i);
     await expect(
       asOwner.mutation(api.loyaltyRewards.create, { name: 'A', pointsCost: 0, discountIDR: 10000 })
@@ -108,9 +112,9 @@ describe('loyaltyRewards CRUD', () => {
         discountIDR: 5000,
       })
     ).rejects.toThrow(/tidak ditemukan/i);
-    await expect(
-      ownerB.mutation(api.loyaltyRewards.archive, { id: foreign })
-    ).rejects.toThrow(/tidak ditemukan/i);
+    await expect(ownerB.mutation(api.loyaltyRewards.archive, { id: foreign })).rejects.toThrow(
+      /tidak ditemukan/i
+    );
   });
 });
 
@@ -118,9 +122,20 @@ describe('loyaltyRewards.listForCustomer', () => {
   it('returns only rewards the customer can afford, sorted by pointsCost', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
-    await asOwner.mutation(api.loyaltyRewards.create, { name: 'Cheap', pointsCost: 100, discountIDR: 10000 });
-    await asOwner.mutation(api.loyaltyRewards.create, { name: 'Pricey', pointsCost: 200, discountIDR: 20000 });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'C', phone: '08120000001' });
+    await asOwner.mutation(api.loyaltyRewards.create, {
+      name: 'Cheap',
+      pointsCost: 100,
+      discountIDR: 10000,
+    });
+    await asOwner.mutation(api.loyaltyRewards.create, {
+      name: 'Pricey',
+      pointsCost: 200,
+      discountIDR: 20000,
+    });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'C',
+      phone: '08120000001',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 150 });
     const rows = await asOwner.query(api.loyaltyRewards.listForCustomer, { customerId });
     expect(rows).toHaveLength(1);
@@ -132,9 +147,20 @@ describe('loyaltyRewards.listForCustomer', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     // Both affordable by points; only the 10000 one fits a 20000 cart remainder.
-    await asOwner.mutation(api.loyaltyRewards.create, { name: 'Small', pointsCost: 100, discountIDR: 10000 });
-    await asOwner.mutation(api.loyaltyRewards.create, { name: 'Big', pointsCost: 100, discountIDR: 50000 });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'C', phone: '08120000002' });
+    await asOwner.mutation(api.loyaltyRewards.create, {
+      name: 'Small',
+      pointsCost: 100,
+      discountIDR: 10000,
+    });
+    await asOwner.mutation(api.loyaltyRewards.create, {
+      name: 'Big',
+      pointsCost: 100,
+      discountIDR: 50000,
+    });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'C',
+      phone: '08120000002',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 500 });
     const rows = await asOwner.query(api.loyaltyRewards.listForCustomer, {
       customerId,
@@ -155,7 +181,10 @@ describe('reward redemption at checkout', () => {
       pointsCost: 120,
       discountIDR: 25000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111111' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111111',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 200 });
 
     // Baseline: identical sale WITHOUT a reward → its totalIDR (100000, no tax).
@@ -210,7 +239,10 @@ describe('reward redemption at checkout', () => {
       pointsCost: 120,
       discountIDR: 25000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111112' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111112',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 100 });
     await expect(
       asOwner.mutation(api.orders.createCashSale, {
@@ -234,7 +266,10 @@ describe('reward redemption at checkout', () => {
       pointsCost: 100,
       discountIDR: 999999,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111113' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111113',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 200 });
     await expect(
       asOwner.mutation(api.orders.createCashSale, {
@@ -258,7 +293,10 @@ describe('reward redemption at checkout', () => {
       pointsCost: 120,
       discountIDR: 25000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111114' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111114',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 300 });
     await expect(
       asOwner.mutation(api.orders.createCashSale, {
@@ -304,7 +342,10 @@ describe('reward redemption at checkout', () => {
       pointsCost: 120,
       discountIDR: 25000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111115' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111115',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 300 });
     // Disable the program (keep the other config fields valid).
     await asOwner.mutation(api.loyalty.updateConfig, {
@@ -336,7 +377,10 @@ describe('reward redemption at checkout', () => {
       pointsCost: 120,
       discountIDR: 100000,
     });
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111116' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111116',
+    });
     // Exactly enough points to redeem; the sale earns 0, so balance lands at 0.
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 120 });
     const res = await asOwner.mutation(api.orders.createCashSale, {
@@ -361,7 +405,10 @@ describe('reward redemption at checkout', () => {
   it('settleSale floors at 0 when the balance was drained below pointsRedeemed', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupSale(t, 'rw-drain@x.com');
-    const customerId = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08121111117' });
+    const customerId = await asOwner.mutation(api.customers.create, {
+      name: 'Budi',
+      phone: '08121111117',
+    });
     await asOwner.mutation(api.customers.adjustPoints, { id: customerId, points: 120 });
 
     // Build a pending order directly that redeems 120 points and earns 0, then

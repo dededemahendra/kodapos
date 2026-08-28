@@ -4,6 +4,7 @@ import type { Doc } from 'convex/_generated/dataModel';
 import { useConvex, useMutation } from 'convex/react';
 import { ClipboardList } from 'lucide-react';
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { ScanBar } from '~/components/scan/scan-bar';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
@@ -22,7 +23,6 @@ import {
 import { Field, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
-import { ScanBar } from '~/components/scan/scan-bar';
 import { scanBeep } from '~/lib/scan-feedback';
 import { toast } from '~/lib/toast';
 
@@ -130,8 +130,7 @@ export function StockTakeDialog({
       toast.success(t`Stok opname selesai · ${res.adjusted} bahan disesuaikan.`);
       onOpenChange(false);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : t`Gagal menyimpan stok opname.`;
+      const message = err instanceof Error ? err.message : t`Gagal menyimpan stok opname.`;
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -174,15 +173,18 @@ export function StockTakeDialog({
             />
             <div className="max-h-[55vh] space-y-2 overflow-y-auto pr-1">
               <div className="grid grid-cols-[1fr_auto_6rem] items-center gap-2 px-1 text-muted-foreground text-xs">
-                <span><Trans>Bahan</Trans></span>
-                <span className="text-right"><Trans>Sistem</Trans></span>
-                <span className="text-right"><Trans>Hitung fisik</Trans></span>
+                <span>
+                  <Trans>Bahan</Trans>
+                </span>
+                <span className="text-right">
+                  <Trans>Sistem</Trans>
+                </span>
+                <span className="text-right">
+                  <Trans>Hitung fisik</Trans>
+                </span>
               </div>
               {ingredients?.map((r) => (
-                <div
-                  key={r._id}
-                  className="grid grid-cols-[1fr_auto_6rem] items-center gap-2"
-                >
+                <div key={r._id} className="grid grid-cols-[1fr_auto_6rem] items-center gap-2">
                   <span className="truncate text-sm">{r.name}</span>
                   <span className="text-right text-muted-foreground text-sm tabular-nums">
                     {r.currentStockQty} {r.canonicalUnit}
@@ -197,9 +199,7 @@ export function StockTakeDialog({
                     inputMode="numeric"
                     aria-label={t`Hitung fisik ${r.name}`}
                     value={counts[r._id] ?? ''}
-                    onChange={(e) =>
-                      setCounts((prev) => ({ ...prev, [r._id]: e.target.value }))
-                    }
+                    onChange={(e) => setCounts((prev) => ({ ...prev, [r._id]: e.target.value }))}
                     className="text-right tabular-nums"
                   />
                 </div>
@@ -223,11 +223,7 @@ export function StockTakeDialog({
                 <Trans>{changedCount} bahan akan disesuaikan</Trans>
               </span>
               <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => onOpenChange(false)}
-                >
+                <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
                   <Trans>Batal</Trans>
                 </Button>
                 <Button type="submit" disabled={submitting || changedCount === 0}>

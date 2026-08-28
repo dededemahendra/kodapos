@@ -28,6 +28,9 @@ test('feature page renders and offers a sign-up path', async ({ page }) => {
 
 test('feature hub links to the pesanan page', async ({ page }) => {
   await gotoHydrated(page, '/fitur');
-  await page.getByRole('link', { name: /Pesanan/ }).first().click();
+  await page
+    .getByRole('link', { name: /Pesanan/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/fitur\/pesanan$/);
 });

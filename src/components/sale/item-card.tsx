@@ -1,5 +1,4 @@
-import { useLingui } from '@lingui/react/macro';
-import { Trans } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { StatusBadge } from '~/components/ui/status-badge';
 import { formatIDR } from '~/lib/money';
@@ -35,7 +34,9 @@ export function ItemCard({
       {imageUrl ? (
         <img src={imageUrl} alt="" className="w-full h-16 rounded object-cover mb-1" />
       ) : (
-        <div className="w-full h-16 rounded bg-muted grid place-items-center text-muted-foreground text-xs mb-1">{item.name.charAt(0)}</div>
+        <div className="w-full h-16 rounded bg-muted grid place-items-center text-muted-foreground text-xs mb-1">
+          {item.name.charAt(0)}
+        </div>
       )}
       <div className="flex items-start justify-between gap-1">
         <div className="font-medium leading-tight">{item.name}</div>

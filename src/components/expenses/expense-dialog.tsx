@@ -67,8 +67,7 @@ export function ExpenseDialog({
       toast.success(t`Pengeluaran dicatat.`);
       onOpenChange(false);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : t`Gagal mencatat pengeluaran.`;
+      const message = err instanceof Error ? err.message : t`Gagal mencatat pengeluaran.`;
       setError(message);
       toast.error(message);
     } finally {
@@ -90,10 +89,7 @@ export function ExpenseDialog({
               <FieldLabel htmlFor="exp-category">
                 <Trans>Kategori</Trans>
               </FieldLabel>
-              <Select
-                value={category}
-                onValueChange={(v) => setCategory(v as ExpenseCategory)}
-              >
+              <Select value={category} onValueChange={(v) => setCategory(v as ExpenseCategory)}>
                 <SelectTrigger id="exp-category">
                   <SelectValue />
                 </SelectTrigger>
@@ -135,11 +131,7 @@ export function ExpenseDialog({
             {error && <FieldError>{error}</FieldError>}
           </FieldGroup>
           <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               <Trans>Batal</Trans>
             </Button>
             <Button type="submit" disabled={submitting || amountValue <= 0}>

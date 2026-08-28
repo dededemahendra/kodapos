@@ -1,19 +1,11 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import { internalAction, internalQuery } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import {
-  buildLowStockHtml,
-  buildLowStockText,
-  type LowStockItem,
-} from './lib/lowStockEmail';
+import { internalAction, internalQuery } from './_generated/server';
 import { currentStockQty } from './lib/inventory';
+import { buildLowStockHtml, buildLowStockText, type LowStockItem } from './lib/lowStockEmail';
 
-const canonicalUnit = v.union(
-  v.literal('g'),
-  v.literal('ml'),
-  v.literal('piece')
-);
+const canonicalUnit = v.union(v.literal('g'), v.literal('ml'), v.literal('piece'));
 
 const lowStockItem = v.object({
   name: v.string(),
@@ -34,9 +26,7 @@ export const lowStockForCafe = internalQuery({
     const cafe = await ctx.db.get(cafeId);
     const ingredients = await ctx.db
       .query('ingredients')
-      .withIndex('by_cafe_active', (q) =>
-        q.eq('cafeId', cafeId).eq('archived', false)
-      )
+      .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
       .collect();
     const items: LowStockItem[] = [];
     for (const ing of ingredients) {
@@ -81,17 +71,13 @@ export const lowStockDigest = internalAction({
       for (const cafe of page.cafes) {
         const cafeId = cafe.cafeId;
         try {
-          const notif = await ctx.runQuery(
-            internal.settings.notificationsForCafe,
-            { cafeId }
-          );
+          const notif = await ctx.runQuery(internal.settings.notificationsForCafe, { cafeId });
           if (!(notif?.emailLowStockDaily && notif.summaryEmail)) continue;
           const to = notif.summaryEmail;
 
-          const { cafeName, items } = await ctx.runQuery(
-            internal.alerts.lowStockForCafe,
-            { cafeId }
-          );
+          const { cafeName, items } = await ctx.runQuery(internal.alerts.lowStockForCafe, {
+            cafeId,
+          });
           if (items.length === 0) continue;
 
           const html = buildLowStockHtml(cafeName, items);

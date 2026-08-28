@@ -80,9 +80,7 @@ export function PinConfirmDialog({
           <DialogTitle>
             <Trans>PIN pemilik</Trans>
           </DialogTitle>
-          {description ? (
-            <DialogDescription>{description}</DialogDescription>
-          ) : null}
+          {description ? <DialogDescription>{description}</DialogDescription> : null}
         </DialogHeader>
         <PinEntry
           onComplete={(pin) => void submit(pin)}

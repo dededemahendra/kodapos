@@ -3,7 +3,6 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { type FormEvent, useEffect, useState } from 'react';
-import type { CartState } from './cart-reducer';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
@@ -23,6 +22,7 @@ import {
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { toast } from '~/lib/toast';
+import type { CartState } from './cart-reducer';
 
 const NO_TABLE = '__none__';
 
@@ -57,9 +57,7 @@ export function HoldOrderDialog({
 
   // Selectable tables: empty ones, plus the current table (defaultTableId) even
   // if it reads occupied-by-self.
-  const tableOptions = (floor ?? []).filter(
-    (tbl) => !tbl.occupied || tbl._id === defaultTableId
-  );
+  const tableOptions = (floor ?? []).filter((tbl) => !tbl.occupied || tbl._id === defaultTableId);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -143,9 +141,7 @@ export function HoldOrderDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NO_TABLE}>
-                  {t`Tanpa meja`}
-                </SelectItem>
+                <SelectItem value={NO_TABLE}>{t`Tanpa meja`}</SelectItem>
                 {tableOptions.map((tbl) => (
                   <SelectItem key={tbl._id} value={tbl._id}>
                     {tbl.name}

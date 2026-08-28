@@ -1,9 +1,9 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import { action, internalMutation, internalQuery, mutation, query } from './_generated/server';
-import type { QueryCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import type { QueryCtx } from './_generated/server';
+import { action, internalMutation, internalQuery, mutation, query } from './_generated/server';
 import { requireActiveOutlet, requireActiveUser, resolveOutletAccess } from './lib/auth';
 import { parseGeocode } from './lib/weather';
 
@@ -177,16 +177,17 @@ export const myCafe = query({
       // A signed-in user with no reachable outlet resolves to null (the
       // query's contract). Re-throw anything unexpected so real failures
       // are not silently hidden.
-      if (e instanceof Error && (e.message === 'not authenticated' || e.message === 'no outlet access')) {
+      if (
+        e instanceof Error &&
+        (e.message === 'not authenticated' || e.message === 'no outlet access')
+      ) {
         return null;
       }
       throw e;
     }
     const cafe = await ctx.db.get(resolved.cafeId);
     if (!cafe) return null;
-    const logoUrl = cafe.logoStorageId
-      ? await ctx.storage.getUrl(cafe.logoStorageId)
-      : null;
+    const logoUrl = cafe.logoStorageId ? await ctx.storage.getUrl(cafe.logoStorageId) : null;
     return { ...cafe, role: resolved.role, ...(logoUrl ? { logoUrl } : {}) };
   },
 });
@@ -358,8 +359,8 @@ export const cleanupDuplicateCafes = mutation({
     const kept = sorted[0]!;
     const duplicates = sorted.slice(1);
 
-    const deleted: typeof kept._id[] = [];
-    const skippedWithData: typeof kept._id[] = [];
+    const deleted: (typeof kept._id)[] = [];
+    const skippedWithData: (typeof kept._id)[] = [];
 
     for (const dup of duplicates) {
       const [categories, items, groups, staff, shifts, orders] = await Promise.all([

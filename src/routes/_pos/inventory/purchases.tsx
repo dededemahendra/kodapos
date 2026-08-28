@@ -9,7 +9,6 @@ import { useMemo, useState } from 'react';
 import { PurchaseForm } from '~/components/inventory/purchase-form';
 import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
-import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import {
   Empty,
   EmptyDescription,
@@ -17,6 +16,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
 import {
   Sheet,
@@ -64,9 +64,7 @@ function PurchasesPage() {
         accessorKey: 'supplierName',
         enableSorting: false,
         header: () => <Trans>Pemasok</Trans>,
-        cell: ({ row }) => (
-          <span>{row.original.supplierName ?? '—'}</span>
-        ),
+        cell: ({ row }) => <span>{row.original.supplierName ?? '—'}</span>,
       },
       {
         accessorKey: 'lineCount',
@@ -77,9 +75,7 @@ function PurchasesPage() {
       {
         accessorKey: 'totalIDR',
         header: () => <Trans>Total</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{formatIDR(row.original.totalIDR)}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{formatIDR(row.original.totalIDR)}</span>,
       },
     ],
     []
@@ -167,10 +163,18 @@ function PurchaseDetailSheet({
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
-                    <th className="py-2"><Trans>Bahan</Trans></th>
-                    <th className="py-2 text-right"><Trans>Qty</Trans></th>
-                    <th className="py-2 text-right"><Trans>Biaya/satuan</Trans></th>
-                    <th className="py-2 text-right"><Trans>Subtotal</Trans></th>
+                    <th className="py-2">
+                      <Trans>Bahan</Trans>
+                    </th>
+                    <th className="py-2 text-right">
+                      <Trans>Qty</Trans>
+                    </th>
+                    <th className="py-2 text-right">
+                      <Trans>Biaya/satuan</Trans>
+                    </th>
+                    <th className="py-2 text-right">
+                      <Trans>Subtotal</Trans>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,8 +185,12 @@ function PurchaseDetailSheet({
                       <td className="py-2 text-right tabular-nums">
                         {l.qty} {l.unit}
                       </td>
-                      <td className="py-2 text-right tabular-nums">{formatIDR(Math.round(l.unitCostIDR))}</td>
-                      <td className="py-2 text-right tabular-nums">{formatIDR(Math.round(l.subtotalIDR))}</td>
+                      <td className="py-2 text-right tabular-nums">
+                        {formatIDR(Math.round(l.unitCostIDR))}
+                      </td>
+                      <td className="py-2 text-right tabular-nums">
+                        {formatIDR(Math.round(l.subtotalIDR))}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

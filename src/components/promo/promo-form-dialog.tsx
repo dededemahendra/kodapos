@@ -12,13 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from '~/components/ui/field';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import {
@@ -140,11 +134,7 @@ export function PromoFormDialog({
     const trimmedCode = code.trim();
     const codeArg = trimmedCode ? { code: trimmedCode } : {};
     const targetArg =
-      scope === 'item'
-        ? { targetItemIds }
-        : scope === 'category'
-          ? { targetCategoryIds }
-          : {};
+      scope === 'item' ? { targetItemIds } : scope === 'category' ? { targetCategoryIds } : {};
     try {
       if (isEdit && promo) {
         await update({
@@ -182,7 +172,9 @@ export function PromoFormDialog({
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="promo-name"><Trans>Nama promo</Trans></FieldLabel>
+              <FieldLabel htmlFor="promo-name">
+                <Trans>Nama promo</Trans>
+              </FieldLabel>
               <Input
                 id="promo-name"
                 value={name}
@@ -193,17 +185,23 @@ export function PromoFormDialog({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="promo-code"><Trans>Kode promo</Trans></FieldLabel>
+              <FieldLabel htmlFor="promo-code">
+                <Trans>Kode promo</Trans>
+              </FieldLabel>
               <Input
                 id="promo-code"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 maxLength={20}
               />
-              <FieldDescription><Trans>Opsional</Trans></FieldDescription>
+              <FieldDescription>
+                <Trans>Opsional</Trans>
+              </FieldDescription>
             </Field>
             <Field>
-              <FieldLabel htmlFor="promo-type"><Trans>Tipe</Trans></FieldLabel>
+              <FieldLabel htmlFor="promo-type">
+                <Trans>Tipe</Trans>
+              </FieldLabel>
               <Select value={type} onValueChange={(v) => setType(v as PromoType)}>
                 <SelectTrigger id="promo-type">
                   <SelectValue />
@@ -230,7 +228,9 @@ export function PromoFormDialog({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="promo-scope"><Trans>Cakupan</Trans></FieldLabel>
+              <FieldLabel htmlFor="promo-scope">
+                <Trans>Cakupan</Trans>
+              </FieldLabel>
               <Select value={scope} onValueChange={(v) => onScopeChange(v as PromoScope)}>
                 <SelectTrigger id="promo-scope">
                   <SelectValue />
@@ -244,7 +244,9 @@ export function PromoFormDialog({
             </Field>
             {scope === 'item' && (
               <Field>
-                <FieldLabel><Trans>Item target</Trans></FieldLabel>
+                <FieldLabel>
+                  <Trans>Item target</Trans>
+                </FieldLabel>
                 <TargetPicker
                   options={(items ?? []).map((i) => ({ id: i._id, name: i.name }))}
                   selected={targetItemIds}
@@ -260,7 +262,9 @@ export function PromoFormDialog({
             )}
             {scope === 'category' && (
               <Field>
-                <FieldLabel><Trans>Kategori target</Trans></FieldLabel>
+                <FieldLabel>
+                  <Trans>Kategori target</Trans>
+                </FieldLabel>
                 <TargetPicker
                   options={(categories ?? []).map((c) => ({ id: c._id, name: c.name }))}
                   selected={targetCategoryIds}

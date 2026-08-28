@@ -1,7 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { MotionConfig, motion } from 'motion/react';
+import type { ReactNode } from 'react';
 
 /** Trigger once when the element is 80px inside the viewport. */
 export const VP = { once: true, margin: '-80px' } as const;

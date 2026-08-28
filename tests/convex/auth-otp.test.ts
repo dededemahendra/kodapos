@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ResendOTP, buildOtpEmail } from '../../convex/otp/ResendOTP';
-import { ResendOTPReset, buildResetEmail } from '../../convex/otp/ResendOTPReset';
+import { buildOtpEmail, ResendOTP } from '../../convex/otp/ResendOTP';
+import { buildResetEmail, ResendOTPReset } from '../../convex/otp/ResendOTPReset';
 
 const EM_DASH_RE = /—|--/;
 

@@ -49,7 +49,10 @@ export function CtaBand({ heading, body }: { heading?: string; body?: string }) 
             >
               {heading ?? <Trans>Siap mempercepat kafe Anda?</Trans>}
             </motion.h2>
-            <motion.p className="mx-auto mt-3.5 max-w-md text-primary-foreground/75" variants={item}>
+            <motion.p
+              className="mx-auto mt-3.5 max-w-md text-primary-foreground/75"
+              variants={item}
+            >
               {body ?? <Trans>Coba kodapos gratis hari ini. Tanpa kartu kredit.</Trans>}
             </motion.p>
             <motion.div className="mt-6 flex flex-wrap justify-center gap-3" variants={item}>
@@ -58,7 +61,11 @@ export function CtaBand({ heading, body }: { heading?: string; body?: string }) 
                   <Trans>Lihat fitur</Trans>
                 </a>
               </Button>
-              <Button asChild size="lg" className="bg-background text-foreground hover:bg-background/90">
+              <Button
+                asChild
+                size="lg"
+                className="bg-background text-foreground hover:bg-background/90"
+              >
                 <Link
                   to="/signin"
                   onClick={() =>

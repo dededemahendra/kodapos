@@ -6,10 +6,16 @@ import { timingSafeEqual } from './util';
 export async function signMockBody(secret: string, body: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
-    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
   );
   const sig = await crypto.subtle.sign('HMAC', key, enc.encode(body));
-  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 export class MockProvider implements PaymentProvider {
@@ -36,7 +42,10 @@ export class MockProvider implements PaymentProvider {
     if (!timingSafeEqual(signature, expected)) return null;
     try {
       const parsed = JSON.parse(req.body) as { providerRef?: string; status?: string };
-      if (!parsed.providerRef || !(WEBHOOK_STATUSES as readonly string[]).includes(parsed.status ?? '')) {
+      if (
+        !parsed.providerRef ||
+        !(WEBHOOK_STATUSES as readonly string[]).includes(parsed.status ?? '')
+      ) {
         return null;
       }
       return { providerRef: parsed.providerRef, status: parsed.status as WebhookEvent['status'] };

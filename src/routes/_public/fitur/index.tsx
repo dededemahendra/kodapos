@@ -23,18 +23,36 @@ export const Route = createFileRoute('/_public/fitur/')({
 // Only pesanan has a page so far. The rest render as plain cards rather than
 // dead links — a link that goes nowhere is worse than no link.
 const AREAS = [
-  { to: '/fitur/pesanan' as const, title: <Trans>Pesanan, meja, dan dapur</Trans>,
-    body: <Trans>Meja, pesan mandiri lewat QR, reservasi, dan layar dapur.</Trans> },
-  { to: null, title: <Trans>Kasir dan pembayaran</Trans>,
-    body: <Trans>Kasir cepat, QRIS, struk, printer, dan shift kas.</Trans> },
-  { to: null, title: <Trans>Stok dan resep</Trans>,
-    body: <Trans>Inventaris, resep dan HPP, limbah, pembelian, dan pemasok.</Trans> },
-  { to: null, title: <Trans>Laporan dan AI</Trans>,
-    body: <Trans>Laporan waktu nyata, asisten AI, dan prakiraan permintaan.</Trans> },
-  { to: null, title: <Trans>Pelanggan dan loyalitas</Trans>,
-    body: <Trans>Pelanggan, poin dan hadiah, promo, dan kartu hadiah.</Trans> },
-  { to: null, title: <Trans>Tim dan outlet</Trans>,
-    body: <Trans>Staf, peran, jam kerja, shift, dan banyak outlet.</Trans> },
+  {
+    to: '/fitur/pesanan' as const,
+    title: <Trans>Pesanan, meja, dan dapur</Trans>,
+    body: <Trans>Meja, pesan mandiri lewat QR, reservasi, dan layar dapur.</Trans>,
+  },
+  {
+    to: null,
+    title: <Trans>Kasir dan pembayaran</Trans>,
+    body: <Trans>Kasir cepat, QRIS, struk, printer, dan shift kas.</Trans>,
+  },
+  {
+    to: null,
+    title: <Trans>Stok dan resep</Trans>,
+    body: <Trans>Inventaris, resep dan HPP, limbah, pembelian, dan pemasok.</Trans>,
+  },
+  {
+    to: null,
+    title: <Trans>Laporan dan AI</Trans>,
+    body: <Trans>Laporan waktu nyata, asisten AI, dan prakiraan permintaan.</Trans>,
+  },
+  {
+    to: null,
+    title: <Trans>Pelanggan dan loyalitas</Trans>,
+    body: <Trans>Pelanggan, poin dan hadiah, promo, dan kartu hadiah.</Trans>,
+  },
+  {
+    to: null,
+    title: <Trans>Tim dan outlet</Trans>,
+    body: <Trans>Staf, peran, jam kerja, shift, dan banyak outlet.</Trans>,
+  },
 ];
 
 function FiturIndex() {
@@ -61,7 +79,10 @@ function FiturIndex() {
             return (
               <Reveal key={i} delay={i * 0.05}>
                 {area.to ? (
-                  <Link to={area.to} className="block h-full transition-colors hover:border-primary">
+                  <Link
+                    to={area.to}
+                    className="block h-full transition-colors hover:border-primary"
+                  >
                     <Card className="h-full">{body}</Card>
                   </Link>
                 ) : (

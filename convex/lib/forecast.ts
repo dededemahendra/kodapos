@@ -77,8 +77,12 @@ export function predictedQty(base: number, dow: number, weather: number, holiday
 }
 
 export type HolidayKey =
-  | 'lebaran_eve' | 'lebaran_day' | 'lebaran_after'
-  | 'independence' | 'christmas' | 'new_year';
+  | 'lebaran_eve'
+  | 'lebaran_day'
+  | 'lebaran_after'
+  | 'independence'
+  | 'christmas'
+  | 'new_year';
 
 export type Driver =
   | { code: 'dow_busy' | 'dow_quiet'; pct: number; dow: number }
@@ -124,7 +128,12 @@ export function holidayMultiplier(dateKey: string): { mult: number; driver?: Dri
 }
 
 /** Up to 2 structured drivers for a prediction (dow → holiday → weather, highest-priority first). */
-export function driversFor(args: { dowMult: number; dow: number; holiday?: Driver; weather?: Driver }): Driver[] {
+export function driversFor(args: {
+  dowMult: number;
+  dow: number;
+  holiday?: Driver;
+  weather?: Driver;
+}): Driver[] {
   const out: Driver[] = [];
   if (Math.abs(args.dowMult - 1) >= 0.1) {
     const pct = Math.round((args.dowMult - 1) * 100);

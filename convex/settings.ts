@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
-import { internalQuery, mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
+import { internalQuery, mutation, query } from './_generated/server';
 import { requireActiveOutlet, requireBusinessOwner } from './lib/auth';
 import { DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
 import { assertValidTemplate } from './lib/whatsapp';
@@ -95,11 +95,7 @@ const receiptValidator = v.object({
   fontSize: v.union(v.literal('small'), v.literal('normal'), v.literal('large')),
   autoPrint: v.boolean(),
   printCopies: v.number(),
-  printerType: v.union(
-    v.literal('bluetooth'),
-    v.literal('usb'),
-    v.literal('network')
-  ),
+  printerType: v.union(v.literal('bluetooth'), v.literal('usb'), v.literal('network')),
   openDrawer: v.boolean(),
 });
 
@@ -438,7 +434,9 @@ export const disconnectIntegration = mutation({
       for (const p of unconfirmed) {
         const order = await ctx.db.get(p.orderId);
         if (order?.paymentStatus === 'pending') {
-          throw new Error('Tidak bisa memutuskan QRIS saat ada pembayaran QRIS dinamis yang tertunda.');
+          throw new Error(
+            'Tidak bisa memutuskan QRIS saat ada pembayaran QRIS dinamis yang tertunda.'
+          );
         }
       }
     }

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type * as React from 'react';
 import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
 // App-wide toast surface. Mounted once in the POS layout. The app uses a

@@ -1,8 +1,8 @@
+import { Trans } from '@lingui/react/macro';
 import { useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
-import { Trans } from '@lingui/react/macro';
 import { useState } from 'react';
 import { Badge } from '~/components/ui/badge';
 import {

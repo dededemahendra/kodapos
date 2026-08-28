@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { computeDemand } from './lib/demand';
 import { computeRestock } from './lib/restockCompute';
 
@@ -37,12 +37,22 @@ export const suggestion = query({
       .order('desc')
       .first();
     if (snap) {
-      return { status: 'ready' as const, suggestionId: snap._id, suggestionStatus: snap.status, lines: snap.lines };
+      return {
+        status: 'ready' as const,
+        suggestionId: snap._id,
+        suggestionStatus: snap.status,
+        lines: snap.lines,
+      };
     }
     const demand = await computeDemand(ctx, cafeId);
     if (demand.status === 'learning') return demand;
     const lines = await computeRestock(ctx, cafeId, demand.lines);
-    return { status: 'ready' as const, suggestionId: null, suggestionStatus: 'draft' as const, lines };
+    return {
+      status: 'ready' as const,
+      suggestionId: null,
+      suggestionStatus: 'draft' as const,
+      lines,
+    };
   },
 });
 

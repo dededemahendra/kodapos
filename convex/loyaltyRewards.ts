@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 
 const rewardDoc = v.object({
   _id: v.id('loyaltyRewards'),

@@ -128,7 +128,6 @@ export function formatIDR(amount: number): string {
 export function formatIDRCompact(amount: number): string {
   if (amount >= 1_000_000)
     return `Rp${(amount / 1_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} jt`;
-  if (amount >= 1_000)
-    return `Rp${Math.round(amount / 1_000).toLocaleString('id-ID')} rb`;
+  if (amount >= 1_000) return `Rp${Math.round(amount / 1_000).toLocaleString('id-ID')} rb`;
   return formatIDR(amount);
 }

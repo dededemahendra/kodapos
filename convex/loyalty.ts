@@ -67,7 +67,11 @@ export const updateConfig = mutation({
         seenThresholds.add(tier.minSpendIDR);
       }
       tiers = [...tiers]
-        .map((t) => ({ name: t.name.trim(), minSpendIDR: t.minSpendIDR, earnMultiplier: t.earnMultiplier }))
+        .map((t) => ({
+          name: t.name.trim(),
+          minSpendIDR: t.minSpendIDR,
+          earnMultiplier: t.earnMultiplier,
+        }))
         .sort((a, b) => a.minSpendIDR - b.minSpendIDR);
     }
     const loyalty = { ...cfg, ...(tiers !== undefined ? { tiers } : {}) };

@@ -12,9 +12,7 @@ function ingMap(arr: IngredientCostInfo[]): Map<Id<'ingredients'>, IngredientCos
 describe('costPerCupIDR', () => {
   it('computes 200ml × 1.0 × Rp 25/ml = Rp 5.000', () => {
     const m = ingMap([{ _id: susuId, lastCostPerUnitIDR: 25 }]);
-    expect(
-      costPerCupIDR([{ ingredientId: susuId, qty: 200, wastageFactor: 1.0 }], m)
-    ).toBe(5000);
+    expect(costPerCupIDR([{ ingredientId: susuId, qty: 200, wastageFactor: 1.0 }], m)).toBe(5000);
   });
 
   it('returns 0 for empty lines', () => {
@@ -23,9 +21,7 @@ describe('costPerCupIDR', () => {
 
   it('applies wastageFactor: 200ml × 1.5 × Rp 25 = Rp 7.500', () => {
     const m = ingMap([{ _id: susuId, lastCostPerUnitIDR: 25 }]);
-    expect(
-      costPerCupIDR([{ ingredientId: susuId, qty: 200, wastageFactor: 1.5 }], m)
-    ).toBe(7500);
+    expect(costPerCupIDR([{ ingredientId: susuId, qty: 200, wastageFactor: 1.5 }], m)).toBe(7500);
   });
 
   it('handles a zero-cost ingredient without NaN', () => {

@@ -1,18 +1,18 @@
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
 import { useMemo, useState } from 'react';
-import { SaveBar } from '~/components/settings/save-bar';
 import {
   RowSep,
   SettingRow,
   SettingsPageHeader,
   SettingsSection,
 } from '~/components/settings/primitives';
+import { SaveBar } from '~/components/settings/save-bar';
 import { useEditableState } from '~/components/settings/use-editable-state';
 import { Button } from '~/components/ui/button';
+import { FieldGroup } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
 import {
   Select,
@@ -22,10 +22,8 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { Switch } from '~/components/ui/switch';
-import { FieldGroup } from '~/components/ui/field';
-import { cn } from '~/lib/utils';
-import { useBoolPreference, usePreference } from '~/lib/preferences';
 import { EscPos } from '~/lib/escpos';
+import { useBoolPreference, usePreference } from '~/lib/preferences';
 import {
   clearSavedPrinter,
   getSavedPrinterInfo,
@@ -35,6 +33,7 @@ import {
   requestThermalPrinter,
 } from '~/lib/thermal-printer';
 import { toast } from '~/lib/toast';
+import { cn } from '~/lib/utils';
 
 export const Route = createFileRoute('/_pos/settings/receipt')({
   component: SettingsReceipt,
@@ -106,15 +105,7 @@ const SAMPLE_RECEIPT = {
 /* eslint-enable lingui/no-unlocalized-strings */
 
 /** One left-label / right-value line on the receipt. */
-function RcptRow({
-  label,
-  value,
-  bold,
-}: {
-  label: string;
-  value: string;
-  bold?: boolean;
-}) {
+function RcptRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div className={cn('flex justify-between gap-2', bold && 'font-bold text-[1.1em]')}>
       <span>{label}</span>
@@ -211,9 +202,7 @@ function ReceiptPreview({
               <span>{it.total}</span>
             </div>
             <div className="opacity-70">{it.qtyLine}</div>
-            {draft.showItemModifiers && it.mod && (
-              <div className="pl-2 opacity-70">{it.mod}</div>
-            )}
+            {draft.showItemModifiers && it.mod && <div className="pl-2 opacity-70">{it.mod}</div>}
           </div>
         ))}
       </div>
@@ -500,8 +489,12 @@ function SettingsReceipt() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="58mm"><Trans>58 mm</Trans></SelectItem>
-                      <SelectItem value="80mm"><Trans>80 mm</Trans></SelectItem>
+                      <SelectItem value="58mm">
+                        <Trans>58 mm</Trans>
+                      </SelectItem>
+                      <SelectItem value="80mm">
+                        <Trans>80 mm</Trans>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 }
@@ -514,9 +507,7 @@ function SettingsReceipt() {
                 control={
                   <Select
                     value={draft.fontSize}
-                    onValueChange={(v) =>
-                      setField('fontSize', v as 'small' | 'normal' | 'large')
-                    }
+                    onValueChange={(v) => setField('fontSize', v as 'small' | 'normal' | 'large')}
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />
@@ -681,8 +672,12 @@ function ThermalPrinterSection() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="58"><Trans>58 mm</Trans></SelectItem>
-                <SelectItem value="80"><Trans>80 mm</Trans></SelectItem>
+                <SelectItem value="58">
+                  <Trans>58 mm</Trans>
+                </SelectItem>
+                <SelectItem value="80">
+                  <Trans>80 mm</Trans>
+                </SelectItem>
               </SelectContent>
             </Select>
           }
@@ -694,11 +689,7 @@ function ThermalPrinterSection() {
           label={<Trans>Cetak otomatis</Trans>}
           description={<Trans>Cetak struk otomatis setelah pembayaran.</Trans>}
           control={
-            <Switch
-              checked={printAuto}
-              onCheckedChange={setPrintAuto}
-              disabled={!supported}
-            />
+            <Switch checked={printAuto} onCheckedChange={setPrintAuto} disabled={!supported} />
           }
         />
 

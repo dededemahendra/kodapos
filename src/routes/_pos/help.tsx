@@ -1,5 +1,5 @@
-import { Trans, useLingui } from '@lingui/react/macro';
 import { useLingui as useLinguiReact } from '@lingui/react';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   ArrowRight,
@@ -13,8 +13,8 @@ import {
   Search,
   Settings,
   ShoppingCart,
-  UtensilsCrossed,
   Users,
+  UtensilsCrossed,
 } from 'lucide-react';
 import { type ComponentType, useMemo, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
@@ -27,12 +27,7 @@ import {
   EmptyTitle,
 } from '~/components/ui/empty';
 import { Input } from '~/components/ui/input';
-import {
-  FAQ,
-  GETTING_STARTED,
-  HELP_CATEGORIES,
-  type HelpCategory,
-} from '~/lib/help-content';
+import { FAQ, GETTING_STARTED, HELP_CATEGORIES, type HelpCategory } from '~/lib/help-content';
 import type { Locale } from '~/lib/locale';
 import { localized } from '~/lib/localized';
 import { cn } from '~/lib/utils';
@@ -83,7 +78,8 @@ function HelpPage() {
     return FAQ.filter((item) => {
       if (category !== 'all' && item.category !== category) return false;
       if (!q) return true;
-      const hay = `${localized(item.question, locale)} ${localized(item.answer, locale)}`.toLowerCase();
+      const hay =
+        `${localized(item.question, locale)} ${localized(item.answer, locale)}`.toLowerCase();
       return hay.includes(q);
     });
   }, [query, category, locale]);
@@ -138,7 +134,12 @@ function HelpPage() {
                 {GETTING_STARTED.map((c) => {
                   const Icon = CARD_ICONS[c.icon] ?? Rocket;
                   return (
-                    <Link key={c.docSlug} to="/docs" search={{ topic: c.docSlug }} className="group">
+                    <Link
+                      key={c.docSlug}
+                      to="/docs"
+                      search={{ topic: c.docSlug }}
+                      className="group"
+                    >
                       <Card className="h-full transition-colors group-hover:border-primary/50">
                         <CardContent className="flex items-start gap-3 p-4">
                           <span className="rounded-md bg-muted p-2 text-primary">
@@ -146,7 +147,9 @@ function HelpPage() {
                           </span>
                           <div className="min-w-0">
                             <p className="font-medium text-sm">{localized(c.title, locale)}</p>
-                            <p className="text-xs text-muted-foreground">{localized(c.desc, locale)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {localized(c.desc, locale)}
+                            </p>
                           </div>
                         </CardContent>
                       </Card>
@@ -176,7 +179,7 @@ function HelpPage() {
                       </span>
                       <span className="font-medium text-sm">{localized(c.label, locale)}</span>
                       <span className="text-xs text-muted-foreground">
-                        {(counts[c.key] ?? 0)} <Trans>artikel</Trans>
+                        {counts[c.key] ?? 0} <Trans>artikel</Trans>
                       </span>
                     </button>
                   );
@@ -276,7 +279,10 @@ function FaqRow({
       >
         <span>{question}</span>
         <ChevronDown
-          className={cn('size-4 shrink-0 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
+          className={cn(
+            'size-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            open && 'rotate-180'
+          )}
         />
       </button>
       {open ? (

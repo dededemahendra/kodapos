@@ -1,7 +1,7 @@
 'use client';
 
-import { i18n } from '~/lib/i18n';
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
+import { i18n } from '~/lib/i18n';
 import { DEFAULT_LOCALE, getStoredLocale, type Locale, storeLocale } from '~/lib/locale';
 
 type LocaleContextValue = { locale: Locale; setLocale: (l: Locale) => void };
@@ -28,11 +28,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     setLocaleState(next);
   }
 
-  return (
-    <LocaleContext.Provider value={{ locale, setLocale }}>
-      {children}
-    </LocaleContext.Provider>
-  );
+  return <LocaleContext.Provider value={{ locale, setLocale }}>{children}</LocaleContext.Provider>;
 }
 
 export function useLocale(): LocaleContextValue {

@@ -1,6 +1,6 @@
 import type { ReceiptCafe, ReceiptOrder } from 'convex/lib/receipt';
 import { formatDate, formatIDR } from 'convex/lib/receipt';
-import { EscPos, divider, twoCol } from './escpos';
+import { divider, EscPos, twoCol } from './escpos';
 
 // Maps an order to ESC/POS bytes for a thermal printer. Mirrors the English
 // content of the emailed/plain-text receipt (always English, off the i18n
@@ -77,15 +77,21 @@ export function buildReceiptBytes(
   if (order.discountIDR > 0) p.line(twoCol('Discount', formatIDR(-order.discountIDR), w));
   if ((order.serviceChargeIDR ?? 0) > 0) {
     const name = order.serviceChargeName ?? 'Service';
-    p.line(twoCol(`${name} ${order.serviceChargePct ?? 0}%`, formatIDR(order.serviceChargeIDR ?? 0), w));
+    p.line(
+      twoCol(`${name} ${order.serviceChargePct ?? 0}%`, formatIDR(order.serviceChargeIDR ?? 0), w)
+    );
   }
   if (order.taxIDR > 0) p.line(twoCol(`Tax ${order.taxRatePct}%`, formatIDR(order.taxIDR), w));
-  p.bold(true).line(twoCol('TOTAL', formatIDR(order.totalIDR), w)).bold(false);
+  p.bold(true)
+    .line(twoCol('TOTAL', formatIDR(order.totalIDR), w))
+    .bold(false);
   p.line(divider(w));
 
   // Payments.
   for (const pay of order.payments) {
-    p.line(twoCol(`Paid: ${PAYMENT_LABELS[pay.method] ?? pay.method}`, formatIDR(pay.amountIDR), w));
+    p.line(
+      twoCol(`Paid: ${PAYMENT_LABELS[pay.method] ?? pay.method}`, formatIDR(pay.amountIDR), w)
+    );
   }
   if (order.pointsEarned !== undefined && order.pointsEarned > 0) {
     p.line(`Points earned: +${order.pointsEarned}`);

@@ -1,7 +1,7 @@
-import type { Localized } from './localized';
 import { DOCS_PART_1 } from './docs-content-1';
 import { DOCS_PART_2 } from './docs-content-2';
 import { DOCS_PART_3 } from './docs-content-3';
+import type { Localized } from './localized';
 
 export type DocBlock =
   | { type: 'p'; text: Localized }
@@ -15,14 +15,24 @@ export interface DocSection {
 }
 
 export type DocIcon =
-  | 'start' | 'register' | 'payments' | 'void' | 'menu' | 'inventory'
-  | 'customers' | 'promos' | 'tables' | 'staff' | 'reports' | 'settings';
+  | 'start'
+  | 'register'
+  | 'payments'
+  | 'void'
+  | 'menu'
+  | 'inventory'
+  | 'customers'
+  | 'promos'
+  | 'tables'
+  | 'staff'
+  | 'reports'
+  | 'settings';
 
 export interface DocTopic {
   slug: string;
   icon: DocIcon;
   title: Localized;
-  summary: Localized;     // one line
+  summary: Localized; // one line
   sections: DocSection[];
 }
 

@@ -1,5 +1,5 @@
-import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react';
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   ChevronRight,
@@ -14,8 +14,8 @@ import {
   Settings,
   ShoppingCart,
   Tag,
-  UtensilsCrossed,
   Users,
+  UtensilsCrossed,
 } from 'lucide-react';
 import { type ComponentType, useEffect, useState } from 'react';
 import {
@@ -133,11 +133,7 @@ function DocsPage() {
 
           <div className="space-y-8">
             {active.sections.map((section, si) => (
-              <section
-                key={ids[si]}
-                id={ids[si]}
-                className="scroll-mt-20 space-y-3"
-              >
+              <section key={ids[si]} id={ids[si]} className="scroll-mt-20 space-y-3">
                 <h2 className="text-xl font-semibold tracking-tight">
                   {localized(section.heading, locale)}
                 </h2>
@@ -292,15 +288,7 @@ function OnThisPage({ sections }: { sections: { id: string; label: string }[] })
   );
 }
 
-function PagerLink({
-  dir,
-  slug,
-  title,
-}: {
-  dir: 'prev' | 'next';
-  slug: string;
-  title: string;
-}) {
+function PagerLink({ dir, slug, title }: { dir: 'prev' | 'next'; slug: string; title: string }) {
   return (
     <Link
       to="/docs"

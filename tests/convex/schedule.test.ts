@@ -34,7 +34,10 @@ describe('schedule create + list', () => {
       note: 'Buka toko',
     });
     expect(id).toBeTruthy();
-    const { rows } = await asOwner.query(api.schedule.list, { from: '2026-06-15', to: '2026-06-15' });
+    const { rows } = await asOwner.query(api.schedule.list, {
+      from: '2026-06-15',
+      to: '2026-06-15',
+    });
     expect(rows).toHaveLength(1);
     expect(rows[0]?.id).toBe(id);
     expect(rows[0]?.staffId).toBe(staffId);
@@ -66,7 +69,10 @@ describe('schedule create + list', () => {
       startTime: '08:00',
       endTime: '12:00',
     });
-    const { rows } = await asOwner.query(api.schedule.list, { from: '2026-06-15', to: '2026-06-16' });
+    const { rows } = await asOwner.query(api.schedule.list, {
+      from: '2026-06-15',
+      to: '2026-06-16',
+    });
     expect(rows.map((r) => `${r.date} ${r.startTime}`)).toEqual([
       '2026-06-15 08:00',
       '2026-06-15 14:00',
@@ -89,7 +95,10 @@ describe('schedule create + list', () => {
       startTime: '09:00',
       endTime: '17:00',
     });
-    const { rows } = await asOwner.query(api.schedule.list, { from: '2026-06-15', to: '2026-06-21' });
+    const { rows } = await asOwner.query(api.schedule.list, {
+      from: '2026-06-15',
+      to: '2026-06-21',
+    });
     expect(rows).toHaveLength(1);
     expect(rows[0]?.id).toBe(inside);
   });
@@ -160,16 +169,19 @@ describe('schedule update + remove', () => {
       startTime: '10:00',
       note: 'Shift sore',
     });
-    const { rows } = await asOwner.query(api.schedule.list, { from: '2026-06-15', to: '2026-06-16' });
+    const { rows } = await asOwner.query(api.schedule.list, {
+      from: '2026-06-15',
+      to: '2026-06-16',
+    });
     expect(rows).toHaveLength(1);
     expect(rows[0]?.date).toBe('2026-06-16');
     expect(rows[0]?.startTime).toBe('10:00');
     expect(rows[0]?.endTime).toBe('17:00');
     expect(rows[0]?.note).toBe('Shift sore');
 
-    await expect(
-      asOwner.mutation(api.schedule.update, { id, startTime: '18:00' })
-    ).rejects.toThrow(/selesai harus setelah mulai/i);
+    await expect(asOwner.mutation(api.schedule.update, { id, startTime: '18:00' })).rejects.toThrow(
+      /selesai harus setelah mulai/i
+    );
   });
 
   it('remove deletes the shift', async () => {
@@ -182,7 +194,10 @@ describe('schedule update + remove', () => {
       endTime: '17:00',
     });
     await asOwner.mutation(api.schedule.remove, { id });
-    const { rows } = await asOwner.query(api.schedule.list, { from: '2026-06-15', to: '2026-06-15' });
+    const { rows } = await asOwner.query(api.schedule.list, {
+      from: '2026-06-15',
+      to: '2026-06-15',
+    });
     expect(rows).toHaveLength(0);
   });
 });

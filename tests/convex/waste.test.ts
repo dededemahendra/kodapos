@@ -191,7 +191,7 @@ describe('waste.recent', () => {
     expect(some).toHaveLength(1);
   });
 
-  it('does not leak another cafe\'s waste', async () => {
+  it("does not leak another cafe's waste", async () => {
     const t = convexTest(schema, modules);
     const { asOwner: ownerA } = await setupOwner(t, 'a@x.com');
     const { asOwner: ownerB } = await setupOwner(t, 'b@x.com');

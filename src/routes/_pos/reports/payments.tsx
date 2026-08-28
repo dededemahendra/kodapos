@@ -5,6 +5,7 @@ import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { CreditCard } from 'lucide-react';
 import { useMemo } from 'react';
+import { useReportRange } from '~/components/reports/use-report-range';
 import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
 import {
@@ -18,7 +19,6 @@ import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
 import { exportTablePdf } from '~/lib/pdf';
-import { useReportRange } from '~/components/reports/use-report-range';
 
 export const Route = createFileRoute('/_pos/reports/payments')({
   component: PaymentsReport,
@@ -57,10 +57,7 @@ function PaymentsReport() {
       label: METHOD_LABEL[m.method] ?? m.method,
       count: m.count,
       amountIDR: m.amountIDR,
-      pct:
-        data.totalIDR === 0
-          ? 0
-          : Math.round((m.amountIDR / data.totalIDR) * 100),
+      pct: data.totalIDR === 0 ? 0 : Math.round((m.amountIDR / data.totalIDR) * 100),
     }));
   }, [data]);
 
@@ -70,25 +67,19 @@ function PaymentsReport() {
       {
         accessorKey: 'count',
         header: () => <Trans>Transaksi</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{row.original.count}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{row.original.count}</span>,
       },
       {
         accessorKey: 'amountIDR',
         header: () => <Trans>Jumlah</Trans>,
         cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatIDR(row.original.amountIDR)}
-          </span>
+          <span className="tabular-nums">{formatIDR(row.original.amountIDR)}</span>
         ),
       },
       {
         accessorKey: 'pct',
         header: () => <Trans>Porsi</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{row.original.pct}%</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{row.original.pct}%</span>,
       },
     ],
     []
@@ -165,12 +156,7 @@ function PaymentsReport() {
         <Button type="button" variant="outline" size="sm" onClick={onDownload}>
           <Trans>Unduh CSV</Trans>
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onDownloadPDF}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={onDownloadPDF}>
           <Trans>Unduh PDF</Trans>
         </Button>
       </div>

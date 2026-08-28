@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import type { MutationCtx } from './_generated/server';
 import { mutation } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { methodTotals } from './lib/payment';
 import { type RefundOrderLine, validateRefundLines } from './lib/refund';
 

@@ -19,8 +19,7 @@ export function useEditableState<T>(serverValue: T | undefined) {
       // Preserve in-progress edits: only adopt the new server snapshot when
       // the user hasn't diverged from the previous one.
       const wasDirty =
-        lastServer.current !== undefined &&
-        JSON.stringify(draft) !== lastServer.current;
+        lastServer.current !== undefined && JSON.stringify(draft) !== lastServer.current;
       lastServer.current = key;
       if (!wasDirty) setDraft(serverValue);
     }

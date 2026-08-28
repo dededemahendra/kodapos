@@ -1,19 +1,27 @@
-import type { MutationCtx, QueryCtx } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
-import { DAY_MS, addDaysToKey, dayKeyFn, dowOfKey, startOfLocalDay, tzFor, utcOfDayKey } from './time';
+import type { MutationCtx, QueryCtx } from '../_generated/server';
 import {
-  type Confidence,
-  type DaySample,
-  type Driver,
   baseEstimate,
+  type Confidence,
   coeffOfVariation,
   confidence,
+  type DaySample,
+  type Driver,
   dayOfWeekMultiplier,
   driversFor,
   holidayMultiplier,
   predictedQty,
   weatherMultiplier,
 } from './forecast';
+import {
+  addDaysToKey,
+  DAY_MS,
+  dayKeyFn,
+  dowOfKey,
+  startOfLocalDay,
+  tzFor,
+  utcOfDayKey,
+} from './time';
 import type { WeatherDay } from './weather';
 
 export type DemandLine = {
@@ -70,7 +78,12 @@ export async function computeDemand(
   const daysCollected = activeKeys.size;
   if (daysCollected < 14) {
     const firstKey = [...activeKeys].sort()[0] ?? todayKey;
-    return { status: 'learning', daysCollected, daysNeeded: 14, etaDateKey: addDaysToKey(firstKey, 14) };
+    return {
+      status: 'learning',
+      daysCollected,
+      daysNeeded: 14,
+      etaDateKey: addDaysToKey(firstKey, 14),
+    };
   }
 
   const axis = [...activeKeys]
@@ -82,14 +95,23 @@ export async function computeDemand(
 
   const lines: DemandLine[] = [];
   for (const [id, it] of items) {
-    const samples: DaySample[] = axis.map((a) => ({ daysAgo: a.daysAgo, dow: a.dow, qty: it.byDay.get(a.dk) ?? 0 }));
+    const samples: DaySample[] = axis.map((a) => ({
+      daysAgo: a.daysAgo,
+      dow: a.dow,
+      qty: it.byDay.get(a.dk) ?? 0,
+    }));
     const base = baseEstimate(samples);
     const soldDaysAgo = axis.filter((a) => (it.byDay.get(a.dk) ?? 0) > 0).map((a) => a.daysAgo);
     const firstSaleDaysAgo = soldDaysAgo.length ? Math.max(...soldDaysAgo) : 0;
     const spanQtys = samples.filter((s) => s.daysAgo <= firstSaleDaysAgo).map((s) => s.qty);
     const conf = confidence(spanQtys.length, coeffOfVariation(spanQtys));
     const dayQty = (dk: string) =>
-      predictedQty(base, dayOfWeekMultiplier(samples, dowOfKey(dk)), weatherMultiplier(condByDate.get(dk)), holidayMultiplier(dk).mult);
+      predictedQty(
+        base,
+        dayOfWeekMultiplier(samples, dowOfKey(dk)),
+        weatherMultiplier(condByDate.get(dk)),
+        holidayMultiplier(dk).mult
+      );
     const tomorrowQty = dayQty(tomorrowKey);
     const sevenDayQty = futureKeys.reduce((s, dk) => s + dayQty(dk), 0);
     const tomorrowHoliday = holidayMultiplier(tomorrowKey).driver;
@@ -105,7 +127,14 @@ export async function computeDemand(
       ...(tomorrowHoliday ? { holiday: tomorrowHoliday } : {}),
       ...(weatherDriver ? { weather: weatherDriver } : {}),
     });
-    lines.push({ menuItemId: id as unknown as Id<'menuItems'>, name: it.name, tomorrowQty, sevenDayQty, confidence: conf, drivers });
+    lines.push({
+      menuItemId: id as unknown as Id<'menuItems'>,
+      name: it.name,
+      tomorrowQty,
+      sevenDayQty,
+      confidence: conf,
+      drivers,
+    });
   }
   lines.sort((a, b) => b.tomorrowQty - a.tomorrowQty || a.name.localeCompare(b.name, 'id-ID'));
   return { status: 'ready', forDateKey: tomorrowKey, lines };

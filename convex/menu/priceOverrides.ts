@@ -3,11 +3,7 @@ import type { Id } from '../_generated/dataModel';
 import { mutation, query } from '../_generated/server';
 import { requireActiveOutlet, requireOwned } from '../lib/auth';
 
-const targetKindValidator = v.union(
-  v.literal('item'),
-  v.literal('variant'),
-  v.literal('modifier')
-);
+const targetKindValidator = v.union(v.literal('item'), v.literal('variant'), v.literal('modifier'));
 
 const targetIdValidator = v.union(
   v.id('menuItems'),
@@ -46,8 +42,7 @@ async function assertTargetOwned(
   targetKind: 'item' | 'variant' | 'modifier',
   targetId: string
 ): Promise<void> {
-  const label =
-    targetKind === 'item' ? 'Menu' : targetKind === 'variant' ? 'Varian' : 'Modifier';
+  const label = targetKind === 'item' ? 'Menu' : targetKind === 'variant' ? 'Varian' : 'Modifier';
 
   // targetKindValidator and targetIdValidator are independent union members,
   // so nothing in the args validator stops a mismatched pair (targetKind:
@@ -240,9 +235,7 @@ export const grid = query({
         standardPriceIDR: item.priceIDR,
         overrideIDR: overrides.get(item._id) ?? null,
       });
-      const variants = (variantsByItem.get(item._id) ?? []).sort(
-        (a, b) => a.position - b.position
-      );
+      const variants = (variantsByItem.get(item._id) ?? []).sort((a, b) => a.position - b.position);
       for (const variant of variants) {
         out.push({
           targetKind: 'variant',

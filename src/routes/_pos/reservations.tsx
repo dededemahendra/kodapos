@@ -3,11 +3,20 @@ import { createFileRoute } from '@tanstack/react-router';
 import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
-import { CalendarClock, CalendarDays, Check, CircleSlash, Pencil, Trash2, UserCheck, XCircle } from 'lucide-react';
+import {
+  CalendarClock,
+  CalendarDays,
+  Check,
+  CircleSlash,
+  Pencil,
+  Trash2,
+  UserCheck,
+  XCircle,
+} from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import {
-  type ReservationRow,
   ReservationFormDialog,
+  type ReservationRow,
 } from '~/components/reservations/reservation-form-dialog';
 import { Button } from '~/components/ui/button';
 import { Calendar } from '~/components/ui/calendar';
@@ -125,9 +134,7 @@ function ReservationsPage() {
           <div>
             <div className="font-medium">{row.original.customerName}</div>
             {row.original.phone ? (
-              <div className="text-muted-foreground text-xs tabular-nums">
-                {row.original.phone}
-              </div>
+              <div className="text-muted-foreground text-xs tabular-nums">{row.original.phone}</div>
             ) : null}
           </div>
         ),

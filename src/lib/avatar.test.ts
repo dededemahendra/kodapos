@@ -3,9 +3,7 @@ import { defaultAvatarUrl } from './avatar';
 
 describe('defaultAvatarUrl', () => {
   it('builds a notionists URL from the seed', () => {
-    expect(defaultAvatarUrl('abc')).toBe(
-      'https://api.dicebear.com/9.x/notionists/svg?seed=abc'
-    );
+    expect(defaultAvatarUrl('abc')).toBe('https://api.dicebear.com/9.x/notionists/svg?seed=abc');
   });
 
   it('url-encodes the seed', () => {

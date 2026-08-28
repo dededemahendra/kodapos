@@ -1,8 +1,8 @@
 import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 import { mutation, type QueryCtx, query } from './_generated/server';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { heldLineValidator } from './lib/heldOrder';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
 import { buildOrder, settleSale } from './lib/sale';
 
 /**
@@ -23,9 +23,7 @@ const queueRow = v.object({
   subtotalIDR: v.number(),
   // Pay-now surfacing for the queue card ("Lunas (QRIS)" + the charged total).
   // Absent on pay-at-counter self-orders.
-  paymentStatus: v.optional(
-    v.union(v.literal('unpaid'), v.literal('awaiting'), v.literal('paid'))
-  ),
+  paymentStatus: v.optional(v.union(v.literal('unpaid'), v.literal('awaiting'), v.literal('paid'))),
   totalIDR: v.optional(v.number()),
   customerNote: v.optional(v.string()),
   createdAt: v.number(),

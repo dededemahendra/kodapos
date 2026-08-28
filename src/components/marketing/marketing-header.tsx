@@ -1,9 +1,9 @@
 import { Trans } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
 import { MotionConfig, motion } from 'motion/react';
-import { Button } from '~/components/ui/button';
 import { BrandMark } from '~/components/brand-mark';
 import { ThemeToggle } from '~/components/theme-toggle';
+import { Button } from '~/components/ui/button';
 import { track } from '~/lib/analytics/track';
 
 export function MarketingHeader() {
@@ -15,37 +15,47 @@ export function MarketingHeader() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
       >
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
-        <a href="/#top" className="flex items-center gap-2">
-          <BrandMark className="h-5 w-auto text-foreground" />
-          <span className="font-semibold">kodapos</span>
-        </a>
-        <nav className="ml-6 hidden gap-6 text-sm text-muted-foreground md:flex">
-          {/* /fitur is built but unpublished until public/shots/ is captured — see public/robots.txt */}
-          <a href="/#how-it-works" className="transition-colors hover:text-foreground"><Trans>Cara kerja</Trans></a>
-          <a href="/#pricing" className="transition-colors hover:text-foreground"><Trans>Gratis</Trans></a>
-          <a href="/#faq" className="transition-colors hover:text-foreground">FAQ</a>
-        </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <ThemeToggle className="size-9" />
-          <Button asChild variant="outline" size="sm">
-            <Link
-              to="/signin"
-              onClick={() => track('marketing_cta_clicked', { location: 'header', label: 'sign_in' })}
-            >
-              <Trans>Masuk</Trans>
-            </Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link
-              to="/signin"
-              onClick={() => track('marketing_cta_clicked', { location: 'header', label: 'start_free' })}
-            >
-              <Trans>Daftar</Trans>
-            </Link>
-          </Button>
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
+          <a href="/#top" className="flex items-center gap-2">
+            <BrandMark className="h-5 w-auto text-foreground" />
+            <span className="font-semibold">kodapos</span>
+          </a>
+          <nav className="ml-6 hidden gap-6 text-sm text-muted-foreground md:flex">
+            {/* /fitur is built but unpublished until public/shots/ is captured — see public/robots.txt */}
+            <a href="/#how-it-works" className="transition-colors hover:text-foreground">
+              <Trans>Cara kerja</Trans>
+            </a>
+            <a href="/#pricing" className="transition-colors hover:text-foreground">
+              <Trans>Gratis</Trans>
+            </a>
+            <a href="/#faq" className="transition-colors hover:text-foreground">
+              FAQ
+            </a>
+          </nav>
+          <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle className="size-9" />
+            <Button asChild variant="outline" size="sm">
+              <Link
+                to="/signin"
+                onClick={() =>
+                  track('marketing_cta_clicked', { location: 'header', label: 'sign_in' })
+                }
+              >
+                <Trans>Masuk</Trans>
+              </Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link
+                to="/signin"
+                onClick={() =>
+                  track('marketing_cta_clicked', { location: 'header', label: 'start_free' })
+                }
+              >
+                <Trans>Daftar</Trans>
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
       </motion.header>
     </MotionConfig>
   );

@@ -2,8 +2,10 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_SERVICE_CHARGE_NAME } from 'convex/lib/pricing';
+import type { ReceiptCafe, ReceiptOrder } from 'convex/lib/receipt';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { useEffect, useRef, useState } from 'react';
+import { PinConfirmDialog, useOwnerPin } from '~/components/permission/pin-confirm-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,15 +22,13 @@ import { Dialog, DialogContent } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { Spinner } from '~/components/ui/spinner';
-import { PinConfirmDialog, useOwnerPin } from '~/components/permission/pin-confirm-dialog';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { formatIDR } from '~/lib/money';
 import { usePermissions } from '~/lib/permissions';
-import { usePreference, useBoolPreference } from '~/lib/preferences';
+import { useBoolPreference, usePreference } from '~/lib/preferences';
+import { formatPromoValue } from '~/lib/promo';
 import { buildReceiptBytes } from '~/lib/receipt-print';
 import { isThermalSupported, printBytes } from '~/lib/thermal-printer';
-import type { ReceiptCafe, ReceiptOrder } from 'convex/lib/receipt';
-import { formatPromoValue } from '~/lib/promo';
 import { toast } from '~/lib/toast';
 import { RefundDialog } from './refund-dialog';
 
@@ -156,8 +156,7 @@ export function ReceiptPreview({
   // discount and the points redeemed on separate lines.
   const pointsRedeemedIDR = order?.pointsRedeemedIDR ?? 0;
   const manualDiscountIDR = order?.manualDiscountIDR ?? 0;
-  const promoDiscountIDR =
-    (order?.discountIDR ?? 0) - pointsRedeemedIDR - manualDiscountIDR;
+  const promoDiscountIDR = (order?.discountIDR ?? 0) - pointsRedeemedIDR - manualDiscountIDR;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -374,9 +373,7 @@ export function ReceiptPreview({
                         await sendReceipt({ orderId, to });
                         toast.success(t`Struk dikirim ke email.`);
                       } catch (err) {
-                        toast.error(
-                          err instanceof Error ? err.message : t`Gagal mengirim email.`
-                        );
+                        toast.error(err instanceof Error ? err.message : t`Gagal mengirim email.`);
                       } finally {
                         setSending(false);
                       }

@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  type RefundOrderLine,
-  unitRefundIDR,
-  validateRefundLines,
-} from '../../convex/lib/refund';
+import { type RefundOrderLine, unitRefundIDR, validateRefundLines } from '../../convex/lib/refund';
 
 /** Helper: build order lines carrying a shared total/subtotal. */
 function lines(

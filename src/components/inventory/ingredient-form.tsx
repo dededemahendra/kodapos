@@ -1,7 +1,7 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Trans, useLingui } from '@lingui/react/macro';
 import { type FormEvent, useEffect, useState } from 'react';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { Button } from '~/components/ui/button';
@@ -111,7 +111,9 @@ export function IngredientForm({
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="ing-name"><Trans>Nama</Trans></FieldLabel>
+              <FieldLabel htmlFor="ing-name">
+                <Trans>Nama</Trans>
+              </FieldLabel>
               <Input
                 id="ing-name"
                 value={name}
@@ -121,7 +123,9 @@ export function IngredientForm({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="ing-unit"><Trans>Satuan</Trans></FieldLabel>
+              <FieldLabel htmlFor="ing-unit">
+                <Trans>Satuan</Trans>
+              </FieldLabel>
               <Select value={unit} onValueChange={(v) => setUnit(v as CanonicalUnit)}>
                 <SelectTrigger id="ing-unit">
                   <SelectValue />
@@ -136,7 +140,9 @@ export function IngredientForm({
               </Select>
             </Field>
             <Field>
-              <FieldLabel htmlFor="ing-threshold"><Trans>Ambang isi ulang</Trans></FieldLabel>
+              <FieldLabel htmlFor="ing-threshold">
+                <Trans>Ambang isi ulang</Trans>
+              </FieldLabel>
               <Input
                 id="ing-threshold"
                 type="number"
@@ -148,7 +154,9 @@ export function IngredientForm({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="ing-cost"><Trans>Biaya per satuan (Rp)</Trans></FieldLabel>
+              <FieldLabel htmlFor="ing-cost">
+                <Trans>Biaya per satuan (Rp)</Trans>
+              </FieldLabel>
               <Input
                 id="ing-cost"
                 type="number"
@@ -160,7 +168,9 @@ export function IngredientForm({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="ing-barcode"><Trans>Barcode</Trans></FieldLabel>
+              <FieldLabel htmlFor="ing-barcode">
+                <Trans>Barcode</Trans>
+              </FieldLabel>
               <Input
                 id="ing-barcode"
                 value={barcode}

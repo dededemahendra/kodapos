@@ -1,5 +1,4 @@
-import { useLingui } from '@lingui/react/macro';
-import { Trans } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import type { Id } from 'convex/_generated/dataModel';
 import { useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
@@ -96,11 +95,10 @@ export function ModifierPickerDialog({
   }
   const hasVariants = item.variants.length > 0;
   const selectedVariant = hasVariants
-    ? item.variants.find((v) => v._id === variantId) ?? null
+    ? (item.variants.find((v) => v._id === variantId) ?? null)
     : null;
   const basePrice = selectedVariant ? selectedVariant.priceIDR : item.item.priceIDR;
-  const unitPriceIDR =
-    basePrice + adjustments.reduce((s, m) => s + m.priceAdjustmentIDR, 0);
+  const unitPriceIDR = basePrice + adjustments.reduce((s, m) => s + m.priceAdjustmentIDR, 0);
   const variantSatisfied = !hasVariants || selectedVariant !== null;
 
   function submit() {
@@ -173,9 +171,7 @@ export function ModifierPickerDialog({
                   <span className="text-xs text-muted-foreground">
                     {isRequired
                       ? t`Wajib (pilih ${ag.group.minSelect}${
-                          ag.group.maxSelect > ag.group.minSelect
-                            ? `-${ag.group.maxSelect}`
-                            : ''
+                          ag.group.maxSelect > ag.group.minSelect ? `-${ag.group.maxSelect}` : ''
                         })`
                       : t`Opsional (maks ${ag.group.maxSelect})`}
                   </span>
@@ -233,7 +229,8 @@ export function ModifierPickerDialog({
         <DialogFooter className="flex items-center justify-between">
           <div className="text-sm">
             <Trans>
-              Total <span className="font-semibold tabular-nums">{formatIDR(qty * unitPriceIDR)}</span>
+              Total{' '}
+              <span className="font-semibold tabular-nums">{formatIDR(qty * unitPriceIDR)}</span>
             </Trans>
           </div>
           <div className="flex gap-2">

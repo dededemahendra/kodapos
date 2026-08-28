@@ -1,12 +1,9 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
-import { uploadToStorage } from '~/lib/upload';
 import { ConfirmArchive } from '~/components/menu/confirm-archive';
-import { toast } from '~/lib/toast';
 import { Button } from '~/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field';
 import { Input } from '~/components/ui/input';
@@ -18,6 +15,8 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
+import { toast } from '~/lib/toast';
+import { uploadToStorage } from '~/lib/upload';
 
 export interface AttachedGroupRow {
   group: Doc<'modifierGroups'>;
@@ -70,7 +69,9 @@ export function ItemEditForm(props: ItemEditFormProps) {
   const [priceIDR, setPriceIDR] = useState<number>(props.initial.priceIDR);
   const [isActive, setIsActive] = useState(props.initial.isActive);
   const [barcode, setBarcode] = useState(props.initial.barcode);
-  const [imageStorageId, setImageStorageId] = useState<Id<'_storage'> | undefined>(props.initial.imageStorageId);
+  const [imageStorageId, setImageStorageId] = useState<Id<'_storage'> | undefined>(
+    props.initial.imageStorageId
+  );
   const [imageUrl, setImageUrl] = useState<string | null>(props.initial.imageUrl ?? null);
   const [uploading, setUploading] = useState(false);
   const imgRef = useRef<HTMLInputElement>(null);
@@ -155,10 +156,14 @@ export function ItemEditForm(props: ItemEditFormProps) {
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-8 max-w-4xl">
       <div>
-        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2"><Trans>Dasar</Trans></h2>
+        <h2 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+          <Trans>Dasar</Trans>
+        </h2>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="name"><Trans>Nama</Trans></FieldLabel>
+            <FieldLabel htmlFor="name">
+              <Trans>Nama</Trans>
+            </FieldLabel>
             <Input
               id="name"
               value={name}
@@ -168,14 +173,13 @@ export function ItemEditForm(props: ItemEditFormProps) {
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="categoryId"><Trans>Kategori</Trans></FieldLabel>
+            <FieldLabel htmlFor="categoryId">
+              <Trans>Kategori</Trans>
+            </FieldLabel>
             {/* Radix Select can't represent the empty "unselected" state with an
                 item, so the placeholder covers it (it renders for value '') and
                 handleSubmit guards required. */}
-            <Select
-              value={categoryId}
-              onValueChange={(v) => setCategoryId(v as Id<'categories'>)}
-            >
+            <Select value={categoryId} onValueChange={(v) => setCategoryId(v as Id<'categories'>)}>
               <SelectTrigger id="categoryId">
                 <SelectValue placeholder={t`Pilih kategori`} />
               </SelectTrigger>
@@ -189,7 +193,9 @@ export function ItemEditForm(props: ItemEditFormProps) {
             </Select>
           </Field>
           <Field>
-            <FieldLabel htmlFor="priceIDR"><Trans>Harga (Rp)</Trans></FieldLabel>
+            <FieldLabel htmlFor="priceIDR">
+              <Trans>Harga (Rp)</Trans>
+            </FieldLabel>
             <Input
               id="priceIDR"
               type="number"
@@ -201,7 +207,9 @@ export function ItemEditForm(props: ItemEditFormProps) {
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="barcode"><Trans>Barcode</Trans></FieldLabel>
+            <FieldLabel htmlFor="barcode">
+              <Trans>Barcode</Trans>
+            </FieldLabel>
             <Input
               id="barcode"
               value={barcode}
@@ -214,21 +222,43 @@ export function ItemEditForm(props: ItemEditFormProps) {
             </p>
           </Field>
           <Field>
-            <FieldLabel><Trans>Gambar item</Trans></FieldLabel>
+            <FieldLabel>
+              <Trans>Gambar item</Trans>
+            </FieldLabel>
             <div className="flex items-center gap-3">
               {imageUrl ? (
-                <img src={imageUrl} alt="" className="size-16 rounded object-cover border border-border" />
+                <img
+                  src={imageUrl}
+                  alt=""
+                  className="size-16 rounded object-cover border border-border"
+                />
               ) : (
-                <div className="size-16 rounded bg-muted grid place-items-center text-muted-foreground text-xs">—</div>
+                <div className="size-16 rounded bg-muted grid place-items-center text-muted-foreground text-xs">
+                  —
+                </div>
               )}
-              <input ref={imgRef} type="file" accept="image/*" onChange={onImageChange} className="hidden" />
+              <input
+                ref={imgRef}
+                type="file"
+                accept="image/*"
+                onChange={onImageChange}
+                className="hidden"
+              />
               <div className="flex flex-col gap-1">
-                <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => imgRef.current?.click()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploading}
+                  onClick={() => imgRef.current?.click()}
+                >
                   {uploading ? <Spinner data-icon="inline-start" /> : null}
                   {imageStorageId ? <Trans>Ganti gambar</Trans> : <Trans>Unggah gambar</Trans>}
                 </Button>
                 {imageStorageId ? (
-                  <Button type="button" variant="ghost" size="sm" onClick={removeImage}><Trans>Hapus gambar</Trans></Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={removeImage}>
+                    <Trans>Hapus gambar</Trans>
+                  </Button>
                 ) : null}
               </div>
             </div>
@@ -278,9 +308,13 @@ export function ItemEditForm(props: ItemEditFormProps) {
           )}
         </div>
         {props.itemId === 'new' ? (
-          <p className="text-sm text-muted-foreground"><Trans>Simpan item dulu untuk memasang grup modifier.</Trans></p>
+          <p className="text-sm text-muted-foreground">
+            <Trans>Simpan item dulu untuk memasang grup modifier.</Trans>
+          </p>
         ) : props.attached.length === 0 ? (
-          <p className="text-sm text-muted-foreground"><Trans>Belum ada grup terpasang.</Trans></p>
+          <p className="text-sm text-muted-foreground">
+            <Trans>Belum ada grup terpasang.</Trans>
+          </p>
         ) : (
           <ul className="space-y-2">
             {props.attached.map((a, i) => (

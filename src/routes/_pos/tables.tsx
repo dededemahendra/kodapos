@@ -9,11 +9,17 @@ import { QrPrintDialog } from '~/components/sale/qr-print-dialog';
 import { TableManageDialog } from '~/components/tables/table-manage-dialog';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { CardGridSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
-import { usePermissions } from '~/lib/permissions';
 import { formatIDR } from '~/lib/money';
+import { usePermissions } from '~/lib/permissions';
 
 export const Route = createFileRoute('/_pos/tables')({ component: TablesPage });
 

@@ -20,7 +20,11 @@ export async function enforceRateLimit(
     .first();
 
   if (existing === null) {
-    await ctx.db.insert('otpRateLimit', { identifier: opts.identifier, windowStart: now, count: 1 });
+    await ctx.db.insert('otpRateLimit', {
+      identifier: opts.identifier,
+      windowStart: now,
+      count: 1,
+    });
     return;
   }
   if (now - existing.windowStart > opts.windowMs) {

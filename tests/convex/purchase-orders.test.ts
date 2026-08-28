@@ -6,19 +6,24 @@ import schema from '../../convex/schema';
 const modules = import.meta.glob('../../convex/**/*.*s');
 
 async function setup(t: ReturnType<typeof convexTest>, email = 'o@x.com') {
-  const userId = await t.run(async (ctx) =>
-    ctx.db.insert('users', { name: 'Owner', email })
-  );
+  const userId = await t.run(async (ctx) => ctx.db.insert('users', { name: 'Owner', email }));
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   const biji = await asOwner.mutation(api.ingredients.upsert, {
-    name: 'Biji', canonicalUnit: 'g', reorderThreshold: 0, lastCostPerUnitIDR: 40,
+    name: 'Biji',
+    canonicalUnit: 'g',
+    reorderThreshold: 0,
+    lastCostPerUnitIDR: 40,
   });
   const susu = await asOwner.mutation(api.ingredients.upsert, {
-    name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 20,
+    name: 'Susu',
+    canonicalUnit: 'ml',
+    reorderThreshold: 0,
+    lastCostPerUnitIDR: 20,
   });
   const supplier = await asOwner.mutation(api.suppliers.create, {
-    name: 'Kopi Jaya', phone: '08123456789',
+    name: 'Kopi Jaya',
+    phone: '08123456789',
   });
   return { asOwner, biji, susu, supplier };
 }
@@ -72,9 +77,9 @@ describe('purchaseOrders.create', () => {
   it('rejects empty lines / non-positive qty / archived ingredient / foreign supplier', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, biji, susu } = await setup(t);
-    await expect(
-      asOwner.mutation(api.purchaseOrders.create, { lines: [] })
-    ).rejects.toThrow(/minimal satu/i);
+    await expect(asOwner.mutation(api.purchaseOrders.create, { lines: [] })).rejects.toThrow(
+      /minimal satu/i
+    );
     await expect(
       asOwner.mutation(api.purchaseOrders.create, {
         lines: [{ ingredientId: biji, orderedQty: 0, unitCostIDR: 10 }],
@@ -324,9 +329,9 @@ describe('purchaseOrders.cancel', () => {
       id,
       lines: [{ ingredientId: biji, qty: 5000 }],
     });
-    await expect(
-      asOwner.mutation(api.purchaseOrders.cancel, { id })
-    ).rejects.toThrow(/selesai|dibatalkan|received/i);
+    await expect(asOwner.mutation(api.purchaseOrders.cancel, { id })).rejects.toThrow(
+      /selesai|dibatalkan|received/i
+    );
   });
 });
 
@@ -350,8 +355,8 @@ describe('purchaseOrders owner-scope', () => {
         lines: [{ ingredientId: bijiB, qty: 1 }],
       })
     ).rejects.toThrow(/tidak ditemukan/i);
-    await expect(
-      ownerB.mutation(api.purchaseOrders.cancel, { id })
-    ).rejects.toThrow(/tidak ditemukan/i);
+    await expect(ownerB.mutation(api.purchaseOrders.cancel, { id })).rejects.toThrow(
+      /tidak ditemukan/i
+    );
   });
 });

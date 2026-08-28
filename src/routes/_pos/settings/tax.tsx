@@ -14,8 +14,8 @@ import { SaveBar } from '~/components/settings/save-bar';
 import { useEditableState } from '~/components/settings/use-editable-state';
 import { Button } from '~/components/ui/button';
 import { FieldGroup } from '~/components/ui/field';
-import { FormSkeleton } from '~/components/ui/loading-skeletons';
 import { Input } from '~/components/ui/input';
+import { FormSkeleton } from '~/components/ui/loading-skeletons';
 import {
   Select,
   SelectContent,
@@ -222,7 +222,9 @@ function SettingsTax() {
         serviceChargeName: d.payment.serviceChargeName,
         ...(qrisMerchantName !== undefined ? { qrisMerchantName } : {}),
         ...(qrisNmid !== undefined ? { qrisNmid } : {}),
-        ...(d.payment.qrisImageStorageId ? { qrisImageStorageId: d.payment.qrisImageStorageId } : {}),
+        ...(d.payment.qrisImageStorageId
+          ? { qrisImageStorageId: d.payment.qrisImageStorageId }
+          : {}),
       };
 
       await Promise.all([

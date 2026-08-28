@@ -68,9 +68,7 @@ describe('kitchen.tickets', () => {
     expect(tickets[0]?.orderType).toBe('dine_in');
     expect(tickets[0]?.createdAtClient).toBe(1700000000000);
     expect(tickets[0]?.tableName).toBeUndefined();
-    expect(tickets[0]?.lines).toEqual([
-      { nameSnapshot: 'Espresso', qty: 2, modifiers: [] },
-    ]);
+    expect(tickets[0]?.lines).toEqual([{ nameSnapshot: 'Espresso', qty: 2, modifiers: [] }]);
   });
 
   it('includes modifier labels on the ticket lines', async () => {
@@ -201,7 +199,7 @@ describe('kitchen.tickets', () => {
     expect(tickets.map((x) => x._id)).toEqual([older.orderId, newer.orderId]);
   });
 
-  it('only returns the open shift\'s tickets', async () => {
+  it("only returns the open shift's tickets", async () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     await asOwner.mutation(api.orders.createCashSale, {

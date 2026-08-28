@@ -56,14 +56,7 @@ export function BarcodeSVG({
         viewBox={`0 0 ${totalWidth} ${height}`}
       >
         {bars.map((bar) => (
-          <rect
-            key={bar.x}
-            x={bar.x}
-            y={0}
-            width={bar.width}
-            height={height}
-            fill="black"
-          />
+          <rect key={bar.x} x={bar.x} y={0} width={bar.width} height={height} fill="black" />
         ))}
       </svg>
       <div className="font-mono text-xs text-center">{value}</div>

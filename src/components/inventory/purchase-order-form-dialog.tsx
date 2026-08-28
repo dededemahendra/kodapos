@@ -101,9 +101,7 @@ export function PurchaseOrderFormDialog({
     setError(null);
     try {
       await create({
-        ...(supplierId !== NO_SUPPLIER
-          ? { supplierId: supplierId as Id<'suppliers'> }
-          : {}),
+        ...(supplierId !== NO_SUPPLIER ? { supplierId: supplierId as Id<'suppliers'> } : {}),
         lines: parsed,
       });
       toast.success(t`Pesanan beli dibuat.`);

@@ -61,15 +61,22 @@ describe('customers CRUD', () => {
   it('validates name + phone', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
-    await expect(asOwner.mutation(api.customers.create, { name: '  ', phone: '08121111111' })).rejects.toThrow(/nama/i);
-    await expect(asOwner.mutation(api.customers.create, { name: 'OK', phone: '12' })).rejects.toThrow(/telepon/i);
+    await expect(
+      asOwner.mutation(api.customers.create, { name: '  ', phone: '08121111111' })
+    ).rejects.toThrow(/nama/i);
+    await expect(
+      asOwner.mutation(api.customers.create, { name: 'OK', phone: '12' })
+    ).rejects.toThrow(/telepon/i);
   });
 
   it('update changes name/phone; rejects a phone already used by another customer', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const id = await asOwner.mutation(api.customers.create, { name: 'Budi', phone: '08120000001' });
-    const other = await asOwner.mutation(api.customers.create, { name: 'Ani', phone: '08120000002' });
+    const other = await asOwner.mutation(api.customers.create, {
+      name: 'Ani',
+      phone: '08120000002',
+    });
     // self-update keeping same phone is allowed
     await asOwner.mutation(api.customers.update, { id, name: 'Budi S', phone: '08120000001' });
     const list = await asOwner.query(api.customers.list, {});

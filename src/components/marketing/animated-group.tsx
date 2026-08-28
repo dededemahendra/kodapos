@@ -1,7 +1,7 @@
 'use client';
 
-import { Children, type ReactNode } from 'react';
 import { MotionConfig, motion, type Variants } from 'motion/react';
+import { Children, type ReactNode } from 'react';
 import { cn } from '~/lib/utils';
 
 const defaultContainer: Variants = {

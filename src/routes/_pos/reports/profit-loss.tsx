@@ -113,22 +113,10 @@ function ProfitLossReport() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-end gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={exportCSV}
-          disabled={!data}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={exportCSV} disabled={!data}>
           <Trans>Unduh CSV</Trans>
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={exportPDF}
-          disabled={!data}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={exportPDF} disabled={!data}>
           <Trans>Unduh PDF</Trans>
         </Button>
       </div>
@@ -208,25 +196,17 @@ function ProfitLossReport() {
               <dt>
                 <Trans>+ Pendapatan lain</Trans>
               </dt>
-              <dd className="tabular-nums">
-                +{formatIDR(data.otherIncomeIDR)}
-              </dd>
+              <dd className="tabular-nums">+{formatIDR(data.otherIncomeIDR)}</dd>
             </div>
 
             <div className="flex items-baseline justify-between gap-4 border-t border-border pt-2 text-lg font-bold">
               <dt className="flex items-center gap-2">
                 <Trans>= Laba bersih</Trans>
-                <Badge
-                  variant={data.netProfitIDR < 0 ? 'destructive' : 'secondary'}
-                >
+                <Badge variant={data.netProfitIDR < 0 ? 'destructive' : 'secondary'}>
                   {`${data.netMarginPct}%`}
                 </Badge>
               </dt>
-              <dd
-                className={`tabular-nums${
-                  data.netProfitIDR < 0 ? ' text-destructive' : ''
-                }`}
-              >
+              <dd className={`tabular-nums${data.netProfitIDR < 0 ? ' text-destructive' : ''}`}>
                 {formatIDR(data.netProfitIDR)}
               </dd>
             </div>
@@ -235,9 +215,7 @@ function ProfitLossReport() {
       )}
 
       <p className="text-muted-foreground text-xs mt-3">
-        <Trans>
-          HPP memakai biaya bahan terkini; pengeluaran di luar inventaris.
-        </Trans>
+        <Trans>HPP memakai biaya bahan terkini; pengeluaran di luar inventaris.</Trans>
       </p>
     </div>
   );

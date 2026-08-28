@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import type { MutationCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { startOfLocalDay, tzFor } from './lib/time';
 
 const statusValidator = v.union(
@@ -82,12 +82,7 @@ export const create = mutation({
     if (args.tableId) await requireOwned(ctx, cafeId, args.tableId, 'Meja');
     if (args.customerId) await requireOwned(ctx, cafeId, args.customerId, 'Pelanggan');
 
-    const customerName = await resolveCustomerName(
-      ctx,
-      cafeId,
-      args.customerName,
-      args.customerId
-    );
+    const customerName = await resolveCustomerName(ctx, cafeId, args.customerName, args.customerId);
     const partySize = assertPartySize(args.partySize);
     const at = assertAt(args.at);
     const durationMin = assertDurationMin(args.durationMin);

@@ -1,11 +1,5 @@
 import type { ReactNode } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Field, FieldDescription, FieldTitle } from '~/components/ui/field';
 import { Separator } from '~/components/ui/separator';
 
@@ -20,9 +14,7 @@ export function SettingsPageHeader({
   return (
     <div>
       <h1 className="text-2xl font-bold mb-1">{title}</h1>
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
+      {description && <p className="text-muted-foreground text-sm">{description}</p>}
     </div>
   );
 }
@@ -62,9 +54,7 @@ export function SettingRow({
     <Field orientation="horizontal" className="items-start gap-4">
       <div className="flex-1 min-w-0">
         <FieldTitle>{label}</FieldTitle>
-        {description && (
-          <FieldDescription className="mt-0.5">{description}</FieldDescription>
-        )}
+        {description && <FieldDescription className="mt-0.5">{description}</FieldDescription>}
       </div>
       <div className="shrink-0">{control}</div>
     </Field>
