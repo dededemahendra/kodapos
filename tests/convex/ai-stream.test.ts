@@ -76,14 +76,17 @@ describe('POST /ai/stream', () => {
     expect(res.headers.get('access-control-allow-headers')).toContain('authorization');
   });
 
-  it('returns 502 provider when the provider rejects the request', async () => {
+  // 424, not the semantically obvious 502: Cloudflare intercepts and replaces
+  // 502/504 response bodies on *.convex.site, so the route answers with 424
+  // instead — see the comment at `fail(424, 'provider')` in convex/ai.ts.
+  it('returns 424 provider when the provider rejects the request', async () => {
     const t = convexTest(schema, modules);
     const refs = await setup(t);
     await connectAi(refs);
     await seedSales(t, refs, 20, Date.now());
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('nope', { status: 401 }));
     const res = await post(refs.asOwner, { kind: 'insights', locale: 'id' });
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(424);
     expect(await res.json()).toEqual({ code: 'provider' });
   });
 

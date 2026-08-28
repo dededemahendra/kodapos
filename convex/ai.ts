@@ -296,14 +296,20 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
     });
   } catch {
     clearTimeout(timer);
-    return fail(504, 'network');
+    // 503, not the semantically obvious 504: Cloudflare fronts *.convex.site
+    // and replaces a 502/504 response body with its own HTML error page, so
+    // 504 here would silently lose this JSON code before the browser sees it.
+    return fail(503, 'network');
   }
   if (!upstream.ok || !upstream.body) {
     // Provider bodies can carry account and quota metadata — log, never send.
     const detail = await upstream.text().catch(() => '');
     console.error(`AI provider error ${upstream.status}: ${detail.slice(0, 500)}`);
     clearTimeout(timer);
-    return fail(502, 'provider');
+    // 424, not the semantically obvious 502: Cloudflare fronts *.convex.site
+    // and replaces a 502/504 response body with its own HTML error page, so
+    // 502 here would silently lose this JSON code before the browser sees it.
+    return fail(424, 'provider');
   }
 
   const encoder = new TextEncoder();

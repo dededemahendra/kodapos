@@ -143,8 +143,29 @@ JSON body `{"code":"…"}`:
 | Malformed body, empty question | 400 | `bad_request` |
 | AI integration not connected | 400 | `not_configured` |
 | Per-cafe rate limit exhausted | 429 | `rate_limited` |
-| Provider returned non-2xx | 502 | `provider` |
-| Timeout or network failure opening the upstream stream | 504 | `network` |
+| Provider returned non-2xx | 424 | `provider` |
+| Timeout or network failure opening the upstream stream | 503 | `network` |
+
+**Not 502/504, despite those being the semantically obvious choices.**
+Cloudflare fronts `*.convex.site` and replaces the response body of a 502 or a
+504 with its own HTML error page, so the client would never see the JSON
+`code` for either failure — it would just see a generic Cloudflare error page.
+Verified empirically against the live deployment with a temporary probe route
+that returned a known JSON body under each status:
+
+| Status | Result |
+|---|---|
+| 400 | passes through — body intact |
+| 409 | passes through — body intact |
+| 424 | passes through — body intact |
+| 500 | passes through — body intact |
+| 502 | **intercepted — body replaced by Cloudflare HTML** |
+| 503 | passes through — body intact |
+| 504 | **intercepted — body replaced by Cloudflare HTML** |
+
+424 (Failed Dependency) and 503 (Service Unavailable) are the nearest
+pass-through statuses that keep the `provider` and `network` failures distinct
+from each other and from every other code in the table above.
 
 Everything after those headers is necessarily in-band, as an
 `{"t":"error","code":"…"}` event: a provider error emitted mid-stream
