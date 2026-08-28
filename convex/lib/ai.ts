@@ -146,27 +146,6 @@ export function buildLLMRequest(
   };
 }
 
-/** Extracts the assistant text from a provider's JSON response. Throws if absent. */
-export function parseLLMResponse(provider: AiProvider, json: unknown): string {
-  if (provider === 'anthropic') {
-    // content is an array of typed blocks; concatenate every text block (skips
-    // non-text blocks like thinking/tool_use that some models emit first).
-    const blocks = (json as { content?: Array<{ text?: string }> })?.content;
-    const text = Array.isArray(blocks)
-      ? blocks
-          .map((b) => (typeof b.text === 'string' ? b.text : ''))
-          .join('')
-          .trim()
-      : '';
-    if (!text) throw new Error('Respons AI kosong.');
-    return text;
-  }
-  const text = (json as { choices?: Array<{ message?: { content?: string } }> })?.choices?.[0]
-    ?.message?.content;
-  if (!text) throw new Error('Respons AI kosong.');
-  return text.trim();
-}
-
 /** A validated `/ai/stream` request body. */
 export type AiStreamRequest =
   | { kind: 'insights'; locale: AiLocale }
@@ -186,6 +165,11 @@ const MAX_MESSAGE_CHARS = 4000;
 export function parseStreamBody(body: unknown): AiStreamRequest | null {
   if (typeof body !== 'object' || body === null) return null;
   const b = body as { kind?: unknown; locale?: unknown; messages?: unknown };
+  // Deliberately permissive: anything other than exactly 'en' (missing, 'id',
+  // or an unrecognized value) coerces to 'id' rather than rejecting the
+  // request. The four now-deleted actions used a Convex validator that
+  // REJECTED any locale outside 'id'/'en' with a 400 — this loosening is
+  // intentional, not an oversight.
   const locale: AiLocale = b.locale === 'en' ? 'en' : 'id';
 
   if (b.kind === 'insights' || b.kind === 'restock') return { kind: b.kind, locale };

@@ -4,7 +4,6 @@ import {
   INSIGHTS_SYSTEM_PROMPT,
   languageInstruction,
   normalizeHistory,
-  parseLLMResponse,
   parseProvider,
   parseStreamBody,
 } from '../../../convex/lib/ai';
@@ -56,34 +55,6 @@ describe('buildLLMRequest', () => {
     const body = JSON.parse(req.body);
     expect(body.system).toBe('sys');
     expect(body.messages).toEqual(msgs);
-  });
-});
-
-describe('parseLLMResponse', () => {
-  it('reads OpenAI choices[0].message.content', () => {
-    expect(parseLLMResponse('openai', { choices: [{ message: { content: ' hi ' } }] })).toBe('hi');
-  });
-
-  it('reads Anthropic content[0].text', () => {
-    expect(parseLLMResponse('anthropic', { content: [{ text: 'yo' }] })).toBe('yo');
-  });
-
-  it('concatenates Anthropic text blocks and skips non-text leading blocks', () => {
-    const json = {
-      content: [{ type: 'thinking' }, { type: 'text', text: 'a' }, { type: 'text', text: 'b' }],
-    };
-    expect(parseLLMResponse('anthropic', json)).toBe('ab');
-  });
-
-  it('reads OpenRouter through the OpenAI choices shape', () => {
-    expect(parseLLMResponse('openrouter', { choices: [{ message: { content: ' ok ' } }] })).toBe(
-      'ok'
-    );
-  });
-
-  it('throws on an empty response', () => {
-    expect(() => parseLLMResponse('openai', {})).toThrow();
-    expect(() => parseLLMResponse('anthropic', { content: [] })).toThrow();
   });
 });
 
@@ -266,6 +237,15 @@ describe('parseStreamBody', () => {
 
   it('rejects a non-object entry in the messages array', () => {
     expect(parseStreamBody({ kind: 'chat', locale: 'id', messages: ['halo'] })).toBeNull();
+  });
+
+  it('rejects a null entry in the messages array', () => {
+    // `typeof null === 'object'`, so a null entry is caught only by the
+    // `m === null` half of the guard — unlike the string case above, which is
+    // also caught by the next guard down (destructuring a string yields
+    // undefined role/content). Without the `m === null` check, this falls
+    // through to destructuring `null` and throws instead of returning null.
+    expect(parseStreamBody({ kind: 'chat', locale: 'id', messages: [null] })).toBeNull();
   });
 
   it('rejects chat whose history normalizes to nothing', () => {

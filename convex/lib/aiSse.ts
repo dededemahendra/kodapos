@@ -12,8 +12,8 @@ export type SSEEvent =
 /**
  * Turns one `data:` payload into an event, or null when the payload carries
  * nothing we render (keepalives, block start/stop, usage deltas, and —
- * deliberately — Anthropic `thinking_delta`, matching how `parseLLMResponse`
- * already skips non-text blocks).
+ * deliberately — Anthropic `thinking_delta`: reasoning tokens, not reply
+ * text).
  */
 function decodePayload(provider: AiProvider, payload: string): SSEEvent | null {
   if (payload === '[DONE]') return { type: 'done' };

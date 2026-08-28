@@ -163,6 +163,23 @@ function ndjson(encoder: TextEncoder, event: Record<string, unknown>): Uint8Arra
 }
 
 /**
+ * Scrubs key-shaped substrings out of provider response text before it is
+ * logged. Logging provider error bodies server-side is intentional (they
+ * carry account/quota context useful for debugging), but some providers'
+ * bodies also embed a redacted-but-partial fragment of the real API key
+ * (OpenAI's documented 401 body does this), and this log stream is shared
+ * across cafes. Conservative on purpose: strips `sk-`-prefixed tokens (covers
+ * the OpenAI/Anthropic/OpenRouter key shapes) and any other long bearer-ish
+ * alphanumeric run, rather than trying to parse every provider's exact
+ * error-body shape.
+ */
+function redactKeys(text: string): string {
+  return text
+    .replace(/sk-[A-Za-z0-9*_-]+/g, '[redacted]')
+    .replace(/\b[A-Za-z0-9_-]{20,}\b/g, '[redacted]');
+}
+
+/**
  * A one-shot stream carrying a fixed message. The restock advisor has three
  * answers that never reach a model (not configured, forecast still learning,
  * nothing to order); emitting them through the same channel as a real
@@ -294,7 +311,11 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
       body: llm.body,
       signal: controller.signal,
     });
-  } catch {
+  } catch (err) {
+    // Never client-visible (the client only ever sees the `network` code
+    // below), but worth a server-side breadcrumb — otherwise this is a
+    // silent failure to open the connection at all (DNS, TLS, refused).
+    console.error('AI provider fetch failed:', err);
     clearTimeout(timer);
     // 503, not the semantically obvious 504: Cloudflare fronts *.convex.site
     // and replaces a 502/504 response body with its own HTML error page, so
@@ -303,8 +324,11 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
   }
   if (!upstream.ok || !upstream.body) {
     // Provider bodies can carry account and quota metadata — log, never send.
+    // Some providers' error bodies also embed a redacted-but-partial fragment
+    // of the real API key, so scrub key-shaped substrings before this reaches
+    // the shared, cross-cafe log stream.
     const detail = await upstream.text().catch(() => '');
-    console.error(`AI provider error ${upstream.status}: ${detail.slice(0, 500)}`);
+    console.error(`AI provider error ${upstream.status}: ${redactKeys(detail).slice(0, 500)}`);
     clearTimeout(timer);
     // 424, not the semantically obvious 502: Cloudflare fronts *.convex.site
     // and replaces a 502/504 response body with its own HTML error page, so
@@ -326,11 +350,15 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
 
   const stream = new ReadableStream<Uint8Array>({
     async start(c) {
-      const reader = body.getReader();
       const text = new TextDecoder();
       let produced = false;
       let failure: AiErrorCode | null = null;
+      // Declared here (not `const reader = body.getReader()`) so a throw from
+      // `getReader()` itself still reaches the `finally` below instead of
+      // skipping it and leaking the 60s timer.
+      let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
       try {
+        reader = body.getReader();
         for (;;) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -339,7 +367,9 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
               produced = true;
               c.enqueue(ndjson(encoder, { t: 'delta', v: event.text }));
             } else if (event.type === 'error') {
-              console.error(`AI provider stream error: ${event.message.slice(0, 500)}`);
+              // Same redaction as the pre-stream branch above — an in-band
+              // provider error can carry the same key-shaped fragments.
+              console.error(`AI provider stream error: ${redactKeys(event.message).slice(0, 500)}`);
               failure = 'provider';
               break;
             }
@@ -354,15 +384,28 @@ export async function handleAiStream(ctx: ActionCtx, req: Request): Promise<Resp
             }
           }
         }
-      } catch {
-        // An upstream drop or the 60s abort landing mid-generation.
+      } catch (err) {
+        // An upstream drop, the 60s abort landing mid-generation, or (rarely)
+        // `getReader()` itself throwing. Never client-visible beyond the
+        // `network` code below — worth a server-side breadcrumb.
+        console.error('AI provider stream network error:', err);
         failure = 'network';
       } finally {
         // The loop above always finishes its last `reader.read()` before
         // reaching here (via `break` or the catch), so no read is pending —
-        // safe to release unconditionally, cancelled or not.
-        reader.releaseLock();
+        // safe to release unconditionally, cancelled or not. `reader` is only
+        // undefined if `getReader()` itself threw, before any read.
+        reader?.releaseLock();
         clearTimeout(timer);
+        // Unconditional on every exit path — normal EOF, an in-band `error`
+        // event, an upstream drop, the 60s timeout, or the consumer
+        // cancelling — so the upstream connection is always torn down.
+        // `abort()` is idempotent (already-aborted is a no-op), so calling it
+        // again here when `cancel()` or the timeout already fired is always
+        // safe. Without this, an in-band `error` event left the socket open,
+        // since the timer that would otherwise have aborted it was just
+        // cleared above.
+        controller.abort();
         // The consumer may have gone away mid-generation; its controller is
         // already closed, so emitting a terminal event here would throw.
         if (!cancelled) {

@@ -32,6 +32,17 @@ export function useAiStream() {
     if (error) toast.error(i18n._(aiErrorMessage(error)));
   }, [error, i18n]);
 
+  // Abort any in-flight request on unmount (e.g. the owner navigates away
+  // mid-generation), so it stops burning the owner's tokens server-side.
+  // Abort-only, same contract as `stop()` below: the in-flight `send`'s own
+  // `finally` still owns clearing `abortRef`/`streaming` by controller
+  // identity, so this cleanup must not null the ref itself.
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
   const stop = useCallback(() => {
     // Abort only. The in-flight invocation's `finally` owns clearing `abortRef`
     // and `streaming`, and identifies itself by controller identity — nulling
