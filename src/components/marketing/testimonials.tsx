@@ -50,7 +50,7 @@ const TESTIMONIALS = [
 export function Testimonials() {
   const [active, setActive] = useState(0);
   // active is always 0-2 (set only by clicking a TESTIMONIALS pill), so the index is always valid
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  // biome-ignore lint/style/noNonNullAssertion: active is clamped to the TESTIMONIALS range
   const person = TESTIMONIALS[active]!;
 
   return (

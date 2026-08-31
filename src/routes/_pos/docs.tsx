@@ -311,6 +311,7 @@ function useScrollSpy(ids: string[]): string | null {
   const [activeId, setActiveId] = useState<string | null>(ids[0] ?? null);
   const key = ids.join('|');
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `key` is the serialized form of `ids`, so it changes exactly when the id list does
   useEffect(() => {
     setActiveId(ids[0] ?? null);
     if (typeof window === 'undefined' || ids.length === 0) return;
@@ -332,7 +333,6 @@ function useScrollSpy(ids: string[]): string | null {
       observer.observe(el);
     });
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
   return activeId;

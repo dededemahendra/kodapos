@@ -67,6 +67,7 @@ export function CustomerSection({
   );
 
   // When a lookup resolves to a customer, select it.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: onChange/value intentionally excluded — guarded by value.customerId
   useEffect(() => {
     if (lookup && !value.customerId) {
       onChange({
@@ -77,8 +78,6 @@ export function CustomerSection({
       });
       setShowCreate(false);
     }
-    // onChange/value intentionally excluded — guarded by value.customerId.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookup]);
 
   const selected = value.customerId !== undefined;

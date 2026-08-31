@@ -138,6 +138,7 @@ export function ReceiptPreview({
 
   // Auto-print a fresh sale's receipt to the thermal printer (never falls back to
   // the browser print dialog). Fires once per order; history views pass autoPrint=false.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: printThermalCopies is re-created every render; the autoPrintedRef guard is what makes this fire once
   useEffect(() => {
     if (!autoPrint || !open || !order || !orderId) return;
     if (printerMode !== 'thermal' || !isThermalSupported()) return;
@@ -146,7 +147,6 @@ export function ReceiptPreview({
     void printThermalCopies().catch((err) =>
       toast.error(err instanceof Error ? err.message : t`Gagal mencetak.`)
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPrint, open, order, orderId, printerMode]);
 
   if (!orderId) return null;
