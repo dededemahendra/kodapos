@@ -3,9 +3,14 @@ import { gotoHydrated, waitForUrlHydrated } from './_helpers';
 
 test('public home renders and links to sign-in / sign-up', async ({ page }) => {
   await gotoHydrated(page, '/');
-  await expect(page.getByRole('heading', { name: 'kodapos' })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Masuk/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Daftar/ })).toBeVisible();
+  // The brand is a link in the header, not a heading — assert the hero's h1,
+  // the way the feature-page tests do.
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  // Both CTAs also appear in the footer, so scope to the header to keep the
+  // locators unambiguous.
+  const header = page.getByRole('banner');
+  await expect(header.getByRole('link', { name: /Masuk/ })).toBeVisible();
+  await expect(header.getByRole('link', { name: /Daftar/ })).toBeVisible();
 });
 
 test('signup URL redirects to signin, which defaults to the code flow', async ({ page }) => {
