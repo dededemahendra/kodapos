@@ -12,9 +12,28 @@ export const SITE_NAME = 'kodapos';
 export const DEFAULT_DESCRIPTION =
   'Satu aplikasi untuk kasir, stok, dan laporan. Jual lebih cepat, jaga margin, dan ambil keputusan dengan bantuan AI.';
 
+/**
+ * Separator between a page name and the brand. An en dash rather than a comma:
+ * a comma reads as a list fragment, and a tab truncated mid-title ("Dasbor, k…")
+ * looks like a typo instead of a shortened title.
+ */
+export const TITLE_SEPARATOR = ' – ';
+
+/**
+ * The one place a browser-tab title is composed: `Page – kodapos`. Both entry
+ * points route through it — `seo()`/`privatePage()` for titles that ship in the
+ * SSR head, and `useAppDocumentTitle` for the authenticated pages that set
+ * `document.title` client-side — so the two cannot drift apart. Callers pass the
+ * page name alone and never repeat the brand.
+ */
+export function pageTitle(page: string): string {
+  return `${page}${TITLE_SEPARATOR}${SITE_NAME}`;
+}
+
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 export interface SeoOptions {
+  /** The page name ALONE. `seo()` appends the brand; do not repeat it here. */
   title: string;
   description?: string;
   /** Path including the leading slash, e.g. '/terms'. Defaults to '/'. */
@@ -25,21 +44,22 @@ export interface SeoOptions {
 
 export function seo({ title, description = DEFAULT_DESCRIPTION, path = '/', noindex }: SeoOptions) {
   const url = `${SITE_URL}${path}`;
+  const fullTitle = pageTitle(title);
   return {
     meta: [
-      { title },
+      { title: fullTitle },
       { name: 'description', content: description },
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: SITE_NAME },
       { property: 'og:locale', content: 'id_ID' },
-      { property: 'og:title', content: title },
+      { property: 'og:title', content: fullTitle },
       { property: 'og:description', content: description },
       { property: 'og:url', content: url },
       { property: 'og:image', content: OG_IMAGE },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '630' },
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: title },
+      { name: 'twitter:title', content: fullTitle },
       { name: 'twitter:description', content: description },
       { name: 'twitter:image', content: OG_IMAGE },
       ...(noindex ? [{ name: 'robots', content: 'noindex, nofollow' }] : []),
@@ -54,9 +74,9 @@ export function seo({ title, description = DEFAULT_DESCRIPTION, path = '/', noin
  * Open Graph, because there is no public URL worth pointing them at (the order
  * page's URL carries a per-order token, and the screens are cafe hardware).
  */
-export function privatePage(title: string, suffix: string = SITE_NAME) {
+export function privatePage(title: string) {
   return {
-    meta: [{ title: `${title}, ${suffix}` }, { name: 'robots', content: 'noindex, nofollow' }],
+    meta: [{ title: pageTitle(title) }, { name: 'robots', content: 'noindex, nofollow' }],
   };
 }
 

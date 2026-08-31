@@ -9,7 +9,7 @@ import { formatCount } from '~/lib/formater';
 import { privatePage } from '~/lib/seo';
 
 export const Route = createFileRoute('/_admin/overview')({
-  head: () => privatePage('Overview', 'kodapos admin'),
+  head: () => privatePage('Overview'),
   component: AdminOverview,
 });
 

@@ -1,5 +1,6 @@
 // biome-ignore-all lint/security/noDangerouslySetInnerHtml: two static build-time script constants (theme + auth redirect), never user input
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
+import { msg } from '@lingui/core/macro';
 import { I18nProvider } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import { createRootRoute, HeadContent, Link, Outlet, Scripts } from '@tanstack/react-router';
@@ -13,6 +14,7 @@ import { authStorage } from '~/lib/auth-storage';
 import { convex } from '~/lib/convex';
 import { i18n } from '~/lib/i18n';
 import { applyDensity, applyTheme, getDensity, getTheme } from '~/lib/preferences';
+import { usePageTitle } from '~/lib/use-page-title';
 import globalsCss from '~/styles/globals.css?url';
 
 // Runs in <head> before paint to set the `.dark` class from the stored theme
@@ -118,23 +120,36 @@ function RootErrorBoundary({ error, reset }: { error: unknown; reset: () => void
   );
 }
 
+const NOT_FOUND_TITLE = msg`Halaman tidak ditemukan`;
+
 function NotFound() {
   // Like errorComponent, notFoundComponent renders outside RootComponent's
-  // I18nProvider, so it needs its own.
+  // I18nProvider, so it needs its own. The body is a separate component because
+  // usePageTitle reads that provider, and a hook called here would sit outside it.
   return (
     <I18nProvider i18n={i18n}>
-      <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
-        <h1 className="text-2xl font-bold">
-          <Trans>Halaman tidak ditemukan</Trans>
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          <Trans>URL yang kamu buka tidak ada di kodapos.</Trans>
-        </p>
-        <Link to="/" className="text-primary underline">
-          <Trans>Kembali ke beranda</Trans>
-        </Link>
-      </main>
+      <NotFoundBody />
     </I18nProvider>
+  );
+}
+
+function NotFoundBody() {
+  // A 404 is the one page the root's static `head()` title cannot name: it
+  // matches no route, so no route's head() runs and the tab would otherwise read
+  // as the bare brand.
+  usePageTitle(NOT_FOUND_TITLE);
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-center p-6">
+      <h1 className="text-2xl font-bold">
+        <Trans>Halaman tidak ditemukan</Trans>
+      </h1>
+      <p className="text-muted-foreground text-sm">
+        <Trans>URL yang kamu buka tidak ada di kodapos.</Trans>
+      </p>
+      <Link to="/" className="text-primary underline">
+        <Trans>Kembali ke beranda</Trans>
+      </Link>
+    </main>
   );
 }
 

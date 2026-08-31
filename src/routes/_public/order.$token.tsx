@@ -1,3 +1,4 @@
+import { msg } from '@lingui/core/macro';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
@@ -26,9 +27,12 @@ import {
 } from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { privatePage } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
+
+const TITLE = msg`Pesanan Anda`;
 
 export const Route = createFileRoute('/_public/order/$token')({
-  head: () => privatePage('Pesanan Anda'),
+  head: () => privatePage(headTitle(TITLE)),
   component: OrderPage,
 });
 
@@ -39,6 +43,7 @@ function newClientId(): string {
 }
 
 function OrderPage() {
+  usePageTitle(TITLE);
   const { token } = Route.useParams();
   const menu = useQuery(api.public.menuForTable, { qrToken: token });
 

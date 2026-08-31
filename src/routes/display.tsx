@@ -1,3 +1,4 @@
+import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
@@ -15,17 +16,21 @@ import { Skeleton } from '~/components/ui/skeleton';
 import { type DisplayPayload, readDisplay, subscribeDisplay } from '~/lib/customer-display';
 import { formatIDR } from '~/lib/money';
 import { privatePage } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
 
 // Standalone full-screen customer-facing view. Lives at the top level (NOT
 // under _pos) so it renders bare, with no app sidebar/chrome, while still
 // inheriting Convex/auth context from __root. The cashier drags this window to
 // the till's second monitor; it mirrors the live cart via localStorage.
+const TITLE = msg`Layar Pelanggan`;
+
 export const Route = createFileRoute('/display')({
-  head: () => privatePage('Layar Pelanggan'),
+  head: () => privatePage(headTitle(TITLE)),
   component: CustomerDisplay,
 });
 
 function CustomerDisplay() {
+  usePageTitle(TITLE);
   const [data, setData] = useState<DisplayPayload>(() => readDisplay());
   useEffect(() => subscribeDisplay(setData), []);
   const cafe = useQuery(api.cafes.myCafe, {});

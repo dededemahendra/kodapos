@@ -1,3 +1,4 @@
+import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { MarketingFooter } from '~/components/marketing/marketing-footer';
@@ -5,11 +6,14 @@ import { MarketingHeader } from '~/components/marketing/marketing-header';
 import { Reveal } from '~/components/marketing/motion';
 import { Card, CardContent } from '~/components/ui/card';
 import { seo } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
+
+const TITLE = msg`Semua fitur untuk kafe dan resto`;
 
 export const Route = createFileRoute('/_public/fitur/')({
   head: () =>
     seo({
-      title: 'Fitur kodapos, semua yang dibutuhkan kafe Anda',
+      title: headTitle(TITLE),
       description:
         'Kasir, pesanan, stok, laporan, pelanggan, dan tim. Lihat apa saja yang bisa kodapos lakukan untuk kafe dan resto Anda.',
       path: '/fitur',
@@ -56,6 +60,7 @@ const AREAS = [
 ];
 
 function FiturIndex() {
+  usePageTitle(TITLE);
   return (
     <div id="top" className="min-h-screen bg-background text-foreground">
       <MarketingHeader />

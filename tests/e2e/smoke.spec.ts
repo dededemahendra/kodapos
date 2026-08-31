@@ -19,8 +19,8 @@ test('signup URL redirects to signin, which defaults to the code flow', async ({
 test('feature page renders and offers a sign-up path', async ({ page }) => {
   await gotoHydrated(page, '/fitur/pesanan');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  // DEFAULT_LOCALE is 'en' (src/lib/locale.ts), so a fresh browser context
-  // renders English; match both locales rather than assume one.
+  // DEFAULT_LOCALE is 'id' (src/lib/locale.ts), so a fresh browser context
+  // renders Indonesian; match both locales rather than assume one.
   await expect(
     page.getByRole('link', { name: /Mulai gratis|Daftar|Start free|Sign up/ }).first()
   ).toBeVisible();

@@ -14,7 +14,7 @@ import { Spinner } from '~/components/ui/spinner';
 import { privatePage } from '~/lib/seo';
 
 export const Route = createFileRoute('/_admin/audit')({
-  head: () => privatePage('Audit', 'kodapos admin'),
+  head: () => privatePage('Audit'),
   component: AdminAuditPage,
 });
 

@@ -7,15 +7,16 @@ import type { FaqBlock } from '~/content/marketing/types';
 import type { Localized } from '~/lib/localized';
 import { localized } from '~/lib/localized';
 import { breadcrumbJsonLd, faqJsonLd, seo } from '~/lib/seo';
+import { headLocale, usePageTitle } from '~/lib/use-page-title';
 
 export const Route = createFileRoute('/_public/fitur/pesanan')({
-  // `head()` runs outside React and cannot read the active locale, so the
-  // Indonesian copy is authoritative here — matching og:locale=id_ID in seo().
-  // Sourced from the content module so the title has one home.
+  // Sourced from the content module so the title has one home. `headLocale()`
+  // resolves it the same way the SSR body resolves, so the <title> and the <h1>
+  // are never in different languages.
   head: () =>
     seo({
-      title: PESANAN.seoTitle.id,
-      description: PESANAN.seoDescription.id,
+      title: localized(PESANAN.seoTitle, headLocale()),
+      description: localized(PESANAN.seoDescription, headLocale()),
       path: '/fitur/pesanan',
       // Unpublished until public/shots/ is captured: the page's screenshots
       // do not exist yet. Drop `noindex` when they land.
@@ -31,6 +32,9 @@ const FITUR_LABEL: Localized = { id: 'Fitur', en: 'Features' };
 
 function PesananPage() {
   const { locale } = useLocale();
+  // Title comes from the content module rather than the message catalog, so it
+  // is resolved here by locale rather than handed to usePageTitle as a message.
+  usePageTitle(localized(PESANAN.seoTitle, locale));
 
   // Structured data is built from PESANAN's own `faq` section (in the active
   // locale) so the JSON-LD and the visible FAQ text can never diverge.

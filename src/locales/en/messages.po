@@ -3524,8 +3524,8 @@ msgid "Keamanan"
 msgstr "Security"
 
 #: src/routes/_public/privacy.tsx
-#~ msgid "Kebijakan Privasi"
-#~ msgstr "Privacy Policy"
+msgid "Kebijakan Privasi"
+msgstr "Privacy Policy"
 
 #: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/settings/receipt.tsx
@@ -4002,6 +4002,10 @@ msgstr "Service"
 #: src/components/sale/register-top-bar.tsx
 msgid "Layar pelanggan"
 msgstr "Customer display"
+
+#: src/routes/display.tsx
+msgid "Layar Pelanggan"
+msgstr "Customer Display"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Lebar kertas"
@@ -4931,6 +4935,10 @@ msgstr "Use password"
 msgid "Pantau dan kembangkan"
 msgstr "Track and grow"
 
+#: src/routes/menu-board.tsx
+msgid "Papan Menu"
+msgstr "Menu Board"
+
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Pas"
 msgstr "Exact"
@@ -5384,6 +5392,10 @@ msgstr "Orders"
 msgid "Pesanan ({0})"
 msgstr "Order ({0})"
 
+#: src/routes/_public/order.$token.tsx
+msgid "Pesanan Anda"
+msgstr "Your Order"
+
 #: src/routes/display.tsx
 msgid "Pesanan Anda akan tampil di sini."
 msgstr "Your order will appear here."
@@ -5709,6 +5721,10 @@ msgstr "Share"
 #: src/routes/_pos/reports/payments.tsx
 msgid "Porsi (%)"
 msgstr "Share (%)"
+
+#: src/routes/_public/index.tsx
+msgid "POS pintar untuk kafe dan resto"
+msgstr "Smart POS for cafes and restaurants"
 
 #: src/components/marketing/marketing-footer.tsx
 #~ msgid "POS pintar untuk kafe dan resto di Indonesia."
@@ -6348,6 +6364,10 @@ msgstr "All caught up"
 #~ msgid "Semua fitur terbuka"
 #~ msgstr "All features unlocked"
 
+#: src/routes/_public/fitur/index.tsx
+msgid "Semua fitur untuk kafe dan resto"
+msgstr "Every feature for cafes and restaurants"
+
 #: src/components/marketing/pricing.tsx
 msgid "Semua fitur, tanpa biaya, tanpa kartu kredit."
 msgstr "All features, no cost, no credit card."
@@ -6733,8 +6753,8 @@ msgid "Susut"
 msgstr "Wastage"
 
 #: src/routes/_public/terms.tsx
-#~ msgid "Syarat Layanan"
-#~ msgstr "Terms of Service"
+msgid "Syarat Layanan"
+msgstr "Terms of Service"
 
 #: src/components/sale/hold-order-dialog.tsx
 msgid "Tahan"

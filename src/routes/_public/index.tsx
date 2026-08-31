@@ -1,4 +1,5 @@
 // biome-ignore-all lint/security/noDangerouslySetInnerHtml: JSON.stringify of a static, app-controlled JSON-LD object for SEO
+import { msg } from '@lingui/core/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { RedirectWhenAuthenticated } from '~/components/auth/redirect-when-authenticated';
 import { AiSpotlight } from '~/components/marketing/ai-spotlight';
@@ -13,13 +14,17 @@ import { Pricing } from '~/components/marketing/pricing';
 import { Testimonials } from '~/components/marketing/testimonials';
 import { WhyIndonesia } from '~/components/marketing/why-indonesia';
 import { HOMEPAGE_JSON_LD, seo } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
+
+const TITLE = msg`POS pintar untuk kafe dan resto`;
 
 export const Route = createFileRoute('/_public/')({
-  head: () => seo({ title: 'kodapos, POS pintar untuk kafe dan resto', path: '/' }),
+  head: () => seo({ title: headTitle(TITLE), path: '/' }),
   component: PublicHome,
 });
 
 function PublicHome() {
+  usePageTitle(TITLE);
   return (
     <>
       {/* Signed-in visitors skip the marketing page and land on the dashboard.

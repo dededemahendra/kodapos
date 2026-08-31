@@ -113,13 +113,13 @@ export function AnalyticsProvider(): null {
   // per-route leaves posthog does not emit mid-SPA-navigation.
 
   // Re-registers the super properties whenever `locale` changes. LocaleProvider
-  // deliberately mounts at DEFAULT_LOCALE ('en') and only reads the stored
+  // deliberately mounts at DEFAULT_LOCALE ('id') and only reads the stored
   // locale in an effect of its own; React runs child effects before parent
   // effects, so the init effect above always registers with the wrong locale
   // on first run. Without this, `started.current` is already true by the
   // time the real locale is known, so the `[locale]` dependency on the init
   // effect can never fire it again, and every event from every user reports
-  // locale: 'en' for the rest of the session.
+  // locale: 'id' for the rest of the session.
   useEffect(() => {
     if (!ready) return;
     registerSuperProperties(buildSuperProperties({ locale, appVersion: __APP_VERSION__ }));

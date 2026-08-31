@@ -2,7 +2,8 @@ import { useLingui } from '@lingui/react';
 import { useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { navLinks } from '~/components/app-shared';
-import { buildEntries, pickTitle, TITLE_SUFFIX } from './document-title';
+import { buildEntries, pickTitle } from './document-title';
+import { pageTitle, SITE_NAME } from './seo';
 
 const ENTRIES = buildEntries(
   navLinks.flatMap((item) => (item.path ? [{ path: item.path, title: item.title }] : []))
@@ -18,8 +19,12 @@ const ENTRIES = buildEntries(
 export function useAppDocumentTitle(): void {
   const { i18n } = useLingui();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // lingui's `i18n` is a stable object that `activate()` mutates in place, so
+  // `i18n.locale` is the only dependency that actually changes when the reader
+  // flips the language toggle. Biome cannot see that and calls it redundant.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: i18n.locale is the value that changes
   useEffect(() => {
     const title = pickTitle(ENTRIES, pathname);
-    document.title = title ? `${i18n._(title)}, ${TITLE_SUFFIX}` : TITLE_SUFFIX;
+    document.title = title ? pageTitle(i18n._(title)) : SITE_NAME;
   }, [pathname, i18n, i18n.locale]);
 }

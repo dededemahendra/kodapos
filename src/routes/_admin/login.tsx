@@ -12,7 +12,7 @@ import { validateEmail } from '~/lib/auth-validation';
 import { privatePage } from '~/lib/seo';
 
 export const Route = createFileRoute('/_admin/login')({
-  head: () => privatePage('Sign in', 'kodapos admin'),
+  head: () => privatePage('Sign in'),
   component: OperatorLogin,
 });
 

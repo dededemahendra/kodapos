@@ -69,6 +69,7 @@ export type FeatureSectionBlock =
 export interface FeaturePageContent {
   /** URL segment under /fitur. */
   slug: string;
+  /** Page name alone — `seo()` appends the brand. */
   seoTitle: Localized;
   seoDescription: Localized;
   /** Breadcrumb label. */
