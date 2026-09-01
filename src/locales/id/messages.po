@@ -241,8 +241,8 @@ msgid "{n} kategori dipilih"
 msgstr "{n} kategori dipilih"
 
 #: src/components/sale/offline-banner.tsx
-msgid "{pending} penjualan menunggu sinkron"
-msgstr "{pending} penjualan menunggu sinkron"
+msgid "{pending, plural, one {# penjualan menunggu sinkron} other {# penjualan menunggu sinkron}}"
+msgstr "{pending, plural, one {# penjualan menunggu sinkron} other {# penjualan menunggu sinkron}}"
 
 #: src/components/sale/customer-section.tsx
 msgid "{points} poin"

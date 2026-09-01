@@ -55,6 +55,20 @@ import { ReceiptPreview } from './receipt-preview';
 import { SaleScreenSkeleton } from './sale-screen-skeleton';
 import { SplitPaymentDialog } from './split-payment-dialog';
 
+/**
+ * How often the cached snapshot is rewritten while online, purely to move its
+ * `writtenAt` forward.
+ *
+ * The content needs no refresh — the snapshot query is a live subscription, so
+ * while the socket is up what is in memory IS current. Only the timestamp goes
+ * stale, and it is measured against `MAX_SNAPSHOT_AGE_MS` (24h). Fifteen
+ * minutes leaves the cache at most that old at the instant the network drops,
+ * three orders of magnitude inside the bound, for four small IndexedDB puts an
+ * hour on a till that is otherwise idle. Shorter buys nothing; much longer
+ * starts to matter for a device that sleeps and wakes mid-outage.
+ */
+const REGISTER_CACHE_REFRESH_MS = 15 * 60 * 1000;
+
 function genLineKey(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -166,14 +180,26 @@ export function SaleScreen({
   }
 
   // Refresh the offline snapshot whenever the register data changes while the
-  // socket is up. `save` overwrites in one put, so the cache never holds a mix
-  // of two different reads. A failure is logged, not surfaced: the till is
-  // online and working, and there is nothing the cashier can do about it.
+  // socket is up, AND on a heartbeat while it stays unchanged. `save` overwrites
+  // in one put, so the cache never holds a mix of two different reads. A failure
+  // is logged, not surfaced: the till is online and working, and there is
+  // nothing the cashier can do about it.
+  //
+  // The heartbeat is the part that matters. Without it `writtenAt` only moves
+  // when the query result changes, so a register left open through a quiet
+  // afternoon drifts past MAX_SNAPSHOT_AGE_MS and every offline sale is then
+  // refused for a stale cache — the feature dying at exactly the moment an
+  // outage would need it.
   useEffect(() => {
     if (connection !== 'online' || !registerSnapshot) return;
-    void saveRegisterCache(registerSnapshot).catch((err: unknown) => {
-      console.error('[offline] register cache save failed', err);
-    });
+    const write = () => {
+      void saveRegisterCache(registerSnapshot).catch((err: unknown) => {
+        console.error('[offline] register cache save failed', err);
+      });
+    };
+    write();
+    const id = setInterval(write, REGISTER_CACHE_REFRESH_MS);
+    return () => clearInterval(id);
   }, [connection, registerSnapshot]);
 
   // Accept a QR self-order into the register: /sale?selfOrder=<selfOrderId>.

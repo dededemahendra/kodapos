@@ -15,6 +15,7 @@ import {
   buildReplayPayload,
   type OfflineSaleInput,
   type OfflineSaleRejection,
+  toOfflineSaleLines,
 } from '~/lib/offline/sale-payload';
 import { genUUID } from '~/lib/uuid';
 import type { CartState } from './cart-reducer';
@@ -175,20 +176,12 @@ export function CashPaymentDialog({
       clientId: clientIdRef.current,
       shiftId,
       cashierId,
-      // The cart's unitPriceIDR is already modifier-inclusive (set by
-      // modifier-picker-dialog and kept that way by the cart reducer's reprice),
-      // which is the convention the replay mutation asserts against. It is
-      // passed straight through; nothing here recomputes a price.
-      lines: cart.lines.map((l) => ({
-        menuItemId: l.menuItemId,
-        nameSnapshot: l.nameSnapshot,
-        ...(l.variantId ? { variantId: l.variantId } : {}),
-        ...(l.variantName ? { variantName: l.variantName } : {}),
-        qty: l.qty,
-        unitPriceIDR: l.unitPriceIDR,
-        modifierOptionIds: l.modifierOptionIds,
-        modifierLabels: l.modifierLabels,
-      })),
+      // The cart's unitPriceIDR is already modifier-inclusive, which is the
+      // convention the replay mutation asserts against. The mapping lives in
+      // `toOfflineSaleLines` (pure, and tested) rather than inline here,
+      // because that copy is precisely where a base price could wrongly be
+      // substituted for the modifier-inclusive one.
+      lines: toOfflineSaleLines(cart.lines),
       orderType: cart.orderType,
       ...(promoId ? { promoId } : {}),
       ...(priceCategoryId ? { priceCategoryId } : {}),

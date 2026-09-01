@@ -33,6 +33,53 @@ export type OfflineSaleLine = {
   }[];
 };
 
+/**
+ * A register cart line, as `cart-reducer.ts` holds it. Structural (branded
+ * `Id<...>` strings satisfy the plain `string` fields) so this module stays
+ * free of Convex client types and testable without them.
+ */
+export type RegisterCartLine = {
+  menuItemId: string;
+  nameSnapshot: string;
+  variantId?: string | undefined;
+  variantName?: string | undefined;
+  qty: number;
+  unitPriceIDR: number;
+  modifierOptionIds: readonly string[];
+  modifierLabels: readonly {
+    groupName: string;
+    optionName: string;
+    priceAdjustmentIDR: number;
+  }[];
+};
+
+/**
+ * The cart -> queued-sale line mapping, in one tested place rather than inline
+ * at the till.
+ *
+ * This is the exact seam the modifier-inclusive convention can be broken at: a
+ * mapping that reached for an item's base price and re-added modifier amounts
+ * separately would look reasonable, compile, and dead-letter every modified
+ * sale on replay. So it does nothing but copy `unitPriceIDR` across. The price
+ * arrives here already modifier-inclusive (`modifier-picker-dialog.tsx` sets
+ * `basePrice + sum(priceAdjustmentIDR)`, and the reducer's `reprice` rebuilds
+ * it the same way), and `buildReplayPayload` derives every line total from it.
+ * Nothing in this file recomputes a price.
+ */
+export function toOfflineSaleLines(lines: readonly RegisterCartLine[]): OfflineSaleLine[] {
+  return lines.map((line) => ({
+    menuItemId: line.menuItemId,
+    nameSnapshot: line.nameSnapshot,
+    ...(line.variantId !== undefined ? { variantId: line.variantId } : {}),
+    ...(line.variantName !== undefined ? { variantName: line.variantName } : {}),
+    qty: line.qty,
+    // Copied, never recomputed. See the doc comment above.
+    unitPriceIDR: line.unitPriceIDR,
+    modifierOptionIds: [...line.modifierOptionIds],
+    modifierLabels: line.modifierLabels.map((m) => ({ ...m })),
+  }));
+}
+
 export type OfflineSaleInput = {
   clientId: string;
   shiftId: string;

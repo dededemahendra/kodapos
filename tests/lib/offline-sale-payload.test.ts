@@ -6,7 +6,9 @@ import {
   changeIDROf,
   type OfflineSaleInput,
   type OfflineSaleLine,
+  type RegisterCartLine,
   subtotalIDROf,
+  toOfflineSaleLines,
 } from '~/lib/offline/sale-payload';
 
 // A latte with two paid modifiers, priced the way the register prices it:
@@ -244,5 +246,81 @@ describe('changeIDROf', () => {
 
   it('never goes negative', () => {
     expect(changeIDROf({ cashTenderedIDR: 1_000, totalIDR: 68_000 })).toBe(0);
+  });
+});
+
+describe('toOfflineSaleLines — the cart mapping itself', () => {
+  // The seam the payload builder's tests cannot reach: `sale-payload`'s own
+  // checks all start from an already-mapped line, so a mapping that handed over
+  // a bare base price would satisfy every one of them and still dead-letter the
+  // sale on replay. These tests cover the copy itself.
+  const cartLine = (over: Partial<RegisterCartLine> = {}): RegisterCartLine => ({
+    menuItemId: 'item1',
+    nameSnapshot: 'Latte',
+    qty: 2,
+    // What modifier-picker-dialog puts on the line: base + every adjustment.
+    unitPriceIDR: MODIFIER_INCLUSIVE_UNIT_PRICE,
+    modifierOptionIds: ['opt1', 'opt2'],
+    modifierLabels: [
+      { groupName: 'Espresso', optionName: 'Extra shot', priceAdjustmentIDR: EXTRA_SHOT },
+      { groupName: 'Susu', optionName: 'Oat', priceAdjustmentIDR: OAT_MILK },
+    ],
+    ...over,
+  });
+
+  it('carries the modifier-inclusive unit price across untouched', () => {
+    const [mapped] = toOfflineSaleLines([cartLine()]);
+    expect(mapped?.unitPriceIDR).toBe(MODIFIER_INCLUSIVE_UNIT_PRICE);
+    // Not the base price, and not the base price with the modifiers added a
+    // second time — the two ways this mapping could go wrong.
+    expect(mapped?.unitPriceIDR).not.toBe(BASE_PRICE);
+    expect(mapped?.unitPriceIDR).not.toBe(MODIFIER_INCLUSIVE_UNIT_PRICE + EXTRA_SHOT + OAT_MILK);
+  });
+
+  it('produces lines whose totals satisfy the server assertion once built', () => {
+    const lines = toOfflineSaleLines([
+      cartLine(),
+      cartLine({ menuItemId: 'item2', qty: 1, unitPriceIDR: 18_000, modifierOptionIds: [] }),
+      cartLine({ menuItemId: 'item3', qty: 3, unitPriceIDR: 7_500, variantId: 'var1' }),
+    ]);
+    const subtotalIDR = subtotalIDROf(lines);
+    const built = buildReplayPayload(
+      input({ lines, totalIDR: subtotalIDR, cashTenderedIDR: subtotalIDR })
+    );
+    if (!built.ok) throw new Error(`expected a payload, got rejection: ${built.reason}`);
+    for (const l of built.payload.lines) {
+      expect(l.lineTotalIDR).toBe(l.qty * l.unitPriceIDR);
+    }
+    // And the modifier-carrying line specifically: 2 x 34_000, not 2 x 25_000.
+    expect(built.payload.lines[0]?.lineTotalIDR).toBe(2 * MODIFIER_INCLUSIVE_UNIT_PRICE);
+  });
+
+  it('keeps the name, ids and modifier labels the receipt needs', () => {
+    const [mapped] = toOfflineSaleLines([cartLine({ variantId: 'var1', variantName: 'L' })]);
+    expect(mapped?.nameSnapshot).toBe('Latte');
+    expect(mapped?.menuItemId).toBe('item1');
+    expect(mapped?.variantId).toBe('var1');
+    expect(mapped?.variantName).toBe('L');
+    expect(mapped?.modifierOptionIds).toEqual(['opt1', 'opt2']);
+    expect(mapped?.modifierLabels.map((m) => m.optionName)).toEqual(['Extra shot', 'Oat']);
+  });
+
+  it('omits absent variant fields rather than mapping them to undefined', () => {
+    const [mapped] = toOfflineSaleLines([cartLine()]);
+    expect('variantId' in (mapped ?? {})).toBe(false);
+    expect('variantName' in (mapped ?? {})).toBe(false);
+  });
+
+  it('does not alias the cart arrays it copies', () => {
+    // The cart keeps being edited after a sale is queued; the queued payload
+    // must not change underneath the outbox.
+    const source = cartLine();
+    const [mapped] = toOfflineSaleLines([source]);
+    expect(mapped?.modifierOptionIds).not.toBe(source.modifierOptionIds);
+    expect(mapped?.modifierLabels[0]).not.toBe(source.modifierLabels[0]);
+  });
+
+  it('maps an empty cart to an empty list', () => {
+    expect(toOfflineSaleLines([])).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/react/macro';
+import { Plural, Trans } from '@lingui/react/macro';
 import { WifiOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useConnectionState } from '~/lib/offline/connectivity';
@@ -68,7 +68,14 @@ export function OfflineBanner() {
       </span>
       {pending > 0 ? (
         <span className="ml-auto rounded-full bg-amber-200 px-2 py-0.5 text-xs font-semibold tabular-nums">
-          <Trans>{pending} penjualan menunggu sinkron</Trans>
+          {/* Indonesian has one form, so `one` and `other` read the same here;
+              the split exists so translations with a plural (English: "1 sale",
+              "2 sales") have somewhere to put it. */}
+          <Plural
+            value={pending}
+            one="# penjualan menunggu sinkron"
+            other="# penjualan menunggu sinkron"
+          />
         </span>
       ) : null}
     </div>
