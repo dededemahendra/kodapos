@@ -1,15 +1,8 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
-import {
-  AlertTriangle,
-  BellIcon,
-  BellOff,
-  ChevronRight,
-  ConciergeBell,
-  X,
-} from 'lucide-react';
-import { Trans, useLingui } from '@lingui/react/macro';
+import { AlertTriangle, BellIcon, BellOff, ChevronRight, ConciergeBell, X } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';

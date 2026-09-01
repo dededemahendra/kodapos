@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { manualDiscountValidator } from './lib/discount';
 import { orderTypeValidator } from './lib/orderType';
 import { methodTotals } from './lib/payment';
@@ -138,9 +138,7 @@ const orderSummary = v.object({
       name: v.string(),
       type: v.union(v.literal('percent'), v.literal('fixed')),
       value: v.number(),
-      scope: v.optional(
-        v.union(v.literal('order'), v.literal('item'), v.literal('category'))
-      ),
+      scope: v.optional(v.union(v.literal('order'), v.literal('item'), v.literal('category'))),
       targetItemIds: v.optional(v.array(v.id('menuItems'))),
       targetCategoryIds: v.optional(v.array(v.id('categories'))),
     })
@@ -157,9 +155,7 @@ const orderSummary = v.object({
   totalIDR: v.number(),
   orderType: v.optional(orderTypeValidator),
   tableId: v.optional(v.id('tables')),
-  kitchenStatus: v.optional(
-    v.union(v.literal('new'), v.literal('ready'), v.literal('done'))
-  ),
+  kitchenStatus: v.optional(v.union(v.literal('new'), v.literal('ready'), v.literal('done'))),
   paymentMethod: v.union(
     v.literal('cash'),
     v.literal('qris_static'),
@@ -247,7 +243,15 @@ export const search = query({
   args: {
     range: rangeArg,
     cashierId: v.optional(v.id('cafeStaff')),
-    paymentMethod: v.optional(v.union(v.literal('cash'), v.literal('qris_static'), v.literal('qris_dynamic'), v.literal('giftcard'), v.literal('split'))),
+    paymentMethod: v.optional(
+      v.union(
+        v.literal('cash'),
+        v.literal('qris_static'),
+        v.literal('qris_dynamic'),
+        v.literal('giftcard'),
+        v.literal('split')
+      )
+    ),
     orderType: v.optional(orderTypeValidator),
     status: v.optional(v.union(v.literal('paid'), v.literal('pending'), v.literal('void'))),
     paginationOpts: paginationOptsValidator,

@@ -1,9 +1,13 @@
 import { Trans } from '@lingui/react/macro';
-import { Link, Outlet, createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 import { RequirePermission } from '~/components/permission/require-permission';
-import { PageHeader } from '~/components/ui/page-header';
 import { RangePicker } from '~/components/reports/range-picker';
-import { type ReportSearch, parseReportSearch, useReportRange } from '~/components/reports/use-report-range';
+import {
+  parseReportSearch,
+  type ReportSearch,
+  useReportRange,
+} from '~/components/reports/use-report-range';
+import { PageHeader } from '~/components/ui/page-header';
 
 export const Route = createFileRoute('/_pos/reports')({
   validateSearch: parseReportSearch,
@@ -28,31 +32,31 @@ function ReportsLayout() {
   const { search, setPreset, setCustom } = useReportRange();
   return (
     <RequirePermission perm="canViewReports">
-    <main className="p-6">
-      <PageHeader title={<Trans>Laporan</Trans>} />
-      <div className="mt-2">
-        <RangePicker search={search} setPreset={setPreset} setCustom={setCustom} />
-      </div>
-      <nav className="mt-4 flex gap-4 border-b border-border text-sm">
-        {TABS.map((t) => (
-          <Link
-            key={t.to}
-            to={t.to}
-            // TanStack merges sibling-route search into an all-optional type;
-            // validateSearch guarantees prev is already a valid ReportSearch.
-            search={(prev) => prev as ReportSearch}
-            activeOptions={{ exact: t.to === '/reports' }}
-            className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
-            activeProps={{ className: 'border-ring font-semibold' }}
-          >
-            {t.label}
-          </Link>
-        ))}
-      </nav>
-      <div className="mt-4">
-        <Outlet />
-      </div>
-    </main>
+      <main className="p-6">
+        <PageHeader title={<Trans>Laporan</Trans>} />
+        <div className="mt-2">
+          <RangePicker search={search} setPreset={setPreset} setCustom={setCustom} />
+        </div>
+        <nav className="mt-4 flex gap-4 border-b border-border text-sm">
+          {TABS.map((t) => (
+            <Link
+              key={t.to}
+              to={t.to}
+              // TanStack merges sibling-route search into an all-optional type;
+              // validateSearch guarantees prev is already a valid ReportSearch.
+              search={(prev) => prev as ReportSearch}
+              activeOptions={{ exact: t.to === '/reports' }}
+              className="py-2 px-1 -mb-px border-b-2 border-transparent hover:border-ring"
+              activeProps={{ className: 'border-ring font-semibold' }}
+            >
+              {t.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="mt-4">
+          <Outlet />
+        </div>
+      </main>
     </RequirePermission>
   );
 }

@@ -1,8 +1,8 @@
 import { Trans } from '@lingui/react/macro';
-import { History } from 'lucide-react';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
+import { History } from 'lucide-react';
 import { WASTE_REASON_LABELS } from '~/components/inventory/waste-reason';
 import {
   Empty,
@@ -78,10 +78,18 @@ export function MovementHistorySheet({
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
-                    <th className="py-2"><Trans>Tanggal</Trans></th>
-                    <th className="py-2"><Trans>Tipe</Trans></th>
-                    <th className="py-2 text-right"><Trans>Perubahan</Trans></th>
-                    <th className="py-2 text-right"><Trans>Saldo</Trans></th>
+                    <th className="py-2">
+                      <Trans>Tanggal</Trans>
+                    </th>
+                    <th className="py-2">
+                      <Trans>Tipe</Trans>
+                    </th>
+                    <th className="py-2 text-right">
+                      <Trans>Perubahan</Trans>
+                    </th>
+                    <th className="py-2 text-right">
+                      <Trans>Saldo</Trans>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

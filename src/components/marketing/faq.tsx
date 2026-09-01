@@ -1,6 +1,11 @@
 import { Trans } from '@lingui/react/macro';
 import { MotionConfig, motion } from 'motion/react';
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '~/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '~/components/ui/accordion';
 import { SectionHeading } from './section-heading';
 
 const VP = { once: true, margin: '-80px' } as const;
@@ -9,17 +14,31 @@ const QA = [
   {
     value: 'item-1',
     q: <Trans>Apakah perlu perangkat khusus?</Trans>,
-    a: <Trans>Tidak. kodapos berjalan di browser, jadi bisa dipakai di tablet, HP, atau laptop yang sudah Anda punya.</Trans>,
+    a: (
+      <Trans>
+        Tidak. kodapos berjalan di browser, jadi bisa dipakai di tablet, HP, atau laptop yang sudah
+        Anda punya.
+      </Trans>
+    ),
   },
   {
     value: 'item-2',
     q: <Trans>Bagaimana cara pindah dari sistem lama?</Trans>,
-    a: <Trans>Anda cukup membuat menu dan stok awal. Tim kami siap membantu proses perpindahan lewat WhatsApp.</Trans>,
+    a: (
+      <Trans>
+        Anda cukup membuat menu dan stok awal. Tim kami siap membantu proses perpindahan lewat
+        WhatsApp.
+      </Trans>
+    ),
   },
   {
     value: 'item-3',
     q: <Trans>Apakah mendukung QRIS?</Trans>,
-    a: <Trans>Ya. kodapos mendukung QRIS statis dan dinamis, plus tunai, split, dan kartu hadiah.</Trans>,
+    a: (
+      <Trans>
+        Ya. kodapos mendukung QRIS statis dan dinamis, plus tunai, split, dan kartu hadiah.
+      </Trans>
+    ),
   },
   {
     value: 'item-4',

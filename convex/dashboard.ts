@@ -1,22 +1,14 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
-import { query } from './_generated/server';
 import type { QueryCtx } from './_generated/server';
+import { query } from './_generated/server';
 import { requireActiveOutlet } from './lib/auth';
 import { currentStockQty } from './lib/inventory';
 import { methodTotals } from './lib/payment';
 import { DAY_MS, dayKeyFn, startOfLocalDay, tzFor } from './lib/time';
 
-const paymentStatus = v.union(
-  v.literal('pending'),
-  v.literal('paid'),
-  v.literal('void')
-);
-const canonicalUnit = v.union(
-  v.literal('g'),
-  v.literal('ml'),
-  v.literal('piece')
-);
+const paymentStatus = v.union(v.literal('pending'), v.literal('paid'), v.literal('void'));
+const canonicalUnit = v.union(v.literal('g'), v.literal('ml'), v.literal('piece'));
 
 /** Buckets the last 7 cafe-local days (oldest → newest), keyed by day. Returns
  *  the ordered buckets plus a `windowStart` instant for the index range scan
@@ -110,13 +102,9 @@ export async function computeKpis(
   // a true money figure and the delta stays apples-to-apples.
   const refunds = await ctx.db
     .query('refunds')
-    .withIndex('by_cafe_at', (q) =>
-      q.eq('cafeId', cafeId).gte('at', yesterdayStart)
-    )
+    .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', yesterdayStart))
     .collect();
-  const tRefunds = refunds
-    .filter((r) => r.at >= todayStart)
-    .reduce((s, r) => s + r.amountIDR, 0);
+  const tRefunds = refunds.filter((r) => r.at >= todayStart).reduce((s, r) => s + r.amountIDR, 0);
   const yRefunds = refunds
     .filter((r) => r.at >= yesterdayStart && r.at < todayStart)
     .reduce((s, r) => s + r.amountIDR, 0);
@@ -150,11 +138,9 @@ export const revenueDaily = query({
   handler: async (ctx) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
-    const { windowStart, buckets, bucketFor } = sevenDayBuckets(
-      tz,
-      Date.now(),
-      () => ({ revenueIDR: 0 })
-    );
+    const { windowStart, buckets, bucketFor } = sevenDayBuckets(tz, Date.now(), () => ({
+      revenueIDR: 0,
+    }));
     const rows = await ctx.db
       .query('orders')
       .withIndex('by_cafe_created', (q) =>
@@ -183,17 +169,14 @@ export const revenueDaily = query({
 /** Daily transaction counts by payment method, last 7 days (QRIS = static+dynamic). */
 export const paymentMethods = query({
   args: {},
-  returns: v.array(
-    v.object({ day: v.string(), cash: v.number(), qris: v.number() })
-  ),
+  returns: v.array(v.object({ day: v.string(), cash: v.number(), qris: v.number() })),
   handler: async (ctx) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
-    const { windowStart, buckets, bucketFor } = sevenDayBuckets(
-      tz,
-      Date.now(),
-      () => ({ cash: 0, qris: 0 })
-    );
+    const { windowStart, buckets, bucketFor } = sevenDayBuckets(tz, Date.now(), () => ({
+      cash: 0,
+      qris: 0,
+    }));
     const rows = await ctx.db
       .query('orders')
       .withIndex('by_cafe_created', (q) =>
@@ -289,9 +272,7 @@ export async function computeLowStock(
 }> {
   const ingredients = await ctx.db
     .query('ingredients')
-    .withIndex('by_cafe_active', (q) =>
-      q.eq('cafeId', cafeId).eq('archived', false)
-    )
+    .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
     .collect();
   const low = [];
   for (const ing of ingredients) {
@@ -315,11 +296,7 @@ export const recentActivity = query({
   args: {},
   returns: v.array(
     v.object({
-      type: v.union(
-        v.literal('sale'),
-        v.literal('shift-open'),
-        v.literal('shift-close')
-      ),
+      type: v.union(v.literal('sale'), v.literal('shift-open'), v.literal('shift-close')),
       at: v.number(),
       amountIDR: v.optional(v.number()),
     })

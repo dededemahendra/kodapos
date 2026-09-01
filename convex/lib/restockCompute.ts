@@ -1,8 +1,8 @@
-import type { MutationCtx, QueryCtx } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
+import type { MutationCtx, QueryCtx } from '../_generated/server';
+import type { DemandLine } from './demand';
 import { currentStockQty } from './inventory';
 import { suggestRestock } from './restock';
-import type { DemandLine } from './demand';
 
 export type RestockLine = {
   ingredientId: Id<'ingredients'>;
@@ -37,7 +37,13 @@ export async function computeRestock(
     const stock = await currentStockQty(ctx, cafeId, ing._id);
     const suggestedQty = suggestRestock(req, stock, ing.reorderThreshold);
     if (suggestedQty > 0) {
-      lines.push({ ingredientId: ing._id, name: ing.name, unit: ing.canonicalUnit, suggestedQty, currentStockQty: stock });
+      lines.push({
+        ingredientId: ing._id,
+        name: ing.name,
+        unit: ing.canonicalUnit,
+        suggestedQty,
+        currentStockQty: stock,
+      });
     }
   }
   lines.sort((a, b) => a.name.localeCompare(b.name, 'id-ID'));

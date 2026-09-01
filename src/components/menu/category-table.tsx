@@ -15,10 +15,7 @@ import {
   EmptyTitle,
 } from '~/components/ui/empty';
 import { PageHeader } from '~/components/ui/page-header';
-import {
-  ReorderableTable,
-  type ReorderableColumn,
-} from '~/components/ui/reorderable-table';
+import { type ReorderableColumn, ReorderableTable } from '~/components/ui/reorderable-table';
 import { RowActions } from '~/components/ui/row-actions';
 import { StatusBadge } from '~/components/ui/status-badge';
 import { Toolbar } from '~/components/ui/toolbar';
@@ -166,8 +163,16 @@ export function CategoryTable() {
         active={filter}
         onFilter={(v) => setFilter(v as Filter)}
         filters={[
-          { label: <Trans>Aktif</Trans>, value: 'active', ...(counts !== undefined && { count: counts.active }) },
-          { label: <Trans>Arsip</Trans>, value: 'archived', ...(counts !== undefined && { count: counts.archived }) },
+          {
+            label: <Trans>Aktif</Trans>,
+            value: 'active',
+            ...(counts !== undefined && { count: counts.active }),
+          },
+          {
+            label: <Trans>Arsip</Trans>,
+            value: 'archived',
+            ...(counts !== undefined && { count: counts.archived }),
+          },
         ]}
       />
 
@@ -182,9 +187,7 @@ export function CategoryTable() {
             try {
               await setOrder({ orderedIds: orderedIds as Id<'categories'>[] });
             } catch (err) {
-              toast.error(
-                err instanceof Error ? err.message : t`Gagal menyimpan urutan.`
-              );
+              toast.error(err instanceof Error ? err.message : t`Gagal menyimpan urutan.`);
             }
           }}
         />
@@ -221,8 +224,7 @@ export function CategoryTable() {
             await archiveCategory({ id: archiveTarget._id });
             toast.success(t`Kategori diarsipkan.`);
           } catch (err) {
-            const message =
-              err instanceof Error ? err.message : t`Gagal mengarsipkan kategori.`;
+            const message = err instanceof Error ? err.message : t`Gagal mengarsipkan kategori.`;
             toast.error(message);
             throw err;
           }
@@ -251,9 +253,7 @@ function ArchivedCategoryList({
         <div key={c._id} className="flex items-center justify-between px-4 py-2 text-sm">
           <span className="font-medium">{c.name}</span>
           <span className="flex items-center gap-4">
-            <span className="tabular-nums text-muted-foreground">
-              {itemCounts.get(c._id) ?? 0}
-            </span>
+            <span className="tabular-nums text-muted-foreground">{itemCounts.get(c._id) ?? 0}</span>
             <StatusBadge variant="muted">
               <Trans>Arsip</Trans>
             </StatusBadge>

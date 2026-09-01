@@ -12,8 +12,17 @@ export class XenditProvider implements PaymentProvider {
     const auth = btoa(`${this.config.secretApiKey}:`);
     const res = await fetch(XENDIT_QR_URL, {
       method: 'POST',
-      headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json', 'api-version': '2022-07-31' },
-      body: JSON.stringify({ reference_id: input.referenceId, type: 'DYNAMIC', currency: 'IDR', amount: input.amountIDR }),
+      headers: {
+        Authorization: `Basic ${auth}`,
+        'Content-Type': 'application/json',
+        'api-version': '2022-07-31',
+      },
+      body: JSON.stringify({
+        reference_id: input.referenceId,
+        type: 'DYNAMIC',
+        currency: 'IDR',
+        amount: input.amountIDR,
+      }),
     });
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
@@ -61,7 +70,11 @@ export class XenditProvider implements PaymentProvider {
       const data = (JSON.parse(req.body) as { data?: { qr_id?: string; status?: string } }).data;
       if (!data?.qr_id || !data.status) return null;
       const map: Record<string, WebhookEvent['status']> = {
-        SUCCEEDED: 'paid', COMPLETED: 'paid', EXPIRED: 'expired', FAILED: 'failed', INACTIVE: 'expired',
+        SUCCEEDED: 'paid',
+        COMPLETED: 'paid',
+        EXPIRED: 'expired',
+        FAILED: 'failed',
+        INACTIVE: 'expired',
       };
       const status = map[data.status];
       if (!status) return null;

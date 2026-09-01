@@ -147,7 +147,10 @@ describe('public.menuForTable', () => {
     const { t: tt, categoryId, itemId } = await setup(t);
 
     const userId2 = await tt.run(async (ctx) =>
-      ctx.db.query('users').first().then((u) => u!._id)
+      ctx.db
+        .query('users')
+        .first()
+        .then((u) => u!._id)
     );
     const asOwner = tt.withIdentity({ subject: `${userId2}|test_session` });
 
@@ -298,7 +301,11 @@ describe('public.submitSelfOrder', () => {
         qrToken: QR_TOKEN,
         clientId: cid('client-manymods'),
         lines: [
-          { menuItemId: itemId, qty: 1, modifierOptionIds: Array.from({ length: 21 }, () => regularId) },
+          {
+            menuItemId: itemId,
+            qty: 1,
+            modifierOptionIds: Array.from({ length: 21 }, () => regularId),
+          },
         ],
       })
     ).rejects.toThrow(/terlalu banyak modifier/i);
@@ -429,7 +436,10 @@ describe('public.submitSelfOrder', () => {
     const t = convexTest(schema, modules);
     const { t: tt, itemId, categoryId, regularId } = await setup(t);
     const userId2 = await tt.run(async (ctx) =>
-      ctx.db.query('users').first().then((u) => u!._id)
+      ctx.db
+        .query('users')
+        .first()
+        .then((u) => u!._id)
     );
     const asOwner = tt.withIdentity({ subject: `${userId2}|test_session` });
     const otherItemId = await asOwner.mutation(api.menu.items.create, {
@@ -457,7 +467,10 @@ describe('public.submitSelfOrder', () => {
     const t = convexTest(schema, modules);
     const { t: tt, itemId } = await setup(t);
     const userId2 = await tt.run(async (ctx) =>
-      ctx.db.query('users').first().then((u) => u!._id)
+      ctx.db
+        .query('users')
+        .first()
+        .then((u) => u!._id)
     );
     const asOwner = tt.withIdentity({ subject: `${userId2}|test_session` });
     const detachedGroupId = await asOwner.mutation(api.menu.modifierGroups.upsert, {

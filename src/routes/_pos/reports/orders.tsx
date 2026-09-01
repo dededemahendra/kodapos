@@ -55,14 +55,10 @@ function OrdersReport() {
       ...(method !== ALL
         ? { paymentMethod: method as 'cash' | 'qris_static' | 'qris_dynamic' | 'split' }
         : {}),
-      ...(orderType !== ALL
-        ? { orderType: orderType as 'dine_in' | 'takeaway' | 'pickup' }
-        : {}),
-      ...(status !== ALL
-        ? { status: status as 'paid' | 'pending' | 'void' }
-        : {}),
+      ...(orderType !== ALL ? { orderType: orderType as 'dine_in' | 'takeaway' | 'pickup' } : {}),
+      ...(status !== ALL ? { status: status as 'paid' | 'pending' | 'void' } : {}),
     },
-    { initialNumItems: 25 },
+    { initialNumItems: 25 }
   );
 
   return (
@@ -169,9 +165,7 @@ function OrdersReport() {
                   </span>
                   <span>· {t`${o.lineCount} item`}</span>
                   {o.orderType ? (
-                    <span>
-                      · {ORDER_TYPE_OPTIONS.find((x) => x.value === o.orderType)?.label}
-                    </span>
+                    <span>· {ORDER_TYPE_OPTIONS.find((x) => x.value === o.orderType)?.label}</span>
                   ) : null}
                   <Badge
                     variant={

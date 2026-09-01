@@ -92,10 +92,7 @@ export function CsvImportDialog({ open, onOpenChange, kind, onImport }: Props) {
   const [result, setResult] = useState<ImportResult | null>(null);
 
   const aliases = kind === 'items' ? ITEM_HEADERS : INGREDIENT_HEADERS;
-  const required =
-    kind === 'items'
-      ? ['name', 'category', 'price']
-      : ['name', 'unit', 'reorder'];
+  const required = kind === 'items' ? ['name', 'category', 'price'] : ['name', 'unit', 'reorder'];
 
   const previewColumns =
     kind === 'items'
@@ -180,9 +177,7 @@ export function CsvImportDialog({ open, onOpenChange, kind, onImport }: Props) {
     try {
       const res = await onImport(rows);
       setResult(res);
-      toast.success(
-        t`${res.created} dibuat, ${res.skipped} dilewati, ${res.errors.length} gagal`
-      );
+      toast.success(t`${res.created} dibuat, ${res.skipped} dilewati, ${res.errors.length} gagal`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t`Gagal mengimpor.`);
     } finally {
@@ -223,23 +218,15 @@ export function CsvImportDialog({ open, onOpenChange, kind, onImport }: Props) {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {kind === 'items' ? (
-              <Trans>Impor item menu</Trans>
-            ) : (
-              <Trans>Impor bahan</Trans>
-            )}
+            {kind === 'items' ? <Trans>Impor item menu</Trans> : <Trans>Impor bahan</Trans>}
           </DialogTitle>
           <DialogDescription>
             {kind === 'items' ? (
               <Trans>
-                Unggah file CSV dengan kolom name, category, price, dan barcode
-                (opsional).
+                Unggah file CSV dengan kolom name, category, price, dan barcode (opsional).
               </Trans>
             ) : (
-              <Trans>
-                Unggah file CSV dengan kolom name, unit, reorder, dan cost
-                (opsional).
-              </Trans>
+              <Trans>Unggah file CSV dengan kolom name, unit, reorder, dan cost (opsional).</Trans>
             )}
           </DialogDescription>
         </DialogHeader>
@@ -256,26 +243,16 @@ export function CsvImportDialog({ open, onOpenChange, kind, onImport }: Props) {
                 if (file) void handleFile(file);
               }}
             />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-            >
+            <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
               <Upload />
               <Trans>Pilih file CSV</Trans>
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleDownloadTemplate}
-            >
+            <Button type="button" variant="ghost" onClick={handleDownloadTemplate}>
               <FileSpreadsheet />
               <Trans>Unduh template</Trans>
             </Button>
             {fileName ? (
-              <span className="text-sm text-muted-foreground truncate">
-                {fileName}
-              </span>
+              <span className="text-sm text-muted-foreground truncate">{fileName}</span>
             ) : null}
           </div>
 
@@ -284,8 +261,7 @@ export function CsvImportDialog({ open, onOpenChange, kind, onImport }: Props) {
             <div className="flex flex-col gap-2 rounded-md border p-4">
               <p className="text-sm font-medium">
                 <Trans>
-                  {result.created} dibuat, {result.skipped} dilewati,{' '}
-                  {result.errors.length} gagal
+                  {result.created} dibuat, {result.skipped} dilewati, {result.errors.length} gagal
                 </Trans>
               </p>
               {result.errors.length > 0 ? (
@@ -302,9 +278,7 @@ export function CsvImportDialog({ open, onOpenChange, kind, onImport }: Props) {
             </div>
           ) : missingColumns.length > 0 ? (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm">
-              <Trans>
-                Kolom wajib tidak ditemukan: {missingColumns.join(', ')}
-              </Trans>
+              <Trans>Kolom wajib tidak ditemukan: {missingColumns.join(', ')}</Trans>
             </div>
           ) : parsedAny && rows.length === 0 ? (
             <Empty>
@@ -316,10 +290,7 @@ export function CsvImportDialog({ open, onOpenChange, kind, onImport }: Props) {
                   <Trans>Tidak ada baris untuk diimpor.</Trans>
                 </EmptyTitle>
                 <EmptyDescription>
-                  <Trans>
-                    File kosong atau hanya berisi baris header. Periksa lalu coba
-                    lagi.
-                  </Trans>
+                  <Trans>File kosong atau hanya berisi baris header. Periksa lalu coba lagi.</Trans>
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -377,11 +348,7 @@ export function CsvImportDialog({ open, onOpenChange, kind, onImport }: Props) {
             </Button>
           ) : (
             <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleClose(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => handleClose(false)}>
                 <Trans>Batal</Trans>
               </Button>
               <Button

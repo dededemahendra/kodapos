@@ -73,10 +73,7 @@ export function ManualDiscountDialog({
               <FieldLabel htmlFor="manual-discount-type">
                 <Trans>Diskon</Trans>
               </FieldLabel>
-              <Select
-                value={type}
-                onValueChange={(v) => setType(v as 'percent' | 'fixed')}
-              >
+              <Select value={type} onValueChange={(v) => setType(v as 'percent' | 'fixed')}>
                 <SelectTrigger id="manual-discount-type">
                   <SelectValue />
                 </SelectTrigger>

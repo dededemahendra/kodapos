@@ -1,8 +1,8 @@
 import { Trans } from '@lingui/react/macro';
 import { ShieldCheck } from 'lucide-react';
 import { MotionConfig, motion } from 'motion/react';
-import { LoyaltyAvatars } from './loyalty-avatars';
 import { Card, CardContent } from '~/components/ui/card';
+import { LoyaltyAvatars } from './loyalty-avatars';
 import { SectionHeading } from './section-heading';
 
 /** Shared viewport settings: trigger once when the element is 80px inside the viewport */
@@ -77,7 +77,10 @@ export function FeatureSection() {
             {/* Card 2: ShieldCheck card - Aman secara bawaan */}
             <Card className="col-span-full sm:col-span-3 lg:col-span-2">
               <CardContent className="p-6">
-                <div className="mb-4 relative flex items-center justify-center" style={{ width: 64, height: 64 }}>
+                <div
+                  className="mb-4 relative flex items-center justify-center"
+                  style={{ width: 64, height: 64 }}
+                >
                   {/* Soft radial glow behind the shield */}
                   <div className="absolute inset-0 rounded-full bg-primary/5" />
                   {/* Outermost ring - fades in last (inside-out stagger reversed = outside-in reveal) */}
@@ -147,7 +150,9 @@ export function FeatureSection() {
                   <Trans>Aman secara bawaan</Trans>
                 </h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">
-                  <Trans>Data kafe tersimpan aman di cloud dan hanya bisa diakses oleh akun Anda.</Trans>
+                  <Trans>
+                    Data kafe tersimpan aman di cloud dan hanya bisa diakses oleh akun Anda.
+                  </Trans>
                 </p>
               </CardContent>
             </Card>
@@ -244,14 +249,24 @@ export function FeatureSection() {
                       }}
                     />
                     {/* Faint baseline */}
-                    <line x1="0" y1="42" x2="180" y2="42" stroke="currentColor" strokeWidth="1" className="opacity-20" />
+                    <line
+                      x1="0"
+                      y1="42"
+                      x2="180"
+                      y2="42"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      className="opacity-20"
+                    />
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium">
                   <Trans>Prakiraan permintaan</Trans>
                 </h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">
-                  <Trans>AI memperkirakan permintaan harian dari pola penjualan dan cuaca lokal.</Trans>
+                  <Trans>
+                    AI memperkirakan permintaan harian dari pola penjualan dan cuaca lokal.
+                  </Trans>
                 </p>
               </CardContent>
             </Card>
@@ -266,7 +281,9 @@ export function FeatureSection() {
                   <Trans>Loyalitas pelanggan</Trans>
                 </h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">
-                  <Trans>Kumpulkan pelanggan, beri poin dan hadiah, lalu buat mereka kembali.</Trans>
+                  <Trans>
+                    Kumpulkan pelanggan, beri poin dan hadiah, lalu buat mereka kembali.
+                  </Trans>
                 </p>
               </CardContent>
             </Card>

@@ -30,9 +30,7 @@ async function setup(
   const qrToken = opts.qrToken ?? QR_TOKEN;
   const taxEnabled = opts.taxEnabled ?? true;
   const taxRatePct = opts.taxRatePct ?? 10;
-  const userId = await t.run(async (ctx) =>
-    ctx.db.insert('users', { name: 'Owner', email })
-  );
+  const userId = await t.run(async (ctx) => ctx.db.insert('users', { name: 'Owner', email }));
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   await asOwner.mutation(api.cafes.updateProfile, {
@@ -184,7 +182,9 @@ describe('payments.qrisDynamic.getSelfOrderCafeByRef', () => {
     await t.action(api.public.createSelfOrderCharge, { qrToken: s.qrToken, selfOrderId });
     const providerRef = await t.run(async (ctx) => (await ctx.db.get(selfOrderId))!.providerRef!);
 
-    const result = await t.query(internal.payments.qrisDynamic.getSelfOrderCafeByRef, { providerRef });
+    const result = await t.query(internal.payments.qrisDynamic.getSelfOrderCafeByRef, {
+      providerRef,
+    });
     expect(result).toEqual({ cafeId: s.cafeId });
 
     const miss = await t.query(internal.payments.qrisDynamic.getSelfOrderCafeByRef, {
@@ -304,7 +304,10 @@ describe('selfOrders.acceptPaid', () => {
     expect(order!.totalIDR).toBe(22000);
 
     const payments = await t.run(async (ctx) =>
-      ctx.db.query('payments').withIndex('by_order', (q) => q.eq('orderId', orderId)).collect()
+      ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', orderId))
+        .collect()
     );
     expect(payments).toHaveLength(1);
     expect(payments[0]!.method).toBe('qris_dynamic');
@@ -320,9 +323,7 @@ describe('selfOrders.acceptPaid', () => {
     const movements = await t.run(async (ctx) =>
       ctx.db
         .query('inventoryMovements')
-        .withIndex('by_cafe_ingredient', (q) =>
-          q.eq('cafeId', s.cafeId).eq('ingredientId', beanId)
-        )
+        .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', s.cafeId).eq('ingredientId', beanId))
         .collect()
     );
     expect(movements).toHaveLength(1);
@@ -338,16 +339,28 @@ describe('selfOrders.acceptPaid', () => {
     const { cashierId } = await openShift(s.asOwner);
     const selfOrderId = await seedPaid(t, s, 'c-idem-accept');
 
-    const first = await s.asOwner.mutation(api.selfOrders.acceptPaid, { id: selfOrderId, cashierId });
-    const second = await s.asOwner.mutation(api.selfOrders.acceptPaid, { id: selfOrderId, cashierId });
+    const first = await s.asOwner.mutation(api.selfOrders.acceptPaid, {
+      id: selfOrderId,
+      cashierId,
+    });
+    const second = await s.asOwner.mutation(api.selfOrders.acceptPaid, {
+      id: selfOrderId,
+      cashierId,
+    });
     expect(second.orderId).toBe(first.orderId);
 
     const orders = await t.run(async (ctx) =>
-      ctx.db.query('orders').withIndex('by_cafe_clientId', (q) => q.eq('cafeId', s.cafeId)).collect()
+      ctx.db
+        .query('orders')
+        .withIndex('by_cafe_clientId', (q) => q.eq('cafeId', s.cafeId))
+        .collect()
     );
     expect(orders).toHaveLength(1);
     const payments = await t.run(async (ctx) =>
-      ctx.db.query('payments').withIndex('by_order', (q) => q.eq('orderId', first.orderId)).collect()
+      ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', first.orderId))
+        .collect()
     );
     expect(payments).toHaveLength(1);
   });
@@ -418,9 +431,9 @@ describe('selfOrders.reject (pay-now guard)', () => {
     const s = await setup(t);
     await connectQris(s.asOwner);
     const selfOrderId = await seedPaid(t, s, 'c-reject-paid');
-    await expect(
-      s.asOwner.mutation(api.selfOrders.reject, { id: selfOrderId })
-    ).rejects.toThrow(/sudah dibayar/i);
+    await expect(s.asOwner.mutation(api.selfOrders.reject, { id: selfOrderId })).rejects.toThrow(
+      /sudah dibayar/i
+    );
   });
 
   // Finding 1: a LIVE QR (awaiting, charge in-flight) must NOT be rejectable —
@@ -431,9 +444,9 @@ describe('selfOrders.reject (pay-now guard)', () => {
     await connectQris(s.asOwner);
     const selfOrderId = await submit(t, s, 'c-reject-await');
     await t.action(api.public.createSelfOrderCharge, { qrToken: s.qrToken, selfOrderId });
-    await expect(
-      s.asOwner.mutation(api.selfOrders.reject, { id: selfOrderId })
-    ).rejects.toThrow(/sedang atau sudah dibayar|dibayar/i);
+    await expect(s.asOwner.mutation(api.selfOrders.reject, { id: selfOrderId })).rejects.toThrow(
+      /sedang atau sudah dibayar|dibayar/i
+    );
   });
 });
 

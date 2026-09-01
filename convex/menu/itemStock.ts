@@ -25,9 +25,7 @@ export async function itemRecipeStatus(
     if (!ing || ing.cafeId !== cafeId || ing.archived) continue;
     const movements = await ctx.db
       .query('inventoryMovements')
-      .withIndex('by_cafe_ingredient', (q) =>
-        q.eq('cafeId', cafeId).eq('ingredientId', ing._id)
-      )
+      .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', cafeId).eq('ingredientId', ing._id))
       .collect();
     const stock = movements.reduce((sum, m) => sum + m.delta, 0);
     if (stock < ing.reorderThreshold) lowStockIngredientNames.push(ing.name);

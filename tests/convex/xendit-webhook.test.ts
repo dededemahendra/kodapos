@@ -60,10 +60,9 @@ async function connectXendit(asOwner: Setup['asOwner'], token: string) {
 
 function stubXenditCreate(qrId: string) {
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-    new Response(
-      JSON.stringify({ id: qrId, qr_string: 's', expires_at: '2026-06-10T12:00:00Z' }),
-      { status: 201 }
-    )
+    new Response(JSON.stringify({ id: qrId, qr_string: 's', expires_at: '2026-06-10T12:00:00Z' }), {
+      status: 201,
+    })
   );
 }
 
@@ -165,14 +164,24 @@ describe('disconnect guard while a dynamic order is pending', () => {
     });
 
     // Pending order present → disconnect is blocked.
-    await expect(asOwner.mutation(api.settings.disconnectIntegration, { key: 'qris' })).rejects.toThrow(
-      /tertunda/i
-    );
+    await expect(
+      asOwner.mutation(api.settings.disconnectIntegration, { key: 'qris' })
+    ).rejects.toThrow(/tertunda/i);
 
     // Settle it via webhook, then disconnect succeeds.
-    const body = JSON.stringify({ data: { qr_id: 'qr_D', reference_id: r.orderId, status: 'SUCCEEDED' } });
-    await t.fetch('/webhooks/qris/xendit', { method: 'POST', body, headers: { 'x-callback-token': 'tokenA' } });
-    expect((await t.run((ctx) => ctx.db.get(r.orderId as Id<'orders'>)))?.paymentStatus).toBe('paid');
-    await expect(asOwner.mutation(api.settings.disconnectIntegration, { key: 'qris' })).resolves.toBeNull();
+    const body = JSON.stringify({
+      data: { qr_id: 'qr_D', reference_id: r.orderId, status: 'SUCCEEDED' },
+    });
+    await t.fetch('/webhooks/qris/xendit', {
+      method: 'POST',
+      body,
+      headers: { 'x-callback-token': 'tokenA' },
+    });
+    expect((await t.run((ctx) => ctx.db.get(r.orderId as Id<'orders'>)))?.paymentStatus).toBe(
+      'paid'
+    );
+    await expect(
+      asOwner.mutation(api.settings.disconnectIntegration, { key: 'qris' })
+    ).resolves.toBeNull();
   });
 });

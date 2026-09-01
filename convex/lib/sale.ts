@@ -1,7 +1,7 @@
 import { type Infer, v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
-import { requireOwned, requireActiveOutlet } from './auth';
+import { requireActiveOutlet, requireOwned } from './auth';
 import { manualDiscountValidator } from './discount';
 import { redeemGiftCard } from './giftcard';
 import { DEFAULT_LOYALTY, earnMultiplierFor, pointsEarned, redemptionIDR } from './loyalty';
@@ -157,10 +157,7 @@ export async function buildOrder(
     const variant = line.variantId ? await ctx.db.get(line.variantId) : null;
     if (
       line.variantId &&
-      (!variant ||
-        variant.menuItemId !== item._id ||
-        variant.cafeId !== cafeId ||
-        variant.archived)
+      (!variant || variant.menuItemId !== item._id || variant.cafeId !== cafeId || variant.archived)
     ) {
       throw new Error('Varian tidak tersedia.');
     }
@@ -185,8 +182,7 @@ export async function buildOrder(
         throw new Error('Modifier tidak tersedia.');
       }
       countByGroup.set(group._id, (countByGroup.get(group._id) ?? 0) + 1);
-      const adjustment =
-        priceOverrides.get(option._id as string) ?? option.priceAdjustmentIDR;
+      const adjustment = priceOverrides.get(option._id as string) ?? option.priceAdjustmentIDR;
       modifiersSnapshot.push({
         groupName: group.name,
         optionName: option.name,
@@ -448,7 +444,10 @@ export async function buildOrder(
     }
     if (sum !== totalIDR) throw new Error('Total tender tidak sama dengan total pesanan.');
     orderMethod = 'split';
-    paymentBreakdown = tenders.map((tender) => ({ method: tender.method, amountIDR: tender.amountIDR }));
+    paymentBreakdown = tenders.map((tender) => ({
+      method: tender.method,
+      amountIDR: tender.amountIDR,
+    }));
     splitTenders = tenders;
   } else {
     // method-specific: funds check + change only for cash. A standalone giftcard
@@ -466,7 +465,10 @@ export async function buildOrder(
 
   const earnBase = subtotalIDR - discountIDR;
   const earned = customer
-    ? Math.floor(pointsEarned(earnBase, loyaltyCfg) * earnMultiplierFor(customer.totalSpentIDR, loyaltyCfg.tiers))
+    ? Math.floor(
+        pointsEarned(earnBase, loyaltyCfg) *
+          earnMultiplierFor(customer.totalSpentIDR, loyaltyCfg.tiers)
+      )
     : 0;
 
   const now = Date.now();
@@ -496,9 +498,7 @@ export async function buildOrder(
     paymentStatus: 'pending',
     createdAtClient: args.createdAtClient ?? now,
     syncedAt: now,
-    ...(priceCategoryName
-      ? { priceCategoryId: args.priceCategoryId, priceCategoryName }
-      : {}),
+    ...(priceCategoryName ? { priceCategoryId: args.priceCategoryId, priceCategoryName } : {}),
   });
 
   // Payment rows (order-first so they reference orderId). A split inserts one row
@@ -520,7 +520,10 @@ export async function buildOrder(
         method: tender.method,
         amountIDR: tender.amountIDR,
         ...(tender.method === 'cash'
-          ? { cashTenderedIDR: tender.tenderedIDR, changeIDR: tender.tenderedIDR - tender.amountIDR }
+          ? {
+              cashTenderedIDR: tender.tenderedIDR,
+              changeIDR: tender.tenderedIDR - tender.amountIDR,
+            }
           : {}),
         ...(giftCardId ? { giftCardId } : {}),
       });

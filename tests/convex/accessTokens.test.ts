@@ -190,9 +190,9 @@ describe('accessTokens.create', () => {
     const t = convexTest(schema, modules);
     const { cafeId } = await ownerWithCafe(t);
 
-    await expect(
-      t.mutation(api.accessTokens.create, { name: 'x', cafeId })
-    ).rejects.toThrow(/not authenticated/i);
+    await expect(t.mutation(api.accessTokens.create, { name: 'x', cafeId })).rejects.toThrow(
+      /not authenticated/i
+    );
   });
 
   it('rejects a signed-in manager (owner access required)', async () => {

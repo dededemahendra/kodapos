@@ -168,8 +168,8 @@ describe('heldOrders', () => {
       lines: sampleLines(itemId),
     });
     const { asOwner: asOther } = await setup(t, { email: 'other@x.com' });
-    await expect(
-      asOther.mutation(api.heldOrders.remove, { id: again })
-    ).rejects.toThrow(/tidak ditemukan/i);
+    await expect(asOther.mutation(api.heldOrders.remove, { id: again })).rejects.toThrow(
+      /tidak ditemukan/i
+    );
   });
 });

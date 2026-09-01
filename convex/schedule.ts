@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
@@ -46,7 +46,9 @@ export const list = query({
     const nameById = new Map(staff.map((s) => [s._id, s.name] as const));
 
     const rows = found
-      .sort((a, b) => (a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date)))
+      .sort((a, b) =>
+        a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date)
+      )
       .map((s) => ({
         id: s._id,
         staffId: s.staffId,

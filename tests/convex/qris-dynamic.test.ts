@@ -2,8 +2,8 @@ import { convexTest } from 'convex-test';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
-import schema from '../../convex/schema';
 import { signMockBody } from '../../convex/payments/providers/mock';
+import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
 
@@ -91,11 +91,12 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
     expect(order?.paymentStatus).toBe('pending');
     expect(order?.totalIDR).toBe(18000);
 
-    const payment = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .unique()
+    const payment = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .unique()
     );
     expect(payment?.method).toBe('qris_dynamic');
     expect(payment?.providerStatus).toBe('pending');
@@ -103,8 +104,8 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
     expect(payment?.confirmedAt).toBeUndefined();
 
     // Espresso has no recipe, so no side effects until the webhook confirms.
-    const movements = await t.run(async (ctx) =>
-      await ctx.db.query('inventoryMovements').collect()
+    const movements = await t.run(
+      async (ctx) => await ctx.db.query('inventoryMovements').collect()
     );
     expect(movements).toHaveLength(0);
   });
@@ -117,11 +118,12 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
       api.payments.qrisDynamic.createQrisDynamicSale,
       saleArgs(s, 'qd-3')
     );
-    const payment = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .unique()
+    const payment = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .unique()
     );
     const providerRef = payment!.providerRef!;
 
@@ -140,11 +142,12 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
     order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
     expect(order?.paymentStatus).toBe('paid');
 
-    const confirmed = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .unique()
+    const confirmed = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .unique()
     );
     expect(confirmed?.providerStatus).toBe('paid');
     expect(confirmed?.confirmedAt).toEqual(expect.any(Number));
@@ -171,11 +174,12 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
     });
     const order = await t.run(async (ctx) => await ctx.db.get(res.orderId));
     expect(order?.paymentStatus).toBe('void');
-    const payment = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .unique()
+    const payment = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .unique()
     );
     expect(payment?.providerStatus).toBe('void');
   });
@@ -190,11 +194,12 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
       api.payments.qrisDynamic.createQrisDynamicSale,
       saleArgs(s, 'qd-void-1')
     );
-    const pendingPayment = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', pending.orderId))
-        .unique()
+    const pendingPayment = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', pending.orderId))
+          .unique()
     );
     await t.mutation(internal.payments.qrisDynamic.voidByRef, {
       providerRef: pendingPayment!.providerRef!,
@@ -207,11 +212,12 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
       api.payments.qrisDynamic.createQrisDynamicSale,
       saleArgs(s, 'qd-void-2')
     );
-    const paidPayment = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', paid.orderId))
-        .unique()
+    const paidPayment = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', paid.orderId))
+          .unique()
     );
     const paidRef = paidPayment!.providerRef!;
     await t.mutation(internal.payments.qrisDynamic.confirmFromWebhook, { providerRef: paidRef });
@@ -219,7 +225,6 @@ describe('payments.qrisDynamic.createQrisDynamicSale', () => {
     const stillPaid = await t.run(async (ctx) => await ctx.db.get(paid.orderId));
     expect(stillPaid?.paymentStatus).toBe('paid');
   });
-
 });
 
 describe('POST /webhooks/qris', () => {
@@ -236,11 +241,12 @@ describe('POST /webhooks/qris', () => {
       api.payments.qrisDynamic.createQrisDynamicSale,
       saleArgs(s, 'wh-1')
     );
-    const payment = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .unique()
+    const payment = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .unique()
     );
     const providerRef = payment!.providerRef!;
     const body = JSON.stringify({ providerRef, status: 'paid' });
@@ -263,11 +269,12 @@ describe('POST /webhooks/qris', () => {
       api.payments.qrisDynamic.createQrisDynamicSale,
       saleArgs(s, 'wh-2')
     );
-    const payment = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .unique()
+    const payment = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .unique()
     );
     const providerRef = payment!.providerRef!;
     const body = JSON.stringify({ providerRef, status: 'paid' });
@@ -293,11 +300,12 @@ describe('POST /webhooks/qris', () => {
       api.payments.qrisDynamic.createQrisDynamicSale,
       saleArgs(s, 'wh-3')
     );
-    const payment = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .unique()
+    const payment = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .unique()
     );
     const body = JSON.stringify({ providerRef: payment!.providerRef!, status: 'paid' });
     const response = await t.fetch('/webhooks/qris', {

@@ -1,5 +1,5 @@
-import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { Trans, useLingui } from '@lingui/react/macro';
+import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { AnimatePresence, MotionConfig, motion, type Variants } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import { BrandMark } from '~/components/brand-mark';

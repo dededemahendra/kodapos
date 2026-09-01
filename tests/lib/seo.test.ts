@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SITE_URL, breadcrumbJsonLd, faqJsonLd } from '../../src/lib/seo';
+import { breadcrumbJsonLd, faqJsonLd, SITE_URL } from '../../src/lib/seo';
 
 describe('breadcrumbJsonLd', () => {
   it('numbers positions from 1 and builds absolute urls', () => {

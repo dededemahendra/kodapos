@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { type MutationCtx, mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 
 const promotionDoc = v.object({
   _id: v.id('promotions'),
@@ -164,7 +164,10 @@ export const update = mutation({
     targetCategoryIds: v.optional(v.array(v.id('categories'))),
   },
   returns: v.null(),
-  handler: async (ctx, { id, name, type, value, code, scope, targetItemIds, targetCategoryIds }) => {
+  handler: async (
+    ctx,
+    { id, name, type, value, code, scope, targetItemIds, targetCategoryIds }
+  ) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     await requireOwned(ctx, cafeId, id, 'Promo');
     const cleanName = assertPromo(name, type, value);

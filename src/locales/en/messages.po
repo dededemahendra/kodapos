@@ -3043,7 +3043,7 @@ msgstr "Inventory"
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Inventaris, resep dan HPP, limbah, pembelian, dan pemasok."
-msgstr ""
+msgstr "Inventory, recipes and COGS, waste, purchasing, and suppliers."
 
 #: src/components/dashboard-invoices.tsx
 #~ msgid "Invoice"
@@ -3408,11 +3408,11 @@ msgstr "Cashier"
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Kasir cepat, QRIS, struk, printer, dan shift kas."
-msgstr ""
+msgstr "Fast register, QRIS, receipts, printer, and cash shifts."
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Kasir dan pembayaran"
-msgstr ""
+msgstr "Cashier and payments"
 
 #: src/routes/_pos/settings/general.tsx
 msgid "Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi."
@@ -3524,8 +3524,8 @@ msgid "Keamanan"
 msgstr "Security"
 
 #: src/routes/_public/privacy.tsx
-#~ msgid "Kebijakan Privasi"
-#~ msgstr "Privacy Policy"
+msgid "Kebijakan Privasi"
+msgstr "Privacy Policy"
 
 #: src/routes/_pos/menu/labels.tsx
 #: src/routes/_pos/settings/receipt.tsx
@@ -3945,7 +3945,7 @@ msgstr "Reports"
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Laporan dan AI"
-msgstr ""
+msgstr "Reports and AI"
 
 #: src/components/marketing/feature-section.tsx
 #~ msgid "Laporan dan laba rugi"
@@ -3985,7 +3985,7 @@ msgstr "Real time reports"
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Laporan waktu nyata, asisten AI, dan prakiraan permintaan."
-msgstr ""
+msgstr "Real time reports, AI assistant, and demand forecast."
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Latest updates in your workspace."
@@ -4002,6 +4002,10 @@ msgstr "Service"
 #: src/components/sale/register-top-bar.tsx
 msgid "Layar pelanggan"
 msgstr "Customer display"
+
+#: src/routes/display.tsx
+msgid "Layar Pelanggan"
+msgstr "Customer Display"
 
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Lebar kertas"
@@ -4260,7 +4264,7 @@ msgstr "Table saved."
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Meja, pesan mandiri lewat QR, reservasi, dan layar dapur."
-msgstr ""
+msgstr "Tables, QR self-order, reservations, and kitchen display."
 
 #: src/components/marketing/pricing.tsx
 msgid "Meja, reservasi, dan pesan mandiri (QR)"
@@ -4931,6 +4935,10 @@ msgstr "Use password"
 msgid "Pantau dan kembangkan"
 msgstr "Track and grow"
 
+#: src/routes/menu-board.tsx
+msgid "Papan Menu"
+msgstr "Menu Board"
+
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Pas"
 msgstr "Exact"
@@ -4969,7 +4977,7 @@ msgstr "New customer"
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Pelanggan dan loyalitas"
-msgstr ""
+msgstr "Customers and loyalty"
 
 #: src/routes/_pos/loyalty.tsx
 msgid "Pelanggan dengan belanja lebih tinggi memperoleh pengali poin."
@@ -5009,7 +5017,7 @@ msgstr "Customer not found."
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Pelanggan, poin dan hadiah, promo, dan kartu hadiah."
-msgstr ""
+msgstr "Customers, points and rewards, promotions, and gift cards."
 
 #: src/components/app-shared.tsx
 #: src/routes/_pos/inventory/purchase-orders.tsx
@@ -5384,6 +5392,10 @@ msgstr "Orders"
 msgid "Pesanan ({0})"
 msgstr "Order ({0})"
 
+#: src/routes/_public/order.$token.tsx
+msgid "Pesanan Anda"
+msgstr "Your Order"
+
 #: src/routes/display.tsx
 msgid "Pesanan Anda akan tampil di sini."
 msgstr "Your order will appear here."
@@ -5498,7 +5510,7 @@ msgstr "Orders completed during this shift will appear here."
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Pesanan, meja, dan dapur"
-msgstr ""
+msgstr "Orders, tables, and kitchen"
 
 #. placeholder {0}: item.name
 #: src/routes/_pos/menu/labels.tsx
@@ -5709,6 +5721,10 @@ msgstr "Share"
 #: src/routes/_pos/reports/payments.tsx
 msgid "Porsi (%)"
 msgstr "Share (%)"
+
+#: src/routes/_public/index.tsx
+msgid "POS pintar untuk kafe dan resto"
+msgstr "Smart POS for cafes and restaurants"
 
 #: src/components/marketing/marketing-footer.tsx
 #~ msgid "POS pintar untuk kafe dan resto di Indonesia."
@@ -6348,6 +6364,10 @@ msgstr "All caught up"
 #~ msgid "Semua fitur terbuka"
 #~ msgstr "All features unlocked"
 
+#: src/routes/_public/fitur/index.tsx
+msgid "Semua fitur untuk kafe dan resto"
+msgstr "Every feature for cafes and restaurants"
+
 #: src/components/marketing/pricing.tsx
 msgid "Semua fitur, tanpa biaya, tanpa kartu kredit."
 msgstr "All features, no cost, no credit card."
@@ -6389,7 +6409,7 @@ msgstr "All transactions are in Rupiah."
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Semua yang dibutuhkan kafe Anda"
-msgstr ""
+msgstr "Everything your cafe needs"
 
 #: src/components/marketing/feature-section.tsx
 msgid "Semua yang dibutuhkan kafe Anda, dalam satu tempat"
@@ -6555,7 +6575,7 @@ msgstr "Staff"
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Staf, peran, jam kerja, shift, dan banyak outlet."
-msgstr ""
+msgstr "Staff, roles, work hours, shifts, and multiple outlets."
 
 #: src/routes/_pos/settings/staff.tsx
 #~ msgid "Staff"
@@ -6733,8 +6753,8 @@ msgid "Susut"
 msgstr "Wastage"
 
 #: src/routes/_public/terms.tsx
-#~ msgid "Syarat Layanan"
-#~ msgstr "Terms of Service"
+msgid "Syarat Layanan"
+msgstr "Terms of Service"
 
 #: src/components/sale/hold-order-dialog.tsx
 msgid "Tahan"
@@ -7464,7 +7484,7 @@ msgstr "Team"
 
 #: src/routes/_public/fitur/index.tsx
 msgid "Tim dan outlet"
-msgstr ""
+msgstr "Team and outlets"
 
 #: src/components/command-palette.tsx
 msgid "Tindakan Cepat"
@@ -8016,11 +8036,11 @@ msgstr "Yes. kodapos supports static and dynamic QRIS, plus cash, split, and gif
 
 #: src/components/marketing/feature-page.tsx
 msgid "Yang belum"
-msgstr ""
+msgstr "What it can't do yet"
 
 #: src/components/marketing/feature-page.tsx
 msgid "Yang sudah bisa"
-msgstr ""
+msgstr "What it can do"
 
 #: src/components/dashboard-activity.tsx
 #~ msgid "Yesterday"

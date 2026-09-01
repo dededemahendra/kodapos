@@ -1,10 +1,16 @@
 import { v } from 'convex/values';
 import { internal } from '../_generated/api';
 import type { Id } from '../_generated/dataModel';
-import { action, internalAction, internalMutation, internalQuery, mutation } from '../_generated/server';
+import {
+  action,
+  internalAction,
+  internalMutation,
+  internalQuery,
+  mutation,
+} from '../_generated/server';
 import { requireActiveOutlet } from '../lib/auth';
-import { buildOrder, settleSale, saleArgs, voidPendingOrder } from '../lib/sale';
-import { resolveProvider, qrisWebhookSecret } from './providers';
+import { buildOrder, saleArgs, settleSale, voidPendingOrder } from '../lib/sale';
+import { qrisWebhookSecret, resolveProvider } from './providers';
 import { signMockBody } from './providers/mock';
 
 /**
@@ -156,7 +162,8 @@ export const patchCharge = internalMutation({
       .withIndex('by_order', (q) => q.eq('orderId', orderId))
       .filter((q) => q.eq(q.field('method'), 'qris_dynamic'))
       .unique();
-    if (payment) await ctx.db.patch(payment._id, { providerRef, expiresAt, providerStatus: 'pending' });
+    if (payment)
+      await ctx.db.patch(payment._id, { providerRef, expiresAt, providerStatus: 'pending' });
     return null;
   },
 });
@@ -186,7 +193,10 @@ export const createQrisDynamicSale = action({
     );
     let charge: { providerRef: string; qrString: string; expiresAt: number };
     try {
-      charge = await resolveProvider(config).createCharge({ amountIDR: totalIDR, referenceId: orderId });
+      charge = await resolveProvider(config).createCharge({
+        amountIDR: totalIDR,
+        referenceId: orderId,
+      });
     } catch (err) {
       await ctx.runMutation(internal.payments.qrisDynamic.voidPendingOrderByRef, {
         orderId,
@@ -250,7 +260,12 @@ export const cancelQrisDynamicSale = mutation({
 export const listPendingDynamic = internalQuery({
   args: {},
   returns: v.array(
-    v.object({ orderId: v.id('orders'), cafeId: v.id('cafes'), providerRef: v.string(), expiresAt: v.number() })
+    v.object({
+      orderId: v.id('orders'),
+      cafeId: v.id('cafes'),
+      providerRef: v.string(),
+      expiresAt: v.number(),
+    })
   ),
   handler: async (ctx) => {
     const payments = await ctx.db
@@ -259,12 +274,22 @@ export const listPendingDynamic = internalQuery({
         q.eq('method', 'qris_dynamic').eq('providerStatus', 'pending')
       )
       .take(50);
-    const out: Array<{ orderId: Id<'orders'>; cafeId: Id<'cafes'>; providerRef: string; expiresAt: number }> = [];
+    const out: Array<{
+      orderId: Id<'orders'>;
+      cafeId: Id<'cafes'>;
+      providerRef: string;
+      expiresAt: number;
+    }> = [];
     for (const p of payments) {
       if (!p.providerRef || p.expiresAt === undefined) continue;
       const order = await ctx.db.get(p.orderId);
       if (order?.paymentStatus === 'pending') {
-        out.push({ orderId: p.orderId, cafeId: order.cafeId, providerRef: p.providerRef, expiresAt: p.expiresAt });
+        out.push({
+          orderId: p.orderId,
+          cafeId: order.cafeId,
+          providerRef: p.providerRef,
+          expiresAt: p.expiresAt,
+        });
       }
     }
     return out;
@@ -289,19 +314,29 @@ export const reconcilePending = internalAction({
     let left = 0;
     for (const c of candidates) {
       try {
-        const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, { cafeId: c.cafeId });
-        const status = config ? await resolveProvider(config).fetchStatus(c.providerRef) : 'unknown';
+        const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, {
+          cafeId: c.cafeId,
+        });
+        const status = config
+          ? await resolveProvider(config).fetchStatus(c.providerRef)
+          : 'unknown';
         if (status === 'paid') {
-          await ctx.runMutation(internal.payments.qrisDynamic.confirmFromWebhook, { providerRef: c.providerRef });
+          await ctx.runMutation(internal.payments.qrisDynamic.confirmFromWebhook, {
+            providerRef: c.providerRef,
+          });
           settled++;
         } else if (status === 'expired' || status === 'failed') {
-          await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, { providerRef: c.providerRef });
+          await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, {
+            providerRef: c.providerRef,
+          });
           voided++;
         } else if (status === 'pending') {
           left++;
         } else {
           if (now > c.expiresAt + FAILSAFE_GRACE_MS) {
-            await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, { providerRef: c.providerRef });
+            await ctx.runMutation(internal.payments.qrisDynamic.voidByRef, {
+              providerRef: c.providerRef,
+            });
             voided++;
           } else {
             left++;
@@ -317,19 +352,29 @@ export const reconcilePending = internalAction({
     const selfOrders = await ctx.runQuery(internal.payments.qrisDynamic.listPendingSelfOrders, {});
     for (const c of selfOrders) {
       try {
-        const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, { cafeId: c.cafeId });
-        const status = config ? await resolveProvider(config).fetchStatus(c.providerRef) : 'unknown';
+        const config = await ctx.runQuery(internal.payments.qrisDynamic.getQrisConfig, {
+          cafeId: c.cafeId,
+        });
+        const status = config
+          ? await resolveProvider(config).fetchStatus(c.providerRef)
+          : 'unknown';
         if (status === 'paid') {
-          await ctx.runMutation(internal.payments.qrisDynamic.confirmSelfOrderFromWebhook, { providerRef: c.providerRef });
+          await ctx.runMutation(internal.payments.qrisDynamic.confirmSelfOrderFromWebhook, {
+            providerRef: c.providerRef,
+          });
           settled++;
         } else if (status === 'expired' || status === 'failed') {
-          await ctx.runMutation(internal.payments.qrisDynamic.voidSelfOrderCharge, { providerRef: c.providerRef });
+          await ctx.runMutation(internal.payments.qrisDynamic.voidSelfOrderCharge, {
+            providerRef: c.providerRef,
+          });
           voided++;
         } else if (status === 'pending') {
           left++;
         } else {
           if (now > c.expiresAt + FAILSAFE_GRACE_MS) {
-            await ctx.runMutation(internal.payments.qrisDynamic.voidSelfOrderCharge, { providerRef: c.providerRef });
+            await ctx.runMutation(internal.payments.qrisDynamic.voidSelfOrderCharge, {
+              providerRef: c.providerRef,
+            });
             voided++;
           } else {
             left++;
@@ -345,7 +390,10 @@ export const reconcilePending = internalAction({
 
 /** Dev-only: POST a correctly-signed webhook event to the local route (full round-trip). */
 export const simulateWebhook = internalAction({
-  args: { providerRef: v.string(), status: v.union(v.literal('paid'), v.literal('expired'), v.literal('failed')) },
+  args: {
+    providerRef: v.string(),
+    status: v.union(v.literal('paid'), v.literal('expired'), v.literal('failed')),
+  },
   returns: v.number(),
   handler: async (_ctx, { providerRef, status }) => {
     const body = JSON.stringify({ providerRef, status });
@@ -353,7 +401,9 @@ export const simulateWebhook = internalAction({
     if (!secret) throw new Error('QRIS_WEBHOOK_SECRET is not set in the Convex environment.');
     const sig = await signMockBody(secret, body);
     const res = await fetch(`${process.env.CONVEX_SITE_URL}/webhooks/qris`, {
-      method: 'POST', headers: { 'x-signature': sig, 'content-type': 'application/json' }, body,
+      method: 'POST',
+      headers: { 'x-signature': sig, 'content-type': 'application/json' },
+      body,
     });
     return res.status;
   },

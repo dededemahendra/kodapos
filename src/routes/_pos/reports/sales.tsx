@@ -6,8 +6,14 @@ import { useQuery } from 'convex/react';
 import { BarChart3 } from 'lucide-react';
 import { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
+import { useReportRange } from '~/components/reports/use-report-range';
 import { Button } from '~/components/ui/button';
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart';
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '~/components/ui/chart';
 import { DataTable } from '~/components/ui/data-table';
 import {
   Empty,
@@ -21,7 +27,6 @@ import { Skeleton } from '~/components/ui/skeleton';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
 import { exportTablePdf } from '~/lib/pdf';
-import { useReportRange } from '~/components/reports/use-report-range';
 
 export const Route = createFileRoute('/_pos/reports/sales')({
   component: SalesReport,
@@ -40,17 +45,13 @@ function SalesReport() {
       {
         accessorKey: 'orders',
         header: () => <Trans>Transaksi</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{row.original.orders}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{row.original.orders}</span>,
       },
       {
         accessorKey: 'revenueIDR',
         header: () => <Trans>Pendapatan</Trans>,
         cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatIDR(row.original.revenueIDR)}
-          </span>
+          <span className="tabular-nums">{formatIDR(row.original.revenueIDR)}</span>
         ),
       },
     ],
@@ -123,12 +124,7 @@ function SalesReport() {
         <Button type="button" variant="outline" size="sm" onClick={onDownload}>
           <Trans>Unduh CSV</Trans>
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onDownloadPDF}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={onDownloadPDF}>
           <Trans>Unduh PDF</Trans>
         </Button>
       </div>
@@ -143,7 +139,9 @@ function SalesReport() {
             tickFormatter={(value) => String(value).slice(5)}
           />
           <ChartTooltip
-            content={<ChartTooltipContent formatter={(value) => formatIDR(Math.round(Number(value)))} />}
+            content={
+              <ChartTooltipContent formatter={(value) => formatIDR(Math.round(Number(value)))} />
+            }
             cursor={false}
           />
           <Bar dataKey="revenueIDR" fill="var(--color-revenueIDR)" radius={4} />

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 
 const ingredientDoc = v.object({
   _id: v.id('ingredients'),
@@ -52,9 +52,7 @@ export const getForItem = query({
     if (!item || item.cafeId !== cafeId) return null;
     const recipe = await ctx.db
       .query('recipes')
-      .withIndex('by_cafe_item', (q) =>
-        q.eq('cafeId', cafeId).eq('menuItemId', menuItemId)
-      )
+      .withIndex('by_cafe_item', (q) => q.eq('cafeId', cafeId).eq('menuItemId', menuItemId))
       .unique();
     if (!recipe) return null;
     const lines: Array<{
@@ -89,9 +87,7 @@ export const listForCatalog = query({
       if (item.archived) continue;
       const recipe = await ctx.db
         .query('recipes')
-        .withIndex('by_cafe_item', (q) =>
-          q.eq('cafeId', cafeId).eq('menuItemId', item._id)
-        )
+        .withIndex('by_cafe_item', (q) => q.eq('cafeId', cafeId).eq('menuItemId', item._id))
         .unique();
       let lineCount = 0;
       let costPerCupIDR = 0;
@@ -146,9 +142,7 @@ export const upsert = mutation({
 
     const existing = await ctx.db
       .query('recipes')
-      .withIndex('by_cafe_item', (q) =>
-        q.eq('cafeId', cafeId).eq('menuItemId', args.menuItemId)
-      )
+      .withIndex('by_cafe_item', (q) => q.eq('cafeId', cafeId).eq('menuItemId', args.menuItemId))
       .unique();
 
     // Empty lines = clean opt-out.

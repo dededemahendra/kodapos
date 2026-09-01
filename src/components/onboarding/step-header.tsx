@@ -19,9 +19,7 @@ export function OnboardingStepHeader({
         {icon}
       </div>
       <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-      {description ? (
-        <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>
-      ) : null}
+      {description ? <p className="mt-1.5 text-sm text-muted-foreground">{description}</p> : null}
     </div>
   );
 }

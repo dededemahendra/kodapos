@@ -52,14 +52,20 @@ async function setup(
 }
 
 async function connectXendit(asOwner: Setup['asOwner']) {
-  await asOwner.mutation(api.settings.connectQrisProvider, { secretApiKey: 'xnd_test_k', callbackToken: 'cb' });
+  await asOwner.mutation(api.settings.connectQrisProvider, {
+    secretApiKey: 'xnd_test_k',
+    callbackToken: 'cb',
+  });
 }
 
 function stubXendit(getBody: unknown) {
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
     const method = (init?.method ?? 'GET').toUpperCase();
     if (method === 'POST') {
-      return new Response(JSON.stringify({ id: 'qr_R', qr_string: 's', expires_at: '2099-01-01T00:00:00Z' }), { status: 201 });
+      return new Response(
+        JSON.stringify({ id: 'qr_R', qr_string: 's', expires_at: '2099-01-01T00:00:00Z' }),
+        { status: 201 }
+      );
     }
     return new Response(JSON.stringify(getBody), { status: 200 });
   });
@@ -69,7 +75,11 @@ async function seedPending(t: ReturnType<typeof convexTest>): Promise<Id<'orders
   const { asOwner, shiftId, cashierId, itemId } = await setup(t);
   await connectXendit(asOwner);
   const r = await asOwner.action(api.payments.qrisDynamic.createQrisDynamicSale, {
-    clientId: 'rec-1', shiftId, cashierId, lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }], createdAtClient: 1,
+    clientId: 'rec-1',
+    shiftId,
+    cashierId,
+    lines: [{ menuItemId: itemId, qty: 1, modifierOptionIds: [] }],
+    createdAtClient: 1,
   });
   return r.orderId as Id<'orders'>;
 }
@@ -106,7 +116,10 @@ describe('reconcilePending', () => {
     const t = convexTest(schema, modules);
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (_i, init) =>
       (init?.method ?? 'GET').toUpperCase() === 'POST'
-        ? new Response(JSON.stringify({ id: 'qr_R', qr_string: 's', expires_at: '2099-01-01T00:00:00Z' }), { status: 201 })
+        ? new Response(
+            JSON.stringify({ id: 'qr_R', qr_string: 's', expires_at: '2099-01-01T00:00:00Z' }),
+            { status: 201 }
+          )
         : new Response('err', { status: 500 })
     );
     const orderId = await seedPending(t);
@@ -114,7 +127,10 @@ describe('reconcilePending', () => {
     expect(r1.left).toBe(1);
     expect((await t.run((ctx) => ctx.db.get(orderId)))?.paymentStatus).toBe('pending');
     await t.run(async (ctx) => {
-      const p = await ctx.db.query('payments').withIndex('by_order', (q) => q.eq('orderId', orderId)).unique();
+      const p = await ctx.db
+        .query('payments')
+        .withIndex('by_order', (q) => q.eq('orderId', orderId))
+        .unique();
       if (p) await ctx.db.patch(p._id, { expiresAt: 1 });
     });
     const r2 = await t.action(internal.payments.qrisDynamic.reconcilePending, {});

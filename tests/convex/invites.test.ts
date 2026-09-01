@@ -7,7 +7,9 @@ import schema from '../../convex/schema';
 const modules = import.meta.glob('../../convex/**/*.*s');
 
 async function seedOwner(t: ReturnType<typeof convexTest>, name = 'Kopi Senja') {
-  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: `${name}@x.com` }));
+  const userId = await t.run((ctx) =>
+    ctx.db.insert('users', { name: 'Owner', email: `${name}@x.com` })
+  );
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name });
   const cafe = await t.run((ctx) => ctx.db.get(cafeId as Id<'cafes'>));
@@ -25,7 +27,10 @@ describe('inviteManager', () => {
     });
 
     const invite = await t.run((ctx) =>
-      ctx.db.query('businessInvites').withIndex('by_business', (q) => q.eq('businessId', businessId)).first()
+      ctx.db
+        .query('businessInvites')
+        .withIndex('by_business', (q) => q.eq('businessId', businessId))
+        .first()
     );
     expect(invite?.email).toBe('manager@example.com'); // trimmed + lowercased
     expect(invite?.role).toBe('manager');
@@ -43,7 +48,10 @@ describe('inviteManager', () => {
     await asOwner.mutation(api.invites.inviteManager, { email: 'm@x.com', cafeIds: [second] });
 
     const invites = await t.run((ctx) =>
-      ctx.db.query('businessInvites').withIndex('by_email', (q) => q.eq('email', 'm@x.com')).collect()
+      ctx.db
+        .query('businessInvites')
+        .withIndex('by_email', (q) => q.eq('email', 'm@x.com'))
+        .collect()
     );
     expect(invites).toHaveLength(1);
     expect(invites[0]!.cafeIds).toEqual([second]);
@@ -52,10 +60,19 @@ describe('inviteManager', () => {
   it('rejects an outlet outside the business', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await seedOwner(t);
-    const otherUser = await t.run((ctx) => ctx.db.insert('users', { name: 'X', email: 'x2@x.com' }));
-    const otherBiz = await t.run((ctx) => ctx.db.insert('businesses', { name: 'B', ownerUserId: otherUser, createdAt: 1 }));
+    const otherUser = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'X', email: 'x2@x.com' })
+    );
+    const otherBiz = await t.run((ctx) =>
+      ctx.db.insert('businesses', { name: 'B', ownerUserId: otherUser, createdAt: 1 })
+    );
     const foreign = await t.run((ctx) =>
-      ctx.db.insert('cafes', { name: 'Foreign', ownerUserId: otherUser, businessId: otherBiz, createdAt: 1 })
+      ctx.db.insert('cafes', {
+        name: 'Foreign',
+        ownerUserId: otherUser,
+        businessId: otherBiz,
+        createdAt: 1,
+      })
     );
     await expect(
       asOwner.mutation(api.invites.inviteManager, { email: 'm@x.com', cafeIds: [foreign] })
@@ -65,16 +82,27 @@ describe('inviteManager', () => {
   it('rejects an empty outlet set and an invalid email', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, cafeId } = await seedOwner(t);
-    await expect(asOwner.mutation(api.invites.inviteManager, { email: 'm@x.com', cafeIds: [] })).rejects.toThrow('minimal satu outlet');
-    await expect(asOwner.mutation(api.invites.inviteManager, { email: 'nope', cafeIds: [cafeId] })).rejects.toThrow('Email tidak valid.');
+    await expect(
+      asOwner.mutation(api.invites.inviteManager, { email: 'm@x.com', cafeIds: [] })
+    ).rejects.toThrow('minimal satu outlet');
+    await expect(
+      asOwner.mutation(api.invites.inviteManager, { email: 'nope', cafeIds: [cafeId] })
+    ).rejects.toThrow('Email tidak valid.');
   });
 
   it('rejects a manager (owner-only)', async () => {
     const t = convexTest(schema, modules);
     const { userId: ownerId, businessId, cafeId } = await seedOwner(t);
-    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'mgr2@x.com' }));
+    const mgrUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Mgr', email: 'mgr2@x.com' })
+    );
     const mgrMemberId = await t.run((ctx) =>
-      ctx.db.insert('businessMembers', { businessId, userId: mgrUserId, role: 'manager', createdAt: 5 })
+      ctx.db.insert('businessMembers', {
+        businessId,
+        userId: mgrUserId,
+        role: 'manager',
+        createdAt: 5,
+      })
     );
     await t.run((ctx) =>
       ctx.db.insert('memberOutletAccess', { businessMemberId: mgrMemberId, cafeId, createdAt: 5 })
@@ -92,25 +120,36 @@ describe('acceptPendingInvites', () => {
     const { asOwner, cafeId, businessId } = await seedOwner(t);
     await asOwner.mutation(api.invites.inviteManager, { email: 'mgr@x.com', cafeIds: [cafeId] });
 
-    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' }));
+    const mgrUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' })
+    );
     const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
 
     const result = await asMgr.mutation(api.invites.acceptPendingInvites, {});
     expect(result.accepted).toBe(1);
 
     const member = await t.run((ctx) =>
-      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', mgrUserId)).first()
+      ctx.db
+        .query('businessMembers')
+        .withIndex('by_user', (q) => q.eq('userId', mgrUserId))
+        .first()
     );
     expect(member?.role).toBe('manager');
     expect(member?.businessId).toBe(businessId);
 
     const access = await t.run((ctx) =>
-      ctx.db.query('memberOutletAccess').withIndex('by_member', (q) => q.eq('businessMemberId', member!._id)).collect()
+      ctx.db
+        .query('memberOutletAccess')
+        .withIndex('by_member', (q) => q.eq('businessMemberId', member!._id))
+        .collect()
     );
     expect(access.map((a) => a.cafeId)).toEqual([cafeId]);
 
     const remaining = await t.run((ctx) =>
-      ctx.db.query('businessInvites').withIndex('by_email', (q) => q.eq('email', 'mgr@x.com')).collect()
+      ctx.db
+        .query('businessInvites')
+        .withIndex('by_email', (q) => q.eq('email', 'mgr@x.com'))
+        .collect()
     );
     expect(remaining).toHaveLength(0);
 
@@ -123,7 +162,9 @@ describe('acceptPendingInvites', () => {
     const t = convexTest(schema, modules);
     const { asOwner, cafeId } = await seedOwner(t);
     await asOwner.mutation(api.invites.inviteManager, { email: 'mixed@x.com', cafeIds: [cafeId] });
-    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'M', email: 'Mixed@X.com' }));
+    const mgrUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'M', email: 'Mixed@X.com' })
+    );
     const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
     const result = await asMgr.mutation(api.invites.acceptPendingInvites, {});
     expect(result.accepted).toBe(1);
@@ -133,7 +174,9 @@ describe('acceptPendingInvites', () => {
     const t = convexTest(schema, modules);
     const { asOwner, cafeId } = await seedOwner(t);
     // The invitee is themselves already an owner of another business.
-    const otherOwnerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Other', email: 'other@x.com' }));
+    const otherOwnerId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Other', email: 'other@x.com' })
+    );
     const asOther = t.withIdentity({ subject: `${otherOwnerId}|test_session` });
     await asOther.mutation(api.cafes.createForOwner, { name: 'Other Biz' }); // gives them an owner membership
 
@@ -142,7 +185,10 @@ describe('acceptPendingInvites', () => {
     expect(result.accepted).toBe(0);
 
     const remaining = await t.run((ctx) =>
-      ctx.db.query('businessInvites').withIndex('by_email', (q) => q.eq('email', 'other@x.com')).collect()
+      ctx.db
+        .query('businessInvites')
+        .withIndex('by_email', (q) => q.eq('email', 'other@x.com'))
+        .collect()
     );
     expect(remaining).toHaveLength(1); // still pending, surfaced to the owner
   });
@@ -161,11 +207,16 @@ describe('member management', () => {
       ctx.db.insert('cafes', { name: 'Cabang 2', ownerUserId: ownerId, businessId, createdAt: 2 })
     );
     await asOwner.mutation(api.invites.inviteManager, { email: 'mgr@x.com', cafeIds: [cafeId] });
-    const mgrUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' }));
+    const mgrUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Mgr', email: 'mgr@x.com' })
+    );
     const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
     await asMgr.mutation(api.invites.acceptPendingInvites, {});
     const member = await t.run((ctx) =>
-      ctx.db.query('businessMembers').filter((q) => q.eq(q.field('userId'), mgrUserId)).first()
+      ctx.db
+        .query('businessMembers')
+        .filter((q) => q.eq(q.field('userId'), mgrUserId))
+        .first()
     );
     return { asOwner, ownerId, cafeId, second, businessId, mgrUserId, memberId: member!._id };
   }
@@ -173,7 +224,10 @@ describe('member management', () => {
   it('lists members (owner + manager) and pending invites', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, cafeId } = await seedOwnerWithManager(t);
-    await asOwner.mutation(api.invites.inviteManager, { email: 'pending@x.com', cafeIds: [cafeId] });
+    await asOwner.mutation(api.invites.inviteManager, {
+      email: 'pending@x.com',
+      cafeIds: [cafeId],
+    });
 
     const members = await asOwner.query(api.invites.listMembers, {});
     expect(members.some((m) => m.role === 'owner')).toBe(true);
@@ -190,7 +244,10 @@ describe('member management', () => {
     const { asOwner, second, memberId } = await seedOwnerWithManager(t);
     await asOwner.mutation(api.invites.setManagerOutlets, { memberId, cafeIds: [second] });
     const access = await t.run((ctx) =>
-      ctx.db.query('memberOutletAccess').withIndex('by_member', (q) => q.eq('businessMemberId', memberId)).collect()
+      ctx.db
+        .query('memberOutletAccess')
+        .withIndex('by_member', (q) => q.eq('businessMemberId', memberId))
+        .collect()
     );
     expect(access.map((a) => a.cafeId)).toEqual([second]);
   });
@@ -200,11 +257,17 @@ describe('member management', () => {
     const { asOwner, mgrUserId, memberId } = await seedOwnerWithManager(t);
     await asOwner.mutation(api.invites.revokeMember, { memberId });
     const member = await t.run((ctx) =>
-      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', mgrUserId)).first()
+      ctx.db
+        .query('businessMembers')
+        .withIndex('by_user', (q) => q.eq('userId', mgrUserId))
+        .first()
     );
     expect(member).toBeNull();
     const access = await t.run((ctx) =>
-      ctx.db.query('memberOutletAccess').withIndex('by_member', (q) => q.eq('businessMemberId', memberId)).collect()
+      ctx.db
+        .query('memberOutletAccess')
+        .withIndex('by_member', (q) => q.eq('businessMemberId', memberId))
+        .collect()
     );
     expect(access).toHaveLength(0);
   });
@@ -222,9 +285,14 @@ describe('member management', () => {
     const t = convexTest(schema, modules);
     const { asOwner, ownerId } = await seedOwnerWithManager(t);
     const ownerMember = await t.run((ctx) =>
-      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', ownerId)).first()
+      ctx.db
+        .query('businessMembers')
+        .withIndex('by_user', (q) => q.eq('userId', ownerId))
+        .first()
     );
-    await expect(asOwner.mutation(api.invites.revokeMember, { memberId: ownerMember!._id })).rejects.toThrow();
+    await expect(
+      asOwner.mutation(api.invites.revokeMember, { memberId: ownerMember!._id })
+    ).rejects.toThrow();
   });
 
   it('rejects a manager from the owner-only member queries/mutations', async () => {
@@ -232,10 +300,12 @@ describe('member management', () => {
     const { mgrUserId, memberId } = await seedOwnerWithManager(t);
     const asMgr = t.withIdentity({ subject: `${mgrUserId}|test_session` });
     await expect(asMgr.query(api.invites.listMembers, {})).rejects.toThrow('owner access required');
-    await expect(asMgr.query(api.invites.listPendingInvites, {})).rejects.toThrow('owner access required');
-    await expect(
-      asMgr.mutation(api.invites.revokeMember, { memberId })
-    ).rejects.toThrow('owner access required');
+    await expect(asMgr.query(api.invites.listPendingInvites, {})).rejects.toThrow(
+      'owner access required'
+    );
+    await expect(asMgr.mutation(api.invites.revokeMember, { memberId })).rejects.toThrow(
+      'owner access required'
+    );
   });
 
   it('rejects mutating members, outlets, and invites of another business', async () => {
@@ -244,16 +314,28 @@ describe('member management', () => {
     const { asOwner: ownerA, memberId: mgrA } = await seedOwnerWithManager(t);
 
     // Business B: independent owner + manager + pending invite + outlet.
-    const ownerBUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'B', email: 'ownerb@x.com' }));
+    const ownerBUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'B', email: 'ownerb@x.com' })
+    );
     const asOwnerB = t.withIdentity({ subject: `${ownerBUserId}|test_session` });
     const cafeB = await asOwnerB.mutation(api.cafes.createForOwner, { name: 'Bisnis B' });
     await asOwnerB.mutation(api.invites.inviteManager, { email: 'mgrb@x.com', cafeIds: [cafeB] });
-    const mgrBUserId = await t.run((ctx) => ctx.db.insert('users', { name: 'MgrB', email: 'mgrb@x.com' }));
-    await t.withIdentity({ subject: `${mgrBUserId}|test_session` }).mutation(api.invites.acceptPendingInvites, {});
-    const mgrBMember = await t.run((ctx) =>
-      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', mgrBUserId)).first()
+    const mgrBUserId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'MgrB', email: 'mgrb@x.com' })
     );
-    await asOwnerB.mutation(api.invites.inviteManager, { email: 'pendingb@x.com', cafeIds: [cafeB] });
+    await t
+      .withIdentity({ subject: `${mgrBUserId}|test_session` })
+      .mutation(api.invites.acceptPendingInvites, {});
+    const mgrBMember = await t.run((ctx) =>
+      ctx.db
+        .query('businessMembers')
+        .withIndex('by_user', (q) => q.eq('userId', mgrBUserId))
+        .first()
+    );
+    await asOwnerB.mutation(api.invites.inviteManager, {
+      email: 'pendingb@x.com',
+      cafeIds: [cafeB],
+    });
     const inviteB = (await asOwnerB.query(api.invites.listPendingInvites, {}))[0]!.inviteId;
 
     // Owner A cannot touch business B's manager, invite, or use B's outlet.
@@ -261,11 +343,14 @@ describe('member management', () => {
       ownerA.mutation(api.invites.revokeMember, { memberId: mgrBMember!._id })
     ).rejects.toThrow('Anggota tidak ditemukan.');
     await expect(
-      ownerA.mutation(api.invites.setManagerOutlets, { memberId: mgrBMember!._id, cafeIds: [cafeB] })
+      ownerA.mutation(api.invites.setManagerOutlets, {
+        memberId: mgrBMember!._id,
+        cafeIds: [cafeB],
+      })
     ).rejects.toThrow('Anggota tidak ditemukan.');
-    await expect(
-      ownerA.mutation(api.invites.cancelInvite, { inviteId: inviteB })
-    ).rejects.toThrow('Undangan tidak ditemukan.');
+    await expect(ownerA.mutation(api.invites.cancelInvite, { inviteId: inviteB })).rejects.toThrow(
+      'Undangan tidak ditemukan.'
+    );
     // And cannot grant business A's own manager an outlet from business B.
     await expect(
       ownerA.mutation(api.invites.setManagerOutlets, { memberId: mgrA, cafeIds: [cafeB] })

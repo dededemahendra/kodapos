@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
+import { internalMutation, internalQuery, mutation, query } from './_generated/server';
 import { requireBusinessOwner } from './lib/auth';
 import { generateToken, hashToken } from './lib/token';
-import { internalMutation, internalQuery, mutation, query } from './_generated/server';
 
 export const resolve = internalQuery({
   args: { tokenHash: v.string() },

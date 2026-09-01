@@ -6,7 +6,13 @@ import { ChefHat } from 'lucide-react';
 import { ORDER_TYPE_OPTIONS } from '~/components/sale/order-types';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { CardGridSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
 import { cn } from '~/lib/utils';

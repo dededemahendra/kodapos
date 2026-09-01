@@ -239,11 +239,7 @@ export default defineSchema({
     cafeId: v.id('cafes'),
     priceCategoryId: v.id('priceCategories'),
     targetKind: v.union(v.literal('item'), v.literal('variant'), v.literal('modifier')),
-    targetId: v.union(
-      v.id('menuItems'),
-      v.id('menuItemVariants'),
-      v.id('modifierOptions')
-    ),
+    targetId: v.union(v.id('menuItems'), v.id('menuItemVariants'), v.id('modifierOptions')),
     priceIDR: v.number(),
     createdAt: v.number(),
   })

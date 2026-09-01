@@ -165,7 +165,9 @@ describe('reservations setStatus lifecycle', () => {
     expect((await asOwner.query(api.reservations.list, { status: 'cancelled' })).rows).toHaveLength(
       1
     );
-    expect((await asOwner.query(api.reservations.list, { status: 'no_show' })).rows).toHaveLength(1);
+    expect((await asOwner.query(api.reservations.list, { status: 'no_show' })).rows).toHaveLength(
+      1
+    );
   });
 
   it('list filters by status', async () => {

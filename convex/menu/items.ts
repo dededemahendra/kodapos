@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from '../_generated/dataModel';
-import { mutation, type MutationCtx, query, type QueryCtx } from '../_generated/server';
-import { requireOwned, requireActiveOutlet } from '../lib/auth';
+import { type MutationCtx, mutation, type QueryCtx, query } from '../_generated/server';
+import { requireActiveOutlet, requireOwned } from '../lib/auth';
 import { itemRecipeStatus } from './itemStock';
 
 const menuItemDoc = v.object({
@@ -91,10 +91,7 @@ const itemDetail = v.object({
   imageUrl: v.union(v.string(), v.null()),
 });
 
-async function imageUrlFor(
-  ctx: QueryCtx,
-  storageId?: Id<'_storage'>
-): Promise<string | null> {
+async function imageUrlFor(ctx: QueryCtx, storageId?: Id<'_storage'>): Promise<string | null> {
   return storageId ? await ctx.storage.getUrl(storageId) : null;
 }
 
@@ -379,9 +376,7 @@ export const assignMissingBarcodes = mutation({
 const importResult = v.object({
   created: v.number(),
   skipped: v.number(),
-  errors: v.array(
-    v.object({ row: v.number(), name: v.string(), reason: v.string() })
-  ),
+  errors: v.array(v.object({ row: v.number(), name: v.string(), reason: v.string() })),
 });
 
 export const bulkImport = mutation({
@@ -617,7 +612,12 @@ export const getById = query({
       position: vr.position,
       ...(vr.barcode ? { barcode: vr.barcode } : {}),
     }));
-    return { item, attachedGroups, variants, imageUrl: await imageUrlFor(ctx, item.imageStorageId) };
+    return {
+      item,
+      attachedGroups,
+      variants,
+      imageUrl: await imageUrlFor(ctx, item.imageStorageId),
+    };
   },
 });
 

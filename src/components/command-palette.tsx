@@ -2,13 +2,7 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
-import {
-  Calculator,
-  Clock,
-  Plus,
-  UtensilsCrossed,
-  Users,
-} from 'lucide-react';
+import { Calculator, Clock, Plus, Users, UtensilsCrossed } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { navGroups, type SidebarNavItem } from '~/components/app-shared';
 import {
@@ -32,10 +26,7 @@ export function CommandPalette() {
 
   const trimmed = query.trim();
   const isLive = open && trimmed.length >= 2;
-  const liveResults = useQuery(
-    api.search.global,
-    isLive ? { term: trimmed } : 'skip'
-  );
+  const liveResults = useQuery(api.search.global, isLive ? { term: trimmed } : 'skip');
 
   // ⌘K / Ctrl+K to toggle
   useEffect(() => {
@@ -87,7 +78,12 @@ export function CommandPalette() {
     { key: 'sale', label: t`Buka kasir`, icon: <Calculator className="size-4" />, path: '/sale' },
     { key: 'menu', label: t`Kelola menu`, icon: <Plus className="size-4" />, path: '/menu' },
     { key: 'shift', label: t`Buka shift`, icon: <Clock className="size-4" />, path: '/shift/open' },
-    { key: 'customers', label: t`Kelola pelanggan`, icon: <Users className="size-4" />, path: '/customers' },
+    {
+      key: 'customers',
+      label: t`Kelola pelanggan`,
+      icon: <Users className="size-4" />,
+      path: '/customers',
+    },
   ] as const;
 
   const matchingActions = queryLower
@@ -95,23 +91,21 @@ export function CommandPalette() {
     : QUICK_ACTIONS;
 
   const hasLiveResults =
-    (liveResults?.menuItems.length ?? 0) > 0 ||
-    (liveResults?.customers.length ?? 0) > 0;
+    (liveResults?.menuItems.length ?? 0) > 0 || (liveResults?.customers.length ?? 0) > 0;
   const isLoading = isLive && liveResults === undefined;
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
-      <CommandInput
-        placeholder={t`Cari...`}
-        value={query}
-        onValueChange={setQuery}
-      />
+      <CommandInput placeholder={t`Cari...`} value={query} onValueChange={setQuery} />
       <CommandList>
-        {!isLoading && !hasLiveResults && matchingActions.length === 0 && matchingNav.length === 0 && (
-          <CommandEmpty>
-            <Trans>Tidak ada hasil untuk "{query}"</Trans>
-          </CommandEmpty>
-        )}
+        {!isLoading &&
+          !hasLiveResults &&
+          matchingActions.length === 0 &&
+          matchingNav.length === 0 && (
+            <CommandEmpty>
+              <Trans>Tidak ada hasil untuk "{query}"</Trans>
+            </CommandEmpty>
+          )}
 
         {matchingActions.length > 0 && (
           <CommandGroup heading={t`Tindakan Cepat`}>
@@ -119,9 +113,7 @@ export function CommandPalette() {
               <CommandItem
                 key={action.key}
                 value={`action-${action.key}`}
-                onSelect={() =>
-                  select(() => void navigate({ to: action.path as '/' }))
-                }
+                onSelect={() => select(() => void navigate({ to: action.path as '/' }))}
               >
                 {action.icon}
                 {action.label}
@@ -136,9 +128,7 @@ export function CommandPalette() {
               <CommandItem
                 key={item.path}
                 value={`nav-${item.path}`}
-                onSelect={() =>
-                  select(() => void navigate({ to: item.path! as '/' }))
-                }
+                onSelect={() => select(() => void navigate({ to: item.path! as '/' }))}
               >
                 {item.icon}
                 <span>{i18n._(item.title)}</span>
@@ -161,9 +151,7 @@ export function CommandPalette() {
               <CommandItem
                 key={item._id}
                 value={`menu-${item._id}`}
-                onSelect={() =>
-                  select(() => void navigate({ to: '/menu' }))
-                }
+                onSelect={() => select(() => void navigate({ to: '/menu' }))}
               >
                 <UtensilsCrossed className="size-4" />
                 <span>{item.name}</span>
@@ -189,9 +177,7 @@ export function CommandPalette() {
               <CommandItem
                 key={customer._id}
                 value={`customer-${customer._id}`}
-                onSelect={() =>
-                  select(() => void navigate({ to: '/customers' }))
-                }
+                onSelect={() => select(() => void navigate({ to: '/customers' }))}
               >
                 <Users className="size-4" />
                 <span>{customer.name}</span>

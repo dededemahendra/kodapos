@@ -26,7 +26,7 @@ export type PricingResult = {
 export function promoDiscountIDR(
   type: 'percent' | 'fixed',
   value: number,
-  subtotalIDR: number,
+  subtotalIDR: number
 ): number {
   const raw = type === 'percent' ? Math.round((subtotalIDR * value) / 100) : value;
   return Math.max(0, Math.min(raw, subtotalIDR));
@@ -48,7 +48,7 @@ export function scopedSubtotalIDR(
   lines: Array<{ menuItemId: string; categoryId: string; lineTotalIDR: number }>,
   scope: 'order' | 'item' | 'category' | undefined,
   targetItemIds?: readonly string[],
-  targetCategoryIds?: readonly string[],
+  targetCategoryIds?: readonly string[]
 ): number {
   if (scope === 'item') {
     const set = new Set(targetItemIds ?? []);

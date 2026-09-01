@@ -254,7 +254,10 @@ export const DOCS_PART_1: DocTopic[] = [
         ],
       },
       {
-        heading: { id: 'Menahan, memanggil kembali, dan mengosongkan', en: 'Hold, recall, and clear' },
+        heading: {
+          id: 'Menahan, memanggil kembali, dan mengosongkan',
+          en: 'Hold, recall, and clear',
+        },
         blocks: [
           {
             type: 'p',

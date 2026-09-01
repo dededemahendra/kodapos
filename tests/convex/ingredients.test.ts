@@ -348,13 +348,24 @@ describe('ingredients.performStockTake', () => {
     const { asOwner } = await setupOwner(t);
     const mk = (name: string) =>
       asOwner.mutation(api.ingredients.upsert, {
-        name, canonicalUnit: 'piece', reorderThreshold: 0, lastCostPerUnitIDR: 100,
+        name,
+        canonicalUnit: 'piece',
+        reorderThreshold: 0,
+        lastCostPerUnitIDR: 100,
       });
     const a = await mk('A');
     const b = await mk('B');
     const c = await mk('C');
-    await asOwner.mutation(api.ingredients.adjustStock, { ingredientId: a, newQty: 10, reasonLabel: 'Koreksi' });
-    await asOwner.mutation(api.ingredients.adjustStock, { ingredientId: b, newQty: 5, reasonLabel: 'Koreksi' });
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: a,
+      newQty: 10,
+      reasonLabel: 'Koreksi',
+    });
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: b,
+      newQty: 5,
+      reasonLabel: 'Koreksi',
+    });
 
     const res = await asOwner.mutation(api.ingredients.performStockTake, {
       counts: [
@@ -376,7 +387,10 @@ describe('ingredients.performStockTake', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const a = await asOwner.mutation(api.ingredients.upsert, {
-      name: 'A', canonicalUnit: 'piece', reorderThreshold: 0, lastCostPerUnitIDR: 100,
+      name: 'A',
+      canonicalUnit: 'piece',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 100,
     });
     await asOwner.mutation(api.ingredients.performStockTake, {
       counts: [{ ingredientId: a, countedQty: 7 }],
@@ -393,9 +407,16 @@ describe('ingredients.performStockTake', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const a = await asOwner.mutation(api.ingredients.upsert, {
-      name: 'A', canonicalUnit: 'piece', reorderThreshold: 0, lastCostPerUnitIDR: 100,
+      name: 'A',
+      canonicalUnit: 'piece',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 100,
     });
-    await asOwner.mutation(api.ingredients.adjustStock, { ingredientId: a, newQty: 4, reasonLabel: 'Koreksi' });
+    await asOwner.mutation(api.ingredients.adjustStock, {
+      ingredientId: a,
+      newQty: 4,
+      reasonLabel: 'Koreksi',
+    });
     await expect(
       asOwner.mutation(api.ingredients.performStockTake, {
         counts: [{ ingredientId: a, countedQty: -1 }],
@@ -417,7 +438,10 @@ describe('ingredients.performStockTake', () => {
     const { asOwner } = await setupOwner(t);
     const { asOwner: asOther } = await setupOwner(t, 'other@x.com');
     const foreign = await asOther.mutation(api.ingredients.upsert, {
-      name: 'X', canonicalUnit: 'piece', reorderThreshold: 0, lastCostPerUnitIDR: 100,
+      name: 'X',
+      canonicalUnit: 'piece',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 100,
     });
     await expect(
       asOwner.mutation(api.ingredients.performStockTake, {
@@ -432,14 +456,20 @@ describe('ingredients.upsert barcode', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     await asOwner.mutation(api.ingredients.upsert, {
-      name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 0,
       barcode: '8991234567890',
     });
     const list = await asOwner.query(api.ingredients.list, {});
     expect(list[0]?.barcode).toBe('8991234567890');
     await expect(
       asOwner.mutation(api.ingredients.upsert, {
-        name: 'Susu Lain', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+        name: 'Susu Lain',
+        canonicalUnit: 'ml',
+        reorderThreshold: 0,
+        lastCostPerUnitIDR: 0,
         barcode: '8991234567890',
       })
     ).rejects.toThrow('Barcode sudah dipakai');
@@ -449,11 +479,18 @@ describe('ingredients.upsert barcode', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const id = await asOwner.mutation(api.ingredients.upsert, {
-      name: 'Gula', canonicalUnit: 'g', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      name: 'Gula',
+      canonicalUnit: 'g',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 0,
       barcode: '111',
     });
     await asOwner.mutation(api.ingredients.upsert, {
-      id, name: 'Gula Pasir', canonicalUnit: 'g', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      id,
+      name: 'Gula Pasir',
+      canonicalUnit: 'g',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 0,
       barcode: '111',
     });
     const list = await asOwner.query(api.ingredients.list, {});
@@ -467,11 +504,15 @@ describe('ingredients.getByBarcode', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const id = await asOwner.mutation(api.ingredients.upsert, {
-      name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 0,
       barcode: '900111',
     });
-    expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: '900111' }))
-      .toEqual({ ingredientId: id });
+    expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: '900111' })).toEqual({
+      ingredientId: id,
+    });
     expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: 'nope' })).toBeNull();
     await asOwner.mutation(api.ingredients.archive, { id });
     expect(await asOwner.query(api.ingredients.getByBarcode, { barcode: '900111' })).toBeNull();
@@ -481,7 +522,10 @@ describe('ingredients.getByBarcode', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t, 'a@x.com');
     await asOwner.mutation(api.ingredients.upsert, {
-      name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 0,
+      name: 'Susu',
+      canonicalUnit: 'ml',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 0,
       barcode: '900222',
     });
     const { asOwner: asOther } = await setupOwner(t, 'b@x.com');

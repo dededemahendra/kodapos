@@ -48,7 +48,9 @@ describe('multi-outlet schema', () => {
 describe('createForOwner — business bootstrap', () => {
   it('creates a business, owner membership, and active outlet for a new owner', async () => {
     const t = convexTest(schema, modules);
-    const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' }));
+    const userId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' })
+    );
     const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
 
     const cafeId = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
@@ -60,20 +62,28 @@ describe('createForOwner — business bootstrap', () => {
     expect(business?.ownerUserId).toBe(userId);
 
     const member = await t.run((ctx) =>
-      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>)).first()
+      ctx.db
+        .query('businessMembers')
+        .withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>))
+        .first()
     );
     expect(member?.role).toBe('owner');
     expect(member?.businessId).toBe(cafe!.businessId);
 
     const active = await t.run((ctx) =>
-      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>)).first()
+      ctx.db
+        .query('activeOutlet')
+        .withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>))
+        .first()
     );
     expect(active?.cafeId).toBe(cafeId);
   });
 
   it('is idempotent: a second call returns the same cafe and does not duplicate the business', async () => {
     const t = convexTest(schema, modules);
-    const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' }));
+    const userId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' })
+    );
     const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
 
     const first = await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
@@ -81,7 +91,10 @@ describe('createForOwner — business bootstrap', () => {
     expect(second).toBe(first);
 
     const businesses = await t.run((ctx) =>
-      ctx.db.query('businesses').withIndex('by_owner', (q) => q.eq('ownerUserId', userId as Id<'users'>)).collect()
+      ctx.db
+        .query('businesses')
+        .withIndex('by_owner', (q) => q.eq('ownerUserId', userId as Id<'users'>))
+        .collect()
     );
     expect(businesses).toHaveLength(1);
   });
@@ -112,12 +125,18 @@ describe('backfillBusinesses migration', () => {
     expect(business?.ownerUserId).toBe(userId);
 
     const member = await t.run((ctx) =>
-      ctx.db.query('businessMembers').withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>)).first()
+      ctx.db
+        .query('businessMembers')
+        .withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>))
+        .first()
     );
     expect(member?.role).toBe('owner');
 
     const active = await t.run((ctx) =>
-      ctx.db.query('activeOutlet').withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>)).first()
+      ctx.db
+        .query('activeOutlet')
+        .withIndex('by_user', (q) => q.eq('userId', userId as Id<'users'>))
+        .first()
     );
     expect(active?.cafeId).toBe(cafeId);
 
@@ -125,7 +144,10 @@ describe('backfillBusinesses migration', () => {
     const second = await t.mutation(internal.multiOutlet.backfillBusinesses, {});
     expect(second.migrated).toBe(0);
     const businesses = await t.run((ctx) =>
-      ctx.db.query('businesses').withIndex('by_owner', (q) => q.eq('ownerUserId', userId as Id<'users'>)).collect()
+      ctx.db
+        .query('businesses')
+        .withIndex('by_owner', (q) => q.eq('ownerUserId', userId as Id<'users'>))
+        .collect()
     );
     expect(businesses).toHaveLength(1);
   });

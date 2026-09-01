@@ -1,17 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useQuery } from 'convex/react';
-import { api } from 'convex/_generated/api';
 import { Trans } from '@lingui/react/macro';
+import { createFileRoute } from '@tanstack/react-router';
+import { api } from 'convex/_generated/api';
+import { useQuery } from 'convex/react';
 import { Store } from 'lucide-react';
+import { OutletsRevenueChart } from '~/components/all-outlets/outlets-revenue-chart';
+import { OutletsTable } from '~/components/all-outlets/outlets-table';
+import { DashboardCard } from '~/components/dashboard-card';
 import { RequirePermission } from '~/components/permission/require-permission';
 import { RangePicker } from '~/components/reports/range-picker';
 import { parseReportSearch, useAllOutletsRange } from '~/components/reports/use-report-range';
-import { DashboardCard } from '~/components/dashboard-card';
-import { formatCount, formatIDR } from '~/lib/formater';
-import { OutletsRevenueChart } from '~/components/all-outlets/outlets-revenue-chart';
-import { OutletsTable } from '~/components/all-outlets/outlets-table';
-import { StatCardsSkeleton } from '~/components/ui/loading-skeletons';
-import { Skeleton } from '~/components/ui/skeleton';
 import {
   Empty,
   EmptyDescription,
@@ -19,6 +16,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
+import { StatCardsSkeleton } from '~/components/ui/loading-skeletons';
+import { Skeleton } from '~/components/ui/skeleton';
+import { formatCount, formatIDR } from '~/lib/formater';
 
 export const Route = createFileRoute('/_pos/all-outlets')({
   validateSearch: parseReportSearch,

@@ -17,6 +17,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { Skeleton } from '~/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -26,7 +27,6 @@ import {
   TableRow,
 } from '~/components/ui/table';
 import { cn } from '~/lib/utils';
-import { Skeleton } from '~/components/ui/skeleton';
 import { tableViewState } from './data-table-state';
 import { moveId } from './reorder';
 
@@ -145,8 +145,9 @@ function SortableRow({
   className?: string;
   children: ReactNode;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
   return (
     <TableRow
       ref={setNodeRef}

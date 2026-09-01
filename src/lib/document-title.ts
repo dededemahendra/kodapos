@@ -1,8 +1,6 @@
 import type { MessageDescriptor } from '@lingui/core';
 import { msg } from '@lingui/core/macro';
 
-export const TITLE_SUFFIX = 'kodapos';
-
 export type TitleEntry = { path: string; title: MessageDescriptor };
 
 /**

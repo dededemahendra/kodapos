@@ -10,8 +10,8 @@ import type { FeaturePageContent } from './types';
 export const PESANAN: FeaturePageContent = {
   slug: 'pesanan',
   seoTitle: {
-    id: 'Pesanan: meja, QR, dan dapur — kodapos',
-    en: 'Orders: tables, QR, and kitchen — kodapos',
+    id: 'Pesanan: meja, QR, dan dapur',
+    en: 'Orders: tables, QR, and kitchen',
   },
   seoDescription: {
     id: 'Meja, pemesanan mandiri lewat QR, reservasi, dan papan dapur real-time — semua tersambung, tanpa nota kertas yang tercecer.',

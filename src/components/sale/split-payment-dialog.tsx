@@ -249,9 +249,7 @@ export function SplitPaymentDialog({
                   <div className="flex items-center gap-2">
                     <Select
                       value={row.method}
-                      onValueChange={(v) =>
-                        updateRow(i, { method: v as SyncMethod, tendered: '' })
-                      }
+                      onValueChange={(v) => updateRow(i, { method: v as SyncMethod, tendered: '' })}
                     >
                       <SelectTrigger className="h-9 flex-1">
                         <SelectValue placeholder={t`Metode`} />
@@ -278,9 +276,7 @@ export function SplitPaymentDialog({
                       inputMode="numeric"
                       placeholder={t`Jumlah (Rp)`}
                       value={row.amount}
-                      onChange={(e) =>
-                        updateRow(i, { amount: e.target.value.replace(/\D/g, '') })
-                      }
+                      onChange={(e) => updateRow(i, { amount: e.target.value.replace(/\D/g, '') })}
                       className="h-9 w-28 text-right tabular-nums"
                     />
                     <button
@@ -320,7 +316,9 @@ export function SplitPaymentDialog({
                       amountIDR={amt}
                       onCodeChange={(code) => updateRow(i, { code })}
                       onBalance={(code, balance) =>
-                        setGiftBalances((b) => (b[code] === balance ? b : { ...b, [code]: balance }))
+                        setGiftBalances((b) =>
+                          b[code] === balance ? b : { ...b, [code]: balance }
+                        )
                       }
                     />
                   ) : null}

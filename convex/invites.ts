@@ -1,8 +1,8 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { mutation, query } from './_generated/server';
 import { requireBusinessOwner } from './lib/auth';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,7 +36,7 @@ export const inviteManager = mutation({
       .withIndex('by_email', (q) => q.eq('email', normalized))
       .filter((q) => q.eq(q.field('businessId'), businessId))
       .first();
-    let inviteId;
+    let inviteId: Id<'businessInvites'>;
     if (existing) {
       await ctx.db.patch(existing._id, { cafeIds });
       inviteId = existing._id;
@@ -199,7 +199,11 @@ export const setManagerOutlets = mutation({
     for (const row of existing) await ctx.db.delete(row._id);
     const now = Date.now();
     for (const cafeId of cafeIds) {
-      await ctx.db.insert('memberOutletAccess', { businessMemberId: memberId, cafeId, createdAt: now });
+      await ctx.db.insert('memberOutletAccess', {
+        businessMemberId: memberId,
+        cafeId,
+        createdAt: now,
+      });
     }
     return null;
   },

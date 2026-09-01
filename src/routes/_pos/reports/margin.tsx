@@ -45,44 +45,32 @@ function MarginReport() {
       {
         accessorKey: 'qty',
         header: () => <Trans>Terjual</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{row.original.qty}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{row.original.qty}</span>,
       },
       {
         accessorKey: 'revenueIDR',
         header: () => <Trans>Pendapatan</Trans>,
         cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatIDR(row.original.revenueIDR)}
-          </span>
+          <span className="tabular-nums">{formatIDR(row.original.revenueIDR)}</span>
         ),
       },
       {
         accessorKey: 'cogsIDR',
         header: () => <Trans>Biaya</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatIDR(row.original.cogsIDR)}
-          </span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{formatIDR(row.original.cogsIDR)}</span>,
       },
       {
         accessorKey: 'marginIDR',
         header: () => <Trans>Margin</Trans>,
         cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatIDR(row.original.marginIDR)}
-          </span>
+          <span className="tabular-nums">{formatIDR(row.original.marginIDR)}</span>
         ),
       },
       {
         accessorKey: 'marginPct',
         header: () => <Trans>Margin %</Trans>,
         cell: ({ row }) => (
-          <Badge
-            variant={row.original.marginPct < 0 ? 'destructive' : 'secondary'}
-          >
+          <Badge variant={row.original.marginPct < 0 ? 'destructive' : 'secondary'}>
             {`${row.original.marginPct}%`}
           </Badge>
         ),

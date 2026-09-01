@@ -57,8 +57,7 @@ export function IncomeDialog({
       toast.success(t`Pendapatan dicatat.`);
       onOpenChange(false);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : t`Gagal mencatat pendapatan.`;
+      const message = err instanceof Error ? err.message : t`Gagal mencatat pendapatan.`;
       setError(message);
       toast.error(message);
     } finally {
@@ -117,11 +116,7 @@ export function IncomeDialog({
             {error && <FieldError>{error}</FieldError>}
           </FieldGroup>
           <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               <Trans>Batal</Trans>
             </Button>
             <Button type="submit" disabled={submitting || !valid}>

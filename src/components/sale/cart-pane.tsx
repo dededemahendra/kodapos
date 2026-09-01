@@ -1,5 +1,4 @@
-import { useLingui } from '@lingui/react/macro';
-import { Trans } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { Link } from '@tanstack/react-router';
 import { Banknote, Ellipsis, PauseCircle, Trash2, X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
@@ -12,8 +11,8 @@ import {
 import { formatIDR } from '~/lib/money';
 import { usePermissions } from '~/lib/permissions';
 import { formatPromoValue } from '~/lib/promo';
-import type { CartAction, CartPromo, CartState, ManualDiscount } from './cart-reducer';
 import { CartLineRow } from './cart-line-row';
+import type { CartAction, CartPromo, CartState, ManualDiscount } from './cart-reducer';
 import { ORDER_TYPE_OPTIONS } from './order-types';
 import { methodLabel, type PaymentMethod } from './payment-methods';
 
@@ -89,7 +88,9 @@ export function CartPane({
           </h2>
           {onSwitch ? (
             <Button type="button" size="sm" variant="outline" asChild>
-              <Link to="/pin"><Trans>Ganti kasir</Trans></Link>
+              <Link to="/pin">
+                <Trans>Ganti kasir</Trans>
+              </Link>
             </Button>
           ) : null}
           {onShowHeld ? (
@@ -97,7 +98,7 @@ export function CartPane({
               <Trans>Ditahan ({heldCount ?? 0})</Trans>
             </Button>
           ) : null}
-          {(onKas || onHold) ? (
+          {onKas || onHold ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button type="button" size="icon-sm" variant="outline" aria-label={t`Lainnya`}>
@@ -107,12 +108,14 @@ export function CartPane({
               <DropdownMenuContent align="end">
                 {onKas ? (
                   <DropdownMenuItem onClick={onKas}>
-                    <Banknote /><Trans>Kas</Trans>
+                    <Banknote />
+                    <Trans>Kas</Trans>
                   </DropdownMenuItem>
                 ) : null}
                 {onHold ? (
                   <DropdownMenuItem onClick={onHold} disabled={empty}>
-                    <PauseCircle /><Trans>Tahan pesanan</Trans>
+                    <PauseCircle />
+                    <Trans>Tahan pesanan</Trans>
                   </DropdownMenuItem>
                 ) : null}
                 <DropdownMenuItem
@@ -120,7 +123,8 @@ export function CartPane({
                   disabled={empty}
                   className="text-destructive focus:text-destructive"
                 >
-                  <Trash2 /><Trans>Kosongkan</Trans>
+                  <Trash2 />
+                  <Trans>Kosongkan</Trans>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -199,8 +203,8 @@ export function CartPane({
         {manualDiscount && !empty ? (
           <div className="flex items-center justify-between text-emerald-700">
             <span className="flex items-center gap-1">
-              <Trans>Diskon manual</Trans>{' '}
-              ({formatPromoValue(manualDiscount.type, manualDiscount.value)})
+              <Trans>Diskon manual</Trans> (
+              {formatPromoValue(manualDiscount.type, manualDiscount.value)})
               <button
                 type="button"
                 onClick={onRemoveManualDiscount}
@@ -292,7 +296,9 @@ function Row({
   large?: boolean;
 }) {
   return (
-    <div className={`flex justify-between ${bold ? 'font-semibold' : ''} ${large ? 'text-base' : ''}`}>
+    <div
+      className={`flex justify-between ${bold ? 'font-semibold' : ''} ${large ? 'text-base' : ''}`}
+    >
       <span>{label}</span>
       <span className="tabular-nums">{value}</span>
     </div>

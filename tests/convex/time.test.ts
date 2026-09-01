@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveRange, eachDayKey, dowOfKey, addDaysToKey } from '../../convex/lib/time';
+import { addDaysToKey, dowOfKey, eachDayKey, resolveRange } from '../../convex/lib/time';
 
 const TZ = 'Asia/Jakarta'; // fixed +07:00
 // 2026-06-01T03:00:00Z === 2026-06-01 10:00 WIB
@@ -36,20 +36,29 @@ describe('resolveRange', () => {
     expect(r.endMs).toBe(Date.UTC(2026, 4, 12, 17, 0, 0) - 1);
   });
   it('rejects from > to', () => {
-    expect(() => resolveRange(TZ, { from: '2026-05-12', to: '2026-05-10' }, NOW)).toThrow(/tidak valid/i);
+    expect(() => resolveRange(TZ, { from: '2026-05-12', to: '2026-05-10' }, NOW)).toThrow(
+      /tidak valid/i
+    );
   });
   it('rejects a malformed date key', () => {
-    expect(() => resolveRange(TZ, { from: '2026-5-1', to: '2026-05-10' }, NOW)).toThrow(/tidak valid/i);
+    expect(() => resolveRange(TZ, { from: '2026-5-1', to: '2026-05-10' }, NOW)).toThrow(
+      /tidak valid/i
+    );
   });
   it('rejects a span over 366 days', () => {
-    expect(() => resolveRange(TZ, { from: '2024-01-01', to: '2026-01-01' }, NOW)).toThrow(/tidak valid/i);
+    expect(() => resolveRange(TZ, { from: '2024-01-01', to: '2026-01-01' }, NOW)).toThrow(
+      /tidak valid/i
+    );
   });
 });
 
 describe('eachDayKey', () => {
   it('lists inclusive calendar days', () => {
     expect(eachDayKey('2026-05-30', '2026-06-02')).toEqual([
-      '2026-05-30', '2026-05-31', '2026-06-01', '2026-06-02',
+      '2026-05-30',
+      '2026-05-31',
+      '2026-06-01',
+      '2026-06-02',
     ]);
   });
   it('single day → one entry', () => {

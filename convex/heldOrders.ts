@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { heldLineValidator, heldPromoValidator } from './lib/heldOrder';
 import { orderTypeValidator } from './lib/orderType';
 

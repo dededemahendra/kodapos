@@ -130,11 +130,7 @@ export function PriceCategoryTable() {
         </ul>
       )}
 
-      <PriceCategoryFormDialog
-        open={dialogOpen}
-        category={editing}
-        onOpenChange={setDialogOpen}
-      />
+      <PriceCategoryFormDialog open={dialogOpen} category={editing} onOpenChange={setDialogOpen} />
     </div>
   );
 }

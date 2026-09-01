@@ -68,9 +68,21 @@ describe('menu.variants CRUD', () => {
   it('position increments by max+1 and listForItem is ordered by position', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, itemId } = await setup(t);
-    await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'S', priceIDR: 16000 });
-    await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'M', priceIDR: 20000 });
-    await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'L', priceIDR: 24000 });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'S',
+      priceIDR: 16000,
+    });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'M',
+      priceIDR: 20000,
+    });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'L',
+      priceIDR: 24000,
+    });
     const variants = await asOwner.query(api.menu.variants.listForItem, { menuItemId: itemId });
     expect(variants.map((v) => v.name)).toEqual(['S', 'M', 'L']);
     expect(variants.map((v) => v.position)).toEqual([0, 1, 2]);
@@ -107,7 +119,11 @@ describe('menu.variants CRUD', () => {
     const t = convexTest(schema, modules);
     const { asOwner, itemId } = await setup(t);
     await expect(
-      asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: '  ', priceIDR: 16000 })
+      asOwner.mutation(api.menu.variants.create, {
+        menuItemId: itemId,
+        name: '  ',
+        priceIDR: 16000,
+      })
     ).rejects.toThrow(/nama/i);
     await expect(
       asOwner.mutation(api.menu.variants.create, {
@@ -154,9 +170,9 @@ describe('menu.variants CRUD', () => {
     await expect(
       b.asOwner.mutation(api.menu.variants.update, { id: aVariant, name: 'X', priceIDR: 1000 })
     ).rejects.toThrow(/tidak ditemukan/i);
-    await expect(
-      b.asOwner.mutation(api.menu.variants.archive, { id: aVariant })
-    ).rejects.toThrow(/tidak ditemukan/i);
+    await expect(b.asOwner.mutation(api.menu.variants.archive, { id: aVariant })).rejects.toThrow(
+      /tidak ditemukan/i
+    );
   });
 });
 
@@ -164,10 +180,22 @@ describe('read paths expose active variants', () => {
   it('listForSale returns an item active variants in position order', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, itemId } = await setup(t);
-    await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'S', priceIDR: 16000 });
-    const mId = await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'M', priceIDR: 20000 });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'S',
+      priceIDR: 16000,
+    });
+    const mId = await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'M',
+      priceIDR: 20000,
+    });
     await asOwner.mutation(api.menu.variants.archive, { id: mId });
-    await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'L', priceIDR: 24000 });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'L',
+      priceIDR: 24000,
+    });
 
     const rows = await asOwner.query(api.menu.items.listForSale, {});
     const row = rows.find((r) => r.item._id === itemId);
@@ -178,8 +206,16 @@ describe('read paths expose active variants', () => {
   it('getById returns the item active variants', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, itemId } = await setup(t);
-    await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'S', priceIDR: 16000 });
-    await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'L', priceIDR: 24000 });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'S',
+      priceIDR: 16000,
+    });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'L',
+      priceIDR: 24000,
+    });
     const detail = await asOwner.query(api.menu.items.getById, { id: itemId });
     expect(detail?.variants.map((v) => v.name)).toEqual(['S', 'L']);
   });
@@ -253,7 +289,11 @@ describe('buildOrder variant pricing', () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     // even with variants present on the item
-    await asOwner.mutation(api.menu.variants.create, { menuItemId: itemId, name: 'L', priceIDR: 24000 });
+    await asOwner.mutation(api.menu.variants.create, {
+      menuItemId: itemId,
+      name: 'L',
+      priceIDR: 24000,
+    });
     const result = await asOwner.mutation(api.orders.createCashSale, {
       clientId: 'novar-1',
       shiftId,

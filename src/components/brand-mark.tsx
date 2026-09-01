@@ -1,4 +1,4 @@
-import { cn } from "~/lib/utils";
+import { cn } from '~/lib/utils';
 
 /**
  * The kodapos logomark. Uses `currentColor` so it inherits text color (e.g.
@@ -13,7 +13,7 @@ export function BrandMark({ className }: { className?: string }) {
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      className={cn("h-6 w-auto", className)}
+      className={cn('h-6 w-auto', className)}
     >
       <path
         fillRule="evenodd"

@@ -170,7 +170,13 @@ describe('staff.permissionsFor', () => {
     const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
     await asOwner.mutation(api.staff.setPermissions, {
       id: cashierId,
-      permissions: { canVoid: false, canDiscount: true, canManageShift: false, canViewReports: true, canEditMenu: false },
+      permissions: {
+        canVoid: false,
+        canDiscount: true,
+        canManageShift: false,
+        canViewReports: true,
+        canEditMenu: false,
+      },
     });
     const res = await asOwner.query(api.staff.permissionsFor, { cashierId });
     expect(res).not.toBeNull();

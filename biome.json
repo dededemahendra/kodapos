@@ -37,11 +37,22 @@
         "useImportType": "error"
       },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "warn",
+        "noArrayIndexKey": "warn"
       },
       "correctness": {
         "noUnusedVariables": "warn",
         "useExhaustiveDependencies": "warn"
+      },
+      "a11y": {
+        "noStaticElementInteractions": "warn",
+        "useValidAnchor": "warn",
+        "useAltText": "warn",
+        "noLabelWithoutControl": "warn",
+        "useAriaPropsSupportedByRole": "warn",
+        "useFocusableInteractive": "warn",
+        "useSemanticElements": "warn",
+        "useButtonType": "warn"
       }
     }
   },

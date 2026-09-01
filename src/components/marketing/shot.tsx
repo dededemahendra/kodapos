@@ -19,7 +19,9 @@ export function ScreenshotFrame({
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-background"
-        style={{ backgroundImage: `linear-gradient(to bottom, transparent ${fadeFrom}%, var(--background))` }}
+        style={{
+          backgroundImage: `linear-gradient(to bottom, transparent ${fadeFrom}%, var(--background))`,
+        }}
       />
     </div>
   );
@@ -33,7 +35,15 @@ export function ScreenshotFrame({
  * `alt` is required and must describe what the screen SHOWS. These images are
  * the evidence for a feature claim, not decoration.
  */
-export function Shot({ id, alt, priority = false }: { id: ShotId; alt: string; priority?: boolean }) {
+export function Shot({
+  id,
+  alt,
+  priority = false,
+}: {
+  id: ShotId;
+  alt: string;
+  priority?: boolean;
+}) {
   const common = {
     alt,
     width: 1440,
@@ -44,7 +54,11 @@ export function Shot({ id, alt, priority = false }: { id: ShotId; alt: string; p
   return (
     <>
       <img {...common} src={shotSrc(id, 'light')} className={`${common.className} dark:hidden`} />
-      <img {...common} src={shotSrc(id, 'dark')} className={`${common.className} hidden dark:block`} />
+      <img
+        {...common}
+        src={shotSrc(id, 'dark')}
+        className={`${common.className} hidden dark:block`}
+      />
     </>
   );
 }

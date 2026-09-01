@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
-import { requireOwned, requireActiveOutlet } from '../lib/auth';
+import { requireActiveOutlet, requireOwned } from '../lib/auth';
 
 export const attach = mutation({
   args: { menuItemId: v.id('menuItems'), modifierGroupId: v.id('modifierGroups') },

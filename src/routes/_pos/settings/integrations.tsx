@@ -1,25 +1,20 @@
-import { msg } from '@lingui/core/macro';
 import type { MessageDescriptor } from '@lingui/core';
+import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
 import { Trans, useLingui as useLinguiMacro } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
-import { RequirePermission } from '~/components/permission/require-permission';
 import { api } from 'convex/_generated/api';
 import { AI_PROVIDERS, type AiProvider, parseProvider } from 'convex/lib/ai';
+import { DEFAULT_WHATSAPP_TEMPLATE } from 'convex/lib/whatsapp';
 import { useMutation, useQuery } from 'convex/react';
 import { useState } from 'react';
-import { SettingsPageHeader } from '~/components/settings/primitives';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { IntegrationLogo } from '~/components/settings/integration-logo';
 import { McpAccessCard } from '~/components/settings/mcp-access-card';
+import { SettingsPageHeader } from '~/components/settings/primitives';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +26,6 @@ import { Input } from '~/components/ui/input';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Spinner } from '~/components/ui/spinner';
 import { Textarea } from '~/components/ui/textarea';
-import { DEFAULT_WHATSAPP_TEMPLATE } from 'convex/lib/whatsapp';
 
 export const Route = createFileRoute('/_pos/settings/integrations')({
   component: SettingsIntegrationsPage,
@@ -132,13 +126,7 @@ const CATALOG: CatalogEntry[] = [
   },
 ];
 
-const CATEGORIES: IntegrationCategory[] = [
-  'payment',
-  'delivery',
-  'accounting',
-  'messaging',
-  'ai',
-];
+const CATEGORIES: IntegrationCategory[] = ['payment', 'delivery', 'accounting', 'messaging', 'ai'];
 
 function CategoryHeading({ category }: { category: IntegrationCategory }) {
   if (category === 'payment') return <Trans>Pembayaran</Trans>;
@@ -168,21 +156,21 @@ function SettingsIntegrations() {
   const [xnditToken, setXnditToken] = useState('');
   const [waEndpoint, setWaEndpoint] = useState('');
   const [waHeader, setWaHeader] = useState('Authorization');
-const AI_PROVIDER_META = {
-  openai: { label: 'OpenAI', keyHint: 'sk-...', defaultModel: 'gpt-4o-mini' },
-  anthropic: {
-    label: 'Anthropic',
-    keyHint: 'sk-ant-...',
-    defaultModel: 'claude-3-5-haiku-20241022',
-  },
-  // OpenRouter routes to many vendors, so its models are `vendor/model` slugs
-  // and its catalog shifts; this default is a starting point the owner edits.
-  openrouter: {
-    label: 'OpenRouter',
-    keyHint: 'sk-or-v1-...',
-    defaultModel: 'openai/gpt-4o-mini',
-  },
-} as const satisfies Record<AiProvider, { label: string; keyHint: string; defaultModel: string }>;
+  const AI_PROVIDER_META = {
+    openai: { label: 'OpenAI', keyHint: 'sk-...', defaultModel: 'gpt-4o-mini' },
+    anthropic: {
+      label: 'Anthropic',
+      keyHint: 'sk-ant-...',
+      defaultModel: 'claude-3-5-haiku-20241022',
+    },
+    // OpenRouter routes to many vendors, so its models are `vendor/model` slugs
+    // and its catalog shifts; this default is a starting point the owner edits.
+    openrouter: {
+      label: 'OpenRouter',
+      keyHint: 'sk-or-v1-...',
+      defaultModel: 'openai/gpt-4o-mini',
+    },
+  } as const satisfies Record<AiProvider, { label: string; keyHint: string; defaultModel: string }>;
 
   const [waToken, setWaToken] = useState('');
   const [waTemplate, setWaTemplate] = useState(DEFAULT_WHATSAPP_TEMPLATE);
@@ -390,11 +378,7 @@ const AI_PROVIDER_META = {
                           <Trans>Putuskan</Trans>
                         </Button>
                       ) : (
-                        <Button
-                          size="sm"
-                          disabled={isBusy}
-                          onClick={() => openDialog(entry.key)}
-                        >
+                        <Button size="sm" disabled={isBusy} onClick={() => openDialog(entry.key)}>
                           <Trans>Hubungkan</Trans>
                         </Button>
                       )}

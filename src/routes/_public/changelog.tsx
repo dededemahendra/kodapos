@@ -1,3 +1,4 @@
+import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { useLocale } from '~/components/locale-provider';
@@ -6,11 +7,14 @@ import { MarketingHeader } from '~/components/marketing/marketing-header';
 import { Badge } from '~/components/ui/badge';
 import { CHANGELOG, localized } from '~/lib/changelog';
 import { seo } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
+
+const TITLE = msg`Pembaruan`;
 
 export const Route = createFileRoute('/_public/changelog')({
   head: () =>
     seo({
-      title: 'Pembaruan kodapos, apa yang baru',
+      title: headTitle(TITLE),
       description:
         'Catatan perubahan kodapos: fitur baru, peningkatan, dan perbaikan terbaru untuk POS kafe dan resto Anda.',
       path: '/changelog',
@@ -19,6 +23,7 @@ export const Route = createFileRoute('/_public/changelog')({
 });
 
 function ChangelogPage() {
+  usePageTitle(TITLE);
   const { locale } = useLocale();
   const intlLocale = locale === 'en' ? 'en-US' : 'id-ID';
   const fmtDate = (iso: string) =>

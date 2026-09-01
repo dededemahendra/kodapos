@@ -1,5 +1,5 @@
-import tseslint from 'typescript-eslint';
 import pluginLingui from 'eslint-plugin-lingui';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   // Global ignores — files ESLint should never process at all
@@ -64,11 +64,11 @@ export default tseslint.config(
           // - strings that look like CSS classes, identifiers, or paths
           // - numeric-only strings
           ignore: [
-            '^[A-Z0-9_/-]+$',        // SCREAMING_CASE, IDs, paths: "USD", "API_KEY"
-            '^[a-z][a-z0-9-]*$',     // lowercase-kebab: css classes, html tags, routes
-            '^\\d+(\\.\\d+)?$',       // pure numbers: "42", "3.14"
-            '^\\/.*',                  // URL paths: "/api/users"
-            '^#[0-9a-fA-F]{3,8}$',   // hex colors: "#fff", "#1a2b3c"
+            '^[A-Z0-9_/-]+$', // SCREAMING_CASE, IDs, paths: "USD", "API_KEY"
+            '^[a-z][a-z0-9-]*$', // lowercase-kebab: css classes, html tags, routes
+            '^\\d+(\\.\\d+)?$', // pure numbers: "42", "3.14"
+            '^\\/.*', // URL paths: "/api/users"
+            '^#[0-9a-fA-F]{3,8}$', // hex colors: "#fff", "#1a2b3c"
           ],
           // Prop/variable names to ignore (className, data-*, aria-*, etc.)
           ignoreNames: [
@@ -94,7 +94,11 @@ export default tseslint.config(
             { regex: { pattern: '^data-', flags: 'i' } },
             { regex: { pattern: '^aria-', flags: 'i' } },
             // Tailwind/styling utilities
-            { regex: { pattern: '^(variant|size|color|theme|align|side|sideOffset|avoidCollisions)$' } },
+            {
+              regex: {
+                pattern: '^(variant|size|color|theme|align|side|sideOffset|avoidCollisions)$',
+              },
+            },
           ],
           // Functions whose string arguments don't need translation
           ignoreFunctions: [
@@ -128,5 +132,5 @@ export default tseslint.config(
         },
       ],
     },
-  },
+  }
 );

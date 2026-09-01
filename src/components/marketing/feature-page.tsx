@@ -87,8 +87,12 @@ export function FeaturePage({ content }: { content: FeaturePageContent }) {
                 >
                   <div className="mx-auto grid max-w-5xl items-center gap-10 px-6 md:grid-cols-2">
                     <Reveal className={imageFirst ? 'md:order-2' : ''}>
-                      <h2 className="text-3xl font-extrabold tracking-tight">{L(section.heading)}</h2>
-                      <p className="mt-3 leading-relaxed text-muted-foreground">{L(section.body)}</p>
+                      <h2 className="text-3xl font-extrabold tracking-tight">
+                        {L(section.heading)}
+                      </h2>
+                      <p className="mt-3 leading-relaxed text-muted-foreground">
+                        {L(section.body)}
+                      </p>
                       <ul className="mt-6 space-y-2.5">
                         {section.bullets.map((b, bi) => (
                           <li key={bi} className="flex items-start gap-2.5 text-sm">

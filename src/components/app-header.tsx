@@ -1,115 +1,108 @@
-import { useRouterState } from "@tanstack/react-router";
-import { Trans, useLingui } from "@lingui/react/macro";
-import { useEffect, useState } from "react";
-import { cn } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Separator } from "~/components/ui/separator";
-import { DecorIcon } from "~/components/decor-icon";
-import { AppBreadcrumbs } from "~/components/app-breadcrumbs";
-import { navLinks } from "~/components/app-shared";
-import { CustomSidebarTrigger } from "~/components/custom-sidebar-trigger";
-import { NavUser } from "~/components/nav-user";
-import { NotificationsMenu } from "~/components/notifications-menu";
-import { applyTheme, storeTheme } from "~/lib/preferences";
-import { Kbd } from "~/components/ui/kbd";
-import { MoonIcon, Search, SunIcon } from "lucide-react";
+import { Trans, useLingui } from '@lingui/react/macro';
+import { useRouterState } from '@tanstack/react-router';
+import { MoonIcon, Search, SunIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AppBreadcrumbs } from '~/components/app-breadcrumbs';
+import { navLinks } from '~/components/app-shared';
+import { CustomSidebarTrigger } from '~/components/custom-sidebar-trigger';
+import { DecorIcon } from '~/components/decor-icon';
+import { NavUser } from '~/components/nav-user';
+import { NotificationsMenu } from '~/components/notifications-menu';
+import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
+import { Kbd } from '~/components/ui/kbd';
+import { Separator } from '~/components/ui/separator';
+import { applyTheme, storeTheme } from '~/lib/preferences';
+import { cn } from '~/lib/utils';
 
 export function AppHeader() {
-	const { t } = useLingui();
-	const path = useRouterState({ select: (s) => s.location.pathname });
-	const activeItem = navLinks.find(
-		(item) =>
-			item.path && (path === item.path || path.startsWith(`${item.path}/`))
-	);
+  const { t } = useLingui();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const activeItem = navLinks.find(
+    (item) => item.path && (path === item.path || path.startsWith(`${item.path}/`))
+  );
 
-	// Resolved dark state, synced from the documentElement class on mount (the
-	// no-flash head script already set it before paint).
-	const [isDark, setIsDark] = useState(false);
-	useEffect(() => {
-		setIsDark(document.documentElement.classList.contains("dark"));
-	}, []);
+  // Resolved dark state, synced from the documentElement class on mount (the
+  // no-flash head script already set it before paint).
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'));
+  }, []);
 
-	// The palette opens on either Cmd+K or Ctrl+K; show the modifier that matches
-	// the user's platform instead of a hardcoded ⌘. Resolved on mount to keep SSR
-	// output stable.
-	const [isMac, setIsMac] = useState(false);
-	useEffect(() => {
-		setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform));
-	}, []);
+  // The palette opens on either Cmd+K or Ctrl+K; show the modifier that matches
+  // the user's platform instead of a hardcoded ⌘. Resolved on mount to keep SSR
+  // output stable.
+  const [isMac, setIsMac] = useState(false);
+  useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform));
+  }, []);
 
-	function toggleTheme() {
-		const next = isDark ? "light" : "dark";
-		storeTheme(next);
-		applyTheme(next);
-		setIsDark(next === "dark");
-	}
+  function toggleTheme() {
+    const next = isDark ? 'light' : 'dark';
+    storeTheme(next);
+    applyTheme(next);
+    setIsDark(next === 'dark');
+  }
 
-	function openCommandPalette() {
-		document.dispatchEvent(
-			new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
-		);
-	}
+  function openCommandPalette() {
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
+    );
+  }
 
-	return (
-		<header
-			className={cn(
-				"sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4 md:px-6",
-				"bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/50"
-			)}
-		>
-			<DecorIcon className="hidden md:block" position="bottom-left" />
-			<div className="flex items-center gap-3">
-				<CustomSidebarTrigger />
-				<Separator
-					className="mr-2 h-4 data-[orientation=vertical]:self-center"
-					orientation="vertical"
-				/>
-				<AppBreadcrumbs page={activeItem ?? null} />
-				{/* No text-muted-foreground here: that token is tuned for the page
+  return (
+    <header
+      className={cn(
+        'sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4 md:px-6',
+        'bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/50'
+      )}
+    >
+      <DecorIcon className="hidden md:block" position="bottom-left" />
+      <div className="flex items-center gap-3">
+        <CustomSidebarTrigger />
+        <Separator
+          className="mr-2 h-4 data-[orientation=vertical]:self-center"
+          orientation="vertical"
+        />
+        <AppBreadcrumbs page={activeItem ?? null} />
+        {/* No text-muted-foreground here: that token is tuned for the page
 				    background, and the secondary chip is a near-white surface in dark
 				    mode, which put the label at 1.96:1 (3.08:1 light). The variant's
 				    own text-secondary-foreground reads 12.55:1 / 6.39:1. */}
-				<Badge variant="secondary" className="hidden font-medium sm:inline-flex">
-					<Trans>Akses awal</Trans>
-				</Badge>
-			</div>
-			<div className="flex items-center gap-3">
-				<Button
-					aria-label={t`Cari`}
-					size="sm"
-					variant="ghost"
-					className="hidden md:flex items-center gap-2 border border-input text-muted-foreground hover:text-foreground"
-					onClick={openCommandPalette}
-				>
-					<Search className="size-4" />
-					<span className="text-sm"><Trans>Cari</Trans></span>
-					<Kbd>{isMac ? "⌘K" : "Ctrl K"}</Kbd>
-				</Button>
-				<Button
-					aria-label={t`Cari`}
-					size="icon-sm"
-					variant="ghost"
-					className="flex md:hidden border border-input"
-					onClick={openCommandPalette}
-				>
-					<Search />
-				</Button>
-				<Button
-					aria-label={t`Ganti tema`}
-					size="icon-sm"
-					variant="ghost"
-					onClick={toggleTheme}
-				>
-					{isDark ? <SunIcon /> : <MoonIcon />}
-				</Button>
-				<NotificationsMenu />
-				<Separator
-					className="h-4 data-[orientation=vertical]:self-center"
-					orientation="vertical"
-				/>
-				<NavUser />
-			</div>
-		</header>
-	);
+        <Badge variant="secondary" className="hidden font-medium sm:inline-flex">
+          <Trans>Akses awal</Trans>
+        </Badge>
+      </div>
+      <div className="flex items-center gap-3">
+        <Button
+          aria-label={t`Cari`}
+          size="sm"
+          variant="ghost"
+          className="hidden md:flex items-center gap-2 border border-input text-muted-foreground hover:text-foreground"
+          onClick={openCommandPalette}
+        >
+          <Search className="size-4" />
+          <span className="text-sm">
+            <Trans>Cari</Trans>
+          </span>
+          <Kbd>{isMac ? '⌘K' : 'Ctrl K'}</Kbd>
+        </Button>
+        <Button
+          aria-label={t`Cari`}
+          size="icon-sm"
+          variant="ghost"
+          className="flex md:hidden border border-input"
+          onClick={openCommandPalette}
+        >
+          <Search />
+        </Button>
+        <Button aria-label={t`Ganti tema`} size="icon-sm" variant="ghost" onClick={toggleTheme}>
+          {isDark ? <SunIcon /> : <MoonIcon />}
+        </Button>
+        <NotificationsMenu />
+        <Separator className="h-4 data-[orientation=vertical]:self-center" orientation="vertical" />
+        <NavUser />
+      </div>
+    </header>
+  );
 }

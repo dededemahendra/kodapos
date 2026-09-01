@@ -158,13 +158,23 @@ export function QrisStaticPaymentDialog({
                 <Trans>Gambar QRIS belum diunggah.</Trans>
               </p>
             )}
-            {qrisMerchantName ? <div className="text-sm font-medium">{qrisMerchantName}</div> : null}
-            {qrisNmid ? <div className="text-xs text-muted-foreground">NMID: {qrisNmid}</div> : null}
+            {qrisMerchantName ? (
+              <div className="text-sm font-medium">{qrisMerchantName}</div>
+            ) : null}
+            {qrisNmid ? (
+              <div className="text-xs text-muted-foreground">NMID: {qrisNmid}</div>
+            ) : null}
           </div>
 
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-          <Button type="button" onClick={confirm} disabled={submitting} className="w-full" size="lg">
+          <Button
+            type="button"
+            onClick={confirm}
+            disabled={submitting}
+            className="w-full"
+            size="lg"
+          >
             {submitting ? <Spinner data-icon="inline-start" /> : null}
             {submitting ? <Trans>Memproses…</Trans> : <Trans>Sudah dibayar</Trans>}
           </Button>

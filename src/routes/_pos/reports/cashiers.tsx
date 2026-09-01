@@ -5,6 +5,7 @@ import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { Users } from 'lucide-react';
 import { useMemo } from 'react';
+import { useReportRange } from '~/components/reports/use-report-range';
 import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
 import {
@@ -18,7 +19,6 @@ import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
 import { exportTablePdf } from '~/lib/pdf';
-import { useReportRange } from '~/components/reports/use-report-range';
 
 export const Route = createFileRoute('/_pos/reports/cashiers')({
   component: CashiersReport,
@@ -37,17 +37,13 @@ function CashiersReport() {
       {
         accessorKey: 'orders',
         header: () => <Trans>Transaksi</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{row.original.orders}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{row.original.orders}</span>,
       },
       {
         accessorKey: 'revenueIDR',
         header: () => <Trans>Pendapatan</Trans>,
         cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatIDR(row.original.revenueIDR)}
-          </span>
+          <span className="tabular-nums">{formatIDR(row.original.revenueIDR)}</span>
         ),
       },
     ],
@@ -117,12 +113,7 @@ function CashiersReport() {
         <Button type="button" variant="outline" size="sm" onClick={onDownload}>
           <Trans>Unduh CSV</Trans>
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onDownloadPDF}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={onDownloadPDF}>
           <Trans>Unduh PDF</Trans>
         </Button>
       </div>

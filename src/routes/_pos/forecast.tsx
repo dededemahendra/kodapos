@@ -1,22 +1,34 @@
 import { Trans, useLingui } from '@lingui/react/macro';
-import type { ColumnDef } from '@tanstack/react-table';
 import { createFileRoute } from '@tanstack/react-router';
-import { RequirePermission } from '~/components/permission/require-permission';
+import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
 import { TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { AiRestockAdvice } from '~/components/ai-restock-advice';
+import { type ForecastDriver, RenderDriver } from '~/components/forecast/render-driver';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Input } from '~/components/ui/input';
 import { PageHeader } from '~/components/ui/page-header';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { Skeleton } from '~/components/ui/skeleton';
 import { StatusBadge } from '~/components/ui/status-badge';
-import { waUrl, formatRestockText } from '~/lib/whatsapp';
-import { RenderDriver, type ForecastDriver } from '~/components/forecast/render-driver';
-import { AiRestockAdvice } from '~/components/ai-restock-advice';
+import { formatRestockText, waUrl } from '~/lib/whatsapp';
 
 export const Route = createFileRoute('/_pos/forecast')({
   component: ForecastPage,
@@ -30,7 +42,13 @@ function ForecastPage() {
   );
 }
 
-type RestockLine = { ingredientId: string; name: string; unit: string; suggestedQty: number; currentStockQty: number };
+type RestockLine = {
+  ingredientId: string;
+  name: string;
+  unit: string;
+  suggestedQty: number;
+  currentStockQty: number;
+};
 
 function RestockPanel() {
   const { t } = useLingui();
@@ -66,7 +84,11 @@ function RestockPanel() {
           />
         ),
       },
-      { id: 'unit', header: () => <Trans>Satuan</Trans>, cell: ({ row }) => <span>{row.original.unit}</span> },
+      {
+        id: 'unit',
+        header: () => <Trans>Satuan</Trans>,
+        cell: ({ row }) => <span>{row.original.unit}</span>,
+      },
       {
         accessorKey: 'currentStockQty',
         header: () => <Trans>Stok kini</Trans>,
@@ -89,36 +111,59 @@ function RestockPanel() {
 
   return (
     <section className="mt-8">
-      <h2 className="text-lg font-semibold"><Trans>Daftar Belanja</Trans></h2>
-      {isSent ? <StatusBadge variant="success"><Trans>Terkirim</Trans></StatusBadge> : null}
+      <h2 className="text-lg font-semibold">
+        <Trans>Daftar Belanja</Trans>
+      </h2>
+      {isSent ? (
+        <StatusBadge variant="success">
+          <Trans>Terkirim</Trans>
+        </StatusBadge>
+      ) : null}
       {data === undefined ? (
         <div className="mt-4">
           {/* Native DataTable skeleton matches the shopping-list columns exactly. */}
           <DataTable columns={columns} data={undefined} emptyState={null} skeletonRows={4} />
         </div>
       ) : data.status === 'learning' ? (
-        <p className="mt-2 text-sm text-muted-foreground"><Trans>Daftar belanja akan muncul setelah perkiraan aktif.</Trans></p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          <Trans>Daftar belanja akan muncul setelah perkiraan aktif.</Trans>
+        </p>
       ) : lines.length === 0 ? (
         <Empty className="mt-4">
           <EmptyHeader>
-            <EmptyMedia variant="icon"><TrendingUp /></EmptyMedia>
-            <EmptyTitle><Trans>Stok cukup untuk minggu ini.</Trans></EmptyTitle>
+            <EmptyMedia variant="icon">
+              <TrendingUp />
+            </EmptyMedia>
+            <EmptyTitle>
+              <Trans>Stok cukup untuk minggu ini.</Trans>
+            </EmptyTitle>
           </EmptyHeader>
         </Empty>
       ) : (
         <div className="mt-4 space-y-4">
           <AiRestockAdvice />
-          <DataTable columns={columns} data={lines as RestockLine[]} emptyState={null} initialSort={[{ id: 'name', desc: false }]} />
+          <DataTable
+            columns={columns}
+            data={lines as RestockLine[]}
+            emptyState={null}
+            initialSort={[{ id: 'name', desc: false }]}
+          />
           <div className="flex flex-wrap items-center gap-2">
             <Select value={supplierId} onValueChange={setSupplierId}>
-              <SelectTrigger className="w-56"><SelectValue placeholder={t`Pilih pemasok`} /></SelectTrigger>
+              <SelectTrigger className="w-56">
+                <SelectValue placeholder={t`Pilih pemasok`} />
+              </SelectTrigger>
               <SelectContent>
                 {(suppliers ?? []).map((s) => (
-                  <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>
+                  <SelectItem key={s._id} value={s._id}>
+                    {s.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button type="button" disabled={!supplierId} onClick={onSend}><Trans>Kirim ke WhatsApp</Trans></Button>
+            <Button type="button" disabled={!supplierId} onClick={onSend}>
+              <Trans>Kirim ke WhatsApp</Trans>
+            </Button>
           </div>
         </div>
       )}
@@ -129,9 +174,23 @@ function RestockPanel() {
 type Horizon = 'tomorrow' | 'week';
 
 function ConfidenceBadge({ level }: { level: 'low' | 'med' | 'high' }) {
-  if (level === 'high') return <StatusBadge variant="success"><Trans>Tinggi</Trans></StatusBadge>;
-  if (level === 'med') return <StatusBadge variant="warn"><Trans>Sedang</Trans></StatusBadge>;
-  return <StatusBadge variant="muted"><Trans>Rendah</Trans></StatusBadge>;
+  if (level === 'high')
+    return (
+      <StatusBadge variant="success">
+        <Trans>Tinggi</Trans>
+      </StatusBadge>
+    );
+  if (level === 'med')
+    return (
+      <StatusBadge variant="warn">
+        <Trans>Sedang</Trans>
+      </StatusBadge>
+    );
+  return (
+    <StatusBadge variant="muted">
+      <Trans>Rendah</Trans>
+    </StatusBadge>
+  );
 }
 
 /**
@@ -178,11 +237,16 @@ function ForecastInner() {
       ) : data.status === 'learning' ? (
         <Empty className="mt-6">
           <EmptyHeader>
-            <EmptyMedia variant="icon"><TrendingUp /></EmptyMedia>
-            <EmptyTitle><Trans>Kami sedang belajar</Trans></EmptyTitle>
+            <EmptyMedia variant="icon">
+              <TrendingUp />
+            </EmptyMedia>
+            <EmptyTitle>
+              <Trans>Kami sedang belajar</Trans>
+            </EmptyTitle>
             <EmptyDescription>
               <Trans>
-                Memerlukan minimal {data.daysNeeded} hari data (terkumpul {data.daysCollected}). Perkiraan akan aktif sekitar {data.etaDateKey}.
+                Memerlukan minimal {data.daysNeeded} hari data (terkumpul {data.daysCollected}).
+                Perkiraan akan aktif sekitar {data.etaDateKey}.
               </Trans>
             </EmptyDescription>
           </EmptyHeader>
@@ -190,10 +254,20 @@ function ForecastInner() {
       ) : (
         <div className="mt-4 space-y-4">
           <div className="flex gap-2">
-            <Button type="button" size="sm" variant={horizon === 'tomorrow' ? 'default' : 'outline'} onClick={() => setHorizon('tomorrow')}>
+            <Button
+              type="button"
+              size="sm"
+              variant={horizon === 'tomorrow' ? 'default' : 'outline'}
+              onClick={() => setHorizon('tomorrow')}
+            >
               <Trans>Besok</Trans>
             </Button>
-            <Button type="button" size="sm" variant={horizon === 'week' ? 'default' : 'outline'} onClick={() => setHorizon('week')}>
+            <Button
+              type="button"
+              size="sm"
+              variant={horizon === 'week' ? 'default' : 'outline'}
+              onClick={() => setHorizon('week')}
+            >
               <Trans>7 hari</Trans>
             </Button>
           </div>
@@ -215,7 +289,9 @@ function ForecastInner() {
                 {line.drivers.length > 0 ? (
                   <ul className="mt-1 text-xs text-muted-foreground">
                     {line.drivers.map((d, i) => (
-                      <li key={i}><RenderDriver driver={d as ForecastDriver} /></li>
+                      <li key={i}>
+                        <RenderDriver driver={d as ForecastDriver} />
+                      </li>
                     ))}
                   </ul>
                 ) : null}

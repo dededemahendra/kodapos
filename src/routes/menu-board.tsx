@@ -1,3 +1,4 @@
+import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
@@ -6,6 +7,7 @@ import { useEffect } from 'react';
 import { MenuBoard } from '~/components/menu-board/menu-board';
 import { Skeleton } from '~/components/ui/skeleton';
 import { privatePage } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
 
 // How long to wait before reloading a failed board, to self-heal transient
 // errors (network blip, token refresh, brief outlet suspension).
@@ -16,8 +18,10 @@ const RELOAD_AFTER_MS = 60000;
 // inheriting Convex/auth context from __root. Staff open it on the device
 // driving the TV, go fullscreen, and leave it; the session persists across
 // restarts. Convex reactivity keeps it live when the menu changes.
+const TITLE = msg`Papan Menu`;
+
 export const Route = createFileRoute('/menu-board')({
-  head: () => privatePage('Papan Menu'),
+  head: () => privatePage(headTitle(TITLE)),
   component: MenuBoardPage,
   // The board query can throw (auth/outlet errors, missing cafe). Without a
   // route-level boundary those throws bubble to __root's errorComponent,
@@ -28,6 +32,7 @@ export const Route = createFileRoute('/menu-board')({
 });
 
 function MenuBoardPage() {
+  usePageTitle(TITLE);
   return (
     <>
       <AuthLoading>

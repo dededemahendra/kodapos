@@ -4,13 +4,13 @@ import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_LOYALTY } from 'convex/lib/loyalty';
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useRef, useState } from 'react';
+import type { CartState } from '~/components/sale/cart-reducer';
+import { CustomerSection, type CustomerSelection } from '~/components/sale/customer-section';
+import { usePaymentTotals } from '~/components/sale/use-payment-totals';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
-import { CustomerSection, type CustomerSelection } from '~/components/sale/customer-section';
-import type { CartState } from '~/components/sale/cart-reducer';
-import { usePaymentTotals } from '~/components/sale/use-payment-totals';
 import { formatIDR } from '~/lib/money';
 import { genUUID } from '~/lib/uuid';
 
@@ -194,13 +194,7 @@ export function GiftCardPaymentDialog({
 
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-          <Button
-            type="button"
-            onClick={confirm}
-            disabled={!canPay}
-            className="w-full"
-            size="lg"
-          >
+          <Button type="button" onClick={confirm} disabled={!canPay} className="w-full" size="lg">
             {submitting ? <Spinner data-icon="inline-start" /> : null}
             {submitting ? <Trans>Memproses…</Trans> : <Trans>Bayar</Trans>}
           </Button>

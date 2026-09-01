@@ -29,7 +29,12 @@ function ItemEditPage() {
         <FormSkeleton rows={5} />
       </div>
     );
-  if (!isNew && detail === null) return <p className="text-muted-foreground"><Trans>Item tidak ditemukan.</Trans></p>;
+  if (!isNew && detail === null)
+    return (
+      <p className="text-muted-foreground">
+        <Trans>Item tidak ditemukan.</Trans>
+      </p>
+    );
 
   return (
     <div>
@@ -43,7 +48,9 @@ function ItemEditPage() {
         </Link>{' '}
         › {isNew ? <Trans>Baru</Trans> : detail?.item.name}
       </div>
-      <h1 className="text-xl font-bold mb-4">{isNew ? <Trans>Item baru</Trans> : detail?.item.name}</h1>
+      <h1 className="text-xl font-bold mb-4">
+        {isNew ? <Trans>Item baru</Trans> : detail?.item.name}
+      </h1>
       <ItemEditForm
         itemId={isNew ? 'new' : (itemId as Id<'menuItems'>)}
         initial={{

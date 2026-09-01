@@ -11,12 +11,7 @@ import { IngredientPicker } from '~/components/inventory/ingredient-picker';
 import { StockAdjustDialog } from '~/components/inventory/stock-adjust-dialog';
 import { Button } from '~/components/ui/button';
 import { DataTable } from '~/components/ui/data-table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import {
   Empty,
   EmptyDescription,
@@ -50,9 +45,7 @@ function AdjustmentsPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [adjustId, setAdjustId] = useState<Id<'ingredients'> | null>(null);
 
-  const rows = useQuery(api.ingredients.recentAdjustments, {}) as
-    | AdjustmentRow[]
-    | undefined;
+  const rows = useQuery(api.ingredients.recentAdjustments, {}) as AdjustmentRow[] | undefined;
 
   // Translated chip labels keyed by raw reason value.
   const reasonLabels: Record<string, string> = {
@@ -166,7 +159,11 @@ function AdjustmentsPage() {
         active={filter}
         onFilter={(v) => setFilter(v as Filter)}
         filters={[
-          { label: <Trans>Semua</Trans>, value: 'all', ...(counts !== undefined ? { count: counts.all } : {}) },
+          {
+            label: <Trans>Semua</Trans>,
+            value: 'all',
+            ...(counts !== undefined ? { count: counts.all } : {}),
+          },
           ...ADJUST_REASONS.map((r) => ({
             label: reasonLabels[r],
             value: r,

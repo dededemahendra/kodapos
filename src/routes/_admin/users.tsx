@@ -20,7 +20,7 @@ import { privatePage } from '~/lib/seo';
 import { toast } from '~/lib/toast';
 
 export const Route = createFileRoute('/_admin/users')({
-  head: () => privatePage('Users', 'kodapos admin'),
+  head: () => privatePage('Users'),
   component: AdminUsersPage,
 });
 

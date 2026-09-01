@@ -1,12 +1,12 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
-import { RequirePermission } from '~/components/permission/require-permission';
 import type { ColumnDef } from '@tanstack/react-table';
 import { api } from 'convex/_generated/api';
 import type { Doc } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { Archive, BadgePercent, Pencil, Plus } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { RequirePermission } from '~/components/permission/require-permission';
 import { PromoFormDialog } from '~/components/promo/promo-form-dialog';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
@@ -98,9 +98,13 @@ function PromosInner() {
         header: () => <Trans>Tipe</Trans>,
         cell: ({ row }) =>
           row.original.type === 'percent' ? (
-            <StatusBadge variant="success"><Trans>Persen</Trans></StatusBadge>
+            <StatusBadge variant="success">
+              <Trans>Persen</Trans>
+            </StatusBadge>
           ) : (
-            <StatusBadge variant="muted"><Trans>Nominal</Trans></StatusBadge>
+            <StatusBadge variant="muted">
+              <Trans>Nominal</Trans>
+            </StatusBadge>
           ),
       },
       {
@@ -121,9 +125,13 @@ function PromosInner() {
           return (
             <div className="flex items-center gap-2">
               {code ? (
-                <Badge variant="secondary" className="font-mono">{code}</Badge>
+                <Badge variant="secondary" className="font-mono">
+                  {code}
+                </Badge>
               ) : (
-                <span className="text-sm text-muted-foreground"><Trans>Tidak ada</Trans></span>
+                <span className="text-sm text-muted-foreground">
+                  <Trans>Tidak ada</Trans>
+                </span>
               )}
               <span className="text-sm text-muted-foreground">
                 {scope === 'item' ? (
@@ -144,9 +152,13 @@ function PromosInner() {
         header: () => <Trans>Status</Trans>,
         cell: ({ row }) =>
           row.original.archived ? (
-            <StatusBadge variant="muted"><Trans>Arsip</Trans></StatusBadge>
+            <StatusBadge variant="muted">
+              <Trans>Arsip</Trans>
+            </StatusBadge>
           ) : (
-            <StatusBadge variant="success"><Trans>Aktif</Trans></StatusBadge>
+            <StatusBadge variant="success">
+              <Trans>Aktif</Trans>
+            </StatusBadge>
           ),
       },
       {
@@ -219,8 +231,16 @@ function PromosInner() {
         active={filter}
         onFilter={(v) => setFilter(v as Filter)}
         filters={[
-          { label: <Trans>Aktif</Trans>, value: 'active', ...(counts !== undefined ? { count: counts.active } : {}) },
-          { label: <Trans>Arsip</Trans>, value: 'archived', ...(counts !== undefined ? { count: counts.archived } : {}) },
+          {
+            label: <Trans>Aktif</Trans>,
+            value: 'active',
+            ...(counts !== undefined ? { count: counts.active } : {}),
+          },
+          {
+            label: <Trans>Arsip</Trans>,
+            value: 'archived',
+            ...(counts !== undefined ? { count: counts.archived } : {}),
+          },
         ]}
       />
 

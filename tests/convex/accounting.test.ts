@@ -197,7 +197,7 @@ describe('accounting.ledger — merged money events', () => {
     expect(res.summary.netIDR).toBe(0);
   });
 
-  it('excludes another cafe\'s events (owner scope)', async () => {
+  it("excludes another cafe's events (owner scope)", async () => {
     const t = convexTest(schema, modules);
     const a = await setup(t, { email: 'a@x.com' });
     const b = await setup(t, { email: 'b@x.com' });

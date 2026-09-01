@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
-import { EXPENSE_CATEGORIES, expenseCategoryValidator } from './lib/expense';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
+import { type EXPENSE_CATEGORIES, expenseCategoryValidator } from './lib/expense';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
 type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
@@ -42,9 +42,7 @@ export const list = query({
   returns: v.object({
     rows: v.array(expenseRow),
     totalIDR: v.number(),
-    byCategory: v.array(
-      v.object({ category: expenseCategoryValidator, amountIDR: v.number() })
-    ),
+    byCategory: v.array(v.object({ category: expenseCategoryValidator, amountIDR: v.number() })),
   }),
   handler: async (ctx, { range }) => {
     const { cafeId } = await requireActiveOutlet(ctx);
@@ -52,9 +50,7 @@ export const list = query({
     const { startMs, endMs } = resolveRange(tz, range, Date.now());
     const rows = await ctx.db
       .query('expenses')
-      .withIndex('by_cafe_at', (q) =>
-        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
-      )
+      .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs))
       .order('desc')
       .collect();
     const byCatMap = new Map<ExpenseCategory, number>();

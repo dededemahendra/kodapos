@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  STATUS_BADGE_VARIANTS,
-  statusBadgeClasses,
-} from './status-badge-variant';
+import { STATUS_BADGE_VARIANTS, statusBadgeClasses } from './status-badge-variant';
 
 describe('statusBadgeClasses', () => {
   it('returns a distinct class string for each variant', () => {

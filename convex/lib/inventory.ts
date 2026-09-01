@@ -15,9 +15,7 @@ export async function currentStockQty(
 ): Promise<number> {
   const movements = await ctx.db
     .query('inventoryMovements')
-    .withIndex('by_cafe_ingredient', (q) =>
-      q.eq('cafeId', cafeId).eq('ingredientId', ingredientId)
-    )
+    .withIndex('by_cafe_ingredient', (q) => q.eq('cafeId', cafeId).eq('ingredientId', ingredientId))
     .collect();
   return movements.reduce((sum, m) => sum + m.delta, 0);
 }

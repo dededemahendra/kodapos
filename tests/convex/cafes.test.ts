@@ -77,7 +77,10 @@ describe('cafes.geocodeFromCity', () => {
     const { asOwner, cafeId } = await ownerWithCafe(t, 'Bandung');
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [{ latitude: -6.9, longitude: 107.6 }] }) })
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ results: [{ latitude: -6.9, longitude: 107.6 }] }),
+      })
     );
     const res = await asOwner.action(api.cafes.geocodeFromCity, {});
     expect(res).toEqual({ status: 'ok' });
@@ -99,7 +102,10 @@ describe('cafes.geocodeFromCity', () => {
   it('returns not_found on an empty geocode result (no patch)', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, cafeId } = await ownerWithCafe(t, 'Atlantis');
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [] }) }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [] }) })
+    );
     const res = await asOwner.action(api.cafes.geocodeFromCity, {});
     expect(res).toEqual({ status: 'not_found' });
     const cafe = await t.run((ctx) => ctx.db.get(cafeId));
@@ -116,7 +122,7 @@ describe('cafes.geocodeFromCity', () => {
     expect(cafe?.latitude).toBeUndefined(); // no patch on failure
   });
 
-  it('a second owner can only geocode their own cafe, not another owner\'s', async () => {
+  it("a second owner can only geocode their own cafe, not another owner's", async () => {
     const t = convexTest(schema, modules);
     const { cafeId: cafeA } = await ownerWithCafe(t, 'Bandung'); // owner o@x.com, has a city
 
@@ -129,7 +135,10 @@ describe('cafes.geocodeFromCity', () => {
 
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [{ latitude: 1, longitude: 2 }] }) })
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ results: [{ latitude: 1, longitude: 2 }] }),
+      })
     );
 
     // Owner B geocodes — must patch ONLY cafe B.

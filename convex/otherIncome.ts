@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
 export const record = mutation({
@@ -50,9 +50,7 @@ export const list = query({
     const { startMs, endMs } = resolveRange(tz, range, Date.now());
     const rows = await ctx.db
       .query('otherIncome')
-      .withIndex('by_cafe_at', (q) =>
-        q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs)
-      )
+      .withIndex('by_cafe_at', (q) => q.eq('cafeId', cafeId).gte('at', startMs).lte('at', endMs))
       .order('desc')
       .collect();
     let totalIDR = 0;

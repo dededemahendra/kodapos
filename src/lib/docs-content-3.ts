@@ -159,7 +159,10 @@ export const DOCS_PART_3: DocTopic[] = [
         ],
       },
       {
-        heading: { id: 'Pesanan QR pelanggan (Pesanan Masuk)', en: 'Customer QR orders (incoming orders)' },
+        heading: {
+          id: 'Pesanan QR pelanggan (Pesanan Masuk)',
+          en: 'Customer QR orders (incoming orders)',
+        },
         blocks: [
           {
             type: 'p',

@@ -1,5 +1,5 @@
-import { Trans } from '@lingui/react/macro';
 import { useLingui } from '@lingui/react';
+import { Trans } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   ChevronRight,
@@ -14,8 +14,8 @@ import {
   Settings,
   ShoppingCart,
   Tag,
-  UtensilsCrossed,
   Users,
+  UtensilsCrossed,
 } from 'lucide-react';
 import { type ComponentType, useEffect, useState } from 'react';
 import {
@@ -133,11 +133,7 @@ function DocsPage() {
 
           <div className="space-y-8">
             {active.sections.map((section, si) => (
-              <section
-                key={ids[si]}
-                id={ids[si]}
-                className="scroll-mt-20 space-y-3"
-              >
+              <section key={ids[si]} id={ids[si]} className="scroll-mt-20 space-y-3">
                 <h2 className="text-xl font-semibold tracking-tight">
                   {localized(section.heading, locale)}
                 </h2>
@@ -292,15 +288,7 @@ function OnThisPage({ sections }: { sections: { id: string; label: string }[] })
   );
 }
 
-function PagerLink({
-  dir,
-  slug,
-  title,
-}: {
-  dir: 'prev' | 'next';
-  slug: string;
-  title: string;
-}) {
+function PagerLink({ dir, slug, title }: { dir: 'prev' | 'next'; slug: string; title: string }) {
   return (
     <Link
       to="/docs"
@@ -323,6 +311,7 @@ function useScrollSpy(ids: string[]): string | null {
   const [activeId, setActiveId] = useState<string | null>(ids[0] ?? null);
   const key = ids.join('|');
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `key` is the serialized form of `ids`, so it changes exactly when the id list does
   useEffect(() => {
     setActiveId(ids[0] ?? null);
     if (typeof window === 'undefined' || ids.length === 0) return;
@@ -340,9 +329,10 @@ function useScrollSpy(ids: string[]): string | null {
       },
       { rootMargin: '-80px 0px -70% 0px', threshold: 0 }
     );
-    els.forEach((el) => observer.observe(el));
+    els.forEach((el) => {
+      observer.observe(el);
+    });
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
   return activeId;

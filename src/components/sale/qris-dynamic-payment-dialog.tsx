@@ -1,9 +1,9 @@
 import { Trans, useLingui } from '@lingui/react/macro';
-import { QRCodeSVG } from 'qrcode.react';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_LOYALTY } from 'convex/lib/loyalty';
 import { useAction, useMutation, useQuery } from 'convex/react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';

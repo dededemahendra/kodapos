@@ -1,29 +1,36 @@
+import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
-import { Skeleton } from '~/components/ui/skeleton';
 import {
-  type DisplayPayload,
-  readDisplay,
-  subscribeDisplay,
-} from '~/lib/customer-display';
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
+import { Skeleton } from '~/components/ui/skeleton';
+import { type DisplayPayload, readDisplay, subscribeDisplay } from '~/lib/customer-display';
 import { formatIDR } from '~/lib/money';
 import { privatePage } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
 
 // Standalone full-screen customer-facing view. Lives at the top level (NOT
 // under _pos) so it renders bare, with no app sidebar/chrome, while still
 // inheriting Convex/auth context from __root. The cashier drags this window to
 // the till's second monitor; it mirrors the live cart via localStorage.
+const TITLE = msg`Layar Pelanggan`;
+
 export const Route = createFileRoute('/display')({
-  head: () => privatePage('Layar Pelanggan'),
+  head: () => privatePage(headTitle(TITLE)),
   component: CustomerDisplay,
 });
 
 function CustomerDisplay() {
+  usePageTitle(TITLE);
   const [data, setData] = useState<DisplayPayload>(() => readDisplay());
   useEffect(() => subscribeDisplay(setData), []);
   const cafe = useQuery(api.cafes.myCafe, {});
@@ -41,15 +48,9 @@ function CustomerDisplay() {
         ) : (
           <>
             {cafe?.logoUrl ? (
-              <img
-                src={cafe.logoUrl}
-                alt=""
-                className="h-12 w-12 rounded-md object-cover"
-              />
+              <img src={cafe.logoUrl} alt="" className="h-12 w-12 rounded-md object-cover" />
             ) : null}
-            <span className="text-3xl font-bold tracking-tight">
-              {cafe?.name ?? 'kodapos'}
-            </span>
+            <span className="text-3xl font-bold tracking-tight">{cafe?.name ?? 'kodapos'}</span>
           </>
         )}
       </header>
@@ -74,13 +75,9 @@ function CustomerDisplay() {
         <div className="flex flex-1 flex-col overflow-hidden">
           <ul className="flex-1 divide-y overflow-y-auto px-8">
             {data!.lines.map((line, i) => (
-              <li
-                key={i}
-                className="flex items-baseline justify-between gap-6 py-5"
-              >
+              <li key={i} className="flex items-baseline justify-between gap-6 py-5">
                 <span className="text-2xl md:text-3xl">
-                  <span className="font-bold tabular-nums">{line.qty}x</span>{' '}
-                  {line.name}
+                  <span className="font-bold tabular-nums">{line.qty}x</span> {line.name}
                   {line.variantName ? (
                     <span className="text-muted-foreground"> ({line.variantName})</span>
                   ) : null}
@@ -93,10 +90,7 @@ function CustomerDisplay() {
           </ul>
 
           <div className="border-t bg-muted/30 px-8 py-6 space-y-3">
-            <Row
-              label={<Trans>Subtotal</Trans>}
-              value={formatIDR(data!.subtotalIDR)}
-            />
+            <Row label={<Trans>Subtotal</Trans>} value={formatIDR(data!.subtotalIDR)} />
             {data!.discountIDR > 0 ? (
               <Row
                 label={
@@ -113,16 +107,10 @@ function CustomerDisplay() {
               />
             ) : null}
             {data!.serviceChargeIDR > 0 ? (
-              <Row
-                label={<Trans>Layanan</Trans>}
-                value={formatIDR(data!.serviceChargeIDR)}
-              />
+              <Row label={<Trans>Layanan</Trans>} value={formatIDR(data!.serviceChargeIDR)} />
             ) : null}
             {data!.taxIDR > 0 ? (
-              <Row
-                label={<Trans>Pajak</Trans>}
-                value={formatIDR(data!.taxIDR)}
-              />
+              <Row label={<Trans>Pajak</Trans>} value={formatIDR(data!.taxIDR)} />
             ) : null}
             <div className="flex items-baseline justify-between gap-6 border-t pt-4">
               <span className="text-3xl md:text-4xl font-bold">
@@ -139,13 +127,7 @@ function CustomerDisplay() {
   );
 }
 
-function Row({
-  label,
-  value,
-}: {
-  label: React.ReactNode;
-  value: string;
-}) {
+function Row({ label, value }: { label: React.ReactNode; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-6 text-xl md:text-2xl">
       <span>{label}</span>

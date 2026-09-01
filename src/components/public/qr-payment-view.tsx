@@ -1,6 +1,6 @@
 import { Trans, useLingui } from '@lingui/react/macro';
-import { QRCodeSVG } from 'qrcode.react';
 import { CheckCircle2, Clock, TimerOff, XCircle } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -150,12 +150,7 @@ export function QrPaymentView({
               {error}
             </p>
           ) : null}
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-1 w-full"
-            onClick={onPayAtCounter}
-          >
+          <Button type="button" variant="outline" className="mt-1 w-full" onClick={onPayAtCounter}>
             <Trans>Bayar di kasir</Trans>
           </Button>
         </CardContent>

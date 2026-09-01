@@ -1,7 +1,7 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { Trans, useLingui } from '@lingui/react/macro';
 import { useEffect, useMemo, useState } from 'react';
 import { IngredientPicker } from '~/components/inventory/ingredient-picker';
 import { Button } from '~/components/ui/button';
@@ -108,7 +108,9 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
   return (
     <section className="mt-10 pt-6 border-t border-border">
       <div className="flex items-baseline justify-between mb-3">
-        <h2 className="text-lg font-bold"><Trans>Resep</Trans></h2>
+        <h2 className="text-lg font-bold">
+          <Trans>Resep</Trans>
+        </h2>
         <span className="text-sm text-muted-foreground">
           ≈ <span className="font-semibold tabular-nums">{formatIDR(Math.round(costPreview))}</span>{' '}
           / <Trans>porsi</Trans>
@@ -116,12 +118,16 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
       </div>
 
       {recipe === undefined || ingredients === undefined ? (
-        <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>
+        <p className="text-muted-foreground">
+          <Trans>Memuat…</Trans>
+        </p>
       ) : (
         <>
           {lines.length === 0 ? (
             <p className="text-muted-foreground text-sm mb-3">
-              <Trans>Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis.</Trans>
+              <Trans>
+                Belum ada resep. Item tetap bisa dijual, tapi stok bahan tidak berkurang otomatis.
+              </Trans>
             </p>
           ) : (
             <FieldGroup>
@@ -129,7 +135,9 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
                 <div key={line.key} className="flex items-end gap-2">
                   <div className="flex-1">
                     <Field>
-                      <FieldLabel><Trans>Bahan</Trans></FieldLabel>
+                      <FieldLabel>
+                        <Trans>Bahan</Trans>
+                      </FieldLabel>
                       <IngredientPicker
                         value={line.ingredientId}
                         onChange={(id) => patchLine(line.key, { ingredientId: id })}
@@ -138,7 +146,9 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
                   </div>
                   <div className="w-28">
                     <Field>
-                      <FieldLabel htmlFor={`recipe-qty-${line.key}`}><Trans>Jumlah</Trans></FieldLabel>
+                      <FieldLabel htmlFor={`recipe-qty-${line.key}`}>
+                        <Trans>Jumlah</Trans>
+                      </FieldLabel>
                       <Input
                         id={`recipe-qty-${line.key}`}
                         type="number"
@@ -161,9 +171,7 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
                         max="5"
                         step="0.1"
                         value={line.wastageFactor}
-                        onChange={(e) =>
-                          patchLine(line.key, { wastageFactor: e.target.value })
-                        }
+                        onChange={(e) => patchLine(line.key, { wastageFactor: e.target.value })}
                       />
                     </Field>
                   </div>
@@ -187,7 +195,11 @@ export function RecipeEditor({ menuItemId }: { menuItemId: Id<'menuItems'> }) {
               + <Trans>Tambah bahan</Trans>
             </Button>
             <div className="ml-auto flex items-center gap-3">
-              {savedAt ? <span className="text-xs text-primary"><Trans>Tersimpan.</Trans></span> : null}
+              {savedAt ? (
+                <span className="text-xs text-primary">
+                  <Trans>Tersimpan.</Trans>
+                </span>
+              ) : null}
               <Button type="button" onClick={save} disabled={submitting}>
                 {submitting && <Spinner data-icon="inline-start" />}
                 {submitting ? <Trans>Menyimpan…</Trans> : <Trans>Simpan resep</Trans>}

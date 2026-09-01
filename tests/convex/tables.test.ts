@@ -117,9 +117,9 @@ describe('tables CRUD', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setup(t);
     await expect(asOwner.mutation(api.tables.create, { name: '  ' })).rejects.toThrow(/nama/i);
-    await expect(
-      asOwner.mutation(api.tables.create, { name: 'x'.repeat(41) })
-    ).rejects.toThrow(/nama/i);
+    await expect(asOwner.mutation(api.tables.create, { name: 'x'.repeat(41) })).rejects.toThrow(
+      /nama/i
+    );
   });
 
   it('owner-scope: foreign owner cannot update/archive', async () => {
@@ -130,9 +130,7 @@ describe('tables CRUD', () => {
     await expect(
       b.asOwner.mutation(api.tables.update, { id: aTable, name: 'hax' })
     ).rejects.toThrow();
-    await expect(
-      b.asOwner.mutation(api.tables.archive, { id: aTable })
-    ).rejects.toThrow();
+    await expect(b.asOwner.mutation(api.tables.archive, { id: aTable })).rejects.toThrow();
   });
 });
 

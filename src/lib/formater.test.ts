@@ -1,12 +1,6 @@
 import { i18n } from '@lingui/core';
 import { describe, expect, it } from 'vitest';
-import {
-  formatCount,
-  formatDate,
-  formatDayKey,
-  formatIDR,
-  formatRelative,
-} from '~/lib/formater';
+import { formatCount, formatDate, formatDayKey, formatIDR, formatRelative } from '~/lib/formater';
 
 describe('formatter (locale-aware)', () => {
   it('keeps IDR currency regardless of locale', () => {

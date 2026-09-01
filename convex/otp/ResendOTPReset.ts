@@ -42,7 +42,9 @@ function generateCode(): string {
   const b = new Uint8Array(4);
   globalThis.crypto.getRandomValues(b);
   const n = new DataView(b.buffer).getUint32(0);
-  return String(n % 100000000).padStart(8, '0').slice(0, 8);
+  return String(n % 100000000)
+    .padStart(8, '0')
+    .slice(0, 8);
 }
 
 /**
@@ -70,7 +72,7 @@ export const ResendOTPReset: EmailConfig = {
   // `@ts-expect-error`). We declare ctx here and cast the object below.
   async sendVerificationRequest(
     { identifier: email, token }: { identifier: string; token: string },
-    ctx: ActionCtx,
+    ctx: ActionCtx
   ) {
     // Server-side issuance rate limit (the client cooldown is bypassable).
     // Distinct bucket from the otp flow.

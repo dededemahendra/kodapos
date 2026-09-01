@@ -28,8 +28,7 @@ export const create = mutation({
       .query('priceCategories')
       .withIndex('by_cafe_and_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
       .collect();
-    const position =
-      existing.length === 0 ? 0 : Math.max(...existing.map((x) => x.position)) + 1;
+    const position = existing.length === 0 ? 0 : Math.max(...existing.map((x) => x.position)) + 1;
     return await ctx.db.insert('priceCategories', {
       cafeId,
       name: cleanName,

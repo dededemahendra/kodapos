@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 
 const tableDoc = v.object({
   _id: v.id('tables'),
@@ -28,29 +28,31 @@ export const list = query({
       .query('tables')
       .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
       .collect();
-    return rows
-      .filter((r) => includeArchived || !r.archived)
-      .sort((a, b) => {
-        // Active first, then by sortOrder, then name.
-        if (a.archived !== b.archived) return a.archived ? 1 : -1;
-        if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
-        return a.name.localeCompare(b.name, 'id-ID');
-      })
-      // Project explicitly rather than returning the raw doc. `qrToken` is a
-      // capability granting access to the public /order/{qrToken} page, and no
-      // caller of this list needs it — the QR screen mints/reads its own via
-      // ensureQrToken. Spreading the doc would both leak the token to every
-      // client rendering a table picker and break this query's returns
-      // validator (which is what happened once tokens started being assigned).
-      .map((r) => ({
-        _id: r._id,
-        _creationTime: r._creationTime,
-        cafeId: r.cafeId,
-        name: r.name,
-        sortOrder: r.sortOrder,
-        archived: r.archived,
-        createdAt: r.createdAt,
-      }));
+    return (
+      rows
+        .filter((r) => includeArchived || !r.archived)
+        .sort((a, b) => {
+          // Active first, then by sortOrder, then name.
+          if (a.archived !== b.archived) return a.archived ? 1 : -1;
+          if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+          return a.name.localeCompare(b.name, 'id-ID');
+        })
+        // Project explicitly rather than returning the raw doc. `qrToken` is a
+        // capability granting access to the public /order/{qrToken} page, and no
+        // caller of this list needs it — the QR screen mints/reads its own via
+        // ensureQrToken. Spreading the doc would both leak the token to every
+        // client rendering a table picker and break this query's returns
+        // validator (which is what happened once tokens started being assigned).
+        .map((r) => ({
+          _id: r._id,
+          _creationTime: r._creationTime,
+          cafeId: r.cafeId,
+          name: r.name,
+          sortOrder: r.sortOrder,
+          archived: r.archived,
+          createdAt: r.createdAt,
+        }))
+    );
   },
 });
 
@@ -155,9 +157,7 @@ export const floor = query({
               .filter((q) => q.eq(q.field('shiftId'), openShift._id))
               .first()
           : null;
-        const totalIDR = held
-          ? held.lines.reduce((sum, l) => sum + l.qty * l.unitPriceIDR, 0)
-          : 0;
+        const totalIDR = held ? held.lines.reduce((sum, l) => sum + l.qty * l.unitPriceIDR, 0) : 0;
         const itemCount = held ? held.lines.reduce((sum, l) => sum + l.qty, 0) : 0;
         return {
           _id: table._id,

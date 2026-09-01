@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 beforeAll(() => {
   i18n.activate('id');
 });
+
 import {
   passwordStrength,
   validateCafeName,

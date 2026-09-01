@@ -9,9 +9,15 @@ import { ConfirmArchive } from '~/components/menu/confirm-archive';
 import { SettingsPageHeader } from '~/components/settings/primitives';
 import { PinEntry } from '~/components/staff/pin-entry';
 import { Badge } from '~/components/ui/badge';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Input } from '~/components/ui/input';
 import { Spinner } from '~/components/ui/spinner';
 import { Switch } from '~/components/ui/switch';
@@ -84,9 +90,7 @@ function StaffSettingsPage() {
   const resetPin = useMutation(api.staff.resetPin);
   const archive = useMutation(api.staff.archive);
 
-  const filtered = staff?.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = staff?.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()));
 
   async function handleCreate(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -119,7 +123,11 @@ function StaffSettingsPage() {
   }
 
   if (staff === undefined)
-    return <p className="text-muted-foreground"><Trans>Memuat…</Trans></p>;
+    return (
+      <p className="text-muted-foreground">
+        <Trans>Memuat…</Trans>
+      </p>
+    );
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -172,7 +180,9 @@ function StaffSettingsPage() {
             onCheckedChange={setIncludeArchived}
             id="toggle-archived"
           />
-          <span><Trans>Tampilkan arsip</Trans></span>
+          <span>
+            <Trans>Tampilkan arsip</Trans>
+          </span>
         </label>
       </div>
 
@@ -181,8 +191,12 @@ function StaffSettingsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-xs uppercase text-muted-foreground bg-muted/40 border-b border-border">
-              <th className="py-2 px-3"><Trans>Nama</Trans></th>
-              <th className="py-2 px-3 w-24"><Trans>Peran</Trans></th>
+              <th className="py-2 px-3">
+                <Trans>Nama</Trans>
+              </th>
+              <th className="py-2 px-3 w-24">
+                <Trans>Peran</Trans>
+              </th>
               <th className="py-2 px-3 w-10" />
             </tr>
           </thead>
@@ -192,9 +206,15 @@ function StaffSettingsPage() {
                 <td colSpan={3} className="p-0">
                   <Empty>
                     <EmptyHeader>
-                      <EmptyMedia variant="icon"><Users /></EmptyMedia>
-                      <EmptyTitle><Trans>Tidak ada staf yang ditemukan.</Trans></EmptyTitle>
-                      <EmptyDescription><Trans>Coba ubah kata pencarian atau tambah kasir baru.</Trans></EmptyDescription>
+                      <EmptyMedia variant="icon">
+                        <Users />
+                      </EmptyMedia>
+                      <EmptyTitle>
+                        <Trans>Tidak ada staf yang ditemukan.</Trans>
+                      </EmptyTitle>
+                      <EmptyDescription>
+                        <Trans>Coba ubah kata pencarian atau tambah kasir baru.</Trans>
+                      </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
                 </td>
@@ -205,9 +225,7 @@ function StaffSettingsPage() {
                 key={s._id}
                 row={s}
                 expanded={expandedId === s._id}
-                onToggleExpand={() =>
-                  setExpandedId((prev) => (prev === s._id ? null : s._id))
-                }
+                onToggleExpand={() => setExpandedId((prev) => (prev === s._id ? null : s._id))}
                 onResetPinClick={() => setResetting({ id: s._id, name: s.name })}
                 onArchive={() => archive({ id: s._id })}
               />
@@ -288,14 +306,16 @@ function StaffRowGroup({
       <tr
         className={cn(
           'border-b border-border/50 hover:bg-muted/30 transition-colors',
-          isArchived && 'opacity-60',
+          isArchived && 'opacity-60'
         )}
       >
         <td className="py-2 px-3">
           <div className="flex items-center gap-2">
             <span className="font-medium">{row.name}</span>
             {isArchived && (
-              <Badge variant="secondary"><Trans>Arsip</Trans></Badge>
+              <Badge variant="secondary">
+                <Trans>Arsip</Trans>
+              </Badge>
             )}
           </div>
           {(row.phone || row.email) && (
@@ -315,11 +335,7 @@ function StaffRowGroup({
             onClick={onToggleExpand}
             aria-label={expanded ? t`Tutup detail` : t`Buka detail`}
           >
-            {expanded ? (
-              <ChevronUp className="size-4" />
-            ) : (
-              <ChevronDown className="size-4" />
-            )}
+            {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
           </Button>
         </td>
       </tr>
@@ -412,10 +428,7 @@ function StaffDetail({
     }
   }
 
-  function handlePermissionToggle(
-    key: keyof StaffPermissions,
-    value: boolean,
-  ) {
+  function handlePermissionToggle(key: keyof StaffPermissions, value: boolean) {
     setPerms((prev) => {
       const next = { ...prev, [key]: value };
       void setPermissions({ id: row._id, permissions: next }).catch(() => {
@@ -593,12 +606,7 @@ function StaffDetail({
 
       {/* ── Actions (PIN + Archive) ──────────────────────────────────────── */}
       <div className="flex items-center gap-3 pt-1 border-t border-border/30">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onResetPinClick}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={onResetPinClick}>
           {row.pinHash ? t`Ganti PIN` : t`Set PIN`}
         </Button>
         {!row.archived && (
@@ -607,7 +615,12 @@ function StaffDetail({
             name={row.name}
             onConfirm={onArchive}
             trigger={
-              <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+              >
                 <Trans>Arsipkan</Trans>
               </Button>
             }
@@ -636,11 +649,7 @@ function PermissionRow({
   return (
     <label className="flex items-center justify-between gap-3 rounded-md px-3 py-2 bg-background border border-border/50 cursor-pointer select-none">
       <span className="text-sm">{label}</span>
-      <Switch
-        checked={checked}
-        disabled={disabled}
-        onCheckedChange={onCheckedChange}
-      />
+      <Switch checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
     </label>
   );
 }

@@ -1,5 +1,6 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import type { MessageDescriptor } from '@lingui/core';
+import { msg } from '@lingui/core/macro';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
@@ -27,14 +28,17 @@ import {
   validatePasswordSignup,
 } from '~/lib/auth-validation';
 import { seo } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
 
 // `email`/`code` no longer live in the query string: the magic link now carries
 // them in the URL FRAGMENT (#) so they never reach a server log / Referer. Only
 // `reset` remains a search param (it routes the card into reset mode).
 type SigninSearch = { reset?: string };
 
+const TITLE = msg`Masuk`;
+
 export const Route = createFileRoute('/_public/signin')({
-  head: () => seo({ title: 'Masuk, kodapos', path: '/signin', noindex: true }),
+  head: () => seo({ title: headTitle(TITLE), path: '/signin', noindex: true }),
   validateSearch: (s: Record<string, unknown>): SigninSearch => ({
     ...(typeof s.reset === 'string' ? { reset: s.reset } : {}),
   }),
@@ -63,10 +67,10 @@ type Mode = 'password' | 'otp' | 'reset';
 const RESEND_COOLDOWN_SECONDS = 30;
 
 function SigninPage() {
+  usePageTitle(TITLE);
   const search = Route.useSearch();
   // Magic link: email + code arrive in the URL fragment (never the query).
-  const magic =
-    typeof window !== 'undefined' ? parseMagicLinkHash(window.location.hash) : null;
+  const magic = typeof window !== 'undefined' ? parseMagicLinkHash(window.location.hash) : null;
   if (magic) {
     return <MagicLinkHandler email={magic.email} code={magic.code} />;
   }
@@ -156,7 +160,7 @@ function SigninCard({
 
   const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState<FieldState>(
-    prefillEmail ? { value: prefillEmail, touched: false, error: null } : initialField,
+    prefillEmail ? { value: prefillEmail, touched: false, error: null } : initialField
   );
   const [password, setPassword] = useState<FieldState>(initialField);
   const [newPassword, setNewPassword] = useState<FieldState>(initialField);
@@ -298,7 +302,9 @@ function SigninCard({
         setCooldown(RESEND_COOLDOWN_SECONDS);
         if (outcome === 'fallback') {
           setMode('otp');
-          setInfo(t`Akun ini menggunakan kode masuk, bukan sandi. Kami mengirim kode ke email Anda.`);
+          setInfo(
+            t`Akun ini menggunakan kode masuk, bukan sandi. Kami mengirim kode ke email Anda.`
+          );
         } else {
           setInfo(t`Kode reset dikirim ke email Anda.`);
         }
@@ -314,7 +320,7 @@ function SigninCard({
     } catch {
       // Both the reset and the sign-in code send failed: a genuine email outage.
       setAuthError(
-        t`Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi.`,
+        t`Tidak dapat mengirim kode. Email mungkin belum dikonfigurasi. Coba masuk dengan sandi.`
       );
       track('auth_failed', { method: 'otp', reason: 'send_failed' });
     } finally {
@@ -659,7 +665,6 @@ function SigninCard({
           </div>
         </>
       )}
-
     </AuthCard>
   );
 }

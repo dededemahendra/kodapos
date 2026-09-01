@@ -12,10 +12,7 @@ type Setup = {
   categoryId: Id<'categories'>;
 };
 
-async function setup(
-  t: ReturnType<typeof convexTest>,
-  email = 'owner@test.com'
-): Promise<Setup> {
+async function setup(t: ReturnType<typeof convexTest>, email = 'owner@test.com'): Promise<Setup> {
   const userId = await t.run(async (ctx) => {
     return await ctx.db.insert('users', { name: 'Owner', email });
   });
@@ -306,9 +303,9 @@ describe('menu item assign barcode', () => {
       priceIDR: 25000,
       barcode: '8991234567890',
     });
-    await expect(
-      asOwner.mutation(api.menu.items.assignBarcode, { id })
-    ).rejects.toThrow(/sudah punya/i);
+    await expect(asOwner.mutation(api.menu.items.assignBarcode, { id })).rejects.toThrow(
+      /sudah punya/i
+    );
   });
 
   it('assignMissingBarcodes assigns only to sellable items lacking one', async () => {

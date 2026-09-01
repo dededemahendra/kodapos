@@ -1,9 +1,8 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { useConvex, useMutation, useQuery } from 'convex/react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
 import { useState } from 'react';
 import { PinEntry } from '~/components/staff/pin-entry';
 import { StaffPickerCard } from '~/components/staff/staff-picker-card';
@@ -29,7 +28,11 @@ function PinPickerPage() {
   const [error, setError] = useState<string | null>(null);
 
   if (staff === undefined) {
-    return <p className="text-muted-foreground p-6"><Trans>Memuat…</Trans></p>;
+    return (
+      <p className="text-muted-foreground p-6">
+        <Trans>Memuat…</Trans>
+      </p>
+    );
   }
 
   async function activate(id: Id<'cafeStaff'>): Promise<void> {
@@ -58,8 +61,12 @@ function PinPickerPage() {
 
   return (
     <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-1"><Trans>Siapa yang bertugas?</Trans></h1>
-      <p className="text-muted-foreground text-sm mb-6"><Trans>Pilih nama Anda dan masukkan PIN 4 digit.</Trans></p>
+      <h1 className="text-2xl font-bold mb-1">
+        <Trans>Siapa yang bertugas?</Trans>
+      </h1>
+      <p className="text-muted-foreground text-sm mb-6">
+        <Trans>Pilih nama Anda dan masukkan PIN 4 digit.</Trans>
+      </p>
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
         {staff.map((s) => (
           <StaffPickerCard
@@ -83,7 +90,9 @@ function PinPickerPage() {
       <Dialog open={!!picking} onOpenChange={(open) => !open && setPicking(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle><Trans>PIN untuk {picking?.name}</Trans></DialogTitle>
+            <DialogTitle>
+              <Trans>PIN untuk {picking?.name}</Trans>
+            </DialogTitle>
           </DialogHeader>
           <PinEntry
             onComplete={(pin) => {

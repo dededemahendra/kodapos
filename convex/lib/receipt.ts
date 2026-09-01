@@ -189,7 +189,9 @@ export function buildReceiptHtml(order: ReceiptOrder, cafe: ReceiptCafe | null):
 
   for (const line of order.lines) {
     const variant = line.variantName ? ` (${line.variantName})` : '';
-    rows.push(totalRow(`${line.qty}x ${line.nameSnapshot}${variant}`, formatIDR(line.lineTotalIDR)));
+    rows.push(
+      totalRow(`${line.qty}x ${line.nameSnapshot}${variant}`, formatIDR(line.lineTotalIDR))
+    );
     for (const m of line.modifiersSnapshot) {
       rows.push(`<tr><td colspan="2">+ ${escapeHtml(m.optionName)}</td></tr>`);
     }

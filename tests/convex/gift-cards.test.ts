@@ -195,9 +195,7 @@ describe('gift card redemption (tender)', () => {
     expect(txns[0]?.orderId).toBe(res.orderId);
 
     // A second void can't double-refund (paymentStatus guard).
-    await expect(
-      asOwner.mutation(api.orders.voidSale, { orderId: res.orderId })
-    ).rejects.toThrow();
+    await expect(asOwner.mutation(api.orders.voidSale, { orderId: res.orderId })).rejects.toThrow();
     card = await asOwner.query(api.giftCards.getByCode, { code: 'VOIDME' });
     expect(card?.balanceIDR).toBe(100_000); // still 100000, not 150000
   });
@@ -270,7 +268,10 @@ describe('gift cards management', () => {
   it('list returns newest-first and excludes archived by default', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
-    const first = await asOwner.mutation(api.giftCards.issue, { code: 'FIRST', balanceIDR: 10_000 });
+    const first = await asOwner.mutation(api.giftCards.issue, {
+      code: 'FIRST',
+      balanceIDR: 10_000,
+    });
     const second = await asOwner.mutation(api.giftCards.issue, {
       code: 'SECOND',
       balanceIDR: 20_000,

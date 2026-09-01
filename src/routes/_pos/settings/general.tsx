@@ -1,10 +1,10 @@
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
 import { useMemo, useState } from 'react';
 import { useLocale } from '~/components/locale-provider';
+import { SettingsPageHeader } from '~/components/settings/primitives';
 import { SaveBar } from '~/components/settings/save-bar';
 import { useEditableState } from '~/components/settings/use-editable-state';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
@@ -20,20 +20,19 @@ import {
 } from '~/components/ui/select';
 import { Separator } from '~/components/ui/separator';
 import { Switch } from '~/components/ui/switch';
-import { type Locale, LOCALES } from '~/lib/locale';
+import { LOCALES, type Locale } from '~/lib/locale';
 import {
   applyDensity,
   applyTheme,
+  type Density,
   getDensity,
   getTheme,
   storeDensity,
   storeTheme,
-  type Density,
   type Theme,
   useBoolPreference,
   usePreference,
 } from '~/lib/preferences';
-import { SettingsPageHeader } from '~/components/settings/primitives';
 
 export const Route = createFileRoute('/_pos/settings/general')({
   component: GeneralSettings,
@@ -195,9 +194,7 @@ function RegionSection({
           <SettingRow
             label={<Trans>Mata Uang</Trans>}
             description={<Trans>Semua transaksi dalam Rupiah.</Trans>}
-            control={
-              <span className="text-sm font-mono text-muted-foreground">Rupiah (Rp)</span>
-            }
+            control={<span className="text-sm font-mono text-muted-foreground">Rupiah (Rp)</span>}
           />
         </FieldGroup>
       </CardContent>
@@ -355,7 +352,9 @@ function NotificationsSection({
         <FieldGroup>
           <SettingRow
             label={<Trans>Peringatan stok rendah</Trans>}
-            description={<Trans>Tampilkan peringatan saat stok bahan mendekati ambang batas.</Trans>}
+            description={
+              <Trans>Tampilkan peringatan saat stok bahan mendekati ambang batas.</Trans>
+            }
             control={
               <Switch
                 checked={lowStockAlerts}
@@ -408,7 +407,9 @@ function SecuritySection({
         <FieldGroup>
           <SettingRow
             label={<Trans>Wajib PIN untuk void/refund</Trans>}
-            description={<Trans>Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi.</Trans>}
+            description={
+              <Trans>Kasir harus memasukkan PIN pemilik untuk membatalkan transaksi.</Trans>
+            }
             control={
               <Switch
                 checked={pinForVoid}
@@ -473,8 +474,7 @@ function EmailSummarySection() {
     return {
       emailSummaryOnClose: n.emailSummaryOnClose,
       summaryEmail: ('summaryEmail' in n ? n.summaryEmail : undefined) ?? '',
-      emailLowStockDaily:
-        ('emailLowStockDaily' in n ? n.emailLowStockDaily : undefined) ?? false,
+      emailLowStockDaily: ('emailLowStockDaily' in n ? n.emailLowStockDaily : undefined) ?? false,
     };
   }, [s]);
 
@@ -526,15 +526,11 @@ function EmailSummarySection() {
         <FieldGroup>
           <SettingRow
             label={<Trans>Kirim ringkasan saat tutup shift</Trans>}
-            description={
-              <Trans>Kirim rekap penjualan dan kas ke email saat shift ditutup.</Trans>
-            }
+            description={<Trans>Kirim rekap penjualan dan kas ke email saat shift ditutup.</Trans>}
             control={
               <Switch
                 checked={draft.emailSummaryOnClose}
-                onCheckedChange={(checked) =>
-                  setDraft({ ...draft, emailSummaryOnClose: checked })
-                }
+                onCheckedChange={(checked) => setDraft({ ...draft, emailSummaryOnClose: checked })}
                 aria-label={t`Kirim ringkasan saat tutup shift`}
               />
             }
@@ -563,9 +559,7 @@ function EmailSummarySection() {
             control={
               <Switch
                 checked={draft.emailLowStockDaily}
-                onCheckedChange={(checked) =>
-                  setDraft({ ...draft, emailLowStockDaily: checked })
-                }
+                onCheckedChange={(checked) => setDraft({ ...draft, emailLowStockDaily: checked })}
                 aria-label={t`Email peringatan stok menipis harian`}
               />
             }
@@ -629,9 +623,9 @@ function GeneralSettings() {
         title={<Trans>Umum</Trans>}
         description={
           <Trans>
-            Bahasa, kepadatan tampilan, dan format tanggal &amp; waktu berlaku
-            langsung. Pengaturan struk &amp; pembayaran kini ada di halaman Struk
-            &amp; Printer dan Pajak &amp; Pembayaran.
+            Bahasa, kepadatan tampilan, dan format tanggal &amp; waktu berlaku langsung. Pengaturan
+            struk &amp; pembayaran kini ada di halaman Struk &amp; Printer dan Pajak &amp;
+            Pembayaran.
           </Trans>
         }
       />

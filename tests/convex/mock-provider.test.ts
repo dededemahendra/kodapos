@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MockProvider, signMockBody } from '../../convex/payments/providers/mock';
+
 const SECRET = 'test-secret';
 describe('MockProvider', () => {
   it('createCharge returns providerRef/qrString/future expiry', async () => {
@@ -13,7 +14,10 @@ describe('MockProvider', () => {
     const body = JSON.stringify({ providerRef: 'mock_abc', status: 'paid' });
     const ok = new Headers({ 'x-signature': await signMockBody(SECRET, body) });
     const bad = new Headers({ 'x-signature': 'wrong' });
-    await expect(p.verifyWebhook({ body, headers: ok })).resolves.toEqual({ providerRef: 'mock_abc', status: 'paid' });
+    await expect(p.verifyWebhook({ body, headers: ok })).resolves.toEqual({
+      providerRef: 'mock_abc',
+      status: 'paid',
+    });
     await expect(p.verifyWebhook({ body, headers: bad })).resolves.toBeNull();
   });
 });

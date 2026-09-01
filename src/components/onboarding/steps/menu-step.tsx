@@ -1,7 +1,7 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
-import { Trans, useLingui } from '@lingui/react/macro';
 import { ListChecks, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
 import { OnboardingStepHeader } from '~/components/onboarding/step-header';
@@ -42,9 +42,15 @@ export function MenuStep() {
           <Trans>Langkah singkat</Trans>
         </div>
         <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-          <li><Trans>Buat 2-3 kategori (Kopi, Non-Kopi, Makanan).</Trans></li>
-          <li><Trans>Tambahkan beberapa item beserta harganya.</Trans></li>
-          <li><Trans>Buat grup modifier (mis. Ukuran) dan pasang ke item.</Trans></li>
+          <li>
+            <Trans>Buat 2-3 kategori (Kopi, Non-Kopi, Makanan).</Trans>
+          </li>
+          <li>
+            <Trans>Tambahkan beberapa item beserta harganya.</Trans>
+          </li>
+          <li>
+            <Trans>Buat grup modifier (mis. Ukuran) dan pasang ke item.</Trans>
+          </li>
         </ol>
       </div>
       <div className="mt-6 flex flex-wrap gap-2">
@@ -52,7 +58,9 @@ export function MenuStep() {
           <Trans>Mulai dengan kategori →</Trans>
         </Button>
         <Button asChild variant="outline">
-          <Link to="/onboarding/cashier"><Trans>Lanjut: PIN & Kasir →</Trans></Link>
+          <Link to="/onboarding/cashier">
+            <Trans>Lanjut: PIN & Kasir →</Trans>
+          </Link>
         </Button>
         <Button variant="ghost" onClick={() => finish('/menu')}>
           <Trans>Selesaikan nanti</Trans>
@@ -60,7 +68,9 @@ export function MenuStep() {
       </div>
       <div className="mt-4">
         <Button asChild variant="ghost" className="text-muted-foreground">
-          <Link to="/onboarding/profile"><Trans>← Kembali</Trans></Link>
+          <Link to="/onboarding/profile">
+            <Trans>← Kembali</Trans>
+          </Link>
         </Button>
       </div>
     </>

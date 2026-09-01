@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { MotionConfig, motion } from 'motion/react';
+import { useState } from 'react';
 import { SectionHeading } from './section-heading';
 
 const VP = { once: true, margin: '-80px' } as const;
@@ -50,7 +50,7 @@ const TESTIMONIALS = [
 export function Testimonials() {
   const [active, setActive] = useState(0);
   // active is always 0-2 (set only by clicking a TESTIMONIALS pill), so the index is always valid
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  // biome-ignore lint/style/noNonNullAssertion: active is clamped to the TESTIMONIALS range
   const person = TESTIMONIALS[active]!;
 
   return (
@@ -66,63 +66,63 @@ export function Testimonials() {
             visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
           }}
         >
-        <SectionHeading>
-          <Trans>Dipakai pemilik kafe seperti Anda</Trans>
-        </SectionHeading>
+          <SectionHeading>
+            <Trans>Dipakai pemilik kafe seperti Anda</Trans>
+          </SectionHeading>
 
-        {/* Quote display */}
-        <figure className="flex flex-col items-center gap-6 text-center">
-          <blockquote
-            key={active}
-            className="max-w-2xl text-xl font-medium italic leading-relaxed text-foreground animate-in fade-in duration-300"
-          >
-            {person.quote}
-          </blockquote>
-          <figcaption className="text-sm text-muted-foreground">
-            {person.name}, {person.role}
-          </figcaption>
+          {/* Quote display */}
+          <figure className="flex flex-col items-center gap-6 text-center">
+            <blockquote
+              key={active}
+              className="max-w-2xl text-xl font-medium italic leading-relaxed text-foreground animate-in fade-in duration-300"
+            >
+              {person.quote}
+            </blockquote>
+            <figcaption className="text-sm text-muted-foreground">
+              {person.name}, {person.role}
+            </figcaption>
 
-          {/* Avatar pills */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            {TESTIMONIALS.map((t, i) => (
-              <button
-                key={t.seed}
-                type="button"
-                onClick={() => setActive(i)}
-                className={[
-                  'group flex items-center gap-2 rounded-full transition-all duration-300',
-                  'overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
-                  i === active
-                    ? 'bg-foreground text-background px-3 py-1'
-                    : 'bg-muted text-foreground px-1 py-1 hover:bg-foreground hover:text-background hover:px-3',
-                ].join(' ')}
-              >
-                <img
-                  src={avatarUrl(t.seed)}
-                  alt=""
-                  width={32}
-                  height={32}
-                  loading="lazy"
-                  className="size-8 shrink-0 rounded-full bg-muted"
-                />
-                <span
+            {/* Avatar pills */}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              {TESTIMONIALS.map((t, i) => (
+                <button
+                  key={t.seed}
+                  type="button"
+                  onClick={() => setActive(i)}
                   className={[
-                    'whitespace-nowrap text-sm font-medium transition-all duration-300',
+                    'group flex items-center gap-2 rounded-full transition-all duration-300',
+                    'overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
                     i === active
-                      ? 'max-w-[120px] opacity-100'
-                      : 'max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100',
+                      ? 'bg-foreground text-background px-3 py-1'
+                      : 'bg-muted text-foreground px-1 py-1 hover:bg-foreground hover:text-background hover:px-3',
                   ].join(' ')}
                 >
-                  {t.name}
-                </span>
-              </button>
-            ))}
-          </div>
-        </figure>
+                  <img
+                    src={avatarUrl(t.seed)}
+                    alt=""
+                    width={32}
+                    height={32}
+                    loading="lazy"
+                    className="size-8 shrink-0 rounded-full bg-muted"
+                  />
+                  <span
+                    className={[
+                      'whitespace-nowrap text-sm font-medium transition-all duration-300',
+                      i === active
+                        ? 'max-w-[120px] opacity-100'
+                        : 'max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100',
+                    ].join(' ')}
+                  >
+                    {t.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </figure>
 
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          <Trans>Placeholder. Ganti dengan testimoni pelanggan asli.</Trans>
-        </p>
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            <Trans>Placeholder. Ganti dengan testimoni pelanggan asli.</Trans>
+          </p>
         </motion.div>
       </section>
     </MotionConfig>

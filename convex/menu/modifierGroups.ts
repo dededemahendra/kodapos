@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from '../_generated/dataModel';
 import { mutation, type QueryCtx, query } from '../_generated/server';
-import { requireOwned, requireActiveOutlet } from '../lib/auth';
+import { requireActiveOutlet, requireOwned } from '../lib/auth';
 
 const optionInput = v.object({
   id: v.optional(v.id('modifierOptions')),

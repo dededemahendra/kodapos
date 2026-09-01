@@ -5,7 +5,7 @@ export const LOCALES: { value: Locale; label: string }[] = [
   { value: 'id', label: 'Indonesia' },
 ];
 
-export const DEFAULT_LOCALE: Locale = 'en';
+export const DEFAULT_LOCALE: Locale = 'id';
 const STORAGE_KEY = 'kodapos.locale';
 
 export function normalizeLocale(value: string | null | undefined): Locale {

@@ -5,10 +5,10 @@ import {
   action,
   internalMutation,
   internalQuery,
-  mutation,
   type MutationCtx,
-  query,
+  mutation,
   type QueryCtx,
+  query,
 } from './_generated/server';
 import { computeOrderTotals, DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
 import { resolveProvider } from './payments/providers';
@@ -124,18 +124,14 @@ export const menuForTable = query({
       .query('menuItems')
       .withIndex('by_cafe_active', (q) => q.eq('cafeId', cafeId).eq('archived', false))
       .collect();
-    const activeItems = itemRows
-      .filter((i) => i.isActive)
-      .sort((a, b) => a.position - b.position);
+    const activeItems = itemRows.filter((i) => i.isActive).sort((a, b) => a.position - b.position);
 
     const items = [];
     for (const item of activeItems) {
       const variants = (
         await ctx.db
           .query('menuItemVariants')
-          .withIndex('by_item_active', (q) =>
-            q.eq('menuItemId', item._id).eq('archived', false)
-          )
+          .withIndex('by_item_active', (q) => q.eq('menuItemId', item._id).eq('archived', false))
           .collect()
       )
         .sort((a, b) => a.position - b.position)
@@ -154,9 +150,7 @@ export const menuForTable = query({
         const options = (
           await ctx.db
             .query('modifierOptions')
-            .withIndex('by_group_active', (q) =>
-              q.eq('groupId', group._id).eq('archived', false)
-            )
+            .withIndex('by_group_active', (q) => q.eq('groupId', group._id).eq('archived', false))
             .collect()
         )
           .sort((a, b) => a.position - b.position)
@@ -277,10 +271,7 @@ async function buildSelfOrderLine(
   const variant = line.variantId ? await ctx.db.get(line.variantId) : null;
   if (
     line.variantId &&
-    (!variant ||
-      variant.menuItemId !== item._id ||
-      variant.cafeId !== cafeId ||
-      variant.archived)
+    (!variant || variant.menuItemId !== item._id || variant.cafeId !== cafeId || variant.archived)
   ) {
     throw new Error('Varian tidak tersedia.');
   }
@@ -374,9 +365,7 @@ export const submitSelfOrder = mutation({
     // existing row instead of inserting a duplicate.
     const existing = await ctx.db
       .query('selfOrders')
-      .withIndex('by_cafe_clientId', (q) =>
-        q.eq('cafeId', cafeId).eq('clientId', args.clientId)
-      )
+      .withIndex('by_cafe_clientId', (q) => q.eq('cafeId', cafeId).eq('clientId', args.clientId))
       .first();
     if (existing) return { selfOrderId: existing._id };
 
@@ -569,11 +558,7 @@ export const claimSelfOrderChargeSlot = internalMutation({
     // in flight). Return its (possibly-undefined) charge fields — the winning call
     // returns the real QR to its own client; the UI calls the action once per tap.
     if (row.paymentStatus === 'awaiting') {
-      if (
-        row.qrString &&
-        row.expiresAt !== undefined &&
-        row.totalIDR !== undefined
-      ) {
+      if (row.qrString && row.expiresAt !== undefined && row.totalIDR !== undefined) {
         return { qrString: row.qrString, expiresAt: row.expiresAt, totalIDR: row.totalIDR };
       }
       // Charge in flight, QR not stored yet — treat as already-claimed (no-op for
@@ -615,7 +600,11 @@ export const markSelfOrderCharged = internalMutation({
   handler: async (ctx, { selfOrderId, totalIDR, providerRef, qrString, expiresAt }) => {
     const row = await ctx.db.get(selfOrderId);
     // Idempotency guard against a race: if another charge already landed, keep it.
-    if (row && (row.paymentStatus === 'awaiting' || row.paymentStatus === 'paid') && row.providerRef) {
+    if (
+      row &&
+      (row.paymentStatus === 'awaiting' || row.paymentStatus === 'paid') &&
+      row.providerRef
+    ) {
       return null;
     }
     await ctx.db.patch(selfOrderId, {
@@ -653,7 +642,10 @@ export const createSelfOrderCharge = action({
     // The query validates the qrToken↔table binding + the order status (throws on
     // rejected/accepted / token mismatch) and returns the data to recompute the
     // true total. It does NOT mutate.
-    const info = await ctx.runQuery(internal.public.getSelfOrderForCharge, { selfOrderId, qrToken });
+    const info = await ctx.runQuery(internal.public.getSelfOrderForCharge, {
+      selfOrderId,
+      qrToken,
+    });
 
     // Atomically claim the single charge slot. A concurrent loser gets the
     // existing charge back here (and never creates a second Xendit charge); the

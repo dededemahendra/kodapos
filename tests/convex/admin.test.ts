@@ -38,7 +38,9 @@ describe('admin.listUsers joins', () => {
       ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
     );
     // A legacy owner: owns a cafe with NO businessId / businessMembers row.
-    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Legacy', email: 'legacy@x.com' }));
+    const ownerId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Legacy', email: 'legacy@x.com' })
+    );
     await t.run((ctx) =>
       ctx.db.insert('cafes', { name: 'Old Cafe', ownerUserId: ownerId, createdAt: 1 })
     );
@@ -68,8 +70,12 @@ describe('admin.fixOutletAccess', () => {
     const adminId = await t.run((ctx) =>
       ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
     );
-    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Legacy', email: 'legacy@x.com' }));
-    await t.run((ctx) => ctx.db.insert('cafes', { name: 'Old Cafe', ownerUserId: ownerId, createdAt: 1 }));
+    const ownerId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Legacy', email: 'legacy@x.com' })
+    );
+    await t.run((ctx) =>
+      ctx.db.insert('cafes', { name: 'Old Cafe', ownerUserId: ownerId, createdAt: 1 })
+    );
 
     const first = await as(t, adminId).mutation(api.admin.fixOutletAccess, { userId: ownerId });
     expect(first).toEqual({ fixed: true });
@@ -85,9 +91,9 @@ describe('admin.fixOutletAccess', () => {
   it('rejects a non-admin caller', async () => {
     const t = convexTest(schema, modules);
     const uid = await t.run((ctx) => ctx.db.insert('users', { name: 'Reg', email: 'reg@x.com' }));
-    await expect(
-      as(t, uid).mutation(api.admin.fixOutletAccess, { userId: uid })
-    ).rejects.toThrow('not a platform admin');
+    await expect(as(t, uid).mutation(api.admin.fixOutletAccess, { userId: uid })).rejects.toThrow(
+      'not a platform admin'
+    );
   });
 });
 
@@ -115,9 +121,14 @@ describe('admin.setDeactivated', () => {
 
     await as(t, adminId).mutation(api.admin.setDeactivated, { userId: ownerId, deactivated: true });
     // myCafe swallows the throw and returns null; a hard gate throws.
-    await expect(as(t, ownerId).query(api.shifts.current, {})).rejects.toThrow('account deactivated');
+    await expect(as(t, ownerId).query(api.shifts.current, {})).rejects.toThrow(
+      'account deactivated'
+    );
 
-    await as(t, adminId).mutation(api.admin.setDeactivated, { userId: ownerId, deactivated: false });
+    await as(t, adminId).mutation(api.admin.setDeactivated, {
+      userId: ownerId,
+      deactivated: false,
+    });
     await expect(as(t, ownerId).query(api.shifts.current, {})).resolves.toBeDefined();
   });
 });
@@ -169,7 +180,9 @@ describe('deactivation lockout (requireActiveUser)', () => {
     const adminId = await t.run((ctx) =>
       ctx.db.insert('users', { name: 'Boss', email: 'boss@x.com', isPlatformAdmin: true })
     );
-    const ownerId = await t.run((ctx) => ctx.db.insert('users', { name: 'Op', email: 'op2@x.com' }));
+    const ownerId = await t.run((ctx) =>
+      ctx.db.insert('users', { name: 'Op', email: 'op2@x.com' })
+    );
     await as(t, ownerId).mutation(api.cafes.createForOwner, { name: 'Kopi' });
 
     // Works before deactivation.

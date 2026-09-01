@@ -7,12 +7,7 @@ import { getAutoLockMinutes } from './preferences';
 // pointless (and would fight the wizard navigation).
 const EXEMPT_PREFIXES = ['/pin', '/onboarding'];
 
-const ACTIVITY_EVENTS = [
-  'pointerdown',
-  'keydown',
-  'wheel',
-  'touchstart',
-] as const;
+const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const;
 
 /**
  * Returns the register to the PIN screen after a configurable idle period
@@ -26,9 +21,7 @@ export function useAutoLock(): void {
   const navigate = useNavigate();
   const { cashierId, clearCashier } = useActiveCashier();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const exempt = EXEMPT_PREFIXES.some(
-    (p) => path === p || path.startsWith(`${p}/`),
-  );
+  const exempt = EXEMPT_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 
   // Keep the latest values in a ref so the activity listeners (registered once)
   // always see current state without re-subscribing on every navigation.
@@ -40,8 +33,7 @@ export function useAutoLock(): void {
     let timer: ReturnType<typeof setTimeout> | null = null;
 
     function lock(): void {
-      const { cashierId: id, clearCashier: clear, navigate: nav } =
-        stateRef.current;
+      const { cashierId: id, clearCashier: clear, navigate: nav } = stateRef.current;
       if (id) clear();
       void nav({ to: '/pin' });
     }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { conditionOf, parseGeocode, parseForecast } from '../../convex/lib/weather';
+import { conditionOf, parseForecast, parseGeocode } from '../../convex/lib/weather';
 
 describe('conditionOf', () => {
   it('rainy when precip >= 5 (takes precedence over hot temp)', () => {

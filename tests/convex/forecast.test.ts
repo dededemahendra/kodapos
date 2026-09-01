@@ -2,8 +2,8 @@ import { convexTest } from 'convex-test';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
-import schema from '../../convex/schema';
 import { dayKeyFn } from '../../convex/lib/time';
+import schema from '../../convex/schema';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
 const TZ = 'Asia/Jakarta';
@@ -22,14 +22,27 @@ async function setup(t: ReturnType<typeof convexTest>, email = 'o@x.com'): Promi
   const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email }));
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
-  await asOwner.mutation(api.cafes.updateProfile, { name: 'Kopi Senja', timezone: TZ, taxRatePct: 0, taxEnabled: false });
+  await asOwner.mutation(api.cafes.updateProfile, {
+    name: 'Kopi Senja',
+    timezone: TZ,
+    taxRatePct: 0,
+    taxEnabled: false,
+  });
   const cafe = await asOwner.query(api.cafes.myCafe, {});
   const cafeId = cafe!._id as Id<'cafes'>;
   const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
   const shiftId = await asOwner.mutation(api.shifts.open, { cashierId, openingFloatIDR: 100000 });
   const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Minuman' });
-  const itemKopi = await asOwner.mutation(api.menu.items.create, { categoryId, name: 'Kopi', priceIDR: 15000 });
-  const itemTeh = await asOwner.mutation(api.menu.items.create, { categoryId, name: 'Teh', priceIDR: 10000 });
+  const itemKopi = await asOwner.mutation(api.menu.items.create, {
+    categoryId,
+    name: 'Kopi',
+    priceIDR: 15000,
+  });
+  const itemTeh = await asOwner.mutation(api.menu.items.create, {
+    categoryId,
+    name: 'Teh',
+    priceIDR: 10000,
+  });
   return { asOwner, cafeId, cashierId, shiftId, itemKopi, itemTeh };
 }
 
@@ -77,7 +90,13 @@ describe('forecast.demand', () => {
     const refs = await setup(t);
     const now = Date.now();
     for (let d = 1; d <= 5; d++) {
-      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 3, price: 15000 }], now);
+      await seedOrder(
+        t,
+        refs,
+        d,
+        [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 3, price: 15000 }],
+        now
+      );
     }
     const r = await refs.asOwner.query(api.forecast.demand, {});
     expect(r.status).toBe('learning');
@@ -93,10 +112,16 @@ describe('forecast.demand', () => {
     const refs = await setup(t);
     const now = Date.now();
     for (let d = 1; d <= 20; d++) {
-      await seedOrder(t, refs, d, [
-        { menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 },
-        { menuItemId: refs.itemTeh, name: 'Teh', qty: 2, price: 10000 },
-      ], now);
+      await seedOrder(
+        t,
+        refs,
+        d,
+        [
+          { menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 },
+          { menuItemId: refs.itemTeh, name: 'Teh', qty: 2, price: 10000 },
+        ],
+        now
+      );
     }
     const r = await refs.asOwner.query(api.forecast.demand, {});
     expect(r.status).toBe('ready');
@@ -116,7 +141,13 @@ describe('forecast.demand', () => {
     const a = await setup(t, 'a@x.com');
     const now = Date.now();
     for (let d = 1; d <= 20; d++) {
-      await seedOrder(t, a, d, [{ menuItemId: a.itemKopi, name: 'Kopi', qty: 5, price: 15000 }], now);
+      await seedOrder(
+        t,
+        a,
+        d,
+        [{ menuItemId: a.itemKopi, name: 'Kopi', qty: 5, price: 15000 }],
+        now
+      );
     }
     const b = await setup(t, 'b@x.com');
     const rb = await b.asOwner.query(api.forecast.demand, {});
@@ -128,7 +159,13 @@ describe('forecast.demand', () => {
     const refs = await setup(t);
     const now = Date.now();
     for (let d = 2; d <= 6; d++) {
-      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 3, price: 15000 }], now);
+      await seedOrder(
+        t,
+        refs,
+        d,
+        [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 3, price: 15000 }],
+        now
+      );
     }
     const at = now - 1 * DAY;
     await t.run((ctx) =>
@@ -137,7 +174,16 @@ describe('forecast.demand', () => {
         shiftId: refs.shiftId,
         cashierId: refs.cashierId,
         clientId: 'void-order',
-        lines: [{ menuItemId: refs.itemKopi, nameSnapshot: 'Kopi', qty: 5, unitPriceIDR: 15000, modifiersSnapshot: [], lineTotalIDR: 75000 }],
+        lines: [
+          {
+            menuItemId: refs.itemKopi,
+            nameSnapshot: 'Kopi',
+            qty: 5,
+            unitPriceIDR: 15000,
+            modifiersSnapshot: [],
+            lineTotalIDR: 75000,
+          },
+        ],
         subtotalIDR: 75000,
         taxRatePct: 0,
         taxIDR: 0,
@@ -161,7 +207,13 @@ describe('forecast.demand', () => {
     const refs = await setup(t);
     const now = Date.now();
     for (let d = 1; d <= 20; d++) {
-      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+      await seedOrder(
+        t,
+        refs,
+        d,
+        [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }],
+        now
+      );
     }
     await t.action(internal.forecast.generateNightly, {});
     // wipe all orders AFTER the snapshot — live compute would now be 'learning'
@@ -189,7 +241,10 @@ function stubRainyFetch(days: number) {
   }
   vi.stubGlobal(
     'fetch',
-    vi.fn().mockResolvedValue({ ok: true, json: async () => ({ daily: { time, temperature_2m_max, precipitation_sum } }) })
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ daily: { time, temperature_2m_max, precipitation_sum } }),
+    })
   );
 }
 
@@ -203,7 +258,13 @@ describe('forecast.demand — weatherAvailable', () => {
     const refs = await setup(t);
     const now = Date.now();
     for (let d = 1; d <= 20; d++) {
-      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+      await seedOrder(
+        t,
+        refs,
+        d,
+        [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }],
+        now
+      );
     }
     await t.run((ctx) => ctx.db.patch(refs.cafeId, { latitude: -6.2, longitude: 106.8 }));
     stubRainyFetch(7);
@@ -213,7 +274,9 @@ describe('forecast.demand — weatherAvailable', () => {
     if (r.status === 'ready') {
       expect(r.weatherAvailable).toBe(true);
       const kopi = r.lines.find((l) => l.name === 'Kopi')!;
-      expect(kopi.drivers.some((d) => d.code === 'weather' && d.pct === -15 && d.condition === 'rainy')).toBe(true);
+      expect(
+        kopi.drivers.some((d) => d.code === 'weather' && d.pct === -15 && d.condition === 'rainy')
+      ).toBe(true);
     }
   });
 
@@ -222,7 +285,13 @@ describe('forecast.demand — weatherAvailable', () => {
     const refs = await setup(t);
     const now = Date.now();
     for (let d = 1; d <= 20; d++) {
-      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+      await seedOrder(
+        t,
+        refs,
+        d,
+        [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }],
+        now
+      );
     }
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
@@ -238,7 +307,13 @@ describe('forecast.demand — weatherAvailable', () => {
     const refs = await setup(t);
     const now = Date.now();
     for (let d = 1; d <= 20; d++) {
-      await seedOrder(t, refs, d, [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }], now);
+      await seedOrder(
+        t,
+        refs,
+        d,
+        [{ menuItemId: refs.itemKopi, name: 'Kopi', qty: 10, price: 15000 }],
+        now
+      );
     }
     // No generateNightly run → the query computes live.
     const r = await refs.asOwner.query(api.forecast.demand, {});

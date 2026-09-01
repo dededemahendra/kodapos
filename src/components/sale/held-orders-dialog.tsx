@@ -4,8 +4,6 @@ import type { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { PauseCircle } from 'lucide-react';
 import { useState } from 'react';
-import type { CartState } from './cart-reducer';
-import { ORDER_TYPE_OPTIONS } from './order-types';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import {
@@ -17,6 +15,8 @@ import {
 } from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
+import type { CartState } from './cart-reducer';
+import { ORDER_TYPE_OPTIONS } from './order-types';
 
 export function HeldOrdersDialog({
   open,
@@ -77,7 +77,9 @@ export function HeldOrdersDialog({
               value: h.promo.value,
               ...(h.promo.scope ? { scope: h.promo.scope } : {}),
               ...(h.promo.targetItemIds ? { targetItemIds: h.promo.targetItemIds } : {}),
-              ...(h.promo.targetCategoryIds ? { targetCategoryIds: h.promo.targetCategoryIds } : {}),
+              ...(h.promo.targetCategoryIds
+                ? { targetCategoryIds: h.promo.targetCategoryIds }
+                : {}),
             }
           : null,
         lines: h.lines.map((l) => ({ ...l, lineKey: genLineKey() })),

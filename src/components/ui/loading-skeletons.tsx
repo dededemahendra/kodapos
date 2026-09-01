@@ -51,13 +51,7 @@ export function StatCardsSkeleton({
 }
 
 /** Stacked label + input rows, for settings and edit forms. */
-export function FormSkeleton({
-  rows = 6,
-  className,
-}: {
-  rows?: number;
-  className?: string;
-}) {
+export function FormSkeleton({ rows = 6, className }: { rows?: number; className?: string }) {
   return (
     <div className={cn('space-y-5', className)} aria-hidden>
       {Array.from({ length: rows }).map((_, i) => (

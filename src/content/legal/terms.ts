@@ -280,7 +280,7 @@ export const TERMS: LegalContent = {
         body: [
           {
             type: 'p',
-            text: 'The service may connect with third party providers, such as QRIS payment processing, email delivery, WhatsApp messaging, and AI providers. Use of third party services is subject to each provider\'s own terms and privacy policy, and we are not responsible for their actions.',
+            text: "The service may connect with third party providers, such as QRIS payment processing, email delivery, WhatsApp messaging, and AI providers. Use of third party services is subject to each provider's own terms and privacy policy, and we are not responsible for their actions.",
           },
         ],
       },

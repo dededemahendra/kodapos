@@ -28,10 +28,7 @@ export function tierFor(
   return eligible.reduce((best, t) => (t.minSpendIDR > best.minSpendIDR ? t : best));
 }
 
-export function earnMultiplierFor(
-  totalSpentIDR: number,
-  tiers: LoyaltyTier[] | undefined
-): number {
+export function earnMultiplierFor(totalSpentIDR: number, tiers: LoyaltyTier[] | undefined): number {
   return tierFor(totalSpentIDR, tiers)?.earnMultiplier ?? 1;
 }
 

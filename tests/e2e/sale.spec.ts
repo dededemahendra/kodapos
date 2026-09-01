@@ -69,7 +69,10 @@ test.describe('sale (auth-gated)', () => {
     await waitForUrlHydrated(page, /\/sale$/);
 
     // 8. Tap Espresso tile → cart shows "Espresso" line, total Rp 19.980 (18.000 + 11% PPN)
-    await page.getByRole('button', { name: /Espresso/ }).first().click();
+    await page
+      .getByRole('button', { name: /Espresso/ })
+      .first()
+      .click();
     await expect(page.getByText(/Espresso/).first()).toBeVisible();
     await expect(page.getByText(/Rp 19\.980/).first()).toBeVisible();
 
@@ -155,7 +158,10 @@ test.describe('sale (auth-gated)', () => {
     await waitForUrlHydrated(page, /\/sale$/);
 
     // Add Espresso → subtotal Rp 20.000
-    await page.getByRole('button', { name: /Espresso/ }).first().click();
+    await page
+      .getByRole('button', { name: /Espresso/ })
+      .first()
+      .click();
     await expect(page.getByText(/Rp 20\.000/).first()).toBeVisible();
 
     // Apply the promo → Diskon line + total Rp 15.000 (20.000 − 25%)
@@ -172,7 +178,9 @@ test.describe('sale (auth-gated)', () => {
     await expect(page.getByText(/−Rp 5\.000/)).toBeVisible();
   });
 
-  test('reports: record a sale, view it on /reports, switch range, download CSV', async ({ page }) => {
+  test('reports: record a sale, view it on /reports, switch range, download CSV', async ({
+    page,
+  }) => {
     const email = `e2e+reports+${Date.now()}@kodapos.test`;
     const password = 'Sa{ngat-Aman-123';
 
@@ -217,7 +225,10 @@ test.describe('sale (auth-gated)', () => {
     await waitForUrlHydrated(page, /\/shift\/close$/);
     await page.goto('/sale');
     await waitForUrlHydrated(page, /\/sale$/);
-    await page.getByRole('button', { name: /Espresso/ }).first().click();
+    await page
+      .getByRole('button', { name: /Espresso/ })
+      .first()
+      .click();
     await page.getByRole('button', { name: /^Tunai$/ }).click();
     await page.getByRole('button', { name: /^Pas$/ }).click();
     await page.getByRole('button', { name: /Konfirmasi/ }).click();
@@ -351,7 +362,10 @@ test.describe('sale (auth-gated)', () => {
     // the real config.apiKey path in handleConnect).
     await page.getByLabel('Kunci API').fill('test-api-key');
     // Click the "Hubungkan" button inside the dialog footer (not the card button).
-    await page.getByRole('dialog').getByRole('button', { name: /Hubungkan/ }).click();
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: /Hubungkan/ })
+      .click();
 
     // Wait for the dialog to close — the card badge should flip to "Terhubung".
     await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10_000 });
@@ -359,7 +373,10 @@ test.describe('sale (auth-gated)', () => {
     // ── 7. Go to /sale, add an item, open QRIS payment dialog ────────────────
     await page.goto('/sale');
     await waitForUrlHydrated(page, /\/sale$/);
-    await page.getByRole('button', { name: /Espresso/ }).first().click();
+    await page
+      .getByRole('button', { name: /Espresso/ })
+      .first()
+      .click();
     await expect(page.getByText(/Espresso/).first()).toBeVisible();
 
     // Click the QRIS pay button. With the qris integration connected (and no
@@ -506,7 +523,10 @@ test.describe('sale (auth-gated)', () => {
     // Sale: add an item and pay via QRIS
     await page.goto('/sale');
     await waitForUrlHydrated(page, '/sale');
-    await page.getByRole('button', { name: /Espresso/ }).first().click();
+    await page
+      .getByRole('button', { name: /Espresso/ })
+      .first()
+      .click();
     await page.getByRole('button', { name: /^QRIS$/ }).click();
     await page.getByRole('button', { name: /Sudah dibayar/ }).click();
 

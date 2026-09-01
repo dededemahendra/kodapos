@@ -1,13 +1,12 @@
+import { Trans, useLingui } from '@lingui/react/macro';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
-import { type FormEvent, useState } from 'react';
 import { KeyRound, Plus, Users } from 'lucide-react';
+import { type FormEvent, useState } from 'react';
 import { toast } from 'sonner';
-import { PinEntry } from '~/components/staff/pin-entry';
 import { OnboardingStepHeader } from '~/components/onboarding/step-header';
+import { PinEntry } from '~/components/staff/pin-entry';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Field, FieldError, FieldLabel } from '~/components/ui/field';
@@ -84,7 +83,9 @@ export function CashierStep() {
         icon={<Users />}
         title={<Trans>PIN Pemilik & Kasir</Trans>}
         description={
-          <Trans>Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (opsional).</Trans>
+          <Trans>
+            Atur PIN 4 digit untuk Anda. Anda juga bisa menambahkan kasir tambahan (opsional).
+          </Trans>
         }
       />
 
@@ -114,11 +115,15 @@ export function CashierStep() {
         </h2>
         <form onSubmit={handleAddCashier} className="flex gap-2 items-end mb-3">
           <Field className="flex-1">
-            <FieldLabel htmlFor="cName"><Trans>Nama</Trans></FieldLabel>
+            <FieldLabel htmlFor="cName">
+              <Trans>Nama</Trans>
+            </FieldLabel>
             <Input id="cName" name="name" placeholder={t`mis. Andi`} required maxLength={60} />
           </Field>
           <Field className="w-32">
-            <FieldLabel htmlFor="cPin"><Trans>PIN 4 digit</Trans></FieldLabel>
+            <FieldLabel htmlFor="cPin">
+              <Trans>PIN 4 digit</Trans>
+            </FieldLabel>
             <Input
               id="cPin"
               name="pin"
@@ -151,16 +156,22 @@ export function CashierStep() {
       </section>
 
       <div className="flex gap-2">
-        <Button onClick={() => void finish()}><Trans>Selesai</Trans></Button>
+        <Button onClick={() => void finish()}>
+          <Trans>Selesai</Trans>
+        </Button>
         <Button asChild variant="ghost" className="text-muted-foreground">
-          <Link to="/onboarding/menu"><Trans>← Kembali</Trans></Link>
+          <Link to="/onboarding/menu">
+            <Trans>← Kembali</Trans>
+          </Link>
         </Button>
       </div>
 
       <Dialog open={pickingOwner} onOpenChange={(o) => !o && setPickingOwner(false)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle><Trans>Atur PIN Pemilik</Trans></DialogTitle>
+            <DialogTitle>
+              <Trans>Atur PIN Pemilik</Trans>
+            </DialogTitle>
           </DialogHeader>
           <PinEntry
             onComplete={(pin) => {

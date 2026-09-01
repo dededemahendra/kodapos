@@ -15,6 +15,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '~/components/ui/empty';
+import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { PageHeader } from '~/components/ui/page-header';
 import {
   Select,
@@ -23,7 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import { ListSkeleton } from '~/components/ui/loading-skeletons';
 import { Spinner } from '~/components/ui/spinner';
 import { downloadCSV, toCSV } from '~/lib/csv';
 import { formatIDR } from '~/lib/money';
@@ -107,11 +107,7 @@ function ClockSection() {
                     })}
                   </Trans>
                 </span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onClockOut(s._id)}
-                >
+                <Button type="button" variant="outline" onClick={() => onClockOut(s._id)}>
                   <Trans>Clock out</Trans>
                 </Button>
               </div>
@@ -154,17 +150,13 @@ function ReportSection() {
       {
         accessorKey: 'sessionCount',
         header: () => <Trans>Sesi</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{row.original.sessionCount}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{row.original.sessionCount}</span>,
       },
       {
         accessorKey: 'totalMinutes',
         header: () => <Trans>Jam</Trans>,
         cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatMinutes(row.original.totalMinutes)}
-          </span>
+          <span className="tabular-nums">{formatMinutes(row.original.totalMinutes)}</span>
         ),
       },
     ],
@@ -243,9 +235,7 @@ function ReportSection() {
           <DataTable columns={columns} data={report.rows} emptyState={null} />
           <div className="text-sm">
             <Trans>Total</Trans>:{' '}
-            <span className="font-semibold tabular-nums">
-              {formatMinutes(report.totalMinutes)}
-            </span>
+            <span className="font-semibold tabular-nums">{formatMinutes(report.totalMinutes)}</span>
           </div>
         </>
       )}
@@ -278,25 +268,19 @@ function PayrollSection() {
       {
         accessorKey: 'hours',
         header: () => <Trans>Jam</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{row.original.hours}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{row.original.hours}</span>,
       },
       {
         accessorKey: 'hourlyRateIDR',
         header: () => <Trans>Tarif/jam</Trans>,
         cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatIDR(row.original.hourlyRateIDR)}
-          </span>
+          <span className="tabular-nums">{formatIDR(row.original.hourlyRateIDR)}</span>
         ),
       },
       {
         accessorKey: 'payIDR',
         header: () => <Trans>Bayar</Trans>,
-        cell: ({ row }) => (
-          <span className="tabular-nums">{formatIDR(row.original.payIDR)}</span>
-        ),
+        cell: ({ row }) => <span className="tabular-nums">{formatIDR(row.original.payIDR)}</span>,
       },
     ],
     []
@@ -363,10 +347,7 @@ function PayrollSection() {
           <span className="text-sm font-semibold">
             <Trans>Payroll</Trans>
           </span>
-          <Select
-            value={preset}
-            onValueChange={(v) => setPreset(v as Preset)}
-          >
+          <Select value={preset} onValueChange={(v) => setPreset(v as Preset)}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
@@ -428,9 +409,7 @@ function PayrollSection() {
           <DataTable columns={columns} data={payroll.rows} emptyState={null} />
           <div className="text-sm">
             <Trans>Total</Trans>:{' '}
-            <span className="font-semibold tabular-nums">
-              {formatIDR(payroll.totalPayIDR)}
-            </span>
+            <span className="font-semibold tabular-nums">{formatIDR(payroll.totalPayIDR)}</span>
           </div>
         </>
       )}

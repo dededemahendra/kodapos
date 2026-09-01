@@ -6,9 +6,7 @@ import schema from '../../convex/schema';
 const modules = import.meta.glob('../../convex/**/*.*s');
 
 async function setupOwner(t: ReturnType<typeof convexTest>, email = 'o@x.com') {
-  const userId = await t.run(async (ctx) =>
-    ctx.db.insert('users', { name: 'Owner', email })
-  );
+  const userId = await t.run(async (ctx) => ctx.db.insert('users', { name: 'Owner', email }));
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   return { asOwner };
@@ -18,8 +16,16 @@ describe('promotions CRUD', () => {
   it('creates + lists (non-archived by default)', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
-    await asOwner.mutation(api.promotions.create, { name: 'Diskon Kopi', type: 'percent', value: 20 });
-    await asOwner.mutation(api.promotions.create, { name: 'Promo Lebaran', type: 'fixed', value: 10000 });
+    await asOwner.mutation(api.promotions.create, {
+      name: 'Diskon Kopi',
+      type: 'percent',
+      value: 20,
+    });
+    await asOwner.mutation(api.promotions.create, {
+      name: 'Promo Lebaran',
+      type: 'fixed',
+      value: 10000,
+    });
     const list = await asOwner.query(api.promotions.list, {});
     expect(list).toHaveLength(2);
     // Sorted by name (id-ID): "Diskon Kopi" before "Promo Lebaran".
@@ -33,9 +39,13 @@ describe('promotions CRUD', () => {
   it('update changes fields; archive hides from default list', async () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
-    const id = await asOwner.mutation(api.promotions.create, { name: 'X', type: 'percent', value: 10 });
+    const id = await asOwner.mutation(api.promotions.create, {
+      name: 'X',
+      type: 'percent',
+      value: 10,
+    });
     await asOwner.mutation(api.promotions.update, { id, name: 'X2', type: 'fixed', value: 5000 });
-    let list = await asOwner.query(api.promotions.list, {});
+    const list = await asOwner.query(api.promotions.list, {});
     expect(list[0]?.name).toBe('X2');
     expect(list[0]?.type).toBe('fixed');
     expect(list[0]?.value).toBe(5000);
@@ -70,7 +80,11 @@ describe('promotions CRUD', () => {
   it('tenant isolation: cafe B cannot list or archive cafe A promos', async () => {
     const t = convexTest(schema, modules);
     const { asOwner: ownerA } = await setupOwner(t, 'a@x.com');
-    const aId = await ownerA.mutation(api.promotions.create, { name: 'A', type: 'percent', value: 10 });
+    const aId = await ownerA.mutation(api.promotions.create, {
+      name: 'A',
+      type: 'percent',
+      value: 10,
+    });
     const { asOwner: ownerB } = await setupOwner(t, 'b@x.com');
     expect(await ownerB.query(api.promotions.list, { includeArchived: true })).toHaveLength(0);
     await expect(ownerB.mutation(api.promotions.archive, { id: aId })).rejects.toThrow();
@@ -82,7 +96,10 @@ describe('promotions: coupon codes', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     await asOwner.mutation(api.promotions.create, {
-      name: 'Summer', type: 'percent', value: 20, code: 'summer20',
+      name: 'Summer',
+      type: 'percent',
+      value: 20,
+      code: 'summer20',
     });
     const list = await asOwner.query(api.promotions.list, {});
     expect(list[0]?.code).toBe('SUMMER20');
@@ -92,16 +109,25 @@ describe('promotions: coupon codes', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     await asOwner.mutation(api.promotions.create, {
-      name: 'First', type: 'percent', value: 20, code: 'summer20',
+      name: 'First',
+      type: 'percent',
+      value: 20,
+      code: 'summer20',
     });
     await expect(
       asOwner.mutation(api.promotions.create, {
-        name: 'Second', type: 'percent', value: 10, code: 'SUMMER20',
+        name: 'Second',
+        type: 'percent',
+        value: 10,
+        code: 'SUMMER20',
       })
     ).rejects.toThrow(/kode/i);
     await expect(
       asOwner.mutation(api.promotions.create, {
-        name: 'Third', type: 'percent', value: 10, code: 'Summer20',
+        name: 'Third',
+        type: 'percent',
+        value: 10,
+        code: 'Summer20',
       })
     ).rejects.toThrow(/kode/i);
   });
@@ -110,19 +136,28 @@ describe('promotions: coupon codes', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const id = await asOwner.mutation(api.promotions.create, {
-      name: 'First', type: 'percent', value: 20, code: 'SAVE10',
+      name: 'First',
+      type: 'percent',
+      value: 20,
+      code: 'SAVE10',
     });
     await asOwner.mutation(api.promotions.archive, { id });
     // Archived holder of SAVE10 no longer blocks the code → reuse succeeds.
     await asOwner.mutation(api.promotions.create, {
-      name: 'Reuse', type: 'percent', value: 10, code: 'save10',
+      name: 'Reuse',
+      type: 'percent',
+      value: 10,
+      code: 'save10',
     });
     const list = await asOwner.query(api.promotions.list, {});
     expect(list.find((p) => p.code === 'SAVE10')?.name).toBe('Reuse');
     // A non-archived duplicate of the now-live SAVE10 still throws.
     await expect(
       asOwner.mutation(api.promotions.create, {
-        name: 'Dup', type: 'percent', value: 5, code: 'SAVE10',
+        name: 'Dup',
+        type: 'percent',
+        value: 5,
+        code: 'SAVE10',
       })
     ).rejects.toThrow(/kode/i);
   });
@@ -132,10 +167,16 @@ describe('promotions: coupon codes', () => {
     const { asOwner: ownerA } = await setupOwner(t, 'a@x.com');
     const { asOwner: ownerB } = await setupOwner(t, 'b@x.com');
     await ownerA.mutation(api.promotions.create, {
-      name: 'A', type: 'percent', value: 20, code: 'summer20',
+      name: 'A',
+      type: 'percent',
+      value: 20,
+      code: 'summer20',
     });
     await ownerB.mutation(api.promotions.create, {
-      name: 'B', type: 'percent', value: 20, code: 'summer20',
+      name: 'B',
+      type: 'percent',
+      value: 20,
+      code: 'summer20',
     });
     expect((await ownerB.query(api.promotions.list, {}))[0]?.code).toBe('SUMMER20');
   });
@@ -147,7 +188,12 @@ describe('promotions: coupon codes', () => {
       asOwner.mutation(api.promotions.create, { name: 'P', type: 'percent', value: 10, code: 'ab' })
     ).rejects.toThrow(/kode/i);
     await expect(
-      asOwner.mutation(api.promotions.create, { name: 'P', type: 'percent', value: 10, code: 'has space' })
+      asOwner.mutation(api.promotions.create, {
+        name: 'P',
+        type: 'percent',
+        value: 10,
+        code: 'has space',
+      })
     ).rejects.toThrow(/kode/i);
   });
 
@@ -155,19 +201,33 @@ describe('promotions: coupon codes', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const id1 = await asOwner.mutation(api.promotions.create, {
-      name: 'P1', type: 'percent', value: 20, code: 'CODE1',
+      name: 'P1',
+      type: 'percent',
+      value: 20,
+      code: 'CODE1',
     });
     await asOwner.mutation(api.promotions.create, {
-      name: 'P2', type: 'percent', value: 20, code: 'CODE2',
+      name: 'P2',
+      type: 'percent',
+      value: 20,
+      code: 'CODE2',
     });
     // keeping its own code is fine (excludes self)
     await asOwner.mutation(api.promotions.update, {
-      id: id1, name: 'P1', type: 'percent', value: 20, code: 'code1',
+      id: id1,
+      name: 'P1',
+      type: 'percent',
+      value: 20,
+      code: 'code1',
     });
     // taking P2's code is rejected
     await expect(
       asOwner.mutation(api.promotions.update, {
-        id: id1, name: 'P1', type: 'percent', value: 20, code: 'CODE2',
+        id: id1,
+        name: 'P1',
+        type: 'percent',
+        value: 20,
+        code: 'CODE2',
       })
     ).rejects.toThrow(/kode/i);
   });
@@ -177,7 +237,9 @@ async function setupMenu(t: ReturnType<typeof convexTest>, email = 'o@x.com') {
   const { asOwner } = await setupOwner(t, email);
   const catX = await asOwner.mutation(api.menu.categories.create, { name: 'CatX' });
   const itemA = await asOwner.mutation(api.menu.items.create, {
-    categoryId: catX, name: 'A', priceIDR: 18000,
+    categoryId: catX,
+    name: 'A',
+    priceIDR: 18000,
   });
   return { asOwner, catX, itemA };
 }
@@ -188,7 +250,11 @@ describe('promotions: scope validation', () => {
     const { asOwner } = await setupMenu(t);
     await expect(
       asOwner.mutation(api.promotions.create, {
-        name: 'P', type: 'percent', value: 10, scope: 'item', targetItemIds: [],
+        name: 'P',
+        type: 'percent',
+        value: 10,
+        scope: 'item',
+        targetItemIds: [],
       })
     ).rejects.toThrow(/target|pilih/i);
   });
@@ -199,7 +265,11 @@ describe('promotions: scope validation', () => {
     const { itemA: foreignItem } = await setupMenu(t, 'b@x.com');
     await expect(
       asOwner.mutation(api.promotions.create, {
-        name: 'P', type: 'percent', value: 10, scope: 'item', targetItemIds: [foreignItem],
+        name: 'P',
+        type: 'percent',
+        value: 10,
+        scope: 'item',
+        targetItemIds: [foreignItem],
       })
     ).rejects.toThrow();
   });
@@ -208,7 +278,11 @@ describe('promotions: scope validation', () => {
     const t = convexTest(schema, modules);
     const { asOwner, itemA } = await setupMenu(t);
     await asOwner.mutation(api.promotions.create, {
-      name: 'P', type: 'percent', value: 10, scope: 'item', targetItemIds: [itemA],
+      name: 'P',
+      type: 'percent',
+      value: 10,
+      scope: 'item',
+      targetItemIds: [itemA],
     });
     const list = await asOwner.query(api.promotions.list, {});
     expect(list[0]?.scope).toBe('item');
@@ -221,16 +295,28 @@ describe('promotions: scope validation', () => {
     const { catX: foreignCat } = await setupMenu(t, 'b@x.com');
     await expect(
       asOwner.mutation(api.promotions.create, {
-        name: 'P', type: 'percent', value: 10, scope: 'category', targetCategoryIds: [],
+        name: 'P',
+        type: 'percent',
+        value: 10,
+        scope: 'category',
+        targetCategoryIds: [],
       })
     ).rejects.toThrow(/target|pilih/i);
     await expect(
       asOwner.mutation(api.promotions.create, {
-        name: 'P', type: 'percent', value: 10, scope: 'category', targetCategoryIds: [foreignCat],
+        name: 'P',
+        type: 'percent',
+        value: 10,
+        scope: 'category',
+        targetCategoryIds: [foreignCat],
       })
     ).rejects.toThrow();
     await asOwner.mutation(api.promotions.create, {
-      name: 'P', type: 'percent', value: 10, scope: 'category', targetCategoryIds: [catX],
+      name: 'P',
+      type: 'percent',
+      value: 10,
+      scope: 'category',
+      targetCategoryIds: [catX],
     });
     const list = await asOwner.query(api.promotions.list, {});
     expect(list[0]?.scope).toBe('category');
@@ -241,10 +327,18 @@ describe('promotions: scope validation', () => {
     const t = convexTest(schema, modules);
     const { asOwner, itemA } = await setupMenu(t);
     const id = await asOwner.mutation(api.promotions.create, {
-      name: 'P', type: 'percent', value: 10, scope: 'item', targetItemIds: [itemA],
+      name: 'P',
+      type: 'percent',
+      value: 10,
+      scope: 'item',
+      targetItemIds: [itemA],
     });
     await asOwner.mutation(api.promotions.update, {
-      id, name: 'P', type: 'percent', value: 10, scope: 'order',
+      id,
+      name: 'P',
+      type: 'percent',
+      value: 10,
+      scope: 'order',
     });
     const list = await asOwner.query(api.promotions.list, {});
     expect(list[0]?.scope).toBe('order');
@@ -257,8 +351,12 @@ describe('promotions.resolveByCode', () => {
     const t = convexTest(schema, modules);
     const { asOwner, itemA } = await setupMenu(t);
     await asOwner.mutation(api.promotions.create, {
-      name: 'Summer', type: 'percent', value: 20, code: 'summer20',
-      scope: 'item', targetItemIds: [itemA],
+      name: 'Summer',
+      type: 'percent',
+      value: 20,
+      code: 'summer20',
+      scope: 'item',
+      targetItemIds: [itemA],
     });
     const promo = await asOwner.query(api.promotions.resolveByCode, { code: 'summer20' });
     expect(promo?.code).toBe('SUMMER20');
@@ -278,7 +376,10 @@ describe('promotions.resolveByCode', () => {
     const t = convexTest(schema, modules);
     const { asOwner } = await setupOwner(t);
     const id = await asOwner.mutation(api.promotions.create, {
-      name: 'Old', type: 'percent', value: 20, code: 'old20',
+      name: 'Old',
+      type: 'percent',
+      value: 20,
+      code: 'old20',
     });
     await asOwner.mutation(api.promotions.archive, { id });
     expect(await asOwner.query(api.promotions.resolveByCode, { code: 'old20' })).toBeNull();
@@ -289,7 +390,10 @@ describe('promotions.resolveByCode', () => {
     const { asOwner: ownerA } = await setupOwner(t, 'a@x.com');
     const { asOwner: ownerB } = await setupOwner(t, 'b@x.com');
     await ownerA.mutation(api.promotions.create, {
-      name: 'A', type: 'percent', value: 20, code: 'shared',
+      name: 'A',
+      type: 'percent',
+      value: 20,
+      code: 'shared',
     });
     expect(await ownerB.query(api.promotions.resolveByCode, { code: 'shared' })).toBeNull();
   });

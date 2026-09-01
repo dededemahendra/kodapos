@@ -1,5 +1,4 @@
-import { useLingui } from '@lingui/react/macro';
-import { Trans } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { UtensilsCrossed } from 'lucide-react';
 import { useMemo, useState } from 'react';

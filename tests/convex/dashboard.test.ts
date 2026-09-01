@@ -16,9 +16,7 @@ type Refs = {
 };
 
 async function setup(t: ReturnType<typeof convexTest>): Promise<Refs> {
-  const userId = await t.run((ctx) =>
-    ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' })
-  );
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' }));
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
   await asOwner.mutation(api.cafes.updateProfile, {
@@ -46,7 +44,7 @@ async function setup(t: ReturnType<typeof convexTest>): Promise<Refs> {
 describe('dashboard.kpis paid-only invariant', () => {
   // A pending dynamic-QRIS order must NOT inflate today's revenue / order /
   // item counts. Only `paymentStatus === 'paid'` orders are completed sales.
-  it("counts the paid sale but excludes a pending dynamic-QRIS order", async () => {
+  it('counts the paid sale but excludes a pending dynamic-QRIS order', async () => {
     const t = convexTest(schema, modules);
     const { asOwner, shiftId, cashierId, itemId } = await setup(t);
     const now = Date.now();

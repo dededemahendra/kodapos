@@ -1,3 +1,4 @@
+import { msg } from '@lingui/core/macro';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
@@ -9,15 +10,29 @@ import { CartReviewSheet } from '~/components/public/cart-review-sheet';
 import { ItemPickerSheet } from '~/components/public/item-picker-sheet';
 import { PublicMenuView } from '~/components/public/public-menu';
 import { QrPaymentView } from '~/components/public/qr-payment-view';
-import { type CartLine, cartLineKey, type MenuItem, type PickResult } from '~/components/public/types';
+import {
+  type CartLine,
+  cartLineKey,
+  type MenuItem,
+  type PickResult,
+} from '~/components/public/types';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty';
 import { Spinner } from '~/components/ui/spinner';
 import { privatePage } from '~/lib/seo';
+import { headTitle, usePageTitle } from '~/lib/use-page-title';
+
+const TITLE = msg`Pesanan Anda`;
 
 export const Route = createFileRoute('/_public/order/$token')({
-  head: () => privatePage('Pesanan Anda'),
+  head: () => privatePage(headTitle(TITLE)),
   component: OrderPage,
 });
 
@@ -28,6 +43,7 @@ function newClientId(): string {
 }
 
 function OrderPage() {
+  usePageTitle(TITLE);
   const { token } = Route.useParams();
   const menu = useQuery(api.public.menuForTable, { qrToken: token });
 
@@ -68,9 +84,7 @@ function OrderPage() {
     setCart((prev) => {
       const existing = prev.find((l) => l.key === key);
       if (existing) {
-        return prev.map((l) =>
-          l.key === key ? { ...l, qty: Math.min(99, l.qty + pick.qty) } : l
-        );
+        return prev.map((l) => (l.key === key ? { ...l, qty: Math.min(99, l.qty + pick.qty) } : l));
       }
       return [
         ...prev,

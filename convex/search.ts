@@ -40,9 +40,7 @@ export const global = query({
         idx.eq('cafeId', cafeId).eq('archived', false).eq('isActive', true)
       )
       .collect();
-    const matchingItems = allItems.filter((item) =>
-      item.name.toLowerCase().includes(q)
-    );
+    const matchingItems = allItems.filter((item) => item.name.toLowerCase().includes(q));
     const menuItems = await Promise.all(
       matchingItems.slice(0, 5).map(async (item) => {
         const cat = await ctx.db.get(item.categoryId);
@@ -58,16 +56,10 @@ export const global = query({
     // Customers: scope to cafe's active customers, filter by name or phone
     const allCustomers = await ctx.db
       .query('customers')
-      .withIndex('by_cafe_active', (idx) =>
-        idx.eq('cafeId', cafeId).eq('archived', false)
-      )
+      .withIndex('by_cafe_active', (idx) => idx.eq('cafeId', cafeId).eq('archived', false))
       .collect();
     const customers = allCustomers
-      .filter(
-        (c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.phone.toLowerCase().includes(q)
-      )
+      .filter((c) => c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
       .slice(0, 5)
       .map((c) => ({ _id: c._id, name: c.name, phone: c.phone }));
 

@@ -14,9 +14,7 @@ export function toCSV(
 ): string {
   const header = columns.map((c) => escapeCSV(c.header)).join(',');
   if (rows.length === 0) return header;
-  const body = rows
-    .map((r) => columns.map((c) => escapeCSV(r[c.key])).join(','))
-    .join('\n');
+  const body = rows.map((r) => columns.map((c) => escapeCSV(r[c.key])).join(',')).join('\n');
   return `${header}\n${body}`;
 }
 

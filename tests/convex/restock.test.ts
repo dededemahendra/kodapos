@@ -21,28 +21,68 @@ async function setup(t: ReturnType<typeof convexTest>, email = 'o@x.com'): Promi
   const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email }));
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
-  await asOwner.mutation(api.cafes.updateProfile, { name: 'Kopi Senja', timezone: TZ, taxRatePct: 0, taxEnabled: false });
+  await asOwner.mutation(api.cafes.updateProfile, {
+    name: 'Kopi Senja',
+    timezone: TZ,
+    taxRatePct: 0,
+    taxEnabled: false,
+  });
   const cafe = await asOwner.query(api.cafes.myCafe, {});
   const cafeId = cafe!._id as Id<'cafes'>;
   const cashierId = await asOwner.mutation(api.staff.create, { name: 'Andi', pin: '1234' });
   const shiftId = await asOwner.mutation(api.shifts.open, { cashierId, openingFloatIDR: 100000 });
   const categoryId = await asOwner.mutation(api.menu.categories.create, { name: 'Minuman' });
-  const itemKopi = await asOwner.mutation(api.menu.items.create, { categoryId, name: 'Kopi', priceIDR: 15000 });
-  const ingSusu = await asOwner.mutation(api.ingredients.upsert, { name: 'Susu', canonicalUnit: 'ml', reorderThreshold: 0, lastCostPerUnitIDR: 100 });
-  await asOwner.mutation(api.recipes.upsert, { menuItemId: itemKopi, lines: [{ ingredientId: ingSusu, qty: 50, wastageFactor: 1 }] });
+  const itemKopi = await asOwner.mutation(api.menu.items.create, {
+    categoryId,
+    name: 'Kopi',
+    priceIDR: 15000,
+  });
+  const ingSusu = await asOwner.mutation(api.ingredients.upsert, {
+    name: 'Susu',
+    canonicalUnit: 'ml',
+    reorderThreshold: 0,
+    lastCostPerUnitIDR: 100,
+  });
+  await asOwner.mutation(api.recipes.upsert, {
+    menuItemId: itemKopi,
+    lines: [{ ingredientId: ingSusu, qty: 50, wastageFactor: 1 }],
+  });
   return { asOwner, cafeId, cashierId, shiftId, itemKopi, ingSusu };
 }
 
-async function seedSales(t: ReturnType<typeof convexTest>, refs: Refs, days: number, nowMs: number) {
+async function seedSales(
+  t: ReturnType<typeof convexTest>,
+  refs: Refs,
+  days: number,
+  nowMs: number
+) {
   for (let d = 1; d <= days; d++) {
     const at = nowMs - d * DAY;
     await t.run((ctx) =>
       ctx.db.insert('orders', {
-        cafeId: refs.cafeId, shiftId: refs.shiftId, cashierId: refs.cashierId,
+        cafeId: refs.cafeId,
+        shiftId: refs.shiftId,
+        cashierId: refs.cashierId,
         clientId: `c-${d}`,
-        lines: [{ menuItemId: refs.itemKopi, nameSnapshot: 'Kopi', qty: 10, unitPriceIDR: 15000, modifiersSnapshot: [], lineTotalIDR: 150000 }],
-        subtotalIDR: 150000, taxRatePct: 0, taxIDR: 0, discountIDR: 0, totalIDR: 150000,
-        paymentMethod: 'cash', paymentStatus: 'paid', createdAtClient: at, syncedAt: at,
+        lines: [
+          {
+            menuItemId: refs.itemKopi,
+            nameSnapshot: 'Kopi',
+            qty: 10,
+            unitPriceIDR: 15000,
+            modifiersSnapshot: [],
+            lineTotalIDR: 150000,
+          },
+        ],
+        subtotalIDR: 150000,
+        taxRatePct: 0,
+        taxIDR: 0,
+        discountIDR: 0,
+        totalIDR: 150000,
+        paymentMethod: 'cash',
+        paymentStatus: 'paid',
+        createdAtClient: at,
+        syncedAt: at,
       })
     );
   }
@@ -79,7 +119,11 @@ describe('restock.suggestion', () => {
     const now = Date.now();
     await t.run((ctx) =>
       ctx.db.insert('inventoryMovements', {
-        cafeId: refs.cafeId, ingredientId: refs.ingSusu, delta: 1_000_000, reason: 'adjustment', at: now,
+        cafeId: refs.cafeId,
+        ingredientId: refs.ingSusu,
+        delta: 1_000_000,
+        reason: 'adjustment',
+        at: now,
       })
     );
     const r = await refs.asOwner.query(api.restock.suggestion, {});
@@ -117,9 +161,13 @@ describe('restock.suggestion', () => {
     const refs = await setup(t);
     await seedSales(t, refs, 20, Date.now());
     await t.action(internal.forecast.generateNightly, {});
-    const supplierId = await refs.asOwner.mutation(api.suppliers.create, { name: 'Sumber Susu', phone: '08123456789' });
+    const supplierId = await refs.asOwner.mutation(api.suppliers.create, {
+      name: 'Sumber Susu',
+      phone: '08123456789',
+    });
     const r = await refs.asOwner.query(api.restock.suggestion, {});
-    if (r.status !== 'ready' || r.suggestionId === null) throw new Error('expected a persisted draft');
+    if (r.status !== 'ready' || r.suggestionId === null)
+      throw new Error('expected a persisted draft');
     await refs.asOwner.mutation(api.restock.markSent, {
       id: r.suggestionId,
       supplierId,
@@ -144,7 +192,7 @@ describe('restock.suggestion', () => {
     }
   });
 
-  it('markSent: cafe B cannot mark cafe A\'s suggestion', async () => {
+  it("markSent: cafe B cannot mark cafe A's suggestion", async () => {
     const t = convexTest(schema, modules);
     const a = await setup(t, 'a@x.com');
     await seedSales(t, a, 20, Date.now());
@@ -152,9 +200,16 @@ describe('restock.suggestion', () => {
     const ra = await a.asOwner.query(api.restock.suggestion, {});
     if (ra.status !== 'ready' || ra.suggestionId === null) throw new Error('expected a@ draft');
     const b = await setup(t, 'b@x.com');
-    const supplierB = await b.asOwner.mutation(api.suppliers.create, { name: 'B Supp', phone: '08123456789' });
+    const supplierB = await b.asOwner.mutation(api.suppliers.create, {
+      name: 'B Supp',
+      phone: '08123456789',
+    });
     await expect(
-      b.asOwner.mutation(api.restock.markSent, { id: ra.suggestionId, supplierId: supplierB, sentLines: [] })
+      b.asOwner.mutation(api.restock.markSent, {
+        id: ra.suggestionId,
+        supplierId: supplierB,
+        sentLines: [],
+      })
     ).rejects.toThrow();
   });
 });

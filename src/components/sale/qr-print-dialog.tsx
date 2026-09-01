@@ -57,9 +57,7 @@ export function QrPrintDialog({
   }, [open]);
 
   const orderUrl =
-    token && typeof window !== 'undefined'
-      ? `${window.location.origin}/order/${token}`
-      : '';
+    token && typeof window !== 'undefined' ? `${window.location.origin}/order/${token}` : '';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

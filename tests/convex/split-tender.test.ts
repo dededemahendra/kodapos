@@ -92,15 +92,14 @@ describe('orders.createSplitSale', () => {
     expect(order?.paymentStatus).toBe('paid');
     expect(order?.totalIDR).toBe(TOTAL);
     expect(order?.paymentBreakdown).toHaveLength(2);
-    expect(
-      order?.paymentBreakdown?.reduce((s, b) => s + b.amountIDR, 0)
-    ).toBe(TOTAL);
+    expect(order?.paymentBreakdown?.reduce((s, b) => s + b.amountIDR, 0)).toBe(TOTAL);
 
-    const payments = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .collect()
+    const payments = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .collect()
     );
     expect(payments).toHaveLength(2);
     expect(payments.reduce((s, p) => s + p.amountIDR, 0)).toBe(TOTAL);
@@ -125,11 +124,12 @@ describe('orders.createSplitSale', () => {
       createdAtClient: 1700000000000,
     });
     expect(res.changeIDR).toBe(5000);
-    const payments = await t.run(async (ctx) =>
-      await ctx.db
-        .query('payments')
-        .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
-        .collect()
+    const payments = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query('payments')
+          .withIndex('by_order', (q) => q.eq('orderId', res.orderId))
+          .collect()
     );
     const cashRow = payments.find((p) => p.method === 'cash');
     expect(cashRow?.changeIDR).toBe(5000);

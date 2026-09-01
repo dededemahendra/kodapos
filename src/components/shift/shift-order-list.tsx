@@ -28,9 +28,15 @@ export function ShiftOrderList({ shiftId }: { shiftId: Id<'shifts'> }) {
     return (
       <Empty>
         <EmptyHeader>
-          <EmptyMedia variant="icon"><Receipt /></EmptyMedia>
-          <EmptyTitle><Trans>Belum ada pesanan di shift ini.</Trans></EmptyTitle>
-          <EmptyDescription><Trans>Pesanan yang diselesaikan selama shift ini akan muncul di sini.</Trans></EmptyDescription>
+          <EmptyMedia variant="icon">
+            <Receipt />
+          </EmptyMedia>
+          <EmptyTitle>
+            <Trans>Belum ada pesanan di shift ini.</Trans>
+          </EmptyTitle>
+          <EmptyDescription>
+            <Trans>Pesanan yang diselesaikan selama shift ini akan muncul di sini.</Trans>
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -41,13 +47,20 @@ export function ShiftOrderList({ shiftId }: { shiftId: Id<'shifts'> }) {
       <ul className="divide-y divide-border border border-border rounded-md">
         {orders.map((o) => (
           <li key={o._id}>
-            <button type="button" onClick={() => setOpenId(o._id)} className="w-full text-left p-3 hover:bg-muted">
+            <button
+              type="button"
+              onClick={() => setOpenId(o._id)}
+              className="w-full text-left p-3 hover:bg-muted"
+            >
               <div className="flex justify-between">
-                <span className="text-sm">{new Date(o.createdAtClient).toLocaleTimeString('id-ID')}</span>
+                <span className="text-sm">
+                  {new Date(o.createdAtClient).toLocaleTimeString('id-ID')}
+                </span>
                 <span className="text-sm font-semibold tabular-nums">{formatIDR(o.totalIDR)}</span>
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
-                {t`${o.lines.length} item`} · {o.paymentMethod === 'cash' ? t`Tunai` : o.paymentMethod}
+                {t`${o.lines.length} item`} ·{' '}
+                {o.paymentMethod === 'cash' ? t`Tunai` : o.paymentMethod}
               </div>
             </button>
           </li>
@@ -55,7 +68,9 @@ export function ShiftOrderList({ shiftId }: { shiftId: Id<'shifts'> }) {
       </ul>
       <ReceiptPreview
         open={openId !== null}
-        onOpenChange={(open) => { if (!open) setOpenId(null); }}
+        onOpenChange={(open) => {
+          if (!open) setOpenId(null);
+        }}
         orderId={openId}
         onDone={() => setOpenId(null)}
       />

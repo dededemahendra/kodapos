@@ -1,9 +1,9 @@
 import { Trans, useLingui } from '@lingui/react/macro';
-import { CalendarDays } from 'lucide-react';
 import { api } from 'convex/_generated/api';
-import type { FunctionReturnType } from 'convex/server';
 import type { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
+import type { FunctionReturnType } from 'convex/server';
+import { CalendarDays } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Calendar } from '~/components/ui/calendar';

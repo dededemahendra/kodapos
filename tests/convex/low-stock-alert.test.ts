@@ -2,20 +2,15 @@ import { convexTest } from 'convex-test';
 import { describe, expect, it } from 'vitest';
 import { api, internal } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
+import { buildLowStockHtml, buildLowStockText } from '../../convex/lib/lowStockEmail';
 import schema from '../../convex/schema';
-import {
-  buildLowStockHtml,
-  buildLowStockText,
-} from '../../convex/lib/lowStockEmail';
 
 const modules = import.meta.glob('../../convex/**/*.*s');
 
 const NO_EM_DASH = /[—]|--/;
 
 async function seedOwner(t: ReturnType<typeof convexTest>) {
-  const userId = await t.run((ctx) =>
-    ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' })
-  );
+  const userId = await t.run((ctx) => ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' }));
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Kita' });
   const cafe = await asOwner.query(api.cafes.myCafe, {});

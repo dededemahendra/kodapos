@@ -1,8 +1,8 @@
 'use client';
 
-import type { MouseEvent, ReactNode } from 'react';
 import { Trans } from '@lingui/react/macro';
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
+import type { MouseEvent, ReactNode } from 'react';
 
 /** DiceBear "notionists" generates illustrated (non real person) avatars from a seed. */
 function avatarUrl(seed: string) {
@@ -19,8 +19,14 @@ function TooltipAvatar({
   image?: string;
 }) {
   const x = useMotionValue(0);
-  const rotate = useSpring(useTransform(x, [-100, 100], [-45, 45]), { stiffness: 100, damping: 15 });
-  const translateX = useSpring(useTransform(x, [-100, 100], [-50, 50]), { stiffness: 100, damping: 15 });
+  const rotate = useSpring(useTransform(x, [-100, 100], [-45, 45]), {
+    stiffness: 100,
+    damping: 15,
+  });
+  const translateX = useSpring(useTransform(x, [-100, 100], [-50, 50]), {
+    stiffness: 100,
+    damping: 15,
+  });
 
   function handleMouseMove(e: MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireOwned, requireActiveOutlet } from './lib/auth';
+import { requireActiveOutlet, requireOwned } from './lib/auth';
 
 const statusV = v.union(
   v.literal('open'),
@@ -185,9 +185,7 @@ export const list = query({
       ? // bounded; PO volume per cafe is modest
         await ctx.db
           .query('purchaseOrders')
-          .withIndex('by_cafe_status', (q) =>
-            q.eq('cafeId', cafeId).eq('status', status)
-          )
+          .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', status))
           .take(200)
       : // bounded; PO volume per cafe is modest
         await ctx.db
@@ -202,14 +200,8 @@ export const list = query({
       ...(po.supplierName ? { supplierName: po.supplierName } : {}),
       status: po.status,
       lineCount: po.lines.length,
-      orderedTotalIDR: po.lines.reduce(
-        (sum, l) => sum + l.orderedQty * l.unitCostIDR,
-        0
-      ),
-      receivedTotalIDR: po.lines.reduce(
-        (sum, l) => sum + l.receivedQty * l.unitCostIDR,
-        0
-      ),
+      orderedTotalIDR: po.lines.reduce((sum, l) => sum + l.orderedQty * l.unitCostIDR, 0),
+      receivedTotalIDR: po.lines.reduce((sum, l) => sum + l.receivedQty * l.unitCostIDR, 0),
       createdAt: po.createdAt,
     }));
   },

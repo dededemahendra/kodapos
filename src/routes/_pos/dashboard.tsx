@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { RequirePermission } from '~/components/permission/require-permission';
 import { Dashboard } from '~/components/dashboard';
+import { RequirePermission } from '~/components/permission/require-permission';
 
 export const Route = createFileRoute('/_pos/dashboard')({
   component: DashboardPage,

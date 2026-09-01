@@ -264,8 +264,6 @@ describe('tables.ensureQrToken', () => {
     const a = await setup(t, { email: 'a@x.com' });
     const aTable = await a.asOwner.mutation(api.tables.create, { name: 'A' });
     const b = await setup(t, { email: 'b@x.com', qrToken: 'b'.repeat(32) });
-    await expect(
-      b.asOwner.mutation(api.tables.ensureQrToken, { id: aTable })
-    ).rejects.toThrow();
+    await expect(b.asOwner.mutation(api.tables.ensureQrToken, { id: aTable })).rejects.toThrow();
   });
 });
