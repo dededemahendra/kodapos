@@ -1,4 +1,5 @@
 import { api } from 'convex/_generated/api';
+import type { Id } from 'convex/_generated/dataModel';
 import type { ReplayPayload } from 'convex/lib/replay';
 import { useConvex } from 'convex/react';
 import type { FunctionArgs } from 'convex/server';
@@ -62,6 +63,53 @@ export async function drain(deps: {
 }
 
 /**
+ * Builds the mutation's real argument object from the client-side payload.
+ *
+ * Deliberately an object literal (spread + per-field id casts) assigned to
+ * an explicitly-typed return, not a single `payload as ReplayArgs`
+ * assertion. A bare assertion only checks that the two types are
+ * "comparable" — TypeScript permits asserting to a type that has EXTRA
+ * required properties the source doesn't have, so `payload as ReplayArgs`
+ * would still compile clean even after a new required argument is added to
+ * `createReplayedCashSale`, and then dead-letter every queued sale at
+ * runtime the first time it actually posts. Returning an object literal
+ * against an explicit return type makes TypeScript check every property the
+ * target type requires is actually present in the literal, so a missing one
+ * fails `tsc` instead.
+ */
+function toReplayArgs(
+  payload: ReplayPayload
+): FunctionArgs<typeof api.orders.createReplayedCashSale> {
+  // promoId/priceCategoryId destructured out before spreading `rest`, same
+  // reason as `variantId` below: `exactOptionalPropertyTypes` rejects an
+  // untyped `string | undefined` field sitting alongside a conditionally
+  // re-added, properly-cast one of the same name.
+  const { promoId, priceCategoryId, ...rest } = payload;
+  return {
+    ...rest,
+    shiftId: rest.shiftId as Id<'shifts'>,
+    cashierId: rest.cashierId as Id<'cafeStaff'>,
+    ...(promoId !== undefined ? { promoId: promoId as Id<'promotions'> } : {}),
+    ...(priceCategoryId !== undefined
+      ? { priceCategoryId: priceCategoryId as Id<'priceCategories'> }
+      : {}),
+    lines: rest.lines.map((line) => {
+      // Destructure variantId out before spreading `rest`: leaving it in
+      // would keep its untyped `string | undefined` shape alongside the
+      // conditionally-added, properly-cast `variantId` below, which
+      // `exactOptionalPropertyTypes` also rejects.
+      const { variantId, ...rest } = line;
+      return {
+        ...rest,
+        menuItemId: rest.menuItemId as Id<'menuItems'>,
+        modifierOptionIds: rest.modifierOptionIds as Id<'modifierOptions'>[],
+        ...(variantId !== undefined ? { variantId: variantId as Id<'menuItemVariants'> } : {}),
+      };
+    }),
+  };
+}
+
+/**
  * Drains the outbox on every offline→online transition, and retries on an
  * interval while online in case a drain stopped partway. Guarded by a ref so
  * two drains never run concurrently — concurrent drains would post the same
@@ -89,14 +137,7 @@ export function useReplayOnReconnect(): void {
           remove,
           recordAttempt,
           post: async (payload) => {
-            await convex.mutation(
-              api.orders.createReplayedCashSale,
-              // Targeted cast to the mutation's own argument type (not
-              // `never`) so a required arg added to `createReplayedCashSale`
-              // that `ReplayPayload` doesn't yet produce fails `tsc` here,
-              // instead of dead-lettering every queued sale at runtime.
-              payload as FunctionArgs<typeof api.orders.createReplayedCashSale>
-            );
+            await convex.mutation(api.orders.createReplayedCashSale, toReplayArgs(payload));
           },
         });
         if (result.deadLettered.length > 0) {
