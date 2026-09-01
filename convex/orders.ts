@@ -518,7 +518,11 @@ export const search = query({
      * `_id`; an offline one's is the last four of its `clientId` (see
      * `offlineReceiptNumber` in `src/lib/offline/receipt-number.ts`, and
      * `ReceiptPreview`, which prints the same `_id` suffix online). Matched
-     * case-insensitively against either.
+     * case-insensitively against either. A non-empty query that is NOT
+     * exactly 4 characters matches nothing (rather than silently returning
+     * the unfiltered page) — receipt codes are always 4 characters, so a
+     * mistyped 3- or 5-character search should read as "no results", not as
+     * "search ignored".
      */
     q: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
@@ -555,7 +559,7 @@ export const search = query({
     const code = q?.trim().toUpperCase();
     const matchesCode = (o: (typeof result.page)[number]) =>
       o._id.slice(-4).toUpperCase() === code || o.clientId.slice(-4).toUpperCase() === code;
-    const matched = code && code.length === 4 ? result.page.filter(matchesCode) : result.page;
+    const matched = !code ? result.page : code.length === 4 ? result.page.filter(matchesCode) : [];
     const page = matched.map((o) => ({
       _id: o._id,
       createdAtClient: o.createdAtClient,

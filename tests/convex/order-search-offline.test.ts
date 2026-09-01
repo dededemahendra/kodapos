@@ -130,4 +130,52 @@ describe('orders.search', () => {
     expect(upper.page.length).toBe(1);
     expect(upper.page[0]?._id).toBe(lower.page[0]?._id);
   });
+
+  it('treats a non-4-character query as no matches, not as an ignored filter', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeef12',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 20000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 20000,
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+    });
+
+    const threeChars = await s.asOwner.query(api.orders.search, {
+      range: { preset: 'today' },
+      q: 'F12',
+      paginationOpts: { numItems: 25, cursor: null },
+    });
+    expect(threeChars.page).toHaveLength(0);
+
+    const fiveChars = await s.asOwner.query(api.orders.search, {
+      range: { preset: 'today' },
+      q: 'EEF12',
+      paginationOpts: { numItems: 25, cursor: null },
+    });
+    expect(fiveChars.page).toHaveLength(0);
+
+    // An absent/empty q is "no search", not "search for nothing" — the
+    // unfiltered page still comes back.
+    const noQuery = await s.asOwner.query(api.orders.search, {
+      range: { preset: 'today' },
+      paginationOpts: { numItems: 25, cursor: null },
+    });
+    expect(noQuery.page.length).toBeGreaterThan(0);
+  });
 });
