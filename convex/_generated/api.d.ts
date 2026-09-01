@@ -95,6 +95,7 @@ import type * as public_ from "../public.js";
 import type * as purchaseOrders from "../purchaseOrders.js";
 import type * as purchases from "../purchases.js";
 import type * as recipes from "../recipes.js";
+import type * as reconciliation from "../reconciliation.js";
 import type * as refunds from "../refunds.js";
 import type * as reports from "../reports.js";
 import type * as reservations from "../reservations.js";
@@ -207,6 +208,7 @@ declare const fullApi: ApiFromModules<{
   purchaseOrders: typeof purchaseOrders;
   purchases: typeof purchases;
   recipes: typeof recipes;
+  reconciliation: typeof reconciliation;
   refunds: typeof refunds;
   reports: typeof reports;
   reservations: typeof reservations;

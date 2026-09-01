@@ -72,6 +72,7 @@ import { Route as PosSettingsMembersRouteImport } from './routes/_pos/settings/m
 import { Route as PosSettingsIntegrationsRouteImport } from './routes/_pos/settings/integrations'
 import { Route as PosSettingsGeneralRouteImport } from './routes/_pos/settings/general'
 import { Route as PosReportsSalesRouteImport } from './routes/_pos/reports/sales'
+import { Route as PosReportsReconciliationRouteImport } from './routes/_pos/reports/reconciliation'
 import { Route as PosReportsProfitLossRouteImport } from './routes/_pos/reports/profit-loss'
 import { Route as PosReportsProductsRouteImport } from './routes/_pos/reports/products'
 import { Route as PosReportsPaymentsRouteImport } from './routes/_pos/reports/payments'
@@ -410,6 +411,12 @@ const PosReportsSalesRoute = PosReportsSalesRouteImport.update({
   path: '/sales',
   getParentRoute: () => PosReportsRouteRoute,
 } as any)
+const PosReportsReconciliationRoute =
+  PosReportsReconciliationRouteImport.update({
+    id: '/reconciliation',
+    path: '/reconciliation',
+    getParentRoute: () => PosReportsRouteRoute,
+  } as any)
 const PosReportsProfitLossRoute = PosReportsProfitLossRouteImport.update({
   id: '/profit-loss',
   path: '/profit-loss',
@@ -603,6 +610,7 @@ export interface FileRoutesByFullPath {
   '/reports/payments': typeof PosReportsPaymentsRoute
   '/reports/products': typeof PosReportsProductsRoute
   '/reports/profit-loss': typeof PosReportsProfitLossRoute
+  '/reports/reconciliation': typeof PosReportsReconciliationRoute
   '/reports/sales': typeof PosReportsSalesRoute
   '/settings/general': typeof PosSettingsGeneralRoute
   '/settings/integrations': typeof PosSettingsIntegrationsRoute
@@ -683,6 +691,7 @@ export interface FileRoutesByTo {
   '/reports/payments': typeof PosReportsPaymentsRoute
   '/reports/products': typeof PosReportsProductsRoute
   '/reports/profit-loss': typeof PosReportsProfitLossRoute
+  '/reports/reconciliation': typeof PosReportsReconciliationRoute
   '/reports/sales': typeof PosReportsSalesRoute
   '/settings/general': typeof PosSettingsGeneralRoute
   '/settings/integrations': typeof PosSettingsIntegrationsRoute
@@ -774,6 +783,7 @@ export interface FileRoutesById {
   '/_pos/reports/payments': typeof PosReportsPaymentsRoute
   '/_pos/reports/products': typeof PosReportsProductsRoute
   '/_pos/reports/profit-loss': typeof PosReportsProfitLossRoute
+  '/_pos/reports/reconciliation': typeof PosReportsReconciliationRoute
   '/_pos/reports/sales': typeof PosReportsSalesRoute
   '/_pos/settings/general': typeof PosSettingsGeneralRoute
   '/_pos/settings/integrations': typeof PosSettingsIntegrationsRoute
@@ -863,6 +873,7 @@ export interface FileRouteTypes {
     | '/reports/payments'
     | '/reports/products'
     | '/reports/profit-loss'
+    | '/reports/reconciliation'
     | '/reports/sales'
     | '/settings/general'
     | '/settings/integrations'
@@ -943,6 +954,7 @@ export interface FileRouteTypes {
     | '/reports/payments'
     | '/reports/products'
     | '/reports/profit-loss'
+    | '/reports/reconciliation'
     | '/reports/sales'
     | '/settings/general'
     | '/settings/integrations'
@@ -1033,6 +1045,7 @@ export interface FileRouteTypes {
     | '/_pos/reports/payments'
     | '/_pos/reports/products'
     | '/_pos/reports/profit-loss'
+    | '/_pos/reports/reconciliation'
     | '/_pos/reports/sales'
     | '/_pos/settings/general'
     | '/_pos/settings/integrations'
@@ -1509,6 +1522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosReportsSalesRouteImport
       parentRoute: typeof PosReportsRouteRoute
     }
+    '/_pos/reports/reconciliation': {
+      id: '/_pos/reports/reconciliation'
+      path: '/reconciliation'
+      fullPath: '/reports/reconciliation'
+      preLoaderRoute: typeof PosReportsReconciliationRouteImport
+      parentRoute: typeof PosReportsRouteRoute
+    }
     '/_pos/reports/profit-loss': {
       id: '/_pos/reports/profit-loss'
       path: '/profit-loss'
@@ -1801,6 +1821,7 @@ interface PosReportsRouteRouteChildren {
   PosReportsPaymentsRoute: typeof PosReportsPaymentsRoute
   PosReportsProductsRoute: typeof PosReportsProductsRoute
   PosReportsProfitLossRoute: typeof PosReportsProfitLossRoute
+  PosReportsReconciliationRoute: typeof PosReportsReconciliationRoute
   PosReportsSalesRoute: typeof PosReportsSalesRoute
   PosReportsIndexRoute: typeof PosReportsIndexRoute
 }
@@ -1815,6 +1836,7 @@ const PosReportsRouteRouteChildren: PosReportsRouteRouteChildren = {
   PosReportsPaymentsRoute: PosReportsPaymentsRoute,
   PosReportsProductsRoute: PosReportsProductsRoute,
   PosReportsProfitLossRoute: PosReportsProfitLossRoute,
+  PosReportsReconciliationRoute: PosReportsReconciliationRoute,
   PosReportsSalesRoute: PosReportsSalesRoute,
   PosReportsIndexRoute: PosReportsIndexRoute,
 }
