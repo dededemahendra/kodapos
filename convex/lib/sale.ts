@@ -60,7 +60,12 @@ export type PaymentInput =
       >;
     };
 
-function assertIDR(n: number, label: string): number {
+/**
+ * Every client-supplied amount in this file passes through here. Exported so the
+ * replay path can apply the same gate to the till's own figures: trusting the
+ * till's arithmetic never meant trusting that the bytes are well-formed rupiah.
+ */
+export function assertIDR(n: number, label: string): number {
   if (!Number.isInteger(n)) throw new Error(`${label} harus berupa angka bulat (rupiah).`);
   if (n < 0) throw new Error(`${label} tidak boleh negatif.`);
   return n;
@@ -84,9 +89,10 @@ export type ReplayContext = {
  * and the payment row's tendered/change + provider fields.
  *
  * `replay` is set ONLY by orders.createReplayedCashSale, for a cash sale rung
- * while the till was offline. It relaxes exactly five checks (closed shift,
+ * while the till was offline. It relaxes exactly seven checks (closed shift,
  * item/variant/modifier availability, archived promo, tightened modifier
- * min/max rules, a payment method switched off) and pins the recorded
+ * min/max rules, a payment method switched off, an archived cashier, an
+ * archived price category) and pins the recorded
  * money to the till's snapshot. Absent — every online path — behavior is
  * byte-for-byte what it was before offline replay existed.
  */
@@ -129,7 +135,16 @@ export async function buildOrder(
   let priceCategoryName: string | undefined;
   if (args.priceCategoryId) {
     const priceCategory = await ctx.db.get(args.priceCategoryId);
-    if (!priceCategory || priceCategory.cafeId !== cafeId || priceCategory.archived) {
+    if (
+      !priceCategory ||
+      priceCategory.cafeId !== cafeId ||
+      // Relaxation 7 of 7 (replay only). A tier archived mid-outage would
+      // otherwise strand the queued cash. Nothing is mispriced by allowing it:
+      // under replay the overrides below never price anything (the till's
+      // snapshot wins), and the lookup is kept only so the order still gets its
+      // priceCategoryName stamped. Tenancy is not relaxed.
+      (!replay && priceCategory.archived)
+    ) {
       throw new Error('Kategori harga tidak ditemukan.');
     }
     priceCategoryName = priceCategory.name;
@@ -145,12 +160,23 @@ export async function buildOrder(
   if (args.lines.length < 1) throw new Error('Keranjang kosong.');
 
   const shift = await requireOwned(ctx, cafeId, args.shiftId, 'Shift');
-  // Relaxation 1 of 3 (replay only). Shift close is allowed with sales still
+  // Relaxation 1 of 7 (replay only). Shift close is allowed with sales still
   // queued in the offline outbox, so a replay always lands in a closed shift.
   // The online path keeps the check verbatim.
   if (!replay && shift.status !== 'open') throw new Error('Shift sudah ditutup.');
 
-  await requireActiveCashier(ctx, cafeId, args.cashierId);
+  if (replay) {
+    // Relaxation 6 of 7 (replay only). A cashier archived at end of shift — the
+    // routine case when someone quits — must not strand the cash they took.
+    // Only the archived flag is relaxed; an unknown or foreign cashier is still
+    // rejected, with requireActiveCashier's exact message.
+    const cashier = await ctx.db.get(args.cashierId);
+    if (!cashier || cashier.cafeId !== cafeId) {
+      throw new Error('Kasir tidak ditemukan atau sudah diarsipkan.');
+    }
+  } else {
+    await requireActiveCashier(ctx, cafeId, args.cashierId);
+  }
 
   // Tag the sold order with its table (dine-in). Validate ownership up-front so a
   // foreign/unknown tableId is rejected before any side effects.
@@ -173,7 +199,7 @@ export async function buildOrder(
     // Tenancy is NEVER relaxed, not even on replay: an unknown or foreign item
     // is rejected on both paths.
     if (!item || item.cafeId !== cafeId) throw new Error('Item tidak tersedia.');
-    // Relaxation 2a of 3 (replay only). The customer already paid and left; an
+    // Relaxation 2a of 7 (replay only). The customer already paid and left; an
     // item archived / deactivated / sold out during the outage must not strand
     // the cash. The line falls back to the till's nameSnapshot + unitPriceIDR
     // below, and orders.recordReconciliations logs the discrepancy.
@@ -190,7 +216,7 @@ export async function buildOrder(
       (!variant ||
         variant.menuItemId !== item._id ||
         variant.cafeId !== cafeId ||
-        // Relaxation 2b of 3 (replay only): archived-during-outage is tolerated,
+        // Relaxation 2b of 7 (replay only): archived-during-outage is tolerated,
         // a missing or foreign variant still is not.
         (!replay && variant.archived))
     ) {
@@ -209,7 +235,7 @@ export async function buildOrder(
     const countByGroup = new Map<string, number>();
     for (const optionId of line.modifierOptionIds) {
       const option = await ctx.db.get(optionId);
-      // Relaxation 2c of 3 (replay only): an option archived, or its group
+      // Relaxation 2c of 7 (replay only): an option archived, or its group
       // detached from the item, during the outage no longer rejects the sale.
       if (!option || option.cafeId !== cafeId || (!replay && option.archived)) {
         throw new Error('Modifier tidak tersedia.');
@@ -232,7 +258,7 @@ export async function buildOrder(
       const group = await ctx.db.get(attachment.modifierGroupId);
       if (!group || group.archived) continue;
       const count = countByGroup.get(group._id) ?? 0;
-      // Relaxation 4 of 5 (replay only). A min/max rule tightened during the
+      // Relaxation 4 of 7 (replay only). A min/max rule tightened during the
       // outage would otherwise strand the queued cash forever — the customer
       // already has the drink the old rule allowed. Logged as
       // `modifier_rule_changed` by orders.recordReconciliations.
@@ -302,7 +328,7 @@ export async function buildOrder(
   let appliedPromo: Doc<'orders'>['appliedPromo'];
   if (args.promoId) {
     const promo = await requireOwned(ctx, cafeId, args.promoId, 'Promo');
-    // Relaxation 3 of 3 (replay only). A promo archived mid-outage still has to
+    // Relaxation 3 of 7 (replay only). A promo archived mid-outage still has to
     // be honored — it was already applied on the receipt.
     if (!replay && promo.archived) throw new Error('Promo tidak tersedia.');
     // Scope the discount to its matching lines (server reads the promo doc by id;
@@ -368,7 +394,7 @@ export async function buildOrder(
   const usesQrisStatic =
     payment.method === 'qris_static' ||
     (payment.method === 'split' && payment.tenders.some((t) => t.method === 'qris_static'));
-  // Relaxation 5 of 5 (replay only). Turning cash off mid-outage must not make
+  // Relaxation 5 of 7 (replay only). Turning cash off mid-outage must not make
   // already-collected cash unpostable. (Only the cash branch is relaxed: a
   // replay is always a cash sale, so `usesQrisStatic` is false here.) Logged as
   // `payment_method_disabled` by orders.recordReconciliations.

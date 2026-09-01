@@ -9,6 +9,7 @@ import { methodTotals } from './lib/payment';
 import { unitRefundIDR } from './lib/refund';
 import { type ReplayArgs, replayArgs } from './lib/replay';
 import {
+  assertIDR,
   buildOrder,
   reverseSettledSale,
   type SaleArgs,
@@ -124,7 +125,10 @@ async function recordReconciliations(
       | 'item_unavailable'
       | 'promo_archived'
       | 'modifier_rule_changed'
-      | 'payment_method_disabled',
+      | 'payment_method_disabled'
+      | 'shift_closed'
+      | 'cashier_archived'
+      | 'price_category_archived',
     extra: { rungIDR?: number; currentIDR?: number; detail?: string }
   ) =>
     ctx.db.insert('saleReconciliations', {
@@ -158,7 +162,7 @@ async function recordReconciliations(
     }
 
     const variant = line.variantId ? await ctx.db.get(line.variantId) : null;
-    if (variant && variant.archived) {
+    if (variant?.archived) {
       await insert('item_unavailable', {
         detail: `${line.nameSnapshot}: varian ${variant.name}`,
       });
@@ -241,6 +245,26 @@ async function recordReconciliations(
   if (settings?.payment?.methods?.cash === false) {
     await insert('payment_method_disabled', { detail: 'Tunai' });
   }
+
+  // The ordinary replay case, and the one whose cash impact is otherwise
+  // invisible: the shift was counted and closed before this sale arrived, so its
+  // expected-cash figure does not include this drawer money.
+  const shift = await ctx.db.get(args.shiftId);
+  if (shift && shift.cafeId === cafeId && shift.status !== 'open') {
+    await insert('shift_closed', { detail: 'Shift sudah ditutup saat penjualan masuk' });
+  }
+
+  const cashier = await ctx.db.get(args.cashierId);
+  if (cashier && cashier.cafeId === cafeId && cashier.archived) {
+    await insert('cashier_archived', { detail: cashier.name });
+  }
+
+  if (priceCategoryId) {
+    const priceCategory = await ctx.db.get(priceCategoryId);
+    if (priceCategory && priceCategory.cafeId === cafeId && priceCategory.archived) {
+      await insert('price_category_archived', { detail: priceCategory.name });
+    }
+  }
 }
 
 /**
@@ -253,6 +277,30 @@ export const createReplayedCashSale = mutation({
   args: replayArgs,
   returns: saleResult,
   handler: async (ctx, args) => {
+    // The till's arithmetic is trusted; its bytes are not. Without this, an
+    // offline `20000 * 0.11` persists as taxIDR 2200.0000000000003, and a
+    // negative totalIDR passes the funds check and pays out change.
+    assertIDR(args.discountIDR, 'Diskon');
+    assertIDR(args.serviceChargeIDR, 'Biaya layanan');
+    assertIDR(args.taxIDR, 'Pajak');
+    assertIDR(args.totalIDR, 'Total');
+    assertIDR(args.cashTenderedIDR, 'Uang yang diterima');
+    for (const line of args.lines) {
+      assertIDR(line.unitPriceIDR, 'Harga satuan');
+      assertIDR(line.lineTotalIDR, 'Total baris');
+      if (line.lineTotalIDR !== line.qty * line.unitPriceIDR) {
+        throw new Error('Total baris tidak cocok dengan jumlah dikali harga satuan.');
+      }
+    }
+    // Internal consistency, checked against the payload's OWN numbers so
+    // "record it as rung" still holds. Without it a ten-item cart can persist
+    // with totalIDR 0, settle as paid, and contribute nothing to expected cash.
+    const subtotalIDR = args.lines.reduce((sum, l) => sum + l.lineTotalIDR, 0);
+    const expectedTotalIDR = subtotalIDR - args.discountIDR + args.serviceChargeIDR + args.taxIDR;
+    if (args.totalIDR !== expectedTotalIDR) {
+      throw new Error('Total pesanan tidak cocok dengan rinciannya.');
+    }
+
     const { cafeId } = await requireActiveOutlet(ctx);
     // buildOrder short-circuits a repeated clientId to the committed order. Look
     // first so a retry after a timeout does not append a second set of

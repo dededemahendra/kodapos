@@ -18,9 +18,12 @@ type Setup = {
 // Mirrors tests/convex/sale-core.test.ts, except the item is priced at exactly
 // the amount the replay payloads below were "rung" at, so a discrepancy row is
 // only ever produced by the drift a test deliberately introduces.
-async function setup(t: ReturnType<typeof convexTest>): Promise<Setup> {
+async function setup(
+  t: ReturnType<typeof convexTest>,
+  opts: { email?: string } = {}
+): Promise<Setup> {
   const userId = await t.run(async (ctx) => {
-    return await ctx.db.insert('users', { name: 'Owner', email: 'o@x.com' });
+    return await ctx.db.insert('users', { name: 'Owner', email: opts.email ?? 'o@x.com' });
   });
   const asOwner = t.withIdentity({ subject: `${userId}|test_session` });
   await asOwner.mutation(api.cafes.createForOwner, { name: 'Kopi Senja' });
@@ -74,6 +77,12 @@ describe('createReplayedCashSale', () => {
       createdAtClient: Date.now(),
     });
     expect(res.totalIDR).toBe(20000);
+    // The closed shift was counted and reconciled before this cash arrived, so
+    // the owner has to be told the drawer moved after the fact.
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    const row = recon.find((r) => r.kind === 'shift_closed');
+    expect(row).toBeDefined();
+    expect(row?.detail).toBeTruthy();
   });
 
   it('records the price it was rung at, not the current price', async () => {
@@ -471,6 +480,287 @@ describe('createReplayedCashSale', () => {
     const row = recon.find((r) => r.kind === 'modifier_rule_changed');
     expect(row).toBeDefined();
     expect(row?.detail).toContain('Tambahan');
+  });
+
+  it('does not duplicate reconciliation rows when a drifted sale is replayed twice', async () => {
+    // The plain idempotency test above rings at the current price, so it produces
+    // no rows and would stay green even with the guard deleted. This one drifts
+    // first, so the `if (!already)` guard is the only thing keeping the count at 1.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.items.update, {
+      id: s.itemId,
+      categoryId: s.categoryId,
+      name: 'Kopi',
+      priceIDR: 30000,
+    });
+    const args = {
+      clientId: 'offline-dupe-drift',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 20000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 20000,
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+    };
+    const a = await s.asOwner.mutation(api.orders.createReplayedCashSale, args);
+    const b = await s.asOwner.mutation(api.orders.createReplayedCashSale, args);
+
+    expect(b.orderId).toBe(a.orderId);
+    const orders = await t.run((ctx) => ctx.db.query('orders').collect());
+    expect(orders).toHaveLength(1);
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    expect(recon).toHaveLength(1);
+    expect(recon[0]?.kind).toBe('price_drift');
+  });
+
+  it('still rejects an item belonging to another cafe', async () => {
+    // The tenancy check is the one guard deliberately NOT relaxed under replay.
+    // A forged payload must not be able to post another tenant's menu item.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const other = await setup(t, { email: 'other@x.com' });
+
+    await expect(
+      s.asOwner.mutation(api.orders.createReplayedCashSale, {
+        clientId: 'offline-foreign',
+        shiftId: s.shiftId,
+        cashierId: s.cashierId,
+        lines: [
+          {
+            menuItemId: other.itemId,
+            qty: 1,
+            modifierOptionIds: [],
+            nameSnapshot: 'Kopi',
+            unitPriceIDR: 20000,
+            lineTotalIDR: 20000,
+          },
+        ],
+        discountIDR: 0,
+        serviceChargeIDR: 0,
+        taxIDR: 0,
+        totalIDR: 20000,
+        cashTenderedIDR: 20000,
+        createdAtClient: Date.now(),
+      })
+    ).rejects.toThrow(/tidak tersedia/i);
+
+    const orders = await t.run((ctx) => ctx.db.query('orders').collect());
+    expect(orders).toHaveLength(0);
+  });
+
+  it('accepts a sale whose cashier was archived during the outage', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    // The real sequence, and why staff.archive refuses otherwise: the shift is
+    // closed at end of day and the cashier who quit is archived right after.
+    await s.asOwner.mutation(api.shifts.close, { id: s.shiftId, countedCashIDR: 0 });
+    await s.asOwner.mutation(api.staff.archive, { id: s.cashierId });
+
+    const res = await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'offline-cashier',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 20000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 20000,
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+    });
+
+    expect(res.totalIDR).toBe(20000);
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    const row = recon.find((r) => r.kind === 'cashier_archived');
+    expect(row).toBeDefined();
+    expect(row?.detail).toContain('Andi');
+  });
+
+  it('accepts a sale whose price category was archived during the outage', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const priceCategoryId = await s.asOwner.mutation(api.menu.priceCategories.create, {
+      name: 'Turis',
+    });
+    await s.asOwner.mutation(api.menu.priceCategories.archive, { id: priceCategoryId });
+
+    const res = await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'offline-tier',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 20000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 20000,
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+      priceCategoryId,
+    });
+
+    expect(res.totalIDR).toBe(20000);
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    const row = recon.find((r) => r.kind === 'price_category_archived');
+    expect(row).toBeDefined();
+    expect(row?.detail).toContain('Turis');
+  });
+
+  it('rejects a non-integer amount from the till', async () => {
+    // An offline till computing tax itself has no reason to land on a whole
+    // rupiah: 24 990 x 11% is 2748.9. The online path never produces this
+    // because computeOrderTotals rounds; the replay path takes the number as
+    // given, so it has to be gated here. Trusting the till's arithmetic never
+    // meant trusting that the bytes are well-formed rupiah.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    // Computed, not a literal, so the value under test is the one the till
+    // would actually produce. Asserted non-integer so this test can never
+    // quietly stop testing anything.
+    const taxIDR = 24990 * 0.11;
+    expect(Number.isInteger(taxIDR)).toBe(false);
+    await expect(
+      s.asOwner.mutation(api.orders.createReplayedCashSale, {
+        clientId: 'offline-float',
+        shiftId: s.shiftId,
+        cashierId: s.cashierId,
+        lines: [
+          {
+            menuItemId: s.itemId,
+            qty: 1,
+            modifierOptionIds: [],
+            nameSnapshot: 'Kopi',
+            unitPriceIDR: 24990,
+            lineTotalIDR: 24990,
+          },
+        ],
+        discountIDR: 0,
+        serviceChargeIDR: 0,
+        taxIDR,
+        totalIDR: 24990 + taxIDR,
+        cashTenderedIDR: 30000,
+        createdAtClient: Date.now(),
+      })
+    ).rejects.toThrow(/bulat/i);
+    expect(await t.run((ctx) => ctx.db.query('orders').collect())).toHaveLength(0);
+  });
+
+  it('rejects a negative total from the till', async () => {
+    // Would otherwise clear the funds check and pay out change.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await expect(
+      s.asOwner.mutation(api.orders.createReplayedCashSale, {
+        clientId: 'offline-negative',
+        shiftId: s.shiftId,
+        cashierId: s.cashierId,
+        lines: [
+          {
+            menuItemId: s.itemId,
+            qty: 1,
+            modifierOptionIds: [],
+            nameSnapshot: 'Kopi',
+            unitPriceIDR: 20000,
+            lineTotalIDR: 20000,
+          },
+        ],
+        discountIDR: 0,
+        serviceChargeIDR: 0,
+        taxIDR: 0,
+        totalIDR: -5000,
+        cashTenderedIDR: 0,
+        createdAtClient: Date.now(),
+      })
+    ).rejects.toThrow(/negatif/i);
+    expect(await t.run((ctx) => ctx.db.query('orders').collect())).toHaveLength(0);
+  });
+
+  it('rejects a line whose total is not qty x unit price', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await expect(
+      s.asOwner.mutation(api.orders.createReplayedCashSale, {
+        clientId: 'offline-bad-line',
+        shiftId: s.shiftId,
+        cashierId: s.cashierId,
+        lines: [
+          {
+            menuItemId: s.itemId,
+            qty: 2,
+            modifierOptionIds: [],
+            nameSnapshot: 'Kopi',
+            unitPriceIDR: 20000,
+            lineTotalIDR: 20000,
+          },
+        ],
+        discountIDR: 0,
+        serviceChargeIDR: 0,
+        taxIDR: 0,
+        totalIDR: 20000,
+        cashTenderedIDR: 20000,
+        createdAtClient: Date.now(),
+      })
+    ).rejects.toThrow(/jumlah dikali harga satuan/i);
+    expect(await t.run((ctx) => ctx.db.query('orders').collect())).toHaveLength(0);
+  });
+
+  it('rejects a total that does not match its own line items', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await expect(
+      s.asOwner.mutation(api.orders.createReplayedCashSale, {
+        clientId: 'offline-inconsistent',
+        shiftId: s.shiftId,
+        cashierId: s.cashierId,
+        lines: [
+          {
+            menuItemId: s.itemId,
+            qty: 1,
+            modifierOptionIds: [],
+            nameSnapshot: 'Kopi',
+            unitPriceIDR: 20000,
+            lineTotalIDR: 20000,
+          },
+        ],
+        discountIDR: 0,
+        serviceChargeIDR: 0,
+        taxIDR: 0,
+        totalIDR: 0,
+        cashTenderedIDR: 0,
+        createdAtClient: Date.now(),
+      })
+    ).rejects.toThrow(/tidak cocok dengan rinciannya/i);
+    expect(await t.run((ctx) => ctx.db.query('orders').collect())).toHaveLength(0);
   });
 
   it('settles the sale so it counts as paid revenue', async () => {

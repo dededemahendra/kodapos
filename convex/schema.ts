@@ -672,7 +672,15 @@ export default defineSchema({
       v.literal('modifier_rule_changed'),
       // The payment method the sale was rung with was switched off during the
       // outage. The cash is still in the drawer, so the sale posts anyway.
-      v.literal('payment_method_disabled')
+      v.literal('payment_method_disabled'),
+      // Posted into a shift that had already closed — the ordinary replay case,
+      // and the one whose cash impact is otherwise invisible: the shift's
+      // counted/expected cash was reconciled before this sale arrived.
+      v.literal('shift_closed'),
+      // The cashier who rang the sale was archived during the outage.
+      v.literal('cashier_archived'),
+      // The price tier the sale was rung under was archived during the outage.
+      v.literal('price_category_archived')
     ),
     /** The line total the till charged, in IDR. Set for price_drift only. */
     rungIDR: v.optional(v.number()),
