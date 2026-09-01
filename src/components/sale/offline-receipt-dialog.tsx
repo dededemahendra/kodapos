@@ -19,6 +19,14 @@ import { buildReceiptBytes } from '~/lib/receipt-print';
 import { isThermalSupported, printBytes } from '~/lib/thermal-printer';
 import { toast } from '~/lib/toast';
 
+// Printed receipt is always English, kept out of the i18n catalog. Mirrors the
+// same map in receipt-preview.tsx and receipt-print.ts.
+const ORDER_TYPE_RECEIPT_LABEL: Record<'dine_in' | 'takeaway' | 'pickup', string> = {
+  dine_in: 'Dine-in',
+  takeaway: 'Takeaway',
+  pickup: 'Pickup',
+};
+
 /**
  * Receipt for a sale that exists only in this device's outbox.
  *
@@ -140,6 +148,11 @@ export function OfflineReceiptDialog({
             </div>
             {/* Printed receipt is always English, kept out of the i18n catalog. */}
             <div className="text-xs text-muted-foreground">Order #{receiptNumber}</div>
+            {receipt.orderType ? (
+              <div className="text-xs text-muted-foreground">
+                Order type: {ORDER_TYPE_RECEIPT_LABEL[receipt.orderType]}
+              </div>
+            ) : null}
             {receipt.priceCategoryName ? (
               <div className="text-xs text-muted-foreground">
                 Price tier: {receipt.priceCategoryName}
