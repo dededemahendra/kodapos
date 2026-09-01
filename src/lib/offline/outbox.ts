@@ -22,21 +22,51 @@ export type QueuedSale = {
   attempts: number;
 };
 
-const DB_NAME = 'kodapos-offline';
+export const DB_NAME = 'kodapos-offline';
 const STORE = 'outbox';
-const VERSION = 1;
+const DEFAULT_VERSION = 1;
+/** Mutable so tests can force a version bump to exercise the blocked/blocking path. */
+let version = DEFAULT_VERSION;
 
 let dbPromise: Promise<IDBPDatabase> | null = null;
 
 function db(): Promise<IDBPDatabase> {
   if (!dbPromise) {
-    dbPromise = openDB(DB_NAME, VERSION, {
-      upgrade(database) {
-        if (!database.objectStoreNames.contains(STORE)) {
-          const store = database.createObjectStore(STORE, { keyPath: 'clientId' });
-          store.createIndex('by_queuedAt', 'queuedAt');
-        }
-      },
+    const opening = new Promise<IDBPDatabase>((resolve, reject) => {
+      openDB(DB_NAME, version, {
+        upgrade(database) {
+          if (!database.objectStoreNames.contains(STORE)) {
+            const store = database.createObjectStore(STORE, { keyPath: 'clientId' });
+            store.createIndex('by_queuedAt', 'queuedAt');
+          }
+        },
+        // Fires when an older connection (a stale tab left open through a
+        // schema bump) is still around, so this open can never proceed.
+        // Left unhandled, idb's promise simply never settles — and because
+        // we cache it in `dbPromise`, every later enqueue/list/size call
+        // would hang forever with no error surfaced anywhere. Reject
+        // instead, so a real error reaches the caller.
+        blocked(currentVersion, blockedVersion) {
+          reject(
+            new Error(
+              `IndexedDB "${DB_NAME}" open blocked: a connection at v${currentVersion} is ` +
+                `still open, preventing v${blockedVersion}. Close other tabs/windows of this ` +
+                'app and retry.'
+            )
+          );
+        },
+        // Fires on THIS connection when a newer version is requested
+        // elsewhere while we're still open. Close ourselves so we don't
+        // become the stale connection that blocks the other tab.
+        blocking() {
+          opening.then((instance) => instance.close()).catch(() => {});
+        },
+      }).then(resolve, reject);
+    });
+    // Don't cache a rejected open — let the next call retry from scratch.
+    dbPromise = opening.catch((error: unknown) => {
+      dbPromise = null;
+      throw error;
     });
   }
   return dbPromise;
@@ -70,20 +100,39 @@ export async function size(): Promise<number> {
   return await d.count(STORE);
 }
 
+/**
+ * Read and write in a single `readwrite` transaction. Two concurrent
+ * `recordAttempt` calls for the same `clientId` would otherwise both read
+ * `attempts: n` from separate transactions and the second `put` would
+ * clobber the first, silently under-counting and pushing dead-lettering
+ * later than intended. (`enqueue`'s similar get-then-put is fine as-is:
+ * `put` there is keyed by `clientId`, so a racing duplicate still collapses
+ * to one record and no sale is lost.)
+ */
 export async function recordAttempt(clientId: string): Promise<void> {
   const d = await db();
-  const existing = (await d.get(STORE, clientId)) as QueuedSale | undefined;
-  if (!existing) return;
-  await d.put(STORE, { ...existing, attempts: existing.attempts + 1 });
+  const tx = d.transaction(STORE, 'readwrite');
+  const store = tx.objectStore(STORE);
+  const existing = (await store.get(clientId)) as QueuedSale | undefined;
+  if (existing) {
+    await store.put({ ...existing, attempts: existing.attempts + 1 });
+  }
+  await tx.done;
+}
+
+/** Test-only. Forces the schema version, to simulate a version bump for blocked/blocking tests. */
+export function _setVersionForTests(v: number): void {
+  version = v;
 }
 
 /** Test-only. Drops the cached connection, optionally wiping stored rows. */
 export async function _resetForTests(opts: { keepData?: boolean } = {}): Promise<void> {
+  version = DEFAULT_VERSION;
   if (!opts.keepData) {
-    const d = await db();
-    await d.clear(STORE);
+    const d = await db().catch(() => null);
+    await d?.clear(STORE);
   }
-  const d = await dbPromise;
+  const d = dbPromise ? await dbPromise.catch(() => null) : null;
   d?.close();
   dbPromise = null;
 }

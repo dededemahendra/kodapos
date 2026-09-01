@@ -1,6 +1,16 @@
 import 'fake-indexeddb/auto';
+import { openDB } from 'idb';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { _resetForTests, enqueue, list, recordAttempt, remove, size } from '~/lib/offline/outbox';
+import {
+  _resetForTests,
+  _setVersionForTests,
+  DB_NAME,
+  enqueue,
+  list,
+  recordAttempt,
+  remove,
+  size,
+} from '~/lib/offline/outbox';
 
 const payload = (n: number) =>
   ({
@@ -47,5 +57,25 @@ describe('outbox', () => {
     await recordAttempt('a');
     await recordAttempt('a');
     expect((await list())[0]?.attempts).toBe(2);
+  });
+
+  it('recordAttempt is race-safe under concurrent calls', async () => {
+    await enqueue({ clientId: 'a', payload: payload(1), queuedAt: 100 });
+    const concurrency = 5;
+    await Promise.all(Array.from({ length: concurrency }, () => recordAttempt('a')));
+    expect((await list())[0]?.attempts).toBe(concurrency);
+  });
+
+  it('rejects instead of hanging when a stale connection blocks a version bump', async () => {
+    // Simulate a stale tab that never closed its connection at the old
+    // schema version, the way a multi-tab register would during a deploy.
+    const stale = await openDB(DB_NAME, 1);
+    _setVersionForTests(2);
+    try {
+      await expect(size()).rejects.toThrow(/blocked/i);
+    } finally {
+      stale.close();
+      _setVersionForTests(1);
+    }
   });
 });
