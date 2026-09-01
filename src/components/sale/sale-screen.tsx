@@ -31,6 +31,9 @@ import {
 } from '~/components/ui/select';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { publishDisplay } from '~/lib/customer-display';
+import { useConnectionState } from '~/lib/offline/connectivity';
+import { save as saveRegisterCache } from '~/lib/offline/register-cache';
+import type { OfflineSaleInput } from '~/lib/offline/sale-payload';
 import { useBoolPreference } from '~/lib/preferences';
 import { scanBeep } from '~/lib/scan-feedback';
 import { playSaleChime } from '~/lib/sound';
@@ -43,7 +46,8 @@ import { HoldOrderDialog } from './hold-order-dialog';
 import { ManualDiscountDialog } from './manual-discount-dialog';
 import { type ItemForSale, MenuPane } from './menu-pane';
 import { ModifierPickerDialog } from './modifier-picker-dialog';
-import { PAYMENT_METHODS, type PaymentMethod } from './payment-methods';
+import { OfflineReceiptDialog } from './offline-receipt-dialog';
+import { methodsForConnection, PAYMENT_METHODS, type PaymentMethod } from './payment-methods';
 import { PromoPickerDialog } from './promo-picker-dialog';
 import { QrisDynamicPaymentDialog } from './qris-dynamic-payment-dialog';
 import { QrisStaticPaymentDialog } from './qris-static-payment-dialog';
@@ -91,6 +95,12 @@ export function SaleScreen({
   const shift = useQuery(api.shifts.current, {});
   const settings = useQuery(api.settings.get, {});
   const { cashierId } = useActiveCashier();
+  const connection = useConnectionState();
+  const offline = connection === 'offline';
+  // Everything the till needs to keep selling through an outage, refreshed
+  // while the socket is up. Without this the cache is always empty, `isUsable`
+  // is always false, and the offline register refuses every sale.
+  const registerSnapshot = useQuery(api.offline.registerSnapshot, {});
   const [confirmClearCart] = useBoolPreference('confirmClearCart', true);
   const [saleSound] = useBoolPreference('saleSound', false);
   const [printAuto] = useBoolPreference('printAuto', false);
@@ -106,6 +116,14 @@ export function SaleScreen({
   const [promoPickerOpen, setPromoPickerOpen] = useState(false);
   const [manualDiscountOpen, setManualDiscountOpen] = useState(false);
   const [receiptOrderId, setReceiptOrderId] = useState<Id<'orders'> | null>(null);
+  // A sale that is safely in the outbox and owes the customer a receipt. Held
+  // here (not in the payment dialog) so the dialog can close on success. The
+  // price-tier NAME is frozen alongside it because settling a sale resets the
+  // tier to Standard, and the receipt has to show what was actually charged.
+  const [queuedSale, setQueuedSale] = useState<{
+    sale: OfflineSaleInput;
+    priceCategoryName?: string;
+  } | null>(null);
   const [kasOpen, setKasOpen] = useState(false);
   const [holdOpen, setHoldOpen] = useState(false);
   const [heldOpen, setHeldOpen] = useState(false);
@@ -131,6 +149,33 @@ export function SaleScreen({
     // whatever tier the last one was rung on.
     setPriceCategoryId(null);
   }
+  // A queued sale settles exactly like a paid one from the cashier's side —
+  // chime, empty cart, untag the table, drop the price tier — the only
+  // difference being which receipt opens. Called ONLY after `enqueue` has
+  // resolved, so the cart is never cleared for a sale that was not stored.
+  function handleQueued(sale: OfflineSaleInput): void {
+    if (saleSound) playSaleChime();
+    setQueuedSale({
+      sale,
+      ...(activePriceCategory ? { priceCategoryName: activePriceCategory.name } : {}),
+    });
+    dispatch({ type: 'clearCart' });
+    setCurrentTable(null);
+    setPriceCategoryId(null);
+    toast.success(t`Penjualan disimpan di perangkat. Akan dikirim saat online.`);
+  }
+
+  // Refresh the offline snapshot whenever the register data changes while the
+  // socket is up. `save` overwrites in one put, so the cache never holds a mix
+  // of two different reads. A failure is logged, not surfaced: the till is
+  // online and working, and there is nothing the cashier can do about it.
+  useEffect(() => {
+    if (connection !== 'online' || !registerSnapshot) return;
+    void saveRegisterCache(registerSnapshot).catch((err: unknown) => {
+      console.error('[offline] register cache save failed', err);
+    });
+  }, [connection, registerSnapshot]);
+
   // Accept a QR self-order into the register: /sale?selfOrder=<selfOrderId>.
   // The payload is the SAME held-order recall shape, so it loads identically.
   const selfOrderCart = useQuery(
@@ -365,8 +410,11 @@ export function SaleScreen({
     : ready;
   // Put the configured default first when it is in the supported set. Sort on a
   // boolean key so the comparator stays a valid total order as methods are added.
-  const payMethods = [...supported].sort(
-    (a, b) => Number(b === defaultMethod) - Number(a === defaultMethod)
+  // Offline, everything that needs the network is REMOVED rather than disabled
+  // (see `methodsForConnection`), which in practice leaves cash alone.
+  const payMethods = methodsForConnection(
+    [...supported].sort((a, b) => Number(b === defaultMethod) - Number(a === defaultMethod)),
+    connection
   );
 
   // Add a specific variant straight to the cart, mirroring the picker's line
@@ -469,6 +517,9 @@ export function SaleScreen({
     ? (priceCategories?.find((c) => c._id === priceCategoryId) ?? null)
     : null;
   const standardLabel = cafe?.standardPriceLabel || t`Standar`;
+  // Printed receipts are always English and kept out of the i18n catalog, so is
+  // this fallback (the snapshot is missing only before the first load lands).
+  const cashierName = registerSnapshot?.staff.find((s) => s._id === cashierId)?.name ?? 'Cashier';
 
   return (
     <div
@@ -557,6 +608,9 @@ export function SaleScreen({
           mobileView === 'order' ? 'flex' : 'hidden'
         }`}
       >
+        {/* Offline, `onSplit`/`onGiftCard` are omitted, not disabled: a split
+            settles part of the bill through QRIS and a gift card debits a
+            server-side balance, so neither can complete without a network. */}
         <CartPane
           cart={cart}
           dispatch={dispatch}
@@ -584,14 +638,14 @@ export function SaleScreen({
             // payment dialog against prices that are about to change under it.
             if (cart.lines.length > 0 && pricesReady) setOpenMethod(method);
           }}
-          {...(shift && cashierId && canSplit
+          {...(shift && cashierId && canSplit && !offline
             ? {
                 onSplit: () => {
                   if (cart.lines.length > 0 && pricesReady) setSplitOpen(true);
                 },
               }
             : {})}
-          {...(shift && cashierId
+          {...(shift && cashierId && !offline
             ? {
                 onGiftCard: () => {
                   if (cart.lines.length > 0 && pricesReady) setGiftCardOpen(true);
@@ -755,10 +809,12 @@ export function SaleScreen({
             cart={cart}
             shiftId={shift._id}
             cashierId={cashierId}
+            offline={offline}
             onPaid={handlePaid}
+            onQueued={handleQueued}
           />
           <QrisStaticPaymentDialog
-            open={openMethod === 'qris_static' && pricesReady}
+            open={openMethod === 'qris_static' && pricesReady && !offline}
             onOpenChange={(o) => {
               if (!o) setOpenMethod(null);
             }}
@@ -784,7 +840,7 @@ export function SaleScreen({
             onPaid={handlePaid}
           />
           <SplitPaymentDialog
-            open={splitOpen && pricesReady}
+            open={splitOpen && pricesReady && !offline}
             onOpenChange={setSplitOpen}
             subtotalIDR={subtotal}
             promoDiscountIDR={discount}
@@ -803,7 +859,7 @@ export function SaleScreen({
             onPaid={handlePaid}
           />
           <GiftCardPaymentDialog
-            open={giftCardOpen && pricesReady}
+            open={giftCardOpen && pricesReady && !offline}
             onOpenChange={setGiftCardOpen}
             subtotalIDR={subtotal}
             promoDiscountIDR={discount}
@@ -820,7 +876,7 @@ export function SaleScreen({
             onPaid={handlePaid}
           />
           <QrisDynamicPaymentDialog
-            open={openMethod === 'qris_dynamic' && pricesReady}
+            open={openMethod === 'qris_dynamic' && pricesReady && !offline}
             onOpenChange={(o) => {
               if (!o) setOpenMethod(null);
             }}
@@ -840,6 +896,22 @@ export function SaleScreen({
           />
         </>
       ) : null}
+      <OfflineReceiptDialog
+        open={queuedSale !== null}
+        onOpenChange={(open) => {
+          if (!open) setQueuedSale(null);
+        }}
+        sale={queuedSale?.sale ?? null}
+        cashierName={cashierName}
+        serviceChargeName={scName}
+        serviceChargePct={scPct}
+        taxRatePct={taxRatePct}
+        {...(queuedSale?.priceCategoryName !== undefined
+          ? { priceCategoryName: queuedSale.priceCategoryName }
+          : {})}
+        onDone={() => setQueuedSale(null)}
+        autoPrint={printAuto}
+      />
       <ReceiptPreview
         open={receiptOrderId !== null}
         onOpenChange={(open) => {

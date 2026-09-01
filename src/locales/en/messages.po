@@ -240,6 +240,10 @@ msgstr "{n} items selected"
 msgid "{n} kategori dipilih"
 msgstr "{n} categories selected"
 
+#: src/components/sale/offline-banner.tsx
+msgid "{pending} penjualan menunggu sinkron"
+msgstr "{pending} sales waiting to sync"
+
 #: src/components/sale/customer-section.tsx
 msgid "{points} poin"
 msgstr "{points} points"
@@ -1769,6 +1773,7 @@ msgstr "Note (optional)"
 #~ msgid "Catatan kaki struk"
 #~ msgstr "Receipt footer"
 
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 msgid "Cetak"
 msgstr "Print"
@@ -1969,6 +1974,10 @@ msgstr "Weather data unavailable."
 msgid "Data kafe tersimpan aman di cloud dan hanya bisa diakses oleh akun Anda."
 msgstr "Your cafe data is stored securely in the cloud and only your account can access it."
 
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Data menu tersimpan sudah terlalu lama untuk dipakai. Sambungkan internet dulu, atau tulis struk manual."
+msgstr "The saved menu data is too old to use. Reconnect to the internet first, or write a manual receipt."
+
 #: src/components/marketing/faq.tsx
 msgid "Data tersimpan aman di cloud dan hanya bisa diakses oleh akun kafe Anda."
 msgstr "Your data is stored securely in the cloud and only your cafe account can access it."
@@ -2046,6 +2055,7 @@ msgstr "Refunded {0}"
 #: src/components/loyalty/reward-form-dialog.tsx
 #: src/components/sale/cart-pane.tsx
 #: src/components/sale/manual-discount-dialog.tsx
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/loyalty.tsx
 #: src/routes/display.tsx
@@ -2350,6 +2360,7 @@ msgstr "Could not record the expense."
 msgid "Gagal mencatat stok."
 msgstr "Failed to record stock."
 
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Gagal mencetak."
@@ -3439,6 +3450,8 @@ msgid "Kasir, stok, dan laporan lengkap"
 msgstr "Full register, stock, and reports"
 
 #. placeholder {0}: order.cashierName
+#. placeholder {0}: receipt.cashierName
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 msgid "Kasir: {0}"
 msgstr "Cashier: {0}"
@@ -3619,6 +3632,7 @@ msgid "Kembali ke menu"
 msgstr "Back to menu"
 
 #: src/components/sale/cash-payment-dialog.tsx
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/components/sale/split-payment-dialog.tsx
 msgid "Kembalian"
@@ -3635,6 +3649,10 @@ msgstr "Cart"
 #: src/components/sale/sale-screen.tsx
 msgid "Keranjang berisi item. Memuat pesanan ditahan akan menggantinya."
 msgstr "The cart has items. Loading a held order will replace it."
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Keranjang kosong."
+msgstr "Cart is empty."
 
 #: src/routes/_pos/inventory/waste.tsx
 msgid "Kerugian"
@@ -4530,6 +4548,10 @@ msgstr "Opening cash (Rp)"
 #~ msgid "Mode gelap"
 #~ msgstr "Dark mode"
 
+#: src/components/sale/offline-banner.tsx
+msgid "Mode offline"
+msgstr "Offline mode"
+
 #: src/routes/_pos/settings/integrations.tsx
 msgid "Model"
 msgstr "Model"
@@ -5089,6 +5111,10 @@ msgstr "QRIS Payment"
 msgid "Pembayaran Tunai"
 msgstr "Cash Payment"
 
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Pembayaran Tunai (Offline)"
+msgstr "Cash Payment (Offline)"
+
 #: src/components/app-shared.tsx
 #: src/components/inventory/movement-history-sheet.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -5243,13 +5269,33 @@ msgstr "Incoming delivery"
 msgid "Penjualan"
 msgstr "Sales"
 
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Penjualan disimpan di perangkat ini dan dikirim otomatis saat koneksi kembali. Poin dan pelanggan tidak bisa dipakai selama offline."
+msgstr "This sale is saved on this device and sent automatically once the connection is back. Points and customers cannot be used while offline."
+
+#: src/components/sale/sale-screen.tsx
+msgid "Penjualan disimpan di perangkat. Akan dikirim saat online."
+msgstr "Sale saved on this device. It will be sent once you are back online."
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Penjualan gagal disimpan di perangkat ini. Struk tidak dicetak, coba lagi."
+msgstr "The sale could not be saved on this device. No receipt was printed, please try again."
+
 #: src/components/marketing/ai-spotlight.tsx
 msgid "Penjualan hari ini Rp 2.450.000, naik 12% dari kemarin. Menu terlaris: Es Kopi Susu."
 msgstr "Today's sales are Rp 2,450,000, up 12% from yesterday. Best seller: Es Kopi Susu."
 
+#: src/components/sale/offline-receipt-dialog.tsx
+msgid "Penjualan ini belum terkirim ke server. Struk sudah sah untuk pelanggan, dan penjualan akan otomatis dikirim saat koneksi kembali."
+msgstr "This sale has not reached the server yet. The receipt is valid for the customer, and the sale is sent automatically once the connection is back."
+
 #: src/components/shift/shift-summary-panel.tsx
 msgid "Penjualan tunai"
 msgstr "Cash sales"
+
+#: src/components/sale/offline-banner.tsx
+msgid "Penjualan tunai disimpan di perangkat ini dan otomatis dikirim saat koneksi kembali."
+msgstr "Cash sales are saved on this device and sent automatically once the connection is back."
 
 #: src/components/marketing/feature-section.tsx
 msgid "Penjualan, produk, dan laba rugi yang diperbarui setiap transaksi."
@@ -5465,6 +5511,10 @@ msgstr "Order rejected."
 #: src/routes/_pos/self-orders.tsx
 msgid "Pesanan ini akan dihapus dari daftar pesanan masuk."
 msgstr "This order will be removed from the incoming orders list."
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Pesanan ini tidak bisa disimpan offline. Periksa kembali item dan totalnya."
+msgstr "This order cannot be saved offline. Check its items and total again."
 
 #: src/components/marketing/feature-section.tsx
 #~ msgid "Pesanan langsung tampil di dapur, rapi dan urut."
@@ -5739,6 +5789,8 @@ msgstr "Smart POS for cafes and restaurants in Indonesia. One app for the regist
 #~ msgstr "POS for cafes and restaurants"
 
 #. placeholder {0}: order.taxRatePct
+#. placeholder {0}: receipt.taxRatePct
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 msgid "PPN {0}%"
 msgstr "VAT {0}%"
@@ -6286,6 +6338,7 @@ msgstr "Learn more"
 
 #: src/components/import/csv-import-dialog.tsx
 #: src/components/onboarding/steps/cashier-step.tsx
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/components/settings/mcp-access-card.tsx
 #: src/routes/_pos/kitchen.tsx
@@ -6520,6 +6573,10 @@ msgstr "Who's on duty?"
 msgid "Simpan"
 msgstr "Save"
 
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Simpan & cetak struk"
+msgstr "Save & print receipt"
+
 #: src/components/menu/modifier-group-form.tsx
 msgid "Simpan grup"
 msgstr "Save group"
@@ -6713,6 +6770,7 @@ msgstr "Sound on successful sale"
 
 #: src/components/public/cart-review-sheet.tsx
 #: src/components/sale/cart-pane.tsx
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/inventory/purchases.tsx
 #: src/routes/display.tsx
@@ -7300,6 +7358,10 @@ msgstr "Saved"
 msgid "Tersimpan ✓"
 msgstr "Saved ✓"
 
+#: src/components/sale/offline-receipt-dialog.tsx
+msgid "Tersimpan di perangkat"
+msgstr "Saved on this device"
+
 #: src/components/inventory/recipe-editor.tsx
 msgid "Tersimpan."
 msgstr "Saved."
@@ -7547,6 +7609,7 @@ msgstr "Quick cash buttons"
 #: src/components/inventory/purchase-form.tsx
 #: src/components/inventory/purchase-order-form-dialog.tsx
 #: src/components/sale/cart-pane.tsx
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/routes/_pos/customers.tsx
 #: src/routes/_pos/inventory/purchases.tsx
@@ -7615,6 +7678,7 @@ msgid "Tumpah"
 msgstr "Spilled"
 
 #: src/components/channel-sales-chart.tsx
+#: src/components/sale/offline-receipt-dialog.tsx
 #: src/components/sale/payment-methods.tsx
 #: src/components/sale/receipt-preview.tsx
 #: src/components/sale/refund-dialog.tsx
@@ -7676,6 +7740,10 @@ msgstr "Counted cash"
 #: src/routes/_pos/shift/close.tsx
 msgid "Uang terhitung (Rp)"
 msgstr "Counted cash (Rp)"
+
+#: src/components/sale/cash-payment-dialog.tsx
+msgid "Uang yang diterima kurang dari total."
+msgstr "The cash received is less than the total."
 
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/menu/price-category-table.tsx
