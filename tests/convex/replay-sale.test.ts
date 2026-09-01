@@ -116,8 +116,143 @@ describe('createReplayedCashSale', () => {
     // toHaveLength above is what actually pins the row's existence.
     const drift = recon[0];
     expect(drift?.kind).toBe('price_drift');
+    // Line-level: qty 1 here, so the line total equals the unit price.
     expect(drift?.rungIDR).toBe(20000);
     expect(drift?.currentIDR).toBe(30000);
+  });
+
+  it('reports price drift at the LINE level, not per unit', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.menu.items.update, {
+      id: s.itemId,
+      categoryId: s.categoryId,
+      name: 'Kopi',
+      priceIDR: 30000,
+    });
+
+    await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'offline-qty3',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 3,
+          modifierOptionIds: [],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 60000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 60000,
+      cashTenderedIDR: 60000,
+      createdAtClient: Date.now(),
+    });
+
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    expect(recon).toHaveLength(1);
+    const drift = recon[0];
+    expect(drift?.kind).toBe('price_drift');
+    // 3 x 20 000 rung against 3 x 30 000 now — the whole line's cash impact,
+    // not the 10 000 per-unit gap.
+    expect(drift?.rungIDR).toBe(60000);
+    expect(drift?.currentIDR).toBe(90000);
+  });
+
+  it('accepts a line whose modifier group became required during the outage', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    // Rung with no modifiers; the owner then attaches a group that demands one.
+    const groupId = await s.asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Ukuran',
+      required: true,
+      minSelect: 1,
+      maxSelect: 1,
+      options: [{ name: 'Besar', priceAdjustmentIDR: 0, position: 100 }],
+    });
+    await s.asOwner.mutation(api.menu.itemGroups.attach, {
+      menuItemId: s.itemId,
+      modifierGroupId: groupId,
+    });
+
+    const res = await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'offline-mod',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 20000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 20000,
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+    });
+
+    expect(res.totalIDR).toBe(20000);
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    expect(recon.some((r) => r.kind === 'modifier_rule_changed')).toBe(true);
+  });
+
+  it('accepts a cash sale after cash was switched off during the outage', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.settings.updatePayment, {
+      payment: {
+        methods: {
+          cash: false,
+          qrisStatic: true,
+          qrisDynamic: false,
+          card: false,
+          ewallet: false,
+          transfer: false,
+        },
+        defaultMethod: 'qris_static',
+        cashRounding: 'none',
+        quickCashButtons: [20000, 50000, 100000],
+        serviceChargeEnabled: false,
+        serviceChargePct: 0,
+        serviceChargeName: 'Biaya Layanan',
+      },
+    });
+
+    const res = await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'offline-cash-off',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 20000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 20000,
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+    });
+
+    expect(res.totalIDR).toBe(20000);
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    expect(recon.some((r) => r.kind === 'payment_method_disabled')).toBe(true);
   });
 
   it('is idempotent — replaying the same clientId twice posts one order', async () => {

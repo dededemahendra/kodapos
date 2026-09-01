@@ -666,11 +666,17 @@ export default defineSchema({
       v.literal('price_drift'),
       v.literal('item_unavailable'),
       v.literal('promo_archived'),
-      v.literal('negative_stock')
+      v.literal('negative_stock'),
+      // A modifier group's min/max selection rule moved during the outage, so
+      // the rung line no longer satisfies it.
+      v.literal('modifier_rule_changed'),
+      // The payment method the sale was rung with was switched off during the
+      // outage. The cash is still in the drawer, so the sale posts anyway.
+      v.literal('payment_method_disabled')
     ),
-    /** What the till charged, in IDR. Set for price_drift only. */
+    /** The line total the till charged, in IDR. Set for price_drift only. */
     rungIDR: v.optional(v.number()),
-    /** What current prices would have charged, in IDR. price_drift only. */
+    /** Current unit price x rung qty, in IDR. price_drift only. */
     currentIDR: v.optional(v.number()),
     /** Human-readable detail, e.g. the item name that was unavailable. */
     detail: v.optional(v.string()),

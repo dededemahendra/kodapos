@@ -119,7 +119,12 @@ async function recordReconciliations(
   const { cafeId } = await requireActiveOutlet(ctx);
   const now = Date.now();
   const insert = (
-    kind: 'price_drift' | 'item_unavailable' | 'promo_archived',
+    kind:
+      | 'price_drift'
+      | 'item_unavailable'
+      | 'promo_archived'
+      | 'modifier_rule_changed'
+      | 'payment_method_disabled',
     extra: { rungIDR?: number; currentIDR?: number; detail?: string }
   ) =>
     ctx.db.insert('saleReconciliations', {
@@ -152,23 +157,45 @@ async function recordReconciliations(
       await insert('item_unavailable', { detail: line.nameSnapshot });
     }
 
-    // Mirror buildOrder's pricing formula so a line with modifiers or a variant
-    // is not reported as drifting just because those parts were priced in.
+    // One pass over the line's options: they feed both the current price and the
+    // per-group selection counts the min/max check below needs.
     const variant = line.variantId ? await ctx.db.get(line.variantId) : null;
     const priceTargetId = (variant ? variant._id : item._id) as string;
-    let currentIDR =
+    let currentUnitIDR =
       priceOverrides.get(priceTargetId) ?? (variant ? variant.priceIDR : item.priceIDR);
+    const countByGroup = new Map<string, number>();
     for (const optionId of line.modifierOptionIds) {
       const option = await ctx.db.get(optionId);
       if (!option || option.cafeId !== cafeId) continue;
-      currentIDR += priceOverrides.get(option._id as string) ?? option.priceAdjustmentIDR;
+      currentUnitIDR += priceOverrides.get(option._id as string) ?? option.priceAdjustmentIDR;
+      countByGroup.set(option.groupId, (countByGroup.get(option.groupId) ?? 0) + 1);
     }
-    if (currentIDR !== line.unitPriceIDR) {
+
+    // Line-level, not per-unit: an owner reconciling the drawer needs the cash
+    // impact of the whole line, which on a qty-3 line is three times the unit gap.
+    const currentIDR = currentUnitIDR * line.qty;
+    if (currentIDR !== line.lineTotalIDR) {
       await insert('price_drift', {
-        rungIDR: line.unitPriceIDR,
+        rungIDR: line.lineTotalIDR,
         currentIDR,
         detail: line.nameSnapshot,
       });
+    }
+
+    // Mirrors buildOrder's min/max loop, which the replay path skips.
+    const attachments = await ctx.db
+      .query('menuItemModifierGroups')
+      .withIndex('by_item', (q) => q.eq('menuItemId', item._id))
+      .collect();
+    for (const attachment of attachments) {
+      const group = await ctx.db.get(attachment.modifierGroupId);
+      if (!group || group.archived) continue;
+      const count = countByGroup.get(group._id) ?? 0;
+      if (count < group.minSelect || count > group.maxSelect) {
+        await insert('modifier_rule_changed', {
+          detail: `${line.nameSnapshot}: ${group.name}`,
+        });
+      }
     }
   }
 
@@ -177,6 +204,16 @@ async function recordReconciliations(
     if (promo && promo.cafeId === cafeId && promo.archived) {
       await insert('promo_archived', { detail: promo.name });
     }
+  }
+
+  // The sale was rung as cash; if cash has since been switched off, buildOrder
+  // let it through anyway and the owner gets told here.
+  const settings = await ctx.db
+    .query('cafeSettings')
+    .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+    .first();
+  if (settings?.payment?.methods?.cash === false) {
+    await insert('payment_method_disabled', { detail: 'Tunai' });
   }
 }
 

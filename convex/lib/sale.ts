@@ -84,8 +84,9 @@ export type ReplayContext = {
  * and the payment row's tendered/change + provider fields.
  *
  * `replay` is set ONLY by orders.createReplayedCashSale, for a cash sale rung
- * while the till was offline. It relaxes exactly three checks (closed shift,
- * item/variant/modifier availability, archived promo) and pins the recorded
+ * while the till was offline. It relaxes exactly five checks (closed shift,
+ * item/variant/modifier availability, archived promo, tightened modifier
+ * min/max rules, a payment method switched off) and pins the recorded
  * money to the till's snapshot. Absent — every online path — behavior is
  * byte-for-byte what it was before offline replay existed.
  */
@@ -231,10 +232,14 @@ export async function buildOrder(
       const group = await ctx.db.get(attachment.modifierGroupId);
       if (!group || group.archived) continue;
       const count = countByGroup.get(group._id) ?? 0;
-      if (count < group.minSelect) {
+      // Relaxation 4 of 5 (replay only). A min/max rule tightened during the
+      // outage would otherwise strand the queued cash forever — the customer
+      // already has the drink the old rule allowed. Logged as
+      // `modifier_rule_changed` by orders.recordReconciliations.
+      if (!replay && count < group.minSelect) {
         throw new Error(`Modifier wajib pada grup ${group.name} belum dipilih.`);
       }
-      if (count > group.maxSelect) {
+      if (!replay && count > group.maxSelect) {
         throw new Error(`Pilihan modifier melebihi batas pada grup ${group.name}.`);
       }
     }
@@ -363,7 +368,11 @@ export async function buildOrder(
   const usesQrisStatic =
     payment.method === 'qris_static' ||
     (payment.method === 'split' && payment.tenders.some((t) => t.method === 'qris_static'));
-  if (usesCash && methods?.cash === false) {
+  // Relaxation 5 of 5 (replay only). Turning cash off mid-outage must not make
+  // already-collected cash unpostable. (Only the cash branch is relaxed: a
+  // replay is always a cash sale, so `usesQrisStatic` is false here.) Logged as
+  // `payment_method_disabled` by orders.recordReconciliations.
+  if (!replay && usesCash && methods?.cash === false) {
     throw new Error('Metode tunai tidak aktif.');
   }
   if (usesQrisStatic) {
