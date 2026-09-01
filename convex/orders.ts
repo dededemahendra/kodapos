@@ -1,12 +1,21 @@
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
+import { type MutationCtx, mutation, query } from './_generated/server';
 import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { manualDiscountValidator } from './lib/discount';
 import { orderTypeValidator } from './lib/orderType';
 import { methodTotals } from './lib/payment';
 import { unitRefundIDR } from './lib/refund';
-import { buildOrder, reverseSettledSale, saleArgs, saleResult, settleSale } from './lib/sale';
+import { type ReplayArgs, replayArgs } from './lib/replay';
+import {
+  buildOrder,
+  reverseSettledSale,
+  type SaleArgs,
+  saleArgs,
+  saleResult,
+  settleSale,
+} from './lib/sale';
 import { rangeArg, resolveRange, tzFor } from './lib/time';
 
 export const createCashSale = mutation({
@@ -68,6 +77,144 @@ export const createSplitSale = mutation({
   handler: async (ctx, args) => {
     const res = await buildOrder(ctx, args, { method: 'split', tenders: args.tenders });
     await settleSale(ctx, res.orderId);
+    return res;
+  },
+});
+
+// ─── Offline replay ──────────────────────────────────────────────────────────
+
+/**
+ * Drop the snapshot-only fields so the payload fits `SaleArgs`. The money the
+ * till charged travels separately, as the `replay` argument to `buildOrder`.
+ */
+function toSaleArgs(args: ReplayArgs): SaleArgs {
+  return {
+    clientId: args.clientId,
+    shiftId: args.shiftId,
+    cashierId: args.cashierId,
+    lines: args.lines.map((l) => ({
+      menuItemId: l.menuItemId,
+      qty: l.qty,
+      modifierOptionIds: l.modifierOptionIds,
+      ...(l.variantId ? { variantId: l.variantId } : {}),
+    })),
+    ...(args.promoId ? { promoId: args.promoId } : {}),
+    createdAtClient: args.createdAtClient,
+    ...(args.orderType ? { orderType: args.orderType } : {}),
+    ...(args.priceCategoryId ? { priceCategoryId: args.priceCategoryId } : {}),
+  };
+}
+
+/**
+ * The audit trail for a replayed sale: one row per way the recorded sale differs
+ * from what current server state would have produced. The sale itself always
+ * posts — the cash is already in the drawer — so these rows are the owner's
+ * record of what drifted, not a rejection.
+ */
+async function recordReconciliations(
+  ctx: MutationCtx,
+  args: ReplayArgs,
+  orderId: Id<'orders'>
+): Promise<void> {
+  const { cafeId } = await requireActiveOutlet(ctx);
+  const now = Date.now();
+  const insert = (
+    kind: 'price_drift' | 'item_unavailable' | 'promo_archived',
+    extra: { rungIDR?: number; currentIDR?: number; detail?: string }
+  ) =>
+    ctx.db.insert('saleReconciliations', {
+      cafeId,
+      orderId,
+      clientId: args.clientId,
+      kind,
+      ...extra,
+      createdAt: now,
+    });
+
+  // Price-category overrides, resolved once — same lookup buildOrder does, so
+  // "what it would cost now" is computed the way a live sale would compute it.
+  const priceOverrides = new Map<string, number>();
+  const priceCategoryId = args.priceCategoryId;
+  if (priceCategoryId) {
+    const rows = await ctx.db
+      .query('priceOverrides')
+      .withIndex('by_cafe_and_category', (q) =>
+        q.eq('cafeId', cafeId).eq('priceCategoryId', priceCategoryId)
+      )
+      .collect();
+    for (const row of rows) priceOverrides.set(row.targetId as string, row.priceIDR);
+  }
+
+  for (const line of args.lines) {
+    const item = await ctx.db.get(line.menuItemId);
+    if (!item || item.cafeId !== cafeId) continue; // buildOrder already rejected these
+    if (item.archived || !item.isActive || item.soldOut) {
+      await insert('item_unavailable', { detail: line.nameSnapshot });
+    }
+
+    // Mirror buildOrder's pricing formula so a line with modifiers or a variant
+    // is not reported as drifting just because those parts were priced in.
+    const variant = line.variantId ? await ctx.db.get(line.variantId) : null;
+    const priceTargetId = (variant ? variant._id : item._id) as string;
+    let currentIDR =
+      priceOverrides.get(priceTargetId) ?? (variant ? variant.priceIDR : item.priceIDR);
+    for (const optionId of line.modifierOptionIds) {
+      const option = await ctx.db.get(optionId);
+      if (!option || option.cafeId !== cafeId) continue;
+      currentIDR += priceOverrides.get(option._id as string) ?? option.priceAdjustmentIDR;
+    }
+    if (currentIDR !== line.unitPriceIDR) {
+      await insert('price_drift', {
+        rungIDR: line.unitPriceIDR,
+        currentIDR,
+        detail: line.nameSnapshot,
+      });
+    }
+  }
+
+  if (args.promoId) {
+    const promo = await ctx.db.get(args.promoId);
+    if (promo && promo.cafeId === cafeId && promo.archived) {
+      await insert('promo_archived', { detail: promo.name });
+    }
+  }
+}
+
+/**
+ * Posts a cash sale that was rung while the till had no network, exactly as it
+ * was rung. Separate from `createCashSale` on purpose: the online path must keep
+ * every validation it has today, so the relaxations live behind this mutation's
+ * `replay` argument and nowhere else.
+ */
+export const createReplayedCashSale = mutation({
+  args: replayArgs,
+  returns: saleResult,
+  handler: async (ctx, args) => {
+    const { cafeId } = await requireActiveOutlet(ctx);
+    // buildOrder short-circuits a repeated clientId to the committed order. Look
+    // first so a retry after a timeout does not append a second set of
+    // reconciliation rows for a sale that already posted.
+    const already = await ctx.db
+      .query('orders')
+      .withIndex('by_cafe_clientId', (q) => q.eq('cafeId', cafeId).eq('clientId', args.clientId))
+      .unique();
+
+    const res = await buildOrder(
+      ctx,
+      toSaleArgs(args),
+      { method: 'cash', tenderedIDR: args.cashTenderedIDR },
+      {
+        lines: args.lines,
+        discountIDR: args.discountIDR,
+        serviceChargeIDR: args.serviceChargeIDR,
+        taxIDR: args.taxIDR,
+        totalIDR: args.totalIDR,
+      }
+    );
+    if (!already) {
+      await settleSale(ctx, res.orderId);
+      await recordReconciliations(ctx, args, res.orderId);
+    }
     return res;
   },
 });

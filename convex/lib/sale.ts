@@ -66,6 +66,15 @@ function assertIDR(n: number, label: string): number {
   return n;
 }
 
+export type ReplayContext = {
+  /** Per-line snapshot taken at the till, trusted over current item docs. */
+  lines: Array<{ nameSnapshot: string; unitPriceIDR: number; lineTotalIDR: number }>;
+  discountIDR: number;
+  serviceChargeIDR: number;
+  taxIDR: number;
+  totalIDR: number;
+};
+
 /**
  * Shared checkout core for every payment method. Validates the cart, recomputes
  * promo + loyalty + totals authoritatively, and inserts the order + payment. The
@@ -73,11 +82,18 @@ function assertIDR(n: number, label: string): number {
  * inventory + loyalty side effects and the paid transition live in `settleSale`.
  * The only per-method differences are the funds check, the order's paymentMethod,
  * and the payment row's tendered/change + provider fields.
+ *
+ * `replay` is set ONLY by orders.createReplayedCashSale, for a cash sale rung
+ * while the till was offline. It relaxes exactly three checks (closed shift,
+ * item/variant/modifier availability, archived promo) and pins the recorded
+ * money to the till's snapshot. Absent — every online path — behavior is
+ * byte-for-byte what it was before offline replay existed.
  */
 export async function buildOrder(
   ctx: MutationCtx,
   args: SaleArgs,
-  payment: PaymentInput
+  payment: PaymentInput,
+  replay?: ReplayContext
 ): Promise<{ orderId: Id<'orders'>; totalIDR: number; changeIDR: number }> {
   const { cafeId } = await requireActiveOutlet(ctx);
 
@@ -128,7 +144,10 @@ export async function buildOrder(
   if (args.lines.length < 1) throw new Error('Keranjang kosong.');
 
   const shift = await requireOwned(ctx, cafeId, args.shiftId, 'Shift');
-  if (shift.status !== 'open') throw new Error('Shift sudah ditutup.');
+  // Relaxation 1 of 3 (replay only). Shift close is allowed with sales still
+  // queued in the offline outbox, so a replay always lands in a closed shift.
+  // The online path keeps the check verbatim.
+  if (!replay && shift.status !== 'open') throw new Error('Shift sudah ditutup.');
 
   await requireActiveCashier(ctx, cafeId, args.cashierId);
 
@@ -141,14 +160,24 @@ export async function buildOrder(
   // by the scoped-promo computation below (category scope needs the item's
   // category, which isn't on the order line snapshot).
   const scopeLines: Array<{ menuItemId: string; categoryId: string; lineTotalIDR: number }> = [];
-  for (const line of args.lines) {
+  for (const [lineIndex, line] of args.lines.entries()) {
+    // Positional: the caller builds SaleArgs.lines from the same array, so
+    // index i of both always describes the same till line.
+    const snapshot = replay?.lines[lineIndex];
+    if (replay && !snapshot) throw new Error('Baris replay tidak lengkap.');
     if (!Number.isInteger(line.qty) || line.qty < 1 || line.qty > 99) {
       throw new Error('Jumlah item tidak valid.');
     }
     const item = await ctx.db.get(line.menuItemId);
-    if (!item || item.cafeId !== cafeId || item.archived || !item.isActive || item.soldOut) {
-      const name = item?.name ? ` ${item.name}` : '';
-      throw new Error(`Item${name} tidak tersedia.`);
+    // Tenancy is NEVER relaxed, not even on replay: an unknown or foreign item
+    // is rejected on both paths.
+    if (!item || item.cafeId !== cafeId) throw new Error('Item tidak tersedia.');
+    // Relaxation 2a of 3 (replay only). The customer already paid and left; an
+    // item archived / deactivated / sold out during the outage must not strand
+    // the cash. The line falls back to the till's nameSnapshot + unitPriceIDR
+    // below, and orders.recordReconciliations logs the discrepancy.
+    if (!replay && (item.archived || !item.isActive || item.soldOut)) {
+      throw new Error(`Item ${item.name} tidak tersedia.`);
     }
 
     // Resolve the variant (server-authoritative price). A variant-less line keeps
@@ -157,7 +186,12 @@ export async function buildOrder(
     const variant = line.variantId ? await ctx.db.get(line.variantId) : null;
     if (
       line.variantId &&
-      (!variant || variant.menuItemId !== item._id || variant.cafeId !== cafeId || variant.archived)
+      (!variant ||
+        variant.menuItemId !== item._id ||
+        variant.cafeId !== cafeId ||
+        // Relaxation 2b of 3 (replay only): archived-during-outage is tolerated,
+        // a missing or foreign variant still is not.
+        (!replay && variant.archived))
     ) {
       throw new Error('Varian tidak tersedia.');
     }
@@ -174,11 +208,13 @@ export async function buildOrder(
     const countByGroup = new Map<string, number>();
     for (const optionId of line.modifierOptionIds) {
       const option = await ctx.db.get(optionId);
-      if (!option || option.cafeId !== cafeId || option.archived) {
+      // Relaxation 2c of 3 (replay only): an option archived, or its group
+      // detached from the item, during the outage no longer rejects the sale.
+      if (!option || option.cafeId !== cafeId || (!replay && option.archived)) {
         throw new Error('Modifier tidak tersedia.');
       }
       const group = await ctx.db.get(option.groupId);
-      if (!group || !attachedGroupIds.has(group._id)) {
+      if (!group || (!replay && !attachedGroupIds.has(group._id))) {
         throw new Error('Modifier tidak tersedia.');
       }
       countByGroup.set(group._id, (countByGroup.get(group._id) ?? 0) + 1);
@@ -215,8 +251,10 @@ export async function buildOrder(
     const priceTargetId = (variant ? variant._id : item._id) as string;
     const basePrice =
       priceOverrides.get(priceTargetId) ?? (variant ? variant.priceIDR : item.priceIDR);
-    const unitPriceIDR = basePrice + modifierAdjustments;
-    const lineTotalIDR = line.qty * unitPriceIDR;
+    // A replayed sale is recorded exactly as it was rung — the receipt in the
+    // customer's hand is the source of truth, not item docs that moved since.
+    const unitPriceIDR = snapshot ? snapshot.unitPriceIDR : basePrice + modifierAdjustments;
+    const lineTotalIDR = snapshot ? snapshot.lineTotalIDR : line.qty * unitPriceIDR;
 
     const recipe = await ctx.db
       .query('recipes')
@@ -241,7 +279,7 @@ export async function buildOrder(
 
     builtLines.push({
       menuItemId: item._id,
-      nameSnapshot: item.name,
+      nameSnapshot: snapshot ? snapshot.nameSnapshot : item.name,
       qty: line.qty,
       unitPriceIDR,
       modifiersSnapshot,
@@ -259,7 +297,9 @@ export async function buildOrder(
   let appliedPromo: Doc<'orders'>['appliedPromo'];
   if (args.promoId) {
     const promo = await requireOwned(ctx, cafeId, args.promoId, 'Promo');
-    if (promo.archived) throw new Error('Promo tidak tersedia.');
+    // Relaxation 3 of 3 (replay only). A promo archived mid-outage still has to
+    // be honored — it was already applied on the receipt.
+    if (!replay && promo.archived) throw new Error('Promo tidak tersedia.');
     // Scope the discount to its matching lines (server reads the promo doc by id;
     // the client never dictates the scope). An order/undefined scope sums all
     // lines (unchanged); a scoped promo with no matching line yields 0.
@@ -380,6 +420,12 @@ export async function buildOrder(
     }
   }
 
+  // The promo/loyalty machinery above still ran so the order keeps its
+  // appliedPromo attribution, but on a replay the money is whatever the till
+  // charged. (replayArgs carries no customer/loyalty/manual-discount fields, so
+  // only the promo block can have moved discountIDR here.)
+  if (replay) discountIDR = replay.discountIDR;
+
   const cafe = await ctx.db.get(cafeId);
   const taxEnabled = cafe?.taxEnabled === true;
   const taxRatePct = taxEnabled ? (cafe?.taxRatePct ?? 0) : 0;
@@ -389,7 +435,7 @@ export async function buildOrder(
   const scPct = scEnabled ? (pay?.serviceChargePct ?? 0) : 0;
   const scName = pay?.serviceChargeName ?? DEFAULT_SERVICE_CHARGE_NAME;
 
-  const { serviceChargeIDR, taxIDR, totalIDR } = computeOrderTotals({
+  const computedTotals = computeOrderTotals({
     subtotalIDR,
     discountIDR,
     serviceChargeEnabled: scEnabled,
@@ -397,6 +443,11 @@ export async function buildOrder(
     taxEnabled,
     taxRatePct,
   });
+  // Replay records the rung amounts verbatim; a service-charge or tax-rate
+  // change during the outage must not silently restate a settled receipt.
+  const serviceChargeIDR = replay ? replay.serviceChargeIDR : computedTotals.serviceChargeIDR;
+  const taxIDR = replay ? replay.taxIDR : computedTotals.taxIDR;
+  const totalIDR = replay ? replay.totalIDR : computedTotals.totalIDR;
 
   // Resolve the per-method breakdown + total change for the order. Single-method
   // orders produce one breakdown entry [{ method, totalIDR }]; a split validates
