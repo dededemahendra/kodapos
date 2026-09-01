@@ -102,6 +102,21 @@ msgstr "(Over)"
 #~ msgid "[Contoh testimoni. Ganti dengan kutipan pelanggan asli sebelum tayang.]"
 #~ msgstr "[Sample testimonial. Replace with a real customer quote before launch.]"
 
+#. placeholder {0}: sale.payload.lines.length
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "{0, plural, one {# item} other {# item}}"
+msgstr "{0, plural, one {# item} other {# items}}"
+
+#. placeholder {0}: deadLettered.length
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "{0, plural, one {# penjualan belum tercatat di server.} other {# penjualan belum tercatat di server.}}"
+msgstr "{0, plural, one {# sale is not recorded on the server.} other {# sales are not recorded on the server.}}"
+
+#. placeholder {0}: queuedSales.length
+#: src/routes/_pos/shift/close.tsx
+msgid "{0, plural, one {# penjualan tunai belum terkirim ke server.} other {# penjualan tunai belum terkirim ke server.}}"
+msgstr "{0, plural, one {# cash sale has not reached the server yet.} other {# cash sales have not reached the server yet.}}"
+
 #. placeholder {0}: tier.name
 #. placeholder {1}: tier.earnMultiplier
 #: src/components/customer/customer-detail-sheet.tsx
@@ -614,6 +629,14 @@ msgstr "Gold member"
 #~ msgid "Antarmuka ringan yang siap dipakai di tablet, HP, atau laptop."
 #~ msgstr "A light interface ready on a tablet, phone, or laptop."
 
+#: src/routes/_pos/shift/close.tsx
+msgid "Antrean offline di perangkat ini tidak bisa dibaca, jadi penjualan yang belum terkirim belum tentu terhitung. Tutup tab kodapos lain lalu muat ulang."
+msgstr "This device's offline queue could not be read, so unsent sales may not be counted. Close any other kodapos tab and reload."
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Antrean offline di perangkat ini tidak bisa dibaca. Tutup tab kodapos lain lalu muat ulang halaman."
+msgstr "This device's offline queue could not be read. Close any other kodapos tab and reload the page."
+
 #: src/routes/_public/changelog.tsx
 msgid "Apa yang baru di kodapos"
 msgstr "What's new in kodapos"
@@ -800,6 +823,10 @@ msgstr "Reset password"
 #: src/routes/_pos/menu/modifiers.index.tsx
 msgid "Aturan"
 msgstr "Rule"
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Aturan modifier berubah"
+msgstr "Modifier rule changed"
 
 #: src/components/admin/admin-top-bar.tsx
 #~ msgid "Audit"
@@ -1301,6 +1328,10 @@ msgstr "Never used"
 msgid "Belum terhubung"
 msgstr "Not connected"
 
+#: src/routes/_pos/shifts.tsx
+msgid "Belum terkirim saat tutup"
+msgstr "Still unsent at close"
+
 #: src/components/marketing/ai-spotlight.tsx
 msgid "Berapa penjualan hari ini?"
 msgstr "What are today's sales?"
@@ -1769,6 +1800,10 @@ msgstr "Notes"
 msgid "Catatan (opsional)"
 msgstr "Note (optional)"
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Catatan akan muncul di sini saat penjualan offline terkirim."
+msgstr "Notes appear here when offline sales come through."
+
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Catatan kaki struk"
 #~ msgstr "Receipt footer"
@@ -2084,6 +2119,10 @@ msgstr "Reward discount"
 msgid "Diskon tidak valid."
 msgstr "Invalid discount."
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Ditagih"
+msgstr "Charged"
+
 #. placeholder {0}: heldCount ?? 0
 #: src/components/sale/cart-pane.tsx
 msgid "Ditahan ({0})"
@@ -2224,6 +2263,10 @@ msgstr "Date format"
 msgid "Format Waktu"
 msgstr "Time format"
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Gagal"
+msgstr "Failed"
+
 #: src/routes/_pos/time-clock.tsx
 msgid "Gagal clock in."
 msgstr "Failed to clock in."
@@ -2331,6 +2374,10 @@ msgstr "Failed to add staff."
 #: src/components/menu/item-edit-form.tsx
 msgid "Gagal menambah varian."
 msgstr "Failed to add variant."
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Gagal menandai selesai."
+msgstr "Could not mark this as handled."
 
 #: src/components/settings/mcp-access-card.tsx
 msgid "Gagal mencabut token."
@@ -2888,6 +2935,10 @@ msgstr "Price (Rp)"
 msgid "Harga aktif: {0}"
 msgstr "Active price: {0}"
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Harga berubah setelah penjualan"
+msgstr "Price changed after the sale"
+
 #. placeholder {0}: formatIDR(item.item.priceIDR)
 #. placeholder {0}: formatIDR(menuItem.priceIDR)
 #: src/components/public/item-picker-sheet.tsx
@@ -2910,6 +2961,10 @@ msgstr "Category price"
 #: src/components/marketing/pricing.tsx
 #~ msgid "Harga sederhana"
 #~ msgstr "Simple pricing"
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Harga sekarang"
+msgstr "Price now"
 
 #: src/components/menu/price-grid.tsx
 msgid "Harga standar"
@@ -3142,6 +3197,10 @@ msgstr "Specific items"
 #: src/routes/_pos/menu/items.$itemId.tsx
 msgid "Item tidak ditemukan."
 msgstr "Item not found."
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Item tidak lagi tersedia"
+msgstr "Item no longer available"
 
 #: src/routes/_pos/menu/index.tsx
 msgid "Item yang diarsipkan akan muncul di sini."
@@ -3433,6 +3492,10 @@ msgstr "Cashier must enter the owner PIN to void a transaction."
 msgid "Kasir lain (opsional)"
 msgstr "Other cashiers (optional)"
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Kasir sudah diarsipkan"
+msgstr "Cashier has been archived"
+
 #: src/routes/_pos/shift/open.tsx
 msgid "Kasir tidak dikenal."
 msgstr "Unknown cashier."
@@ -3507,6 +3570,10 @@ msgstr "Price Categories"
 #: src/components/menu/price-category-table.tsx
 msgid "Kategori harga baru"
 msgstr "New price category"
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Kategori harga sudah diarsipkan"
+msgstr "Price tier has been archived"
 
 #: src/routes/_pos/menu/price-categories.$categoryId.tsx
 msgid "Kategori harga tidak ditemukan."
@@ -3684,6 +3751,10 @@ msgstr "Description"
 msgid "Ketersediaan"
 msgstr "Availability"
 
+#: src/routes/_pos/reports/orders.tsx
+msgid "Ketik 4 karakter terakhir yang tercetak di struk."
+msgstr "Type the last 4 characters printed on the receipt."
+
 #: src/routes/_pos/ai.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Kirim"
@@ -3793,6 +3864,14 @@ msgstr "Reset code sent to your email."
 #: src/routes/_public/signin.tsx
 msgid "Kode salah atau sudah kedaluwarsa."
 msgstr "The code is incorrect or has expired."
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Kode struk"
+msgstr "Receipt code"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Kode struk harus 4 karakter."
+msgstr "A receipt code is 4 characters."
 
 #: src/components/sale/promo-picker-dialog.tsx
 msgid "Kode tidak valid."
@@ -4072,6 +4151,10 @@ msgstr "View reports"
 msgid "Lihat laporan harian dan biarkan AI menyarankan stok serta menu terlaris."
 msgstr "See daily reports and let AI suggest restock and your best sellers."
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Lihat pesanan"
+msgstr "View order"
+
 #: src/routes/_pos/inventory/index.tsx
 msgid "Lihat riwayat"
 msgstr "View history"
@@ -4195,6 +4278,10 @@ msgstr "Margin appears once items are sold in this range."
 msgid "Masuk"
 msgstr "Sign in"
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Masuk antrean"
+msgstr "Queued at"
+
 #: src/routes/_public/signin.tsx
 msgid "Masuk dengan kode"
 msgstr "Sign in with a code"
@@ -4219,6 +4306,10 @@ msgstr "Switch to owner"
 #: src/routes/_pos/time-clock.tsx
 msgid "Masuk sejak {0}"
 msgstr "In since {0}"
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Masuk setelah shift ditutup"
+msgstr "Arrived after the shift closed"
 
 #: src/routes/_pos/settings/staff.tsx
 msgid "Masukkan angka yang valid."
@@ -4372,6 +4463,14 @@ msgstr "Showing the 100 most recent movements."
 msgid "Menampilkan 100 transaksi terakhir."
 msgstr "Showing the last 100 transactions."
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Menandai selesai hanya menutup catatannya. Pesanan dan uangnya tidak ikut berubah."
+msgstr "Marking it handled only closes the note. The order and the money are left untouched."
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Mencari kode struk {code}…"
+msgstr "Searching for receipt code {code}…"
+
 #: src/components/sale/customer-section.tsx
 msgid "Mencari…"
 msgstr "Searching…"
@@ -4420,6 +4519,10 @@ msgid "Menunggu pembayaran…"
 msgstr "Waiting for payment…"
 
 #: src/routes/_pos/shift/close.tsx
+msgid "Menunggu sinkron"
+msgstr "Pending sync"
+
+#: src/routes/_pos/shift/close.tsx
 msgid "Menutup…"
 msgstr "Closing…"
 
@@ -4462,6 +4565,10 @@ msgstr "Default method"
 #: src/routes/_pos/settings/tax.tsx
 msgid "Metode pembayaran"
 msgstr "Payment methods"
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Metode pembayaran dimatikan"
+msgstr "Payment method switched off"
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Metode pembayaran yang dipilih saat checkout."
@@ -5157,6 +5264,10 @@ msgstr "Owner has all permissions."
 msgid "Pemilik resto"
 msgstr "Restaurant owner"
 
+#: src/routes/_pos/reports/orders.tsx
+msgid "Pencarian dihentikan sebelum selesai."
+msgstr "The search stopped before it finished."
+
 #: src/routes/_pos/settings/receipt.tsx
 msgid "Pencetak termal (USB)"
 msgstr "Thermal printer (USB)"
@@ -5281,6 +5392,10 @@ msgstr "Sale saved on this device. It will be sent once you are back online."
 msgid "Penjualan gagal disimpan di perangkat ini. Struk tidak dicetak, coba lagi."
 msgstr "The sale could not be saved on this device. No receipt was printed, please try again."
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Penjualan gagal terkirim"
+msgstr "Sales that never reached the server"
+
 #: src/components/marketing/ai-spotlight.tsx
 msgid "Penjualan hari ini Rp 2.450.000, naik 12% dari kemarin. Menu terlaris: Es Kopi Susu."
 msgstr "Today's sales are Rp 2,450,000, up 12% from yesterday. Best seller: Es Kopi Susu."
@@ -5290,12 +5405,29 @@ msgid "Penjualan ini belum terkirim ke server. Struk sudah sah untuk pelanggan, 
 msgstr "This sale has not reached the server yet. The receipt is valid for the customer, and the sale is sent automatically once the connection is back."
 
 #: src/components/shift/shift-summary-panel.tsx
+#: src/routes/_pos/shifts.tsx
+msgid "Penjualan offline masuk setelah tutup"
+msgstr "Offline sales that arrived after close"
+
+#: src/components/shift/shift-summary-panel.tsx
+msgid "Penjualan offline menunggu sinkron"
+msgstr "Offline sales pending sync"
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Penjualan offline yang sudah masuk, tapi kondisinya berubah selama koneksi putus. Pesanannya tercatat persis seperti yang ditagih ke pelanggan; catatan ini hanya untuk ditinjau."
+msgstr "Offline sales that did come through, but whose conditions moved while the connection was down. Each order is recorded exactly as the customer was charged; these notes are for review only."
+
+#: src/components/shift/shift-summary-panel.tsx
 msgid "Penjualan tunai"
 msgstr "Cash sales"
 
 #: src/components/sale/offline-banner.tsx
 msgid "Penjualan tunai disimpan di perangkat ini dan otomatis dikirim saat koneksi kembali."
 msgstr "Cash sales are saved on this device and sent automatically once the connection is back."
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Penjualan tunai yang sudah dibayar pelanggan tapi tidak pernah berhasil masuk ke server dari perangkat ini. Uangnya ada di laci, tapi transaksinya belum tercatat — masukkan manual, lalu simpan catatan ini."
+msgstr "Cash sales the customer already paid for that never made it to the server from this device. The money is in the drawer but the transaction is unrecorded — key it in by hand, then keep this note."
 
 #: src/components/marketing/feature-section.tsx
 msgid "Penjualan, produk, dan laba rugi yang diperbarui setiap transaksi."
@@ -5895,6 +6027,10 @@ msgstr "Promo updated."
 msgid "Promo ditambahkan."
 msgstr "Promo added."
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Promo sudah diarsipkan"
+msgstr "Promo has been archived"
+
 #: src/components/app-shared.tsx
 #: src/routes/_pos/help.tsx
 msgid "Pusat Bantuan"
@@ -6004,6 +6140,10 @@ msgstr "Refund order"
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Regional"
 #~ msgstr "Regional"
+
+#: src/routes/_pos/reports/route.tsx
+msgid "Rekonsiliasi"
+msgstr "Reconciliation"
 
 #: src/routes/_pos/forecast.tsx
 #: src/routes/_pos/inventory/index.tsx
@@ -6356,6 +6496,7 @@ msgid "Selesaikan nanti"
 msgstr "Finish later"
 
 #: src/components/shift/shift-summary-panel.tsx
+#: src/routes/_pos/reports/reconciliation.tsx
 #: src/routes/_pos/shift/close.tsx
 #: src/routes/_pos/shifts.tsx
 msgid "Selisih"
@@ -6364,6 +6505,10 @@ msgstr "Difference"
 #: src/components/menu/modifier-group-form.tsx
 msgid "Selisih harga"
 msgstr "Price difference"
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Selisih penjualan offline"
+msgstr "Offline sale discrepancies"
 
 #: src/components/marketing/why-indonesia.tsx
 msgid "Seluruh aplikasi dalam Bahasa Indonesia, mudah dipakai semua staf."
@@ -6706,6 +6851,10 @@ msgstr "Stock and recipes"
 msgid "Stok dicatat."
 msgstr "Stock recorded."
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Stok jadi minus"
+msgstr "Stock went negative"
+
 #: src/routes/_pos/forecast.tsx
 msgid "Stok kini"
 msgstr "Current stock"
@@ -6742,6 +6891,10 @@ msgstr "Current stock:"
 #: src/components/marketing/ai-spotlight.tsx
 msgid "Stok susu cukup untuk 2 hari. Mau saya buatkan daftar belanja?"
 msgstr "Milk stock lasts about 2 days. Want me to make a shopping list?"
+
+#: src/routes/_pos/reports/orders.tsx
+msgid "Struk {code} tidak ditemukan pada rentang ini."
+msgstr "Receipt {code} was not found in this range."
 
 #: src/routes/_pos/settings/general.tsx
 #~ msgid "Struk & Cetak"
@@ -7062,6 +7215,10 @@ msgstr "Guest seated."
 msgid "Tandai habis"
 msgstr "Mark sold out"
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Tandai selesai"
+msgstr "Mark handled"
+
 #: src/routes/_pos/menu/index.tsx
 msgid "Tandai tersedia"
 msgstr "Mark available"
@@ -7346,6 +7503,10 @@ msgstr "Sold"
 msgid "Terkirim"
 msgstr "Sent"
 
+#: src/routes/_pos/reports/orders.tsx
+msgid "Terlalu banyak pesanan pada rentang ini. Persempit rentang tanggalnya lalu cari lagi."
+msgstr "There are too many orders in this range. Narrow the date range and search again."
+
 #: src/routes/_pos/menu/index.tsx
 msgid "Tersedia"
 msgstr "Available"
@@ -7478,6 +7639,10 @@ msgstr "No archived customers."
 msgid "Tidak ada pemasok diarsipkan."
 msgstr "No archived suppliers."
 
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Tidak ada penjualan yang gagal terkirim di perangkat ini."
+msgstr "No sales failed to send from this device."
+
 #: src/routes/_pos/kitchen.tsx
 msgid "Tidak ada pesanan di dapur."
 msgstr "No kitchen orders."
@@ -7489,6 +7654,10 @@ msgstr "No held orders."
 #: src/routes/_pos/promos.tsx
 msgid "Tidak ada promo diarsipkan."
 msgstr "No archived promos."
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Tidak ada selisih yang perlu ditinjau."
+msgstr "Nothing to review."
 
 #: src/routes/_pos/shift/close.tsx
 msgid "Tidak ada shift terbuka."
@@ -7620,11 +7789,23 @@ msgstr "Quick cash buttons"
 msgid "Total"
 msgstr "Total"
 
+#: src/routes/_pos/reports/reconciliation.tsx
+#~ msgid "Total {0}."
+#~ msgstr "{0} in total."
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Total {deadLetteredTotal}."
+msgstr "{deadLetteredTotal} in total."
+
 #. placeholder {0}: formatIDR(qty * unitPriceIDR)
 #: src/components/public/item-picker-sheet.tsx
 #: src/components/sale/modifier-picker-dialog.tsx
 msgid "Total <0>{0}</0>"
 msgstr "Total <0>{0}</0>"
+
+#: src/routes/_pos/reports/reconciliation.tsx
+msgid "Total pesanan"
+msgstr "Order total"
 
 #: src/components/giftcard/gift-card-payment-dialog.tsx
 #: src/components/sale/cash-payment-dialog.tsx
@@ -7744,6 +7925,14 @@ msgstr "Counted cash (Rp)"
 #: src/components/sale/cash-payment-dialog.tsx
 msgid "Uang yang diterima kurang dari total."
 msgstr "The cash received is less than the total."
+
+#: src/routes/_pos/shift/close.tsx
+#~ msgid "Uangnya sudah ada di laci, jadi {0} sudah ditambahkan ke uang seharusnya di bawah."
+#~ msgstr "That cash is already in the drawer, so {0} has been added to the expected cash below."
+
+#: src/routes/_pos/shift/close.tsx
+msgid "Uangnya sudah ada di laci, jadi {queuedCashText} sudah ditambahkan ke uang seharusnya di bawah."
+msgstr "That cash is already in the drawer, so {queuedCashText} has been added to the expected cash below."
 
 #: src/components/customer/customer-detail-sheet.tsx
 #: src/components/menu/price-category-table.tsx
