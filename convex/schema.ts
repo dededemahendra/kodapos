@@ -655,6 +655,29 @@ export default defineSchema({
     .index('by_provider_ref', ['providerRef'])
     .index('by_method_provider_status', ['method', 'providerStatus']),
 
+  // One row per replayed offline sale whose recorded values differ from what
+  // current server state would have produced. The sale still posts — the cash
+  // is in the drawer — so this is the owner's record of what drifted.
+  saleReconciliations: defineTable({
+    cafeId: v.id('cafes'),
+    orderId: v.id('orders'),
+    clientId: v.string(),
+    kind: v.union(
+      v.literal('price_drift'),
+      v.literal('item_unavailable'),
+      v.literal('promo_archived'),
+      v.literal('negative_stock')
+    ),
+    /** What the till charged, in IDR. Set for price_drift only. */
+    rungIDR: v.optional(v.number()),
+    /** What current prices would have charged, in IDR. price_drift only. */
+    currentIDR: v.optional(v.number()),
+    /** Human-readable detail, e.g. the item name that was unavailable. */
+    detail: v.optional(v.string()),
+    createdAt: v.number(),
+    resolvedAt: v.optional(v.number()),
+  }).index('by_cafe', ['cafeId']),
+
   ingredients: defineTable({
     cafeId: v.id('cafes'),
     name: v.string(),
