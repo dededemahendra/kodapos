@@ -252,6 +252,20 @@ function ShiftHistoryPage() {
                     </span>
                   ) : null}
                 </div>
+                {/* Offline cash that landed after this shift was counted. Shown
+                    so the recomputed "uang seharusnya" above is explainable
+                    rather than looking like a number that quietly moved. */}
+                {s.lateCashIDR > 0 ? (
+                  <div className="text-xs mt-1 text-amber-700 dark:text-amber-500">
+                    <Trans>Penjualan offline masuk setelah tutup</Trans>: {formatIDR(s.lateCashIDR)}
+                  </div>
+                ) : null}
+                {s.queuedCashIDR > 0 && s.lateCashIDR < s.queuedCashIDR ? (
+                  <div className="text-xs mt-1 text-amber-700 dark:text-amber-500">
+                    <Trans>Belum terkirim saat tutup</Trans>:{' '}
+                    {formatIDR(s.queuedCashIDR - s.lateCashIDR)}
+                  </div>
+                ) : null}
               </button>
               <div className="shrink-0">
                 <EmailSummaryButton

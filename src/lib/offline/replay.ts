@@ -7,10 +7,9 @@ import { useEffect, useRef } from 'react';
 import { useConnectionState } from './connectivity';
 import type { QueuedSale } from './outbox';
 import { list, recordAttempt, remove } from './outbox';
+import { MAX_REPLAY_ATTEMPTS } from './queued-sales';
 
 export type ReplayResult = { posted: number; deadLettered: string[] };
-
-const DEFAULT_MAX_ATTEMPTS = 5;
 
 /**
  * Drain the outbox oldest-first. Sales that can still be posted go out in
@@ -31,7 +30,7 @@ export async function drain(deps: {
   post: (payload: ReplayPayload) => Promise<void>;
   maxAttempts?: number;
 }): Promise<ReplayResult> {
-  const max = deps.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
+  const max = deps.maxAttempts ?? MAX_REPLAY_ATTEMPTS;
   const queued = await deps.list();
   let posted = 0;
   const deadLettered: string[] = [];
@@ -141,10 +140,12 @@ export function useReplayOnReconnect(): void {
           },
         });
         if (result.deadLettered.length > 0) {
-          // No toast/log surface exists yet for the cashier or owner; a
-          // console warning at least makes a stuck queue discoverable
-          // instead of silently blocking nothing (dead letters are skipped,
-          // not head-of-line blocking) while still going unnoticed forever.
+          // The owner-facing surface is Laporan → Rekonsiliasi, which reads
+          // the same entries straight from the outbox (attempts >=
+          // MAX_REPLAY_ATTEMPTS) rather than from this result — a drain that
+          // never runs, or a tab that closes before it does, must not be able
+          // to hide unposted revenue. This warning stays for the console
+          // trail.
           console.warn(
             '[offline] replay: sale(s) stuck past max attempts, needs manual attention',
             result.deadLettered

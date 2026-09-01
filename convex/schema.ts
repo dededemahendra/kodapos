@@ -391,6 +391,15 @@ export default defineSchema({
     expectedCashIDR: v.optional(v.number()),
     countedCashIDR: v.optional(v.number()),
     varianceIDR: v.optional(v.number()),
+    /**
+     * Cash the till took for sales still sitting in the device outbox when the
+     * shift was closed, in IDR. Declared by the closing client (only the device
+     * can see its own outbox) and folded into `expectedCashIDR` above, so the
+     * drawer count reconciles to zero at close instead of reading as an
+     * overage. Read paths subtract whatever has since replayed — see
+     * `shiftCashBreakdown` in convex/shifts.ts.
+     */
+    queuedCashIDR: v.optional(v.number()),
     status: v.union(v.literal('open'), v.literal('closed')),
   })
     .index('by_cafe_status', ['cafeId', 'status'])
