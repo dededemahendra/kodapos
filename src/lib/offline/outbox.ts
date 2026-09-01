@@ -32,8 +32,13 @@ let dbPromise: Promise<IDBPDatabase> | null = null;
 
 function db(): Promise<IDBPDatabase> {
   if (!dbPromise) {
+    // Tracks whether `opening` has already settled via `blocked()` below,
+    // so the raw open's eventual success/error — which idb keeps waiting
+    // for even after we've given up on it — can be told apart from a
+    // still-live first attempt.
+    let settled = false;
     const opening = new Promise<IDBPDatabase>((resolve, reject) => {
-      openDB(DB_NAME, version, {
+      const openPromise = openDB(DB_NAME, version, {
         upgrade(database) {
           if (!database.objectStoreNames.contains(STORE)) {
             const store = database.createObjectStore(STORE, { keyPath: 'clientId' });
@@ -47,6 +52,7 @@ function db(): Promise<IDBPDatabase> {
         // would hang forever with no error surfaced anywhere. Reject
         // instead, so a real error reaches the caller.
         blocked(currentVersion, blockedVersion) {
+          settled = true;
           reject(
             new Error(
               `IndexedDB "${DB_NAME}" open blocked: a connection at v${currentVersion} is ` +
@@ -55,13 +61,36 @@ function db(): Promise<IDBPDatabase> {
             )
           );
         },
-        // Fires on THIS connection when a newer version is requested
-        // elsewhere while we're still open. Close ourselves so we don't
-        // become the stale connection that blocks the other tab.
+        // Fires on THIS connection, once successfully open, when a newer
+        // version is requested elsewhere while we're still open. Close
+        // ourselves so we don't become the stale connection that blocks
+        // the other tab.
         blocking() {
-          opening.then((instance) => instance.close()).catch(() => {});
+          openPromise.then((instance) => instance.close()).catch(() => {});
         },
-      }).then(resolve, reject);
+      });
+      // The underlying open keeps running even after `blocked()` rejects
+      // `opening` above — idb doesn't cancel it, it just waits for the
+      // stale connection to eventually close. If that happens, this
+      // resolves late with a real, live `IDBPDatabase` that nothing is
+      // waiting for any more. Left alone, that connection leaks — open
+      // forever, never stored anywhere, blocking every future version
+      // bump. Close it instead of dropping it.
+      openPromise.then(
+        (instance) => {
+          if (settled) {
+            instance.close();
+            return;
+          }
+          settled = true;
+          resolve(instance);
+        },
+        (error: unknown) => {
+          if (settled) return;
+          settled = true;
+          reject(error);
+        }
+      );
     });
     // Don't cache a rejected open — let the next call retry from scratch.
     dbPromise = opening.catch((error: unknown) => {
