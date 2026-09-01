@@ -321,6 +321,158 @@ describe('createReplayedCashSale', () => {
     expect(recon.some((r) => r.kind === 'item_unavailable')).toBe(true);
   });
 
+  it('records a row for a variant archived during the outage', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const variantId = await s.asOwner.mutation(api.menu.variants.create, {
+      menuItemId: s.itemId,
+      name: 'Besar',
+      priceIDR: 25000,
+    });
+    await s.asOwner.mutation(api.menu.variants.archive, { id: variantId });
+
+    const res = await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'offline-variant',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [],
+          variantId,
+          nameSnapshot: 'Kopi Besar',
+          unitPriceIDR: 25000,
+          lineTotalIDR: 25000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 25000,
+      cashTenderedIDR: 25000,
+      createdAtClient: Date.now(),
+    });
+
+    expect(res.totalIDR).toBe(25000);
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    const row = recon.find((r) => r.kind === 'item_unavailable');
+    expect(row).toBeDefined();
+    // Distinguishable by a human from an item-level row on the same order.
+    expect(row?.detail).toContain('Besar');
+  });
+
+  it('records a row for a modifier option archived during the outage', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const groupId = await s.asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Tambahan',
+      required: false,
+      minSelect: 0,
+      maxSelect: 1,
+      options: [{ name: 'Susu', priceAdjustmentIDR: 0, position: 100 }],
+    });
+    await s.asOwner.mutation(api.menu.itemGroups.attach, {
+      menuItemId: s.itemId,
+      modifierGroupId: groupId,
+    });
+    const optionId = await t.run(async (ctx) => {
+      const option = await ctx.db
+        .query('modifierOptions')
+        .withIndex('by_group_active', (q) => q.eq('groupId', groupId).eq('archived', false))
+        .first();
+      if (!option) throw new Error('seed: modifier option not found');
+      return option._id;
+    });
+    // No public mutation archives a single option in isolation (upsert reconciles
+    // the whole option list), so drive the outage-time change directly.
+    await t.run((ctx) => ctx.db.patch(optionId, { archived: true }));
+
+    const res = await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'offline-option',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [optionId],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 20000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 20000,
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+    });
+
+    expect(res.totalIDR).toBe(20000);
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    const row = recon.find((r) => r.kind === 'item_unavailable');
+    expect(row).toBeDefined();
+    expect(row?.detail).toContain('Susu');
+  });
+
+  it('records a row for a modifier group detached during the outage', async () => {
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const groupId = await s.asOwner.mutation(api.menu.modifierGroups.upsert, {
+      name: 'Tambahan',
+      required: false,
+      minSelect: 0,
+      maxSelect: 1,
+      options: [{ name: 'Susu', priceAdjustmentIDR: 0, position: 100 }],
+    });
+    await s.asOwner.mutation(api.menu.itemGroups.attach, {
+      menuItemId: s.itemId,
+      modifierGroupId: groupId,
+    });
+    const optionId = await t.run(async (ctx) => {
+      const option = await ctx.db
+        .query('modifierOptions')
+        .withIndex('by_group_active', (q) => q.eq('groupId', groupId).eq('archived', false))
+        .first();
+      if (!option) throw new Error('seed: modifier option not found');
+      return option._id;
+    });
+    await s.asOwner.mutation(api.menu.itemGroups.detach, {
+      menuItemId: s.itemId,
+      modifierGroupId: groupId,
+    });
+
+    const res = await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId: 'offline-detached',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 1,
+          modifierOptionIds: [optionId],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 20000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 20000,
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+    });
+
+    expect(res.totalIDR).toBe(20000);
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    const row = recon.find((r) => r.kind === 'modifier_rule_changed');
+    expect(row).toBeDefined();
+    expect(row?.detail).toContain('Tambahan');
+  });
+
   it('settles the sale so it counts as paid revenue', async () => {
     const t = convexTest(schema, modules);
     const s = await setup(t);

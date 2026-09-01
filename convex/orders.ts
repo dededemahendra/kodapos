@@ -157,18 +157,48 @@ async function recordReconciliations(
       await insert('item_unavailable', { detail: line.nameSnapshot });
     }
 
-    // One pass over the line's options: they feed both the current price and the
-    // per-group selection counts the min/max check below needs.
     const variant = line.variantId ? await ctx.db.get(line.variantId) : null;
+    if (variant && variant.archived) {
+      await insert('item_unavailable', {
+        detail: `${line.nameSnapshot}: varian ${variant.name}`,
+      });
+    }
+
+    // Loaded before the option pass so a selected option's group can be checked
+    // against what is still attached to the item.
+    const attachments = await ctx.db
+      .query('menuItemModifierGroups')
+      .withIndex('by_item', (q) => q.eq('menuItemId', item._id))
+      .collect();
+    const attachedGroupIds = new Set(attachments.map((a) => a.modifierGroupId));
+
+    // One pass over the line's options: it feeds the current price, the
+    // per-group selection counts the min/max check below needs, and the two
+    // silent-relaxation checks (archived option, detached group).
     const priceTargetId = (variant ? variant._id : item._id) as string;
     let currentUnitIDR =
       priceOverrides.get(priceTargetId) ?? (variant ? variant.priceIDR : item.priceIDR);
     const countByGroup = new Map<string, number>();
+    // Two options from the same detached group are one fact about the order, so
+    // report each group at most once per line.
+    const reportedDetached = new Set<string>();
     for (const optionId of line.modifierOptionIds) {
       const option = await ctx.db.get(optionId);
       if (!option || option.cafeId !== cafeId) continue;
       currentUnitIDR += priceOverrides.get(option._id as string) ?? option.priceAdjustmentIDR;
       countByGroup.set(option.groupId, (countByGroup.get(option.groupId) ?? 0) + 1);
+      if (option.archived) {
+        await insert('item_unavailable', {
+          detail: `${line.nameSnapshot}: modifier ${option.name}`,
+        });
+      }
+      if (!attachedGroupIds.has(option.groupId) && !reportedDetached.has(option.groupId)) {
+        reportedDetached.add(option.groupId);
+        const group = await ctx.db.get(option.groupId);
+        await insert('modifier_rule_changed', {
+          detail: `${line.nameSnapshot}: grup ${group?.name ?? option.name} tidak lagi terpasang`,
+        });
+      }
     }
 
     // Line-level, not per-unit: an owner reconciling the drawer needs the cash
@@ -183,17 +213,13 @@ async function recordReconciliations(
     }
 
     // Mirrors buildOrder's min/max loop, which the replay path skips.
-    const attachments = await ctx.db
-      .query('menuItemModifierGroups')
-      .withIndex('by_item', (q) => q.eq('menuItemId', item._id))
-      .collect();
     for (const attachment of attachments) {
       const group = await ctx.db.get(attachment.modifierGroupId);
       if (!group || group.archived) continue;
       const count = countByGroup.get(group._id) ?? 0;
       if (count < group.minSelect || count > group.maxSelect) {
         await insert('modifier_rule_changed', {
-          detail: `${line.nameSnapshot}: ${group.name}`,
+          detail: `${line.nameSnapshot}: aturan grup ${group.name}`,
         });
       }
     }
