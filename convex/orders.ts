@@ -512,30 +512,51 @@ export const search = query({
     ),
     orderType: v.optional(orderTypeValidator),
     status: v.optional(v.union(v.literal('paid'), v.literal('pending'), v.literal('void'))),
+    /**
+     * The 4-character receipt code the cashier reads off a printed receipt.
+     * An online receipt's code is the last four characters of the order
+     * `_id`; an offline one's is the last four of its `clientId` (see
+     * `offlineReceiptNumber` in `src/lib/offline/receipt-number.ts`, and
+     * `ReceiptPreview`, which prints the same `_id` suffix online). Matched
+     * case-insensitively against either.
+     */
+    q: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
   },
   returns: v.object({ page: v.array(orderRow), isDone: v.boolean(), continueCursor: v.string() }),
-  handler: async (ctx, { range, cashierId, paymentMethod, orderType, status, paginationOpts }) => {
+  handler: async (
+    ctx,
+    { range, cashierId, paymentMethod, orderType, status, q, paginationOpts }
+  ) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     const tz = await tzFor(ctx, cafeId);
     const { startMs, endMs } = resolveRange(tz, range, Date.now());
-    let q = ctx.db
+    let ordersQuery = ctx.db
       .query('orders')
       .withIndex('by_cafe_created', (ix) =>
         ix.eq('cafeId', cafeId).gte('createdAtClient', startMs).lte('createdAtClient', endMs)
       )
       .order('desc');
-    if (cashierId) q = q.filter((f) => f.eq(f.field('cashierId'), cashierId));
-    if (paymentMethod) q = q.filter((f) => f.eq(f.field('paymentMethod'), paymentMethod));
-    if (orderType) q = q.filter((f) => f.eq(f.field('orderType'), orderType));
-    if (status) q = q.filter((f) => f.eq(f.field('paymentStatus'), status));
-    const result = await q.paginate(paginationOpts);
+    if (cashierId) ordersQuery = ordersQuery.filter((f) => f.eq(f.field('cashierId'), cashierId));
+    if (paymentMethod) {
+      ordersQuery = ordersQuery.filter((f) => f.eq(f.field('paymentMethod'), paymentMethod));
+    }
+    if (orderType) ordersQuery = ordersQuery.filter((f) => f.eq(f.field('orderType'), orderType));
+    if (status) ordersQuery = ordersQuery.filter((f) => f.eq(f.field('paymentStatus'), status));
+    const result = await ordersQuery.paginate(paginationOpts);
     const staff = await ctx.db
       .query('cafeStaff')
       .withIndex('by_cafe_active', (ix) => ix.eq('cafeId', cafeId))
       .collect();
     const nameById = new Map(staff.map((s) => [s._id, s.name] as const));
-    const page = result.page.map((o) => ({
+    // A receipt code isn't a stored field — it's derived from `_id`/`clientId`
+    // — so it can't be pushed into the index `.filter()` above; it narrows
+    // the already-fetched page instead.
+    const code = q?.trim().toUpperCase();
+    const matchesCode = (o: (typeof result.page)[number]) =>
+      o._id.slice(-4).toUpperCase() === code || o.clientId.slice(-4).toUpperCase() === code;
+    const matched = code && code.length === 4 ? result.page.filter(matchesCode) : result.page;
+    const page = matched.map((o) => ({
       _id: o._id,
       createdAtClient: o.createdAtClient,
       totalIDR: o.totalIDR,
