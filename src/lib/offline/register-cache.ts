@@ -124,7 +124,12 @@ export const MAX_SNAPSHOT_AGE_MS = 24 * 60 * 60 * 1000;
  */
 export function isUsable(snapshot: RegisterSnapshot | null, now: number): boolean {
   if (!snapshot) return false;
-  return now - snapshot.writtenAt < MAX_SNAPSHOT_AGE_MS;
+  const age = now - snapshot.writtenAt;
+  // A future-dated writtenAt (a hand-set clock, a dead RTC battery) would
+  // otherwise make `age` negative, which is always < MAX_SNAPSHOT_AGE_MS —
+  // the snapshot would never expire. Treat it the same as too-old: refuse.
+  if (age < 0) return false;
+  return age < MAX_SNAPSHOT_AGE_MS;
 }
 
 /** Test-only. Forces the schema version, to simulate a version bump for blocked/blocking tests. */
