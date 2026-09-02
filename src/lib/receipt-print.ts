@@ -30,6 +30,10 @@ export interface ReceiptPrintOptions {
   orderNumber?: string;
   /** Print a VOID banner. */
   voided?: boolean;
+  /** Print an OFFLINE banner: the sale is queued on the till and has not
+   *  reached the server yet, so this paper is the only record of it until it
+   *  syncs. Anyone reconciling the drawer needs to see that on the receipt. */
+  offline?: boolean;
   /** Pulse the cash drawer at the end. */
   drawerKick?: boolean;
 }
@@ -58,6 +62,7 @@ export function buildReceiptBytes(
   if (order.orderType) p.line(`Order type: ${ORDER_TYPE_LABELS[order.orderType]}`);
   if (order.priceCategoryName) p.line(`Price tier: ${order.priceCategoryName}`);
   if (opts.voided) p.bold(true).line('** VOID **').bold(false);
+  if (opts.offline) p.bold(true).line('** OFFLINE (PENDING SYNC) **').bold(false);
   if ((order.refundedIDR ?? 0) > 0) p.line(`REFUNDED ${formatIDR(order.refundedIDR ?? 0)}`);
 
   // Items (left).

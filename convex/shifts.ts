@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import type { Doc } from './_generated/dataModel';
+import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import { internalQuery, mutation, query } from './_generated/server';
 import { requireActiveOutlet, requireOwned } from './lib/auth';
@@ -20,6 +20,7 @@ const shiftWithCashier = v.object({
   expectedCashIDR: v.optional(v.number()),
   countedCashIDR: v.optional(v.number()),
   varianceIDR: v.optional(v.number()),
+  queuedCashIDR: v.optional(v.number()),
   status: v.union(v.literal('open'), v.literal('closed')),
 });
 
@@ -29,14 +30,106 @@ function assertIDR(n: number, label: string): number {
   return n;
 }
 
-async function shiftCashBreakdown(ctx: QueryCtx | MutationCtx, shift: Doc<'shifts'>) {
-  const orders = await ctx.db
-    .query('orders')
-    .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
+/**
+ * The drawer arithmetic for one shift, ALWAYS recomputed from the orders and
+ * cash movements that currently exist — never read back off the frozen
+ * `expectedCashIDR`/`varianceIDR` a close wrote.
+ *
+ * That matters because a shift can be closed with offline sales still queued on
+ * the device: `orders.createReplayedCashSale` posts a paid cash order into an
+ * already-closed shift minutes or hours later. A frozen expected-cash figure
+ * cannot know about that money, while `cashSalesIDR` here (derived from orders)
+ * picks it up the instant it lands — so preferring the frozen number made the
+ * two disagree by exactly the offline amount, and the Z-report showed the
+ * replayed cash as an unexplained overage on top of the orders that already
+ * contained it.
+ *
+ * Two derived figures keep the numbers honest across the whole window:
+ *
+ * - `lateCashIDR` — cash from paid orders that posted after the drawer was
+ *   counted. Identified by the `shift_closed` reconciliation row that
+ *   `orders.recordReconciliations` writes for exactly this case, NOT by
+ *   comparing timestamps: `createdAtClient` on a replayed sale is back inside
+ *   the shift, and `_creationTime` versus `closedAt` is a same-millisecond
+ *   coin flip at the boundary. The marker row is the fact itself. This is the
+ *   REPORTED figure ("offline cash that landed after close"), so a voided
+ *   replay drops out of it — that cash went back to the customer.
+ * - `postedQueuedIDR` — the same set of late orders, voided ones included,
+ *   used only to drain the declaration below. See its comment for why the two
+ *   must differ.
+ * - `unpostedQueuedIDR` — what the closing client declared as still queued
+ *   (`shift.queuedCashIDR`), less whatever has since posted, floored at 0. It
+ *   holds expected cash steady during the window between close and replay: at
+ *   close it is the full queued amount, and it drains to 0 as the sales post,
+ *   with `cashSalesIDR` rising by the same amount.
+ *
+ * Net effect: `expectedCashIDR` equals the cash that should physically be in
+ * the drawer, at close and at every point after it, whether or not the queue
+ * has drained. A shift closed before this field existed simply has
+ * `queuedCashIDR` undefined and gets the live recomputation alone, which is
+ * still the fix for the double-count.
+ */
+/**
+ * Ids of the orders that posted into an already-closed shift, for one cafe.
+ * Read once and passed down when several shifts are summarized in a row
+ * (`listClosed`), so a page of 20 shifts does not read this table 20 times.
+ */
+async function lateOrderIdsFor(
+  ctx: QueryCtx | MutationCtx,
+  cafeId: Id<'cafes'>
+): Promise<Set<string>> {
+  // Indexed on kind, not filtered after a by_cafe collect: these rows are only
+  // ever flagged resolved, never deleted, so scanning the whole table here grew
+  // without bound for the life of the outlet and would eventually blow the
+  // per-query read limit on the very page that depends on it.
+  const rows = await ctx.db
+    .query('saleReconciliations')
+    .withIndex('by_cafe_kind', (q) => q.eq('cafeId', cafeId).eq('kind', 'shift_closed'))
     .collect();
-  const cashSalesIDR = orders
+  return new Set(rows.map((r) => r.orderId as string));
+}
+
+type BreakdownPrefetch = {
+  /** The shift's orders, when the caller already collected them. */
+  orders?: Doc<'orders'>[];
+  /** The cafe's late-posting order ids, from {@link lateOrderIdsFor}. */
+  lateOrderIds?: Set<string>;
+};
+
+async function shiftCashBreakdown(
+  ctx: QueryCtx | MutationCtx,
+  shift: Doc<'shifts'>,
+  prefetch: BreakdownPrefetch = {}
+) {
+  const orders =
+    prefetch.orders ??
+    (await ctx.db
+      .query('orders')
+      .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
+      .collect());
+  const paid = orders.filter((o) => o.paymentStatus === 'paid');
+  const cashSalesIDR = paid.reduce((s, o) => s + cashCollectedIDR(o), 0);
+  // Only a closed shift can have anything land late, so an open one skips the
+  // read entirely.
+  const lateOrderIds =
+    shift.status === 'closed'
+      ? (prefetch.lateOrderIds ?? (await lateOrderIdsFor(ctx, shift.cafeId)))
+      : new Set<string>();
+  const lateOrders = orders.filter((o) => lateOrderIds.has(o._id));
+  const lateCashIDR = lateOrders
     .filter((o) => o.paymentStatus === 'paid')
     .reduce((s, o) => s + cashCollectedIDR(o), 0);
+  // What the declaration drains against. Counted on POSTING, not on staying
+  // paid — a voided replayed sale has still posted, and its cash has left the
+  // drawer with the refund. Voiding it drops it out of `cashSalesIDR` above,
+  // so if it also dropped out here `unpostedQueuedIDR` would climb back by the
+  // same amount and expected cash would never fall: the Z-report would demand
+  // that money forever, a permanent phantom shortfall. `paymentStatus` is
+  // 'pending' only for an order mid-settle, which a replay never leaves behind.
+  const postedQueuedIDR = lateOrders
+    .filter((o) => o.paymentStatus !== 'pending')
+    .reduce((s, o) => s + cashCollectedIDR(o), 0);
+  const unpostedQueuedIDR = Math.max(0, (shift.queuedCashIDR ?? 0) - postedQueuedIDR);
   const movements = await ctx.db
     .query('cashMovements')
     .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
@@ -47,8 +140,17 @@ async function shiftCashBreakdown(ctx: QueryCtx | MutationCtx, shift: Doc<'shift
     if (m.direction === 'in') cashInIDR += m.amountIDR;
     else cashOutIDR += m.amountIDR;
   }
-  const expectedCashIDR = shift.openingFloatIDR + cashSalesIDR + cashInIDR - cashOutIDR;
-  return { cashSalesIDR, cashInIDR, cashOutIDR, expectedCashIDR };
+  const expectedCashIDR =
+    shift.openingFloatIDR + cashSalesIDR + cashInIDR - cashOutIDR + unpostedQueuedIDR;
+  return {
+    cashSalesIDR,
+    cashInIDR,
+    cashOutIDR,
+    expectedCashIDR,
+    lateCashIDR,
+    postedQueuedIDR,
+    unpostedQueuedIDR,
+  };
 }
 
 export const current = query({
@@ -93,22 +195,65 @@ export const open = mutation({
 });
 
 export const close = mutation({
-  args: { id: v.id('shifts'), countedCashIDR: v.number() },
+  args: {
+    id: v.id('shifts'),
+    countedCashIDR: v.number(),
+    /**
+     * The sales still sitting in this device's outbox, one entry each. The
+     * server cannot see the outbox, so the closing client declares them;
+     * without the declaration the drawer count reads as an overage for the
+     * whole window between close and replay.
+     *
+     * Per-sale, NOT a pre-summed total, and that is the whole point. The
+     * client's snapshot of its outbox is up to a poll interval stale, so a
+     * queued sale can replay in the gap between the snapshot and this
+     * mutation. A bare total would then be counted twice — once inside
+     * `shiftCashBreakdown` (the order now exists) and once in the
+     * declaration — and it could never drain, because `lateCashIDR` only
+     * counts orders that posted into an ALREADY-CLOSED shift and this one
+     * posted while it was still open. The result was a permanent phantom
+     * shortfall on the Z-report: exactly the "is my staff short?" question
+     * this whole feature exists to answer honestly. Declaring `clientId`s
+     * lets the server drop any that already landed, so the arithmetic is
+     * correct regardless of timing.
+     */
+    queuedSales: v.optional(v.array(v.object({ clientId: v.string(), totalIDR: v.number() }))),
+  },
   returns: v.null(),
-  handler: async (ctx, { id, countedCashIDR }) => {
+  handler: async (ctx, { id, countedCashIDR, queuedSales }) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     const shift = await requireOwned(ctx, cafeId, id, 'Shift');
     if (shift.status !== 'open') {
       throw new Error('Shift sudah ditutup.');
     }
     const counted = assertIDR(countedCashIDR, 'Uang terhitung');
-    const { expectedCashIDR } = await shiftCashBreakdown(ctx, shift);
+    let queued = 0;
+    for (const declared of queuedSales ?? []) {
+      assertIDR(declared.totalIDR, 'Penjualan menunggu sinkron');
+      // Already posted (it replayed between the client's snapshot and now, or
+      // the outbox entry outlived a successful post). Its cash is already in
+      // the orders `shiftCashBreakdown` reads below; counting it again here
+      // would inflate expected cash forever.
+      const posted = await ctx.db
+        .query('orders')
+        .withIndex('by_cafe_clientId', (q) =>
+          q.eq('cafeId', cafeId).eq('clientId', declared.clientId)
+        )
+        .unique();
+      if (posted) continue;
+      queued += declared.totalIDR;
+    }
+    // The shift row has no queuedCashIDR yet, so the breakdown's own
+    // unpostedQueuedIDR is 0 here; add the declaration explicitly.
+    const { expectedCashIDR: postedExpectedIDR } = await shiftCashBreakdown(ctx, shift);
+    const expectedCashIDR = postedExpectedIDR + queued;
     await ctx.db.patch(id, {
       status: 'closed',
       closedAt: Date.now(),
       countedCashIDR: counted,
       expectedCashIDR,
       varianceIDR: counted - expectedCashIDR,
+      ...(queued > 0 ? { queuedCashIDR: queued } : {}),
     });
 
     // Auto-send the shift-summary email when the owner has enabled it. Run via
@@ -177,9 +322,13 @@ const shiftSummary = v.object({
   qrisSalesIDR: v.number(),
   expectedCashIDR: v.number(),
   varianceIDR: v.union(v.number(), v.null()),
+  /** Cash from sales that posted after this shift closed (offline replay). */
+  lateCashIDR: v.number(),
+  /** What the closing client declared as still queued on the device. */
+  queuedCashIDR: v.number(),
 });
 
-async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
+async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>, lateOrderIds?: Set<string>) {
   const orders = await ctx.db
     .query('orders')
     .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
@@ -200,7 +349,14 @@ async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
   }
   const cashier = await ctx.db.get(shift.cashierId);
   const countedCashIDR = shift.countedCashIDR ?? null;
-  const expectedCashIDR = shift.expectedCashIDR ?? shift.openingFloatIDR + cashSalesIDR;
+  // Recomputed, NOT read back off shift.expectedCashIDR / shift.varianceIDR.
+  // A replayed offline sale lands in a shift that is already closed, and the
+  // frozen pair cannot move with it — see shiftCashBreakdown's doc comment for
+  // why preferring them double-counted the offline cash on the Z-report.
+  const { expectedCashIDR, lateCashIDR } = await shiftCashBreakdown(ctx, shift, {
+    orders,
+    ...(lateOrderIds ? { lateOrderIds } : {}),
+  });
   return {
     _id: shift._id,
     openedAt: shift.openedAt,
@@ -213,8 +369,9 @@ async function summarizeShift(ctx: QueryCtx, shift: Doc<'shifts'>) {
     cashSalesIDR,
     qrisSalesIDR,
     expectedCashIDR,
-    varianceIDR:
-      shift.varianceIDR ?? (countedCashIDR !== null ? countedCashIDR - expectedCashIDR : null),
+    varianceIDR: countedCashIDR !== null ? countedCashIDR - expectedCashIDR : null,
+    lateCashIDR,
+    queuedCashIDR: shift.queuedCashIDR ?? 0,
   };
 }
 
@@ -289,7 +446,8 @@ export const listClosed = query({
       .withIndex('by_cafe_status', (q) => q.eq('cafeId', cafeId).eq('status', 'closed'))
       .order('desc')
       .paginate(paginationOpts);
-    const page = await Promise.all(result.page.map((s) => summarizeShift(ctx, s)));
+    const lateOrderIds = await lateOrderIdsFor(ctx, cafeId);
+    const page = await Promise.all(result.page.map((s) => summarizeShift(ctx, s, lateOrderIds)));
     return { page, isDone: result.isDone, continueCursor: result.continueCursor };
   },
 });

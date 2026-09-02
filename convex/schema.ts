@@ -391,6 +391,15 @@ export default defineSchema({
     expectedCashIDR: v.optional(v.number()),
     countedCashIDR: v.optional(v.number()),
     varianceIDR: v.optional(v.number()),
+    /**
+     * Cash the till took for sales still sitting in the device outbox when the
+     * shift was closed, in IDR. Declared by the closing client (only the device
+     * can see its own outbox) and folded into `expectedCashIDR` above, so the
+     * drawer count reconciles to zero at close instead of reading as an
+     * overage. Read paths subtract whatever has since replayed — see
+     * `shiftCashBreakdown` in convex/shifts.ts.
+     */
+    queuedCashIDR: v.optional(v.number()),
     status: v.union(v.literal('open'), v.literal('closed')),
   })
     .index('by_cafe_status', ['cafeId', 'status'])
@@ -654,6 +663,50 @@ export default defineSchema({
     .index('by_cafe_method_confirmed', ['cafeId', 'method', 'confirmedAt'])
     .index('by_provider_ref', ['providerRef'])
     .index('by_method_provider_status', ['method', 'providerStatus']),
+
+  // One row per replayed offline sale whose recorded values differ from what
+  // current server state would have produced. The sale still posts — the cash
+  // is in the drawer — so this is the owner's record of what drifted.
+  saleReconciliations: defineTable({
+    cafeId: v.id('cafes'),
+    orderId: v.id('orders'),
+    clientId: v.string(),
+    kind: v.union(
+      v.literal('price_drift'),
+      v.literal('item_unavailable'),
+      v.literal('promo_archived'),
+      v.literal('negative_stock'),
+      // A modifier group's min/max selection rule moved during the outage, so
+      // the rung line no longer satisfies it.
+      v.literal('modifier_rule_changed'),
+      // The payment method the sale was rung with was switched off during the
+      // outage. The cash is still in the drawer, so the sale posts anyway.
+      v.literal('payment_method_disabled'),
+      // Posted into a shift that had already closed — the ordinary replay case,
+      // and the one whose cash impact is otherwise invisible: the shift's
+      // counted/expected cash was reconciled before this sale arrived.
+      v.literal('shift_closed'),
+      // The cashier who rang the sale was archived during the outage.
+      v.literal('cashier_archived'),
+      // The price tier the sale was rung under was archived during the outage.
+      v.literal('price_category_archived')
+    ),
+    /** The line total the till charged, in IDR. Set for price_drift only. */
+    rungIDR: v.optional(v.number()),
+    /** Current unit price x rung qty, in IDR. price_drift only. */
+    currentIDR: v.optional(v.number()),
+    /** Human-readable detail, e.g. the item name that was unavailable. */
+    detail: v.optional(v.string()),
+    createdAt: v.number(),
+    resolvedAt: v.optional(v.number()),
+  })
+    .index('by_cafe', ['cafeId'])
+    // Reading only the `shift_closed` rows keeps shifts.lateOrderIdsFor off the
+    // rest of the table. These rows are flagged resolved, never deleted, so an
+    // unindexed by_cafe scan grew monotonically for the life of the outlet and
+    // would eventually trip the per-query read limit — taking the shift-history
+    // page down with it.
+    .index('by_cafe_kind', ['cafeId', 'kind']),
 
   ingredients: defineTable({
     cafeId: v.id('cafes'),
