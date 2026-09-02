@@ -51,9 +51,14 @@ function assertIDR(n: number, label: string): number {
  *   `orders.recordReconciliations` writes for exactly this case, NOT by
  *   comparing timestamps: `createdAtClient` on a replayed sale is back inside
  *   the shift, and `_creationTime` versus `closedAt` is a same-millisecond
- *   coin flip at the boundary. The marker row is the fact itself.
+ *   coin flip at the boundary. The marker row is the fact itself. This is the
+ *   REPORTED figure ("offline cash that landed after close"), so a voided
+ *   replay drops out of it — that cash went back to the customer.
+ * - `postedQueuedIDR` — the same set of late orders, voided ones included,
+ *   used only to drain the declaration below. See its comment for why the two
+ *   must differ.
  * - `unpostedQueuedIDR` — what the closing client declared as still queued
- *   (`shift.queuedCashIDR`), less whatever has since replayed, floored at 0. It
+ *   (`shift.queuedCashIDR`), less whatever has since posted, floored at 0. It
  *   holds expected cash steady during the window between close and replay: at
  *   close it is the full queued amount, and it drains to 0 as the sales post,
  *   with `cashSalesIDR` rising by the same amount.
@@ -110,10 +115,21 @@ async function shiftCashBreakdown(
     shift.status === 'closed'
       ? (prefetch.lateOrderIds ?? (await lateOrderIdsFor(ctx, shift.cafeId)))
       : new Set<string>();
-  const lateCashIDR = paid
-    .filter((o) => lateOrderIds.has(o._id))
+  const lateOrders = orders.filter((o) => lateOrderIds.has(o._id));
+  const lateCashIDR = lateOrders
+    .filter((o) => o.paymentStatus === 'paid')
     .reduce((s, o) => s + cashCollectedIDR(o), 0);
-  const unpostedQueuedIDR = Math.max(0, (shift.queuedCashIDR ?? 0) - lateCashIDR);
+  // What the declaration drains against. Counted on POSTING, not on staying
+  // paid — a voided replayed sale has still posted, and its cash has left the
+  // drawer with the refund. Voiding it drops it out of `cashSalesIDR` above,
+  // so if it also dropped out here `unpostedQueuedIDR` would climb back by the
+  // same amount and expected cash would never fall: the Z-report would demand
+  // that money forever, a permanent phantom shortfall. `paymentStatus` is
+  // 'pending' only for an order mid-settle, which a replay never leaves behind.
+  const postedQueuedIDR = lateOrders
+    .filter((o) => o.paymentStatus !== 'pending')
+    .reduce((s, o) => s + cashCollectedIDR(o), 0);
+  const unpostedQueuedIDR = Math.max(0, (shift.queuedCashIDR ?? 0) - postedQueuedIDR);
   const movements = await ctx.db
     .query('cashMovements')
     .withIndex('by_shift', (q) => q.eq('shiftId', shift._id))
@@ -132,6 +148,7 @@ async function shiftCashBreakdown(
     cashOutIDR,
     expectedCashIDR,
     lateCashIDR,
+    postedQueuedIDR,
     unpostedQueuedIDR,
   };
 }

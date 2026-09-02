@@ -195,6 +195,62 @@ describe('closed-shift cash with sales still queued', () => {
     expect(row.queuedCashIDR).toBe(0);
   });
 
+  it('stops expecting the cash once a replayed sale is voided', async () => {
+    // The regression this exists for. `lateCashIDR` counted only PAID orders,
+    // so voiding a replayed sale dropped it out of `cashSalesIDR` and out of
+    // the drained-declaration figure at the same time — `unpostedQueuedIDR`
+    // climbed straight back by the amount just removed, and expected cash
+    // never moved. The owner hands the 20.000 back to the customer and the
+    // Z-report goes on demanding it forever.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await s.asOwner.mutation(api.shifts.close, {
+      id: s.shiftId,
+      countedCashIDR: 120000,
+      queuedSales: [{ clientId: 'offline-1', totalIDR: 20000 }],
+    });
+    const replayed = await replaySale(s, 'offline-1');
+
+    const afterReplay = await summaryOf(s);
+    expect(afterReplay.expectedCashIDR).toBe(120000);
+    expect(afterReplay.varianceIDR).toBe(0);
+
+    await s.asOwner.mutation(api.orders.voidSale, { orderId: replayed.orderId });
+
+    // The cash went back over the counter, so the drawer should only be
+    // expected to hold the 100.000 float. Variance is +20.000 against the
+    // frozen close-time count, which is the honest reading: 120.000 really was
+    // counted, and 20.000 of it has since been refunded.
+    const afterVoid = await summaryOf(s);
+    expect(afterVoid.cashSalesIDR).toBe(0);
+    expect(afterVoid.expectedCashIDR).toBe(100000);
+    expect(afterVoid.varianceIDR).toBe(20000);
+    // Nothing offline is still counted as landed after close.
+    expect(afterVoid.lateCashIDR).toBe(0);
+  });
+
+  it('matches the online path when a sale in the same shift is voided', async () => {
+    // The parity check the fix is calibrated against: an ONLINE sale voided
+    // after close has always behaved this way, so the replayed path must land
+    // on exactly the same expected/variance pair.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    const sale = await s.asOwner.mutation(api.orders.createCashSale, {
+      clientId: 'online-1',
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [{ menuItemId: s.itemId, qty: 1, modifierOptionIds: [] }],
+      cashTenderedIDR: 20000,
+      createdAtClient: Date.now(),
+    });
+    await s.asOwner.mutation(api.shifts.close, { id: s.shiftId, countedCashIDR: 120000 });
+    await s.asOwner.mutation(api.orders.voidSale, { orderId: sale.orderId });
+
+    const row = await summaryOf(s);
+    expect(row.expectedCashIDR).toBe(100000);
+    expect(row.varianceIDR).toBe(20000);
+  });
+
   it('leaves an ordinary shift with no offline sales untouched', async () => {
     const t = convexTest(schema, modules);
     const s = await setup(t);
