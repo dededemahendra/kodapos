@@ -1,6 +1,12 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
 import { requireActiveOutlet } from './lib/auth';
+import {
+  projectRegisterSettings,
+  projectRegisterStaff,
+  registerSettingsValidator,
+  registerStaffValidator,
+} from './lib/settings';
 import schema from './schema';
 
 /**
@@ -24,9 +30,19 @@ const registerSnapshotValidator = v.object({
   variants: v.array(docOf('menuItemVariants')),
   priceCategories: v.array(docOf('priceCategories')),
   promos: v.array(docOf('promotions')),
-  settings: docOf('cafeSettings'),
+  // NOT `docOf('cafeSettings')`. The raw settings document carries
+  // `integrations[].config`, which holds the live Xendit secret key + callback
+  // token, the WhatsApp token, and the AI provider key. This query is gated by
+  // `requireActiveOutlet`, so every cashier can call it, and the client writes
+  // the result straight into IndexedDB — a raw document here would put a
+  // production payment credential, unencrypted, on every till in the cafe.
+  // `registerSettingsValidator` ships only the pricing/tax/receipt fields the
+  // register actually needs; the redaction lives in `lib/settings.ts`.
+  settings: registerSettingsValidator,
   shift: docOf('shifts'),
-  staff: v.array(docOf('cafeStaff')),
+  // Likewise projected: `pinHash` and `hourlyRateIDR` are not needed to ring a
+  // sale and must not be persisted to device storage.
+  staff: v.array(registerStaffValidator),
 });
 
 /**
@@ -35,10 +51,16 @@ const registerSnapshotValidator = v.object({
  * (`src/lib/offline/register-cache.ts`) without mixing prices from two
  * different points in time.
  *
- * Deliberately raw documents, not the reshaped rows `menu.items.listForSale`
- * returns: the cache's `RegisterSnapshot` is typed as `Doc<...>[]`, and
- * assembling it out of the trimmed view shapes would mean casting fabricated
- * documents into a type the rest of the offline code trusts.
+ * Menu-side rows are the raw documents, not the reshaped rows
+ * `menu.items.listForSale` returns: the cache's `RegisterSnapshot` is derived
+ * from this query's return type, and assembling it out of the trimmed view
+ * shapes would mean casting fabricated documents into a type the rest of the
+ * offline code trusts.
+ *
+ * `settings` and `staff` are the exception and are projected down (see the
+ * validator above): both carry fields — payment-provider credentials, PIN
+ * hashes, hourly rates — that must never reach a client, let alone a client
+ * that writes them to IndexedDB.
  *
  * Returns null when the cafe has no `cafeSettings` row or no open shift. There
  * is no complete snapshot to take in that state, and a partial one would be
@@ -125,9 +147,9 @@ export const registerSnapshot = query({
       variants,
       priceCategories,
       promos,
-      settings,
+      settings: projectRegisterSettings(settings),
       shift,
-      staff,
+      staff: staff.map(projectRegisterStaff),
     };
   },
 });

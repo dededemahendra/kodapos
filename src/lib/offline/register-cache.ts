@@ -1,4 +1,5 @@
-import type { Doc } from 'convex/_generated/dataModel';
+import type { api } from 'convex/_generated/api';
+import type { FunctionReturnType } from 'convex/server';
 import { type IDBPDatabase, openDB } from 'idb';
 
 /**
@@ -6,18 +7,18 @@ import { type IDBPDatabase, openDB } from 'idb';
  * offline: the current menu, its modifiers and variants, active promos, the
  * cafe's settings, the open shift, and staff. Written in one snapshot so a
  * read never mixes prices from two different points in time.
+ *
+ * Derived from the query's own return type rather than re-declared as
+ * `Doc<...>`, because `settings` and `staff` are deliberately NOT whole
+ * documents: `convex/offline.ts` projects away the payment-provider
+ * credentials on the settings row and the PIN hash + wage on staff rows, and
+ * this cache is written to disk. Deriving keeps the two from drifting back
+ * apart, and a re-widened field here would fail typecheck instead of quietly
+ * persisting a secret.
  */
-export type RegisterSnapshot = {
-  items: Doc<'menuItems'>[];
-  categories: Doc<'categories'>[];
-  modifierGroups: Doc<'modifierGroups'>[];
-  modifierOptions: Doc<'modifierOptions'>[];
-  variants: Doc<'menuItemVariants'>[];
-  priceCategories: Doc<'priceCategories'>[];
-  promos: Doc<'promotions'>[];
-  settings: Doc<'cafeSettings'>;
-  shift: Doc<'shifts'>;
-  staff: Doc<'cafeStaff'>[];
+export type RegisterSnapshot = NonNullable<
+  FunctionReturnType<typeof api.offline.registerSnapshot>
+> & {
   writtenAt: number;
 };
 
