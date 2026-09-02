@@ -73,11 +73,15 @@ async function lateOrderIdsFor(
   ctx: QueryCtx | MutationCtx,
   cafeId: Id<'cafes'>
 ): Promise<Set<string>> {
+  // Indexed on kind, not filtered after a by_cafe collect: these rows are only
+  // ever flagged resolved, never deleted, so scanning the whole table here grew
+  // without bound for the life of the outlet and would eventually blow the
+  // per-query read limit on the very page that depends on it.
   const rows = await ctx.db
     .query('saleReconciliations')
-    .withIndex('by_cafe', (q) => q.eq('cafeId', cafeId))
+    .withIndex('by_cafe_kind', (q) => q.eq('cafeId', cafeId).eq('kind', 'shift_closed'))
     .collect();
-  return new Set(rows.filter((r) => r.kind === 'shift_closed').map((r) => r.orderId as string));
+  return new Set(rows.map((r) => r.orderId as string));
 }
 
 type BreakdownPrefetch = {
@@ -178,24 +182,50 @@ export const close = mutation({
     id: v.id('shifts'),
     countedCashIDR: v.number(),
     /**
-     * Cash the till took for sales still in this device's outbox. The server
-     * cannot see the outbox, so the closing client declares it; without it the
-     * drawer count reads as an overage for the whole window between close and
-     * replay. Recorded as its own labelled field (not silently absorbed) so the
-     * declaration stays auditable against the sales that actually post.
+     * The sales still sitting in this device's outbox, one entry each. The
+     * server cannot see the outbox, so the closing client declares them;
+     * without the declaration the drawer count reads as an overage for the
+     * whole window between close and replay.
+     *
+     * Per-sale, NOT a pre-summed total, and that is the whole point. The
+     * client's snapshot of its outbox is up to a poll interval stale, so a
+     * queued sale can replay in the gap between the snapshot and this
+     * mutation. A bare total would then be counted twice — once inside
+     * `shiftCashBreakdown` (the order now exists) and once in the
+     * declaration — and it could never drain, because `lateCashIDR` only
+     * counts orders that posted into an ALREADY-CLOSED shift and this one
+     * posted while it was still open. The result was a permanent phantom
+     * shortfall on the Z-report: exactly the "is my staff short?" question
+     * this whole feature exists to answer honestly. Declaring `clientId`s
+     * lets the server drop any that already landed, so the arithmetic is
+     * correct regardless of timing.
      */
-    queuedCashIDR: v.optional(v.number()),
+    queuedSales: v.optional(v.array(v.object({ clientId: v.string(), totalIDR: v.number() }))),
   },
   returns: v.null(),
-  handler: async (ctx, { id, countedCashIDR, queuedCashIDR }) => {
+  handler: async (ctx, { id, countedCashIDR, queuedSales }) => {
     const { cafeId } = await requireActiveOutlet(ctx);
     const shift = await requireOwned(ctx, cafeId, id, 'Shift');
     if (shift.status !== 'open') {
       throw new Error('Shift sudah ditutup.');
     }
     const counted = assertIDR(countedCashIDR, 'Uang terhitung');
-    const queued =
-      queuedCashIDR === undefined ? 0 : assertIDR(queuedCashIDR, 'Penjualan menunggu sinkron');
+    let queued = 0;
+    for (const declared of queuedSales ?? []) {
+      assertIDR(declared.totalIDR, 'Penjualan menunggu sinkron');
+      // Already posted (it replayed between the client's snapshot and now, or
+      // the outbox entry outlived a successful post). Its cash is already in
+      // the orders `shiftCashBreakdown` reads below; counting it again here
+      // would inflate expected cash forever.
+      const posted = await ctx.db
+        .query('orders')
+        .withIndex('by_cafe_clientId', (q) =>
+          q.eq('cafeId', cafeId).eq('clientId', declared.clientId)
+        )
+        .unique();
+      if (posted) continue;
+      queued += declared.totalIDR;
+    }
     // The shift row has no queuedCashIDR yet, so the breakdown's own
     // unpostedQueuedIDR is 0 here; add the declaration explicitly.
     const { expectedCashIDR: postedExpectedIDR } = await shiftCashBreakdown(ctx, shift);

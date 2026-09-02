@@ -699,7 +699,14 @@ export default defineSchema({
     detail: v.optional(v.string()),
     createdAt: v.number(),
     resolvedAt: v.optional(v.number()),
-  }).index('by_cafe', ['cafeId']),
+  })
+    .index('by_cafe', ['cafeId'])
+    // Reading only the `shift_closed` rows keeps shifts.lateOrderIdsFor off the
+    // rest of the table. These rows are flagged resolved, never deleted, so an
+    // unindexed by_cafe scan grew monotonically for the life of the outlet and
+    // would eventually trip the per-query read limit — taking the shift-history
+    // page down with it.
+    .index('by_cafe_kind', ['cafeId', 'kind']),
 
   ingredients: defineTable({
     cafeId: v.id('cafes'),

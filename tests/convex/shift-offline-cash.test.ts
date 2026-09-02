@@ -105,7 +105,7 @@ describe('closed-shift cash with sales still queued', () => {
     await s.asOwner.mutation(api.shifts.close, {
       id: s.shiftId,
       countedCashIDR: 120000,
-      queuedCashIDR: 20000,
+      queuedSales: [{ clientId: 'offline-1', totalIDR: 20000 }],
     });
 
     // Expected already accounts for the sale nobody has posted yet.
@@ -137,7 +137,7 @@ describe('closed-shift cash with sales still queued', () => {
     await s.asOwner.mutation(api.shifts.close, {
       id: s.shiftId,
       countedCashIDR: 120000,
-      queuedCashIDR: 20000,
+      queuedSales: [{ clientId: 'offline-1', totalIDR: 20000 }],
     });
     await replaySale(s, 'offline-1');
     await replaySale(s, 'offline-2');
@@ -157,16 +157,42 @@ describe('closed-shift cash with sales still queued', () => {
       s.asOwner.mutation(api.shifts.close, {
         id: s.shiftId,
         countedCashIDR: 100000,
-        queuedCashIDR: 1500.5,
+        queuedSales: [{ clientId: 'offline-1', totalIDR: 1500.5 }],
       })
     ).rejects.toThrow('angka bulat');
     await expect(
       s.asOwner.mutation(api.shifts.close, {
         id: s.shiftId,
         countedCashIDR: 100000,
-        queuedCashIDR: -1000,
+        queuedSales: [{ clientId: 'offline-1', totalIDR: -1000 }],
       })
     ).rejects.toThrow('negatif');
+  });
+
+  it('does not double-count a declared sale that already posted before close (the race window)', async () => {
+    // The declaration comes from an outbox snapshot up to a poll interval
+    // stale. If a queued sale replays between that snapshot and the close
+    // mutation — here modelled by posting it while the shift is still open,
+    // then declaring the same clientId at close — its cash is already inside
+    // `shiftCashBreakdown`'s live `cashSalesIDR`. Counting the declaration on
+    // top would inflate expected cash by 20.000 forever: unlike a genuine
+    // late replay, a sale that posted before close never gets a
+    // `shift_closed` marker, so nothing would ever be able to unwind it.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await replaySale(s, 'offline-1');
+    await s.asOwner.mutation(api.shifts.close, {
+      id: s.shiftId,
+      countedCashIDR: 120000,
+      queuedSales: [{ clientId: 'offline-1', totalIDR: 20000 }],
+    });
+
+    const row = await summaryOf(s);
+    expect(row.cashSalesIDR).toBe(20000);
+    expect(row.expectedCashIDR).toBe(120000);
+    expect(row.varianceIDR).toBe(0);
+    expect(row.lateCashIDR).toBe(0);
+    expect(row.queuedCashIDR).toBe(0);
   });
 
   it('leaves an ordinary shift with no offline sales untouched', async () => {

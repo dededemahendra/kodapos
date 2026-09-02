@@ -41,6 +41,21 @@ export function queuedForShift(sales: readonly QueuedSale[], shiftId: string): Q
 }
 
 /**
+ * One queued sale as `shifts.close` wants it declared: the id the server can
+ * check against posted orders, plus what the till took for it.
+ *
+ * Deliberately per-sale rather than a pre-summed total. The outbox snapshot a
+ * screen holds is up to a poll interval old, so a sale can replay between the
+ * snapshot and the close mutation; only the ids let the server drop the ones
+ * that already landed instead of counting them twice.
+ */
+export type QueuedSaleDeclaration = { clientId: string; totalIDR: number };
+
+export function toQueuedDeclarations(sales: readonly QueuedSale[]): QueuedSaleDeclaration[] {
+  return sales.map((sale) => ({ clientId: sale.clientId, totalIDR: sale.payload.totalIDR }));
+}
+
+/**
  * Cash the drawer physically holds for the given queued sales.
  *
  * `totalIDR`, not `cashTenderedIDR`: the change was handed back, so what stays
