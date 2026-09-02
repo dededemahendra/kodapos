@@ -34,6 +34,7 @@ import {
   normalizeReceiptCode,
   RECEIPT_CODE_LENGTH,
   shouldAutoLoadMore,
+  shouldShowOrderList,
 } from '~/lib/order-search';
 
 export const Route = createFileRoute('/_pos/reports/orders')({
@@ -175,7 +176,27 @@ function OrdersReport() {
         </Select>
       </div>
 
-      {pageStatus === 'LoadingFirstPage' || (autoLoading && !gaveUp) ? (
+      {isPartialReceiptCode(codeInput) ? (
+        // A partial code (e.g. "EF1") normalizes to no `q` at all — see
+        // normalizeReceiptCode — so the query below silently returns the
+        // whole unfiltered range instead of "no results". This branch has to
+        // outrank both the loading spinner and the result list: on a busy
+        // day `results.length` is never 0 here, so nothing else would ever
+        // say the search was ignored rather than empty.
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Receipt />
+            </EmptyMedia>
+            <EmptyTitle>
+              <Trans>Kode struk harus 4 karakter.</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Ketik 4 karakter terakhir yang tercetak di struk.</Trans>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : pageStatus === 'LoadingFirstPage' || (autoLoading && !gaveUp) ? (
         <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground">
           <Spinner />
           {code !== null ? (
@@ -184,38 +205,7 @@ function OrdersReport() {
             </span>
           ) : null}
         </div>
-      ) : results.length === 0 ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Receipt />
-            </EmptyMedia>
-            <EmptyTitle>
-              {isPartialReceiptCode(codeInput) ? (
-                <Trans>Kode struk harus 4 karakter.</Trans>
-              ) : gaveUp ? (
-                <Trans>Pencarian dihentikan sebelum selesai.</Trans>
-              ) : code !== null ? (
-                <Trans>Struk {code} tidak ditemukan pada rentang ini.</Trans>
-              ) : (
-                <Trans>Belum ada pesanan pada rentang ini.</Trans>
-              )}
-            </EmptyTitle>
-            <EmptyDescription>
-              {isPartialReceiptCode(codeInput) ? (
-                <Trans>Ketik 4 karakter terakhir yang tercetak di struk.</Trans>
-              ) : gaveUp ? (
-                <Trans>
-                  Terlalu banyak pesanan pada rentang ini. Persempit rentang tanggalnya lalu cari
-                  lagi.
-                </Trans>
-              ) : (
-                <Trans>Coba ubah filter atau rentang tanggal di atas.</Trans>
-              )}
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
+      ) : shouldShowOrderList(codeInput, results.length) ? (
         <ul className="divide-y divide-border border border-border rounded-md">
           {results.map((o) => (
             <li key={o._id}>
@@ -268,6 +258,33 @@ function OrdersReport() {
             </li>
           ))}
         </ul>
+      ) : (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Receipt />
+            </EmptyMedia>
+            <EmptyTitle>
+              {gaveUp ? (
+                <Trans>Pencarian dihentikan sebelum selesai.</Trans>
+              ) : code !== null ? (
+                <Trans>Struk {code} tidak ditemukan pada rentang ini.</Trans>
+              ) : (
+                <Trans>Belum ada pesanan pada rentang ini.</Trans>
+              )}
+            </EmptyTitle>
+            <EmptyDescription>
+              {gaveUp ? (
+                <Trans>
+                  Terlalu banyak pesanan pada rentang ini. Persempit rentang tanggalnya lalu cari
+                  lagi.
+                </Trans>
+              ) : (
+                <Trans>Coba ubah filter atau rentang tanggal di atas.</Trans>
+              )}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
 
       {pageStatus === 'CanLoadMore' ? (

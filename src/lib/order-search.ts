@@ -51,6 +51,22 @@ export function isPartialReceiptCode(raw: string): boolean {
   return trimmed.length > 0 && trimmed.length !== RECEIPT_CODE_LENGTH;
 }
 
+/**
+ * Whether the fetched page should render as the order list.
+ *
+ * A partial code (e.g. "EF1") normalizes to `null` — see
+ * `normalizeReceiptCode` — so `q` is never sent and the query quietly returns
+ * the whole unfiltered range instead of "no results". Deciding "show the
+ * list" from `resultCount > 0` alone would then render every order in range
+ * with nothing to say the search was ignored, on a screen used to find a
+ * specific sale to refund. The list must never render while a partial code
+ * sits in the input, no matter how many unfiltered rows came back; the caller
+ * shows the "type 4 characters" hint instead.
+ */
+export function shouldShowOrderList(rawCode: string, resultCount: number): boolean {
+  return !isPartialReceiptCode(rawCode) && resultCount > 0;
+}
+
 export type PaginationStatus = 'LoadingFirstPage' | 'LoadingMore' | 'CanLoadMore' | 'Exhausted';
 
 export type CodeSearchState = {

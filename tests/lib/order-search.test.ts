@@ -6,6 +6,7 @@ import {
   MAX_CODE_SEARCH_PAGES,
   normalizeReceiptCode,
   shouldAutoLoadMore,
+  shouldShowOrderList,
 } from '~/lib/order-search';
 
 describe('normalizeReceiptCode', () => {
@@ -95,6 +96,31 @@ describe('codeSearchExhausted', () => {
       } as const;
       expect(shouldAutoLoadMore(state) && codeSearchExhausted(state)).toBe(false);
     }
+  });
+});
+
+describe('shouldShowOrderList', () => {
+  it('never shows the list while the code is partial, no matter how many rows came back', () => {
+    // The bug this exists for: a partial code normalizes to no `q`, so the
+    // query silently returns the whole unfiltered range. Showing that range
+    // as if it were the search result reads as "search ignored" rather than
+    // "keep typing", on a screen used to find one sale to refund.
+    expect(shouldShowOrderList('EF1', 25)).toBe(false);
+    expect(shouldShowOrderList('EF123', 25)).toBe(false);
+    expect(shouldShowOrderList('EF1', 0)).toBe(false);
+  });
+
+  it('shows the list once a complete code has matches', () => {
+    expect(shouldShowOrderList('EF12', 1)).toBe(true);
+  });
+
+  it('shows the list while plain browsing (no code) once rows exist', () => {
+    expect(shouldShowOrderList('', 25)).toBe(true);
+  });
+
+  it('does not show an empty list', () => {
+    expect(shouldShowOrderList('', 0)).toBe(false);
+    expect(shouldShowOrderList('EF12', 0)).toBe(false);
   });
 });
 
