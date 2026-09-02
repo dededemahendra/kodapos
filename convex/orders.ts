@@ -4,6 +4,7 @@ import type { Id } from './_generated/dataModel';
 import { type MutationCtx, mutation, query } from './_generated/server';
 import { requireActiveOutlet, requireOwned } from './lib/auth';
 import { manualDiscountValidator } from './lib/discount';
+import { currentStockQty } from './lib/inventory';
 import { orderTypeValidator } from './lib/orderType';
 import { methodTotals } from './lib/payment';
 import { unitRefundIDR } from './lib/refund';
@@ -128,7 +129,8 @@ async function recordReconciliations(
       | 'payment_method_disabled'
       | 'shift_closed'
       | 'cashier_archived'
-      | 'price_category_archived',
+      | 'price_category_archived'
+      | 'negative_stock',
     extra: { rungIDR?: number; currentIDR?: number; detail?: string }
   ) =>
     ctx.db.insert('saleReconciliations', {
@@ -264,6 +266,34 @@ async function recordReconciliations(
     if (priceCategory && priceCategory.cafeId === cafeId && priceCategory.archived) {
       await insert('price_category_archived', { detail: priceCategory.name });
     }
+  }
+
+  // Negative stock. `settleSale` (already run by the time this is called) posts
+  // the inventory deduction unconditionally and by design: the drink was handed
+  // over during the outage, so the consumption is a fact whether or not the
+  // books had the stock for it. What is NOT acceptable is that fact being
+  // silent — the owner has to know which ingredient the replay drove below
+  // zero, or the first they hear of it is a stock take that will not balance.
+  //
+  // Read from the committed order, not `args`: `buildOrder` is what resolves
+  // each line's `recipeSnapshot`, and that snapshot is exactly what was
+  // deducted.
+  const order = await ctx.db.get(orderId);
+  const ingredientIds = new Set<Id<'ingredients'>>();
+  for (const line of order?.lines ?? []) {
+    for (const recipeLine of line.recipeSnapshot ?? []) ingredientIds.add(recipeLine.ingredientId);
+  }
+  for (const ingredientId of ingredientIds) {
+    const qty = await currentStockQty(ctx, cafeId, ingredientId);
+    if (qty >= 0) continue;
+    const ingredient = await ctx.db.get(ingredientId);
+    if (!ingredient || ingredient.cafeId !== cafeId) continue;
+    // Rounded: stock is a float (qty x wastageFactor), and a detail line
+    // reading "-2.0000000000000004 g" helps nobody.
+    const shortfall = Math.round(qty * 100) / 100;
+    await insert('negative_stock', {
+      detail: `${ingredient.name}: sisa ${shortfall} ${ingredient.canonicalUnit}`,
+    });
   }
 }
 

@@ -763,6 +763,102 @@ describe('createReplayedCashSale', () => {
     expect(await t.run((ctx) => ctx.db.query('orders').collect())).toHaveLength(0);
   });
 
+  /**
+   * Gives the item a one-ingredient recipe and sets the ingredient's stock, so
+   * a replay can be made to drive it below zero on demand.
+   */
+  async function withRecipe(s: Setup, opts: { stock: number; perDrink: number }) {
+    const ingredientId = await s.asOwner.mutation(api.ingredients.upsert, {
+      name: 'Susu UHT',
+      canonicalUnit: 'ml',
+      reorderThreshold: 0,
+      lastCostPerUnitIDR: 100,
+    });
+    await s.asOwner.mutation(api.recipes.upsert, {
+      menuItemId: s.itemId,
+      lines: [{ ingredientId, qty: opts.perDrink, wastageFactor: 1 }],
+    });
+    if (opts.stock > 0) {
+      await s.asOwner.mutation(api.ingredients.adjustStock, {
+        ingredientId,
+        newQty: opts.stock,
+        reasonLabel: 'Stok awal',
+      });
+    }
+    return ingredientId;
+  }
+
+  async function replayTwoDrinks(s: Setup, clientId: string) {
+    return await s.asOwner.mutation(api.orders.createReplayedCashSale, {
+      clientId,
+      shiftId: s.shiftId,
+      cashierId: s.cashierId,
+      lines: [
+        {
+          menuItemId: s.itemId,
+          qty: 2,
+          modifierOptionIds: [],
+          nameSnapshot: 'Kopi',
+          unitPriceIDR: 20000,
+          lineTotalIDR: 40000,
+        },
+      ],
+      discountIDR: 0,
+      serviceChargeIDR: 0,
+      taxIDR: 0,
+      totalIDR: 40000,
+      cashTenderedIDR: 40000,
+      createdAtClient: Date.now(),
+    });
+  }
+
+  it('flags an ingredient the replay drove below zero', async () => {
+    // `settleSale` posts the inventory deduction unconditionally, and that is
+    // correct: the coffee was made and handed over during the outage, so the
+    // milk is gone whether or not the books said there was any. What the spec
+    // requires — and what was missing — is that the owner be TOLD which
+    // ingredient went negative, instead of finding out at the next stock take.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    // 150ml on hand, two coffees at 100ml each: 50ml short.
+    await withRecipe(s, { stock: 150, perDrink: 100 });
+
+    await replayTwoDrinks(s, 'offline-negative-stock');
+
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    const row = recon.find((r) => r.kind === 'negative_stock');
+    expect(row).toBeDefined();
+    // Named, because "some ingredient is negative" is not actionable.
+    expect(row?.detail).toContain('Susu UHT');
+    expect(row?.detail).toContain('-50');
+  });
+
+  it('does not flag a replay the stock covered', async () => {
+    // The other half of the assertion: a row on every replay with a recipe
+    // would be noise, and noise is how a real discrepancy gets ignored.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await withRecipe(s, { stock: 500, perDrink: 100 });
+
+    await replayTwoDrinks(s, 'offline-stock-ok');
+
+    const recon = await t.run((ctx) => ctx.db.query('saleReconciliations').collect());
+    expect(recon.filter((r) => r.kind === 'negative_stock')).toHaveLength(0);
+  });
+
+  it('surfaces the negative-stock row in the reconciliation view', async () => {
+    // The spec names `negative_stock` as one of the kinds the reconciliation
+    // report must surface; the row is worthless if it cannot be read back out.
+    const t = convexTest(schema, modules);
+    const s = await setup(t);
+    await withRecipe(s, { stock: 0, perDrink: 100 });
+
+    await replayTwoDrinks(s, 'offline-negative-stock-2');
+
+    const rows = await s.asOwner.query(api.reconciliation.listOpen, {});
+    expect(rows.some((r) => r.kind === 'negative_stock')).toBe(true);
+  });
+
   it('settles the sale so it counts as paid revenue', async () => {
     const t = convexTest(schema, modules);
     const s = await setup(t);
