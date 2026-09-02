@@ -4419,6 +4419,10 @@ msgstr "Signing you in..."
 msgid "Memproses…"
 msgstr "Processing…"
 
+#: src/routes/_pos/shift/close.tsx
+msgid "Memuat antrean…"
+msgstr "Loading queue…"
+
 #: src/components/sale/sale-screen.tsx
 #~ msgid "Memuat menu…"
 #~ msgstr "Loading menu…"

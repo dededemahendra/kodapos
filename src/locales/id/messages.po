@@ -4419,6 +4419,10 @@ msgstr "Memproses tautan masuk..."
 msgid "Memproses…"
 msgstr "Memproses…"
 
+#: src/routes/_pos/shift/close.tsx
+msgid "Memuat antrean…"
+msgstr "Memuat antrean…"
+
 #: src/components/sale/sale-screen.tsx
 #~ msgid "Memuat menu…"
 #~ msgstr "Memuat menu…"
