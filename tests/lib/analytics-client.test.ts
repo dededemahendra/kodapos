@@ -286,3 +286,100 @@ describe('capturePageleave', () => {
     expect(() => capturePageleave('https://kodapos.app/')).not.toThrow();
   });
 });
+
+describe('feature flags', () => {
+  /**
+   * A posthog-js stand-in whose flag payload the test delivers by hand, the way
+   * PostHog does when `/flags` responds. `deliver` reads the captured callback
+   * at call time, so it works whether init subscribed before or after the test
+   * grabbed it.
+   */
+  function flagSdk(extra: Record<string, unknown> = {}) {
+    let delivered: (() => void) | undefined;
+    const sdk = {
+      init: vi.fn(),
+      register: vi.fn(),
+      capture: vi.fn(),
+      isFeatureEnabled: vi.fn((_key: string): boolean | undefined => true),
+      onFeatureFlags: vi.fn((cb: () => void) => {
+        delivered = cb;
+        return () => {};
+      }),
+      ...extra,
+    };
+    return { sdk, deliver: () => delivered?.() };
+  }
+
+  async function startWith(sdk: Record<string, unknown>) {
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    stubHostname('kodapos.app');
+    vi.doMock('posthog-js', () => ({ default: sdk }));
+    vi.resetModules();
+    return import('../../src/lib/analytics/client');
+  }
+
+  // Undefined, not false. The offline kill switch fails closed on undefined by
+  // its own decision; a client that collapsed "unknown" into false would make
+  // that choice for every future flag caller, silently.
+  it('reads undefined when analytics never started', async () => {
+    vi.resetModules();
+    const { isFeatureEnabled } = await import('../../src/lib/analytics/client');
+
+    expect(isFeatureEnabled('offline-cash-sales')).toBeUndefined();
+  });
+
+  it('returns the SDK cached value once initialized', async () => {
+    const { sdk } = flagSdk();
+    const { initAnalytics, isFeatureEnabled } = await startWith(sdk);
+    await initAnalytics({});
+
+    expect(isFeatureEnabled('offline-cash-sales')).toBe(true);
+    expect(sdk.isFeatureEnabled).toHaveBeenCalledWith('offline-cash-sales');
+  });
+
+  // React runs child effects before parent effects, so the register subscribes
+  // BEFORE the analytics provider has called initAnalytics. A subscription that
+  // read `client` at subscribe time would find it null and miss every payload.
+  it('notifies a listener that subscribed before init once flags load', async () => {
+    const { sdk, deliver } = flagSdk();
+    const { initAnalytics, onFeatureFlagsChanged } = await startWith(sdk);
+    const listener = vi.fn();
+
+    onFeatureFlagsChanged(listener);
+    await initAnalytics({});
+    expect(listener).not.toHaveBeenCalled();
+
+    deliver();
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops notifying after unsubscribe', async () => {
+    const { sdk, deliver } = flagSdk();
+    const { initAnalytics, onFeatureFlagsChanged } = await startWith(sdk);
+    const listener = vi.fn();
+
+    const unsubscribe = onFeatureFlagsChanged(listener);
+    await initAnalytics({});
+    unsubscribe();
+    deliver();
+
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  // Regression guard. Flag wiring is a convenience; the client is not. When the
+  // flag subscription was registered inside init's try, before `client` was
+  // assigned, one throw from it nulled the whole client — pageviews, identify
+  // and error tracking all went dark to serve a feature flag.
+  it('still initializes the client when the flag subscription throws', async () => {
+    const { sdk } = flagSdk({
+      onFeatureFlags: vi.fn(() => {
+        throw new Error('flags unavailable');
+      }),
+    });
+    const { initAnalytics, capture } = await startWith(sdk);
+
+    await expect(initAnalytics({})).resolves.toBe(true);
+    capture('probe');
+    expect(sdk.capture).toHaveBeenCalledWith('probe', undefined);
+  });
+});

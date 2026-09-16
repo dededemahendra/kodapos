@@ -15,6 +15,11 @@ export interface ShiftSummary {
   expectedCashIDR?: number;
   countedCashIDR?: number;
   varianceIDR?: number;
+  /** Cash taken for sales still queued on the device at close. Already part of
+   *  `expectedCashIDR`; shown as its own line so the figure is explainable. */
+  queuedCashIDR?: number;
+  /** Cash from queued sales that have since posted into this closed shift. */
+  lateCashIDR?: number;
 }
 
 export interface ShiftSummaryPanelProps {
@@ -68,6 +73,22 @@ export function ShiftSummaryPanel({ shift }: ShiftSummaryPanelProps) {
             <Trans>Kas keluar</Trans>
           </dt>
           <dd>−{formatIDR(shift.cashOutIDR)}</dd>
+        </>
+      )}
+      {shift.queuedCashIDR !== undefined && shift.queuedCashIDR > 0 && (
+        <>
+          <dt className="text-muted-foreground">
+            <Trans>Penjualan offline menunggu sinkron</Trans>
+          </dt>
+          <dd>+{formatIDR(shift.queuedCashIDR)}</dd>
+        </>
+      )}
+      {shift.lateCashIDR !== undefined && shift.lateCashIDR > 0 && (
+        <>
+          <dt className="text-muted-foreground">
+            <Trans>Penjualan offline masuk setelah tutup</Trans>
+          </dt>
+          <dd>{formatIDR(shift.lateCashIDR)}</dd>
         </>
       )}
       {shift.expectedCashIDR !== undefined && (

@@ -32,3 +32,30 @@ export const PAYMENT_METHODS: PaymentMethodEntry[] = [
 export function methodLabel(method: PaymentMethod): ReactNode {
   return PAYMENT_METHODS.find((m) => m.method === method)?.label ?? method;
 }
+
+/**
+ * Whether a method can be completed with no network at all.
+ *
+ * Only cash can: the customer hands over money and the till owes them a
+ * receipt, nothing has to be confirmed anywhere else. Dynamic QRIS needs the
+ * provider to issue and settle the code. STATIC QRIS is excluded too even
+ * though its QR is just a printed image — the payment cannot be CONFIRMED
+ * offline, so the till would be recording money it has no way of knowing
+ * arrived. Gift cards need their balance read and debited server-side.
+ */
+export function isOfflineCapable(method: PaymentMethod): boolean {
+  return method === 'cash';
+}
+
+/**
+ * The methods to actually show. Offline-incapable methods are REMOVED, never
+ * merely disabled: a greyed-out button in the middle of a rush invites a
+ * cashier to keep tapping it, and every tap is a second the customer is
+ * waiting on a payment that can never complete.
+ */
+export function methodsForConnection(
+  methods: PaymentMethod[],
+  connection: 'online' | 'offline'
+): PaymentMethod[] {
+  return connection === 'offline' ? methods.filter(isOfflineCapable) : methods;
+}

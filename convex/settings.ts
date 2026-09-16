@@ -4,6 +4,7 @@ import type { MutationCtx } from './_generated/server';
 import { internalQuery, mutation, query } from './_generated/server';
 import { requireActiveOutlet, requireBusinessOwner } from './lib/auth';
 import { DEFAULT_SERVICE_CHARGE_NAME } from './lib/pricing';
+import { sanitizeIntegrations } from './lib/settings';
 import { assertValidTemplate } from './lib/whatsapp';
 
 /**
@@ -145,59 +146,12 @@ export const get = query({
     const storageId = row?.payment?.qrisImageStorageId;
     const qrisImageUrl = storageId ? await ctx.storage.getUrl(storageId) : null;
 
-    // Strip server-only secrets (Xendit creds) from the qris integration before
-    // returning to the client — only the non-sensitive provider + key hint leak.
-    const integrations = (row?.integrations ?? DEFAULT_SETTINGS.integrations).map((i) => {
-      // Strip server-only secrets before returning to the client.
-      if (i.key === 'qris') {
-        return {
-          key: i.key,
-          connected: i.connected,
-          ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
-          config: {
-            provider: (i.config as { provider?: string } | undefined)?.provider ?? 'xendit',
-            keyHint: (i.config as { keyHint?: string } | undefined)?.keyHint ?? '',
-          },
-        };
-      }
-      if (i.key === 'whatsapp') {
-        const c = (i.config ?? {}) as {
-          endpoint?: string;
-          headerName?: string;
-          bodyTemplate?: string;
-          tokenHint?: string;
-        };
-        return {
-          key: i.key,
-          connected: i.connected,
-          ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
-          config: {
-            endpoint: c.endpoint ?? '',
-            headerName: c.headerName ?? 'Authorization',
-            bodyTemplate: c.bodyTemplate ?? '',
-            tokenHint: c.tokenHint ?? '',
-          },
-        };
-      }
-      if (i.key === 'ai') {
-        const c = (i.config ?? {}) as {
-          provider?: string;
-          model?: string;
-          keyHint?: string;
-        };
-        return {
-          key: i.key,
-          connected: i.connected,
-          ...(i.connectedAt !== undefined ? { connectedAt: i.connectedAt } : {}),
-          config: {
-            provider: c.provider ?? 'openai',
-            model: c.model ?? '',
-            keyHint: c.keyHint ?? '',
-          },
-        };
-      }
-      return i;
-    });
+    // Strip server-only secrets (Xendit/WhatsApp/AI credentials) before
+    // returning to the client — only the non-sensitive provider metadata and
+    // masked hints leave the server. The redaction itself lives in
+    // `lib/settings.ts` so every path that ships settings to a client shares
+    // one implementation and cannot drift apart.
+    const integrations = sanitizeIntegrations(row?.integrations ?? DEFAULT_SETTINGS.integrations);
 
     return {
       payment,

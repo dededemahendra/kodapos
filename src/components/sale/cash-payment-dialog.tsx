@@ -2,12 +2,21 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 import { DEFAULT_LOYALTY } from 'convex/lib/loyalty';
+import { computeOrderTotals } from 'convex/lib/pricing';
 import { useMutation, useQuery } from 'convex/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
 import { formatIDR } from '~/lib/money';
+import { enqueue } from '~/lib/offline/outbox';
+import { isUsable, load } from '~/lib/offline/register-cache';
+import {
+  buildReplayPayload,
+  type OfflineSaleInput,
+  type OfflineSaleRejection,
+  toOfflineSaleLines,
+} from '~/lib/offline/sale-payload';
 import { genUUID } from '~/lib/uuid';
 import type { CartState } from './cart-reducer';
 import { CustomerSection, type CustomerSelection } from './customer-section';
@@ -40,7 +49,9 @@ export function CashPaymentDialog({
   promoId,
   tableId,
   priceCategoryId,
+  offline,
   onPaid,
+  onQueued,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -58,7 +69,11 @@ export function CashPaymentDialog({
   promoId?: Id<'promotions'>;
   tableId?: Id<'tables'>;
   priceCategoryId?: Id<'priceCategories'>;
+  /** No usable connection: the sale goes to the device outbox, not the server. */
+  offline: boolean;
   onPaid: (orderId: Id<'orders'>) => void;
+  /** An offline sale that is safely stored on the device and owes a receipt. */
+  onQueued: (sale: OfflineSaleInput) => void;
 }) {
   const { t } = useLingui();
   const createCashSale = useMutation(api.orders.createCashSale);
@@ -79,11 +94,20 @@ export function CashPaymentDialog({
     }
   }, [open]);
 
+  // Loyalty is a server-side ledger: `replayArgs` carries no customer, points
+  // or reward field, so a redemption rung offline would discount the bill and
+  // never be deducted from anyone's balance. The picker is hidden below and the
+  // redemption is forced to zero here, so a customer selected just before the
+  // socket dropped can't still move the total.
+  useEffect(() => {
+    if (offline) setCustomer({ redeemPoints: 0 });
+  }, [offline]);
+
   const { afterPromoIDR, redeemIDR, totalIDR } = usePaymentTotals({
     subtotalIDR,
     discountIDR: promoDiscountIDR,
-    redeemPoints: customer.redeemPoints,
-    redeemRewardIDR: customer.redeemRewardIDR,
+    redeemPoints: offline ? 0 : customer.redeemPoints,
+    ...(offline ? {} : { redeemRewardIDR: customer.redeemRewardIDR }),
     loyaltyCfg,
     serviceChargeEnabled,
     serviceChargePct,
@@ -105,10 +129,105 @@ export function CashPaymentDialog({
   const denoms =
     usableQuickCash.length > 0 ? usableQuickCash : computeDenominations(totalIDR).slice(1);
 
+  function rejectionMessage(reason: OfflineSaleRejection): string {
+    if (reason === 'insufficient_cash') return t`Uang yang diterima kurang dari total.`;
+    if (reason === 'empty_cart') return t`Keranjang kosong.`;
+    // invalid_qty / non_integer_money / totals_mismatch are all "this cart
+    // would be rejected when it syncs". Ringing it anyway would take the cash
+    // and dead-letter the sale, so the till refuses it here instead.
+    return t`Pesanan ini tidak bisa disimpan offline. Periksa kembali item dan totalnya.`;
+  }
+
+  /**
+   * The offline path. Order matters and is not negotiable: check the cached
+   * menu is fresh, build the payload, store it, and only then let the caller
+   * print. A receipt printed for a sale that never reached the outbox is money
+   * gone with no record it existed.
+   */
+  async function confirmOffline() {
+    // The snapshot is what the offline register is priced from. `load()` itself
+    // can reject (IndexedDB blocked/unavailable), which is exactly as unusable
+    // as a stale snapshot, so it collapses into the same refusal.
+    const snapshot = await load().catch(() => null);
+    if (!isUsable(snapshot, Date.now())) {
+      setError(
+        t`Data menu tersimpan sudah terlalu lama untuk dipakai. Sambungkan internet dulu, atau tulis struk manual.`
+      );
+      return;
+    }
+
+    // Recomputed here rather than reusing the dialog's displayed total so the
+    // three numbers the server re-checks (service charge, tax, total) come from
+    // one call to the shared pricing helper and cannot disagree with each other.
+    const {
+      serviceChargeIDR,
+      taxIDR,
+      totalIDR: offlineTotalIDR,
+    } = computeOrderTotals({
+      subtotalIDR,
+      discountIDR: promoDiscountIDR,
+      serviceChargeEnabled,
+      serviceChargePct,
+      taxEnabled,
+      taxRatePct,
+    });
+
+    const sale: OfflineSaleInput = {
+      clientId: clientIdRef.current,
+      shiftId,
+      cashierId,
+      // The cart's unitPriceIDR is already modifier-inclusive, which is the
+      // convention the replay mutation asserts against. The mapping lives in
+      // `toOfflineSaleLines` (pure, and tested) rather than inline here,
+      // because that copy is precisely where a base price could wrongly be
+      // substituted for the modifier-inclusive one.
+      lines: toOfflineSaleLines(cart.lines),
+      orderType: cart.orderType,
+      ...(promoId ? { promoId } : {}),
+      ...(priceCategoryId ? { priceCategoryId } : {}),
+      // Promo + manual discount, already combined by the sale screen.
+      discountIDR: promoDiscountIDR,
+      serviceChargeIDR,
+      taxIDR,
+      totalIDR: offlineTotalIDR,
+      cashTenderedIDR: tenderedNum,
+      createdAtClient: Date.now(),
+    };
+
+    const built = buildReplayPayload(sale);
+    if (!built.ok) {
+      setError(rejectionMessage(built.reason));
+      return;
+    }
+
+    // `enqueue` rejects on a full or unavailable IndexedDB (quota, private
+    // browsing, a blocked upgrade). The throw propagates to confirm()'s catch,
+    // which surfaces it and leaves the cart intact — no receipt is printed.
+    await enqueue({
+      clientId: built.payload.clientId,
+      payload: built.payload,
+      queuedAt: Date.now(),
+    });
+
+    onQueued(sale);
+    onOpenChange(false);
+  }
+
   async function confirm() {
     if (tenderedNum < totalIDR || submitting) return;
     setSubmitting(true);
     setError(null);
+    if (offline) {
+      try {
+        await confirmOffline();
+      } catch (err) {
+        console.error('[offline] queueing the cash sale failed', err);
+        setError(t`Penjualan gagal disimpan di perangkat ini. Struk tidak dicetak, coba lagi.`);
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
     try {
       const result = await createCashSale({
         clientId: clientIdRef.current,
@@ -153,16 +272,25 @@ export function CashPaymentDialog({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>
-            <Trans>Pembayaran Tunai</Trans>
+            {offline ? <Trans>Pembayaran Tunai (Offline)</Trans> : <Trans>Pembayaran Tunai</Trans>}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <CustomerSection
-            cafeLoyalty={loyaltyCfg}
-            afterPromoIDR={afterPromoIDR}
-            value={customer}
-            onChange={setCustomer}
-          />
+          {offline ? (
+            <p className="rounded-md border border-amber-300 bg-amber-100 px-3 py-2 text-xs text-amber-900">
+              <Trans>
+                Penjualan disimpan di perangkat ini dan dikirim otomatis saat koneksi kembali. Poin
+                dan pelanggan tidak bisa dipakai selama offline.
+              </Trans>
+            </p>
+          ) : (
+            <CustomerSection
+              cafeLoyalty={loyaltyCfg}
+              afterPromoIDR={afterPromoIDR}
+              value={customer}
+              onChange={setCustomer}
+            />
+          )}
 
           <div className="rounded-md bg-muted px-3 py-2 space-y-1">
             {redeemIDR > 0 ? (
@@ -244,7 +372,13 @@ export function CashPaymentDialog({
             size="lg"
           >
             {submitting ? <Spinner data-icon="inline-start" /> : null}
-            {submitting ? <Trans>Memproses…</Trans> : <Trans>Konfirmasi</Trans>}
+            {submitting ? (
+              <Trans>Memproses…</Trans>
+            ) : offline ? (
+              <Trans>Simpan & cetak struk</Trans>
+            ) : (
+              <Trans>Konfirmasi</Trans>
+            )}
           </Button>
         </div>
       </DialogContent>

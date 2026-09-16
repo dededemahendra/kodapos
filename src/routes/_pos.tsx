@@ -12,6 +12,7 @@ import { LoadingCounter } from '~/components/ui/loading-counter';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
 import { currentHostApp } from '~/lib/host';
+import { useReplayOnReconnect } from '~/lib/offline/replay';
 import { useAutoLock } from '~/lib/use-auto-lock';
 import { useAppDocumentTitle } from '~/lib/use-document-title';
 
@@ -57,6 +58,7 @@ function PosLayout() {
       </Unauthenticated>
       <Authenticated>
         <AutoLock />
+        <ReplayOnReconnect />
         <CommandPalette />
         <OnboardingGate>
           {showNav ? (
@@ -87,6 +89,14 @@ function PosLayout() {
 // Arms the idle auto-lock only while authenticated (renders nothing).
 function AutoLock() {
   useAutoLock();
+  return null;
+}
+
+// Drains the offline outbox only while authenticated (renders nothing): the
+// replay mutation requires an active outlet, which an unauthenticated client
+// can never have, so there is nothing useful to replay before sign-in.
+function ReplayOnReconnect() {
+  useReplayOnReconnect();
   return null;
 }
 

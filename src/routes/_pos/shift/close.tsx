@@ -1,4 +1,4 @@
-import { Trans, useLingui } from '@lingui/react/macro';
+import { Plural, Trans, useLingui } from '@lingui/react/macro';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
@@ -19,6 +19,12 @@ import { SummaryRowsSkeleton } from '~/components/ui/loading-skeletons';
 import { Spinner } from '~/components/ui/spinner';
 import { useActiveCashier } from '~/lib/active-cashier';
 import { formatIDR } from '~/lib/money';
+import {
+  queuedCashTotalIDR,
+  queuedForShift,
+  toQueuedDeclarations,
+} from '~/lib/offline/queued-sales';
+import { useQueuedSales } from '~/lib/offline/use-queued-sales';
 
 export const Route = createFileRoute('/_pos/shift/close')({
   component: ShiftClosePage,
@@ -35,6 +41,22 @@ function ShiftClosePage() {
   const [submitting, setSubmitting] = useState(false);
   const [closedShift, setClosedShift] = useState<ShiftSummary | null>(null);
   const [countedStr, setCountedStr] = useState('');
+  // The server cannot see this device's outbox, so the cash the till took for
+  // sales that have not posted yet is invisible to `closeoutSummary`. Left out,
+  // every offline sale reads as a drawer overage at close.
+  const outbox = useQueuedSales();
+  const queuedSales = current ? queuedForShift(outbox.sales, current._id) : [];
+  const queuedCashIDR = queuedCashTotalIDR(queuedSales);
+  // Nothing on this screen may treat an unread outbox as an empty one: the
+  // expected-cash figure below is built from it, so "we haven't looked yet"
+  // rendering as "nothing queued" would quietly under-report the drawer and
+  // hand the cashier a shortfall that isn't theirs. Both the panel and the
+  // submit stay closed until the first read lands.
+  const expectedCashIDR =
+    summary === undefined || !outbox.loaded ? null : summary.expectedCashIDR + queuedCashIDR;
+  // Hoisted for the <Trans> below: a message placeholder must be a plain
+  // variable, not an expression.
+  const queuedCashText = formatIDR(queuedCashIDR);
 
   if (closedShift) {
     return (
@@ -98,19 +120,32 @@ function ShiftClosePage() {
     try {
       if (cashierId) await record({ cashierId, type: 'logout' });
       const counted = Number.parseInt(countedStr, 10);
-      await closeShift({ id: current._id, countedCashIDR: counted });
+      // Declared, not folded into countedCashIDR: the server records it as its
+      // own field and drains it as the queued sales actually post, so the
+      // Z-report reconciles at close AND after replay. See shiftCashBreakdown.
+      // Per-sale, not a total: the snapshot behind `queuedSales` is up to a
+      // poll interval stale, so one of them may have replayed since it was
+      // taken. Sending the ids lets the server drop anything that already
+      // posted instead of counting that cash twice and stranding a phantom
+      // shortfall on the Z-report forever.
+      await closeShift({
+        id: current._id,
+        countedCashIDR: counted,
+        ...(queuedSales.length > 0 ? { queuedSales: toQueuedDeclarations(queuedSales) } : {}),
+      });
       setClosedShift({
         ...current,
         cashierName: summary?.cashierName ?? '—',
         countedCashIDR: counted,
         closedAt: Date.now(),
-        ...(summary
+        ...(queuedCashIDR > 0 ? { queuedCashIDR } : {}),
+        ...(summary && expectedCashIDR !== null
           ? {
               cashSalesIDR: summary.cashSalesIDR,
               cashInIDR: summary.cashInIDR,
               cashOutIDR: summary.cashOutIDR,
-              expectedCashIDR: summary.expectedCashIDR,
-              varianceIDR: counted - summary.expectedCashIDR,
+              expectedCashIDR,
+              varianceIDR: counted - expectedCashIDR,
             }
           : {}),
       });
@@ -123,7 +158,7 @@ function ShiftClosePage() {
   }
 
   const panelShift =
-    summary && current
+    summary && current && expectedCashIDR !== null
       ? {
           _id: current._id,
           cashierId: current.cashierId,
@@ -133,7 +168,8 @@ function ShiftClosePage() {
           cashSalesIDR: summary.cashSalesIDR,
           cashInIDR: summary.cashInIDR,
           cashOutIDR: summary.cashOutIDR,
-          expectedCashIDR: summary.expectedCashIDR,
+          expectedCashIDR,
+          ...(queuedCashIDR > 0 ? { queuedCashIDR } : {}),
         }
       : null;
 
@@ -143,6 +179,33 @@ function ShiftClosePage() {
         <h1 className="text-2xl font-bold mb-3">
           <Trans>Tutup Shift</Trans>
         </h1>
+        {queuedSales.length > 0 ? (
+          <p
+            role="status"
+            className="mb-3 rounded-md border border-amber-300 bg-amber-100 px-3 py-2 text-sm text-amber-900"
+          >
+            <span className="font-medium">
+              <Trans>Menunggu sinkron</Trans>
+            </span>{' '}
+            <Plural
+              value={queuedSales.length}
+              one="# penjualan tunai belum terkirim ke server."
+              other="# penjualan tunai belum terkirim ke server."
+            />{' '}
+            <Trans>
+              Uangnya sudah ada di laci, jadi {queuedCashText} sudah ditambahkan ke uang seharusnya
+              di bawah.
+            </Trans>
+          </p>
+        ) : null}
+        {outbox.error ? (
+          <p role="status" className="mb-3 text-sm text-red-600">
+            <Trans>
+              Antrean offline di perangkat ini tidak bisa dibaca, jadi penjualan yang belum terkirim
+              belum tentu terhitung. Tutup tab kodapos lain lalu muat ulang.
+            </Trans>
+          </p>
+        ) : null}
         {panelShift ? <ShiftSummaryPanel shift={panelShift} /> : <SummaryRowsSkeleton rows={6} />}
       </section>
       <section>
@@ -163,9 +226,9 @@ function ShiftClosePage() {
                 onChange={(e) => setCountedStr(e.target.value)}
               />
             </Field>
-            {summary && countedStr
+            {expectedCashIDR !== null && countedStr
               ? (() => {
-                  const variance = Number.parseInt(countedStr, 10) - summary.expectedCashIDR;
+                  const variance = Number.parseInt(countedStr, 10) - expectedCashIDR;
                   return Number.isFinite(variance) ? (
                     <p
                       className={`text-sm ${variance === 0 ? 'text-muted-foreground' : variance > 0 ? 'text-emerald-600' : 'text-red-600'}`}
@@ -182,9 +245,21 @@ function ShiftClosePage() {
                 })()
               : null}
             {error && <FieldError>{error}</FieldError>}
-            <Button type="submit" disabled={submitting}>
+            {/* Gated on outbox.loaded, not just on expectedCashIDR: before the
+                first outbox read lands, queuedSales below is `[]` regardless
+                of what is actually queued on this device. Submitting then
+                would close with no declaration at all for real queued sales —
+                the exact permanent phantom shortfall this screen exists to
+                prevent — rather than merely showing a stale figure. */}
+            <Button type="submit" disabled={submitting || !outbox.loaded}>
               {submitting && <Spinner data-icon="inline-start" />}
-              {submitting ? <Trans>Menutup…</Trans> : <Trans>Tutup Shift</Trans>}
+              {submitting ? (
+                <Trans>Menutup…</Trans>
+              ) : !outbox.loaded ? (
+                <Trans>Memuat antrean…</Trans>
+              ) : (
+                <Trans>Tutup Shift</Trans>
+              )}
             </Button>
           </FieldGroup>
         </form>
