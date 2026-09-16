@@ -32,6 +32,7 @@ import {
 import { useActiveCashier } from '~/lib/active-cashier';
 import { publishDisplay } from '~/lib/customer-display';
 import { useConnectionState } from '~/lib/offline/connectivity';
+import { useOfflineSalesEnabled } from '~/lib/offline/offline-enabled';
 import { save as saveRegisterCache } from '~/lib/offline/register-cache';
 import type { OfflineSaleInput } from '~/lib/offline/sale-payload';
 import { useBoolPreference } from '~/lib/preferences';
@@ -110,7 +111,14 @@ export function SaleScreen({
   const settings = useQuery(api.settings.get, {});
   const { cashierId } = useActiveCashier();
   const connection = useConnectionState();
-  const offline = connection === 'offline';
+  const offlineSalesEnabled = useOfflineSalesEnabled();
+  // Gated here rather than inside `useConnectionState` on purpose. With the
+  // flag off, an outage looks exactly as it did before this feature existed:
+  // the online payment dialogs stay mounted and their mutation fails, so
+  // nothing is queued on a till the kill switch cannot reach. Gating the
+  // connection signal itself would also have disabled the replay worker,
+  // stranding cash already sitting in another device's outbox.
+  const offline = connection === 'offline' && offlineSalesEnabled;
   // Everything the till needs to keep selling through an outage, refreshed
   // while the socket is up. Without this the cache is always empty, `isUsable`
   // is always false, and the offline register refuses every sale.

@@ -2,6 +2,7 @@ import { Plural, Trans } from '@lingui/react/macro';
 import { WifiOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useConnectionState } from '~/lib/offline/connectivity';
+import { useOfflineSalesEnabled } from '~/lib/offline/offline-enabled';
 import { size } from '~/lib/offline/outbox';
 
 /** How often the pending count is re-read while offline. An IndexedDB count is
@@ -46,7 +47,11 @@ function usePendingSaleCount(active: boolean): number {
  */
 export function OfflineBanner() {
   const connection = useConnectionState();
+  const enabled = useOfflineSalesEnabled();
   const offline = connection === 'offline';
+  // Polled whenever offline, flag or no flag. Sales queued before the switch
+  // was flipped off are cash someone already took, `drain` still posts them,
+  // and hiding the count would read as "nothing outstanding".
   const pending = usePendingSaleCount(offline);
 
   if (!offline) return null;
@@ -62,9 +67,16 @@ export function OfflineBanner() {
         <Trans>Mode offline</Trans>
       </span>
       <span>
-        <Trans>
-          Penjualan tunai disimpan di perangkat ini dan otomatis dikirim saat koneksi kembali.
-        </Trans>
+        {enabled ? (
+          <Trans>
+            Penjualan tunai disimpan di perangkat ini dan otomatis dikirim saat koneksi kembali.
+          </Trans>
+        ) : (
+          <Trans>
+            Penjualan tunai offline tidak aktif. Transaksi baru tidak dapat diproses sampai koneksi
+            kembali.
+          </Trans>
+        )}
       </span>
       {pending > 0 ? (
         <span className="ml-auto rounded-full bg-amber-200 px-2 py-0.5 text-xs font-semibold tabular-nums">

@@ -27,6 +27,17 @@ let client: PostHog | null = null;
 // on a ref held in another file for its own correctness.
 let pending: Promise<boolean> | null = null;
 
+/**
+ * Feature-flag change subscribers, notified from `wireFeatureFlags` below.
+ *
+ * Held here rather than having callers subscribe to posthog-js directly,
+ * because React runs child effects before parent effects: the register's hooks
+ * subscribe BEFORE the analytics provider has called `initAnalytics`, while
+ * `client` is still null. Buffering listeners in this module makes subscribe
+ * order irrelevant.
+ */
+const flagListeners = new Set<() => void>();
+
 function key(): string {
   return import.meta.env.VITE_POSTHOG_KEY ?? '';
 }
@@ -102,6 +113,30 @@ function scrubOutgoing(event: CaptureResult | null): CaptureResult | null {
   if (!event || event.event !== '$exception') return event;
   if (typeof window !== 'undefined' && isCustomerSurface(window.location.pathname)) return null;
   return { ...event, properties: scrubExceptionProperties(event.properties ?? {}) };
+}
+
+/**
+ * Forwards posthog-js flag payloads to `flagListeners`.
+ *
+ * Isolated in its own try, and called only once `client` is assigned, because a
+ * flag subscription is a convenience and the client is not. Registered inside
+ * start()'s try ahead of the assignment, one throw here would land in that
+ * catch, resolve init as `false`, and leave `client` null — taking pageviews,
+ * identify and error tracking down to serve a feature flag.
+ *
+ * Swallowing is safe for the one current caller: without live updates the
+ * offline kill switch still reads the cached value on mount, and an absent
+ * value fails closed. What degrades is only that a flag change waits for a
+ * reload instead of reaching a running till.
+ */
+function wireFeatureFlags(posthog: PostHog): void {
+  try {
+    posthog.onFeatureFlags(() => {
+      for (const listener of flagListeners) listener();
+    });
+  } catch {
+    // Deliberately empty; see above.
+  }
 }
 
 async function start(superProps: Record<string, string>): Promise<boolean> {
@@ -197,6 +232,8 @@ async function start(superProps: Record<string, string>): Promise<boolean> {
     });
     posthog.register(superProps);
     client = posthog;
+    // After `client` is assigned, never before it: see wireFeatureFlags.
+    wireFeatureFlags(posthog);
     return true;
   } catch {
     return false;
@@ -215,6 +252,28 @@ async function start(superProps: Record<string, string>): Promise<boolean> {
  */
 export function registerSuperProperties(props: Record<string, string>): void {
   client?.register(props);
+}
+
+/**
+ * Cached feature-flag read. `undefined` means "no value on this device":
+ * posthog-js is not running (dev, preview, DNT, a blocked chunk) or no payload
+ * has resolved yet. Callers must treat it as unknown and choose their own
+ * default — it is never a `false`.
+ *
+ * Answers from localStorage (`persistence: 'localStorage'` above) with no
+ * network, which is what makes a flag readable on a till that is already
+ * offline, using the value from its last online session.
+ */
+export function isFeatureEnabled(key: string): boolean | undefined {
+  return client?.isFeatureEnabled(key);
+}
+
+/** Subscribes to flag payloads; returns an unsubscribe. Safe to call before init. */
+export function onFeatureFlagsChanged(listener: () => void): () => void {
+  flagListeners.add(listener);
+  return () => {
+    flagListeners.delete(listener);
+  };
 }
 
 export function capture(name: string, props?: Record<string, unknown>): void {

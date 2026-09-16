@@ -5429,6 +5429,10 @@ msgstr "Cash sales"
 msgid "Penjualan tunai disimpan di perangkat ini dan otomatis dikirim saat koneksi kembali."
 msgstr "Cash sales are saved on this device and sent automatically once the connection is back."
 
+#: src/components/sale/offline-banner.tsx
+msgid "Penjualan tunai offline tidak aktif. Transaksi baru tidak dapat diproses sampai koneksi kembali."
+msgstr "Offline cash sales are turned off. New transactions cannot be processed until the connection is back."
+
 #: src/routes/_pos/reports/reconciliation.tsx
 msgid "Penjualan tunai yang sudah dibayar pelanggan tapi tidak pernah berhasil masuk ke server dari perangkat ini. Uangnya ada di laci, tapi transaksinya belum tercatat — masukkan manual, lalu simpan catatan ini."
 msgstr "Cash sales the customer already paid for that never made it to the server from this device. The money is in the drawer but the transaction is unrecorded — key it in by hand, then keep this note."
