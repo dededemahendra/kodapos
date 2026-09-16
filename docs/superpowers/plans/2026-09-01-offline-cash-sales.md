@@ -45,14 +45,14 @@ The only component holding money-bearing state. Gets the heaviest coverage.
 
 Task 4 defines `ReplayPayload`. Implement Task 4 first if executing out of order, or stub the import and fix it in Task 4's commit.
 
-- [ ] **Step 1: Install dependencies**
+- [x] **Step 1: Install dependencies**
 
 ```bash
 pnpm add idb
 pnpm add -D fake-indexeddb
 ```
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Create `tests/lib/offline-outbox.test.ts`:
 
@@ -110,12 +110,12 @@ describe('outbox', () => {
 });
 ```
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [x] **Step 3: Run the test to verify it fails**
 
 Run: `pnpm vitest run tests/lib/offline-outbox.test.ts`
 Expected: FAIL — cannot resolve `~/lib/offline/outbox`.
 
-- [ ] **Step 4: Implement the outbox**
+- [x] **Step 4: Implement the outbox**
 
 Create `src/lib/offline/outbox.ts`:
 
@@ -197,17 +197,17 @@ export async function _resetForTests(opts: { keepData?: boolean } = {}): Promise
 }
 ```
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `pnpm vitest run tests/lib/offline-outbox.test.ts`
 Expected: PASS, 5 tests.
 
-- [ ] **Step 6: Run the gate**
+- [x] **Step 6: Run the gate**
 
 Run: `pnpm typecheck && pnpm test && pnpm lint`
 Expected: all exit 0. If `convex/lib/replay` does not exist yet, complete Task 4 first.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add package.json pnpm-lock.yaml src/lib/offline/outbox.ts tests/lib/offline-outbox.test.ts
@@ -231,7 +231,7 @@ git commit -m "feat(offline): durable IndexedDB outbox for queued sales"
 
 Why not `navigator.onLine` alone: it reports `true` on a captive portal or a dead uplink. The authority is whether Convex's websocket is connected, because that is what determines if a mutation can land. `navigator.onLine === false` is treated as a fast negative signal only.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/lib/offline-connectivity.test.ts`:
 
@@ -255,12 +255,12 @@ describe('deriveState', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `pnpm vitest run tests/lib/offline-connectivity.test.ts`
 Expected: FAIL — cannot resolve module.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/lib/offline/connectivity.ts`:
 
@@ -312,17 +312,17 @@ export function useConnectionState(): ConnectionState {
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `pnpm vitest run tests/lib/offline-connectivity.test.ts`
 Expected: PASS, 3 tests.
 
-- [ ] **Step 5: Verify the Convex client API**
+- [x] **Step 5: Verify the Convex client API**
 
 Run: `grep -rn "isWebSocketConnected" node_modules/convex/dist/cjs-types/browser/*.d.ts | head -3`
 Expected: the property exists on the object returned by `connectionState()`. If the shape differs in convex 1.39, adjust `useConnectionState` to match and note it in the commit message. Do not guess — read the type.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/offline/connectivity.ts tests/lib/offline-connectivity.test.ts
@@ -339,7 +339,7 @@ git commit -m "feat(offline): connectivity signal keyed on the Convex socket"
 **Interfaces:**
 - Produces: table `saleReconciliations`, index `by_cafe` on `['cafeId']`.
 
-- [ ] **Step 1: Add the table**
+- [x] **Step 1: Add the table**
 
 In `convex/schema.ts`, alongside the other table definitions:
 
@@ -368,12 +368,12 @@ In `convex/schema.ts`, alongside the other table definitions:
   }).index('by_cafe', ['cafeId']),
 ```
 
-- [ ] **Step 2: Verify the schema compiles**
+- [x] **Step 2: Verify the schema compiles**
 
 Run: `pnpm typecheck`
 Expected: exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add convex/schema.ts
@@ -401,7 +401,7 @@ The heart of the feature. Three relaxations, each independently tested.
 
 **Design note:** the *mutation* is separate so the online path keeps every validation it has today. Internally it reuses `buildOrder` via a new optional `replay` parameter rather than duplicating 485 lines. The separation that matters is the public surface.
 
-- [ ] **Step 1: Define the payload type**
+- [x] **Step 1: Define the payload type**
 
 Create `convex/lib/replay.ts`:
 
@@ -466,7 +466,7 @@ export type ReplayPayload = {
 };
 ```
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 Create `tests/convex/replay-sale.test.ts`. Reuse the `setup()` helper pattern from `tests/convex/sale-core.test.ts` — copy it in, adjusting for what these tests need.
 
@@ -648,12 +648,12 @@ describe('createReplayedCashSale', () => {
 
 Before running: confirm the mutation names used above (`api.shifts.close`, `api.menu.updateItemPrice`, `api.menu.archiveItem`) exist with those argument shapes. Run `grep -nE "^export const (close|updateItemPrice|archiveItem)" convex/shifts.ts convex/menu.ts` and adjust the test calls to the real signatures. Do not invent mutations.
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `pnpm vitest run tests/convex/replay-sale.test.ts`
 Expected: FAIL — `createReplayedCashSale` is not a function.
 
-- [ ] **Step 4: Add the `replay` parameter to `buildOrder`**
+- [x] **Step 4: Add the `replay` parameter to `buildOrder`**
 
 In `convex/lib/sale.ts`, extend the signature:
 
@@ -683,7 +683,7 @@ Then apply exactly three relaxations, each guarded by `if (!replay)` or `replay 
 
 Totals: when `replay` is set, use `replay.totalIDR`, `replay.discountIDR`, `replay.serviceChargeIDR`, and `replay.taxIDR` verbatim instead of the computed values.
 
-- [ ] **Step 5: Add the mutation**
+- [x] **Step 5: Add the mutation**
 
 In `convex/orders.ts`:
 
@@ -713,17 +713,17 @@ export const createReplayedCashSale = mutation({
 
 `toSaleArgs` maps the replay payload onto `SaleArgs` by dropping the snapshot-only fields. `recordReconciliations` compares each line's `unitPriceIDR` against the current item price and inserts a `saleReconciliations` row per discrepancy. Write both as local helpers in `convex/orders.ts`.
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `pnpm vitest run tests/convex/replay-sale.test.ts`
 Expected: PASS, 5 tests.
 
-- [ ] **Step 7: Verify the online path is unchanged**
+- [x] **Step 7: Verify the online path is unchanged**
 
 Run: `pnpm vitest run tests/convex/sale-core.test.ts tests/convex/orders.test.ts tests/convex/sale-price-categories.test.ts`
 Expected: PASS, unchanged counts. If any online test now fails, a relaxation leaked outside its `if (!replay)` guard — fix before continuing.
 
-- [ ] **Step 8: Run the gate and commit**
+- [x] **Step 8: Run the gate and commit**
 
 ```bash
 pnpm typecheck && pnpm test && pnpm lint
@@ -765,7 +765,7 @@ export type RegisterSnapshot = {
   - `load(): Promise<RegisterSnapshot | null>`
   - `isUsable(snapshot: RegisterSnapshot | null, now: number): boolean`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import 'fake-indexeddb/auto';
@@ -795,12 +795,12 @@ describe('isUsable', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `pnpm vitest run tests/lib/offline-register-cache.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Mirror `outbox.ts`'s `openDB` structure with a `register` object store holding a single row under key `'current'`. `isUsable`:
 
@@ -819,12 +819,12 @@ export function isUsable(snapshot: RegisterSnapshot | null, now: number): boolea
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `pnpm vitest run tests/lib/offline-register-cache.test.ts`
 Expected: PASS, 4 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/offline/register-cache.ts tests/lib/offline-register-cache.test.ts
@@ -847,7 +847,7 @@ git commit -m "feat(offline): register read-cache with a 24h staleness bound"
 
 Dependencies are injected so the worker is testable without IndexedDB or a Convex client.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, expect, it, vi } from 'vitest';
@@ -919,12 +919,12 @@ describe('drain', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `pnpm vitest run tests/lib/offline-replay.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 ```ts
 import type { ReplayPayload } from 'convex/lib/replay';
@@ -971,12 +971,12 @@ export async function drain(deps: {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `pnpm vitest run tests/lib/offline-replay.test.ts`
 Expected: PASS, 4 tests.
 
-- [ ] **Step 5: Wire the trigger**
+- [x] **Step 5: Wire the trigger**
 
 `drain` is inert until something calls it. Add to the same file:
 
@@ -1028,12 +1028,12 @@ Call `useReplayOnReconnect()` from the POS shell so it runs on every register
 screen — locate it with `grep -rln "_pos/route" src/routes` and mount the hook
 in that layout component.
 
-- [ ] **Step 6: Verify the trigger compiles and the gate passes**
+- [x] **Step 6: Verify the trigger compiles and the gate passes**
 
 Run: `pnpm typecheck && pnpm test && pnpm lint`
 Expected: all exit 0.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/lib/offline/replay.ts tests/lib/offline-replay.test.ts src/routes
@@ -1052,7 +1052,7 @@ git commit -m "feat(offline): replay worker with ordered drain and dead-letterin
 **Interfaces:**
 - Produces: `offlineReceiptNumber(prefix: string, clientId: string): string`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -1069,12 +1069,12 @@ describe('offlineReceiptNumber', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `pnpm vitest run tests/lib/offline-receipt-number.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 ```ts
 /**
@@ -1093,16 +1093,16 @@ export function offlineReceiptNumber(prefix: string, clientId: string): string {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `pnpm vitest run tests/lib/offline-receipt-number.test.ts`
 Expected: PASS, 2 tests.
 
-- [ ] **Step 5: Wire it into the receipt**
+- [x] **Step 5: Wire it into the receipt**
 
 In `src/components/sale/receipt-preview.tsx`, where `orderNumber` is built (line 117), branch on whether the order came from the outbox: use `offlineReceiptNumber(orderPrefix, clientId)` and render an "OFFLINE" mark beside it. Wrap the mark in `<Trans>`.
 
-- [ ] **Step 6: Run the gate and commit**
+- [x] **Step 6: Run the gate and commit**
 
 ```bash
 pnpm typecheck && pnpm test && pnpm lint
@@ -1120,7 +1120,7 @@ git commit -m "feat(offline): clientId-derived receipt numbers for offline sales
 
 Without this, a customer holding an offline receipt cannot be found — which breaks refunds for exactly the sales most likely to need one.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { convexTest } from 'convex-test';
@@ -1167,23 +1167,23 @@ describe('orders.search', () => {
 
 Check `api.orders.search`'s real argument name before running — read `convex/orders.ts:242`. Adjust `{ q: 'EF12' }` to match.
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `pnpm vitest run tests/convex/order-search-offline.test.ts`
 Expected: FAIL — no results.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Extend `search` so a 4-character query is also matched against the last four characters of `clientId`, case-insensitively, alongside the existing `_id` suffix match.
 
-- [ ] **Step 4: Run to verify it passes, then the gate**
+- [x] **Step 4: Run to verify it passes, then the gate**
 
 ```bash
 pnpm vitest run tests/convex/order-search-offline.test.ts
 pnpm typecheck && pnpm test && pnpm lint
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add convex/orders.ts tests/convex/order-search-offline.test.ts
@@ -1203,34 +1203,34 @@ git commit -m "feat(offline): resolve offline receipt codes in order search"
 **Interfaces:**
 - Consumes: `useConnectionState` (Task 2), `enqueue`/`size` (Task 1), `load`/`isUsable` (Task 5), `offlineReceiptNumber` (Task 7).
 
-- [ ] **Step 1: Offline banner component**
+- [x] **Step 1: Offline banner component**
 
 Create `src/components/sale/offline-banner.tsx` — a persistent bar shown when `useConnectionState() === 'offline'`, stating that sales are being saved on the device and will sync, plus the pending count from `size()`. All copy in `<Trans>`.
 
-- [ ] **Step 2: Gate the unsupported payment methods**
+- [x] **Step 2: Gate the unsupported payment methods**
 
 In `payment-methods.tsx`, hide gift card and dynamic QRIS when offline. Hide, not disable — a disabled control invites the cashier to keep tapping it during a rush. Static QRIS is also hidden: it cannot be confirmed offline.
 
-- [ ] **Step 3: Route the cash sale through the outbox when offline**
+- [x] **Step 3: Route the cash sale through the outbox when offline**
 
 In `sale-screen.tsx`, where the cash sale is submitted: when `useConnectionState() === 'offline'`, build a `ReplayPayload` from the cart (totals already computed via `convex/lib/pricing`), `enqueue` it, print with `offlineReceiptNumber`, and show a "queued" confirmation instead of "paid". When online, the existing path runs unchanged.
 
-- [ ] **Step 4: Refuse the sale when the cache is unusable**
+- [x] **Step 4: Refuse the sale when the cache is unusable**
 
 If `isUsable(await load(), Date.now())` is false, block the offline sale and explain that the cached menu is too old. Do not print a receipt for a sale that cannot be stored or priced reliably.
 
-- [ ] **Step 5: Refuse the sale when the queue write fails**
+- [x] **Step 5: Refuse the sale when the queue write fails**
 
 Wrap `enqueue` in try/catch. On failure (quota, private browsing, IndexedDB unavailable) show an error and do **not** print. A printed receipt for a sale that was never stored is money lost with no record.
 
-- [ ] **Step 6: Extract lingui messages**
+- [x] **Step 6: Extract lingui messages**
 
 ```bash
 pnpm lingui:extract
 ```
 Then translate the new entries in `src/locales/en/messages.po`. Leave no `msgstr ""` for the strings this task added.
 
-- [ ] **Step 7: Run the gate and commit**
+- [x] **Step 7: Run the gate and commit**
 
 ```bash
 pnpm typecheck && pnpm test && pnpm lint && pnpm lint:i18n
@@ -1248,7 +1248,7 @@ git commit -m "feat(offline): register rings cash sales into the outbox when off
 - Create: `convex/reconciliation.ts`
 - Create: `tests/convex/reconciliation.test.ts`
 
-- [ ] **Step 1: Write the failing query test**
+- [x] **Step 1: Write the failing query test**
 
 ```ts
 import { convexTest } from 'convex-test';
@@ -1291,33 +1291,33 @@ describe('reconciliation.listOpen', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `pnpm vitest run tests/convex/reconciliation.test.ts`
 Expected: FAIL — `api.reconciliation` does not exist.
 
-- [ ] **Step 3: Implement the query**
+- [x] **Step 3: Implement the query**
 
 Create `convex/reconciliation.ts` with `listOpen` (owner-scoped via `requireActiveOutlet`, filtering `resolvedAt === undefined`) and `resolve` (marks one row resolved). Both need `args` and `returns` validators.
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `pnpm vitest run tests/convex/reconciliation.test.ts`
 Expected: PASS, 1 test.
 
-- [ ] **Step 5: Shift close counts queued sales**
+- [x] **Step 5: Shift close counts queued sales**
 
 On the shift-close screen, add queued-sale totals from the outbox to the expected-cash figure so the drawer count matches what the cashier actually took, and label the shift "pending sync" while `size() > 0`. Copy in `<Trans>`.
 
-- [ ] **Step 6: Reconciliation route**
+- [x] **Step 6: Reconciliation route**
 
 Create `src/routes/_pos/reports/reconciliation.tsx` listing open rows — kind, rung vs current amount, order link, and a resolve action. Follow the existing patterns in `src/routes/_pos/reports/`.
 
-- [ ] **Step 6b: Surface dead-lettered sales**
+- [x] **Step 6b: Surface dead-lettered sales**
 
 `drain` returns `deadLettered` (Task 6) — sales that failed `maxAttempts` times and will never retry. These are unposted revenue and must not stay invisible. On the same reconciliation route, render a distinct section listing dead-lettered `clientId`s read from the outbox (`list()` filtered to `attempts >= 5`), with the queued timestamp and amount, so the owner can key them in manually. Without this, a permanently failing sale is silently lost — the exact failure mode the spec's error handling forbids.
 
-- [ ] **Step 7: Extract messages, run the gate, commit**
+- [x] **Step 7: Extract messages, run the gate, commit**
 
 ```bash
 pnpm lingui:extract
